@@ -39,10 +39,14 @@ internal data class LibraryUiState(
 
     val isLoading: Boolean = true,
     val gridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-    val isLayoutMenuExpanded: Boolean = false,
     val sortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
     val sortDirectionByTab: Map<String, SortDirection> = emptyMap(),
-    val isSortMenuExpanded: Boolean = false,
+
+    /** The Arrange sheet (layout + titles toggle + sort) shown on both mobile and desktop. */
+    val isArrangeSheetExpanded: Boolean = false,
+
+    /** The Shelves sheet — the tab switcher on mobile; desktop keeps its permanent sidebar. */
+    val isShelvesSheetExpanded: Boolean = false,
 
     val filtersByTab: Map<String, LibraryFilters> = emptyMap(),
     val isFilterSheetExpanded: Boolean = false,
@@ -55,8 +59,9 @@ internal data class LibraryUiState(
     val filterOptionsByTab: Map<String, LibraryFilterOptions> = emptyMap(),
 
     /**
-     * Search + year + filter-chip results per tab for book shelves, precomputed off the main
-     * thread by [DisplayListsCollector] so composition just does a map lookup on every frame.
+     * Search + filter-chip results per tab for book shelves (year-finished narrowing lives inside
+     * [LibraryFilters.readYear]), precomputed off the main thread by [DisplayListsCollector] so
+     * composition just does a map lookup on every frame.
      */
     val displayBooksByTab: Map<String, List<Book>> = emptyMap(),
 
@@ -72,18 +77,10 @@ internal data class LibraryUiState(
      */
     val tabStatsByTab: Map<String, LibraryTabStats> = emptyMap(),
 
-    /**
-     * Available Read-tab years, precomputed off the main thread by [DisplayListsCollector] from
-     * the raw (unfiltered) Read books. Empty until the collector emits its first result.
-     */
-    val availableReadYearsCached: List<Int> = emptyList(),
-
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
-    val isSearchActive: Boolean = false,
     val searchQuery: String = "",
-    val selectedReadYear: Int? = null,
 
     /**
      * Bulk-select mode. Entered by long-pressing a cover on a built-in shelf tab (All or Status);
@@ -179,8 +176,4 @@ internal data class LibraryUiState(
 
         return bookIds.mapNotNull { byId[it] }
     }
-
-    /** Years that the Read tab can be filtered to. Reads from the precomputed [availableReadYearsCached]. */
-    val availableReadYears: List<Int>
-        get() = availableReadYearsCached
 }

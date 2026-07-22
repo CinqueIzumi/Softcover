@@ -19,9 +19,6 @@ The two most-used surfaces gain shelf management depth and reading-flow nudges. 
 ### Step 2.9 — "Since last read" delta on Reading rows (S)
 Eyebrow on compact rows briefly shows the page/time delta since previous open, fading to the regular eyebrow. *(B.2.8)*
 
-### Step 2.14 — Directly add a book to Currently Reading (S–M)
-One-step "start reading" action from book detail's shelf bar, search, and the add flows that puts a book straight onto Currently Reading instead of add-to-shelf-then-change-status. May chain create → set-status (→ start date) mutations on top of the shipped create-userBook path. Pairs with session start (Step 3.5). *(B.2.11)*
-
 ---
 
 ## Phase 3 — Personal data: rating, review, highlight, log, session
@@ -49,7 +46,7 @@ Adds two private tagging surfaces driven by user-supplied data, plus the Room sc
 Both tag sets feed Step 7.13 (diversity stats) and Step 7.14 (custom-scope wrap-ups). Tag vocabularies are curated with a "your own" free-text fallback so users can use their own language.
 
 ### Step 3.10 — Personal moods (book + chapter) (M, depends on 0.3)
-A private mood log. Book-level mood tagging (one or more moods per book) and an optional per-chapter / per-percentage anchored mood ("at 62% — wrecked"). Distinct from B.3.1 community moods used for discovery — these never leave the device. Mood column renders on book detail in italic; per-chapter moods render as a thin mood ribbon along the wavy progress bar where anchors exist. Picker uses a curated mood vocabulary plus a free-text "your moods" option. *(B.4.21)*
+A private mood log. Book-level mood rating (one or more moods per book) and an optional per-chapter / per-percentage anchored mood ("at 62% — wrecked"). Distinct from B.3.1 community moods used for discovery — these never leave the device. Moods are **graded, not binary**: each mood carries an intensity, so a book reads as "tense 62% · sad 66% · funny 8%" and mood profiles can be averaged across a scope (Step 7.15 depends on this). Grading is optional — an ungraded mood reads as "present" — but the schema stores an intensity from day one, so don't ship a boolean column and migrate later. Mood column renders on book detail in italic with hairline intensity bars; per-chapter moods render as a thin mood ribbon along the wavy progress bar where anchors exist. Picker uses a curated mood vocabulary plus a free-text "your moods" option. *(B.4.21)*
 
 ### Step 3.11 — Personal notes (book + characters) (M, depends on 0.3)
 A private notes field deliberately separated from Step 3.2 (personal review): notes are unfiltered marginalia that never publish. Two surfaces:
@@ -59,10 +56,20 @@ A private notes field deliberately separated from Step 3.2 (personal review): no
 
 Notes appear in the Notes & Highlights inbox (Step 3.4) under a "private — notes" group; the inbox UI suppresses the share affordance for this group so private notes can't be exported accidentally. *(B.4.22)*
 
-### Step 3.12 — Rating/review prompt on mark-as-read (S–M)
-When a book is marked Read from any surface (Reading screen, book detail, bulk-select), prompt for a rating and/or review, reusing the shipped personal-rating (Step 3.1) and personal-review (Step 3.2) controls in an editorial prompt sheet. *(B.4.26)*
+### Step 3.13 — Personal book traits, graded (M, depends on 0.3)
+A private structured survey of *how a book read* — the counterpart to Step 3.10, which captures how it made the reader *feel*. Dimensions, each a graded scale rather than a yes/no tag: **pace** (slow · moderate · fast · variable), **plot- or character-driven** (one slider, plot → a mix → character), **characters** (likeable / believable / well-developed / multi-layered, plus "flaws a main focus?" and "diverse cast?", each answered yes · complicated · no), and **writing style** (simple · moderate · demanding, with optional vivid / poetic / unconventional flags).
 
-> **End of Phase 3:** The app has personal voice — the user's ratings, words, highlights, tags, moods, and notes become a corpus the rest of the app can draw from.
+Renders on book detail as a compact editorial panel — one row per dimension, hairline bars and italic labels, collapsed by default, expanded on tap. Every dimension is optional; an untouched book shows an invitation line, not an empty grid. Shares the Step 0.3 personal-data schema and the same strictly-local rule as Steps 3.9–3.11 — nothing is written back to Hardcover.
+
+**Out of scope:** community aggregation of these traits. A per-book average needs a crowd we don't have; this is a solo instrument, and the request that prompted it was explicitly for personal use. Feeds Step 7.15 (how-you-read stats) and Step 7.14 (wrap-ups). *(B.4.30)*
+
+### Step 3.14 — Acquisition source (S, depends on 0.3)
+A single private per-book field — library, bought physical, bought digital, subscription/audio credit, borrowed, gifted, or free-text. One row in the Step 3.13 panel, one tap to set. Cheap to capture and it unlocks the "60% from the library this year" stat in Step 7.16. *(B.4.31)*
+
+### Step 3.15 — Edit & delete past reading-progress entries (S–M)
+A reading-history management surface: correct or remove a logged progress entry after the fact (fix a wrong page, re-date it, delete a mis-logged bump), not just append new ones as Step 2.15 allows. Genuinely new — the app has no delete/amend path for a logged entry today. Implementation route settled during the step: direct `reading_journals` CRUD (`update_reading_journal` / `delete_reading_journal` exist in the schema; `ReadingJournalUpdateType` also carries `action_at`) vs. amending the `user_book_read` row. Reuses Step 2.15's date/time picker for the re-date affordance. *(B.2.13)*
+
+> **End of Phase 3:** The app has personal voice — the user's ratings, words, highlights, tags, moods, traits, and notes become a corpus the rest of the app can draw from. That corpus lives only on this device, so it must not go long without a portable export (Step 8.13).
 
 ---
 
@@ -215,7 +222,13 @@ Time-limited screen surfaced in December via notification. 8–10 editorial slid
 A new Stats Atlas section driven by the private tags from Step 3.9 (author identity + book representation). Surfaces: share of authors by gender, share of authors by BIPOC affiliation, share of authors by LGBTQ+ affiliation, country distribution, share of books with LGBTQ+ representation, share with BIPOC representation. Editorial framing ("38% women, 22% authors of colour, 14 countries this year") with italic copy and hairline bars — no dashboard chrome. Composes with the year filter on the Stats Atlas so the same section can scope to any year on record, and with the custom-scope generator (Step 7.14) so any wrap-up can include a diversity slide. Strictly personal — driven by the user's own private tags. *(B.5.15)*
 
 ### Step 7.14 — Custom-scope wrap-up generator (M, depends on 7.11)
-Generalises Step 7.11 (Year in Books) into a wrap-up generator that takes any scope: day, week, month, year, "since you joined Softcover", or a custom date range. User picks the scope from a small sheet (preset chips + custom-range picker); the generator produces an editorial 6–10 slide spread tuned to the scope's density — a "day" wrap-up is leaner (single book, single session, single highlight) while a "year" wrap-up matches Step 7.11's density. Slides draw on every personal-data source the user has lit up: sessions (Step 3.5), highlights (Step 3.3), reading log (Step 3.7), personal ratings (Step 3.1), personal moods (Step 3.10), personal identity & representation tags (Step 3.9 + Step 7.13). Each slide is shareable via the Step 0.2 / Step 4.8 share surface so users can send a "this week in books" card to a friend who doesn't use the app. Reached from Profile and from a "Wrap it up" affordance on the Stats Atlas (Step 7.9). The year-scope route shares the generator with Step 7.11's December trigger — both surface the same output. *(C.17, C.4)*
+Generalises Step 7.11 (Year in Books) into a wrap-up generator that takes any scope: day, week, month, year, "since you joined Softcover", or a custom date range. User picks the scope from a small sheet (preset chips + custom-range picker); the generator produces an editorial 6–10 slide spread tuned to the scope's density — a "day" wrap-up is leaner (single book, single session, single highlight) while a "year" wrap-up matches Step 7.11's density. Slides draw on every personal-data source the user has lit up: sessions (Step 3.5), highlights (Step 3.3), reading log (Step 3.7), personal ratings (Step 3.1), personal moods (Step 3.10), personal identity & representation tags (Step 3.9 + Step 7.13), graded book traits (Step 3.13 + Step 7.15), and publication/provenance (Step 7.16). A slide whose source the user never filled in is dropped, not rendered empty. Each slide is shareable via the Step 0.2 / Step 4.8 share surface so users can send a "this week in books" card to a friend who doesn't use the app — the image export is the point of the feature, not a garnish on it. Reached from Profile and from a "Wrap it up" affordance on the Stats Atlas (Step 7.9). The year-scope route shares the generator with Step 7.11's December trigger — both surface the same output. *(C.17, C.4)*
+
+### Step 7.15 — "How you read" stats (M, depends on 3.13 + 7.9)
+A Stats Atlas section driven by the graded traits (Step 3.13) and moods (Step 3.10) — the shape of the reading rather than its demographics. Surfaces: the plot-vs-character balance across the scope ("your year leaned character-driven — 69% of the books you graded"), the pace mix, the writing-style mix, and a mood profile (the moods reached for most, ranked by average intensity). Editorial register throughout — italic framing sentence, hairline bars, no dashboard chrome. Only counts books the user actually graded, and says so in the framing line rather than silently treating ungraded books as neutral. Scopes with the Atlas year filter; feeds Step 7.14. *(B.5.16)*
+
+### Step 7.16 — Publication & provenance stats (S–M, depends on 7.9, + 3.9 for nationality, + 3.14 for source)
+The classic reading-journal spread, most of it computable from data already held. Surfaces: **author nationality** (from Step 3.9's country-of-birth tag), **language + share translated** (from the edition's language field), **year-published distribution** (from the release date — separates a new-releases reader from a backlist reader), **audience mix** (YA / Middle Grade / Adult, on top of Step 6.14's classification), and **where you got it** (from Step 3.14). Format split (Step 7.6) and rating + genre distributions (Step 7.4) already exist — this closes the set so the Atlas covers everything a paper reading journal would. Each sub-stat degrades independently: a user who never tagged nationality still gets the language and year charts. Scopes with the Atlas year filter; feeds Step 7.14. *(B.5.17)*
 
 ---
 
@@ -253,6 +266,11 @@ In-app changelog route from Settings → About; same surface drives the post-upg
 ### Step 8.12 — In-app Roadmap screen (S)
 Read-only "Roadmap" route from Settings → About that renders the public `ROADMAP.md`. Fetches the raw file from the repo at runtime (cached) so it's always current without an app release, with a build-time bundled copy as the offline / first-load fallback. No hand-maintained in-app copy. *(D.11)*
 
+### Step 8.13 — Personal-data export & import (S–M, depends on 3.9 + 3.10 + 3.11 + 3.13 + 3.14)
+A plain JSON export and import of the **private corpus** — identity & representation tags, moods, notes, graded traits, acquisition source — keyed by Hardcover book/author ids so a re-import re-attaches to the right books on a fresh install. Save to a file the user owns (share sheet / file picker per platform); import validates, reports what it matched, and skips what it couldn't resolve rather than failing the whole file.
+
+**Why this is a step of its own and not a slice of Step 9.8.** This data exists nowhere but the device — Hardcover has no field for it. Between the corpus landing (Phase 3) and backup & restore (Step 9.8) there must not be a long stretch where a reinstall silently destroys the thing the user put the most work into; that risk is also the first objection any user raises before they'll invest in tagging at all. Ship the portable file early; Step 9.8's fuller single-archive backup (which also covers highlights, sessions, reviews, lists) still follows later and supersedes this as the *complete* answer. *(D.8)*
+
 ### Step 8.10 — Onboarding goal + theme + import + notifications + better error UI (M, depends on 7.3, 8.1, 8.6, 0.4, B.7.6)
 Extend onboarding with skippable goal, theme, import, notification opt-in steps; surface inline error UI on invalid API keys. *(B.7.1–B.7.6)*
 
@@ -286,8 +304,8 @@ Currently-reading complication for Wear; quick-tile to start/stop a session. *(D
 ### Step 9.7 — Offline mutation queue (M)
 Queue progress logging, session writes, ratings, reviews, highlights while offline; sync on reconnect with shake-on-conflict. The minimal queue infrastructure (Room-backed persistence, app-start + reconnect drain triggers, FIFO ordering per target) already shipped in [[2.12]] scoped to list mutations — this step extends it to the remaining mutation types and adds the shake-on-conflict UI and surfaced pending-sync indicator. *(D.7)*
 
-### Step 9.8 — Backup & restore (M, depends on 8.5)
-Single-archive export of all UGC; restore in Settings. *(D.8)*
+### Step 9.8 — Backup & restore (M, depends on 8.5 + 8.13)
+Single-archive export of **all** UGC — highlights, sessions, reviews, lists, *and* the private corpus already made portable by Step 8.13 (identity & representation tags, moods, notes, graded traits, acquisition source). Restore in Settings. Supersedes Step 8.13's standalone JSON as the complete answer; keep 8.13's format readable by the restore path so an older export still imports. Doubles as account migration if Hardcover moves. *(D.8)*
 
 ### Step 9.9 — Voice & TalkBack polish (M)
 Custom TalkBack announcements for the editorial-styled screens; Assistant intents for "+pages" and "start session". *(D.6)*
@@ -343,12 +361,6 @@ Italic finish-date prediction on each Reading row; "Up against the clock" sectio
 ### Step 10.14 — Library export (S, depends on 0.2 + 8.5)
 Export current view as styled shelf card image. *(B.1.13)*
 
-### Step 10.15 — Auto-resize coverless title text (S)
-On coverless book placeholders, shrink the title font to fit cleanly rather than breaking words across lines. Shared component — design-system note travels with it. *(A.3.12)*
-
-### Step 10.16 — Local tag cache + tag suggestions (S–M)
-Cache the user's applied tags locally (aggregated across all tagged books) and suggest them in the tag editor, working around the API's no-`_ilike` tag-search limit. Builds on the shipped tagging slice. *(B.4.25)*
-
 ---
 
 ## Phase 11 — Stretch / out-of-scope flags
@@ -388,7 +400,7 @@ Phase 0  ──┬──> Phase 1 ──> Phase 2 ──> Phase 3 ──┬─�
 
 ## Maintenance reminders
 
-- Every step that introduces a new component or pattern must update `../reference/design-system.md` in the same change (DS maintenance rule, CLAUDE.md).
+- Every step that introduces a new component or pattern must update the relevant section under `../reference/design-system/` in the same change (DS maintenance rule, CLAUDE.md).
 - Substantial changes (new file, new feature module, layout/state/data flow changes) delegate to the `code-reviewer` agent before reporting work done.
 - Test writing always delegates to the `unit-test-writer` agent.
 - Roadmap docs are uncommitted by convention (per existing project practice); keep them local and update as steps complete.

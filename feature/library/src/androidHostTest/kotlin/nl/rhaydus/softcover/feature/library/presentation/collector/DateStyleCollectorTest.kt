@@ -120,7 +120,7 @@ class DateStyleCollectorTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 isLoading = false,
-                isLayoutMenuExpanded = true,
+                isArrangeSheetExpanded = true,
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
             )
             val collector = DateStyleCollector()
@@ -134,7 +134,7 @@ class DateStyleCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isLayoutMenuExpanded shouldBe true
+            stateFlow.value.isArrangeSheetExpanded shouldBe true
             stateFlow.value.dateStyle shouldBe DateStyle.MONTH_DAY_YEAR
             job.cancel()
         }

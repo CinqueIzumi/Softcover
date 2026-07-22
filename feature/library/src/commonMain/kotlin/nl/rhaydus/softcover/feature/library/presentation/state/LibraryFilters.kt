@@ -3,11 +3,14 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.feature.library.presentation.util.finishedYear
 
 internal data class LibraryFilters(
     val tags: Set<Tag> = emptySet(),
     val formats: Set<String> = emptySet(),
     val releaseYears: Set<Int> = emptySet(),
+    /** Single-select year-finished facet, offered on the Read tab only. */
+    val readYear: Int? = null,
     val owned: Boolean? = null,
     val ratingMin: Double? = null,
 ) {
@@ -15,6 +18,7 @@ internal data class LibraryFilters(
         get() = tags.isEmpty() &&
             formats.isEmpty() &&
             releaseYears.isEmpty() &&
+            readYear == null &&
             owned == null &&
             ratingMin == null
 
@@ -30,6 +34,8 @@ internal data class LibraryFilters(
         if (formats.isNotEmpty() && book.editions.none { it.format in formats }) return false
 
         if (releaseYears.isNotEmpty() && book.releaseYear !in releaseYears) return false
+
+        if (readYear != null && book.finishedYear() != readYear) return false
 
         when (owned) {
             true -> if (book.editions.none { it.owned }) return false
@@ -63,6 +69,8 @@ internal data class LibraryFilters(
             val year = book?.releaseYear ?: edition.releaseYear
             if (year !in releaseYears) return false
         }
+
+        if (readYear != null && book?.finishedYear() != readYear) return false
 
         when (owned) {
             true -> if (edition.owned.not()) return false

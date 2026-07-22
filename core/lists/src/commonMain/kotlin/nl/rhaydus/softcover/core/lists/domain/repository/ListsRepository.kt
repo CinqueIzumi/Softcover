@@ -3,12 +3,16 @@ package nl.rhaydus.softcover.core.lists.domain.repository
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 
 interface ListsRepository {
     val allUserLists: Flow<List<BookList>>
 
-    suspend fun createList(name: String): BookList
+    suspend fun createList(
+        name: String,
+        privacy: PrivacySetting = PrivacySetting.PUBLIC,
+    ): BookList
 
     /**
      * Gated full refresh of the user's lists. Fetches a cheap per-list freshness signature for every

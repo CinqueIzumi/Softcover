@@ -13,12 +13,14 @@ class MarkBookAsReadUseCase(
     suspend operator fun invoke(
         book: Book,
         editionId: Int? = null,
+        actionAt: String? = null,
     ): Result<ShelfMutationOutcome> = runCatchingLogged {
         if (book.status == BookStatus.Read) return@runCatchingLogged ShelfMutationOutcome.NoChange
 
         val updatedBook = repository.markBookAsRead(
             book = book,
             editionId = editionId,
+            actionAt = actionAt,
         )
 
         repository.cacheBook(book = updatedBook)

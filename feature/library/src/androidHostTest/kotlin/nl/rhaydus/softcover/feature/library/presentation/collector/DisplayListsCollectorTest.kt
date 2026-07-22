@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBook
@@ -228,81 +227,6 @@ class DisplayListsCollectorTest {
         }
 
         @Test
-        fun `availableReadYearsCached is populated from raw Read-tab books`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val readTabId = LibraryTab.Status.of(UserBookStatus.READ).id
-            val book2023 = buildBook(
-                id = 1,
-                userBook = UserBook(
-                    id = 1,
-                    status = BookStatus.Read,
-                    dateAdded = "2024-01-01",
-                    createdAt = null,
-                    privacySettingId = 1,
-                    reviewHasSpoilers = false,
-                    editionId = null,
-                    lastReadDate = "2023-06-15",
-                    rating = null,
-                    referrerUserId = null,
-                    reviewedAt = null,
-                    updatedAt = null,
-                    journals = emptyList(),
-                ),
-            )
-            val book2022 = buildBook(
-                id = 2,
-                userBook = UserBook(
-                    id = 2,
-                    status = BookStatus.Read,
-                    dateAdded = "2024-01-01",
-                    createdAt = null,
-                    privacySettingId = 1,
-                    reviewHasSpoilers = false,
-                    editionId = null,
-                    lastReadDate = "2022-03-10",
-                    rating = null,
-                    referrerUserId = null,
-                    reviewedAt = null,
-                    updatedAt = null,
-                    journals = emptyList(),
-                ),
-            )
-            val collector = DisplayListsCollector()
-
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(booksByTab = mapOf(readTabId to listOf(book2023, book2022)))
-
-            // ----- Assert -----
-            stateFlow.value.availableReadYearsCached shouldBe listOf(2023, 2022)
-            job.cancel()
-        }
-
-        @Test
-        fun `availableReadYearsCached is empty when there is no Read tab in booksByTab`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val crTabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
-            val book = buildBook(id = 1)
-            val collector = DisplayListsCollector()
-
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(booksByTab = mapOf(crTabId to listOf(book)))
-
-            // ----- Assert -----
-            stateFlow.value.availableReadYearsCached shouldBe emptyList()
-            job.cancel()
-        }
-
-        @Test
         fun `searchQuery filters books in displayBooksByTab`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val tabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
@@ -390,7 +314,7 @@ class DisplayListsCollectorTest {
 
             // ----- Act -----
             // Change a field not included in DisplayInputs — this should not retrigger collectLatest
-            stateFlow.value = stateFlow.value.copy(isLayoutMenuExpanded = true)
+            stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
 
             // ----- Assert -----
             stateFlow.value.displayBooksByTab[tabId] shouldBe listOf(book)

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.toSet
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileLocalDataSource
 import nl.rhaydus.softcover.core.profile.data.datasource.ProfileRemoteDataSource
+import nl.rhaydus.softcover.core.profile.domain.ProfileRefreshGate
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
@@ -13,6 +14,7 @@ import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 internal class ProfileRepositoryImpl(
     private val profileRemoteDataSource: ProfileRemoteDataSource,
     private val profileLocalDataSource: ProfileLocalDataSource,
+    private val profileRefreshGate: ProfileRefreshGate,
 ) : ProfileRepository {
     override fun observeUserProfileData(): Flow<UserProfileData?> =
         profileLocalDataSource.observeUserProfileData()
@@ -43,5 +45,6 @@ internal class ProfileRepositoryImpl(
 
     override suspend fun clearProfileCache() {
         profileLocalDataSource.clear()
+        profileRefreshGate.reset()
     }
 }

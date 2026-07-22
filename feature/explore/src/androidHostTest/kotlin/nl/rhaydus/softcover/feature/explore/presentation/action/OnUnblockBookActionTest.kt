@@ -155,7 +155,7 @@ class OnUnblockBookActionTest {
             // ----- Assert -----
             verify {
                 SnackBarManager.showSnackBar(
-                    title = "\"Dune\" unblocked",
+                    title = "\"Dune\" is back in your suggestions",
                     actionLabel = "Undo",
                     duration = any(),
                     onActionClick = any(),
@@ -193,7 +193,7 @@ class OnUnblockBookActionTest {
             // ----- Assert -----
             verify {
                 SnackBarManager.showSnackBar(
-                    title = "\"Book\" unblocked",
+                    title = "\"Book\" is back in your suggestions",
                     actionLabel = "Undo",
                     duration = any(),
                     onActionClick = any(),

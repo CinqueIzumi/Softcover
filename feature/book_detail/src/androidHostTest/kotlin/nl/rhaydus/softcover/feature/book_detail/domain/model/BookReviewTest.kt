@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.book_detail.domain.model
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 
 class BookReviewTest {
@@ -23,14 +22,14 @@ class BookReviewTest {
     )
 
     @Nested
-    inner class GetFormattedDate {
+    inner class GetReviewedMonthYear {
         @Test
         fun `returns null when reviewedAt is null`() {
             // ----- Arrange -----
             val review = buildReview(reviewedAt = null)
 
             // ----- Act -----
-            val result = review.getFormattedDate(style = DateStyle.DAY_MONTH_YEAR)
+            val result = review.getReviewedMonthYear()
 
             // ----- Assert -----
             result shouldBe null
@@ -42,7 +41,7 @@ class BookReviewTest {
             val review = buildReview(reviewedAt = "not-a-date")
 
             // ----- Act -----
-            val result = review.getFormattedDate(style = DateStyle.DAY_MONTH_YEAR)
+            val result = review.getReviewedMonthYear()
 
             // ----- Assert -----
             result shouldBe null
@@ -54,50 +53,34 @@ class BookReviewTest {
             val review = buildReview(reviewedAt = "")
 
             // ----- Act -----
-            val result = review.getFormattedDate(style = DateStyle.DAY_MONTH_YEAR)
+            val result = review.getReviewedMonthYear()
 
             // ----- Assert -----
             result shouldBe null
         }
 
         @Test
-        fun `formats valid ISO-8601 date-time with DAY_MONTH_YEAR style`() {
+        fun `formats valid ISO-8601 date-time as abbreviated month and year`() {
             // ----- Arrange -----
             val review = buildReview(reviewedAt = "2024-05-15T10:23:45")
 
             // ----- Act -----
-            val result = review.getFormattedDate(style = DateStyle.DAY_MONTH_YEAR)
+            val result = review.getReviewedMonthYear()
 
             // ----- Assert -----
-            result shouldBe "15/05/2024"
+            result shouldBe "May 2024"
         }
 
         @Test
-        fun `formats valid ISO-8601 date-time with MONTH_DAY_YEAR style`() {
+        fun `formats a different valid ISO-8601 date-time as abbreviated month and year`() {
             // ----- Arrange -----
-            val review = buildReview(reviewedAt = "2024-05-15T10:23:45")
+            val review = buildReview(reviewedAt = "2023-09-03T00:00:00")
 
             // ----- Act -----
-            val result = review.getFormattedDate(
-                style = DateStyle.MONTH_DAY_YEAR,
-            )
+            val result = review.getReviewedMonthYear()
 
             // ----- Assert -----
-            result shouldBe "05/15/2024"
-        }
-
-        @Test
-        fun `formats valid ISO-8601 date-time with YEAR_MONTH_DAY style`() {
-            // ----- Arrange -----
-            val review = buildReview(reviewedAt = "2024-05-15T10:23:45")
-
-            // ----- Act -----
-            val result = review.getFormattedDate(
-                style = DateStyle.YEAR_MONTH_DAY,
-            )
-
-            // ----- Assert -----
-            result shouldBe "2024/05/15"
+            result shouldBe "Sep 2023"
         }
     }
 }

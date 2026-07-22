@@ -1,0 +1,55 @@
+# A lean, paginated fetch of every finished book for client-side stat aggregation (year/month
+# columns, ratings histogram, genre breakdown, total pages, author demographics). No covers/author
+# names here - those are only needed for the small recently-loved list in GetUserProfileData. 1 root
+# field (me).
+query GetReadUserBooksForStats($limit: Int!, $offset: Int!) {
+    me {
+        user_books(
+            where: { status_id: { _eq: 3 } }
+            order_by: { last_read_date: desc_nulls_last }
+            limit: $limit
+            offset: $offset
+        ) {
+            rating
+            last_read_date
+            user_book_read_finished_journal: reading_journals(
+                where: { event: { _eq: "user_book_read_finished" } }
+                order_by: { updated_at: desc }
+                limit: 1
+            ) {
+                ...ReadingJournalFragment
+            }
+            edition {
+                pages
+            }
+            book {
+                pages
+                # Top 5 genre tags by popularity only - a book rarely carries more genres worth
+                # counting, and capping here (rather than pulling every tag) keeps this per-book,
+                # paginated payload lean.
+                taggable_counts(
+                    where: { tag: { tag_category: { category: { _eq: "Genre" } } } }
+                    order_by: { count: desc }
+                    limit: 5
+                ) {
+                    tag {
+                        tag
+                        tag_category {
+                            category
+                        }
+                    }
+                }
+                # Only the fields the author-demographics aggregation needs - id for cross-book
+                # dedupe, no name, to keep this per-book, paginated payload lean.
+                contributions {
+                    author {
+                        id
+                        is_bipoc
+                        is_lgbtq
+                        gender_id
+                    }
+                }
+            }
+        }
+    }
+}

@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
 import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsLocalDataSource
 import nl.rhaydus.softcover.core.lists.data.datasource.ListsRemoteDataSource
 
@@ -31,7 +32,15 @@ internal class ListWriteReplay(
     private suspend fun replayCreateList(write: PendingListWrite) {
         val name: String = write.listName ?: error("CREATE_LIST replay missing listName")
 
-        val created: BookList = listsRemoteDataSource.createList(name = name)
+        // Rows queued before this column existed (or optimistically written pre-migration) carry no
+        // privacy choice — fall back to PUBLIC, today's pre-existing behaviour, rather than dropping
+        // the replay.
+        val privacy: PrivacySetting = write.privacy ?: PrivacySetting.PUBLIC
+
+        val created: BookList = listsRemoteDataSource.createList(
+            name = name,
+            privacy = privacy,
+        )
 
         listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
     }

@@ -29,7 +29,14 @@ complexity:
   NestedBlockDepth:
     threshold: 6
   LongParameterList:
-    # The baseline already relaxes the DI constructor threshold; keep a sane bound on plain functions.
+    # TOAD *ScreenModel / *Dependencies constructors grow every time a screen gains a use case (book
+    # detail alone is 30+ params) — a parameter object isn't idiomatic for constructor DI, and the
+    # count has no natural ceiling, so a numeric threshold bump here would need to be revisited on
+    # every future use case addition. Exclude the layer by path instead of chasing the count: every
+    # TOAD screen keeps its ScreenModel + Dependencies under `presentation/screenmodel/` by convention
+    # (see docs/rhaydus/0.3.0/toad-architecture.md), so this targets exactly the DI-constructor classes
+    # and leaves the rule at full strength (the baseline's threshold: 30) everywhere else.
+    excludes: ['**/presentation/screenmodel/**']
     functionThreshold: 12
     ignoreDefaultParameters: true
   TooManyFunctions:

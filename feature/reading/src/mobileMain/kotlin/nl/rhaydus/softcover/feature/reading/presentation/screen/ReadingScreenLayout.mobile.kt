@@ -571,9 +571,9 @@ private fun ReadingScreenAudiobookPreview() {
 
 @StandardPreview
 @Composable
-private fun PlanTodayNudgePreview() {
+private fun PaceNudgeRibbonPreview() {
     SoftcoverTheme {
-        PlanTodayNudge(
+        PaceNudgeRibbon(
             text = "Read 24 pages today to stay on pace.",
             onDismiss = {},
         )

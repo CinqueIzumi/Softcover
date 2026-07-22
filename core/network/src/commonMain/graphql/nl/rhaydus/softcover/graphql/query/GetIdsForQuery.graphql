@@ -1,10 +1,22 @@
+# $sort defaults to the proven relevance ordering; callers pass "users_count:desc" for the
+# popularity sort chip. Only these two orderings are verified against the live Typesense index
+# (see explore-3a brief, deviation 4) - no other sort key should be threaded through here.
+#
+# $page pages forward through the Typesense index. The `search` endpoint is a passthrough that
+# returns only {error, ids, page, per_page, query} - no total hit count - so the client can't
+# compute a page count; it pages forward until a page comes back shorter than $perPage, which
+# signals the end (see SearchRemoteDataSourceImpl.searchForName).
 query GetIdsForQuery(
     $query: String!,
+    $sort: String! = "_text_match:desc,users_count:desc",
+    $page: Int = 1,
+    $perPage: Int = 25,
 ) {
     search(
         query: $query
-        per_page: 25
-        sort: "_text_match:desc,users_count:desc"
+        page: $page
+        per_page: $perPage
+        sort: $sort
         weights: "5,5,3,1,1"
     ) {
         ids

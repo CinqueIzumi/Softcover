@@ -23,18 +23,23 @@ import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
 
 /**
  * Standalone desktop Hidden-suggestions page — a direct push from Settings (there is no master–
- * detail pane for it). Static back bar over the shared [HiddenSuggestionsContent], capped to the
- * reading measure, with a persistent desktop scrollbar — the same shape as the sibling
- * `LibraryVisibilitySettingsScreenLayout` / `AppearanceSettingsScreenLayout` desktop pages in
- * `:feature:settings`.
+ * detail pane for it). A static back bar carrying the back control + the "Hidden suggestions" title,
+ * mirroring the sibling `LibraryVisibilitySettingsScreenLayout` / `AppearanceSettingsScreenLayout`
+ * desktop pages in `:feature:settings` (whose `DesktopSettingsBackBar` shows the page title the same
+ * way), over the shared [HiddenSuggestionsContent], capped to the reading measure, with a persistent
+ * desktop scrollbar. The foundation `DesktopBackStrip` has no slot for a title, so — like the Settings
+ * feature's own `DesktopSettingsBackBar` — this stays a small feature-local back+title row built from
+ * the same `DesktopTooltip` / `pointerHandCursor` primitives.
  */
 @Composable
 internal actual fun HiddenSuggestionsScreenLayout(
@@ -45,10 +50,7 @@ internal actual fun HiddenSuggestionsScreenLayout(
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        HiddenSuggestionsDesktopBackBar(
-            title = "Hidden suggestions",
-            onNavigateBack = onNavigateBack,
-        )
+        HiddenSuggestionsDesktopBackBar(onNavigateBack = onNavigateBack)
 
         Box(
             modifier = Modifier
@@ -77,10 +79,7 @@ internal actual fun HiddenSuggestionsScreenLayout(
 }
 
 @Composable
-private fun HiddenSuggestionsDesktopBackBar(
-    title: String,
-    onNavigateBack: () -> Unit,
-) {
+private fun HiddenSuggestionsDesktopBackBar(onNavigateBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,9 +111,21 @@ private fun HiddenSuggestionsDesktopBackBar(
         Spacer(modifier = Modifier.width(4.dp))
 
         Text(
-            text = title,
+            text = "Hidden suggestions",
             style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun HiddenSuggestionsScreenDesktopPreview() {
+    SoftcoverTheme {
+        HiddenSuggestionsScreenLayout(
+            state = HiddenSuggestionsUiState(),
+            runAction = {},
+            onNavigateBack = {},
         )
     }
 }

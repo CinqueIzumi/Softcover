@@ -20,10 +20,15 @@ internal class OnSubmitAction : CreateListAction {
 
         if (trimmed.isEmpty() || scope.currentState.isSubmitting) return
 
+        val privacy = scope.currentState.privacy
+
         scope.setState { it.copy(isSubmitting = true) }
 
         runCatching {
-            dependencies.createListUseCase(name = trimmed)
+            dependencies.createListUseCase(
+                name = trimmed,
+                privacy = privacy,
+            )
         }.onSuccess { created ->
             scope.setState { it.copy(isSubmitting = false) }
 

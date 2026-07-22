@@ -27,9 +27,9 @@ and `./gradlew check` runs the full set.
 
 ## Design System
 
-The brand-agnostic design skeleton (theme/typography plumbing, layout primitives, the shared component catalog, the editorial role contract) is governed by the foundation [`docs/rhaydus/0.3.0/design-system-foundations.md`](docs/rhaydus/0.3.0/design-system-foundations.md). [docs/reference/design-system.md](docs/reference/design-system.md) is the source of truth for Softcover's brand layered on top — color roles, editorial typography values, brand components, patterns, decision rules. Consult both before designing or modifying any UI surface.
+The brand-agnostic design skeleton (theme/typography plumbing, layout primitives, the shared component catalog, the editorial role contract) is governed by the foundation [`docs/rhaydus/0.3.0/design-system-foundations.md`](docs/rhaydus/0.3.0/design-system-foundations.md). [docs/reference/design-system.md](docs/reference/design-system.md) is the source of truth for Softcover's brand layered on top — color roles, editorial typography values, brand components, patterns, decision rules. It is split into section files under [`design-system/`](docs/reference/design-system/) behind a thin index; **read only the section you need** rather than the whole doc. Consult both before designing or modifying any UI surface.
 
-**Maintenance rule (enforced by review).** Any change that introduces, retires, or alters a foundation, component, or pattern in the design system MUST update `docs/reference/design-system.md` in the same change. The `code-reviewer` agent treats a design-system change without a corresponding doc update as a blocker. Examples that require a doc update: a new shared component under `core/presentation/component/`, a new editorial typography role, a new color role usage, a new layout pattern that other screens should adopt, retirement or renaming of any of the above. Localized tweaks to a single screen that don't change the system itself do not require an update.
+**Maintenance rule (enforced by review).** Any change that introduces, retires, or alters a foundation, component, or pattern in the design system MUST update the relevant section file under `docs/reference/design-system/` in the same change (the doc is split into section files behind the thin `docs/reference/design-system.md` index). The `rhaydus-kotlin:code-reviewer` agent treats a design-system change without a corresponding doc update as a blocker. Examples that require a doc update: a new shared component under `core/presentation/component/`, a new editorial typography role, a new color role usage, a new layout pattern that other screens should adopt, retirement or renaming of any of the above. Localized tweaks to a single screen that don't change the system itself do not require an update.
 
 ## Code Style
 
@@ -44,7 +44,7 @@ The mechanical style rules are enforced by tooling, not manual vigilance — for
 
 The subjective rules no tool can mechanize — blank line between sibling composables (incl. `Spacer`), paragraph spacing around multi-line constructs, an `AppLog.e(...)` log as its own paragraph, reserved fixed height for optional card rows — live in `docs/reference/code-style.md` and are caught in review.
 
-**For substantial Kotlin changes, delegate to the `code-reviewer` agent before reporting work done.** "Substantial" = a new file, a new feature module, a change spanning multiple files, or any change touching layout/state/data flow. The reviewer audits against the full current `docs/reference/code-style.md` and catches both new violations and pre-existing ones in the touched files (per the on-touch compliance policy). Run it after the build succeeds and before the wrap-up message.
+**For substantial Kotlin changes, delegate to the `rhaydus-kotlin:code-reviewer` agent before reporting work done.** "Substantial" = a new file, a new feature module, a change spanning multiple files, or any change touching layout/state/data flow. The reviewer audits against the full current `docs/reference/code-style.md` and catches both new violations and pre-existing ones in the touched files (per the on-touch compliance policy). Run it after the build succeeds and before the wrap-up message.
 
 ## Test Writing
 
@@ -108,9 +108,9 @@ This project builds on the **nl.rhaydus foundation** (v0.3.0, resolved locally v
 
 **How to develop here:**
 - New feature / screen **logic** (state, actions, use cases, data) → the **rhaydus-logic** agent.
-- New feature / screen **UI** (Compose render, design system) → the **rhaydus-ui** agent (it reads the foundation design system + `docs/reference/design-system.md`).
+- New feature / screen **UI** (Compose render, design system) → the **rhaydus-ui** agent (it reads the foundation design system + the relevant section of `docs/reference/design-system/`).
 - A logic-only or UI-only change uses just that one agent; a full new screen goes logic → UI.
-- Review → **code-reviewer**. Tests → **unit-test-writer**. Style gates → the **style-check** skill.
+- Review → **rhaydus-kotlin:code-reviewer**. Tests → **unit-test-writer**. Style gates → the **style-check** skill.
 - **Reuse-first:** check the capabilities index before hand-rolling a component, modifier, or util.
 
 _Re-run the rhaydus-adopt agent after changing any `nl.rhaydus` dependency or version._

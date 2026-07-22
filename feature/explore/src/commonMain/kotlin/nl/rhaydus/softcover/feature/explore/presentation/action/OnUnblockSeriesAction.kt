@@ -12,6 +12,8 @@ internal class OnUnblockSeriesAction(
     val seriesId: Int,
     val seriesName: String?,
     val coverUrl: String?,
+    val authorText: String? = null,
+    val bookCount: Int? = null,
 ) : HiddenSuggestionsAction {
     override suspend fun execute(
         dependencies: HiddenSuggestionsDependencies,
@@ -26,7 +28,7 @@ internal class OnUnblockSeriesAction(
             }
             .onSuccess {
                 SnackBarManager.showSnackBar(
-                    title = "\"${seriesName ?: "Series"}\" unblocked",
+                    title = "\"${seriesName ?: "Series"}\" is back in your suggestions",
                     actionLabel = "Undo",
                     onActionClick = {
                         dependencies.launch {
@@ -34,6 +36,8 @@ internal class OnUnblockSeriesAction(
                                 seriesId = seriesId,
                                 seriesName = seriesName,
                                 coverUrl = coverUrl,
+                                authorText = authorText,
+                                bookCount = bookCount,
                             ).onFailure {
                                 AppLog.e(
                                     it,

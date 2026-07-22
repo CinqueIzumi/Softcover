@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 
 class ListEntityMapperTest {
     // region Shared stubs for UI -> Entity section
@@ -33,6 +34,7 @@ class ListEntityMapperTest {
         name: String = "My List",
         slug: String = "my-list",
         ranked: Boolean = false,
+        privacy: PrivacySetting = PrivacySetting.PUBLIC,
         books: List<ListBook> = emptyList(),
         signature: String? = null,
     ): BookList = mockk {
@@ -48,6 +50,9 @@ class ListEntityMapperTest {
         every {
             this@mockk.ranked
         } returns ranked
+        every {
+            this@mockk.privacy
+        } returns privacy
         every {
             this@mockk.books
         } returns books
@@ -260,12 +265,14 @@ class ListEntityMapperTest {
         name: String = "My List",
         slug: String = "my-list",
         ranked: Boolean = false,
+        privacySettingId: Int = PrivacySetting.PUBLIC.code,
         signature: String? = null,
     ): BookListEntity = BookListEntity(
         id = id,
         name = name,
         slug = slug,
         ranked = ranked,
+        privacySettingId = privacySettingId,
         signature = signature,
     )
 
@@ -347,6 +354,30 @@ class ListEntityMapperTest {
 
             // ----- Assert -----
             result.signature shouldBe null
+        }
+
+        @Test
+        fun `writes PUBLIC privacy as its code to entity`() {
+            // ----- Arrange -----
+            val bookList = stubBookList(privacy = PrivacySetting.PUBLIC)
+
+            // ----- Act -----
+            val result = bookList.toEntity()
+
+            // ----- Assert -----
+            result.privacySettingId shouldBe PrivacySetting.PUBLIC.code
+        }
+
+        @Test
+        fun `writes PRIVATE privacy as its code to entity`() {
+            // ----- Arrange -----
+            val bookList = stubBookList(privacy = PrivacySetting.PRIVATE)
+
+            // ----- Act -----
+            val result = bookList.toEntity()
+
+            // ----- Assert -----
+            result.privacySettingId shouldBe PrivacySetting.PRIVATE.code
         }
     }
 
@@ -1251,6 +1282,45 @@ class ListEntityMapperTest {
 
             // ----- Assert -----
             result.signature shouldBe null
+        }
+
+        @Test
+        fun `reads PUBLIC privacy from entity's privacySettingId`() {
+            // ----- Arrange -----
+            val bookListEntity = stubBookListEntity(privacySettingId = PrivacySetting.PUBLIC.code)
+            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.privacy shouldBe PrivacySetting.PUBLIC
+        }
+
+        @Test
+        fun `reads PRIVATE privacy from entity's privacySettingId`() {
+            // ----- Arrange -----
+            val bookListEntity = stubBookListEntity(privacySettingId = PrivacySetting.PRIVATE.code)
+            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.privacy shouldBe PrivacySetting.PRIVATE
+        }
+
+        @Test
+        fun `degrades unknown privacySettingId to PUBLIC`() {
+            // ----- Arrange -----
+            val bookListEntity = stubBookListEntity(privacySettingId = -1)
+            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
+
+            // ----- Act -----
+            val result = wrapper.toModel()
+
+            // ----- Assert -----
+            result.privacy shouldBe PrivacySetting.PUBLIC
         }
     }
 }

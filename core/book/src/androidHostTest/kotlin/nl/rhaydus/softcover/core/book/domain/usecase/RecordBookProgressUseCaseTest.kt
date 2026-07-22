@@ -6,11 +6,11 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
 
 class RecordBookProgressUseCaseTest {
     private lateinit var markBookAsReadUseCase: MarkBookAsReadUseCase
@@ -71,6 +71,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
             coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
             coVerify(exactly = 0) { updateBookProgressUseCase(
@@ -78,6 +79,64 @@ class RecordBookProgressUseCaseTest {
                 any(),
                 any(),
             ) }
+        }
+
+        @Test
+        fun `forwards actionAt to markBookAsReadUseCase when book is finished`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(pages = 320)
+            val actionAt = "2026-07-21T21:00:00Z"
+
+            coEvery {
+                markBookAsReadUseCase(
+                    book = book,
+                    actionAt = actionAt,
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            val result = useCase(
+                book = book,
+                newPage = 320,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
+
+            coVerify(exactly = 1) { markBookAsReadUseCase(
+                book = book,
+                actionAt = actionAt,
+            ) }
+            coVerify(exactly = 0) { updateBookProgressUseCase(
+                any(),
+                any(),
+                any(),
+                any(),
+            ) }
+        }
+
+        @Test
+        fun `forwards null actionAt to markBookAsReadUseCase when omitted and book is finished`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(pages = 320)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            val result = useCase(
+                book = book,
+                newPage = 320,
+            )
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
+
+            coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
         }
 
         @Test
@@ -101,11 +160,47 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
 
             coVerify(exactly = 1) { updateBookProgressUseCase(
                 book = book,
                 newPage = 150,
                 newSeconds = null,
+            ) }
+            coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
+        }
+
+        @Test
+        fun `forwards actionAt to updateBookProgressUseCase when book is not finished`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(pages = 320)
+            val actionAt = "2026-07-21T21:00:00Z"
+
+            coEvery {
+                updateBookProgressUseCase(
+                    book = book,
+                    newPage = 150,
+                    newSeconds = null,
+                    actionAt = actionAt,
+                )
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            val result = useCase(
+                book = book,
+                newPage = 150,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
+
+            coVerify(exactly = 1) { updateBookProgressUseCase(
+                book = book,
+                newPage = 150,
+                newSeconds = null,
+                actionAt = actionAt,
             ) }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
@@ -130,6 +225,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
             coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
             coVerify(exactly = 0) { updateBookProgressUseCase(
@@ -163,6 +259,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
 
             coVerify(exactly = 1) { updateBookProgressUseCase(
                 book = book,
@@ -193,6 +290,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
 
             coVerify(exactly = 1) { updateBookProgressUseCase(
                 book = book,
@@ -272,6 +370,7 @@ class RecordBookProgressUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
+            result.getOrNull() shouldBe null
 
             coVerify(exactly = 1) { updateBookProgressUseCase(
                 book = book,

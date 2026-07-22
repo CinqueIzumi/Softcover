@@ -34,10 +34,6 @@ internal class OnSetListRankedAction(
         val state = scope.currentState
         val list = state.customLists.firstOrNull { it.id == listId }
 
-        // Close the sort dropdown so the snackbar (on failure) and the auto-switched grid (on
-        // success) aren't hidden behind it.
-        scope.setState { it.copy(isSortMenuExpanded = false) }
-
         val tabId = LibraryTab.CustomList(
             listId = listId,
             listName = list?.name.orEmpty(),

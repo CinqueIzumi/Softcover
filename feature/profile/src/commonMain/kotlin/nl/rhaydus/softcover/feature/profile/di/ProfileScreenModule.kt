@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.UserInformationCollector
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
 
@@ -22,9 +23,11 @@ val profileScreenModule = module {
             initializers = getAll(),
             resetUserDataUseCase = get(),
             observeUserProfileDataUseCase = get(),
+            observeReadingLifeUseCase = get(),
             refreshUserProfileDataUseCase = get(),
         )
     }
 
     factory { UserInformationCollector() } bind ProfileCollector::class
+    factory { ReadingLifeCollector() } bind ProfileCollector::class
 }

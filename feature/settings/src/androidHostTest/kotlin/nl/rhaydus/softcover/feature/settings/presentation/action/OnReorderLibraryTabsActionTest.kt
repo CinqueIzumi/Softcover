@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
+import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
@@ -172,6 +173,27 @@ class OnReorderLibraryTabsActionTest {
 
             // ----- Assert -----
             stateFlow.value.draftTabOrder shouldBe emptyList()
+        }
+
+        @Test
+        fun `strips the All entry id from the supplied order`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                draftTabOrder = emptyList(),
+                initialized = true,
+            )
+            val dependencies = stubDependencies(this)
+            val newOrder = listOf(LibraryTabEntry.ALL_ID, "list-2", "status-3")
+            val action = OnReorderLibraryTabsAction(newOrderedIds = newOrder)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.draftTabOrder shouldBe listOf("list-2", "status-3")
         }
     }
 }

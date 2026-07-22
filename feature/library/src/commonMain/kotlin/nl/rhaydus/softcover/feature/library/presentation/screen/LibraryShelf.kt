@@ -1,40 +1,34 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -48,40 +42,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import kotlin.math.roundToInt
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.designsystem.component.DesktopContextMenu
 import nl.rhaydus.designsystem.component.DesktopContextMenuItem
+import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.LocalHaptics
-import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.designsystem.modifier.hoverHighlight
+import nl.rhaydus.designsystem.modifier.conditional
+import nl.rhaydus.designsystem.modifier.grayscale
 import nl.rhaydus.designsystem.modifier.platformModifierClick
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -95,8 +84,8 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
-import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
@@ -622,7 +611,6 @@ internal fun BookList(
                         isSelectionMode = selectionMode,
                         isSelected = isSelected,
                         deadline = state.deadlines[book.id],
-                        dateStyle = state.dateStyle,
                         dragHandle = if (isRearranging) {
                             { DragHandle(modifier = handleModifier) }
                         } else {
@@ -849,7 +837,6 @@ private fun LayoutBookEntry(
     isSelected: Boolean,
     modifier: Modifier = Modifier,
     deadline: BookDeadline? = null,
-    dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     dragHandle: (@Composable () -> Unit)? = null,
 ) {
     // Prefetch only makes sense when the tap opens book detail. In selection mode the tap
@@ -878,6 +865,14 @@ private fun LayoutBookEntry(
         )
     }
 
+    // The wavy shelf-progress signature (redesign brief): a thin sine wave under every in-progress
+    // cover / beside every in-progress list row, independent of whether a deadline is tracked.
+    val progressFraction = if (book.status == BookStatus.Reading) {
+        book.userBookRead?.progress?.div(100f)
+    } else {
+        null
+    }
+
     when (layout) {
         LibraryGridLayout.GRID_TWO_COLUMNS,
         LibraryGridLayout.GRID_THREE_COLUMNS,
@@ -887,6 +882,7 @@ private fun LayoutBookEntry(
                     modifier = entryModifier,
                     title = book.title,
                     authorName = authorName,
+                    progressFraction = progressFraction,
                     onClick = onClick,
                     onLongClick = onLongClick,
                 ) { coverModifier ->
@@ -895,15 +891,16 @@ private fun LayoutBookEntry(
                         isSelectionMode = isSelectionMode,
                         isSelected = isSelected,
                     ) {
-                        DeadlineCoverOverlay(progress = deadlineProgress) {
+                        LibraryGridCover(deadlineProgress = deadlineProgress) { innerModifier ->
                             EditionImage(
                                 edition = currentEdition,
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = innerModifier,
                                 isLoading = false,
                                 defaultEdition = book.defaultEdition,
                                 fallbackCoverUrl = book.coverUrl,
+                                coverlessTitle = book.title,
                                 elevation = 6.dp,
-                                cornerRadius = 10.dp,
+                                cornerRadius = LIBRARY_COVER_CORNER_RADIUS,
                                 sharedTransitionKey = bookCoverTransitionKey(
                                     editionId = currentEdition?.id,
                                     bookId = book.id,
@@ -922,6 +919,7 @@ private fun LayoutBookEntry(
             CoverGridOverlay(dragHandle = dragHandle) {
                 CoverOnlyCell(
                     modifier = entryModifier,
+                    progressFraction = progressFraction,
                     onClick = onClick,
                     onLongClick = onLongClick,
                 ) { coverModifier ->
@@ -930,16 +928,16 @@ private fun LayoutBookEntry(
                         isSelectionMode = isSelectionMode,
                         isSelected = isSelected,
                     ) {
-                        DeadlineCoverOverlay(progress = deadlineProgress) {
+                        LibraryGridCover(deadlineProgress = deadlineProgress) { innerModifier ->
                             EditionImage(
                                 edition = currentEdition,
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = innerModifier,
                                 isLoading = false,
                                 defaultEdition = book.defaultEdition,
                                 fallbackCoverUrl = book.coverUrl,
                                 coverlessTitle = book.title,
                                 elevation = 6.dp,
-                                cornerRadius = 10.dp,
+                                cornerRadius = LIBRARY_COVER_CORNER_RADIUS,
                                 sharedTransitionKey = bookCoverTransitionKey(
                                     editionId = currentEdition?.id,
                                     bookId = book.id,
@@ -977,8 +975,7 @@ private fun LayoutBookEntry(
                 releaseYear = book.releaseYear,
                 usersCount = book.usersCount,
                 rating = book.rating,
-                deadlineProgress = deadlineProgress,
-                dateStyle = dateStyle,
+                progressFraction = progressFraction,
                 trailing = dragHandle,
             ) { coverModifier ->
                 SelectableCover(
@@ -986,22 +983,21 @@ private fun LayoutBookEntry(
                     isSelectionMode = isSelectionMode,
                     isSelected = isSelected,
                 ) {
-                    DeadlineCoverOverlay(progress = deadlineProgress) {
-                        EditionImage(
-                            edition = currentEdition,
-                            modifier = Modifier.fillMaxSize(),
-                            isLoading = false,
-                            defaultEdition = book.defaultEdition,
-                            fallbackCoverUrl = book.coverUrl,
-                            elevation = 6.dp,
-                            cornerRadius = 10.dp,
-                            sharedTransitionKey = bookCoverTransitionKey(
-                                editionId = currentEdition?.id,
-                                bookId = book.id,
-                            ),
-                            maxDecodePx = 600,
-                        )
-                    }
+                    EditionImage(
+                        edition = currentEdition,
+                        modifier = Modifier.fillMaxSize(),
+                        isLoading = false,
+                        defaultEdition = book.defaultEdition,
+                        fallbackCoverUrl = book.coverUrl,
+                        coverlessTitle = book.title,
+                        elevation = 6.dp,
+                        cornerRadius = LIBRARY_COVER_CORNER_RADIUS,
+                        sharedTransitionKey = bookCoverTransitionKey(
+                            editionId = currentEdition?.id,
+                            bookId = book.id,
+                        ),
+                        maxDecodePx = 600,
+                    )
                 }
             }
         }
@@ -1028,6 +1024,133 @@ private fun CoverGridOverlay(
             Box(modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
                 dragHandle()
             }
+        }
+    }
+}
+
+/**
+ * The cover radius shared by every Library cover — grid, cover-only, and list-large — so the
+ * countdown badge / selection ring overlays below can hard-code the same clip shape `EditionImage`
+ * itself uses.
+ */
+private val LIBRARY_COVER_CORNER_RADIUS = 10.dp
+
+/**
+ * Wraps a book cover with the redesign's deadline **countdown** badge (top-start, "N days" + clock,
+ * primary — only while [deadlineProgress] is on track or behind; the countdown itself has no meaning
+ * once a deadline has expired, so [DeadlineStatus.Expired] instead reads "Expired" and the cover
+ * desaturates via `Modifier.grayscale()`). This supersedes the shared `DeadlineCoverOverlay`'s
+ * top-end status-label badge for Library's grid/cover-only cells specifically — that shared component
+ * (and its status-label badge) is unchanged and still used as-is by Reading and Book detail; see
+ * `docs/reference/design-system.md`'s Deadline badge entry for why the two coexist. Composed *inside*
+ * `SelectableCover`'s content slot (not around it) so the badge dims with the rest of the cover while
+ * unselected, matching the redesign spec's selection-mode behaviour.
+ */
+@Composable
+private fun LibraryGridCover(
+    deadlineProgress: DeadlineProgress?,
+    modifier: Modifier = Modifier,
+    cover: @Composable (Modifier) -> Unit,
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        cover(
+            Modifier
+                .fillMaxSize()
+                .conditional(
+                    condition = deadlineProgress?.status == DeadlineStatus.Expired,
+                    ifTrue = { Modifier.grayscale() },
+                ),
+        )
+
+        if (deadlineProgress != null) {
+            LibraryDeadlineCountdownBadge(
+                progress = deadlineProgress,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(8.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun LibraryDeadlineCountdownBadge(
+    progress: DeadlineProgress,
+    modifier: Modifier = Modifier,
+) {
+    val (container, content) = when (progress.status) {
+        // Kept as errorContainer/onErrorContainer rather than the spec's flat primary for Behind — the
+        // app already uses error for "needs attention" everywhere else, and losing that distinction on
+        // the one badge that most needs to stand out felt like a regression (design-system.md notes it).
+        DeadlineStatus.OnTrack -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+        DeadlineStatus.Behind -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
+        DeadlineStatus.Expired -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    val label = if (progress.status == DeadlineStatus.Expired) {
+        "Expired"
+    } else {
+        val days = progress.daysRemaining
+        "$days ${if (days == 1L) "day" else "days"}"
+    }
+
+    Surface(
+        modifier = modifier,
+        color = container,
+        contentColor = content,
+        shape = RoundedCornerShape(6.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val clockIcon = drawableIconResource(
+                icon = SoftcoverIcon.DateRange,
+                contentDescription = "",
+            )
+
+            Icon(
+                painter = clockIcon.getIconPainter(),
+                contentDescription = clockIcon.contentDescription,
+                modifier = Modifier.size(11.dp),
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+            )
+        }
+    }
+}
+
+/**
+ * The wavy shelf-progress signature (redesign brief / design-system.md "Progress — wavy, not a
+ * ring"): a thin sine wave under a grid cover or beside a list row. Reserves its height even when
+ * [progressFraction] is null so a shelf mixing in-progress and untouched books never jumps a row.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun LibraryWaveProgressRow(
+    progressFraction: Float?,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(8.dp),
+    ) {
+        if (progressFraction != null) {
+            LinearWavyProgressIndicator(
+                progress = { progressFraction.coerceIn(
+                    0f,
+                    1f,
+                ) },
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.outlineVariant,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     }
 }
@@ -1061,6 +1184,7 @@ private fun LayoutEditionEntry(
                         modifier = coverModifier,
                         isLoading = false,
                         defaultEdition = edition,
+                        coverlessTitle = title,
                         elevation = 6.dp,
                         cornerRadius = 10.dp,
                         sharedTransitionKey = bookCoverTransitionKey(
@@ -1124,6 +1248,7 @@ private fun LayoutEditionEntry(
                     modifier = coverModifier,
                     isLoading = false,
                     defaultEdition = edition,
+                    coverlessTitle = title,
                     elevation = 6.dp,
                     cornerRadius = 10.dp,
                     sharedTransitionKey = bookCoverTransitionKey(
@@ -1143,27 +1268,7 @@ private fun CoverOnlyCell(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
-    cover: @Composable (Modifier) -> Unit,
-) {
-    cover(
-        modifier
-            .fillMaxWidth()
-            .aspectRatio(ratio = 2f / 3f)
-            .pointerHandCursor()
-            .pressScaleCombinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick,
-            ),
-    )
-}
-
-@Composable
-private fun GridBookCell(
-    title: String,
-    authorName: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    onLongClick: (() -> Unit)? = null,
+    progressFraction: Float? = null,
     cover: @Composable (Modifier) -> Unit,
 ) {
     Column(
@@ -1180,7 +1285,43 @@ private fun GridBookCell(
                 .aspectRatio(ratio = 2f / 3f),
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        LibraryWaveProgressRow(
+            progressFraction = progressFraction,
+            modifier = Modifier.padding(top = 9.dp),
+        )
+    }
+}
+
+@Composable
+private fun GridBookCell(
+    title: String,
+    authorName: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
+    progressFraction: Float? = null,
+    cover: @Composable (Modifier) -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .pointerHandCursor()
+            .pressScaleCombinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
+    ) {
+        cover(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(ratio = 2f / 3f),
+        )
+
+        LibraryWaveProgressRow(
+            progressFraction = progressFraction,
+            modifier = Modifier.padding(top = 9.dp),
+        )
+
+        Spacer(modifier = Modifier.height(9.dp))
 
         Text(
             text = title,
@@ -1280,6 +1421,15 @@ private fun CompactRow(
     }
 }
 
+/**
+ * The redesign's List (large) row: de-carded (no `surfaceContainer` Surface — the old card look) in
+ * favour of a hairline top divider, matching the spec's flattened list anatomy. Cover, series eyebrow,
+ * title, byline, meta line, and — while [progressFraction] is non-null — the wavy shelf-progress line
+ * + percentage replace the row's old `DeadlineSummaryLine`, which is dropped here: the countdown badge
+ * (grid cells only) and this wave now carry a book's reading state, so a third deadline-date line
+ * would be redundant on the row that already reads busiest.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun LargeRow(
     title: String,
@@ -1291,12 +1441,11 @@ private fun LargeRow(
     releaseYear: Int? = null,
     usersCount: Int? = null,
     rating: Double? = null,
-    deadlineProgress: DeadlineProgress? = null,
-    dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+    progressFraction: Float? = null,
     trailing: (@Composable () -> Unit)? = null,
     cover: @Composable (Modifier) -> Unit,
 ) {
-    Surface(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .pointerHandCursor()
@@ -1304,18 +1453,18 @@ private fun LargeRow(
                 onClick = onClick,
                 onLongClick = onLongClick,
             ),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = RoundedCornerShape(20.dp),
     ) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             cover(
                 Modifier
-                    .width(96.dp)
+                    .width(74.dp)
                     .aspectRatio(ratio = 2f / 3f),
             )
 
@@ -1345,8 +1494,8 @@ private fun LargeRow(
 
                 if (authorName.isNotBlank()) {
                     Text(
-                        text = "By $authorName",
-                        style = MaterialTheme.editorialTypography.bodySmall,
+                        text = "By $authorName".uppercase(),
+                        style = MaterialTheme.editorialTypography.eyebrowSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -1359,7 +1508,7 @@ private fun LargeRow(
                     releaseYear?.takeIf { it != -1 }?.toString(),
                     usersCount?.let { "$it readers" },
                     rating?.takeIf { it != 0.0 }?.toString(),
-                ).joinToString(separator = " • ")
+                ).joinToString(separator = " · ")
 
                 if (statsLabel.isNotEmpty()) {
                     Row(
@@ -1367,7 +1516,7 @@ private fun LargeRow(
                     ) {
                         Text(
                             text = statsLabel,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.editorialTypography.bodySmall.copy(fontFeatureSettings = "tnum"),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
 
@@ -1389,13 +1538,31 @@ private fun LargeRow(
                     }
                 }
 
-                if (deadlineProgress != null) {
-                    Spacer(modifier = Modifier.height(2.dp))
+                if (progressFraction != null) {
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                    DeadlineSummaryLine(
-                        progress = deadlineProgress,
-                        dateStyle = dateStyle,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        LinearWavyProgressIndicator(
+                            progress = { progressFraction.coerceIn(
+                                0f,
+                                1f,
+                            ) },
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.outlineVariant,
+                            modifier = Modifier
+                                .width(120.dp)
+                                .height(8.dp),
+                        )
+
+                        Text(
+                            text = "${(progressFraction * 100f).roundToInt()}%",
+                            style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
 
@@ -1415,6 +1582,8 @@ private fun SelectableCover(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    val coverShape = RoundedCornerShape(LIBRARY_COVER_CORNER_RADIUS)
+
     Box(modifier = modifier) {
         Box(
             modifier = Modifier
@@ -1426,10 +1595,29 @@ private fun SelectableCover(
             content()
         }
 
+        if (isSelectionMode && isSelected) {
+            // The redesign's selected-cover treatment: an inset primary ring + a 16% primary wash,
+            // on top of the (undimmed, per the alpha branch above) cover.
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                        shape = coverShape,
+                    )
+                    .border(
+                        width = 3.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = coverShape,
+                    ),
+            )
+        }
+
         if (isSelectionMode) {
             SelectionCircleIndicator(
                 isSelected = isSelected,
                 unselectedContainer = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                size = 26.dp,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp),
@@ -1451,6 +1639,7 @@ private fun SelectionCircleIndicator(
     isSelected: Boolean,
     unselectedContainer: Color,
     modifier: Modifier = Modifier,
+    size: Dp = 24.dp,
 ) {
     val container = if (isSelected) MaterialTheme.colorScheme.primary else unselectedContainer
 
@@ -1464,7 +1653,7 @@ private fun SelectionCircleIndicator(
         color = container,
         contentColor = content,
         shape = RoundedCornerShape(percent = 50),
-        modifier = modifier.size(24.dp),
+        modifier = modifier.size(size),
     ) {
         if (isSelected) {
             val checkIcon = drawableIconResource(
@@ -1560,209 +1749,26 @@ internal fun subtitleFor(
     return if (pagesPart != null) "$titlesPart · $pagesPart" else titlesPart
 }
 
+/**
+ * The Arrange/Filter sheets' footer "Show N titles" count — the current display list's size, falling
+ * back to the tab's precomputed stats while the display list hasn't landed yet (cold start). Shared by
+ * both the mobile and desktop layouts.
+ */
+internal fun LibraryContentTab.resultCountFor(state: LibraryUiState): Int =
+    when (this) {
+        is LibraryContentTab.CustomList -> state.displayEditionsFor(tabId = id)?.size
+        is LibraryContentTab.All, is LibraryContentTab.Status -> state.displayBooksFor(tabId = id)?.size
+    } ?: state.tabStatsFor(tabId = id).itemCount
+
 private const val UNSELECTED_COVER_ALPHA = 0.55f
 // endregion
-// region Shared controls
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-internal fun ShelfTabRow(
-    tabs: List<LibraryContentTab>,
-    currentPage: Int,
-    maxLabelWidth: Dp,
-    onTabClick: (Int) -> Unit,
-    onTabLongPress: () -> Unit,
-) {
-    val density = LocalDensity.current
-    val peekPx = with(density) { 48.dp.toPx() }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        tabs.forEachIndexed { index, tab ->
-            val selected = currentPage == index
-            val requester = remember { BringIntoViewRequester() }
-            var pillSize by remember { mutableStateOf(IntSize.Zero) }
-
-            LaunchedEffect(selected, pillSize) {
-                if (selected && pillSize.width > 0) {
-                    requester.bringIntoView(
-                        Rect(
-                            left = -peekPx,
-                            top = 0f,
-                            right = pillSize.width + peekPx,
-                            bottom = pillSize.height.toFloat(),
-                        ),
-                    )
-                }
-            }
-
-            ShelfTabPill(
-                label = tab.label,
-                selected = selected,
-                maxLabelWidth = maxLabelWidth,
-                onClick = { onTabClick(index) },
-                onLongClick = onTabLongPress,
-                modifier = Modifier
-                    .bringIntoViewRequester(requester)
-                    .onSizeChanged { pillSize = it },
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ShelfTabPill(
-    label: String,
-    selected: Boolean,
-    maxLabelWidth: Dp,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val container = if (selected) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceContainer
-    }
-
-    val content = if (selected) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
-    val haptics = LocalHaptics.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val pillShape = RoundedCornerShape(percent = 50)
-
-    Surface(
-        modifier = modifier
-            .pointerHandCursor()
-            .hoverHighlight(
-                interactionSource = interactionSource,
-                shape = pillShape,
-            )
-            .combinedClickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick,
-                onLongClick = {
-                    haptics.threshold()
-
-                    onLongClick()
-                },
-            ),
-        color = container,
-        contentColor = content,
-        shape = pillShape,
-    ) {
-        Text(
-            text = label,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-            ),
-            modifier = Modifier
-                .widthIn(max = maxLabelWidth)
-                .padding(horizontal = 18.dp, vertical = 10.dp),
-        )
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-internal fun ReadYearChipRow(
-    years: List<Int>,
-    selectedYear: Int?,
-    onYearClick: (Int?) -> Unit,
-) {
-    // Wraps on a fixed-width desktop pane (a pointer can't fling a chip row sideways); compact and
-    // medium keep the horizontal scroll.
-    val wrap = rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
-
-    val chipContent: @Composable () -> Unit = {
-        YearChip(
-            label = "All years",
-            selected = selectedYear == null,
-            onClick = { onYearClick(null) },
-        )
-
-        years.forEach { year ->
-            YearChip(
-                label = year.toString(),
-                selected = selectedYear == year,
-                onClick = { onYearClick(year) },
-            )
-        }
-    }
-
-    if (wrap) {
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            chipContent()
-        }
-    } else {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            chipContent()
-        }
-    }
-}
-
-@Composable
-private fun YearChip(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    val container = if (selected) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceContainer
-    }
-
-    val content = if (selected) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
-    Surface(
-        color = container,
-        contentColor = content,
-        shape = RoundedCornerShape(percent = 50),
-        onClick = onClick,
-        modifier = Modifier.pointerHandCursor(),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-            ),
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-        )
-    }
-}
-// endregion
 // region Selection mode
+/**
+ * The masthead's selection-mode replacement (redesign brief): a 38dp `surfaceContainerHigh` × circle
+ * to exit, an italic "N selected" headline, then a row of labelled Move / Add-to-list pills (each
+ * `surfaceContainerHigh`, 44dp tall, sharing the row's width) and a 44dp trash circle. Move keeps its
+ * existing shelf-target dropdown; behavior otherwise unchanged from the pre-redesign icon-row header.
+ */
 @Composable
 internal fun SelectionHeader(
     selectedCount: Int,
@@ -1774,59 +1780,40 @@ internal fun SelectionHeader(
     onAddToListClick: () -> Unit,
     onRemoveClick: () -> Unit,
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.fillMaxWidth(),
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 12.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SelectionExitButton(
                 onClick = onExit,
                 enabled = bulkActionInProgress.not(),
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                val exitIcon = drawableIconResource(
-                    icon = SoftcoverIcon.Close,
-                    contentDescription = "Exit selection mode",
-                )
+            )
 
-                Icon(
-                    painter = exitIcon.getIconPainter(),
-                    contentDescription = exitIcon.contentDescription,
-                )
-            }
+            Spacer(modifier = Modifier.width(14.dp))
 
             Text(
                 text = "$selectedCount selected",
-                style = MaterialTheme.editorialTypography.titleMedium,
+                style = MaterialTheme.editorialTypography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp),
+                modifier = Modifier.weight(1f),
             )
+        }
 
-            Box {
-                IconButton(
-                    onClick = { onMoveMenuExpandedChange(true) },
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Box(modifier = Modifier.weight(1f)) {
+                SelectionActionPill(
+                    label = "Move",
+                    icon = SoftcoverIcon.Bookmark,
                     enabled = bulkActionInProgress.not(),
-                    modifier = Modifier.pointerHandCursor(),
-                ) {
-                    val moveIcon = drawableIconResource(
-                        icon = SoftcoverIcon.Bookmark,
-                        contentDescription = "Move selected books to another shelf",
-                    )
-
-                    Icon(
-                        painter = moveIcon.getIconPainter(),
-                        contentDescription = moveIcon.contentDescription,
-                    )
-                }
+                    onClick = { onMoveMenuExpandedChange(true) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
 
                 DropdownMenu(
                     expanded = isMoveMenuExpanded,
@@ -1846,27 +1833,115 @@ internal fun SelectionHeader(
                 }
             }
 
-            IconButton(
-                onClick = onAddToListClick,
+            SelectionActionPill(
+                label = "Add to list",
+                icon = SoftcoverIcon.BookmarkAdd,
                 enabled = bulkActionInProgress.not(),
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                val addToListIcon = drawableIconResource(
-                    icon = SoftcoverIcon.BookmarkAdd,
-                    contentDescription = "Add selected books to a list",
+                onClick = onAddToListClick,
+                modifier = Modifier.weight(1f),
+            )
+
+            SelectionTrashButton(
+                onClick = onRemoveClick,
+                enabled = bulkActionInProgress.not(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SelectionExitButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+) {
+    DesktopTooltip(text = "Exit selection mode") {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            shape = RoundedCornerShape(percent = 50),
+            onClick = onClick,
+            enabled = enabled,
+            modifier = Modifier
+                .pointerHandCursor()
+                .size(38.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                val exitIcon = drawableIconResource(
+                    icon = SoftcoverIcon.Close,
+                    contentDescription = "Exit selection mode",
                 )
 
                 Icon(
-                    painter = addToListIcon.getIconPainter(),
-                    contentDescription = addToListIcon.contentDescription,
+                    painter = exitIcon.getIconPainter(),
+                    contentDescription = exitIcon.contentDescription,
+                    modifier = Modifier.size(18.dp),
                 )
             }
+        }
+    }
+}
 
-            IconButton(
-                onClick = onRemoveClick,
-                enabled = bulkActionInProgress.not(),
-                modifier = Modifier.pointerHandCursor(),
-            ) {
+@Composable
+private fun SelectionActionPill(
+    label: String,
+    icon: SoftcoverIcon,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = RoundedCornerShape(percent = 50),
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier
+            .pointerHandCursor()
+            .height(44.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            val resolvedIcon = drawableIconResource(
+                icon = icon,
+                contentDescription = "",
+            )
+
+            Icon(
+                painter = resolvedIcon.getIconPainter(),
+                contentDescription = resolvedIcon.contentDescription,
+                modifier = Modifier.size(17.dp),
+            )
+
+            Spacer(modifier = Modifier.width(7.dp))
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SelectionTrashButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+) {
+    DesktopTooltip(text = "Remove selected books from library") {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.primary,
+            shape = RoundedCornerShape(percent = 50),
+            onClick = onClick,
+            enabled = enabled,
+            modifier = Modifier
+                .pointerHandCursor()
+                .size(44.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
                 val removeIcon = drawableIconResource(
                     icon = SoftcoverIcon.Delete,
                     contentDescription = "Remove selected books from library",
@@ -1875,6 +1950,7 @@ internal fun SelectionHeader(
                 Icon(
                     painter = removeIcon.getIconPainter(),
                     contentDescription = removeIcon.contentDescription,
+                    modifier = Modifier.size(18.dp),
                 )
             }
         }

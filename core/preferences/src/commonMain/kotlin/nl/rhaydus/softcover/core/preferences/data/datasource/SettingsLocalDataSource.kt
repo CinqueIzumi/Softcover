@@ -89,6 +89,10 @@ interface SettingsLocalDataSource {
     val lastUsedProgressUnit: Flow<ProgressUnit>
 
     suspend fun setLastUsedProgressUnit(unit: ProgressUnit)
+
+    val becauseYouReadGenre: Flow<String?>
+
+    suspend fun setBecauseYouReadGenre(genre: String?)
 }
 
 internal class SettingsLocalDataSourceImpl(
@@ -290,6 +294,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setLastUsedProgressUnit(unit: ProgressUnit) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(lastUsedProgressUnit = unit)
+        }
+    }
+
+    override val becauseYouReadGenre: Flow<String?> = appSettingsDataStore.store.data
+        .map { it.becauseYouReadGenre }
+        .distinctUntilChanged()
+
+    override suspend fun setBecauseYouReadGenre(genre: String?) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(becauseYouReadGenre = genre)
         }
     }
 }

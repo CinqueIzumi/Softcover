@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
+import nl.rhaydus.softcover.FindTagsByUserQuery
 import nl.rhaydus.softcover.SaveTagsMutation
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -10,6 +11,18 @@ import nl.rhaydus.softcover.type.BasicTag
  * The user's own tag as returned by the find query — a tagging plus its joined tag.
  */
 internal fun FindTagsByUserAndTaggableQuery.Data.Tagging.toUserTag(): UserTag = UserTag(
+    name = tag.tag,
+    category = TagCategory.fromApiString(tag.tag_category.category),
+    count = tag.count,
+    spoiler = spoiler,
+)
+
+/**
+ * The user's own tag as returned by the taggable-agnostic find-all-by-user query. [UserTag.count]
+ * here still carries the tag's global popularity count from [FindTagsByUserQuery.Data.Tag] — the
+ * caller overrides it with the user's personal occurrence count once taggings are aggregated.
+ */
+internal fun FindTagsByUserQuery.Data.Tagging.toUserTag(): UserTag = UserTag(
     name = tag.tag,
     category = TagCategory.fromApiString(tag.tag_category.category),
     count = tag.count,

@@ -8,9 +8,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
-import kotlinx.datetime.DateTimeUnit
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
@@ -38,10 +38,6 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
-
-private const val TRENDING_LIMIT = 10
-private const val TRENDING_OFFSET = 0
-private const val TRENDING_WINDOW_DAYS = 7L
 
 internal class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
@@ -285,10 +281,12 @@ internal class BooksRepositoryImpl(
         booksLocalDataSource.deleteOrphanBooks()
     }
 
-    override suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch? {
+    override suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch> {
+        if (isbns.isEmpty()) return emptyMap()
+
         if (networkAvailability.isOnline.value.not()) throw OfflineException()
 
-        return booksRemoteDataSource.fetchEditionMatchForIsbn(isbn = isbn)
+        return booksRemoteDataSource.fetchEditionMatchesForIsbns(isbns = isbns)
     }
 
     override suspend fun addBookByIsbn(isbn: String): CreatedBook {
@@ -301,19 +299,7 @@ internal class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchBooksByIds(ids = ids)
     }
 
-    override suspend fun fetchTrendingBooks(): List<Book> {
-        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-
-        return booksRemoteDataSource.fetchTrendingBooks(
-            from = today.minus(
-                TRENDING_WINDOW_DAYS.toInt(),
-                DateTimeUnit.DAY,
-            ).toString(),
-            to = today.toString(),
-            limit = TRENDING_LIMIT,
-            offset = TRENDING_OFFSET,
-        )
-    }
+    override suspend fun fetchTrendingBooks(): List<Book> = booksRemoteDataSource.fetchTrendingBooks()
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
         if (networkAvailability.isOnline.value.not()) {
@@ -353,13 +339,19 @@ internal class BooksRepositoryImpl(
         }
     }
 
-    override suspend fun markBookAsReading(book: Book): Book {
+    override suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int?,
+    ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withMarkedAsReading()
         booksLocalDataSource.cacheBook(book = optimistic)
 
         return runCatching {
-            booksRemoteDataSource.markBookAsReading(book)
+            booksRemoteDataSource.markBookAsReading(
+                book = book,
+                editionId = editionId,
+            )
         }.getOrElse { error ->
             if (error is CancellationException) throw error
 
@@ -374,8 +366,12 @@ internal class BooksRepositoryImpl(
     ): Book {
         val userBook = book.userBook ?: throw Exception("User did not have a user book")
 
+        // Patch the rating onto the CURRENTLY cached book, not the caller-supplied [book]: a verdict
+        // saved right after finishing (Reading screen's finish → verdict prompt) hands us a pre-finish
+        // snapshot still marked Reading, and re-caching that would resurrect the book in the
+        // currently-reading list until the next refresh. Falling back to [book] only when uncached.
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = book.withRating(rating = rating)
+        val optimistic = (snapshot ?: book).withRating(rating = rating)
         booksLocalDataSource.cacheBook(book = optimistic)
 
         if (networkAvailability.isOnline.value) {
@@ -426,8 +422,12 @@ internal class BooksRepositoryImpl(
 
         val reviewedAt: String = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
+        // Patch the review onto the CURRENTLY cached book, not the caller-supplied [book]: a verdict
+        // saved right after finishing (Reading screen's finish → verdict prompt) hands us a pre-finish
+        // snapshot still marked Reading, and re-caching that would resurrect the book in the
+        // currently-reading list until the next refresh. Falling back to [book] only when uncached.
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = book.withReview(
+        val optimistic = (snapshot ?: book).withReview(
             review = review,
             hasSpoilers = hasSpoilers,
         )
@@ -498,6 +498,7 @@ internal class BooksRepositoryImpl(
         book: Book,
         newPage: Int?,
         newSeconds: Int?,
+        actionAt: String?,
     ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
         val optimistic = book.withProgress(
@@ -512,6 +513,7 @@ internal class BooksRepositoryImpl(
                     book = book,
                     newPage = newPage,
                     newSeconds = newSeconds,
+                    actionAt = actionAt,
                 )
             }.getOrElse { error ->
                 when (error) {
@@ -527,6 +529,7 @@ internal class BooksRepositoryImpl(
                             book = optimistic,
                             newPage = newPage,
                             newSeconds = newSeconds,
+                            actionAt = actionAt,
                         )
                         optimistic
                     }
@@ -543,6 +546,7 @@ internal class BooksRepositoryImpl(
             book = optimistic,
             newPage = newPage,
             newSeconds = newSeconds,
+            actionAt = actionAt,
         )
         return optimistic
     }
@@ -550,9 +554,10 @@ internal class BooksRepositoryImpl(
     override suspend fun markBookAsRead(
         book: Book,
         editionId: Int?,
+        actionAt: String?,
     ): Book {
         val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val optimistic = book.withMarkedAsRead()
+        val optimistic = book.withMarkedAsRead(actionAt = actionAt)
         booksLocalDataSource.cacheBook(book = optimistic)
 
         if (networkAvailability.isOnline.value) {
@@ -560,6 +565,7 @@ internal class BooksRepositoryImpl(
                 booksRemoteDataSource.markBookAsRead(
                     book = book,
                     editionId = editionId,
+                    actionAt = actionAt,
                 )
             }.getOrElse { error ->
                 when (error) {
@@ -571,7 +577,10 @@ internal class BooksRepositoryImpl(
                             "Mark-as-read hit a transient error; queued for retry",
                         )
 
-                        offlineSync.enqueueMarkAsRead(book = optimistic)
+                        offlineSync.enqueueMarkAsRead(
+                            book = optimistic,
+                            actionAt = actionAt,
+                        )
                         optimistic
                     }
 
@@ -583,7 +592,10 @@ internal class BooksRepositoryImpl(
             }
         }
 
-        offlineSync.enqueueMarkAsRead(book = optimistic)
+        offlineSync.enqueueMarkAsRead(
+            book = optimistic,
+            actionAt = actionAt,
+        )
         return optimistic
     }
 
@@ -684,33 +696,48 @@ internal class BooksRepositoryImpl(
         return copy(userBook = updatedUserBook)
     }
 
-    private fun Book.withMarkedAsRead(): Book {
+    private fun Book.withMarkedAsRead(actionAt: String?): Book {
         val existingUserBook = userBook ?: return this
         val existingRead = userBookRead
 
-        val today = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
+        val finishedDate = actionAt
+            ?.let { localDateTimeOf(actionAt = it).date.toString() }
+            ?: Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
         val updatedUserBook: UserBook = existingUserBook
             .copy(status = BookStatus.Read)
-            .withAppendedJournal(event = JournalEventType.StatusFinished)
+            .withAppendedJournal(
+                event = JournalEventType.StatusFinished,
+                actionAt = actionAt,
+            )
 
         return copy(
             userBook = updatedUserBook,
             userBookRead = existingRead?.copy(
-                finishedAt = today,
+                finishedAt = finishedDate,
                 progress = 100f,
             ) ?: existingRead,
         )
     }
 
-    private fun UserBook.withAppendedJournal(event: JournalEventType): UserBook {
+    private fun UserBook.withAppendedJournal(
+        event: JournalEventType,
+        actionAt: String? = null,
+    ): UserBook {
+        val updatedAt = actionAt
+            ?.let { localDateTimeOf(actionAt = it).toString() }
+            ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString()
+
         val entry = ReadingJournal(
-            updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
+            updatedAt = updatedAt,
             event = event.eventName,
         )
 
         return copy(journals = journals + entry)
     }
+
+    private fun localDateTimeOf(actionAt: String): LocalDateTime =
+        Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault())
 
     override suspend fun updateBookEdition(
         userBook: UserBook,

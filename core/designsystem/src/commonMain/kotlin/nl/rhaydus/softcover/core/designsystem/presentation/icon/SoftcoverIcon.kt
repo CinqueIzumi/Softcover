@@ -4,6 +4,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_account
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_add
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_apk_install
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_arrow_back
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_arrow_drop_down
@@ -25,12 +26,15 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_explore
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_filter_list
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_headset
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_history
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_info
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_keyboard_arrow_right
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_library_books
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_menu_book
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_more_vert
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_open_in_new
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_palette
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_pause
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_pin
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_play
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_reading
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_search
@@ -43,6 +47,8 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_star_filled
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_stop
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_storefront
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_view_layout
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_visibility
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_visibility_off
 
 /**
  * The design system's bundled icon catalog. Each entry maps a stable name to a Compose Multiplatform
@@ -54,6 +60,7 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_view_layout
  */
 enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Account(Res.drawable.ic_account),
+    Add(Res.drawable.ic_add),
     ApkInstall(Res.drawable.ic_apk_install),
     ArrowBack(Res.drawable.ic_arrow_back),
     ArrowDropDown(Res.drawable.ic_arrow_drop_down),
@@ -75,12 +82,15 @@ enum class SoftcoverIcon(internal val resource: DrawableResource) {
     FilterList(Res.drawable.ic_filter_list),
     Headset(Res.drawable.ic_headset),
     History(Res.drawable.ic_history),
+    Info(Res.drawable.ic_info),
     KeyboardArrowRight(Res.drawable.ic_keyboard_arrow_right),
     LibraryBooks(Res.drawable.ic_library_books),
     MenuBook(Res.drawable.ic_menu_book),
     MoreVert(Res.drawable.ic_more_vert),
+    OpenInNew(Res.drawable.ic_open_in_new),
     Palette(Res.drawable.ic_palette),
     Pause(Res.drawable.ic_pause),
+    Pin(Res.drawable.ic_pin),
     Play(Res.drawable.ic_play),
     Reading(Res.drawable.ic_reading),
     Search(Res.drawable.ic_search),
@@ -93,4 +103,6 @@ enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Stop(Res.drawable.ic_stop),
     Storefront(Res.drawable.ic_storefront),
     ViewLayout(Res.drawable.ic_view_layout),
+    Visibility(Res.drawable.ic_visibility),
+    VisibilityOff(Res.drawable.ic_visibility_off),
 }

@@ -5,7 +5,9 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.cache.normalized.FetchPolicy
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
@@ -15,11 +17,11 @@ import nl.rhaydus.softcover.GetBookByIdQuery.Data.Book.Companion.bookDetailFragm
 import nl.rhaydus.softcover.GetBookIdByEditionIdQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery.Data.Book.Companion.bookDetailFragment as booksByIdsBookDetailFragment
-import nl.rhaydus.softcover.GetEditionByIsbnQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery
 import nl.rhaydus.softcover.GetEditionsByBookIdQuery.Data.Edition.Companion.editionDetailFragment
 import nl.rhaydus.softcover.GetEditionsByIdsQuery
 import nl.rhaydus.softcover.GetEditionsByIdsQuery.Data.Edition.Companion.editionDetailFragment as editionsByIdsDetailFragment
+import nl.rhaydus.softcover.GetEditionsByIsbnsQuery
 import nl.rhaydus.softcover.GetTrendingBookIdsQuery
 import nl.rhaydus.softcover.GetUserBooksQuery
 import nl.rhaydus.softcover.GetUserBooksQuery.Data.Me.User_book.Companion.userBookFragment
@@ -27,6 +29,8 @@ import nl.rhaydus.softcover.MarkBookAsReadMutation
 import nl.rhaydus.softcover.MarkBookAsReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.MarkBookAsReadingMutation
 import nl.rhaydus.softcover.MarkBookAsReadingMutation.Data.Update_user_book.User_book.Companion.userBookFragment
+import nl.rhaydus.softcover.MarkBookAsReadingViaInsertMutation
+import nl.rhaydus.softcover.MarkBookAsReadingViaInsertMutation.Data.Insert_user_book.User_book.Companion.userBookFragment as markBookAsReadingInsertUserBookFragment
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation
 import nl.rhaydus.softcover.MarkBookAsWantToReadMutation.Data.Insert_user_book.User_book.Companion.userBookFragment
 import nl.rhaydus.softcover.RemoveUserBookMutation
@@ -45,6 +49,7 @@ import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
@@ -60,7 +65,7 @@ interface BooksRemoteDataSource {
 
     suspend fun fetchBookIdForEdition(editionId: Int): Int?
 
-    suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch?
+    suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch>
 
     suspend fun addBookByIsbn(isbn: String): CreatedBook
 
@@ -69,19 +74,17 @@ interface BooksRemoteDataSource {
         forceNetwork: Boolean = false,
     ): List<Book>
 
-    suspend fun fetchTrendingBooks(
-        from: String,
-        to: String,
-        limit: Int,
-        offset: Int,
-    ): List<Book>
+    suspend fun fetchTrendingBooks(): List<Book>
 
     suspend fun markBookAsWantToRead(
         bookId: Int,
         editionId: Int? = null,
     ): Book
 
-    suspend fun markBookAsReading(book: Book): Book
+    suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun updateBookRating(
         userBook: UserBook,
@@ -113,11 +116,13 @@ interface BooksRemoteDataSource {
         book: Book,
         newPage: Int? = null,
         newSeconds: Int? = null,
+        actionAt: String? = null,
     ): Book
 
     suspend fun markBookAsRead(
         book: Book,
         editionId: Int? = null,
+        actionAt: String? = null,
     ): Book
 
     suspend fun updateBookEdition(
@@ -132,11 +137,13 @@ interface BooksRemoteDataSource {
         progressSeconds: Int?,
         startedAt: String?,
         finishedAt: String?,
+        actionAt: String? = null,
     )
 
     suspend fun replayMarkBookAsRead(
         bookId: Int,
         userDate: String,
+        actionAt: String? = null,
     )
 
     suspend fun replayUpdateBookRating(
@@ -195,25 +202,39 @@ internal class BooksRemoteDataSourceImpl(
         return result.editions.firstOrNull()?.book_id
     }
 
-    override suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch? {
+    override suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch> {
+        if (isbns.isEmpty()) return emptyMap()
+
         val result = apolloClient.safeQuery(
-            query = GetEditionByIsbnQuery(isbn = isbn),
+            query = GetEditionsByIsbnsQuery(isbns = isbns),
             fetchPolicy = FetchPolicy.NetworkFirst,
         )
 
-        result.isbn13.firstOrNull()?.let { edition ->
-            return IsbnEditionMatch(
-                bookId = edition.book_id,
-                editionId = edition.id,
-            )
+        val requested = isbns.toSet()
+        val matches = mutableMapOf<String, IsbnEditionMatch>()
+
+        // isbn_13 matches take precedence, so they are folded in before isbn_10 matches fill any gaps.
+        result.editions.forEach { edition ->
+            val isbn13 = edition.isbn_13
+            if (isbn13 != null && isbn13 in requested && isbn13 !in matches) {
+                matches[isbn13] = IsbnEditionMatch(
+                    bookId = edition.book_id,
+                    editionId = edition.id,
+                )
+            }
         }
 
-        return result.isbn10.firstOrNull()?.let { edition ->
-            IsbnEditionMatch(
-                bookId = edition.book_id,
-                editionId = edition.id,
-            )
+        result.editions.forEach { edition ->
+            val isbn10 = edition.isbn_10
+            if (isbn10 != null && isbn10 in requested && isbn10 !in matches) {
+                matches[isbn10] = IsbnEditionMatch(
+                    bookId = edition.book_id,
+                    editionId = edition.id,
+                )
+            }
         }
+
+        return matches
     }
 
     override suspend fun addBookByIsbn(isbn: String): CreatedBook {
@@ -262,20 +283,8 @@ internal class BooksRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun fetchTrendingBooks(
-        from: String,
-        to: String,
-        limit: Int,
-        offset: Int,
-    ): List<Book> {
-        val trendingIds: List<Int> = apolloClient.safeQuery(
-            query = GetTrendingBookIdsQuery(
-                from = from,
-                to = to,
-                limit = limit,
-                offset = offset,
-            ),
-        )
+    override suspend fun fetchTrendingBooks(): List<Book> {
+        val trendingIds: List<Int> = apolloClient.safeQuery(query = GetTrendingBookIdsQuery())
             .books_trending
             ?.ids
             ?.mapNotNull { it }
@@ -343,9 +352,18 @@ internal class BooksRemoteDataSourceImpl(
             ?.toBook() ?: throw Exception("Book could not be mapped")
     }
 
-    override suspend fun markBookAsReading(book: Book): Book {
+    override suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int?,
+    ): Book {
+        // No user_book yet → create one directly on Currently Reading via `insert_user_book`
+        // (mirroring the want-to-read / read create paths), so a not-yet-shelved book can start
+        // reading in one step. Only the update path needs an existing user_book id.
         val userBook = book.userBook
-            ?: throw Exception("User did not have a user book")
+            ?: return createUserBookAsReading(
+                book = book,
+                editionId = editionId,
+            )
 
         val currentDate = Clock.System
             .todayIn(TimeZone.currentSystemDefault())
@@ -374,6 +392,32 @@ internal class BooksRemoteDataSourceImpl(
             .update_user_book
             ?.user_book
             ?.userBookFragment()
+            ?.toBook() ?: throw Exception("Book could not be mapped")
+    }
+
+    private suspend fun createUserBookAsReading(
+        book: Book,
+        editionId: Int?,
+    ): Book {
+        val currentDate = Clock.System
+            .todayIn(TimeZone.currentSystemDefault())
+            .toString()
+
+        val dataObject = UserBookCreateInput(
+            book_id = book.id,
+            edition_id = Optional.presentIfNotNull(editionId),
+            status_id = Optional.present(UserBookStatus.CURRENTLY_READING.code),
+            user_date = Optional.present(currentDate),
+            privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
+        )
+
+        return apolloClient
+            .safeMutation(
+                mutation = MarkBookAsReadingViaInsertMutation(userBookCreateInput = dataObject),
+            )
+            .insert_user_book
+            ?.user_book
+            ?.markBookAsReadingInsertUserBookFragment()
             ?.toBook() ?: throw Exception("Book could not be mapped")
     }
 
@@ -489,6 +533,7 @@ internal class BooksRemoteDataSourceImpl(
         book: Book,
         newPage: Int?,
         newSeconds: Int?,
+        actionAt: String?,
     ): Book {
         val userBook = book.userBook
             ?: throw Exception("Book did not contain a user book")
@@ -504,6 +549,12 @@ internal class BooksRemoteDataSourceImpl(
             started_at = Optional.present(userBookRead.startedAt),
             finished_at = Optional.present(userBookRead.finishedAt),
             edition_id = Optional.present(userBook.editionId),
+            action_at = Optional.presentIfNotNull(actionAt),
+            action = if (actionAt != null) {
+                Optional.present(JournalEventType.ProgressUpdated.eventName)
+            } else {
+                Optional.absent()
+            },
         )
 
         val mutation = UpdateReadingProgressMutation(
@@ -525,14 +576,18 @@ internal class BooksRemoteDataSourceImpl(
     override suspend fun markBookAsRead(
         book: Book,
         editionId: Int?,
+        actionAt: String?,
     ): Book {
-        val currentDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
+        val userDate = actionAt
+            ?.let { localDateOf(actionAt = it) }
+            ?: Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
         val dataObject = UserBookCreateInput(
             book_id = book.id,
             edition_id = Optional.presentIfNotNull(editionId),
             status_id = Optional.present(UserBookStatus.READ.code),
-            user_date = Optional.present(currentDate),
+            user_date = Optional.present(userDate),
+            action_at = Optional.presentIfNotNull(actionAt),
             privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
         )
 
@@ -584,6 +639,7 @@ internal class BooksRemoteDataSourceImpl(
         progressSeconds: Int?,
         startedAt: String?,
         finishedAt: String?,
+        actionAt: String?,
     ) {
         val isAudiobook = progressSeconds != null
 
@@ -593,6 +649,12 @@ internal class BooksRemoteDataSourceImpl(
             started_at = Optional.present(startedAt),
             finished_at = Optional.present(finishedAt),
             edition_id = Optional.present(editionId),
+            action_at = Optional.presentIfNotNull(actionAt),
+            action = if (actionAt != null) {
+                Optional.present(JournalEventType.ProgressUpdated.eventName)
+            } else {
+                Optional.absent()
+            },
         )
 
         apolloClient.safeMutation(
@@ -606,16 +668,23 @@ internal class BooksRemoteDataSourceImpl(
     override suspend fun replayMarkBookAsRead(
         bookId: Int,
         userDate: String,
+        actionAt: String?,
     ) {
+        val resolvedUserDate = actionAt?.let { localDateOf(actionAt = it) } ?: userDate
+
         val dataObject = UserBookCreateInput(
             book_id = bookId,
             status_id = Optional.present(UserBookStatus.READ.code),
-            user_date = Optional.present(userDate),
+            user_date = Optional.present(resolvedUserDate),
+            action_at = Optional.presentIfNotNull(actionAt),
             privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
         )
 
         apolloClient.safeMutation(mutation = MarkBookAsReadMutation(userBookCreateInput = dataObject))
     }
+
+    private fun localDateOf(actionAt: String): String =
+        Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
 
     override suspend fun replayUpdateBookRating(
         userBookId: Int,

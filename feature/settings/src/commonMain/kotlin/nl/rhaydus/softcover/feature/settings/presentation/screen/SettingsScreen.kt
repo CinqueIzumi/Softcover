@@ -22,6 +22,7 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpdate
@@ -47,6 +48,7 @@ object SettingsScreen : Screen {
         val appUpdateSimulator = koinInject<AppUpdateSimulator>()
         val appUpdateState = LocalAppUpdateState.current
         val onStartAppUpdate = LocalStartAppUpdate.current
+        val createListPresenter = LocalCreateListPresenter.current
 
         // Desktop hosts the Library-tabs settings inline in the master–detail pane, so it needs that
         // screen's model under the Settings lifecycle. Mobile pushes a separate screen (with its own
@@ -82,7 +84,7 @@ object SettingsScreen : Screen {
             libraryVisibilityState = libraryVisibilityState,
             libraryVisibilityRunAction = { action -> libraryVisibilityModel?.runAction(action) },
             onCreateListClick = {
-                navigator.parent?.push(appNavigator.screen(ScreenDestination.CreateList))
+                createListPresenter?.open(onListCreated = null)
             },
             appUpdateState = appUpdateState,
             onStartAppUpdate = onStartAppUpdate,

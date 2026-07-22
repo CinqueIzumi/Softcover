@@ -2,19 +2,13 @@ package nl.rhaydus.softcover.core.designsystem.presentation.component
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.TextAutoSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,11 +20,8 @@ import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
@@ -44,20 +35,28 @@ import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 
+/**
+ * @param coverlessTitle The book/edition title to show as a text-only cover when no image can be
+ * loaded (missing edition, missing URL, or a decode failure). Required — not defaulted — so that
+ * a new cover surface cannot silently render a blank tile: the design system's rule is that a
+ * cover slot is never blank. Pass the book/edition title for anything the user reads as a cover.
+ * Pass `null` only for purely decorative imagery that is never itself the content the user is
+ * looking at (e.g. the blurred, scaled-up book-detail backdrop) — and always leave a comment at
+ * the call site explaining why a blank fallback is acceptable there.
+ */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun EditionImage(
     edition: BookEdition?,
     defaultEdition: BookEdition?,
     isLoading: Boolean,
+    coverlessTitle: String?,
     modifier: Modifier = Modifier,
     fallbackCoverUrl: String? = null,
-    coverlessTitle: String? = null,
     elevation: Dp = 0.dp,
     cornerRadius: Dp = 4.dp,
     shadowColor: Color = Color.Unspecified,
@@ -164,40 +163,6 @@ fun EditionImage(
                 contentScale = ContentScale.Fit,
             )
         }
-    }
-}
-
-/**
- * The final rung of [EditionImage]'s fallback chain: when no cover source resolves (and the data is
- * not still loading), a book with a known title is rendered as a coverless cover rather than a blank
- * tile — a filled [surfaceContainerHighest] card carrying the title in the editorial Fraunces voice,
- * autosized to fit the cover. Used by the cover-only library layouts, where there is no adjacent
- * title text to fall back on. Imagery cards keep a container shade (DS §2.1), so this never reaches
- * for primary.
- */
-@Composable
-private fun CoverlessTitleCover(title: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-            .padding(horizontal = 12.dp, vertical = 16.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-            autoSize = TextAutoSize.StepBased(
-                minFontSize = 12.sp,
-                maxFontSize = MaterialTheme.editorialTypography.headlineMedium.fontSize,
-                stepSize = 1.sp,
-            ),
-            maxLines = 5,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 

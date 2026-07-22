@@ -7,9 +7,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
@@ -19,7 +17,7 @@ class LibraryVisibilitySettingsScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val appNavigator = koinInject<AppNavigator>()
+        val createListPresenter = LocalCreateListPresenter.current
 
         val screenModel = koinScreenModel<LibraryVisibilitySettingsScreenModel>()
 
@@ -29,7 +27,7 @@ class LibraryVisibilitySettingsScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onNavigateBack = navigator::pop,
-            onCreateListClick = { navigator.push(appNavigator.screen(ScreenDestination.CreateList)) },
+            onCreateListClick = { createListPresenter?.open(onListCreated = null) },
         )
     }
 }

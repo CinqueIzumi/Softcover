@@ -8,4 +8,6 @@ data class DismissedContinueSeriesEntity(
     @PrimaryKey val seriesId: Int,
     val seriesName: String? = null,
     val coverUrl: String? = null,
+    val authorText: String? = null,
+    val bookCount: Int? = null,
 )

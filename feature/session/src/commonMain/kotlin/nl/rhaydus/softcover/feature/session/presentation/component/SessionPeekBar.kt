@@ -134,6 +134,7 @@ private fun SessionPeekBarContent(
                     defaultEdition = active.book.defaultEdition,
                     isLoading = false,
                     fallbackCoverUrl = active.book.coverUrl,
+                    coverlessTitle = active.book.title,
                     cornerRadius = 4.dp,
                     modifier = Modifier.width(32.dp),
                 )

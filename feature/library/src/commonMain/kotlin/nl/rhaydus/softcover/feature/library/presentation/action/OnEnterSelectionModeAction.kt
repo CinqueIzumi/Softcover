@@ -6,8 +6,14 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
+/**
+ * Enters bulk-selection mode. [bookId], when supplied, seeds the selection with that one book — the
+ * long-press-on-a-cover entry point, which should open with exactly the pressed cover already ticked.
+ * Left `null` for the toolbar Select-circle entry point (the masthead control line), which should
+ * open with nothing pre-selected — the user picks their own starting point.
+ */
 internal class OnEnterSelectionModeAction(
-    private val bookId: Int,
+    private val bookId: Int? = null,
 ) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
@@ -17,7 +23,7 @@ internal class OnEnterSelectionModeAction(
         scope.setState {
             it.copy(
                 selectionMode = true,
-                selectedBookIds = setOf(bookId),
+                selectedBookIds = bookId?.let { id -> setOf(id) } ?: emptySet(),
                 isRearranging = false,
             )
         }

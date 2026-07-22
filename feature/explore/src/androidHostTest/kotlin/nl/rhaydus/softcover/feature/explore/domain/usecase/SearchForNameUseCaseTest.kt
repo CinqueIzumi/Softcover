@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
+import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
 class SearchForNameUseCaseTest {
@@ -39,13 +40,17 @@ class SearchForNameUseCaseTest {
             } returns Result.success(userId)
 
             // ----- Act -----
-            useCase(name = name)
+            useCase(
+                name = name,
+                sortMode = ExploreSortMode.RELEVANCE,
+            )
 
             // ----- Assert -----
             coVerify {
                 searchRepository.searchForName(
                     name = name,
                     userId = userId,
+                    sortMode = ExploreSortMode.RELEVANCE,
                 )
             }
         }
@@ -61,7 +66,10 @@ class SearchForNameUseCaseTest {
             } returns Result.success(userId)
 
             // ----- Act -----
-            useCase(name = name)
+            useCase(
+                name = name,
+                sortMode = ExploreSortMode.RELEVANCE,
+            )
 
             // ----- Assert -----
             coVerify {
@@ -80,7 +88,10 @@ class SearchForNameUseCaseTest {
             } returns Result.success(userId)
 
             // ----- Act -----
-            val result = useCase(name = name)
+            val result = useCase(
+                name = name,
+                sortMode = ExploreSortMode.RELEVANCE,
+            )
 
             // ----- Assert -----
             result.isSuccess shouldBe true
@@ -97,7 +108,10 @@ class SearchForNameUseCaseTest {
             } returns Result.failure(expectedError)
 
             // ----- Act -----
-            val result = useCase(name = name)
+            val result = useCase(
+                name = name,
+                sortMode = ExploreSortMode.RELEVANCE,
+            )
 
             // ----- Assert -----
             result.isFailure shouldBe true
@@ -119,11 +133,15 @@ class SearchForNameUseCaseTest {
                 searchRepository.searchForName(
                     name = name,
                     userId = userId,
+                    sortMode = ExploreSortMode.RELEVANCE,
                 )
             } throws expectedError
 
             // ----- Act -----
-            val result = useCase(name = name)
+            val result = useCase(
+                name = name,
+                sortMode = ExploreSortMode.RELEVANCE,
+            )
 
             // ----- Assert -----
             result.isFailure shouldBe true
@@ -140,7 +158,10 @@ class SearchForNameUseCaseTest {
             } returns Result.failure(RuntimeException("no id"))
 
             // ----- Act -----
-            useCase(name = name)
+            useCase(
+                name = name,
+                sortMode = ExploreSortMode.RELEVANCE,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {
@@ -162,11 +183,15 @@ class SearchForNameUseCaseTest {
                 searchRepository.searchForName(
                     name = name,
                     userId = userId,
+                    sortMode = ExploreSortMode.RELEVANCE,
                 )
             } throws RuntimeException("apollo error")
 
             // ----- Act -----
-            useCase(name = name)
+            useCase(
+                name = name,
+                sortMode = ExploreSortMode.RELEVANCE,
+            )
 
             // ----- Assert -----
             coVerify(exactly = 0) {

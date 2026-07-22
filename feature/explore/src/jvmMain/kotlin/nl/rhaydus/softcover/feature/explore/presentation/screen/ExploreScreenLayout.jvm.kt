@@ -16,20 +16,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,8 +52,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnLoadMoreSearchResultsAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
 private val discoveryScrollState = ScrollState(initial = 0)
@@ -59,14 +67,16 @@ private val DESKTOP_UP_NEXT_CARD_WIDTH = 150.dp
 private const val DESKTOP_DISCOVERY_SKELETON_COUNT = 8
 
 /**
- * Desktop Explore: a full-width discovery surface (no two-pane — a tapped book pushes detail
- * full-screen, see `wideGridTabsUseDetailPane`). A static editorial header (no search top bar) carries
- * an explicit Refresh control and the barcode-scan affordance; a persistent [EditorialSearchField]
- * sits beneath it. With the field empty the body is the discovery wall — trending and up-next rendered
- * as wrapping multi-column grids ([FlowRow] of shared cards) over the recent-search history, scrolled
- * by a [DesktopVerticalScrollbar]. With a query present the body becomes a multi-column results grid.
- * No pager and no pull-to-refresh. The cards, dismiss sheet, and recent-searches block are the shared
- * shelf pieces.
+ * Desktop Explore (explore-3a): a full-width discovery surface (no two-pane — a tapped book pushes
+ * detail full-screen, see `wideGridTabsUseDetailPane`). A static editorial header carries an explicit
+ * Refresh control and the barcode-scan affordance; a persistent [EditorialSearchField] sits beneath it
+ * (desktop has no search-focus takeover — the field is always in place, per the foundation's persistent-
+ * field pattern for a static editorial header). With the field empty and no mood filter active, the body
+ * is the discovery wall: the featured release, then trending / because-you-read / up-next rendered as
+ * wrapping multi-column grids ([FlowRow] of the shared cards), the mood grid, and recent-search history —
+ * all scrolled by a [DesktopVerticalScrollbar]. With a query or mood filter active the body becomes a
+ * multi-column results grid. No pager and no pull-to-refresh. The cards, dismiss sheet, mood grid, and
+ * recent-searches block are the shared shelf pieces.
  */
 @Composable
 internal actual fun ExploreScreenLayout(
@@ -121,7 +131,7 @@ internal actual fun ExploreScreenLayout(
                 .fillMaxWidth(),
         ) {
             when {
-                state.searchText.isEmpty() -> DesktopDiscovery(
+                state.searchText.isEmpty() && state.activeMoodFilter == null -> DesktopDiscovery(
                     state = state,
                     runAction = runAction,
                     onBookClick = onBookClick,
@@ -223,16 +233,38 @@ private fun DesktopDiscovery(
                 .padding(bottom = 24.dp + rememberBottomBarPadding()),
             verticalArrangement = Arrangement.spacedBy(40.dp),
         ) {
-            DesktopTrendingSection(
-                books = state.trendingBooks,
-                isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
+            DesktopFeaturedSection(
+                book = state.featuredUpcomingRelease,
+                isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
                 onBookClick = onBookClick,
+                runAction = runAction,
             )
 
             DesktopUpNextSection(
                 books = state.continueSeriesBooks,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 onBookClick = onBookClick,
+                runAction = runAction,
+            )
+
+            DesktopBecauseYouReadSection(
+                genre = state.becauseYouReadGenre,
+                genreOptions = state.becauseYouReadGenreOptions,
+                books = state.becauseYouReadBooks,
+                isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
+                onBookClick = onBookClick,
+                runAction = runAction,
+            )
+
+            DesktopTrendingSection(
+                books = state.trendingBooks,
+                isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
+                onBookClick = onBookClick,
+            )
+
+            MoodGrid(
+                moods = state.moodTags,
+                isLoading = state.loadingMoodTags && state.moodTags.isEmpty(),
                 runAction = runAction,
             )
 
@@ -252,6 +284,41 @@ private fun DesktopDiscovery(
     }
 }
 
+@Composable
+private fun DesktopFeaturedSection(
+    book: Book?,
+    isLoading: Boolean,
+    onBookClick: (Book, String?) -> Unit,
+    runAction: (ExploreAction) -> Unit,
+) {
+    // Terminal empty (no upcoming release to feature) collapses away with no reserved space;
+    // every other state - loading or loaded - keeps the card's own footprint so the crossfade
+    // below never resizes the feed around it.
+    if (isLoading.not() && book == null) return
+
+    SkeletonCrossfade(
+        isLoading = isLoading,
+        modifier = Modifier.padding(horizontal = 24.dp),
+        label = "DesktopFeaturedSection",
+    ) { loading ->
+        if (loading) {
+            FeaturedCardSkeleton()
+        } else if (book != null) {
+            FeaturedCard(
+                book = book,
+                onClick = {
+                    onBookClick(
+                        book,
+                        SURFACE_FEATURED,
+                    )
+                },
+                onWantToReadClick = { runAction(OnAddBookToLibraryClickAction(book = book)) },
+                onRemoveFromLibraryClick = { runAction(OnRemoveBookFromLibraryClickAction(book = book)) },
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DesktopTrendingSection(
@@ -262,15 +329,14 @@ private fun DesktopTrendingSection(
     if (isLoading.not() && books.isEmpty()) return
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        EditorialSectionHeader(
-            eyebrow = "This week",
-            headline = "Trending",
-            modifier = Modifier.padding(horizontal = 24.dp),
+        SectionHeaderBar(
+            eyebrow = "Trending this week",
+            headline = "What everyone's reading",
         )
 
         SkeletonCrossfade(
             isLoading = isLoading,
-            label = "DesktopTrendingGrid",
+            label = "DesktopTrendingRail",
         ) { loading ->
             FlowRow(
                 modifier = Modifier
@@ -304,6 +370,90 @@ private fun DesktopTrendingSection(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
+private fun DesktopBecauseYouReadSection(
+    genre: String?,
+    genreOptions: List<String>,
+    books: List<Book>,
+    isLoading: Boolean,
+    onBookClick: (Book, String?) -> Unit,
+    runAction: (ExploreAction) -> Unit,
+) {
+    // See the mobile BecauseYouReadSection's comment: the section only collapses once the fetch
+    // is done and there's genuinely nothing to show (no genre, or no books despite a genre) -
+    // any other state, including "still loading with genre unresolved", keeps the header+rail's
+    // full footprint reserved so the section never pops into the feed at full height once the
+    // genre resolves.
+    if (isLoading.not() && (genre == null || books.isEmpty())) return
+
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SkeletonCrossfade(
+            isLoading = isLoading,
+            modifier = Modifier.padding(horizontal = 24.dp),
+            label = "DesktopBecauseYouReadHeader",
+        ) { loading ->
+            if (loading) {
+                EditorialSectionHeaderSkeleton()
+            } else if (genre != null) {
+                EditorialSectionHeader(
+                    eyebrow = "Because you read",
+                    headline = genre,
+                )
+            }
+        }
+
+        // Crossfaded too, not just gated on `genre != null` directly - see the mobile
+        // BecauseYouReadSection's comment: genre and `isLoading` flip together, so an ungated
+        // appearance would hard-pop this control in alongside the header/rail's smooth fade.
+        SkeletonCrossfade(
+            isLoading = isLoading,
+            modifier = Modifier.padding(horizontal = 24.dp),
+            label = "DesktopBecauseYouReadGenreControl",
+        ) { loading ->
+            if (loading.not() && genre != null) {
+                BecauseYouReadGenreControl(
+                    genre = genre,
+                    options = genreOptions,
+                    runAction = runAction,
+                )
+            }
+        }
+
+        SkeletonCrossfade(
+            isLoading = isLoading,
+            label = "DesktopBecauseYouReadRail",
+        ) { loading ->
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+            ) {
+                if (loading) {
+                    repeat(DESKTOP_DISCOVERY_SKELETON_COUNT) {
+                        BecauseYouReadCardSkeleton(modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH))
+                    }
+                } else {
+                    books.forEach { book ->
+                        BecauseYouReadCard(
+                            modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
+                            book = book,
+                            onClick = {
+                                onBookClick(
+                                    book,
+                                    SURFACE_BECAUSE_YOU_READ,
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
 private fun DesktopUpNextSection(
     books: List<Book>,
     isLoading: Boolean,
@@ -315,15 +465,14 @@ private fun DesktopUpNextSection(
     var sheetBook by remember { mutableStateOf<Book?>(null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        EditorialSectionHeader(
+        SectionHeaderBar(
             eyebrow = "Pick up where you left off",
             headline = "Up next in your series",
-            modifier = Modifier.padding(horizontal = 24.dp),
         )
 
         SkeletonCrossfade(
             isLoading = isLoading,
-            label = "DesktopUpNextGrid",
+            label = "DesktopUpNextRail",
         ) { loading ->
             FlowRow(
                 modifier = Modifier
@@ -338,17 +487,33 @@ private fun DesktopUpNextSection(
                     }
                 } else {
                     books.forEach { book ->
-                        SeriesCard(
-                            modifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH),
-                            book = book,
-                            onClick = {
-                                onBookClick(
-                                    book,
-                                    SURFACE_UP_NEXT,
-                                )
-                            },
-                            onMenuClick = { sheetBook = book },
-                        )
+                        val cardModifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH)
+
+                        if (book.isUnreleased) {
+                            UnreleasedSeriesCard(
+                                modifier = cardModifier,
+                                book = book,
+                                onClick = {
+                                    onBookClick(
+                                        book,
+                                        SURFACE_UP_NEXT,
+                                    )
+                                },
+                                onMenuClick = { sheetBook = book },
+                            )
+                        } else {
+                            SeriesCard(
+                                modifier = cardModifier,
+                                book = book,
+                                onClick = {
+                                    onBookClick(
+                                        book,
+                                        SURFACE_UP_NEXT,
+                                    )
+                                },
+                                onMenuClick = { sheetBook = book },
+                            )
+                        }
                     }
                 }
             }
@@ -364,6 +529,20 @@ private fun DesktopUpNextSection(
     }
 }
 
+/** The 32×4 accent-bar section opener (design-system.md §2.3), padded to the desktop grid gutter. */
+@Composable
+private fun SectionHeaderBar(
+    eyebrow: String,
+    headline: String,
+) {
+    EditorialSectionHeader(
+        eyebrow = eyebrow,
+        headline = headline,
+        modifier = Modifier.padding(horizontal = 24.dp),
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun DesktopSearchResults(
     state: ExploreScreenUiState,
@@ -375,19 +554,42 @@ private fun DesktopSearchResults(
             .fillMaxSize()
             .padding(horizontal = 24.dp),
     ) {
-        val text = when {
-            state.isLoading -> "Loading..."
-            state.queriedBooks.isEmpty() -> "No results found"
-            else -> "Showing ${state.queriedBooks.size} results"
+        Row(modifier = Modifier.padding(vertical = 8.dp)) {
+            SortChip(
+                sortMode = state.sortMode,
+                runAction = runAction,
+            )
         }
 
-        Text(
-            text = text,
-            style = MaterialTheme.editorialTypography.eyebrowSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        val subtitle = when {
+            state.searchText.isNotEmpty() -> "for \"${state.searchText}\""
+            state.activeMoodFilter != null -> "for \"${state.activeMoodFilter.label}\""
+            else -> null
+        }
+
+        SearchResultsHeader(
+            resultCount = state.queriedBooks.size,
+            subtitle = subtitle,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Feedback item 7: same append-on-scroll-near-end trigger as mobile's LazyColumn, driven off
+        // this grid's own `searchResultsGridState` instead of a per-composition list state.
+        LaunchedEffect(state.queriedBooks.size, state.queriedBooksHasMore) {
+            val itemCount = state.queriedBooks.size
+            if (state.queriedBooksHasMore.not() || itemCount == 0) return@LaunchedEffect
+
+            snapshotFlow { searchResultsGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+                .collect { lastVisibleIndex ->
+                    val nearEnd = lastVisibleIndex != null &&
+                        lastVisibleIndex >= itemCount - SEARCH_RESULTS_LOAD_MORE_THRESHOLD
+
+                    if (nearEnd) {
+                        runAction(OnLoadMoreSearchResultsAction)
+                    }
+                }
+        }
 
         Box(
             modifier = Modifier
@@ -408,6 +610,19 @@ private fun DesktopSearchResults(
                         onBookClick = onBookClick,
                         runAction = runAction,
                     )
+                }
+
+                if (state.loadingMoreQueriedBooks) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularWavyProgressIndicator()
+                        }
+                    }
                 }
             }
 

@@ -20,8 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.haptics.LocalHaptics
@@ -56,8 +53,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfAction
@@ -68,13 +65,12 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnClearFiltersAc
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnReadYearSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleFilterValueAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleSearchAction
-import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlStrip
+import nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet
+import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlLine
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -84,8 +80,10 @@ import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
  * Desktop Library: a vertical shelf **source list** (the native desktop pattern for switching
  * collections) down the leading edge, beside a wide pane-width-adaptive cover grid with a persistent
  * desktop scrollbar. The header is static (no touch-collapse) and refresh is an explicit control;
- * there is no pager and no pull-to-refresh. Selection mode, filtering, and the bulk sheets reuse the
- * shared shelf components verbatim ([SelectionHeader], [BookList], [EditionList], [LibraryFilterSheet]).
+ * there is no pager and no pull-to-refresh. Unlike mobile, the sidebar stays the switcher (no
+ * title-chevron, no Shelves sheet — see design-system.md); the masthead control line and Arrange sheet
+ * are otherwise shared with mobile. Selection mode, filtering, and the bulk sheets reuse the shared
+ * shelf components verbatim ([SelectionHeader], [BookList], [EditionList], [LibraryFilterSheet]).
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -103,8 +101,6 @@ internal actual fun LibraryScreenLayout(
     val haptics = LocalHaptics.current
 
     val currentTab = tabs.firstOrNull { it.id == state.selectedTabId } ?: tabs.firstOrNull()
-    val isReadTab = currentTab is LibraryContentTab.Status &&
-            currentTab.status == UserBookStatus.READ
 
     val currentTabBooks: List<Book>? = currentTab?.let { tab ->
         when (tab) {
@@ -124,8 +120,6 @@ internal actual fun LibraryScreenLayout(
 
     val currentTabBookCount = currentTabBooks?.size ?: currentTabEditions?.size
     val currentTabPageCount = currentTabBooks?.totalPages() ?: 0
-
-    val availableReadYears = if (isReadTab) state.availableReadYears else emptyList()
 
     val selectionBackState = rememberNavigationEventState(NavigationEventInfo.None)
 
@@ -200,55 +194,38 @@ internal actual fun LibraryScreenLayout(
                     tab = currentTab,
                     bookCount = currentTabBookCount,
                     totalPages = currentTabPageCount,
-                    isSearchActive = state.isSearchActive,
                     isRefreshing = state.isLoading,
-                    onToggleSearchClick = { runAction(OnToggleSearchAction()) },
                     onRefreshClick = { runAction(OnRefreshAction()) },
                 )
 
-                if (state.isSearchActive) {
-                    Spacer(modifier = Modifier.height(4.dp))
+                // Search is persistent (no toggle) per the redesign.
+                Spacer(modifier = Modifier.height(4.dp))
 
-                    EditorialSearchField(
-                        query = state.searchQuery,
-                        onQueryChange = { query ->
-                            runAction(OnSearchQueryChangeAction(query = query))
-                        },
-                        onClearClick = {
-                            runAction(OnSearchQueryChangeAction(query = ""))
-                        },
-                        searchIcon = drawableIconResource(
-                            icon = SoftcoverIcon.Search,
-                            contentDescription = "Search",
-                        ),
-                        clearIcon = drawableIconResource(
-                            icon = SoftcoverIcon.Close,
-                            contentDescription = "Clear search",
-                        ),
-                        placeholder = "Search this shelf…",
-                    )
-                }
+                EditorialSearchField(
+                    query = state.searchQuery,
+                    onQueryChange = { query ->
+                        runAction(OnSearchQueryChangeAction(query = query))
+                    },
+                    onClearClick = {
+                        runAction(OnSearchQueryChangeAction(query = ""))
+                    },
+                    searchIcon = drawableIconResource(
+                        icon = SoftcoverIcon.Search,
+                        contentDescription = "Search",
+                    ),
+                    clearIcon = drawableIconResource(
+                        icon = SoftcoverIcon.Close,
+                        contentDescription = "Clear search",
+                    ),
+                    placeholder = "Search your collection",
+                )
 
-                if (isReadTab && availableReadYears.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    ReadYearChipRow(
-                        years = availableReadYears,
-                        selectedYear = state.selectedReadYear,
-                        onYearClick = { year ->
-                            runAction(OnReadYearSelectedAction(year = year))
-                        },
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                LibraryControlStrip(
+                LibraryControlLine(
                     state = state,
                     tab = currentTab,
                     runAction = runAction,
-                    layoutOptions = DesktopLayoutOptions,
-                    layoutLabel = ::desktopLayoutLabel,
                 )
 
                 val activeFilters = currentTab?.id?.let { state.filtersFor(tabId = it) }
@@ -318,19 +295,22 @@ internal actual fun LibraryScreenLayout(
         }
     }
 
+    if (state.isArrangeSheetExpanded && currentTab != null) {
+        LibraryArrangeSheet(
+            tab = currentTab,
+            state = state,
+            runAction = runAction,
+            onDismissRequest = {
+                runAction(OnArrangeSheetExpandedChangeAction(expanded = false))
+            },
+        )
+    }
+
     if (state.isFilterSheetExpanded && currentTab != null) {
         LibraryFilterSheet(
-            filters = state.filtersFor(tabId = currentTab.id),
-            options = state.availableFilterOptionsFor(tabId = currentTab.id),
-            onToggle = { value ->
-                runAction(
-                    OnToggleFilterValueAction(
-                        tabId = currentTab.id,
-                        value = value,
-                    ),
-                )
-            },
-            onClearAll = { runAction(OnClearFiltersAction(tabId = currentTab.id)) },
+            tabId = currentTab.id,
+            state = state,
+            runAction = runAction,
             onDismissRequest = {
                 runAction(OnFilterSheetExpandedChangeAction(expanded = false))
             },
@@ -357,6 +337,7 @@ internal actual fun LibraryScreenLayout(
             bookIds = state.selectedBookIds,
             customLists = state.customLists.filter { it.isOwned.not() },
             listsBeingMutated = state.listsBeingMutated,
+            bookCovers = state.resolveSelectedBooks().take(3).mapNotNull { it.currentEdition },
             onDismissRequest = {
                 runAction(OnBulkAddToListSheetShownAction(shown = false))
             },
@@ -379,7 +360,10 @@ internal actual fun LibraryScreenLayout(
  * The desktop shelf source list: built-in shelves grouped first, then a "Lists" section for the
  * user's custom lists. Each entry is a full-width row whose long name ellipsizes (no horizontal
  * scroll or wrapping to fight). The whole rail scrolls vertically — a mouse wheel drives it natively.
- * A long-press routes to the shelf-visibility settings, mirroring the mobile tab affordance.
+ * A long-press routes to the shelf-visibility settings, mirroring the mobile Shelves sheet's own
+ * "Manage" affordance. Desktop keeps this permanent sidebar rather than the mobile title-as-switcher
+ * + Shelves sheet — a wide window already has room for a source list, which is the native desktop
+ * switcher pattern (design-system.md §2.7/§5).
  */
 @Composable
 private fun ShelfSidebar(
@@ -499,9 +483,7 @@ private fun DesktopLibraryHeader(
     tab: LibraryContentTab?,
     bookCount: Int?,
     totalPages: Int,
-    isSearchActive: Boolean,
     isRefreshing: Boolean,
-    onToggleSearchClick: () -> Unit,
     onRefreshClick: () -> Unit,
 ) {
     Row(
@@ -553,23 +535,6 @@ private fun DesktopLibraryHeader(
             ) {
                 Text(text = if (isRefreshing) "Refreshing…" else "Refresh")
             }
-
-            DesktopTooltip(text = if (isSearchActive) "Close" else "Search") {
-                IconButton(
-                    onClick = onToggleSearchClick,
-                    modifier = Modifier.pointerHandCursor(),
-                ) {
-                    val searchToggleIcon = drawableIconResource(
-                        icon = if (isSearchActive) SoftcoverIcon.Close else SoftcoverIcon.Search,
-                        contentDescription = if (isSearchActive) "Close library search" else "Search in library",
-                    )
-
-                    Icon(
-                        painter = searchToggleIcon.getIconPainter(),
-                        contentDescription = searchToggleIcon.contentDescription,
-                    )
-                }
-            }
         }
     }
 }
@@ -592,25 +557,6 @@ private fun desktopGridColumns(layout: LibraryGridLayout): GridCells = when (lay
     LibraryGridLayout.LIST_COMPACT,
     LibraryGridLayout.LIST_LARGE,
         -> GridCells.Fixed(count = 1)
-}
-
-/**
- * Desktop offers only the two grid *densities* — covers with captions vs covers alone — because the
- * column count is adaptive to the content width ([desktopGridColumns]); the phone-tuned "2 vs 3 per
- * row" and list options don't apply. [desktopLayoutLabel] drops the "N per row" wording for the same
- * reason.
- */
-private val DesktopLayoutOptions: List<LibraryGridLayout> = listOf(
-    LibraryGridLayout.GRID_TWO_COLUMNS,
-    LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-)
-
-private fun desktopLayoutLabel(layout: LibraryGridLayout): String = when (layout) {
-    LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-    LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-        -> "Covers only"
-
-    else -> "Covers with details"
 }
 
 private val SHELF_SIDEBAR_WIDTH = 208.dp

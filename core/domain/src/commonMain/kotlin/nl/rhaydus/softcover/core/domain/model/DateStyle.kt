@@ -9,7 +9,7 @@ enum class DateStyle(
     val formatter: DateTimeFormat<LocalDate>,
 ) {
     DAY_MONTH_YEAR(
-        label = "DD/MM/YYYY",
+        label = "Day, month, year",
         formatter = LocalDate.Format {
             day()
             char('/')
@@ -19,7 +19,7 @@ enum class DateStyle(
         },
     ),
     MONTH_DAY_YEAR(
-        label = "MM/DD/YYYY",
+        label = "Month, day, year",
         formatter = LocalDate.Format {
             monthNumber()
             char('/')
@@ -29,7 +29,7 @@ enum class DateStyle(
         },
     ),
     YEAR_MONTH_DAY(
-        label = "YYYY/MM/DD",
+        label = "Year, month, day",
         formatter = LocalDate.Format {
             year()
             char('/')
@@ -38,4 +38,7 @@ enum class DateStyle(
             day()
         },
     ),
+    ;
+
+    fun format(date: LocalDate): String = formatter.format(date)
 }

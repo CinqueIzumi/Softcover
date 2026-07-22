@@ -69,7 +69,6 @@ class OnFilterSheetExpandedChangeActionTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 isLoading = false,
-                isSearchActive = true,
                 isFilterSheetExpanded = false,
             )
             val action = OnFilterSheetExpandedChangeAction(expanded = true)
@@ -82,7 +81,6 @@ class OnFilterSheetExpandedChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isSearchActive shouldBe true
             stateFlow.value.isFilterSheetExpanded shouldBe true
         }
     }

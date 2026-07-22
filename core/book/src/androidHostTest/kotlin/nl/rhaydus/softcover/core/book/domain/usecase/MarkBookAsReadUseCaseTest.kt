@@ -7,13 +7,13 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class MarkBookAsReadUseCaseTest {
     private lateinit var repository: BooksRepository
@@ -101,6 +101,44 @@ class MarkBookAsReadUseCaseTest {
             coVerify(exactly = 1) { repository.markBookAsRead(
                 book = inputBook,
                 editionId = editionId,
+            ) }
+            coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
+        }
+
+        @Test
+        fun `forwards a non-null actionAt to the repository`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+            val actionAt = "2026-07-21T21:00:00Z"
+            val updatedBook = mockk<Book>()
+
+            every {
+                inputBook.status
+            } returns BookStatus.Reading
+
+            coEvery {
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = null,
+                    actionAt = actionAt,
+                )
+            } returns updatedBook
+
+            coJustRun {
+                repository.cacheBook(book = updatedBook)
+            }
+
+            // ----- Act -----
+            useCase(
+                book = inputBook,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { repository.markBookAsRead(
+                book = inputBook,
+                editionId = null,
+                actionAt = actionAt,
             ) }
             coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
         }

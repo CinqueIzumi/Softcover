@@ -12,6 +12,7 @@ import nl.rhaydus.toad.ActionScope
 
 internal class OnMarkBookAsReadClickAction(
     private val book: Book,
+    private val actionAt: String? = null,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
@@ -26,6 +27,7 @@ internal class OnMarkBookAsReadClickAction(
             dependencies.markBookAsReadUseCase(
                 book = book,
                 editionId = editionId,
+                actionAt = actionAt,
             )
                 .onSuccess { outcome ->
                     // Celebrate only on a real transition — re-tapping the active "Read" chip

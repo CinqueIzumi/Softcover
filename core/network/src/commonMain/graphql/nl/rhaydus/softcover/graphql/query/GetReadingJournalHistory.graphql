@@ -1,0 +1,18 @@
+query GetReadingJournalHistory(
+    $bookId: Int!,
+    $userId: Int!,
+    $limit: Int!,
+) {
+    reading_journals(
+        where: {
+            book_id: { _eq: $bookId }
+            user_id: { _eq: $userId }
+            event: { _eq: "progress_updated" }
+        }
+        order_by: { updated_at: asc }
+        limit: $limit
+    ) {
+        updated_at
+        metadata
+    }
+}

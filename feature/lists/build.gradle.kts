@@ -16,7 +16,6 @@ kotlin {
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)
-            implementation(libs.rhaydus.designsystemEditorial)
             implementation(libs.rhaydus.toad)
 
             implementation(libs.voyager.navigator)

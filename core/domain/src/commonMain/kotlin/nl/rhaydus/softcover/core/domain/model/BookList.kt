@@ -7,6 +7,7 @@ data class BookList(
     val name: String,
     val slug: String,
     val ranked: Boolean = false,
+    val privacy: PrivacySetting = PrivacySetting.PUBLIC,
     val books: List<ListBook>,
     val signature: String? = null,
 ) {

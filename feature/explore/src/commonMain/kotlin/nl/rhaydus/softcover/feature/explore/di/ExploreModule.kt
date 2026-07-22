@@ -8,7 +8,9 @@ import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
+import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
+import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSourceImpl
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSource
@@ -17,28 +19,38 @@ import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSour
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSourceImpl
 import nl.rhaydus.softcover.feature.explore.data.repository.ExploreRepositoryImpl
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
+import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.EnrichDismissedContinueSeriesMetadataUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetBecauseYouReadBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetDismissedContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetDismissedContinueSeriesUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetFeaturedUpcomingReleaseUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetMoodTagsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetPreviousSearchQueriesUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksHasMoreUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetQueriedBooksUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveAllSearchQueriesUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.RemoveSearchQueryUseCase
+import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchByMoodUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBookDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
+import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouReadCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedSeriesCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichDismissedMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ExploreCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.FeaturedUpcomingReleaseCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.HiddenSuggestionsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTagsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueriesCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsScreenModel
@@ -52,13 +64,17 @@ val exploreModule = module {
         databaseModule,
         apolloModule,
         designSystemModule,
+        preferencesModule,
+        listsModule,
     )
 
     factory {
         ExploreScreenScreenModel(
             getPreviousSearchQueriesUseCase = get(),
             getQueriedBooksUseCase = get(),
+            getQueriedBooksHasMoreUseCase = get(),
             searchForNameUseCase = get(),
+            clearSearchResultsUseCase = get(),
             getAllUserBooksUseCase = get(),
             removeSearchQueryUseCase = get(),
             removeAllSearchQueriesUseCase = get(),
@@ -71,6 +87,11 @@ val exploreModule = module {
             undoContinueSeriesBookDismissalUseCase = get(),
             undoContinueSeriesDismissalUseCase = get(),
             enrichDismissedContinueSeriesMetadataUseCase = get(),
+            getFeaturedUpcomingReleaseUseCase = get(),
+            getBecauseYouReadBooksUseCase = get(),
+            getMoodTagsUseCase = get(),
+            searchByMoodUseCase = get(),
+            setBecauseYouReadGenreUseCase = get(),
             flows = getAll(),
             appDispatchers = get(),
         )
@@ -80,11 +101,19 @@ val exploreModule = module {
 
     factory { QueriedBooksCollector() } bind ExploreCollector::class
 
+    factory { QueriedBooksHasMoreCollector() } bind ExploreCollector::class
+
     factory { TrendingBooksCollector() } bind ExploreCollector::class
 
     factory { ContinueSeriesBooksCollector() } bind ExploreCollector::class
 
     factory { EnrichDismissedMetadataCollector() } bind ExploreCollector::class
+
+    factory { FeaturedUpcomingReleaseCollector() } bind ExploreCollector::class
+
+    factory { BecauseYouReadCollector() } bind ExploreCollector::class
+
+    factory { MoodTagsCollector() } bind ExploreCollector::class
 
     factory {
         HiddenSuggestionsScreenModel(
@@ -137,6 +166,10 @@ val exploreModule = module {
     }
 
     factory {
+        GetQueriedBooksHasMoreUseCase(searchRepository = get())
+    }
+
+    factory {
         RemoveAllSearchQueriesUseCase(searchRepository = get())
     }
 
@@ -149,6 +182,10 @@ val exploreModule = module {
             searchRepository = get(),
             getUserIdUseCase = get(),
         )
+    }
+
+    factory {
+        ClearSearchResultsUseCase(searchRepository = get())
     }
 
     factory {
@@ -187,5 +224,26 @@ val exploreModule = module {
             exploreRepository = get(),
             booksRepository = get(),
         )
+    }
+
+    factory {
+        GetFeaturedUpcomingReleaseUseCase(exploreRepository = get())
+    }
+
+    factory {
+        GetBecauseYouReadBooksUseCase(
+            booksRepository = get(),
+            listsRepository = get(),
+            exploreRepository = get(),
+            getBecauseYouReadGenreUseCase = get(),
+        )
+    }
+
+    factory {
+        GetMoodTagsUseCase(exploreRepository = get())
+    }
+
+    factory {
+        SearchByMoodUseCase(exploreRepository = get())
     }
 }

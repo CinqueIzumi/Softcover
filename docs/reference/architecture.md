@@ -76,6 +76,27 @@ by [`toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md). Softcover de
   kind via `Throwable.toUserMessage()` + the `Result.onApiFailure()` fold helper in `:core:designsystem`
   (see [code-style.md](code-style.md)).
 
+### Unresolvable API enums
+
+Some Hardcover columns are integer foreign keys with **no corresponding lookup type in the GraphQL
+schema**, so they cannot be resolved through the API and must be mapped in our own code. Treat each as
+an external contract that can drift without notice: define the mapping in exactly one place, never
+inline the integers at call sites, and re-confirm with the Hardcover team before relying on a new value.
+
+- **`gender_id`** (on `authors` as `Int`, on `characters` as `bigint`) — **`1` = male, `2` = female,
+  `3` = other.** Confirmed by the Hardcover team; there is no `genders` type anywhere in the schema to
+  derive it from. Three rules apply wherever this surfaces to users:
+  - Render `3` as **"other"**, Hardcover's own word. Do not translate it into a specific identity —
+    the bucket contains both non-binary authors and at least one trans woman, so a narrower label
+    misgenders real people.
+  - **`null` is the unknown case and is distinct from `3`.** A statistic must never merge them or
+    relabel unknown as "other". Unknown may be surfaced as its own clearly-distinct segment — rendered
+    muted, in a neutral role, and labelled "Unknown" (as the profile author-representation section
+    does, where it is a share of *all* distinct authors) — but it is never counted as, blended into, or
+    renamed to the "other" category, which is a real gender bucket in its own right.
+  - The bucket also contains **non-person entities** (publishers, design studios, collective
+    pseudonyms). Filter them out before charting, or the "other" share reads inflated.
+
 ## Platform seams from the foundation
 
 Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core-platform` and

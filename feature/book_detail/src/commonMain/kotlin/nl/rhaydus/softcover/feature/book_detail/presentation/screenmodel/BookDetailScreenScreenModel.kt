@@ -10,8 +10,8 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
@@ -21,13 +21,17 @@ import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.SetEditionAsOwnedUseCase
+import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.ObserveUserTagVocabularyUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.RecordAppliedTagsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCase
+import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
@@ -49,7 +53,7 @@ internal class BookDetailScreenScreenModel(
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
-    private val updateBookRatingUseCase: UpdateBookRatingUseCase,
+    private val saveBookVerdictUseCase: SaveBookVerdictUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     private val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     private val getAllUserListsUseCase: GetAllUserListsUseCase,
@@ -59,12 +63,16 @@ internal class BookDetailScreenScreenModel(
     private val setBookDeadlineUseCase: SetBookDeadlineUseCase,
     private val clearBookDeadlineUseCase: ClearBookDeadlineUseCase,
     private val getTopBookReviewsUseCase: GetTopBookReviewsUseCase,
+    private val getReadingJournalHistoryUseCase: GetReadingJournalHistoryUseCase,
     private val updateBookReviewUseCase: UpdateBookReviewUseCase,
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
     private val getUserTagsUseCase: GetUserTagsUseCase,
     private val saveUserTagsUseCase: SaveUserTagsUseCase,
     private val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     private val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
+    private val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
+    private val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
+    private val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailCollector, BookDetailLocalVariables>(
@@ -87,7 +95,7 @@ internal class BookDetailScreenScreenModel(
         markBookAsReadingUseCase = markBookAsReadingUseCase,
         removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
         markBookAsReadUseCase = markBookAsReadUseCase,
-        updateBookRatingUseCase = updateBookRatingUseCase,
+        saveBookVerdictUseCase = saveBookVerdictUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         setEditionAsOwnedUseCase = setEditionAsOwnedUseCase,
         getAllUserListsUseCase = getAllUserListsUseCase,
@@ -97,12 +105,16 @@ internal class BookDetailScreenScreenModel(
         setBookDeadlineUseCase = setBookDeadlineUseCase,
         clearBookDeadlineUseCase = clearBookDeadlineUseCase,
         getTopBookReviewsUseCase = getTopBookReviewsUseCase,
+        getReadingJournalHistoryUseCase = getReadingJournalHistoryUseCase,
         updateBookReviewUseCase = updateBookReviewUseCase,
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
         getUserTagsUseCase = getUserTagsUseCase,
         saveUserTagsUseCase = saveUserTagsUseCase,
         getLastUsedProgressUnitAsFlowUseCase = getLastUsedProgressUnitAsFlowUseCase,
         setLastUsedProgressUnitUseCase = setLastUsedProgressUnitUseCase,
+        observeUserTagVocabularyUseCase = observeUserTagVocabularyUseCase,
+        syncUserTagVocabularyUseCase = syncUserTagVocabularyUseCase,
+        recordAppliedTagsUseCase = recordAppliedTagsUseCase,
     )
 
     init {

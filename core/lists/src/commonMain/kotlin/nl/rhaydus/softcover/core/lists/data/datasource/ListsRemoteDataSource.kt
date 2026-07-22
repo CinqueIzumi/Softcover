@@ -49,7 +49,10 @@ interface ListsRemoteDataSource {
         listIds: Set<Int>? = null,
     ): List<BookList>
 
-    suspend fun createList(name: String): BookList
+    suspend fun createList(
+        name: String,
+        privacy: PrivacySetting = PrivacySetting.PUBLIC,
+    ): BookList
 
     suspend fun markEditionAsOwned(edition: BookEdition): ListBook
 
@@ -138,11 +141,14 @@ internal class ListsRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun createList(name: String): BookList {
+    override suspend fun createList(
+        name: String,
+        privacy: PrivacySetting,
+    ): BookList {
         val input = ListInput(
             name = Optional.Present(name),
             description = Optional.Present(""),
-            privacy_setting_id = Optional.Present(PrivacySetting.PUBLIC.code),
+            privacy_setting_id = Optional.Present(privacy.code),
             ranked = Optional.Present(false),
             default_view = Optional.Present(DEFAULT_LIST_VIEW),
             url = Optional.Present(""),
@@ -153,7 +159,7 @@ internal class ListsRemoteDataSourceImpl(
             .insert_list
             ?: throw Exception("Did not receive a create-list response")
 
-        val errorText: String? = response.errors?.takeIf { it.isNotBlank() }
+        val errorText: String? = response.errors.toErrorTextOrNull()
 
         if (errorText != null) {
             if (errorText.lowercase().contains(NAME_TAKEN_MARKER)) {
@@ -272,7 +278,7 @@ internal class ListsRemoteDataSourceImpl(
             .listResponse
             ?: throw Exception("Did not receive an update-list response")
 
-        val errorText: String? = response.errors?.takeIf { it.isNotBlank() }
+        val errorText: String? = response.errors.toErrorTextOrNull()
 
         if (errorText != null) {
             throw Exception("UpdateList rejected by server: $errorText")
@@ -286,3 +292,13 @@ internal class ListsRemoteDataSourceImpl(
         listFragment.toBookList()
     }
 }
+
+// The list-mutation responses expose `errors` as a list of messages (the API changed it from a
+// single string). Collapse it to one non-blank message for the callers, which only need "was there
+// an error, and what did it say".
+private fun List<String?>?.toErrorTextOrNull(): String? =
+    this
+        ?.filterNotNull()
+        ?.filter { it.isNotBlank() }
+        ?.joinToString(separator = "; ")
+        ?.takeIf { it.isNotBlank() }

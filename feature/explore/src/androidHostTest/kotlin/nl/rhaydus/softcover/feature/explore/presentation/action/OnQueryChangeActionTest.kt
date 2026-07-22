@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.milliseconds
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -75,7 +76,10 @@ class OnQueryChangeActionTest {
             )
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.success(Unit)
 
             // ----- Act -----
@@ -94,7 +98,10 @@ class OnQueryChangeActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.success(Unit)
 
             val action = OnQueryChangeAction(
@@ -140,7 +147,10 @@ class OnQueryChangeActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.success(Unit)
 
             val action = OnQueryChangeAction(
@@ -164,7 +174,10 @@ class OnQueryChangeActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.success(Unit)
 
             val action = OnQueryChangeAction(
@@ -208,7 +221,10 @@ class OnQueryChangeActionTest {
             stateFlow.value = stateFlow.value.copy(searchError = "previous error")
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.success(Unit)
 
             val action = OnQueryChangeAction(
@@ -232,7 +248,10 @@ class OnQueryChangeActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.failure(OfflineException())
 
             val action = OnQueryChangeAction(
@@ -257,7 +276,10 @@ class OnQueryChangeActionTest {
             dependencies = stubDependencies(this)
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.failure(RuntimeException())
 
             val action = OnQueryChangeAction(
@@ -295,6 +317,69 @@ class OnQueryChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.searchError shouldBe null
+        }
+
+        @Test
+        fun `a non-empty keystroke clears an active mood filter`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                activeMoodFilter = MoodTag(
+                    id = 1,
+                    label = "Cozy",
+                    slug = "cozy",
+                    bookCount = 10,
+                ),
+            )
+
+            coEvery {
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
+            } returns Result.success(Unit)
+
+            val action = OnQueryChangeAction(
+                newQuery = "dune",
+                searchDelay = 0.milliseconds,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.activeMoodFilter shouldBe null
+        }
+
+        @Test
+        fun `clearing the query to empty also clears an active mood filter`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                activeMoodFilter = MoodTag(
+                    id = 2,
+                    label = "Dark",
+                    slug = "dark",
+                    bookCount = 5,
+                ),
+            )
+
+            val action = OnQueryChangeAction(
+                newQuery = "",
+                searchDelay = 0.milliseconds,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.activeMoodFilter shouldBe null
         }
     }
 }

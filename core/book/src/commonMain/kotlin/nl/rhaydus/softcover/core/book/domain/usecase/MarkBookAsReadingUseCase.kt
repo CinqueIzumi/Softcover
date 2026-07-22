@@ -8,10 +8,16 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 class MarkBookAsReadingUseCase(
     private val booksRepository: BooksRepository,
 ) {
-    suspend operator fun invoke(book: Book): Result<ShelfMutationOutcome> = runCatchingLogged {
+    suspend operator fun invoke(
+        book: Book,
+        editionId: Int? = null,
+    ): Result<ShelfMutationOutcome> = runCatchingLogged {
         if (book.status == BookStatus.Reading) return@runCatchingLogged ShelfMutationOutcome.NoChange
 
-        val updatedBook: Book = booksRepository.markBookAsReading(book = book)
+        val updatedBook: Book = booksRepository.markBookAsReading(
+            book = book,
+            editionId = editionId,
+        )
 
         booksRepository.cacheBook(book = updatedBook)
 

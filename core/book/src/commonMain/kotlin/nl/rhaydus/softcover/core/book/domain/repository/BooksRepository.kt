@@ -67,27 +67,30 @@ interface BooksRepository {
     suspend fun fetchBookById(id: Int): Book
 
     /**
-     * Resolves a scanned/typed ISBN (ISBN-10 or ISBN-13) to the Hardcover book + edition that carry
-     * it, or `null` when no edition matches. Carries the edition id (not just the book id) so the
-     * detail screen can preview the exact scanned edition. Throws
+     * Resolves a batch of scanned/typed ISBNs (ISBN-10 or ISBN-13) to the Hardcover book + edition
+     * that carry each one, keyed by the requested ISBN string. A requested ISBN with no matching
+     * edition is simply absent from the returned map. Carries the edition id (not just the book id)
+     * so the detail screen can preview the exact scanned edition. Throws
      * [OfflineException] when offline so callers can tell
-     * a genuine "not in Hardcover" miss apart from a network outage.
+     * a genuine "not in Hardcover" miss apart from a network outage. An empty [isbns] list returns
+     * an empty map immediately, without checking connectivity.
      */
-    suspend fun fetchEditionMatchForIsbn(isbn: String): IsbnEditionMatch?
+    suspend fun fetchEditionMatchesForIsbns(isbns: List<String>): Map<String, IsbnEditionMatch>
 
     /**
      * Creates a not-yet-catalogued book in Hardcover from its ISBN via `upsert_book`, returning the
      * new book id (and edition id when Hardcover supplies one). Throws
      * [OfflineException] when offline, mirroring
-     * [fetchEditionMatchForIsbn].
+     * [fetchEditionMatchesForIsbns].
      */
     suspend fun addBookByIsbn(isbn: String): CreatedBook
 
     suspend fun fetchBooksByIds(ids: List<Int>): List<Book>
 
     /**
-     * Fetches the books trending on Hardcover over the recent window. A book-discovery query
-     * (consumed by the reading and explore surfaces), so it lives with the other book queries.
+     * Fetches the books trending on Hardcover this week - the app's single trending cadence, no
+     * monthly/other fallback. A book-discovery query (consumed by the reading and explore
+     * surfaces), so it lives with the other book queries.
      */
     suspend fun fetchTrendingBooks(): List<Book>
 
@@ -114,7 +117,10 @@ interface BooksRepository {
         editionId: Int? = null,
     ): Book
 
-    suspend fun markBookAsReading(book: Book): Book
+    suspend fun markBookAsReading(
+        book: Book,
+        editionId: Int? = null,
+    ): Book
 
     suspend fun updateBookRating(
         book: Book,
@@ -142,11 +148,13 @@ interface BooksRepository {
         book: Book,
         newPage: Int? = null,
         newSeconds: Int? = null,
+        actionAt: String? = null,
     ): Book
 
     suspend fun markBookAsRead(
         book: Book,
         editionId: Int? = null,
+        actionAt: String? = null,
     ): Book
 
     suspend fun updateBookEdition(

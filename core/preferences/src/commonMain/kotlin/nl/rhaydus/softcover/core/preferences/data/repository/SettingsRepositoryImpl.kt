@@ -143,4 +143,10 @@ internal class SettingsRepositoryImpl(
     override suspend fun setLastUsedProgressUnit(unit: ProgressUnit) {
         settingsLocalDataSource.setLastUsedProgressUnit(unit = unit)
     }
+
+    override val becauseYouReadGenre: Flow<String?> = settingsLocalDataSource.becauseYouReadGenre
+
+    override suspend fun setBecauseYouReadGenre(genre: String?) {
+        settingsLocalDataSource.setBecauseYouReadGenre(genre = genre)
+    }
 }

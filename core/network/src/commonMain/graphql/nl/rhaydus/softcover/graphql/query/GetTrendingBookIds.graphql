@@ -1,15 +1,9 @@
-query GetTrendingBookIds(
-    $from: date!,
-    $to: date!,
-    $limit: Int!,
-    $offset: Int!,
-) {
-    books_trending(
-        from: $from,
-        to: $to,
-        limit: $limit,
-        offset: $offset,
-    ) {
+# Weekly is the app's single trending cadence - no monthly/other fallback. duration is written as
+# a literal (not a variable) since only "week" is ever sent; Apollo serializes the enum literal
+# verbatim regardless of its generated Kotlin naming. from/to/limit/offset are deprecated on
+# books_trending and dropped entirely.
+query GetTrendingBookIds {
+    books_trending(duration: week) {
         ids
     }
 }

@@ -1,0 +1,2 @@
+- [Check working tree before starting](feedback_check_working_tree_before_starting.md) — git status/diff first; uncommitted prior work may already violate the current brief's scope guard
+- [Detekt ScreenModel exclude, not threshold bump](feedback_detekt_screenmodel_exclude_not_threshold_bump.md) — LongParameterList on TOAD ScreenModel/Dependencies: exclude `presentation/screenmodel/**`, don't bump the number again

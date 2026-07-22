@@ -22,7 +22,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -42,6 +41,7 @@ import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
@@ -132,6 +132,8 @@ internal actual fun BookDetailScreenLayout(
             return@Scaffold
         }
 
+        val yoursEnabled = state.book?.userBook != null
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -179,9 +181,10 @@ internal actual fun BookDetailScreenLayout(
             item { Spacer(modifier = Modifier.height(20.dp)) }
 
             item {
-                ShelfActionBar(
+                ShelveControlCard(
                     state = state,
                     runAction = runAction,
+                    dateStyle = state.dateStyle,
                     celebrationKey = celebrationKey,
                 )
             }
@@ -197,90 +200,24 @@ internal actual fun BookDetailScreenLayout(
                 }
             }
 
-            if (state.book?.userBook != null) {
-                item { Spacer(modifier = Modifier.height(24.dp)) }
+            item { Spacer(modifier = Modifier.height(20.dp)) }
 
-                item(key = "userTags") {
-                    UserTagsSection(
-                        state = state,
-                        runAction = runAction,
-                    )
-                }
+            stickyHeader {
+                LensToggle(
+                    selectedLens = state.selectedLens,
+                    onLensSelected = { lens -> runAction(OnLensSelectedAction(lens = lens)) },
+                    yoursEnabled = yoursEnabled,
+                )
             }
 
-            val ratingBook = state.book
-
-            if (ratingBook != null && ratingBook.status == BookStatus.Read) {
-                item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                item {
-                    PersonalRatingRow(
-                        book = ratingBook,
-                        runAction = runAction,
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(20.dp)) }
-
-                item {
-                    PersonalReviewSection(
-                        reviewDocument = ratingBook.userBook?.reviewDocument,
-                        hasSpoilers = ratingBook.userBook?.reviewHasSpoilers == true,
-                        runAction = runAction,
-                    )
-                }
-            }
-
-            val shelfPanelStatus = state.book?.status
-            val shelfPanelWillRender = shelfPanelStatus == BookStatus.Reading ||
-                shelfPanelStatus == BookStatus.DidNotFinish
-
-            if (shelfPanelWillRender) {
-                item { Spacer(modifier = Modifier.height(20.dp)) }
-
-                item {
-                    ShelfStatusPanel(
-                        state = state,
-                        runAction = runAction,
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(28.dp)) }
-            } else {
-                item { Spacer(modifier = Modifier.height(28.dp)) }
-            }
-
-            item { AboutSection(state = state) }
-
-            item(key = "tags") { TagsSection(state = state) }
-
-            item { EditionMetadataStrip(state = state) }
+            item { Spacer(modifier = Modifier.height(24.dp)) }
 
             item {
-                ExternalLinksStrip(
+                LensContent(
                     state = state,
                     runAction = runAction,
                 )
             }
-
-            item {
-                BelowDescriptionStatusPanel(
-                    state = state,
-                    topSpacing = 28.dp,
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(36.dp)) }
-
-            item {
-                ReviewsSection(
-                    state = state,
-                    runAction = runAction,
-                    dateStyle = state.dateStyle,
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(32.dp)) }
 
             item { Spacer(modifier = Modifier.height(bottomChromePadding())) }
         }

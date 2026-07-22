@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.database.model.ListBookEntity
 import nl.rhaydus.softcover.core.database.model.ListBookFull
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 
 private const val OWNED_LIST_SLUG: String = "owned"
 
@@ -14,6 +15,7 @@ internal fun BookList.toEntity(): BookListEntity = BookListEntity(
     name = name,
     slug = slug,
     ranked = ranked,
+    privacySettingId = privacy.code,
     signature = signature,
 )
 
@@ -81,6 +83,8 @@ fun BookListWithBooks.toModel(): BookList {
         name = bookList.name,
         slug = bookList.slug,
         ranked = bookList.ranked,
+        privacy = PrivacySetting.entries.firstOrNull { it.code == bookList.privacySettingId }
+            ?: PrivacySetting.PUBLIC,
         books = ordered.map { it.toModel(isOwnedList = isOwnedList) },
         signature = bookList.signature,
     )

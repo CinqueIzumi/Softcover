@@ -3,6 +3,7 @@
 The day-to-day working surface. This is the **only** planning doc you need open while working: what's getting attention right now, and the small things to clear ASAP. The long-horizon plan lives elsewhere and is unchanged — this file just points into it.
 
 - **Focus** is the 1–2 topics being actively driven. Each is a pointer to its real place in the plan (`[[step]]` / roadmap tag), never a fork of it.
+- **Incoming user requests** is a holding pen for asks that have no catalogue entry or step yet. Triage each into `idea-catalogue.md` + `roadmap-steps.md` before scheduling it.
 - **Fast-track fixes** is a flat, unordered backlog of small things to do soon, independent of the release cadence. They don't wait for a phase slot.
 
 **How this relates to the rest:**
@@ -14,6 +15,7 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 **Maintenance rules.**
 - A **focus** item is a step pulled to the front — link it to its step number / roadmap tag so it stays anchored. When it ships, it follows its step's normal lifecycle (deleted from `roadmap-steps.md`); remove it from Focus here too.
+- An **incoming user request** is deleted from here the moment it has a catalogue tag and a step — it then lives in the plan like anything else, not in two places.
 - A **fast-track fix** is one line, checked off and **deleted** when it ships (same discipline as `roadmap-steps.md`). When a fix ships, fold it into the next release's notes in `release-plan.md` (the "+ fixes and polish" line) rather than listing it individually on the public roadmap.
 
 ---
@@ -22,7 +24,17 @@ The day-to-day working surface. This is the **only** planning doc you need open 
 
 _The 1–2 topics being driven right now. Each links to its step / roadmap tag._
 
-- Foundation adoption onto **local 0.3.0** — **21 F-items landed & committed**: everything except the build-logic batch (F18/F20/F21), which is hard-blocked until the foundation publishes `build-logic` as Gradle plugins. Latest: F9/F10 (core-platform secure storage + connectivity) and F8 (offline-sync). Details: [foundation-upstream-candidates.md](foundation-upstream-candidates.md) → "✅ Adoption progress — LANDED".
+- _(nothing in focus — Step 2.15 (backdated progress + finish) shipped to `release/3.1.0` and is marked ✅ in [release-plan.md](release-plan.md); pick the next release's first step from there. The edit/delete-past-entries follow-on is Step 3.15 / B.2.13 in 3.6.0.)_
+
+> Foundation adoption onto local 0.3.0 is **done** (21 F-items landed). The only residue is the build-logic batch (F18/F20/F21), hard-blocked until the foundation publishes `build-logic` as Gradle plugins — tracked in [foundation-upstream-candidates.md](foundation-upstream-candidates.md), not here.
+
+---
+
+## Incoming user requests
+
+_New asks that aren't in the plan yet. Each needs a catalogue entry (`idea-catalogue.md`) and a step (`roadmap-steps.md`) before it can be scheduled — this section is the holding pen, not their home. Delete a line once it's been promoted._
+
+- _(nothing waiting — the reading-journal ask was triaged: the "log progress at a chosen date & time" half is now `B.2.12` / Step 2.15 (in Focus, 3.1.0), and the edit/delete-entries half is `B.2.13` / Step 3.15 (3.6.0).)_
 
 ---
 
@@ -32,11 +44,11 @@ _Small things to clear ASAP, outside the release cadence. One line each; delete 
 
 - [ ] Complete the AGP 9 migration: flip `android.builtInKotlin` / `android.newDsl` back to defaults in `gradle.properties` and drop the explicit `org.jetbrains.kotlin.android` plugin once KSP supports AGP 9's built-in Kotlin (currently blocked — see architecture-review B2). Verify the Room KSP path still works after the switch.
 - [ ] Replace the deprecated `FlowRowOverflow.expandIndicator` overflow API in `ExpandableFlowRow` once Compose ships a maintained replacement (currently `@file:Suppress("DEPRECATION")`; the successor `ContextualFlowRow` is also deprecated, so there is no stable target yet).
-- [ ] Investigate and fix an HttpClient crash a user reported when starting the **Linux desktop client** (JVM/desktop target). Reproduce on Linux, identify the failing Ktor/HttpClient path, and fix in this version.
 - [ ] Silence the Room "Schema export directory was not provided" warning from `:core:database:kspAndroidMain`: the Room Gradle plugin (2.7.2) wires `room.schemaLocation` for the jvm/iOS KSP targets but not the AGP 9 KMP `androidLibrary` target, so only the android KSP run warns (the schema still exports correctly via the other targets and is committed). Revisit when the Room plugin recognises the new KMP android target, or wire the location to the android KSP without conflicting with the plugin's other-target wiring.
 - [ ] Re-enable the three detekt rules the shared foundation baseline switches off — `UnreachableCode`, `IgnoredReturnValue`, `RedundantSuspendModifier` — once detekt 2.x (K2 frontend) is adopted, and re-triage. They are off only because detekt 1.23 embeds a Kotlin 1.9 frontend and, on a Kotlin 2.x codebase, all three report exclusively false positives (verified against the compiler). Reasons are documented in `detekt-rules/src/main/resources/config/detekt.yml`.
 - [ ] Extend the crash-safety detekt gate to `iosMain`. `detektIosArm64Main` has no type resolution at all, so `rhaydus:UnguardedFlowTerminalRead` cannot run on iOS sources (no real `Flow` terminal reads live there today, so this is a coverage gap, not a live bug). Blocked on detekt supporting type resolution for native targets.
 - [ ] Wire the foundation's own `detektCheck` into its `check` lifecycle. It is registered in `detekt-rules/build.gradle.kts` but attached to nothing, so the foundation never gates on the shared config it ships to every app.
 - [ ] The 18 reading-session use cases in `core/personal/domain/usecase/` do not wrap their bodies in `runCatchingLogged`, so a repository throw (a Room I/O failure in `ReadingSessionRepositoryImpl.pause` / `resume` / `stop`) escapes to `ActiveSessionController`'s scope uncaught. The code-style rule says a use case wraps; these predate it. Fixing it changes their return types to `Result<T>` and touches every caller — hence a fix of its own, not a drive-by.
 - [ ] **Audit the whole unit-test suite for coroutine-safety / test-dispatcher correctness** — a systemic false-positive source. Root cause found while building Hidden-suggestions: `DismissedContinueSeriesDaoTest` built Room with `setQueryCoroutineContext(UnconfinedTestDispatcher())` but ran each body in a bare `runTest {}` whose scheduler differs, so Room-`Flow` emissions dispatched on a clock nothing advances → Turbine `awaitItem()` hung the Gradle worker at 0% CPU (intermittently — it "passed" on lucky eager-dispatch runs). Many other tests likely dispatch on `Dispatchers.Main` without `setMain`, or otherwise don't share one `TestDispatcher`/scheduler, so they pass by luck. Go file-by-file: flag coroutine-safe vs pass-by-luck, fix to the shared-dispatcher pattern (one `TestDispatcher` field used as every dispatcher/`queryContext` + `Dispatchers.setMain`/`resetMain` + `runTest(testDispatcher)`), and verify each with a **bounded** run (a `--tests` filter past ~90s = a scheduler-mismatch hang). The test-writing agent guidance was updated (`.claude/agent-memory/rhaydus-kotlin-unit-test-writer/feedback_coroutine_safe_tests.md`); once the audit confirms the pattern, promote it into the shared `rhaydus-kotlin` `unit-test-writer` agent definition in the foundation.
+- [ ] Fix the `styleCheck` red on `:feature:book_detail:detektAndroidMain` — `LongParameterList` on `BookDetailScreenScreenModel`'s constructor (`:41`), which takes ~28 params (26 use cases, each forwarded verbatim into `BookDetailDependencies`). Determine first *why* it fires: the foundation baseline sets `constructorThreshold: 30` precisely because TOAD ScreenModels inject many use cases via Koin, but Softcover's `config/detekt/detekt.yml` override declares only `functionThreshold` — so either the redesign genuinely pushed the count past 30, or the app-level override is shadowing the baseline's constructor relaxation. A config-layering bug is a config fix; a genuine overrun means grouping the use cases into cohesive parameter objects (shelf / lists / deadlines / review / tags / preferences) rather than raising the threshold. Pre-existing, unrelated to the profile redesign.
 - [ ] Delete `LegacySecureApiKeyStorage` and its two impls (`AndroidLegacySecureApiKeyStorage`, `IosLegacySecureApiKeyStorage`) once every install has passed through a build carrying the F9 migration, along with the `legacySecureStorage` parameter on `ApiKeyLocalDataSourceImpl` and its tests. They exist only to carry the API key out of Softcover's pre-foundation Keystore/Keychain locations; a user who skips the release simply re-authenticates.

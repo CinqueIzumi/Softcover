@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.dao.ReadingLogDao
 import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
+import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.database.model.BookAuthorCrossRef
 import nl.rhaydus.softcover.core.database.model.BookDeadlineEntity
@@ -39,6 +40,7 @@ import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
 import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
+import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 
 @Database(
     entities = [
@@ -64,11 +66,12 @@ import nl.rhaydus.softcover.core.database.model.UserBookReadEntity
         TagEntity::class,
         BookTagCrossRef::class,
         ShelfManualOrderEntity::class,
+        UserTagVocabularyEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 45,
+    version = 49,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -87,6 +90,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun readingSessionDao(): ReadingSessionDao
 
     abstract fun readingLogDao(): ReadingLogDao
+
+    abstract fun userTagVocabularyDao(): UserTagVocabularyDao
 
     companion object {
         internal fun build(
@@ -1253,6 +1258,67 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // Lists gain a user-chosen privacy (public/private) rather than the create-list write always
+        // assuming PUBLIC, and a queued CREATE_LIST write carries that choice so an offline create
+        // doesn't silently replay as PUBLIC once connectivity returns.
+        //
+        // Both columns land in one migration because they are one feature and no build ever shipped
+        // between them — splitting them would invent an intermediate version no install can be on.
+        //
+        // book_lists.privacySettingId is NOT NULL defaulting to PUBLIC (1): the value every list on
+        // the server carries today, since the create path never sent anything else.
+        // pending_list_writes.privacySettingId is nullable — every other pending list write kind
+        // leaves it unset, and rows queued before this column existed fall back to PUBLIC at replay
+        // time (see ListWriteReplay).
+        private val MIGRATION_45_46 = object : Migration(45, 46) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE book_lists ADD COLUMN privacySettingId INTEGER NOT NULL DEFAULT 1")
+
+                connection.execSQL("ALTER TABLE pending_list_writes ADD COLUMN privacySettingId INTEGER DEFAULT NULL")
+            }
+        }
+
+        // The hidden-series row in Hidden Suggestions needs an italic scope caption ("Author ·
+        // N books"), which the row didn't carry before: only `seriesName`/`coverUrl` were persisted.
+        // These columns are display-only metadata, mirroring MIGRATION_43_44. Existing rows default
+        // to NULL and are backfilled lazily by `EnrichDismissedContinueSeriesMetadataUseCase` the
+        // first time that screen loads.
+        private val MIGRATION_46_47 = object : Migration(46, 47) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE dismissed_continue_series ADD COLUMN authorText TEXT DEFAULT NULL")
+                connection.execSQL("ALTER TABLE dismissed_continue_series ADD COLUMN bookCount INTEGER DEFAULT NULL")
+            }
+        }
+
+        // Phase 1 of the local tag cache (roadmap step 10.16): a per-user tag vocabulary table so
+        // previously-used tag names/categories can be suggested offline without a network round trip.
+        // A local cache of the user's applied-tag vocabulary, used to derive tag-editor
+        // suggestions. The composite primary key leads with userId so user/category-scoped reads
+        // are index-covered.
+        private val MIGRATION_47_48 = object : Migration(47, 48) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS user_tag_vocabulary (
+                            userId INTEGER NOT NULL,
+                            category TEXT NOT NULL,
+                            name TEXT NOT NULL,
+                            usageCount INTEGER NOT NULL DEFAULT 0,
+                            PRIMARY KEY(userId, category, name)
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
+        // A progress update can now be backdated to a user-chosen timestamp; the pending-write queue
+        // carries it for offline replay. Nullable so existing rows keep replaying with the "now" stamp.
+        private val MIGRATION_48_49 = object : Migration(48, 49) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE pending_user_book_writes ADD COLUMN actionAt TEXT DEFAULT NULL")
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1299,6 +1365,10 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_42_43,
             MIGRATION_43_44,
             MIGRATION_44_45,
+            MIGRATION_45_46,
+            MIGRATION_46_47,
+            MIGRATION_47_48,
+            MIGRATION_48_49,
         )
     }
 }

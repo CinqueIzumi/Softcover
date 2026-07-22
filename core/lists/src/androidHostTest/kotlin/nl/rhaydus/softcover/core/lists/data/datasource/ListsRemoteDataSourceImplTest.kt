@@ -507,7 +507,7 @@ class ListsRemoteDataSourceImplTest {
 
             every {
                 insertList.errors
-            } returns "Name has already been taken"
+            } returns listOf("Name has already been taken")
 
             // ----- Act & Assert -----
             val thrown = shouldThrow<ListNameTakenException> {
@@ -534,7 +534,7 @@ class ListsRemoteDataSourceImplTest {
 
             every {
                 insertList.errors
-            } returns "NAME HAS ALREADY BEEN TAKEN"
+            } returns listOf("NAME HAS ALREADY BEEN TAKEN")
 
             // ----- Act & Assert -----
             val thrown = shouldThrow<ListNameTakenException> {
@@ -561,7 +561,7 @@ class ListsRemoteDataSourceImplTest {
 
             every {
                 insertList.errors
-            } returns serverError
+            } returns listOf(serverError)
 
             // ----- Act & Assert -----
             val thrown = shouldThrow<Exception> {
@@ -1061,7 +1061,7 @@ class ListsRemoteDataSourceImplTest {
 
             every {
                 listResponse.errors
-            } returns "Something went wrong"
+            } returns listOf("Something went wrong")
 
             // ----- Act & Assert -----
             shouldThrow<Exception> {

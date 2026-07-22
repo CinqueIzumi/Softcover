@@ -15,22 +15,30 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.layout.cappedContentWidth
-import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
@@ -43,11 +51,44 @@ internal actual fun ProfileScreenLayout(
     runAction: (ProfileAction) -> Unit,
     onNavigateUp: () -> Unit,
 ) {
+    var showShareSheet by remember { mutableStateOf(false) }
+    var showLogOutConfirm by remember { mutableStateOf(false) }
+
+    val shareContent = remember(state.readingLife, state.userProfileData) {
+        val life = state.readingLife
+        val profile = state.userProfileData
+
+        if (life != null && profile != null) life.toShareContent(profile) else null
+    }
+
+    // ReadingAtlasSection reads state.isLoading directly (it is driven by userProfileData alone),
+    // but every reading-life section below also needs readingLife to have arrived — the two land
+    // via separate collectors, so gating on isLoading alone risks a section briefly rendering its
+    // permanent "nothing yet" copy before readingLife has actually resolved.
+    val readingLifeLoading = state.isLoading || state.readingLife == null
+
     Scaffold(
         topBar = {
             SoftcoverTopBar(
                 title = "",
                 onNavigateBack = onNavigateUp,
+                additionalActions = {
+                    IconButton(
+                        onClick = { showShareSheet = true },
+                        enabled = shareContent != null,
+                    ) {
+                        val icon = drawableIconResource(
+                            icon = SoftcoverIcon.Share,
+                            contentDescription = "Share your reading year",
+                        )
+
+                        Icon(
+                            painter = icon.getIconPainter(),
+                            contentDescription = icon.contentDescription,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                },
             )
         },
     ) { innerPadding ->
@@ -73,21 +114,76 @@ internal actual fun ProfileScreenLayout(
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ShareEntryRow(
+                isLoading = readingLifeLoading,
+                onClick = { showShareSheet = true },
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+
             Spacer(modifier = Modifier.height(40.dp))
 
-            RhaydusButton(
-                label = "Log out",
-                onClick = { runAction(OnLogOutClickAction()) },
-                style = ButtonStyle.TONAL,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        horizontal = 24.dp,
-                        vertical = 24.dp,
-                    ),
+            YearColumnHistorySection(
+                readingLife = state.readingLife,
+                isLoading = readingLifeLoading,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            GenreStackSection(
+                genres = state.readingLife?.genres.orEmpty(),
+                isLoading = readingLifeLoading,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            AuthorRepresentationSection(
+                authorDemographics = state.readingLife?.authorDemographics ?: AuthorDemographics(),
+                isLoading = readingLifeLoading,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            RatingsHistogramSection(
+                ratings = state.readingLife?.ratings ?: RatingsDistribution(),
+                isLoading = readingLifeLoading,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            RecentlyLovedSection(
+                books = state.readingLife?.recentlyLoved.orEmpty(),
+                isLoading = readingLifeLoading,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            AccountFootSection(
+                onLogOutClick = { showLogOutConfirm = true },
                 enabled = state.isLoading.not(),
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
             )
         }
+    }
+
+    if (showShareSheet && shareContent != null) {
+        ProfileShareBottomSheet(
+            content = shareContent,
+            onDismissRequest = { showShareSheet = false },
+        )
+    }
+
+    if (showLogOutConfirm) {
+        LogOutConfirmBottomSheet(
+            onLogOutClick = { runAction(OnLogOutClickAction()) },
+            onDismissRequest = { showLogOutConfirm = false },
+        )
     }
 }
 
@@ -171,24 +267,39 @@ private fun ProfileHeader(
 
 @StandardPreview
 @Composable
-private fun ProfileScreenPreview() {
-    SoftcoverTheme {
+private fun ProfileScreenLightPreview() {
+    SoftcoverTheme(darkTheme = false) {
         ProfileScreenLayout(
-            state = ProfileUiState(
-                isLoading = false,
-                userProfileData = UserProfileData(
-                    profileImageUrl = "",
-                    name = "Cinque",
-                    username = "cinque",
-                    bio = "Lover of classic literature and sci-fi.",
-                    booksRead = 20,
-                    totalPagesRead = 5_432,
-                    averageRating = 4.2,
-                    readingStreak = 7,
-                ),
-            ),
+            state = ProfileScreenPreviewState,
             runAction = {},
             onNavigateUp = {},
         )
     }
 }
+
+@StandardPreview
+@Composable
+private fun ProfileScreenDarkPreview() {
+    SoftcoverTheme(darkTheme = true) {
+        ProfileScreenLayout(
+            state = ProfileScreenPreviewState,
+            runAction = {},
+            onNavigateUp = {},
+        )
+    }
+}
+
+private val ProfileScreenPreviewState = ProfileUiState(
+    isLoading = false,
+    userProfileData = UserProfileData(
+        profileImageUrl = "",
+        name = "Elena Marchetti",
+        username = "elenam",
+        bio = "Mostly literary fiction, the occasional doorstop fantasy.",
+        booksRead = 214,
+        totalPagesRead = 128_406,
+        averageRating = 4.2,
+        readingStreak = 31,
+    ),
+    readingLife = profileReadingLifePreview(),
+)

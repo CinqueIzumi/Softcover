@@ -31,9 +31,17 @@ internal data class ShareCardDimensions(
             padding = 32.dp,
         )
 
+        val ReadingLife: ShareCardDimensions = ShareCardDimensions(
+            width = 300.dp,
+            fixedHeight = null,
+            minHeight = 560.dp,
+            padding = 24.dp,
+        )
+
         fun forContent(content: ShareContent): ShareCardDimensions = when (content) {
             is BookShareContent -> Book
             is ReadingUpdateShareContent -> Update
+            is ReadingLifeShareContent -> ReadingLife
             is StatShareContent,
             is QuoteShareContent,
             is YearRecapShareContent,

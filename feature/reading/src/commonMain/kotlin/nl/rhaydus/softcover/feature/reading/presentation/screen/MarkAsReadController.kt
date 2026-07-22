@@ -48,21 +48,46 @@ internal class MarkAsReadController(
 
     val slideProgress = Animatable(initialValue = 0f)
 
+    // Set when an explicit "mark as read" affordance bursts at the moment of the gesture, so the
+    // progress-sheet finish path (which bursts later, off the Applied outcome) can tell that this
+    // finish was already celebrated and skip its own burst — keeping a single finish to one burst.
+    private var explicitBurstFired = false
+
     fun celebrate() {
         celebrationKey++
     }
 
-    fun requestMarkAsRead(book: Book) {
+    /** Reads and clears the "an explicit affordance already burst for the pending finish" flag. */
+    fun consumeExplicitBurstFired(): Boolean {
+        val fired = explicitBurstFired
+        explicitBurstFired = false
+
+        return fired
+    }
+
+    // Set alongside slidingBookId so the deferred runSlide() completion below can carry the same
+    // backdated instant the immediate (playMotion == false) branch applies right away.
+    private var pendingActionAt: String? = null
+
+    fun requestMarkAsRead(
+        book: Book,
+        actionAt: String? = null,
+    ) {
         if (slidingBookId != null) return
 
         haptics.commit()
         celebrationKey++
+        explicitBurstFired = true
         navPulse.pulse(LibraryNavPulseKey)
 
         if (playMotion) {
+            pendingActionAt = actionAt
             slidingBookId = book.id
         } else {
-            runAction(OnMarkBookAsReadClickAction(book = book))
+            runAction(OnMarkBookAsReadClickAction(
+                book = book,
+                actionAt = actionAt,
+            ),)
         }
     }
 
@@ -79,9 +104,13 @@ internal class MarkAsReadController(
         )
 
         books.firstOrNull { it.id == targetId }?.let { book ->
-            runAction(OnMarkBookAsReadClickAction(book = book))
+            runAction(OnMarkBookAsReadClickAction(
+                book = book,
+                actionAt = pendingActionAt,
+            ),)
         }
 
+        pendingActionAt = null
         slideProgress.snapTo(targetValue = 0f)
         slidingBookId = null
     }

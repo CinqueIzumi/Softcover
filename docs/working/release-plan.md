@@ -1,15 +1,18 @@
 # Release Plan
-A release-by-release slicing of [roadmap-steps.md](roadmap-steps.md). Current shipped version is **2.4.0**.
+A release-by-release slicing of [roadmap-steps.md](roadmap-steps.md). Current shipped version is **3.0.3**.
 
 Each release below mixes a foundational/plumbing step with user-visible features so every drop feels substantial. Step references map directly to `roadmap-steps.md` — when a step ships, delete it there (per its maintenance rule). This file is the *order* of the steps, not a replacement for them.
 
 This is an **internal** doc: the step list, dependencies, and bundling reasoning. The **user-facing** per-version copy lives in the public [ROADMAP.md](../../ROADMAP.md) (which doubles as the source for Google Play / App Store release notes at ship time). Keep the two in lockstep: any reorder/cut/add here updates the matching `ROADMAP.md` section in the same change.
 
+**Maintenance rule.** A **shipped release is deleted from this file** — this doc is what's still coming, not a changelog. What shipped is recorded by the git tag, and the user-facing history belongs in the per-version changelog (Step 8.9). Drop the shipped section from `ROADMAP.md` in the same change.
+
 Scope key from steps file: **S** ≈ 1–2 day, **M** ≈ 3–6 day, **L** ≈ 7+ day.
 
+**Progress markers.** Within a release that hasn't shipped yet, a finished step is prefixed **✅** and stays in place until the whole release ships — at which point the entire section is deleted per the maintenance rule above. Anything unmarked is still outstanding, so the next release section doubles as the "what's left" list. The ✅ is a convenience view, not the source of truth: a step counts as done when it has been **deleted from `roadmap-steps.md`**, and the two should always agree.
+
 **Versioning convention:**
-- **3.0.0** — first release after the Kotlin Multiplatform migration: the public **iOS + desktop launch**, carrying the post-2.4.0 fixes. The launch is this release, so it takes the major bump.
-- **3.x.0** — additive feature releases.
+- **3.x.0** — additive feature releases. (3.0.0 — the KMP-era iOS + desktop launch — shipped, along with hotfixes through 3.0.3.)
 - **3.x.y** — patch releases (`y > 0`) are reserved for hotfixes shipped *between* planned feature drops; planned releases always bump the minor.
 - Majors are a deliberate call, **not auto-reserved**. The Friend Feed adds a 5th nav tab (a structural change) — flagged as a **`4.0.0` candidate**, your call when it lands.
 
@@ -19,38 +22,18 @@ Dependencies are noted only where they cross a release boundary; same-release de
 
 ---
 
-## 3.0.0 — iOS + desktop launch (+ fixes)
+## 3.1.0 — Editorial redesign + quick wins
 
-The first release on the new Kotlin Multiplatform foundation — the public iOS & desktop debut — anchored on a stable fix set. Ships when the fixes are ready, including the two awaiting investigation (logout, lock-screen notif).
+The headliner is an app-wide **editorial redesign** — almost every surface rebuilt around the editorial design language (Fraunces / Inter type, hairline lists, eyebrow + headline section openers, masthead controls, hero stats), landed across separate already-pushed commits. Alongside it, a batch of small, high-value features on already-shipped foundations.
 
-- ✅ **Fix (done)** — Gate list fetch on `updated_at`; skip re-fetching a list's contents when its `updated_at` hasn't advanced. *(Gated on a composite signature: `updated_at` + `list_books` count + max(`list_books.updated_at`).)*
-- ✅ **Fix (done)** — Finished-date coalesce: `user_book_reads.finished_at ?? user_books.last_read_date ?? finished-journal updated_at ?? user_books.created_at`. Same chain in the date-finished sort SQL and the Read-tab year filter; `created_at` chosen as the stable final fallback, and the existing finished-journal signal kept after `last_read_date`.
-- ✅ **Fix (done)** — Progress updates reflect immediately in the recently-reading strip (reactive propagation on the progress write). *(A successful progress/mark-read write optimistically marks today as an active reading date in the profile cache via the `core:domain` `MarkReadingActivityTodayUseCase` contract — implemented in `core:profile` — so the streak strip lights up without a server refresh.)*
-- ✅ **Fix (done)** — Use the action date (`action_at`) for progress updates so the reading streak is computed from the day the user actually read, not the write timestamp.
-- ✅ **Fix (done)** — Compute the reading streak in the user's **local timezone**, not UTC. Day-bucketing (parsing `action_at`, "today", the optimistic mark, and the strip window) previously ran in `TimeZone.UTC`, so a late-evening session rolled onto the next UTC day and could manufacture a phantom gap that wrongly reset the streak (observed in the wild: the app showed **32** where Hardcover correctly showed **82**). *(A single `TimeZone` is now injected — bound in DI to `TimeZone.currentSystemDefault()` — and shared across `ProfileRemoteDataSource`, `RefreshUserProfileDataUseCase`, `MarkReadingActivityTodayUseCase`, and `ObserveRecentReadingActivityUseCase`, so every collaborator buckets a reading-day on the same local calendar the reader lives in.)*
-- ✅ **Fix (done)** — Retry book-progress (and similar) user-book mutations on server error; drain on startup/reconnect. *(Apollo failures are classified into retryable transport/server errors — offline, an online network failure, or a 5xx/408/429 → `RetryableSyncException` — versus non-retryable successful-call-with-error responses (GraphQL errors, empty body, 4xx). The existing `PendingUserBookWrite` queue now enqueues progress / mark-read / rating / review on **either** offline or server-unavailable, and on drain a row the server actually rejected is discarded immediately instead of being retried. Narrow slice of Step 9.7; the 2.12 queue infra is reused.)*
-- ✅ **Fix (done)** — Reading-streak settings toggle: new `readingStreakEnabled` pref (default on) + a row in the Appearance settings section. Gates **both** the strip's render and its data fetch — `ReadingActivityCollector` observes the pref and, when off, cancels the activity observe and clears the cached activity. *(grouped with the next)*
-- ✅ **Fix (done)** — Show the reading-streak strip on the empty Reading state too (honors the toggle above). Render gate unified to `streakEnabled && recentReadingActivity.isNotEmpty()` across both headers and the empty state; the strip (and its expand sheet) now appears for a brand-new reader as an all-unlit 21-day grid.
-- ✅ **Fix (done)** — Covers not updating on refresh: invalidate the locally-cached cover when the cover URL changes. *(Diagnosis: covers are persisted to a local file keyed by `editionId` and the resolver prefers that file over the remote URL, but the cached file was preserved across refresh even when the edition's URL changed — so the stale cover showed forever. Fix: a new `localImageUrl` provenance column on `book_editions` (DB v42) records the URL each file was downloaded from; a pure `planEditionCaching` reconciler evicts any file whose provenance no longer matches the incoming URL — clearing the path and deleting the on-disk file — so the new cover re-downloads and re-persists. Legacy rows have `localImageUrl = NULL` (no backfill), so already-stale covers self-heal on the next refresh.)*
-- ✅ **Fix (done)** — Graceful invalid-token re-auth without a destructive logout (decouple "update token" from the data-wiping logout). *Slice of B.6.8 / Step 8.7, pulled forward.* *(Shared linchpin: `AuthInterceptor` now reads the token fresh per request instead of caching it once, so a token change/clear applies immediately. A 401/403 is classified in `ApolloExtensions` → emits `SessionExpiredNotifier` (+`InvalidTokenException`). A new `ReAuthenticateUseCase` updates the token without wiping data, validating against the backend and only wiping-then-reloading when the new token resolves to a different account. `MainActivityViewModel` raises a `ReAuthDialog` overlay (re-enter token, or log out) over the current screen — onboarding's first-login flow is unchanged.)*
-- ✅ **Fix (done)** — Logout fully clears local data. *Shares the clear-data contract with the token-reauth fix.* *(`ResetUserDataUseCase` is now a full factory reset: `BookDao.deleteAllLocalData()` clears all 22 tables (previously 8 were missed — sessions, highlights, reading logs, pending queues, deadlines, dismissed-series, series), cover files are pruned, the Apollo normalized cache is cleared via a new `NetworkCacheCleaner`, all DataStore prefs reset to defaults via `SettingsRepository.resetAllSettings()`, and the interceptor drops the cleared token immediately.)*
-- ✅ **Fix (done)** — Audiobook detection by **type** (not `audioSeconds != null`) + allow time entry when duration is null. *(`BookEdition.isAudiobook` is now keyed off the edition's `ReadingFormat` (strictly `== Audio`), not whether a duration is present. The progress sheet's unit switcher is format- and total-aware: the primary unit is time for an audiobook / pages otherwise, and `percentage` is offered only when the matching total is known (duration for audio, pages for print) — otherwise it's hidden, since a fraction can't resolve without a total. When the total is unknown the sheet drops to the primary unit alone, hides the "of N…" suffix + progress bar, and accepts free entry with no clamp-to-total — symmetric across page and time.)*
-- ✅ **Fix (done)** — Remember the last-used progress-entry unit (pages / time / percentage) and pre-select it next time — a lightweight last-used memory persisted across sessions, not a settings toggle. *(User request.)* *(New `ProgressUnit` domain enum persisted in `AppSettingsEntity` (default `PAGE`, no migration), read through a `Get/SetLastUsedProgressUnitAsFlowUseCase` slice mirroring `readingStreakEnabled`. The unit is written on tab tap and fed back into the sheet reactively via a `LastUsedProgressUnitCollector` in reading + book_detail — no one-shot preference read on open.)*
-- ✅ **Fix (done)** — Desktop: no login-screen flash at startup for already-authenticated users (gate first navigation on resolved auth state). *(The shared `App` root built the Voyager `Navigator` synchronously from `SplashState.authenticated` (defaults `false`) before the async user-id check resolved, so the first frame always mounted `OnboardingScreen` and then swapped to `RootScreen`. Android hid that frame behind its system splash — kept on screen while `isLoading` — but desktop has no splash, so the login screen flashed. `App` now gates the navigator on the already-resolved `isLoading` flag, holding a neutral themed `Surface` until the check completes, then navigating once. `isLoading` is strictly one-shot (`true → false`, never reset), so a later in-session logout drops to onboarding through the navigator, not the splash surface.)*
-- ✅ **Fix (done)** — Focus Mode notification displays on the lock screen. *Gap on shipped Step 3.5; Android only.* *(One UI only surfaces *alerting* notifications on the lock screen; the session notification was non-alerting — an `IMPORTANCE_LOW` channel plus `setSilent(true)` in the builder, which Android tags into the "silent" group. Verified on-device via `dumpsys` that lock-screen visibility (`VISIBILITY_PUBLIC` / channel `lockscreenVisibility`) is irrelevant here — One UI even resets it to `NO_OVERRIDE`. Fix is three edits: the Session channel goes `IMPORTANCE_LOW → IMPORTANCE_DEFAULT` so it alerts (default sound), `setSilent(true)` is removed from the builder while `setOnlyAlertOnce(true)` stays — so it chimes once at session start and is silent on every timer update — and the channel id is bumped to `softcover.session.v2` (importance is immutable once a channel exists) with the stale `softcover.session` pruned via `deleteUnlistedNotificationChannels`. Partly device-gated: if the user's lock screen is itself configured to hide notifications, no app-side change can surface it.)*
-- ✅ **Fix (done)** — Desktop text/UI scaling: an in-app **Display scale** setting (100–200%, default 100%) fixes tiny text on Linux, where Compose Desktop inherits a 1.0 density from Java2D and ignores the system's HiDPI/fractional scaling. *(A discrete `UiScale` domain enum persisted in `AppSettingsEntity` (default `PERCENT_100`, no migration), read through a `Get/SetUiScaleAsFlowUseCase` slice mirroring `readingStreakEnabled`, exposed as a desktop-only "Display scale" section on the Appearance settings (hidden on mobile/iOS, where the OS handles DPI). The chosen `factor` overrides `LocalDensity` at the desktop composition root (`DesktopApp`) — scaling `density` scales dp and sp uniformly, and since `rememberWindowSizeClass()` reads `LocalDensity` the responsive breakpoints reflow with the scale; window geometry lives outside the overridden subtree, so persisted size is untouched. The value is seeded synchronously at window open (mirroring `rememberPersistedWindowState`) so the first frame renders at the saved scale with no flash.)*
-- ✅ **Build/release (done)** — CI/CD support for Google Play releases: the tag-triggered `release.yml` now builds + signs the AAB and uploads it to Google Play as a **production draft** on stable tags (`r0adkll/upload-google-play`, authed via a `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` secret). Release notes and the final Publish are done by hand in the Play Console; pre-release tags build + attach to the GitHub release but never push to Play.
-
----
-
-## 3.1.0 — Fast wins
-
-Small, high-value features on already-shipped foundations.
-
-- **Step 10.15** — Auto-resize coverless title text (S).
-- **Improvement** — Batch edition-by-ISBN with an `_or` filter (S) — internal refactor; cleaner fetch path and an enabler for Step 8.6 (ISBN-list import).
-- **Step 10.16** — Local tag cache + tag suggestions (S–M) — works around the API's no-`_ilike` tag search.
-- **Step 3.12** — Rating/review prompt on mark-as-read (S–M) — reuses shipped 3.1 / 3.2 controls.
+- ✅ **App-wide editorial redesign** (the release headliner) — almost the entire app rebuilt around the editorial design language, across separate already-pushed commits. Redesigned surfaces: the **Reading** home feed; the **Library** screen (masthead shelf-switcher + draft-commit sheets) and **Library Tabs**; **Book Detail** (the *The Book* / *Yours* lens split + reading-pace forecast) with its **Choose-lists**, **Change-edition** and **tag-editor** sheets; the **Explore** personalised feed; the **Profile** screen (reading-life recap + genre-led share card); the **Settings** menu and **Appearance** screen; **Onboarding**; and **Hidden Suggestions**.
+- ✅ **Step 10.15** — Auto-resize coverless title text (S) — **done** (`04116c58`, which also covers never leaving a cover slot blank). Already deleted from `roadmap-steps.md`.
+- ✅ **Improvement** — Batch edition-by-ISBN with an `_or` filter (S) — **done**. `GetEditionByIsbn`'s two aliased selections collapsed into one `GetEditionsByIsbns($isbns: [String!]!)` query (`_or` over `isbn_13`/`isbn_10` `_in`); the repository/data-source surface is now batch-only (`fetchEditionMatchesForIsbns(isbns): Map<String, IsbnEditionMatch>`), so Step 8.6's ISBN-list import resolves a whole list in one round trip.
+- ✅ **Step 10.16** — Local tag cache + tag suggestions (S–M) — **done**. A server-synced vocabulary of the user's own applied tags is cached in Room (`user_tag_vocabulary`) and surfaced as most-used-first / substring-narrowed suggestion chips in the tag editor; client-side filtering works around the API's no-`_ilike` tag search. Already deleted from `roadmap-steps.md`.
+- ✅ **Step 3.12** — Rating/review prompt on mark-as-read (S–M) — **done**. A combined **Verdict sheet** (rating + review in one editorial prompt — the shared `core:designsystem` `VerdictSheet`, with a book-page `VerdictBlock` replacing the old separate rating row + review card) rises on a genuine finish from **book detail** and the **Reading screen**, via both the explicit "Mark as Read" affordance and reaching 100% progress. Bulk mark-as-read was intentionally excluded (a per-book prompt doesn't fit a bulk action). Already deleted from `roadmap-steps.md`.
+- ✅ **Step 2.14** — Directly add a book to Currently Reading (S–M) — *pulled forward from 3.3.0 on user request.* **done** — book-detail Shelve control only (search / add-flows intentionally out of scope). The "Reading" row now works on a not-yet-shelved book: `markBookAsReading` gained an `insert_user_book` create path (`status_id = 2` + `user_date = today`, no `started_at`) alongside its existing `update_user_book` path, and the row's `status == None` disable gate was removed. Already deleted from `roadmap-steps.md`.
+- ✅ **Author demographics on Profile** (user request, outside the original step list) — a new **"Who you read"** section on the Profile screen showing the gender / BIPOC / LGBTQ+ makeup of the authors across your finished books. Computed from the remote finished-books stats aggregate (`GetReadUserBooksForStats`) and cached in the profile DataStore, **not** Room (the local book cache only holds currently-displayed Library books, so it can't back a complete stats view). Gender renders as a Women/Men/Other/Unknown proportion bar; BIPOC and LGBTQ+ as three-way Yes/No/Unknown bars, with Unknown shown as its own muted segment so the sparsely-tagged data isn't misrepresented. `gender_id` mapping/rendering per [architecture.md → Unresolvable API enums](../reference/architecture.md#unresolvable-api-enums).
+- ✅ **Step 2.15** — Log a progress update at a chosen date & time (S) — *user request.* **Done.** A date/time picker on the progress-entry flow so a bump can be backdated ("read to here at 9 pm yesterday"), and the picked time also dates the **finish** (reaching 100%, or the sheet's "Mark as Read") on both Reading and Book Detail. Threaded through both write paths' existing (previously unused) `action_at` slots: progress via `update_user_book_read`/`DatesReadInput` (`action_at` + `action = "progress_updated"`), finish via `insert_user_book`/`UserBookCreateInput` (`user_date` = picked local date + `action_at`), plus both offline-replay twins and the pending-write queue (Room `MIGRATION_48_49`). No new mutation, no fragment change; behavior byte-identical when no time is picked. Already deleted from `roadmap-steps.md`. The edit/delete-past-entries half is split out to **Step 3.15** in 3.6.0.
 
 ---
 
@@ -65,7 +48,6 @@ Small, high-value features on already-shipped foundations.
 
 - **Step 5.2** — Series detail screen (M).
 - **Step 5.4** — Series-completion cascade (S) — *deps: 5.2 (same release)*.
-- **Step 2.14** — Directly add a book to Currently Reading (S–M).
 - **Step 4.10** — Format in the edition selector (S).
 
 ---
@@ -87,10 +69,14 @@ Small, high-value features on already-shipped foundations.
 
 *The personal-data surfaces that live on book detail — all add to its scroll, so they precede 4.12.*
 
+This is the release a tracking-minded user is really waiting for: it's the whole private corpus in one drop. It's also the **heaviest release on the plan** — five M-steps. They share one Room schema and one book-detail panel, so splitting them costs more than it saves; but if it needs to shed weight, Step 3.13 + 3.14 are the clean cut line and move together to 3.6.0.
+
 - **Step 3.3** — Personal highlights / Passages + quick-add from Reading (M).
 - **Step 3.9** — Personal identity & representation tagging (M) — *deps: 0.3 (shipped)*.
-- **Step 3.10** — Personal moods (book + chapter) (M) — *deps: 0.3 (shipped)*.
+- **Step 3.10** — Personal moods (book + chapter), **graded** (M) — *deps: 0.3 (shipped)*. Moods carry an intensity from day one; the schema must not ship as a boolean and migrate later (7.15 depends on it).
 - **Step 3.11** — Personal notes (book + characters) (M) — *deps: 0.3 (shipped)*.
+- **Step 3.13** — Personal book traits, graded (M) — *deps: 0.3 (shipped)*. Pace, plot-vs-character, characters, writing style. *(User request.)*
+- **Step 3.14** — Acquisition source, "where I got it" (S) — *deps: 0.3 (shipped)*. Rides in 3.13's panel.
 - **Step 4.7** — Reviews filters & sorts (S).
 
 ---
@@ -99,6 +85,8 @@ Small, high-value features on already-shipped foundations.
 
 - **Step 3.4** — Notes & Highlights inbox screen (M) — *deps: 3.3 (3.5.0)*.
 - **Step 3.6** — Reading Sessions log screen (S).
+- **Step 3.15** — Edit & delete past reading-progress entries (S–M) — *soft dep: 2.15 (3.1.0) for the re-date picker*. Correct or remove a logged progress entry after the fact (fix a page, re-date, delete a mis-logged bump). Genuinely new — no delete/amend path exists today; route (`reading_journals` CRUD vs. amending `user_book_read`) settled in the step. Sits with the log/inbox surfaces in this release. *(User request.)*
+- **Step 8.13** — Personal-data export & import, JSON (S–M) — *deps: the Phase 3 corpus (3.5.0)*. **Pulled forward out of 9.8 deliberately**: the private corpus lands in 3.5.0 and lives nowhere but the device, so it cannot wait until 3.15.0 for a way out. Ships one release after the data exists. 9.8's full archive still follows and supersedes it.
 - **Step 4.8** — Share sheet: link + deep-link modes (S).
 - **Step 4.12** — Book-detail tabs / sectioning (M) — lands **after** all detail-enrichment (3.3–3.5.0 + 4.x). Design spike first.
 
@@ -149,12 +137,14 @@ Small, high-value features on already-shipped foundations.
 
 ## 3.11.0 — Stats Atlas + heatmaps
 
-- **Step 7.7** — Streak heatmap on Profile (M) — *deps: 3.5 (shipped); subsumed by 7.12 next release*.
+- **Step 7.7** — Streak heatmap on Profile (M) — *deps: 3.5 (shipped); subsumed by 7.12 next release*. User asked for a **readable yearly** scope (Hardcover's own site heatmap is being removed as unreadable) — ship the 12-month view alongside the 12-week one, not 12-week only.
 - **Step 7.8** — Time-of-day reading heatmap (M) — *deps: 3.5 (shipped)*.
 - **Step 7.9** — Reading Stats Atlas screen (M).
 - **Step 7.10** — Public activity log (M).
 - **Step 7.13** — Diversity & representation stats (M) — *deps: 3.9 (3.5.0), 7.9 (same release)*.
-- **OPEN — "L" (expanded statistics + image export)** — *unplaced*. Natural home is this release (around 7.9 / 7.13), but it stays open until the metrics are specified and the "own database" question is settled (which may pull a new-data-source foundation earlier).
+- **Step 7.15** — "How you read" stats (M) — *deps: 3.13 (3.5.0), 7.9 (same release)*. Plot-vs-character balance, pace mix, writing-style mix, mood profile. *(User request.)*
+- **Step 7.16** — Publication & provenance stats (S–M) — *deps: 7.9 (same release), 3.9 + 3.14 (3.5.0), 6.14 (3.8.0) for the audience mix*. Nationality, language & share-translated, year published, audience, where you got it.
+- ~~**OPEN — "L" (expanded statistics + image export)**~~ — **closed.** The metrics are now specified (7.13 + 7.15 + 7.16) and the image export is 7.14's share surface in 3.12.0. The "own database" question is settled too: the private corpus lives in our own Room tables and is made portable by Step 8.13 — it is **not** smuggled into Hardcover's private-notes field.
 
 ---
 
@@ -162,7 +152,7 @@ Small, high-value features on already-shipped foundations.
 
 - **Step 7.12** — Reading Activity Calendar (M) — *deps: 3.7 (3.2.0), 7.7 (3.11.0)*.
 - **Step 7.11** — Year in Books recap (M) — seasonal; gate behind a December trigger.
-- **Step 7.14** — Custom-scope wrap-up generator (M) — *deps: 7.11 (same release)*.
+- **Step 7.14** — Custom-scope wrap-up generator (M) — *deps: 7.11 (same release); draws on 7.13 / 7.15 / 7.16 (3.11.0)*. Day / week / month / year / since-you-joined, every slide exportable as an image via the 0.2 share surface — the "send my month to a friend who doesn't use a tracking app" ask. *(User request.)*
 
 ---
 
@@ -195,7 +185,7 @@ Small, high-value features on already-shipped foundations.
 - **Step 9.7** — Offline mutation queue, full (M) — *deps: 2.12 (shipped); extends the 3.0.0 progress-retry fix* to ratings/reviews/sessions/highlights + shake-on-conflict.
 - **Improvement (M)** — Pending-sync indicator (+ tap-to-force-sync) — surfaces the 9.7 queue's pending count; rides with 9.7 so it isn't a near-empty indicator.
 - **Fix/polish (N)** — Error feedback when a progress update via the reading-session notification fails; messaging aligns with the 3.0.0 retry behavior. Android.
-- **Step 9.8** — Backup & restore (M) — *deps: 8.5 (3.13.0)*.
+- **Step 9.8** — Backup & restore (M) — *deps: 8.5 (3.13.0), 8.13 (3.6.0)*. The full single-archive backup; supersedes 8.13's standalone JSON while still reading its format.
 - **Step 9.9** — Voice & TalkBack polish (M).
 - **Step 9.3 (second wave)** — streak, quote-of-day, year-in-books widgets — *deps: widget infra (3.2.0)*.
 - **Step 9.4** — Quote-of-day surface + notification + widget link (S) — *deps: 9.3 second wave (same release)*.
@@ -243,9 +233,14 @@ Heavy on small polish; reorder freely within. Step 0.2 (share/render foundation)
 ## Cross-release dependency map at a glance
 
 ```
+3.1.0 (2.15) ──> 3.6.0 (3.15)
 3.2.0 (3.7) ──> 3.12.0 (7.12)
-3.5.0 (3.9) ──> 3.11.0 (7.13)
+3.5.0 (3.9) ──> 3.11.0 (7.13, 7.16)
+3.5.0 (3.13) ──> 3.11.0 (7.15) ──┐
+3.5.0 (3.14) ──> 3.11.0 (7.16) ──┴──> 3.12.0 (7.14)
+3.5.0 (Phase 3 corpus) ──> 3.6.0 (8.13) ──> 3.15.0 (9.8)
 3.5.0 (Phase 3) ──> 3.9.0 (6.5) ──> 3.14.0 (8.11)
+3.8.0 (6.14) ──> 3.11.0 (7.16)
 
 3.7.0 (5.1, 5.3) ──┬──> 3.8.0 (6.4)
                    ├──> 3.9.0 (6.9)

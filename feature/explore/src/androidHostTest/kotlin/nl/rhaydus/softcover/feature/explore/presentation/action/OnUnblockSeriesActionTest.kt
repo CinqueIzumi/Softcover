@@ -144,7 +144,7 @@ class OnUnblockSeriesActionTest {
             // ----- Assert -----
             verify {
                 SnackBarManager.showSnackBar(
-                    title = "\"Foundation\" unblocked",
+                    title = "\"Foundation\" is back in your suggestions",
                     actionLabel = "Undo",
                     duration = any(),
                     onActionClick = any(),
@@ -177,7 +177,7 @@ class OnUnblockSeriesActionTest {
             // ----- Assert -----
             verify {
                 SnackBarManager.showSnackBar(
-                    title = "\"Series\" unblocked",
+                    title = "\"Series\" is back in your suggestions",
                     actionLabel = "Undo",
                     duration = any(),
                     onActionClick = any(),
@@ -267,6 +267,64 @@ class OnUnblockSeriesActionTest {
                     seriesId = 100,
                     seriesName = "Foundation",
                     coverUrl = "cover.jpg",
+                )
+            }
+        }
+
+        @Test
+        fun `clicking Undo re-dismisses the series with authorText and bookCount intact`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            val onActionClickSlot = slot<() -> Unit>()
+
+            coEvery {
+                undoContinueSeriesDismissalUseCase(seriesId = 100)
+            } returns Result.success(Unit)
+
+            every {
+                SnackBarManager.showSnackBar(
+                    title = any(),
+                    actionLabel = any(),
+                    duration = any(),
+                    onActionClick = capture(onActionClickSlot),
+                    onDismiss = any(),
+                )
+            } returns Unit
+
+            coEvery {
+                dismissContinueSeriesUseCase(
+                    seriesId = 100,
+                    seriesName = "Foundation",
+                    coverUrl = "cover.jpg",
+                    authorText = "Isaac Asimov",
+                    bookCount = 7,
+                )
+            } returns Result.success(Unit)
+
+            val action = OnUnblockSeriesAction(
+                seriesId = 100,
+                seriesName = "Foundation",
+                coverUrl = "cover.jpg",
+                authorText = "Isaac Asimov",
+                bookCount = 7,
+            )
+
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Act -----
+            onActionClickSlot.captured.invoke()
+
+            // ----- Assert -----
+            coVerify {
+                dismissContinueSeriesUseCase(
+                    seriesId = 100,
+                    seriesName = "Foundation",
+                    coverUrl = "cover.jpg",
+                    authorText = "Isaac Asimov",
+                    bookCount = 7,
                 )
             }
         }

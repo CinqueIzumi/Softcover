@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
@@ -14,6 +15,7 @@ import nl.rhaydus.toad.ToadScreenModel
 
 internal class ProfileScreenScreenModel(
     private val observeUserProfileDataUseCase: ObserveUserProfileDataUseCase,
+    private val observeReadingLifeUseCase: ObserveReadingLifeUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
     dispatchers: AppDispatchers,
@@ -25,6 +27,7 @@ internal class ProfileScreenScreenModel(
 ) {
     override val dependencies: ProfileDependencies = ProfileDependencies(
         observeUserProfileDataUseCase = observeUserProfileDataUseCase,
+        observeReadingLifeUseCase = observeReadingLifeUseCase,
         refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
         mainDispatcher = dispatchers.main,

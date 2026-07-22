@@ -1,0 +1,25 @@
+query GetEditionsByIsbns(
+    $isbns: [String!]!,
+) {
+    editions(
+        where: {
+            _or: [
+                {
+                    isbn_13: {
+                        _in: $isbns
+                    }
+                }
+                {
+                    isbn_10: {
+                        _in: $isbns
+                    }
+                }
+            ]
+        }
+    ) {
+        id
+        book_id
+        isbn_13
+        isbn_10
+    }
+}

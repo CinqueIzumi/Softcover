@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -32,6 +33,13 @@ class OnUpdateTimeProgressClickActionTest {
     @BeforeEach
     fun setUp() {
         updateBookProgress = mockk(relaxed = true)
+        coEvery {
+            updateBookProgress(
+                book = any(),
+                newPage = any(),
+                newSeconds = any(),
+            )
+        } returns Result.success(null)
         stateFlow = MutableStateFlow(ReadingScreenUiState())
         localVariablesFlow = MutableStateFlow(ReadingLocalVariables())
         scope = ActionScope(
@@ -207,6 +215,45 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3723,
+                    actionAt = null,
+                )
+            }
+        }
+
+        @Test
+        fun `passes actionAt through to updateBookProgress when provided`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = any(),
+                    actionAt = "2026-07-21T21:00:00Z",
+                )
+            } returns Result.success(null)
+
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                    actionAt = "2026-07-21T21:00:00Z",
                 )
             }
         }
@@ -595,7 +642,7 @@ class OnUpdateTimeProgressClickActionTest {
                     book = book,
                     newSeconds = any(),
                 )
-            } returns Result.success(Unit)
+            } returns Result.success(null)
 
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
@@ -614,6 +661,39 @@ class OnUpdateTimeProgressClickActionTest {
         }
 
         @Test
+        fun `sets verdictPromptBook to bookToUpdate when updateBookProgress outcome is Applied`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(
+                audioSeconds = 7200,
+                id = 5,
+            )
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.verdictPromptBook shouldBe book
+        }
+
+        @Test
         fun `stores job in bookMutationJobs after execute returns`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(
@@ -628,7 +708,7 @@ class OnUpdateTimeProgressClickActionTest {
                     book = book,
                     newSeconds = any(),
                 )
-            } returns Result.success(Unit)
+            } returns Result.success(null)
 
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",
@@ -675,7 +755,7 @@ class OnUpdateTimeProgressClickActionTest {
                     book = book,
                     newSeconds = any(),
                 )
-            } returns Result.success(Unit)
+            } returns Result.success(null)
 
             val action = OnUpdateTimeProgressClickAction(
                 hours = "1",

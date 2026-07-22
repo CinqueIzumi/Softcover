@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
+import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -76,7 +78,10 @@ class OnRetrySearchActionTest {
             var stateAtSearchTime: ExploreScreenUiState? = null
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } answers {
                 stateAtSearchTime = stateFlow.value
                 Result.success(Unit)
@@ -101,7 +106,10 @@ class OnRetrySearchActionTest {
             stateFlow.value = stateFlow.value.copy(searchText = searchText)
 
             coEvery {
-                searchForNameUseCase(name = searchText)
+                searchForNameUseCase(
+                    name = searchText,
+                    sortMode = any(),
+                )
             } returns Result.success(Unit)
 
             // ----- Act -----
@@ -111,7 +119,35 @@ class OnRetrySearchActionTest {
             )
 
             // ----- Assert -----
-            coVerify { searchForNameUseCase(name = searchText) }
+            coVerify {
+                searchForNameUseCase(
+                    name = searchText,
+                    sortMode = ExploreSortMode.RELEVANCE,
+                )
+            }
+        }
+
+        @Test
+        fun `tracks the new queryJob in local variables after executing the search`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(searchText = "dune")
+
+            coEvery {
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
+            } returns Result.success(Unit)
+
+            // ----- Act -----
+            OnRetrySearchAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            localVariablesFlow.value.queryJob shouldNotBe null
         }
 
         @Test
@@ -124,7 +160,10 @@ class OnRetrySearchActionTest {
             )
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.success(Unit)
 
             // ----- Act -----
@@ -145,7 +184,10 @@ class OnRetrySearchActionTest {
             stateFlow.value = stateFlow.value.copy(searchText = "dune")
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.failure(OfflineException())
 
             // ----- Act -----
@@ -166,7 +208,10 @@ class OnRetrySearchActionTest {
             stateFlow.value = stateFlow.value.copy(searchText = "dune")
 
             coEvery {
-                searchForNameUseCase(name = any())
+                searchForNameUseCase(
+                    name = any(),
+                    sortMode = any(),
+                )
             } returns Result.failure(RuntimeException())
 
             // ----- Act -----

@@ -13,11 +13,13 @@ class UpdateBookProgressUseCase(
         book: Book,
         newPage: Int? = null,
         newSeconds: Int? = null,
+        actionAt: String? = null,
     ): Result<Unit> = runCatchingLogged {
         val updatedBook = repository.updateBookProgress(
             book = book,
             newPage = newPage,
             newSeconds = newSeconds,
+            actionAt = actionAt,
         )
 
         repository.cacheBook(book = updatedBook)

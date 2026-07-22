@@ -30,4 +30,5 @@ data class PendingUserBookWriteEntity(
     val reviewHasSpoilers: Boolean? = null,
     val enqueuedAt: String,
     val attempts: Int = 0,
+    val actionAt: String? = null,
 )

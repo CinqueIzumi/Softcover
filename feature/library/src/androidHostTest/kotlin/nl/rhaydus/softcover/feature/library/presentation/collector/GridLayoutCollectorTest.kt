@@ -120,7 +120,7 @@ class GridLayoutCollectorTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 isLoading = false,
-                isLayoutMenuExpanded = true,
+                isArrangeSheetExpanded = true,
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
             val collector = GridLayoutCollector()
@@ -134,7 +134,7 @@ class GridLayoutCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isLayoutMenuExpanded shouldBe true
+            stateFlow.value.isArrangeSheetExpanded shouldBe true
             stateFlow.value.gridLayout shouldBe LibraryGridLayout.GRID_THREE_COLUMNS
             job.cancel()
         }

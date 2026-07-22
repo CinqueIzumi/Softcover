@@ -14,4 +14,5 @@ data class PendingUserBookWrite(
     val reviewSlateJson: String? = null,
     val reviewHasSpoilers: Boolean? = null,
     val enqueuedAt: String,
+    val actionAt: String? = null,
 )

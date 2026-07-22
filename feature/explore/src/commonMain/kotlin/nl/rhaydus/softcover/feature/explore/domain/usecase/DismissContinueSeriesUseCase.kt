@@ -10,11 +10,15 @@ class DismissContinueSeriesUseCase(
         seriesId: Int,
         seriesName: String? = null,
         coverUrl: String? = null,
+        authorText: String? = null,
+        bookCount: Int? = null,
     ): Result<Unit> = runCatchingLogged {
         exploreRepository.dismissContinueSeries(
             seriesId = seriesId,
             seriesName = seriesName,
             coverUrl = coverUrl,
+            authorText = authorText,
+            bookCount = bookCount,
         )
     }
 }

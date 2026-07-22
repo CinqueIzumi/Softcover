@@ -1,7 +1,13 @@
 # Jetpack Compose Audit Report
 
+> **Status (2026-07-14 sweep):** resolved findings are **deleted from this file**; everything below is
+> still open, re-verified against the code. Numbering is **never reused** — Critical Finding **3**
+> (required-after-optional param in `SoftcoverSearchTopBar`) is gone because it was fixed. The scores in
+> the scorecard are **as of the audit date** and have not been recomputed; treat them as the starting
+> picture, not a current measurement.
+
 Target: Softcover (repository root)
-Date: 2026-06-17
+Date: 2026-06-17 (audit) · 2026-07-14 (resolved findings pruned)
 Scope: Compose Multiplatform UI in `commonMain` of `:feature:*` (lists, profile, onboarding, explore, library, book_detail, reading, session, scan, settings, app_update) and `:core:designsystem`; platform leaves in `androidMain` / `jvmMain` / `iosMain` / `mobileMain`
 Excluded from scoring: external `nl.rhaydus.*` foundation components (library code, not this repo); test sources; previews
 Confidence: High (qualitative); compiler diagnostics are partial — measured for `:feature:explore` only, inferred-but-corroborated elsewhere
@@ -14,7 +20,7 @@ Overall Score: 83/100
 | Performance | 8/10 | 35% | solid | SSM on; named-only skippable% = 100%. Capped at 8 by SSM-on table: every feature `UiState` wraps raw `List`/`Set` (no immutable collections), so each is an unstable param carrying a deep-`equals()` cost per recomposition. Everything else (lazy keys, animation phases, typed state) is clean. |
 | State management | 9/10 | 25% | excellent | Single immutable `StateFlow<UiState>` per screen via TOAD; clean hoisting, encapsulation, flow shaping in collectors. One minor floating state holder. |
 | Side effects | 9/10 | 20% | excellent | Effect keys, `rememberUpdatedState`, `DisposableEffect` cleanup, event-only `rememberCoroutineScope`, `snapshotFlow`-in-effect all correct. No IO or navigation in composition. |
-| Composable API quality | 7/10 | 20% | solid | `modifier` contract held by ~15/15 shared components; good slot/variant design. Dinged by one param-order bug, 4 hardcoded UI strings, and thin `@Preview` coverage (2/19 component files). |
+| Composable API quality | 7/10 | 20% | solid | `modifier` contract held by ~15/15 shared components; good slot/variant design. Dinged at audit time by one param-order bug (**since fixed**), 4 hardcoded UI strings (**3 left**), and thin `@Preview` coverage (2/19 component files — unchanged). |
 
 ## Critical Findings
 
@@ -26,15 +32,10 @@ Overall Score: 83/100
 
 2. **Composable API quality: hardcoded UI strings in reusable design-system components**
    - Why it matters: Shared components in `:core:designsystem` embed literal English copy, which breaks i18n and makes the components brittle to reuse/test.
-   - Evidence: `core/designsystem/.../component/ExpandableFlowRow.kt:77` (`Text("Show more")`); `core/designsystem/.../component/ChooseListsBottomSheet.kt:126` (`"No custom lists yet"`), `:271` (`"Create a new list"`); `core/designsystem/.../component/UpdateProgressBottomSheet.kt:190` (`"READING PROGRESS"`).
+   - Evidence (re-verified 2026-07-14): `core/designsystem/.../component/ChooseListsBottomSheet.kt:126` (`"No custom lists yet"`), `:271` (`"Create a new list"`); `core/designsystem/.../component/UpdateProgressBottomSheet.kt:198` (`"READING PROGRESS"`). The fourth site (`ExpandableFlowRow.kt` — `"Show more"`) is gone: the component moved to the foundation.
    - Fix direction: route through string resources or expose the text as parameters with defaults.
+   - Pairs with `architecture-review.md` I1 (hardcoded desktop strings) and Step 8.8 (language & region, 3.13.0) — do them together.
    - References: <https://developer.android.com/develop/ui/compose/resources>
-
-3. **Composable API quality: required parameter placed after an optional one in a shared component**
-   - Why it matters: Required-after-optional ordering forces awkward positional calls and violates the component API guideline ordering (required → `modifier` → optional → trailing lambda).
-   - Evidence: `core/designsystem/.../component/SoftcoverTopBar.kt:40-41` — required `isLoading: Boolean` declared after optional `placeHolder: String = "Search"`.
-   - Fix direction: move `isLoading` ahead of the optional params.
-   - References: <https://android.googlesource.com/platform/frameworks/support/+/androidx-main/compose/docs/compose-component-api-guidelines.md>
 
 ## Adjacent Findings
 
@@ -105,7 +106,7 @@ Overall Score: 83/100
 
 - Effects are correctly keyed; the "run once" `LaunchedEffect(Unit)` instances do not capture mutable values unsafely: `orchestration/.../App.kt:74,113` (one-time flow collection), state-keyed effects at `core/designsystem/.../AnimatedStatNumber.kt:134` (`LaunchedEffect(integerKey)`), `feature/reading/.../MarkAsReadController.kt:119`.
 - `rememberUpdatedState` used to avoid stale captures in long-lived effects: `feature/reading/.../MarkAsReadController.kt:107-108`, `feature/library/.../LibraryScreenLayout.mobile.kt:140-141`.
-- `DisposableEffect` with full cleanup for camera/scanner/executor: `core/designsystem/.../BarcodeScanner.android.kt:84-139` (`onDispose` unbinds, closes scanner, shuts down executor).
+- `DisposableEffect` with full cleanup for camera/scanner/executor: `feature/scan/.../BarcodeScanner.android.kt:84-139` (`onDispose` unbinds, closes scanner, shuts down executor).
 - `rememberCoroutineScope()` used only for event-driven work (click/refresh/gesture): `core/designsystem/.../ShareBookBottomSheet.kt:75`, `feature/library/.../LibraryScreenLayout.mobile.kt:112`. `snapshotFlow` is always collected inside a `LaunchedEffect`: `feature/library/.../LibraryScreenLayout.mobile.kt:144-150`, `orchestration/.../NavDestinations.kt:121-133`.
 - No IO in composition (Coil `AsyncImage` / `SubcomposeAsyncImage` is the accepted carve-out); navigation happens in event handlers, not composition bodies; `requestFocus()` is always wrapped in `LaunchedEffect`.
 
@@ -115,7 +116,7 @@ Overall Score: 83/100
 
 **Evidence**
 
-- `core/designsystem/.../BarcodeScanner.android.kt:84-139` — `DisposableEffect` with complete cleanup. · References: <https://developer.android.com/develop/ui/compose/side-effects>
+- `feature/scan/.../BarcodeScanner.android.kt:84-139` — `DisposableEffect` with complete cleanup. · References: <https://developer.android.com/develop/ui/compose/side-effects>
 - `feature/reading/.../MarkAsReadController.kt:107-108,119` — `rememberUpdatedState` + keyed `LaunchedEffect`. · References: <https://developer.android.com/develop/ui/compose/side-effects>
 - `orchestration/.../NavDestinations.kt:121-133` — `snapshotFlow` collected inside `LaunchedEffect`. · References: <https://developer.android.com/develop/ui/compose/side-effects>
 
@@ -130,22 +131,20 @@ Overall Score: 83/100
 **What is hurting the score**
 
 - Hardcoded UI strings in reusable components (Critical Finding 2).
-- Required-after-optional parameter order in `SoftcoverSearchTopBar` (Critical Finding 3).
 - `@Preview` coverage on only 2 of 19 component files (`SoftcoverTopBar`, `UpdateProgressBottomSheet`) — reusable components should prove they render with no hidden ambient dependencies.
-- Two animated components hard-code timing without exposing `animationSpec` (`AnimatedStatNumber.kt:52-55`, `MarkAsReadBurst.kt:48-54`) — low severity.
+- Two animated components hard-code timing without exposing `animationSpec` (`AnimatedStatNumber.kt:145`, `MarkAsReadBurst.kt:50`) — low severity.
 
 **Evidence**
 
-- `core/designsystem/.../ExpandableFlowRow.kt:77`, `.../ChooseListsBottomSheet.kt:126,271`, `.../UpdateProgressBottomSheet.kt:190` — hardcoded strings. · References: <https://developer.android.com/develop/ui/compose/resources>
-- `core/designsystem/.../SoftcoverTopBar.kt:40-41` — required `isLoading` after optional `placeHolder`. · References: <https://android.googlesource.com/platform/frameworks/support/+/androidx-main/compose/docs/compose-component-api-guidelines.md>
+- `core/designsystem/.../ChooseListsBottomSheet.kt:126,271`, `.../UpdateProgressBottomSheet.kt:198` — hardcoded strings. · References: <https://developer.android.com/develop/ui/compose/resources>
 - 17/19 component files in `core/designsystem/.../presentation/component/` lack `@Preview`. · References: <https://developer.android.com/develop/ui/compose/tooling/previews>
 
 ## Prioritized Fixes
 
 1. **Make `UiState` holders stable.** Add `kotlinx.collections.immutable` to `gradle/libs.versions.toml` and convert raw `List`/`Set`/`Map` fields in every feature `UiState` to `ImmutableList`/`ImmutableSet` (convert with `toImmutableList()` at the mapper boundary), or annotate the holders `@Immutable`. Start with `feature/explore/.../ExploreScreenUiState.kt:6`, `feature/library/.../LibraryUiState.kt`, `feature/book_detail/.../BookDetailUiState.kt`. Removes the per-recomposition deep-`equals()` cost on every screen. Ref: <https://developer.android.com/develop/ui/compose/performance/stability/fix>
-2. **Externalize hardcoded strings** in `ExpandableFlowRow.kt:77`, `ChooseListsBottomSheet.kt:126,271`, `UpdateProgressBottomSheet.kt:190` to string resources or component parameters. Ref: <https://developer.android.com/develop/ui/compose/resources>
-3. **Fix the parameter order** in `SoftcoverTopBar.kt:40-41` (move required `isLoading` before optional `placeHolder`), and add `@Preview` coverage to the high-reuse components. Ref: <https://android.googlesource.com/platform/frameworks/support/+/androidx-main/compose/docs/compose-component-api-guidelines.md>
-4. **Optional follow-up:** add `contentType` to the heterogeneous `ReadingShelf` list (`feature/reading/.../ReadingShelf.kt:161-224`); expose `animationSpec` on `AnimatedStatNumber` / `MarkAsReadBurst`. Ref: <https://developer.android.com/develop/ui/compose/lists>
+2. **Externalize hardcoded strings** in `ChooseListsBottomSheet.kt:126,271`, `UpdateProgressBottomSheet.kt:198` to string resources or component parameters. Ref: <https://developer.android.com/develop/ui/compose/resources>
+3. **Add `@Preview` coverage** to the high-reuse `:core:designsystem` components (17 of 19 have none). Ref: <https://developer.android.com/develop/ui/compose/tooling/previews>
+4. **Optional follow-up:** add `contentType` to the heterogeneous `ReadingShelf` list; expose `animationSpec` on `AnimatedStatNumber` / `MarkAsReadBurst`. Ref: <https://developer.android.com/develop/ui/compose/lists>
 
 ## Notes And Limits
 
@@ -157,13 +156,6 @@ Overall Score: 83/100
 - Weight choice: default 35/25/20/20.
 - Renormalization: none — all four categories had sufficient surface area.
 - Compiler diagnostics used: **yes, but partial**. `assembleRelease` with the bundled `--init-script` succeeded (exit 0); incremental caching meant only `:feature:explore` re-emitted reports (`feature/explore/build/compose_audit/`). Strong Skipping state and the named-only 100% skippable result are measured for explore and confirm the SSM track; the unstable-`UiState` pattern is then corroborated in source across every other feature module (uniform TOAD `UiState` shape), so the stability finding is treated as measured-and-generalized rather than purely inferred. A full clean build would be needed to produce per-module reports for the remaining modules.
-
-## Suggested Follow-Up
-
-- `material-3` skill — ✅ **run**; full MD3 compliance audit in the dedicated section below (overall **84/100**). It scores design/theming, which the four numeric Compose categories deliberately leave out.
-- **`compose-agent focus on testing`** — ✅ **run**; results in the Follow-Up Review Findings section below.
-- **`compose-agent focus on kmp`** — ✅ **run**; results in the Follow-Up Review Findings section below.
-- **`compose-agent focus on focus`** — ✅ **run**; results in the Follow-Up Review Findings section below.
 
 ## Follow-Up Review Findings
 
@@ -210,7 +202,7 @@ Softcover layers a deliberate **editorial brand** on top of Material 3 (Expressi
 |----------|-------|--------|-------|
 | Color tokens | 9/10 | pass | Full `lightColorScheme`/`darkColorScheme` from Material Theme Builder; correct `onX`-on-`X` tonal pairing; brand non-theme accents (`RatingGold`, spoiler covers) are deliberate and documented. |
 | Typography | 9/10 | pass | M3 `Typography()` with brand families on all 15 roles; richer editorial scale supplied in parallel via `LocalEditorialTypography`. |
-| Shape | 6/10 | warn | **73 literal `RoundedCornerShape(N.dp)`** vs **7 `MaterialTheme.shapes` refs**; no brand `Shapes()` object configured — the one real MD3 gap. |
+| Shape | 6/10 | warn | **86 literal `RoundedCornerShape(N.dp)`** (re-counted 2026-07-14; was 73 at audit time — it is getting worse) vs **7 `MaterialTheme.shapes` refs**; no brand `Shapes()` object configured — the one real MD3 gap. |
 | Elevation | 9/10 | pass | Tonal surfaces, not shadows (1 `.shadow()` repo-wide, 0 `cardElevation`); book-cover shadow is the documented carve-out (DS §2.3). |
 | Components | 8/10 | pass | Brand catalog wraps M3 primitives correctly; `NavigationBar`/`Rail`, `SegmentedButton`, M3 Expressive `ContainedLoadingIndicator`/`PullToRefresh` used with correct variants. |
 | Layout | 9/10 | pass | Window size classes (COMPACT/MEDIUM/EXPANDED), `TwoPaneScaffold`, width-capped editorial panels, per-platform `mobile`/`jvm` layout splits. |
@@ -226,7 +218,7 @@ None. No MD2 (`@material/mdc-*`) usage, no broken tonal pairing, no shadow-for-e
 ### Warnings
 
 1. **Shape tokens are magic numbers, not a scale (Shape 6/10).**
-   - Why it matters: **73** `RoundedCornerShape(N.dp)` literals across feature + designsystem against only **7** `MaterialTheme.shapes` references. The theme never supplies a `shapes =` argument to `RhaydusTheme`, so `MaterialTheme.shapes` is the foundation default and components that *do* read it diverge from the ones using literals. The literal values cluster (20dp ×14, 4dp ×10, 8dp ×7, 6dp ×6, 24dp ×4, 16dp ×4, 10dp ×4, 28dp ×3, 12dp ×3) — a *de facto* scale that lives nowhere as a token, so the editorial corner language (`../reference/design-system.md` §2.3 describes "small on cards, medium on buttons, 28dp on sheets") can't be retuned in one place and can drift per call site.
+   - Why it matters: **86** `RoundedCornerShape(N.dp)` literals across feature + designsystem against only **7** `MaterialTheme.shapes` references. The theme never supplies a `shapes =` argument to `RhaydusTheme`, so `MaterialTheme.shapes` is the foundation default and components that *do* read it diverge from the ones using literals. The literal values cluster (20dp ×14, 4dp ×10, 8dp ×7, 6dp ×6, 24dp ×4, 16dp ×4, 10dp ×4, 28dp ×3, 12dp ×3) — a *de facto* scale that lives nowhere as a token, so the editorial corner language (`../reference/design-system.md` §2.3 describes "small on cards, medium on buttons, 28dp on sheets") can't be retuned in one place and can drift per call site.
    - Evidence: `feature/library/.../LibraryShelf.kt`, `feature/book_detail/.../BookDetailShelf.kt`, `core/designsystem/.../component/PillChip.kt`, `.../UpdateProgressBottomSheet.kt`, and ~25 other files; `core/designsystem/.../theme/Theme.kt:107-110` (`RhaydusTheme(colorScheme, typography)` — no `shapes`); no `Shapes(` object defined anywhere in `:core:designsystem`.
    - Fix direction: define a brand `Shapes` (or a named `EditorialShapes` object of `RoundedCornerShape` constants) mapping the cluster to MD3 roles (`extraSmall` 4dp, `small` 8dp, `medium` 12dp, `large` 16/20dp, `extraLarge` 28dp), pass it to the theme, and replace the literals with `MaterialTheme.shapes.*` / the named constants. `PillChip`'s `RoundedCornerShape(percent = 50)` (≈ `shapes`-`full`) is correct and stays.
    - References: <https://developer.android.com/develop/ui/compose/designsystems/material3#shapes>, <https://m3.material.io/styles/shape/overview>
@@ -242,7 +234,7 @@ None. No MD2 (`@material/mdc-*`) usage, no broken tonal pairing, no shadow-for-e
 
 ### Recommended Fixes (priority order)
 
-1. **Centralize shape into tokens.** Add a brand `Shapes`/`EditorialShapes` object, pass it to `RhaydusTheme`, and migrate the 73 `RoundedCornerShape(N.dp)` literals to `MaterialTheme.shapes.*` / named constants. Single highest-leverage MD3 fix; makes the editorial corner language tunable in one place. Ref: <https://developer.android.com/develop/ui/compose/designsystems/material3#shapes>
+1. **Centralize shape into tokens.** Add a brand `Shapes`/`EditorialShapes` object, pass it to `RhaydusTheme`, and migrate the 86 `RoundedCornerShape(N.dp)` literals to `MaterialTheme.shapes.*` / named constants. Single highest-leverage MD3 fix; makes the editorial corner language tunable in one place. Ref: <https://developer.android.com/develop/ui/compose/designsystems/material3#shapes>
 2. **(Carries over from Critical Finding 2 above.)** Externalizing the hardcoded UI strings in shared components also improves MD3 component reusability — same fix, no extra work.
 
 ### Notes & Limits

@@ -1,0 +1,20 @@
+# The single highest-anticipated book releasing soon (Explore's featured card): the most-shelved
+# book whose release date falls within the upcoming window (today, maxDate]. No minimum-readers
+# floor - the point of the card is discovery, so whichever book is most-wanted for that window
+# qualifies regardless of how well-known it already is. Bounded by maxDate rather than left
+# open-ended so the card reads as "arriving soon", not a book that happens to be the
+# most-anticipated of anything releasing in the next several years.
+query GetFeaturedUpcomingRelease(
+    $today: date!,
+    $maxDate: date!,
+) {
+    books(
+        where: {
+            release_date: { _gt: $today, _lte: $maxDate }
+        }
+        order_by: [{ users_count: desc }]
+        limit: 1
+    ) {
+        ...BookDetailFragment
+    }
+}

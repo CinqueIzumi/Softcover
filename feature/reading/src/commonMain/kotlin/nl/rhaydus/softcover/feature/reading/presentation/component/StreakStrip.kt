@@ -113,14 +113,48 @@ internal fun StreakStrip(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        // A static, direction-only caption: it never pins to a specific dot, so it stays
-        // accurate however far the user scrolls into the past.
-        Text(
-            text = "Most recent first".uppercase(),
-            style = MaterialTheme.editorialTypography.eyebrowSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // A static, direction-only caption: it never pins to a specific dot, so it stays
+            // accurate however far the user scrolls into the past.
+            Text(
+                text = "Most recent first".uppercase(),
+                style = MaterialTheme.editorialTypography.eyebrowSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            val streakLength = remember(activity) { currentStreakLength(activity) }
+
+            if (streakLength > 0) {
+                Text(
+                    text = "$streakLength ${if (streakLength == 1) "day" else "days"} running",
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
     }
+}
+
+/**
+ * The number of consecutive read days running backward from today (the last, most-recent entry in
+ * [activity]) - a pure UI-layer computation from the same activity list the dots already render, no
+ * new domain concept. Stops at the first missed day; `0` when today itself was missed or the list is
+ * empty.
+ */
+internal fun currentStreakLength(activity: List<ReadingDayActivity>): Int {
+    var streak = 0
+
+    for (day in activity.asReversed()) {
+        if (day.didRead.not()) break
+
+        streak++
+    }
+
+    return streak
 }
 
 @Composable

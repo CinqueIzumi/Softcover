@@ -35,7 +35,7 @@ class EnrichDismissedContinueSeriesMetadataUseCase(
             .filter { it.title == null || it.seriesPosition == null }
 
         val seriesNeedingEnrichment = exploreRepository.dismissedContinueSeries.firstOrNull().orEmpty()
-            .filter { it.seriesName == null }
+            .filter { it.seriesName == null || it.authorText == null || it.bookCount == null }
 
         if (booksNeedingEnrichment.isEmpty() && seriesNeedingEnrichment.isEmpty()) return
 
@@ -103,6 +103,8 @@ class EnrichDismissedContinueSeriesMetadataUseCase(
                 seriesId = series.seriesId,
                 seriesName = seriesName,
                 coverUrl = seed.coverUrl,
+                authorText = seed.authorString.takeIf { it.isNotBlank() },
+                bookCount = seed.bookSeries?.amountOfBooks,
             )
         }
     }

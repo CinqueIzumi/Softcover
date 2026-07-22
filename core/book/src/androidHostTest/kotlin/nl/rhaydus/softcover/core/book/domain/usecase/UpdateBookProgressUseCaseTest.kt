@@ -104,6 +104,44 @@ class UpdateBookProgressUseCaseTest {
         }
 
         @Test
+        fun `forwards actionAt to the repository`() = runTest {
+            // ----- Arrange -----
+            val inputBook = mockk<Book>()
+            val newPage = 150
+            val actionAt = "2026-07-21T21:00:00Z"
+            val updatedBook = mockk<Book>()
+
+            coEvery {
+                repository.updateBookProgress(
+                    book = inputBook,
+                    newPage = newPage,
+                    actionAt = actionAt,
+                )
+            } returns updatedBook
+
+            coJustRun {
+                repository.cacheBook(book = updatedBook)
+            }
+
+            // ----- Act -----
+            val result = useCase(
+                book = inputBook,
+                newPage = newPage,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            result.isSuccess shouldBe true
+            coVerify(exactly = 1) {
+                repository.updateBookProgress(
+                    book = inputBook,
+                    newPage = newPage,
+                    actionAt = actionAt,
+                )
+            }
+        }
+
+        @Test
         fun `returns failure when updateBookProgress throws`() = runTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()

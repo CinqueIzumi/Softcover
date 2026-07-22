@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -37,9 +35,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScre
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
-import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 private val IDENTITY_SIDEBAR_WIDTH = 360.dp
@@ -52,13 +50,15 @@ private val TWO_COLUMN_MIN_WIDTH = 720.dp
 
 /**
  * Desktop Book Detail. On a wide surface (a full-screen pushed detail) it is a fixed identity sidebar
- * (cover, title, series, rating, shelf-action bar, edition metadata, external links) beside a scrolling
- * narrative column (about, tags, status/progress, your review, community reviews). In the narrower
- * expanded two-pane detail slot it collapses to a single scrolling column. A static top strip holds the
- * back/close control and the overflow menu; there is no scroll-collapsing top bar. Every section, and
- * the full set of modal overlays ([BookDetailOverlays]), is shared shelf code — only the arrangement is
- * desktop-specific. The whole surface paints an opaque [Surface] background so a pushed detail never
- * lets the screen beneath it bleed through during the navigation transition.
+ * (cover, title, series, rating hero, and the shelve-control card) beside a scrolling narrative column
+ * — a sticky lens toggle atop the Yours / The Book lens content (status/progress, your rating/tags/
+ * review on Yours; about, tags, find-it, community reviews on The Book). In the narrower expanded
+ * two-pane detail slot it collapses to a single scrolling column carrying the same sidebar content
+ * inline above the narrative column. A static top strip holds the back/close control and the overflow
+ * menu; there is no scroll-collapsing top bar. Every section, and the full set of modal overlays
+ * ([BookDetailOverlays]), is shared shelf code — only the arrangement is desktop-specific. The whole
+ * surface paints an opaque [Surface] background so a pushed detail never lets the screen beneath it
+ * bleed through during the navigation transition.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -197,19 +197,11 @@ private fun TwoColumnContent(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            ShelfActionBar(
+            ShelveControlCard(
                 state = state,
                 runAction = runAction,
+                dateStyle = state.dateStyle,
                 celebrationKey = celebrationKey,
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            EditionMetadataStrip(state = state)
-
-            ExternalLinksStrip(
-                state = state,
-                runAction = runAction,
             )
 
             Spacer(modifier = Modifier.height(24.dp + bottomChromePadding()))
@@ -227,6 +219,11 @@ private fun TwoColumnContent(
     }
 }
 
+/**
+ * The scrolling narrative column (two-column desktop layout). The lens toggle rides a `stickyHeader`
+ * atop it, so it stays pinned while the Yours/The Book content beneath scrolls — the desktop
+ * counterpart of the mobile column's sticky lens toggle.
+ */
 @Composable
 private fun NarrativeColumn(
     state: BookDetailUiState,
@@ -234,6 +231,7 @@ private fun NarrativeColumn(
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
+    val yoursEnabled = state.book?.userBook != null
 
     Box(modifier = modifier) {
         LazyColumn(
@@ -241,10 +239,22 @@ private fun NarrativeColumn(
             contentPadding = PaddingValues(bottom = bottomChromePadding()),
             state = listState,
         ) {
-            narrativeItems(
-                state = state,
-                runAction = runAction,
-            )
+            stickyHeader {
+                LensToggle(
+                    selectedLens = state.selectedLens,
+                    onLensSelected = { runAction(OnLensSelectedAction(lens = it)) },
+                    yoursEnabled = yoursEnabled,
+                )
+            }
+
+            item { Spacer(modifier = Modifier.height(24.dp)) }
+
+            item {
+                LensContent(
+                    state = state,
+                    runAction = runAction,
+                )
+            }
         }
 
         DesktopVerticalScrollbar(
@@ -267,6 +277,7 @@ private fun SingleColumnContent(
     onCoverClick: () -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val yoursEnabled = state.book?.userBook != null
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -287,18 +298,43 @@ private fun SingleColumnContent(
             item { Spacer(modifier = Modifier.height(20.dp)) }
 
             item {
-                ShelfActionBar(
+                ShelveControlCard(
                     state = state,
                     runAction = runAction,
+                    dateStyle = state.dateStyle,
                     celebrationKey = celebrationKey,
                 )
             }
 
-            narrativeItems(
-                state = state,
-                runAction = runAction,
-                includeEditionStrips = true,
-            )
+            if (state.showScanEditionUpdateBanner) {
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                item {
+                    ScanEditionUpdateBanner(
+                        isUpdating = state.isUpdatingScannedEdition,
+                        runAction = runAction,
+                    )
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(20.dp)) }
+
+            stickyHeader {
+                LensToggle(
+                    selectedLens = state.selectedLens,
+                    onLensSelected = { runAction(OnLensSelectedAction(lens = it)) },
+                    yoursEnabled = yoursEnabled,
+                )
+            }
+
+            item { Spacer(modifier = Modifier.height(24.dp)) }
+
+            item {
+                LensContent(
+                    state = state,
+                    runAction = runAction,
+                )
+            }
         }
 
         DesktopVerticalScrollbar(
@@ -309,115 +345,6 @@ private fun SingleColumnContent(
                 .padding(vertical = 4.dp),
         )
     }
-}
-
-/**
- * The narrative section sequence shared by both desktop arrangements, mirroring the mobile column's
- * leading-spacer rhythm. [includeEditionStrips] is `true` only for the single column (where the edition
- * metadata + external links belong inline); the two-column layout hosts those in its identity sidebar.
- */
-private fun LazyListScope.narrativeItems(
-    state: BookDetailUiState,
-    runAction: (BookDetailAction) -> Unit,
-    includeEditionStrips: Boolean = false,
-) {
-    if (state.showScanEditionUpdateBanner) {
-        item { Spacer(modifier = Modifier.height(20.dp)) }
-
-        item {
-            ScanEditionUpdateBanner(
-                isUpdating = state.isUpdatingScannedEdition,
-                runAction = runAction,
-            )
-        }
-    }
-
-    if (state.book?.userBook != null) {
-        item { Spacer(modifier = Modifier.height(24.dp)) }
-
-        item(key = "userTags") {
-            UserTagsSection(
-                state = state,
-                runAction = runAction,
-            )
-        }
-    }
-
-    val ratingBook = state.book
-
-    if (ratingBook != null && ratingBook.status == BookStatus.Read) {
-        item { Spacer(modifier = Modifier.height(24.dp)) }
-
-        item {
-            PersonalRatingRow(
-                book = ratingBook,
-                runAction = runAction,
-            )
-        }
-
-        item { Spacer(modifier = Modifier.height(20.dp)) }
-
-        item {
-            PersonalReviewSection(
-                reviewDocument = ratingBook.userBook?.reviewDocument,
-                hasSpoilers = ratingBook.userBook?.reviewHasSpoilers == true,
-                runAction = runAction,
-            )
-        }
-    }
-
-    val shelfPanelStatus = state.book?.status
-    val shelfPanelWillRender = shelfPanelStatus == BookStatus.Reading ||
-        shelfPanelStatus == BookStatus.DidNotFinish
-
-    if (shelfPanelWillRender) {
-        item { Spacer(modifier = Modifier.height(20.dp)) }
-
-        item {
-            ShelfStatusPanel(
-                state = state,
-                runAction = runAction,
-            )
-        }
-
-        item { Spacer(modifier = Modifier.height(28.dp)) }
-    } else {
-        item { Spacer(modifier = Modifier.height(28.dp)) }
-    }
-
-    item { AboutSection(state = state) }
-
-    item(key = "tags") { TagsSection(state = state) }
-
-    if (includeEditionStrips) {
-        item { EditionMetadataStrip(state = state) }
-
-        item {
-            ExternalLinksStrip(
-                state = state,
-                runAction = runAction,
-            )
-        }
-    }
-
-    item {
-        BelowDescriptionStatusPanel(
-            state = state,
-            topSpacing = 28.dp,
-        )
-    }
-
-    item { Spacer(modifier = Modifier.height(36.dp)) }
-
-    item {
-        ReviewsSection(
-            state = state,
-            runAction = runAction,
-            dateStyle = state.dateStyle,
-        )
-    }
-
-    item { Spacer(modifier = Modifier.height(32.dp)) }
 }
 
 @Composable

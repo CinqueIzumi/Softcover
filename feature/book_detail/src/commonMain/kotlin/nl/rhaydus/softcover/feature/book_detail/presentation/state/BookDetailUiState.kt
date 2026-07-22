@@ -2,15 +2,16 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
+import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.toad.UiState
 
@@ -30,18 +31,18 @@ internal data class BookDetailUiState(
     val showUpdateProgressSheet: Boolean = false,
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+    val selectedLens: BookDetailLens = BookDetailLens.THE_BOOK,
 
     val deadline: BookDeadline? = null,
     val deadlineProgress: DeadlineProgress? = null,
+    val readingPaceForecast: ReadingPaceForecast? = null,
     val showDeadlinePicker: Boolean = false,
 
     val reviews: List<BookReview> = emptyList(),
     val loadingReviews: Boolean = false,
     val revealedSpoilerReviewIds: Set<Int> = emptySet(),
 
-    val showReviewSheet: Boolean = false,
-    val reviewEditorDocument: ReviewDocument = ReviewDocument.EMPTY,
-    val reviewEditorHasSpoilers: Boolean = false,
+    val verdictSheetContext: VerdictSheetContext? = null,
 
     val failedMutationBookIds: Set<Int> = emptySet(),
     val failedMutationEditionIds: Set<Int> = emptySet(),
@@ -58,6 +59,7 @@ internal data class BookDetailUiState(
     val showTagEditorSheet: Boolean = false,
     val tagEditorCategory: TagCategory = TagCategory.TAG,
     val tagEditorInput: String = "",
+    val tagSuggestions: List<UserTag> = emptyList(),
 ) : UiState {
     /**
      * The edition pinned by an external entry point (a barcode scan), if any. It wins over every

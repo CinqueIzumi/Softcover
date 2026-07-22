@@ -103,12 +103,16 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
             val seriesId = 99
             val seriesName = "Foundation"
             val coverUrl = "https://example.com/foundation.jpg"
+            val authorText = "Isaac Asimov"
+            val bookCount = 7
 
             // ----- Act -----
             dataSource.dismissSeries(
                 seriesId = seriesId,
                 seriesName = seriesName,
                 coverUrl = coverUrl,
+                authorText = authorText,
+                bookCount = bookCount,
             )
 
             // ----- Assert -----
@@ -118,6 +122,8 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
                         seriesId = seriesId,
                         seriesName = seriesName,
                         coverUrl = coverUrl,
+                        authorText = authorText,
+                        bookCount = bookCount,
                     ),
                 )
             }
@@ -133,6 +139,8 @@ class DismissedContinueSeriesLocalDataSourceImplTest {
                 seriesId = seriesId,
                 seriesName = null,
                 coverUrl = null,
+                authorText = null,
+                bookCount = null,
             )
 
             // ----- Assert -----

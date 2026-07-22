@@ -1,6 +1,11 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,14 +28,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.designsystem.modifier.noRippleClickable
+import nl.rhaydus.designsystem.modifier.pressScale
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -103,16 +118,15 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SettingsGroup {
-                SettingsRow(
-                    title = "View user profile",
-                    icon = drawableIconResource(
-                        icon = SoftcoverIcon.Account,
-                        contentDescription = "Account icon",
-                    ),
-                    onClick = navigateToProfile,
-                )
-            }
+            SettingsMenuRow(
+                title = "View user profile",
+                gloss = "Your shelves, stats and reading year",
+                icon = drawableIconResource(
+                    icon = SoftcoverIcon.Account,
+                    contentDescription = "Account icon",
+                ),
+                onClick = navigateToProfile,
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -123,38 +137,35 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SettingsGroup {
-                SettingsRow(
-                    title = "Appearance",
-                    icon = drawableIconResource(
-                        icon = SoftcoverIcon.Palette,
-                        contentDescription = "Appearance icon",
-                    ),
-                    onClick = navigateToAppearanceSettings,
-                )
+            SettingsMenuRow(
+                title = "Appearance",
+                gloss = "Theme, accent and text size",
+                icon = drawableIconResource(
+                    icon = SoftcoverIcon.Palette,
+                    contentDescription = "Appearance icon",
+                ),
+                onClick = navigateToAppearanceSettings,
+            )
 
-                SettingsRowDivider()
+            SettingsMenuRow(
+                title = "Library tabs",
+                gloss = "Which shelves show, and their order",
+                icon = drawableIconResource(
+                    icon = SoftcoverIcon.Shelf,
+                    contentDescription = "Library tabs icon",
+                ),
+                onClick = navigateToLibraryVisibility,
+            )
 
-                SettingsRow(
-                    title = "Library tabs",
-                    icon = drawableIconResource(
-                        icon = SoftcoverIcon.Shelf,
-                        contentDescription = "Library tabs icon",
-                    ),
-                    onClick = navigateToLibraryVisibility,
-                )
-
-                SettingsRowDivider()
-
-                SettingsRow(
-                    title = "Hidden suggestions",
-                    icon = drawableIconResource(
-                        icon = SoftcoverIcon.FilterList,
-                        contentDescription = "Hidden suggestions icon",
-                    ),
-                    onClick = navigateToHiddenSuggestions,
-                )
-            }
+            SettingsMenuRow(
+                title = "Hidden suggestions",
+                gloss = "Books you've asked us to stop recommending",
+                icon = drawableIconResource(
+                    icon = SoftcoverIcon.FilterList,
+                    contentDescription = "Hidden suggestions icon",
+                ),
+                onClick = navigateToHiddenSuggestions,
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -185,43 +196,105 @@ private fun SettingsPageHeader() {
             text = "Tune Softcover to match how you read.",
             style = MaterialTheme.editorialTypography.body,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.widthIn(max = 300.dp),
         )
     }
 }
 
+/**
+ * The Settings menu's borderless row: a top hairline (drawn on every row, including the first, so
+ * rows read as a continuous hairline-separated list rather than a boxed card), a `surfaceContainerHigh`
+ * icon tile, an Inter [title] (never italic) over an italic Fraunces [gloss], and a demoted trailing
+ * chevron. Pressing washes the row to `surfaceContainer` — the row's only container tint.
+ */
 @Composable
-private fun SettingsRow(
+private fun SettingsMenuRow(
     title: String,
+    gloss: String,
     icon: RhaydusIconResource,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val playMotion = playDecorativeMotion()
+
+    val rowBackground by animateColorAsState(
+        targetValue = if (isPressed && playMotion) {
+            MaterialTheme.colorScheme.surfaceContainer
+        } else {
+            Color.Transparent
+        },
+        label = "settingsMenuRowPress",
+    )
+
+    val hairlineColor = MaterialTheme.colorScheme.outlineVariant
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .noRippleClickable(onClick)
+            .pressScale(interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick,
+            )
+            .background(rowBackground)
+            .drawBehind {
+                drawLine(
+                    color = hairlineColor,
+                    start = Offset(
+                        x = 0f,
+                        y = 0f,
+                    ),
+                    end = Offset(
+                        x = size.width,
+                        y = 0f,
+                    ),
+                    strokeWidth = 1.dp.toPx(),
+                )
+            }
             .padding(
-                horizontal = 20.dp,
-                vertical = 18.dp,
+                horizontal = 4.dp,
+                vertical = 17.dp,
             ),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(42.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            contentAlignment = Alignment.Center,
+        ) {
             Icon(
                 painter = icon.getIconPainter(),
                 contentDescription = icon.contentDescription,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(22.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )
+        }
 
-            Spacer(modifier = Modifier.width(20.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.editorialTypography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
+
+            Spacer(modifier = Modifier.height(1.dp))
+
+            Text(
+                text = gloss,
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
+
+        Spacer(modifier = Modifier.width(12.dp))
 
         val arrowIcon = drawableIconResource(
             icon = SoftcoverIcon.KeyboardArrowRight,
@@ -251,6 +324,27 @@ private fun SettingsScreenPreview() {
             libraryVisibilityRunAction = {},
             onCreateListClick = {},
             appUpdateState = AppUpdateState.Idle,
+            onStartAppUpdate = {},
+            debugSection = {},
+        )
+    }
+}
+
+@StandardPreview
+@Composable
+private fun SettingsScreenUpdateAvailablePreview() {
+    SoftcoverTheme {
+        SettingsScreenLayout(
+            state = SettingsScreenUiState(),
+            settingsRunAction = {},
+            navigateToProfile = {},
+            navigateToAppearanceSettings = {},
+            navigateToLibraryVisibility = {},
+            navigateToHiddenSuggestions = {},
+            libraryVisibilityState = LibraryVisibilitySettingsUiState(),
+            libraryVisibilityRunAction = {},
+            onCreateListClick = {},
+            appUpdateState = AppUpdateState.Available,
             onStartAppUpdate = {},
             debugSection = {},
         )
