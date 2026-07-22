@@ -5,7 +5,9 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.cache.normalized.FetchPolicy
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
@@ -47,6 +49,7 @@ import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
 import nl.rhaydus.softcover.core.database.mapper.reviewSlateFromDocument
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.JournalEventType
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
@@ -113,11 +116,13 @@ interface BooksRemoteDataSource {
         book: Book,
         newPage: Int? = null,
         newSeconds: Int? = null,
+        actionAt: String? = null,
     ): Book
 
     suspend fun markBookAsRead(
         book: Book,
         editionId: Int? = null,
+        actionAt: String? = null,
     ): Book
 
     suspend fun updateBookEdition(
@@ -132,11 +137,13 @@ interface BooksRemoteDataSource {
         progressSeconds: Int?,
         startedAt: String?,
         finishedAt: String?,
+        actionAt: String? = null,
     )
 
     suspend fun replayMarkBookAsRead(
         bookId: Int,
         userDate: String,
+        actionAt: String? = null,
     )
 
     suspend fun replayUpdateBookRating(
@@ -526,6 +533,7 @@ internal class BooksRemoteDataSourceImpl(
         book: Book,
         newPage: Int?,
         newSeconds: Int?,
+        actionAt: String?,
     ): Book {
         val userBook = book.userBook
             ?: throw Exception("Book did not contain a user book")
@@ -541,6 +549,12 @@ internal class BooksRemoteDataSourceImpl(
             started_at = Optional.present(userBookRead.startedAt),
             finished_at = Optional.present(userBookRead.finishedAt),
             edition_id = Optional.present(userBook.editionId),
+            action_at = Optional.presentIfNotNull(actionAt),
+            action = if (actionAt != null) {
+                Optional.present(JournalEventType.ProgressUpdated.eventName)
+            } else {
+                Optional.absent()
+            },
         )
 
         val mutation = UpdateReadingProgressMutation(
@@ -562,14 +576,18 @@ internal class BooksRemoteDataSourceImpl(
     override suspend fun markBookAsRead(
         book: Book,
         editionId: Int?,
+        actionAt: String?,
     ): Book {
-        val currentDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
+        val userDate = actionAt
+            ?.let { localDateOf(actionAt = it) }
+            ?: Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
 
         val dataObject = UserBookCreateInput(
             book_id = book.id,
             edition_id = Optional.presentIfNotNull(editionId),
             status_id = Optional.present(UserBookStatus.READ.code),
-            user_date = Optional.present(currentDate),
+            user_date = Optional.present(userDate),
+            action_at = Optional.presentIfNotNull(actionAt),
             privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
         )
 
@@ -621,6 +639,7 @@ internal class BooksRemoteDataSourceImpl(
         progressSeconds: Int?,
         startedAt: String?,
         finishedAt: String?,
+        actionAt: String?,
     ) {
         val isAudiobook = progressSeconds != null
 
@@ -630,6 +649,12 @@ internal class BooksRemoteDataSourceImpl(
             started_at = Optional.present(startedAt),
             finished_at = Optional.present(finishedAt),
             edition_id = Optional.present(editionId),
+            action_at = Optional.presentIfNotNull(actionAt),
+            action = if (actionAt != null) {
+                Optional.present(JournalEventType.ProgressUpdated.eventName)
+            } else {
+                Optional.absent()
+            },
         )
 
         apolloClient.safeMutation(
@@ -643,16 +668,23 @@ internal class BooksRemoteDataSourceImpl(
     override suspend fun replayMarkBookAsRead(
         bookId: Int,
         userDate: String,
+        actionAt: String?,
     ) {
+        val resolvedUserDate = actionAt?.let { localDateOf(actionAt = it) } ?: userDate
+
         val dataObject = UserBookCreateInput(
             book_id = bookId,
             status_id = Optional.present(UserBookStatus.READ.code),
-            user_date = Optional.present(userDate),
+            user_date = Optional.present(resolvedUserDate),
+            action_at = Optional.presentIfNotNull(actionAt),
             privacy_setting_id = Optional.present(PrivacySetting.PUBLIC.code),
         )
 
         apolloClient.safeMutation(mutation = MarkBookAsReadMutation(userBookCreateInput = dataObject))
     }
+
+    private fun localDateOf(actionAt: String): String =
+        Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
 
     override suspend fun replayUpdateBookRating(
         userBookId: Int,

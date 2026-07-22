@@ -12,6 +12,7 @@ import nl.rhaydus.toad.ActionScope
 
 internal data class OnUpdatePageProgressClickAction(
     val newPage: String,
+    val actionAt: String? = null,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
@@ -27,6 +28,7 @@ internal data class OnUpdatePageProgressClickAction(
             dependencies.recordBookProgressUseCase(
                 book = bookToUpdate,
                 newPage = newPageValue,
+                actionAt = actionAt,
             )
                 .onSuccess { outcome ->
                     // Only a genuine finish transition raises the verdict prompt — re-recording the

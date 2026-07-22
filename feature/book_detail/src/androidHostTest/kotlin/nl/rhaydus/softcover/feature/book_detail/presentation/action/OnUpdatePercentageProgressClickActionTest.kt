@@ -208,6 +208,43 @@ class OnUpdatePercentageProgressClickActionTest {
         }
 
         @Test
+        fun `invokes updateBookProgress with the provided actionAt`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(currentEditionPages = 200)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = any(),
+                )
+            } returns Result.success(null)
+
+            val action = OnUpdatePercentageProgressClickAction(
+                newPercentage = "50",
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newPage = 100,
+                    actionAt = "2026-07-21T21:00:00Z",
+                )
+            }
+        }
+
+        @Test
         fun `falls back to defaultEdition pages when currentEdition has no page count`() = runTest {
             // ----- Arrange -----
             val book = stubBook(

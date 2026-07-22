@@ -369,5 +369,72 @@ class OnMarkBookAsReadClickActionTest {
                 )
             }
         }
+
+        @Test
+        fun `forwards actionAt to use case when constructed with a value`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                    actionAt = "2026-07-21T21:00:00Z",
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnMarkBookAsReadClickAction(
+                book = book,
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                    actionAt = "2026-07-21T21:00:00Z",
+                )
+            }
+        }
+
+        @Test
+        fun `forwards null as actionAt when action is constructed without one`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                    actionAt = null,
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnMarkBookAsReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                markBookAsReadUseCase(
+                    book = book,
+                    editionId = any(),
+                    actionAt = null,
+                )
+            }
+        }
     }
 }

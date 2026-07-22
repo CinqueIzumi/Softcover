@@ -21,6 +21,7 @@ A top-to-bottom redesign: nearly every screen (Reading, your Library, book pages
 - When you tag a book, get suggestions based on tags you've used before.
 - When you mark a book as read, it'll ask for an optional rating and review.
 - Add a book straight to **Currently Reading** in one tap, instead of shelving it first.
+- Log a reading update against an earlier time (say you read to a page last night, not just now).
 - New reading stats on your profile: a recap of your reading life, from genres and ratings to the mix of authors you read.
 
 ## 3.2.0: Widgets (Android)
@@ -48,6 +49,7 @@ Everything you might want to record about a book, for your eyes only: none of it
 ## 3.6.0: Inboxes + a tidier book detail
 
 - A **Notes & Highlights** inbox you can search across, and a **Reading Sessions** log.
+- Edit or remove the reading updates you've logged, and change when they happened.
 - **Export and import your private data** as a file you keep, so your tags, moods, notes and gradings survive a reinstall or a move to a new device.
 - Share a book as a plain link or a send-to-a-friend deep link (on top of the image card).
 - A cleaner book-detail layout that tames the long scroll.

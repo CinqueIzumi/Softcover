@@ -2817,28 +2817,44 @@ internal fun BookDetailOverlays(
             onProgressTabClick = {
                 runAction(OnProgressTabClickAction(tab = it))
             },
-            onUpdatePercentageClick = {
-                runAction(OnUpdatePercentageProgressClickAction(newPercentage = it))
+            onUpdatePercentageClick = { percentage, actionAt ->
+                runAction(
+                    OnUpdatePercentageProgressClickAction(
+                        newPercentage = percentage,
+                        actionAt = actionAt,
+                    ),
+                )
             },
-            onUpdatePageProgressClick = {
-                runAction(OnUpdatePageProgressClickAction(newPage = it))
+            onUpdatePageProgressClick = { page, actionAt ->
+                runAction(
+                    OnUpdatePageProgressClickAction(
+                        newPage = page,
+                        actionAt = actionAt,
+                    ),
+                )
             },
-            onUpdateTimeProgressClick = { h, m, s ->
+            onUpdateTimeProgressClick = { h, m, s, actionAt ->
                 runAction(
                     OnUpdateTimeProgressClickAction(
                         hours = h,
                         minutes = m,
                         seconds = s,
+                        actionAt = actionAt,
                     ),
                 )
             },
-            onMarkAsReadClick = {
+            onMarkAsReadClick = { actionAt ->
                 // The same dispatchable action the Shelve control's "Read" row fires. Its celebration
                 // (commit haptic + MarkAsReadBurst) is driven screen-wide off the ScreenModel's
                 // BookMarkedAsReadEvent (BookDetailScreen.Content's ObserveAsEvents), not by anything
                 // local to that row, so dispatching it from the sheet gets the same commit haptic +
-                // burst for free — no new action/state needed.
-                runAction(OnMarkBookAsReadClickAction(book = bookToUpdate))
+                // burst for free — no new action/state needed. The picked backdate travels with it.
+                runAction(
+                    OnMarkBookAsReadClickAction(
+                        book = bookToUpdate,
+                        actionAt = actionAt,
+                    ),
+                )
 
                 runAction(OnDismissProgressSheetAction())
             },

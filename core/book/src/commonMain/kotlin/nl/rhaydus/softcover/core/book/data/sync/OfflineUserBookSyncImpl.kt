@@ -23,6 +23,7 @@ internal class OfflineUserBookSyncImpl(
         book: Book,
         newPage: Int?,
         newSeconds: Int?,
+        actionAt: String?,
     ) {
         val userBook = book.userBook ?: return
         val userBookRead = book.userBookRead ?: return
@@ -39,11 +40,15 @@ internal class OfflineUserBookSyncImpl(
                 startedAt = userBookRead.startedAt,
                 finishedAt = userBookRead.finishedAt,
                 enqueuedAt = Clock.System.now().toString(),
+                actionAt = actionAt,
             ),
         )
     }
 
-    override suspend fun enqueueMarkAsRead(book: Book) {
+    override suspend fun enqueueMarkAsRead(
+        book: Book,
+        actionAt: String?,
+    ) {
         val userBook = book.userBook ?: return
         val userBookRead = book.userBookRead ?: return
 
@@ -59,6 +64,7 @@ internal class OfflineUserBookSyncImpl(
                 startedAt = userBookRead.startedAt,
                 finishedAt = userBookRead.finishedAt,
                 enqueuedAt = Clock.System.now().toString(),
+                actionAt = actionAt,
             ),
         )
     }

@@ -28,6 +28,7 @@ internal class UserBookWriteReplay(
                 progressSeconds = payload.progressSeconds,
                 startedAt = payload.startedAt,
                 finishedAt = payload.finishedAt,
+                actionAt = payload.actionAt,
             )
 
             ReplayOutcome.SYNCED
@@ -37,6 +38,7 @@ internal class UserBookWriteReplay(
             booksRemoteDataSource.replayMarkBookAsRead(
                 bookId = payload.bookId,
                 userDate = payload.enqueuedAt.substringBefore('T'),
+                actionAt = payload.actionAt,
             )
 
             ReplayOutcome.SYNCED

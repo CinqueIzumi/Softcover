@@ -21,6 +21,7 @@ class RecordBookProgressUseCase(
         book: Book,
         newPage: Int? = null,
         newSeconds: Int? = null,
+        actionAt: String? = null,
     ): Result<ShelfMutationOutcome?> {
         val edition = book.currentEdition
 
@@ -32,12 +33,16 @@ class RecordBookProgressUseCase(
         }
 
         return if (finished) {
-            markBookAsReadUseCase(book = book)
+            markBookAsReadUseCase(
+                book = book,
+                actionAt = actionAt,
+            )
         } else {
             updateBookProgressUseCase(
                 book = book,
                 newPage = newPage,
                 newSeconds = newSeconds,
+                actionAt = actionAt,
             ).map { null }
         }
     }

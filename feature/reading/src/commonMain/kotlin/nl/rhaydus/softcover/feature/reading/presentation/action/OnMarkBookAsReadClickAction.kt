@@ -9,7 +9,10 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
 
-internal data class OnMarkBookAsReadClickAction(val book: Book) : ReadingAction {
+internal data class OnMarkBookAsReadClickAction(
+    val book: Book,
+    val actionAt: String? = null,
+) : ReadingAction {
     override suspend fun execute(
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
@@ -17,7 +20,10 @@ internal data class OnMarkBookAsReadClickAction(val book: Book) : ReadingAction 
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
         val job = dependencies.launch {
-            dependencies.markBookAsReadUseCase(book = book)
+            dependencies.markBookAsReadUseCase(
+                book = book,
+                actionAt = actionAt,
+            )
                 .onSuccess { outcome ->
                     // Only a genuine transition prompts for a verdict - re-tapping an already-Read
                     // book (a no-op) must not reopen the sheet.

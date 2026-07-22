@@ -268,28 +268,42 @@ internal fun ReadingOverlays(
             onProgressTabClick = {
                 runAction(OnProgressTabClickAction(it))
             },
-            onUpdatePercentageClick = { percentage ->
-                runAction(OnUpdatePercentageProgressClickAction(percentage))
+            onUpdatePercentageClick = { percentage, actionAt ->
+                runAction(
+                    OnUpdatePercentageProgressClickAction(
+                        newPercentage = percentage,
+                        actionAt = actionAt,
+                    ),
+                )
             },
-            onUpdatePageProgressClick = { pages ->
-                runAction(OnUpdatePageProgressClickAction(pages))
+            onUpdatePageProgressClick = { pages, actionAt ->
+                runAction(
+                    OnUpdatePageProgressClickAction(
+                        newPage = pages,
+                        actionAt = actionAt,
+                    ),
+                )
             },
-            onUpdateTimeProgressClick = { h, m, s ->
+            onUpdateTimeProgressClick = { h, m, s, actionAt ->
                 runAction(
                     OnUpdateTimeProgressClickAction(
                         hours = h,
                         minutes = m,
                         seconds = s,
+                        actionAt = actionAt,
                     ),
                 )
             },
-            onMarkAsReadClick = {
+            onMarkAsReadClick = { actionAt ->
                 // Routes through the same controller the row/hero "mark as read" affordances used
                 // to drive directly, so the sheet-triggered path keeps the full commit choreography
                 // (haptic, burst, bottom-bar pulse, and — when motion is enabled — the "slide to
                 // shelf" follow-through, §2.5) rather than only the haptic + burst a bare dispatch
-                // would give it.
-                controller.requestMarkAsRead(updatingBook)
+                // would give it. The picked backdate travels with it, same as the progress tabs.
+                controller.requestMarkAsRead(
+                    book = updatingBook,
+                    actionAt = actionAt,
+                )
 
                 runAction(DismissProgressSheetAction)
             },

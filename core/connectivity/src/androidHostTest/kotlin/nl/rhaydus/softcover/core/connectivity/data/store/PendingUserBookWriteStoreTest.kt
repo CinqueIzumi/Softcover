@@ -41,6 +41,7 @@ class PendingUserBookWriteStoreTest {
         reviewSlateJson: String? = "{\"paragraphs\":[]}",
         reviewHasSpoilers: Boolean? = true,
         enqueuedAt: String = "2026-05-04T12:00:00Z",
+        actionAt: String? = null,
     ) = PendingUserBookWrite(
         kind = kind,
         userBookId = userBookId,
@@ -55,6 +56,7 @@ class PendingUserBookWriteStoreTest {
         reviewSlateJson = reviewSlateJson,
         reviewHasSpoilers = reviewHasSpoilers,
         enqueuedAt = enqueuedAt,
+        actionAt = actionAt,
     )
 
     private fun pendingUserBookWriteEntity(
@@ -73,6 +75,7 @@ class PendingUserBookWriteStoreTest {
         reviewHasSpoilers: Boolean? = null,
         enqueuedAt: String = "2026-05-04T12:00:00Z",
         attempts: Int = 0,
+        actionAt: String? = null,
     ) = PendingUserBookWriteEntity(
         localId = localId,
         kind = kind,
@@ -89,6 +92,7 @@ class PendingUserBookWriteStoreTest {
         reviewHasSpoilers = reviewHasSpoilers,
         enqueuedAt = enqueuedAt,
         attempts = attempts,
+        actionAt = actionAt,
     )
 
     @Nested
@@ -110,6 +114,7 @@ class PendingUserBookWriteStoreTest {
                 reviewSlateJson = "{\"paragraphs\":[\"hi\"]}",
                 reviewHasSpoilers = false,
                 enqueuedAt = "2026-05-05T09:00:00Z",
+                actionAt = "2026-05-05T09:05:00Z",
             )
             val slot = slot<PendingUserBookWriteEntity>()
 
@@ -136,6 +141,7 @@ class PendingUserBookWriteStoreTest {
             inserted.reviewSlateJson shouldBe "{\"paragraphs\":[\"hi\"]}"
             inserted.reviewHasSpoilers shouldBe false
             inserted.enqueuedAt shouldBe "2026-05-05T09:00:00Z"
+            inserted.actionAt shouldBe "2026-05-05T09:05:00Z"
         }
     }
 
@@ -148,6 +154,7 @@ class PendingUserBookWriteStoreTest {
                 localId = 1L,
                 kind = PendingUserBookWriteKind.UPDATE_PROGRESS.name,
                 attempts = 0,
+                actionAt = "2026-06-01T10:00:00Z",
             )
             val entityB = pendingUserBookWriteEntity(
                 localId = 2L,
@@ -175,6 +182,8 @@ class PendingUserBookWriteStoreTest {
                     payload = requireNotNull(entityB.toPendingUserBookWrite()),
                 ),
             )
+            result[0].payload.actionAt shouldBe "2026-06-01T10:00:00Z"
+            result[1].payload.actionAt shouldBe null
             coVerify(exactly = 1) {
                 dao.getPending(maxAttempts = 7)
             }

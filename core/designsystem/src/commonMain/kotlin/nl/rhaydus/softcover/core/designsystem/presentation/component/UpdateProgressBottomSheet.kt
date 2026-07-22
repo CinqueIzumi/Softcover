@@ -1,6 +1,11 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.rememberScrollState
@@ -24,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -38,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
@@ -59,6 +66,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import nl.rhaydus.common.currentLocalDateTime
 import nl.rhaydus.common.toHoursMinutesSeconds
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
@@ -68,6 +85,8 @@ import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.model.ModalSheetForm
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -82,11 +101,11 @@ fun UpdateProgressBottomSheet(
     bookToUpdate: Book,
     selectedTab: ProgressSheetTab,
     onProgressTabClick: (ProgressSheetTab) -> Unit,
-    onUpdatePercentageClick: (String) -> Unit,
-    onUpdatePageProgressClick: (String) -> Unit,
-    onUpdateTimeProgressClick: (String, String, String) -> Unit,
+    onUpdatePercentageClick: (percentage: String, actionAt: String?) -> Unit,
+    onUpdatePageProgressClick: (page: String, actionAt: String?) -> Unit,
+    onUpdateTimeProgressClick: (hours: String, minutes: String, seconds: String, actionAt: String?) -> Unit,
     onDismissRequest: () -> Unit,
-    onMarkAsReadClick: () -> Unit,
+    onMarkAsReadClick: (actionAt: String?) -> Unit,
 ) {
     AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
         ProgressBottomSheetContent(
@@ -106,10 +125,11 @@ private fun ProgressBottomSheetContent(
     progressSheetTab: ProgressSheetTab,
     book: Book,
     onProgressTabClick: (ProgressSheetTab) -> Unit,
-    onUpdatePercentageClick: (String) -> Unit,
-    onUpdatePageProgressClick: (String) -> Unit,
-    onUpdateTimeProgressClick: (String, String, String) -> Unit = { _, _, _ -> },
-    onMarkAsReadClick: () -> Unit = {},
+    onUpdatePercentageClick: (percentage: String, actionAt: String?) -> Unit,
+    onUpdatePageProgressClick: (page: String, actionAt: String?) -> Unit,
+    onUpdateTimeProgressClick: (hours: String, minutes: String, seconds: String, actionAt: String?) -> Unit =
+        { _, _, _, _ -> },
+    onMarkAsReadClick: (actionAt: String?) -> Unit = {},
 ) {
     val edition = book.currentEdition
     val isAudiobook = edition?.isAudiobook == true
@@ -134,6 +154,14 @@ private fun ProgressBottomSheetContent(
     val activeTab = if (progressSheetTab in visibleTabs) progressSheetTab else primaryTab
 
     val focusManager = LocalFocusManager.current
+
+    // Shared across all three tabs (§ When did you read this?, design-system.md patterns) — whichever
+    // tab's "Update progress" button fires carries this value. Null means "just now": the server stamps
+    // the mutation with its own current time, reproducing today's behaviour exactly. Once the reader
+    // backdates it, the picked instant travels with every tab's submit until cleared.
+    var readAt by remember { mutableStateOf<LocalDateTime?>(null) }
+
+    val actionAt = readAt?.toInstant(TimeZone.currentSystemDefault())?.toString()
 
     // A moderate 56dp M button on both forms — the sheet form previously used a 96dp L button, but
     // that read as oversized against the redline spec's ~52/48dp actions, so both the phone sheet
@@ -164,13 +192,21 @@ private fun ProgressBottomSheetContent(
             onProgressTabClick = onProgressTabClick,
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        WhenReadRow(
+            pickedDateTime = readAt,
+            onPickedDateTimeChange = { readAt = it },
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         when (activeTab) {
             ProgressSheetTab.PAGE -> {
                 ProgressBottomSheetPageContent(
                     book = book,
                     buttonSize = actionButtonSize,
+                    actionAt = actionAt,
                     onUpdatePageProgressClick = onUpdatePageProgressClick,
                 )
             }
@@ -179,6 +215,7 @@ private fun ProgressBottomSheetContent(
                 ProgressBottomSheetTimeContent(
                     book = book,
                     buttonSize = actionButtonSize,
+                    actionAt = actionAt,
                     onUpdateTimeProgressClick = onUpdateTimeProgressClick,
                 )
             }
@@ -187,6 +224,7 @@ private fun ProgressBottomSheetContent(
                 ProgressBottomSheetPercentageContent(
                     book = book,
                     buttonSize = actionButtonSize,
+                    actionAt = actionAt,
                     onUpdatePercentageClick = onUpdatePercentageClick,
                 )
             }
@@ -202,7 +240,7 @@ private fun ProgressBottomSheetContent(
                 icon = SoftcoverIcon.Check,
                 contentDescription = "Mark as read icon",
             ),
-            onClick = onMarkAsReadClick,
+            onClick = { onMarkAsReadClick(actionAt) },
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -322,11 +360,278 @@ private fun StepperCircle(
     }
 }
 
+/**
+ * "When did you read this?" (design-system.md's Backdate-a-logged-action pattern, §5). A pill
+ * defaulting to "Just now" — no backdating, so the submitted `actionAt` is null and the server
+ * stamps the mutation with its own current time. Tapping it seeds the picker with the current
+ * moment and expands an inline day + time-of-day editor below; a trailing clear glyph resets to
+ * "Just now" and collapses. Selected state swaps to `secondaryContainer`, matching the shared
+ * pill-chip anatomy (§4 `PillChip`) this reuses at hand-rolled scale for its icon-leading form.
+ */
+@Composable
+private fun WhenReadRow(
+    pickedDateTime: LocalDateTime?,
+    onPickedDateTimeChange: (LocalDateTime?) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    // The sheet is a short-lived interaction (seconds, not minutes), so a single snapshot of "now"
+    // taken at first composition is precise enough to anchor the "no future" clamp below — it does
+    // not need to keep ticking while the picker is open.
+    val now = remember { currentLocalDateTime() }
+    val timeZone = remember { TimeZone.currentSystemDefault() }
+
+    val isCustomized = pickedDateTime != null
+
+    val containerColor = if (isCustomized) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+
+    val contentColor = if (isCustomized) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clip(RoundedCornerShape(percent = 50))
+                .background(color = containerColor)
+                .pointerHandCursor()
+                .pressScaleClickable(
+                    onClick = {
+                        if (isCustomized.not()) {
+                            onPickedDateTimeChange(now)
+                        }
+
+                        expanded = expanded.not()
+                    },
+                )
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+        ) {
+            val dateRangeIcon = drawableIconResource(
+                icon = SoftcoverIcon.DateRange,
+                contentDescription = "",
+            )
+
+            Icon(
+                painter = dateRangeIcon.getIconPainter(),
+                contentDescription = dateRangeIcon.contentDescription,
+                tint = contentColor,
+                modifier = Modifier.size(18.dp),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = pickedDateTime?.let {
+                    formatWhenReadLabel(
+                        picked = it,
+                        now = now,
+                    )
+                } ?: "Just now",
+                style = MaterialTheme.typography.labelMedium,
+                color = contentColor,
+            )
+
+            if (isCustomized) {
+                Spacer(modifier = Modifier.width(8.dp))
+
+                val clearIcon = drawableIconResource(
+                    icon = SoftcoverIcon.Close,
+                    contentDescription = "Reset to just now",
+                )
+
+                Icon(
+                    painter = clearIcon.getIconPainter(),
+                    contentDescription = clearIcon.contentDescription,
+                    tint = contentColor,
+                    modifier = Modifier
+                        .size(16.dp)
+                        .pointerHandCursor()
+                        .pressScaleClickable(
+                            onClick = {
+                                onPickedDateTimeChange(null)
+                                expanded = false
+                            },
+                        ),
+                )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = expanded && isCustomized,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut(),
+        ) {
+            WhenReadEditor(
+                pickedDateTime = pickedDateTime ?: now,
+                now = now,
+                timeZone = timeZone,
+                onPickedDateTimeChange = onPickedDateTimeChange,
+            )
+        }
+    }
+}
+
+/** "Today" / "Yesterday" / "N days ago". */
+private fun dayLabelFor(
+    picked: LocalDateTime,
+    now: LocalDateTime,
+): String = when (val daysAgo = picked.date.daysUntil(now.date)) {
+    0 -> "Today"
+    1 -> "Yesterday"
+    else -> "$daysAgo days ago"
+}
+
+/** [dayLabelFor], paired with the picked time-of-day. */
+private fun formatWhenReadLabel(
+    picked: LocalDateTime,
+    now: LocalDateTime,
+): String {
+    val hh = picked.hour.toString().padStart(
+        2,
+        '0',
+    )
+    val mm = picked.minute.toString().padStart(
+        2,
+        '0',
+    )
+
+    return "${dayLabelFor(
+        picked = picked,
+        now = now,
+    )}, $hh:$mm"
+}
+
+/**
+ * The inline day + time-of-day editor beneath [WhenReadRow]'s pill. Every stepper shifts
+ * [pickedDateTime] by a fixed [Duration] through instant arithmetic — which rolls a day/hour/minute
+ * over correctly on its own — then clamps the result to [now] so the reader can never dial in a
+ * future moment; a stepper simply stops moving once it reaches that boundary.
+ */
+@Composable
+private fun WhenReadEditor(
+    pickedDateTime: LocalDateTime,
+    now: LocalDateTime,
+    timeZone: TimeZone,
+    onPickedDateTimeChange: (LocalDateTime) -> Unit,
+) {
+    fun shiftBy(duration: Duration) {
+        val shifted = pickedDateTime
+            .toInstant(timeZone)
+            .plus(duration)
+            .toLocalDateTime(timeZone)
+
+        onPickedDateTimeChange(if (shifted > now) now else shifted)
+    }
+
+    val dayLabel = dayLabelFor(
+        picked = pickedDateTime,
+        now = now,
+    )
+
+    val timeStyle = MaterialTheme.editorialTypography.headlineMedium
+    val hh = pickedDateTime.hour.toString().padStart(
+        2,
+        '0',
+    )
+    val mm = pickedDateTime.minute.toString().padStart(
+        2,
+        '0',
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StepperCircle(
+                symbol = "−",
+                contentDescription = "Earlier day",
+                onClick = { shiftBy((-1).days) },
+            )
+
+            Spacer(modifier = Modifier.width(18.dp))
+
+            Text(
+                text = dayLabel,
+                style = MaterialTheme.editorialTypography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            Spacer(modifier = Modifier.width(18.dp))
+
+            StepperCircle(
+                symbol = "+",
+                contentDescription = "Later day",
+                onClick = { shiftBy(1.days) },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StepperCircle(
+                symbol = "−",
+                contentDescription = "Earlier hour",
+                onClick = { shiftBy((-1).hours) },
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            StepperCircle(
+                symbol = "−",
+                contentDescription = "Earlier 15 minutes",
+                onClick = { shiftBy((-15).minutes) },
+            )
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Text(
+                text = "$hh:$mm",
+                style = timeStyle,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            StepperCircle(
+                symbol = "+",
+                contentDescription = "Later 15 minutes",
+                onClick = { shiftBy(15.minutes) },
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            StepperCircle(
+                symbol = "+",
+                contentDescription = "Later hour",
+                onClick = { shiftBy(1.hours) },
+            )
+        }
+    }
+}
+
 @Composable
 private fun ColumnScope.ProgressBottomSheetPageContent(
     book: Book,
     buttonSize: ButtonSize,
-    onUpdatePageProgressClick: (String) -> Unit,
+    actionAt: String?,
+    onUpdatePageProgressClick: (page: String, actionAt: String?) -> Unit,
 ) {
     val totalPages = book.currentEdition?.pages ?: book.defaultEdition?.pages ?: 0
     val hasTotal = totalPages > 0
@@ -455,7 +760,10 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
     RhaydusButton(
         label = "Update progress",
         onClick = {
-            onUpdatePageProgressClick(number.text)
+            onUpdatePageProgressClick(
+                number.text,
+                actionAt,
+            )
         },
         modifier = Modifier.fillMaxWidth(),
         style = ButtonStyle.FILLED,
@@ -469,7 +777,8 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
 private fun ColumnScope.ProgressBottomSheetPercentageContent(
     book: Book,
     buttonSize: ButtonSize,
-    onUpdatePercentageClick: (String) -> Unit,
+    actionAt: String?,
+    onUpdatePercentageClick: (percentage: String, actionAt: String?) -> Unit,
 ) {
     var number by remember {
         val currentProgress = book.userBookRead?.progress?.roundToInt() ?: 0
@@ -591,7 +900,10 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
         style = ButtonStyle.FILLED,
         size = buttonSize,
         onClick = {
-            onUpdatePercentageClick(number.text)
+            onUpdatePercentageClick(
+                number.text,
+                actionAt,
+            )
         },
     )
 
@@ -602,7 +914,8 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
 private fun ColumnScope.ProgressBottomSheetTimeContent(
     book: Book,
     buttonSize: ButtonSize,
-    onUpdateTimeProgressClick: (String, String, String) -> Unit,
+    actionAt: String?,
+    onUpdateTimeProgressClick: (hours: String, minutes: String, seconds: String, actionAt: String?) -> Unit,
 ) {
     val initial = (book.userBookRead?.currentSeconds ?: 0).toHoursMinutesSeconds()
     val totalSeconds = book.currentEdition?.audioSeconds ?: 0
@@ -749,6 +1062,7 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
                 hours.text,
                 minutes.text,
                 seconds.text,
+                actionAt,
             )
         },
         modifier = Modifier.fillMaxWidth(),
@@ -850,9 +1164,9 @@ private fun TimeField(
 private fun ProgressSheetContentPagePreview() {
     SoftcoverTheme {
         ProgressBottomSheetContent(
-            onUpdatePageProgressClick = {},
+            onUpdatePageProgressClick = { _, _ -> },
             onProgressTabClick = {},
-            onUpdatePercentageClick = {},
+            onUpdatePercentageClick = { _, _ -> },
             progressSheetTab = ProgressSheetTab.PAGE,
             book = PreviewData.baseBook.copy(
                 title = "The Dungeon Anarchist's Cookbook",
@@ -870,9 +1184,9 @@ private fun ProgressSheetContentPagePreview() {
 private fun ProgressSheetContentPercentagePreview() {
     SoftcoverTheme {
         ProgressBottomSheetContent(
-            onUpdatePageProgressClick = {},
+            onUpdatePageProgressClick = { _, _ -> },
             onProgressTabClick = {},
-            onUpdatePercentageClick = {},
+            onUpdatePercentageClick = { _, _ -> },
             progressSheetTab = ProgressSheetTab.PERCENTAGE,
             book = PreviewData.baseBook.copy(
                 title = "The Dungeon Anarchist's Cookbook",

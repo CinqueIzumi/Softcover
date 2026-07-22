@@ -127,6 +127,42 @@ class OnUpdatePageProgressClickActionTest {
         }
 
         @Test
+        fun `invokes updateBookProgress with the provided actionAt`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = any(),
+                    newPage = any(),
+                    actionAt = any(),
+                )
+            } returns Result.success(null)
+
+            val action = OnUpdatePageProgressClickAction(
+                newPage = "250",
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newPage = 250,
+                    actionAt = "2026-07-21T21:00:00Z",
+                )
+            }
+        }
+
+        @Test
         fun `treats a non-numeric page string as zero`() = runTest {
             // ----- Arrange -----
             val book = stubBook()

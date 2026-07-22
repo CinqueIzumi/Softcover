@@ -9,7 +9,10 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
 
-internal data class OnUpdatePageProgressClickAction(val newPage: String) : ReadingAction {
+internal data class OnUpdatePageProgressClickAction(
+    val newPage: String,
+    val actionAt: String? = null,
+) : ReadingAction {
     override suspend fun execute(
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
@@ -25,6 +28,7 @@ internal data class OnUpdatePageProgressClickAction(val newPage: String) : Readi
                 book = bookToUpdate,
                 newPage = newPageValue,
                 newSeconds = null,
+                actionAt = actionAt,
             )
                 .onSuccess { outcome ->
                     // Only a genuine finish transition raises the verdict prompt — re-recording the

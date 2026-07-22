@@ -66,6 +66,9 @@ Renders on book detail as a compact editorial panel — one row per dimension, h
 ### Step 3.14 — Acquisition source (S, depends on 0.3)
 A single private per-book field — library, bought physical, bought digital, subscription/audio credit, borrowed, gifted, or free-text. One row in the Step 3.13 panel, one tap to set. Cheap to capture and it unlocks the "60% from the library this year" stat in Step 7.16. *(B.4.31)*
 
+### Step 3.15 — Edit & delete past reading-progress entries (S–M)
+A reading-history management surface: correct or remove a logged progress entry after the fact (fix a wrong page, re-date it, delete a mis-logged bump), not just append new ones as Step 2.15 allows. Genuinely new — the app has no delete/amend path for a logged entry today. Implementation route settled during the step: direct `reading_journals` CRUD (`update_reading_journal` / `delete_reading_journal` exist in the schema; `ReadingJournalUpdateType` also carries `action_at`) vs. amending the `user_book_read` row. Reuses Step 2.15's date/time picker for the re-date affordance. *(B.2.13)*
+
 > **End of Phase 3:** The app has personal voice — the user's ratings, words, highlights, tags, moods, traits, and notes become a corpus the rest of the app can draw from. That corpus lives only on this device, so it must not go long without a portable export (Step 8.13).
 
 ---

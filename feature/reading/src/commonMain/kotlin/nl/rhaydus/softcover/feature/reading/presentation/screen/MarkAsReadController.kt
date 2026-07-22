@@ -65,7 +65,14 @@ internal class MarkAsReadController(
         return fired
     }
 
-    fun requestMarkAsRead(book: Book) {
+    // Set alongside slidingBookId so the deferred runSlide() completion below can carry the same
+    // backdated instant the immediate (playMotion == false) branch applies right away.
+    private var pendingActionAt: String? = null
+
+    fun requestMarkAsRead(
+        book: Book,
+        actionAt: String? = null,
+    ) {
         if (slidingBookId != null) return
 
         haptics.commit()
@@ -74,9 +81,13 @@ internal class MarkAsReadController(
         navPulse.pulse(LibraryNavPulseKey)
 
         if (playMotion) {
+            pendingActionAt = actionAt
             slidingBookId = book.id
         } else {
-            runAction(OnMarkBookAsReadClickAction(book = book))
+            runAction(OnMarkBookAsReadClickAction(
+                book = book,
+                actionAt = actionAt,
+            ),)
         }
     }
 
@@ -93,9 +104,13 @@ internal class MarkAsReadController(
         )
 
         books.firstOrNull { it.id == targetId }?.let { book ->
-            runAction(OnMarkBookAsReadClickAction(book = book))
+            runAction(OnMarkBookAsReadClickAction(
+                book = book,
+                actionAt = pendingActionAt,
+            ),)
         }
 
+        pendingActionAt = null
         slideProgress.snapTo(targetValue = 0f)
         slidingBookId = null
     }

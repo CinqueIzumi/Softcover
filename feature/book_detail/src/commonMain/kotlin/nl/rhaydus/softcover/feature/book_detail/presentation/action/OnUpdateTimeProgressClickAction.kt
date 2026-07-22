@@ -14,6 +14,7 @@ internal data class OnUpdateTimeProgressClickAction(
     val hours: String,
     val minutes: String,
     val seconds: String,
+    val actionAt: String? = null,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
@@ -51,6 +52,7 @@ internal data class OnUpdateTimeProgressClickAction(
             dependencies.recordBookProgressUseCase(
                 book = bookToUpdate,
                 newSeconds = newSeconds,
+                actionAt = actionAt,
             )
                 .onSuccess { outcome ->
                     // Only a genuine finish transition raises the verdict prompt — re-recording the

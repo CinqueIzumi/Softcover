@@ -96,6 +96,40 @@ class OnMarkBookAsReadClickActionTest {
         }
 
         @Test
+        fun `invokes markBookAsReadUseCase with the provided actionAt when backdating a finish`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            val dependencies = stubDependencies(this)
+            val actionAt = "2026-07-21T21:00:00Z"
+
+            coEvery {
+                markBookAsReadUseCase(
+                    book = book,
+                    actionAt = actionAt,
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnMarkBookAsReadClickAction(
+                book = book,
+                actionAt = actionAt,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                markBookAsReadUseCase(
+                    book = book,
+                    actionAt = actionAt,
+                )
+            }
+        }
+
+        @Test
         fun `does not add book id to failedMutationBookIds when use case succeeds`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)

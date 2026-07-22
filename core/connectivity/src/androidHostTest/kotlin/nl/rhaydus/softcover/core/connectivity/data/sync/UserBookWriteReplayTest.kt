@@ -45,6 +45,7 @@ class UserBookWriteReplayTest {
         reviewSlateJson: String? = null,
         reviewHasSpoilers: Boolean? = null,
         enqueuedAt: String = "2026-05-04T12:34:56Z",
+        actionAt: String? = null,
     ) = PendingUserBookWrite(
         kind = kind,
         userBookId = userBookId,
@@ -59,6 +60,7 @@ class UserBookWriteReplayTest {
         reviewSlateJson = reviewSlateJson,
         reviewHasSpoilers = reviewHasSpoilers,
         enqueuedAt = enqueuedAt,
+        actionAt = actionAt,
     )
 
     @Nested
@@ -100,6 +102,50 @@ class UserBookWriteReplayTest {
                     progressSeconds = 3600,
                     startedAt = "2026-01-01",
                     finishedAt = null,
+                )
+            }
+        }
+
+        @Test
+        fun `passes a non-null actionAt through to replayUpdateBookProgress`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.UPDATE_PROGRESS,
+                userBookReadId = 100,
+                editionId = 200,
+                progressPages = 50,
+                progressSeconds = 3600,
+                startedAt = "2026-01-01",
+                finishedAt = null,
+                actionAt = "2026-05-04T12:34:56Z",
+            )
+
+            coJustRun {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = 100,
+                    editionId = 200,
+                    progressPages = 50,
+                    progressSeconds = 3600,
+                    startedAt = "2026-01-01",
+                    finishedAt = null,
+                    actionAt = "2026-05-04T12:34:56Z",
+                )
+            }
+
+            // ----- Act -----
+            val result = replay(payload = payload)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.SYNCED
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.replayUpdateBookProgress(
+                    userBookReadId = 100,
+                    editionId = 200,
+                    progressPages = 50,
+                    progressSeconds = 3600,
+                    startedAt = "2026-01-01",
+                    finishedAt = null,
+                    actionAt = "2026-05-04T12:34:56Z",
                 )
             }
         }
@@ -152,6 +198,38 @@ class UserBookWriteReplayTest {
                 booksRemoteDataSource.replayMarkBookAsRead(
                     bookId = 300,
                     userDate = "2026-05-04",
+                )
+            }
+        }
+
+        @Test
+        fun `passes a non-null actionAt through to replayMarkBookAsRead`() = runTest {
+            // ----- Arrange -----
+            val payload = pendingUserBookWrite(
+                kind = PendingUserBookWriteKind.MARK_AS_READ,
+                bookId = 300,
+                enqueuedAt = "2026-05-04T12:34:56Z",
+                actionAt = "2026-05-04T12:34:56Z",
+            )
+
+            coJustRun {
+                booksRemoteDataSource.replayMarkBookAsRead(
+                    bookId = 300,
+                    userDate = "2026-05-04",
+                    actionAt = "2026-05-04T12:34:56Z",
+                )
+            }
+
+            // ----- Act -----
+            val result = replay(payload = payload)
+
+            // ----- Assert -----
+            result shouldBe ReplayOutcome.SYNCED
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.replayMarkBookAsRead(
+                    bookId = 300,
+                    userDate = "2026-05-04",
+                    actionAt = "2026-05-04T12:34:56Z",
                 )
             }
         }

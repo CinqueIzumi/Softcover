@@ -33,6 +33,7 @@ The headliner is an app-wide **editorial redesign** — almost every surface reb
 - ✅ **Step 3.12** — Rating/review prompt on mark-as-read (S–M) — **done**. A combined **Verdict sheet** (rating + review in one editorial prompt — the shared `core:designsystem` `VerdictSheet`, with a book-page `VerdictBlock` replacing the old separate rating row + review card) rises on a genuine finish from **book detail** and the **Reading screen**, via both the explicit "Mark as Read" affordance and reaching 100% progress. Bulk mark-as-read was intentionally excluded (a per-book prompt doesn't fit a bulk action). Already deleted from `roadmap-steps.md`.
 - ✅ **Step 2.14** — Directly add a book to Currently Reading (S–M) — *pulled forward from 3.3.0 on user request.* **done** — book-detail Shelve control only (search / add-flows intentionally out of scope). The "Reading" row now works on a not-yet-shelved book: `markBookAsReading` gained an `insert_user_book` create path (`status_id = 2` + `user_date = today`, no `started_at`) alongside its existing `update_user_book` path, and the row's `status == None` disable gate was removed. Already deleted from `roadmap-steps.md`.
 - ✅ **Author demographics on Profile** (user request, outside the original step list) — a new **"Who you read"** section on the Profile screen showing the gender / BIPOC / LGBTQ+ makeup of the authors across your finished books. Computed from the remote finished-books stats aggregate (`GetReadUserBooksForStats`) and cached in the profile DataStore, **not** Room (the local book cache only holds currently-displayed Library books, so it can't back a complete stats view). Gender renders as a Women/Men/Other/Unknown proportion bar; BIPOC and LGBTQ+ as three-way Yes/No/Unknown bars, with Unknown shown as its own muted segment so the sparsely-tagged data isn't misrepresented. `gender_id` mapping/rendering per [architecture.md → Unresolvable API enums](../reference/architecture.md#unresolvable-api-enums).
+- ✅ **Step 2.15** — Log a progress update at a chosen date & time (S) — *user request.* **Done.** A date/time picker on the progress-entry flow so a bump can be backdated ("read to here at 9 pm yesterday"), and the picked time also dates the **finish** (reaching 100%, or the sheet's "Mark as Read") on both Reading and Book Detail. Threaded through both write paths' existing (previously unused) `action_at` slots: progress via `update_user_book_read`/`DatesReadInput` (`action_at` + `action = "progress_updated"`), finish via `insert_user_book`/`UserBookCreateInput` (`user_date` = picked local date + `action_at`), plus both offline-replay twins and the pending-write queue (Room `MIGRATION_48_49`). No new mutation, no fragment change; behavior byte-identical when no time is picked. Already deleted from `roadmap-steps.md`. The edit/delete-past-entries half is split out to **Step 3.15** in 3.6.0.
 
 ---
 
@@ -84,6 +85,7 @@ This is the release a tracking-minded user is really waiting for: it's the whole
 
 - **Step 3.4** — Notes & Highlights inbox screen (M) — *deps: 3.3 (3.5.0)*.
 - **Step 3.6** — Reading Sessions log screen (S).
+- **Step 3.15** — Edit & delete past reading-progress entries (S–M) — *soft dep: 2.15 (3.1.0) for the re-date picker*. Correct or remove a logged progress entry after the fact (fix a page, re-date, delete a mis-logged bump). Genuinely new — no delete/amend path exists today; route (`reading_journals` CRUD vs. amending `user_book_read`) settled in the step. Sits with the log/inbox surfaces in this release. *(User request.)*
 - **Step 8.13** — Personal-data export & import, JSON (S–M) — *deps: the Phase 3 corpus (3.5.0)*. **Pulled forward out of 9.8 deliberately**: the private corpus lands in 3.5.0 and lives nowhere but the device, so it cannot wait until 3.15.0 for a way out. Ships one release after the data exists. 9.8's full archive still follows and supersedes it.
 - **Step 4.8** — Share sheet: link + deep-link modes (S).
 - **Step 4.12** — Book-detail tabs / sectioning (M) — lands **after** all detail-enrichment (3.3–3.5.0 + 4.x). Design spike first.
@@ -231,6 +233,7 @@ Heavy on small polish; reorder freely within. Step 0.2 (share/render foundation)
 ## Cross-release dependency map at a glance
 
 ```
+3.1.0 (2.15) ──> 3.6.0 (3.15)
 3.2.0 (3.7) ──> 3.12.0 (7.12)
 3.5.0 (3.9) ──> 3.11.0 (7.13, 7.16)
 3.5.0 (3.13) ──> 3.11.0 (7.15) ──┐

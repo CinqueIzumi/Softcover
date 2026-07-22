@@ -148,11 +148,13 @@ interface BooksRepository {
         book: Book,
         newPage: Int? = null,
         newSeconds: Int? = null,
+        actionAt: String? = null,
     ): Book
 
     suspend fun markBookAsRead(
         book: Book,
         editionId: Int? = null,
+        actionAt: String? = null,
     ): Book
 
     suspend fun updateBookEdition(

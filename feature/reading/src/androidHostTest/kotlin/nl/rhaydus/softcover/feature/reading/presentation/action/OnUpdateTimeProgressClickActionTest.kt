@@ -215,6 +215,45 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3723,
+                    actionAt = null,
+                )
+            }
+        }
+
+        @Test
+        fun `passes actionAt through to updateBookProgress when provided`() = runTest {
+            // ----- Arrange -----
+            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = any(),
+                    actionAt = "2026-07-21T21:00:00Z",
+                )
+            } returns Result.success(null)
+
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "0",
+                seconds = "0",
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newSeconds = 3600,
+                    actionAt = "2026-07-21T21:00:00Z",
                 )
             }
         }

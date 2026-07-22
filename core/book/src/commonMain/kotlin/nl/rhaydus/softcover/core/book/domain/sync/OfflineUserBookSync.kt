@@ -13,9 +13,13 @@ interface OfflineUserBookSync {
         book: Book,
         newPage: Int?,
         newSeconds: Int?,
+        actionAt: String? = null,
     )
 
-    suspend fun enqueueMarkAsRead(book: Book)
+    suspend fun enqueueMarkAsRead(
+        book: Book,
+        actionAt: String? = null,
+    )
 
     suspend fun enqueueRatingUpdate(
         book: Book,

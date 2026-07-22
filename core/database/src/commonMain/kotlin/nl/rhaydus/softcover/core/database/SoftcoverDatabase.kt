@@ -71,7 +71,7 @@ import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
     views = [
         BookEditionView::class
     ],
-    version = 48,
+    version = 49,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -1311,6 +1311,14 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // A progress update can now be backdated to a user-chosen timestamp; the pending-write queue
+        // carries it for offline replay. Nullable so existing rows keep replaying with the "now" stamp.
+        private val MIGRATION_48_49 = object : Migration(48, 49) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE pending_user_book_writes ADD COLUMN actionAt TEXT DEFAULT NULL")
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1360,6 +1368,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_45_46,
             MIGRATION_46_47,
             MIGRATION_47_48,
+            MIGRATION_48_49,
         )
     }
 }

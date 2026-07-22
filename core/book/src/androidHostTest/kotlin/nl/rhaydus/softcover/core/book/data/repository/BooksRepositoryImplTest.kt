@@ -9,6 +9,7 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlin.time.Instant
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
@@ -17,10 +18,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
@@ -41,6 +40,10 @@ import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class BooksRepositoryImplTest {
     private lateinit var booksRemoteDataSource: BooksRemoteDataSource
@@ -3038,6 +3041,33 @@ class BooksRepositoryImplTest {
         }
 
         @Test
+        fun `updateBookProgress forwards actionAt to remote data source`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBookId = 1)
+            val newPage = 150
+            val actionAt = "2026-07-21T21:00:00Z"
+            val expectedBook = stubBook(userBookId = 1)
+
+            coEvery {
+                booksRemoteDataSource.updateBookProgress(
+                    book = book,
+                    newPage = newPage,
+                    actionAt = actionAt,
+                )
+            } returns expectedBook
+
+            // ----- Act -----
+            val result = repository.updateBookProgress(
+                book = book,
+                newPage = newPage,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            result shouldBe expectedBook
+        }
+
+        @Test
         fun `appends a progress_updated journal entry to the optimistic local cache write`() = runTest {
             // ----- Arrange -----
             val existingJournal = ReadingJournal(
@@ -3383,6 +3413,37 @@ class BooksRepositoryImplTest {
         }
 
         @Test
+        fun `forwards a non-null actionAt to remote data source`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(userBookId = 1)
+            val actionAt = "2026-07-21T21:00:00Z"
+            val expectedBook = stubBook(userBookId = 1)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = null,
+                    actionAt = actionAt,
+                )
+            } returns expectedBook
+
+            // ----- Act -----
+            repository.markBookAsRead(
+                book = book,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.markBookAsRead(
+                    book = book,
+                    editionId = null,
+                    actionAt = actionAt,
+                )
+            }
+        }
+
+        @Test
         fun `appends a user_book_read_finished journal entry to the optimistic local cache write`() = runTest {
             // ----- Arrange -----
             val existingJournal = ReadingJournal(
@@ -3458,6 +3519,80 @@ class BooksRepositoryImplTest {
             capturedJournals[1].event shouldBe "user_book_read_finished"
             capturedJournals[1].updatedAt.isNotEmpty() shouldBe true
             capturedUserBook.status shouldBe BookStatus.Read
+        }
+
+        @Test
+        fun `sets optimistic finishedAt to actionAt's local date on a backdated finish`() = runTest {
+            // ----- Arrange -----
+            val actionAt = "2026-07-21T21:00:00Z"
+            val expectedFinishedAt = Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+            val userBook = UserBook(
+                id = 1,
+                status = BookStatus.Reading,
+                dateAdded = "2026-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+            )
+            val userBookRead = UserBookRead(
+                id = 1,
+                currentPage = 50,
+                currentSeconds = null,
+                progress = 0.5f,
+                startedAt = null,
+                finishedAt = null,
+            )
+            val book = Book(
+                id = 42,
+                title = "Test Book",
+                editions = emptyList(),
+                defaultEdition = null,
+                rating = 0.0,
+                description = "",
+                releaseYear = 2020,
+                coverUrl = "",
+                authors = emptyList(),
+                usersCount = 0,
+                ratingsCount = 0,
+                bookSeries = null,
+                positionsInSeries = emptyList(),
+                isCompilation = false,
+                userBook = userBook,
+                userBookRead = userBookRead,
+            )
+            val slot = slot<Book>()
+
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(true)
+
+            coEvery {
+                booksRemoteDataSource.markBookAsRead(
+                    book = any(),
+                    editionId = any(),
+                    actionAt = any(),
+                )
+            } returns stubBook(userBookId = 1)
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = capture(slot))
+            } returns Unit
+
+            // ----- Act -----
+            repository.markBookAsRead(
+                book = book,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            slot.captured.userBookRead?.finishedAt shouldBe expectedFinishedAt
         }
 
         @Test
@@ -3938,6 +4073,35 @@ class BooksRepositoryImplTest {
         }
 
         @Test
+        fun `updateBookProgress when offline forwards actionAt to enqueueProgressUpdate`() = runTest {
+            // ----- Arrange -----
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
+
+            val book = stubBookWithUserBookRead()
+            val newPage = 75
+            val actionAt = "2026-07-21T21:00:00Z"
+
+            // ----- Act -----
+            repository.updateBookProgress(
+                book = book,
+                newPage = newPage,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                offlineSync.enqueueProgressUpdate(
+                    book = any(),
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = actionAt,
+                )
+            }
+        }
+
+        @Test
         fun `markBookAsRead when offline caches optimistic book and enqueues MARK_AS_READ without calling remote`() = runTest {
             // ----- Arrange -----
             every {
@@ -3960,6 +4124,31 @@ class BooksRepositoryImplTest {
                 booksRemoteDataSource.markBookAsRead(
                     book = any(),
                     editionId = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `markBookAsRead when offline forwards actionAt to enqueueMarkAsRead`() = runTest {
+            // ----- Arrange -----
+            every {
+                networkAvailability.isOnline
+            } returns MutableStateFlow(false)
+
+            val book = stubBookWithUserBookRead()
+            val actionAt = "2026-07-21T21:00:00Z"
+
+            // ----- Act -----
+            repository.markBookAsRead(
+                book = book,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                offlineSync.enqueueMarkAsRead(
+                    book = any(),
+                    actionAt = actionAt,
                 )
             }
         }

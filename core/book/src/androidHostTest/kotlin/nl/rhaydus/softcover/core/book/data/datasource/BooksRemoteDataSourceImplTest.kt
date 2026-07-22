@@ -14,13 +14,14 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.CreateBookMutation
 import nl.rhaydus.softcover.GetBookByIdQuery
@@ -55,6 +56,10 @@ import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.network.helper.safeMutation
 import nl.rhaydus.softcover.core.network.helper.safeQuery
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class BooksRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
@@ -2706,6 +2711,185 @@ class BooksRemoteDataSourceImplTest {
             // ----- Assert -----
             result.userBookRead?.currentSeconds shouldBe newSeconds
         }
+
+        @Test
+        fun `sends action_at and action when actionAt is provided`() = runTest {
+            // ----- Arrange -----
+            val actionAt = "2026-07-21T21:00:00Z"
+            val userBook = stubUserBook(id = 3)
+            val userBookRead = stubUserBookRead(id = 5)
+            val book = stubBook(
+                userBook = userBook,
+                userBookRead = userBookRead,
+            )
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+            val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
+            val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+            val expectedBook = stubBook()
+
+            every {
+                userBook.editionId
+            } returns 10
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+
+            every {
+                updateUserBookRead.user_book_read
+            } returns userBookReadEntry
+
+            every {
+                userBookReadEntry.user_book
+            } returns userBookGqlEntry
+
+            every {
+                userBookGqlEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.updateBookProgress(
+                book = book,
+                newPage = 75,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateReadingProgressMutation> { mutation ->
+                        val input = mutation.datesReadInput
+                        input.action_at.getOrNull() == actionAt &&
+                            input.action.getOrNull() == "progress_updated"
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `omits action_at and action when actionAt is not provided`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook(id = 3)
+            val userBookRead = stubUserBookRead(id = 5)
+            val book = stubBook(
+                userBook = userBook,
+                userBookRead = userBookRead,
+            )
+            val mutationData = mockk<UpdateReadingProgressMutation.Data>()
+            val updateUserBookRead = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read>()
+            val userBookReadEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read>()
+            val userBookGqlEntry = mockk<UpdateReadingProgressMutation.Data.Update_user_book_read.User_book_read.User_book>()
+            val expectedBook = stubBook()
+
+            every {
+                userBook.editionId
+            } returns 10
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.update_user_book_read
+            } returns updateUserBookRead
+
+            every {
+                updateUserBookRead.user_book_read
+            } returns userBookReadEntry
+
+            every {
+                userBookReadEntry.user_book
+            } returns userBookGqlEntry
+
+            every {
+                userBookGqlEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.updateBookProgress(
+                book = book,
+                newPage = 75,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateReadingProgressMutation> { mutation ->
+                        val input = mutation.datesReadInput
+                        input.action_at is Optional.Absent && input.action is Optional.Absent
+                    },
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class ReplayUpdateBookProgress {
+        @Test
+        fun `sends action_at and action when actionAt is provided`() = runTest {
+            // ----- Arrange -----
+            val actionAt = "2026-07-21T21:00:00Z"
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayUpdateBookProgress(
+                userBookReadId = 5,
+                editionId = 10,
+                progressPages = 75,
+                progressSeconds = null,
+                startedAt = "2026-01-01",
+                finishedAt = null,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateReadingProgressMutation> { mutation ->
+                        val input = mutation.datesReadInput
+                        input.action_at.getOrNull() == actionAt &&
+                            input.action.getOrNull() == "progress_updated"
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `omits action_at and action when actionAt is not provided`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                apolloClient.safeMutation(mutation = any<UpdateReadingProgressMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayUpdateBookProgress(
+                userBookReadId = 5,
+                editionId = 10,
+                progressPages = 75,
+                progressSeconds = null,
+                startedAt = "2026-01-01",
+                finishedAt = null,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<UpdateReadingProgressMutation> { mutation ->
+                        val input = mutation.datesReadInput
+                        input.action_at is Optional.Absent && input.action is Optional.Absent
+                    },
+                )
+            }
+        }
     }
 
     @Nested
@@ -2919,6 +3103,156 @@ class BooksRemoteDataSourceImplTest {
                 apolloClient.safeMutation(
                     mutation = match<MarkBookAsReadMutation> {
                         it.userBookCreateInput.edition_id == Optional.Absent
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `sets user_date to actionAt's local date and action_at present when actionAt is provided`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            val actionAt = "2026-07-21T21:00:00Z"
+            val expectedUserDate = Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+            val expectedBook = stubBook()
+            val mutationData = mockk<MarkBookAsReadMutation.Data>()
+            val insertUserBook = mockk<MarkBookAsReadMutation.Data.Insert_user_book>()
+            val userBookEntry = mockk<MarkBookAsReadMutation.Data.Insert_user_book.User_book>()
+
+            every {
+                book.id
+            } returns 11
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsReadMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_user_book
+            } returns insertUserBook
+
+            every {
+                insertUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.markBookAsRead(
+                book = book,
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsReadMutation> {
+                        it.userBookCreateInput.user_date == Optional.present(expectedUserDate) &&
+                            it.userBookCreateInput.action_at == Optional.present(actionAt)
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `sets user_date to today and action_at Absent when actionAt is not provided`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            val expectedUserDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
+            val expectedBook = stubBook()
+            val mutationData = mockk<MarkBookAsReadMutation.Data>()
+            val insertUserBook = mockk<MarkBookAsReadMutation.Data.Insert_user_book>()
+            val userBookEntry = mockk<MarkBookAsReadMutation.Data.Insert_user_book.User_book>()
+
+            every {
+                book.id
+            } returns 11
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsReadMutation>())
+            } returns mutationData
+
+            every {
+                mutationData.insert_user_book
+            } returns insertUserBook
+
+            every {
+                insertUserBook.user_book
+            } returns userBookEntry
+
+            every {
+                userBookEntry.toBook()
+            } returns expectedBook
+
+            // ----- Act -----
+            dataSource.markBookAsRead(book = book)
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsReadMutation> {
+                        it.userBookCreateInput.user_date == Optional.present(expectedUserDate) &&
+                            it.userBookCreateInput.action_at is Optional.Absent
+                    },
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class ReplayMarkBookAsRead {
+        @Test
+        fun `sets user_date to actionAt's local date and action_at present when actionAt is provided`() = runTest {
+            // ----- Arrange -----
+            val actionAt = "2026-07-21T21:00:00Z"
+            val expectedUserDate = Instant.parse(actionAt).toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsReadMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayMarkBookAsRead(
+                bookId = 11,
+                userDate = "2026-01-01",
+                actionAt = actionAt,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsReadMutation> {
+                        it.userBookCreateInput.user_date == Optional.present(expectedUserDate) &&
+                            it.userBookCreateInput.action_at == Optional.present(actionAt)
+                    },
+                )
+            }
+        }
+
+        @Test
+        fun `sets user_date to the given userDate and action_at Absent when actionAt is not provided`() = runTest {
+            // ----- Arrange -----
+            val userDate = "2026-01-01"
+
+            coEvery {
+                apolloClient.safeMutation(mutation = any<MarkBookAsReadMutation>())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            dataSource.replayMarkBookAsRead(
+                bookId = 11,
+                userDate = userDate,
+                actionAt = null,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                apolloClient.safeMutation(
+                    mutation = match<MarkBookAsReadMutation> {
+                        it.userBookCreateInput.user_date == Optional.present(userDate) &&
+                            it.userBookCreateInput.action_at is Optional.Absent
                     },
                 )
             }

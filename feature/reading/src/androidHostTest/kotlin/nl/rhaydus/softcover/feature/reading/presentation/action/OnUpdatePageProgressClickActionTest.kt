@@ -137,6 +137,45 @@ class OnUpdatePageProgressClickActionTest {
                     book = book,
                     newPage = 150,
                     newSeconds = null,
+                    actionAt = null,
+                )
+            }
+        }
+
+        @Test
+        fun `passes actionAt through to updateBookProgress when provided`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newPage = any(),
+                    newSeconds = any(),
+                    actionAt = "2026-07-21T21:00:00Z",
+                )
+            } returns Result.success(null)
+
+            val action = OnUpdatePageProgressClickAction(
+                newPage = "150",
+                actionAt = "2026-07-21T21:00:00Z",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookProgress(
+                    book = book,
+                    newPage = 150,
+                    newSeconds = null,
+                    actionAt = "2026-07-21T21:00:00Z",
                 )
             }
         }
