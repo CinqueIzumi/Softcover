@@ -390,12 +390,12 @@ private fun TagEditorAddBlock(
             Spacer(modifier = Modifier.height(14.dp))
 
             // Keyed on the category so the cloud's expansion does not survive a category switch:
-            // `ExpandableFlowRow` holds `maxLines` internally, and a `Full` reveal leaves it at
-            // `Int.MAX_VALUE`. Without a new key, expanding Genre would drop the user into Mood's
-            // entire vocabulary already unfurled, having never asked for it.
+            // `ExpandableFlowRow` holds its revealed-line count internally, so without a fresh key per
+            // category, switching from an expanded Genre into Mood would show Mood already
+            // part-unfurled to the same depth, having never asked for it.
             key(selectedCategory) {
                 ExpandableFlowRow(
-                    expansion = FlowRowExpansion.Full,
+                    expansion = FlowRowExpansion.Progressive(linesPerExpand = 3),
                     collapsible = true,
                 ) {
                     tagSuggestions.forEach { tag ->
