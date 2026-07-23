@@ -86,6 +86,10 @@ interface SettingsLocalDataSource {
 
     suspend fun setShelfSwipeEnabled(enabled: Boolean)
 
+    val hideUntaggedAuthors: Flow<Boolean>
+
+    suspend fun setHideUntaggedAuthors(enabled: Boolean)
+
     val uiScale: Flow<UiScale>
 
     suspend fun setUiScale(scale: UiScale)
@@ -288,6 +292,16 @@ internal class SettingsLocalDataSourceImpl(
     override suspend fun setShelfSwipeEnabled(enabled: Boolean) {
         appSettingsDataStore.store.updateData { entity ->
             entity.copy(shelfSwipeEnabled = enabled)
+        }
+    }
+
+    override val hideUntaggedAuthors: Flow<Boolean> = appSettingsDataStore.store.data
+        .map { it.hideUntaggedAuthors }
+        .distinctUntilChanged()
+
+    override suspend fun setHideUntaggedAuthors(enabled: Boolean) {
+        appSettingsDataStore.store.updateData { entity ->
+            entity.copy(hideUntaggedAuthors = enabled)
         }
     }
 

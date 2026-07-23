@@ -21,6 +21,7 @@ Polish shaken out of the 3.1.0 redesign.
 - **The top of Explore says what it is.** The big card opening Explore now labels itself "Most anticipated, next 30 days" and tells you how many readers are already waiting on it, so it's clear that's the upcoming book with the most people watching it rather than a random pick.
 - **Back steps out of a search first.** On phone and tablet, pressing back while you're searching in Explore clears the search and puts the feed back, instead of taking you off the screen with your results still up. Press back again and you leave as usual. On desktop, Esc does the same thing.
 - **All of your tags, when you want them.** Tagging a book suggests the tags you've used before. "Show more" now opens every tag you've used in that category, rather than stopping after the first handful and leaving the rest out of reach, and "Show less" folds them away again.
+- **Read your author stats without the blanks.** "Who you read" on your profile counts every author, including the many nobody has filled in any details for, which can leave the percentages looking oddly small. A new "Hide untagged authors" switch leaves those out, so each bar reads over the authors it actually has information for (each one over its own, since a book can be missing one detail but not another). It stays where you put it, and it's off to begin with.
 
 ## 3.2.0: Widgets (Android)
 

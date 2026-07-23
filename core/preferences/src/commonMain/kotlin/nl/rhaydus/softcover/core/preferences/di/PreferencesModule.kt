@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDesktopWindowStateAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
@@ -29,6 +30,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseC
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetDesktopWindowStateUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
@@ -103,6 +105,10 @@ val preferencesModule = module {
     factory { GetShelfSwipeEnabledAsFlowUseCase(settingsRepository = get()) }
 
     factory { SetShelfSwipeEnabledUseCase(settingsRepository = get()) }
+
+    factory { GetHideUntaggedAuthorsAsFlowUseCase(settingsRepository = get()) }
+
+    factory { SetHideUntaggedAuthorsUseCase(settingsRepository = get()) }
 
     factory { GetUiScaleAsFlowUseCase(settingsRepository = get()) }
 

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -33,6 +34,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.toShape
@@ -871,25 +873,38 @@ private val GENDER_STACK_ALPHAS = listOf(1f, 0.82f, 0.64f)
 /**
  * "Who you read" — a gender proportion bar + legend (mirroring [GenreStackSection]'s
  * [GenreProportionBar]/[GenreLegend]) over two three-way Yes/No/Unknown proportion bars for
- * [AuthorDemographics.bipocBreakdown] and [AuthorDemographics.lgbtqBreakdown]. All three bars are
- * scoped to *every* distinct tagged author (not just the ones with that attribute known), so the
- * — often large — untagged population is always visible rather than hidden behind a
+ * [AuthorDemographics.bipocBreakdown] and [AuthorDemographics.lgbtqBreakdown]. By default all three
+ * bars are scoped to *every* distinct tagged author (not just the ones with that attribute known), so
+ * the — often large — untagged population is always visible rather than hidden behind a
  * share-of-tagged-authors percentage: [AuthorDemographics.genderSlices] carries its own
  * [Gender.Unknown] slice pinned last, rendered by [GenderProportionBar]/[GenderLegend] in the same
  * muted, non-`primary` treatment [DemographicProportionBar]/[DemographicLegend] use for their Unknown
- * segment, so gender now reads as visually consistent with the other two bars rather than the odd
- * one out. Mirroring [GenreStackSection]/[RatingsHistogramSection], this always renders the
- * [SectionIntro] and falls back to a quiet placeholder line when there are no authors at all, so the
- * section never collapses to nothing between the surrounding `Spacer`s.
+ * segment, so gender reads as visually consistent with the other two bars rather than the odd one out.
+ *
+ * [hideUntaggedAuthors] is the reader's opt-in to the *other* reading: the untagged bucket drops out
+ * of each bar and the remaining percentages are renormalised over the tagged authors alone (per bar —
+ * see `AuthorDemographics.excludingUntaggedAuthors`, which is applied upstream in the state). The
+ * switch renders whenever there is an untagged bucket to drop at all ([canHideUntaggedAuthors]) and
+ * sits *outside* the empty-state branch on purpose, so a reader whose authors are entirely untagged
+ * can always switch back rather than being stranded in an empty section.
+ *
+ * Mirroring [GenreStackSection]/[RatingsHistogramSection], this always renders the [SectionIntro] and
+ * falls back to a quiet placeholder line when there is nothing to show, so the section never collapses
+ * to nothing between the surrounding `Spacer`s.
  */
 @Composable
 internal fun AuthorRepresentationSection(
     authorDemographics: AuthorDemographics,
+    hideUntaggedAuthors: Boolean,
+    canHideUntaggedAuthors: Boolean,
     isLoading: Boolean,
+    onHideUntaggedAuthorsChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val hasGenderData = authorDemographics.genderSlices.isNotEmpty()
-    val hasContent = authorDemographics.bipocBreakdown.total > 0
+    val hasBipocData = authorDemographics.bipocBreakdown.total > 0
+    val hasLgbtqData = authorDemographics.lgbtqBreakdown.total > 0
+    val hasContent = hasGenderData || hasBipocData || hasLgbtqData
 
     Column(modifier = modifier) {
         SectionIntro(
@@ -899,9 +914,18 @@ internal fun AuthorRepresentationSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        if (canHideUntaggedAuthors && isLoading.not()) {
+            HideUntaggedAuthorsToggle(
+                checked = hideUntaggedAuthors,
+                onCheckedChange = onHideUntaggedAuthorsChange,
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
         if (hasContent.not() && isLoading.not()) {
             Text(
-                text = "Author demographics will appear here as the authors you read get tagged.",
+                text = emptyAuthorDemographicsCaption(hideUntaggedAuthors = hideUntaggedAuthors),
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -925,6 +949,7 @@ internal fun AuthorRepresentationSection(
                     text = genderCaption(
                         knownGenderCount = authorDemographics.knownGenderCount,
                         unknownGenderCount = authorDemographics.unknownGenderCount,
+                        hideUntaggedAuthors = hideUntaggedAuthors,
                     ),
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -932,13 +957,13 @@ internal fun AuthorRepresentationSection(
                 )
             }
 
-            if (hasContent || isLoading) {
+            if (hasBipocData || hasLgbtqData || isLoading) {
                 if (hasGenderData || isLoading) {
                     Spacer(modifier = Modifier.height(28.dp))
                 }
 
                 Text(
-                    text = "Shares of every author you've read, tagged or not.",
+                    text = demographicScopeCaption(hideUntaggedAuthors = hideUntaggedAuthors),
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.shimmer(isLoading = isLoading),
@@ -949,6 +974,7 @@ internal fun AuthorRepresentationSection(
                 DemographicBreakdownBlock(
                     label = "BIPOC",
                     breakdown = authorDemographics.bipocBreakdown,
+                    hideUntaggedAuthors = hideUntaggedAuthors,
                     isLoading = isLoading,
                 )
 
@@ -957,11 +983,55 @@ internal fun AuthorRepresentationSection(
                 DemographicBreakdownBlock(
                     label = "LGBTQ+",
                     breakdown = authorDemographics.lgbtqBreakdown,
+                    hideUntaggedAuthors = hideUntaggedAuthors,
                     isLoading = isLoading,
                 )
             }
         }
     }
+}
+
+// The Appearance-settings toggle-row anatomy (label over an italic Fraunces gloss, trailing M3 Switch,
+// no card and no "On/Off" caption) borrowed onto a stats section — the gloss carries the whole
+// explanation, since "untagged" means something different per bar and a bare label couldn't say so.
+@Composable
+private fun HideUntaggedAuthorsToggle(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Hide untagged authors",
+                style = MaterialTheme.editorialTypography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Read each bar over the authors it has data for.",
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
+
+private fun emptyAuthorDemographicsCaption(hideUntaggedAuthors: Boolean): String = if (hideUntaggedAuthors) {
+    "None of the authors you've read carry this data yet — switch off to see the untagged share."
+} else {
+    "Author demographics will appear here as the authors you read get tagged."
 }
 
 // Unlike GenreProportionBar (a ranked top-five that need not sum to 1), every GenderSlice.fraction
@@ -1081,16 +1151,29 @@ private fun Gender.toDisplayLabel(): String = when (this) {
 
 // The bar/legend already render the untagged share directly as their own Unknown slice, so this no
 // longer repeats "M unknown" alongside it — it just grounds the section in the reader's total author
-// count, mirroring how DemographicBreakdownBlock's caption grounds its Yes/No/Unknown breakdown.
+// count, mirroring how DemographicBreakdownBlock's caption grounds its Yes/No/Unknown breakdown. While
+// the untagged authors are hidden the count is the same arithmetic (unknownGenderCount is 0 by then)
+// but a different claim, so the wording says which authors it counted.
 private fun genderCaption(
     knownGenderCount: Int,
     unknownGenderCount: Int,
+    hideUntaggedAuthors: Boolean,
 ): String {
     val totalAuthorCount = knownGenderCount + unknownGenderCount
 
     if (totalAuthorCount == 0) return "Gender breakdown will fill in as your tagged authors are identified."
 
+    if (hideUntaggedAuthors) return "Across $totalAuthorCount authors with a known gender."
+
     return "Across $totalAuthorCount authors."
+}
+
+// Names what the two breakdowns below are a share *of* — the one line that changes meaning wholesale
+// with the switch, since each bar's denominator drops to its own tagged subset.
+private fun demographicScopeCaption(hideUntaggedAuthors: Boolean): String = if (hideUntaggedAuthors) {
+    "Shares of the authors each one is tagged for — untagged authors left out."
+} else {
+    "Shares of every author you've read, tagged or not."
 }
 
 // The three-way Yes/No/Unknown breakdown bar — a variant of the proportion-bar shape above, but with
@@ -1107,6 +1190,7 @@ private const val DEMOGRAPHIC_UNKNOWN_ALPHA = 0.22f
 private fun DemographicBreakdownBlock(
     label: String,
     breakdown: DemographicBreakdown,
+    hideUntaggedAuthors: Boolean,
     isLoading: Boolean,
 ) {
     Column {
@@ -1118,22 +1202,29 @@ private fun DemographicBreakdownBlock(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        DemographicProportionBar(
-            breakdown = breakdown,
-            isLoading = isLoading,
-        )
+        // An empty breakdown keeps its eyebrow and drops to the caption alone: with nobody tagged there
+        // is no proportion to draw, and a bar of three zero-width segments would read as data.
+        if (breakdown.total > 0 || isLoading) {
+            DemographicProportionBar(
+                breakdown = breakdown,
+                isLoading = isLoading,
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        DemographicLegend(
-            breakdown = breakdown,
-            isLoading = isLoading,
-        )
+            DemographicLegend(
+                breakdown = breakdown,
+                isLoading = isLoading,
+            )
 
-        Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
         Text(
-            text = demographicCaption(breakdown = breakdown),
+            text = demographicCaption(
+                breakdown = breakdown,
+                hideUntaggedAuthors = hideUntaggedAuthors,
+            ),
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.shimmer(isLoading = isLoading),
@@ -1157,25 +1248,41 @@ private fun DemographicProportionBar(
             .shimmer(shape = shape, isLoading = isLoading),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .weight((breakdown.yesCount.toFloat() / total).coerceAtLeast(0.01f))
-                .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = DEMOGRAPHIC_YES_ALPHA)),
+        DemographicBarSegment(
+            count = breakdown.yesCount,
+            total = total,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = DEMOGRAPHIC_YES_ALPHA),
         )
 
-        Box(
-            modifier = Modifier
-                .weight((breakdown.noCount.toFloat() / total).coerceAtLeast(0.01f))
-                .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = DEMOGRAPHIC_NO_ALPHA)),
+        DemographicBarSegment(
+            count = breakdown.noCount,
+            total = total,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = DEMOGRAPHIC_NO_ALPHA),
         )
 
+        DemographicBarSegment(
+            count = breakdown.unknownCount,
+            total = total,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = DEMOGRAPHIC_UNKNOWN_ALPHA),
+        )
+    }
+}
+
+// A zero bucket draws nothing at all: the 0.01 floor exists so a tiny *real* share stays visible, and
+// spending it on an empty bucket would draw a segment for authors who aren't there — which is exactly
+// what the Unknown bucket becomes once the untagged authors are hidden.
+@Composable
+private fun RowScope.DemographicBarSegment(
+    count: Int,
+    total: Int,
+    color: Color,
+) {
+    if (count > 0) {
         Box(
             modifier = Modifier
-                .weight((breakdown.unknownCount.toFloat() / total).coerceAtLeast(0.01f))
+                .weight((count.toFloat() / total).coerceAtLeast(0.01f))
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = DEMOGRAPHIC_UNKNOWN_ALPHA)),
+                .background(color),
         )
     }
 }
@@ -1204,13 +1311,18 @@ private fun DemographicLegend(
             hairlineColor = hairlineColor,
         )
 
-        DemographicLegendRow(
-            label = "Unknown",
-            count = breakdown.unknownCount,
-            total = breakdown.total,
-            swatchColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = DEMOGRAPHIC_UNKNOWN_ALPHA),
-            hairlineColor = hairlineColor,
-        )
+        // Yes/No are the fixed categories and stay even at 0%, but Unknown is only a row when there is
+        // an untagged share to report — otherwise "Unknown 0%" claims a bucket that was deliberately
+        // excluded (switch on) or simply doesn't exist (every author tagged).
+        if (breakdown.unknownCount > 0 || isLoading) {
+            DemographicLegendRow(
+                label = "Unknown",
+                count = breakdown.unknownCount,
+                total = breakdown.total,
+                swatchColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = DEMOGRAPHIC_UNKNOWN_ALPHA),
+                hairlineColor = hairlineColor,
+            )
+        }
     }
 }
 
@@ -1268,11 +1380,28 @@ private fun demographicPercentage(
     return ((count.toDouble() / total) * PERCENTAGE_MULTIPLIER).roundToInt()
 }
 
-private fun demographicCaption(breakdown: DemographicBreakdown): String {
-    if (breakdown.total == 0) return "This breakdown will fill in as your tagged authors are identified."
+private fun demographicCaption(
+    breakdown: DemographicBreakdown,
+    hideUntaggedAuthors: Boolean,
+): String {
+    if (breakdown.total == 0) {
+        if (hideUntaggedAuthors) return "None of your authors carry this data yet."
 
-    return "Yes ${breakdown.yesCount} · No ${breakdown.noCount} · Unknown ${breakdown.unknownCount} · " +
+        return "This breakdown will fill in as your tagged authors are identified."
+    }
+
+    val counts = listOfNotNull(
+        "Yes ${breakdown.yesCount}",
+        "No ${breakdown.noCount}",
+        "Unknown ${breakdown.unknownCount}".takeIf { breakdown.unknownCount > 0 },
+    ).joinToString(separator = " · ")
+    val total = if (hideUntaggedAuthors) {
+        "of ${breakdown.total} tagged authors"
+    } else {
         "of ${breakdown.total} authors"
+    }
+
+    return "$counts · $total"
 }
 // endregion
 // region Ratings histogram
