@@ -749,7 +749,8 @@ private val GENRE_STACK_ALPHAS = listOf(1f, 0.82f, 0.64f, 0.48f, 0.34f)
 /**
  * "The genres you read most" — a single stepped-alpha proportion bar over a percentage legend. Both
  * read the [GenreSlice]s in the order [ReadingLife.genres] already ranks them (the domain layer keeps
- * the top five and drops the rest).
+ * the top five and drops the rest). A closing footnote names both reasons the percentages don't sum
+ * to 100 — the top-five cut and the fact that a multi-genre book counts toward each of its genres.
  */
 @Composable
 internal fun GenreStackSection(
@@ -780,6 +781,16 @@ internal fun GenreStackSection(
             Spacer(modifier = Modifier.height(16.dp))
 
             GenreLegend(genres = genres)
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = "Your five most-read genres, as a share of all genre tags on your finished books. " +
+                    "A book tagged with several counts toward each.",
+                style = MaterialTheme.editorialTypography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.shimmer(isLoading = isLoading),
+            )
         }
     }
 }
