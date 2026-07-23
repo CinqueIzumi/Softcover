@@ -39,7 +39,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
@@ -59,12 +58,14 @@ import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnClearSearchAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnLoadMoreSearchResultsAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRetrySearchAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchFocusChangedAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchActivatedAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchDismissedAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreSearchPhase
 
@@ -105,7 +106,10 @@ internal actual fun ExploreScreenLayout(
                 onScanClick = onScanClick,
                 isLoading = state.isLoading,
                 active = state.searchPhase != ExploreSearchPhase.FEED,
-                onFocusChange = { focused -> runAction(OnSearchFocusChangedAction(focused = focused)) },
+                focused = state.searchFocused,
+                onSearchActivated = { runAction(OnSearchActivatedAction) },
+                onSearchDismissed = { runAction(OnSearchDismissedAction) },
+                onClearSearch = { runAction(OnClearSearchAction) },
             )
         },
     ) { padding ->
@@ -148,20 +152,16 @@ private fun SearchFocusScreen(
     runAction: (ExploreAction) -> Unit,
     contentPadding: PaddingValues,
 ) {
-    // Feedback item 11: tapping outside the focused field dismisses the focus surface, but the
-    // BasicTextField living in `SoftcoverSearchTopBar` kept its platform focus/cursor. Clearing it
-    // here reaches into the same composition the top bar's field is part of.
-    val focusManager = LocalFocusManager.current
-
     Box(
+        // Feedback item 11: tapping outside the focused field dismisses the focus surface. Only the
+        // state is dismissed here - the top bar owns the platform focus and the keyboard, and lets
+        // go of both off the back of this action (see `SoftcoverSearchTopBar`). Clearing focus from
+        // this side as well is what used to leave the two out of step.
         modifier = Modifier
             .padding(contentPadding)
             .fillMaxSize()
             .pointerInput(Unit) {
-                detectTapGestures {
-                    focusManager.clearFocus()
-                    runAction(OnSearchFocusChangedAction(focused = false))
-                }
+                detectTapGestures { runAction(OnSearchDismissedAction) }
             },
     ) {
         Column(
