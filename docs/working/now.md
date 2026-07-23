@@ -39,7 +39,7 @@ _Unlike a fast-track fix, an item here is **ticked rather than deleted** when it
 
 **Maybes** (in scope only if they turn out to be cheap):
 
-- [ ] **Exclude books with no genre data from the genre stats.** Wanted, but currently the genre breakdown is computed from the aggregate query and it's unclear whether aggregates can express "has no genres at all". Investigate first: if it isn't expressible there, the fallback is a normal (non-aggregate) query, which is judged far too heavy — in that case, drop it.
+- [ ] **Exclude books with no genre data from the genre stats.** Wanted, but currently the genre breakdown is computed from the aggregate query and it's unclear whether aggregates can express "has no genres at all". Investigate first: if it isn't expressible there, the fallback is a normal (non-aggregate) query, which is judged far too heavy — in that case, drop it. Shares its landing site (`toGenreSlices`) with Step 7.18 (full genre breakdown), which also reworks that aggregate — settle the two together rather than opening it twice.
 
 > Foundation adoption onto local 0.3.0 is **done** (21 F-items landed). The only residue is the build-logic batch (F18/F20/F21), hard-blocked until the foundation publishes `build-logic` as Gradle plugins — tracked in [foundation-upstream-candidates.md](foundation-upstream-candidates.md), not here.
 

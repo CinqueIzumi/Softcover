@@ -77,6 +77,7 @@ A long editorial **Stats Atlas**, and the payoff for everything you recorded in 
 - **Diversity & representation**: your reading by author gender, background and country, drawn from your own private tags.
 - **How you read**: whether your year leaned plot- or character-driven, your pace and writing-style mix, and the moods you reach for most.
 - **Publication & provenance**: author nationality, language and how much you read in translation, publication years, audience, and where your books came from.
+- **Every genre, not just your top five**: the genre chart stays a top five at a glance, with one tap to open the full ranking of everything you have read.
 
 ## 3.12.0: Calendars & recap
 
