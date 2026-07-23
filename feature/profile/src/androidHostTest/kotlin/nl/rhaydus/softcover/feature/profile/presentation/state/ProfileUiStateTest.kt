@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
+import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import org.junit.jupiter.api.Nested
@@ -16,7 +17,7 @@ class ProfileUiStateTest {
         booksByYear = emptyList(),
         pagesByYear = emptyList(),
         pagesByMonth = emptyList(),
-        genres = emptyList(),
+        genres = GenreBreakdown(),
         ratings = RatingsDistribution(),
         recentlyLoved = emptyList(),
         authorDemographics = authorDemographics,

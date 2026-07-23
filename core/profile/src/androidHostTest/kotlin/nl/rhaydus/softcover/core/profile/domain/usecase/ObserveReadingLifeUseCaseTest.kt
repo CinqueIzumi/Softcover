@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
+import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
@@ -56,11 +57,14 @@ class ObserveReadingLifeUseCaseTest {
             month = 3,
             count = 300,
         ),),
-        genres = listOf(GenreSlice(
-            name = "Fantasy",
-            count = 5,
-            fraction = 1.0,
-        ),),
+        genres = GenreBreakdown(
+            slices = listOf(GenreSlice(
+                name = "Fantasy",
+                count = 5,
+                fraction = 1.0,
+            ),),
+            taggedBookCount = 5,
+        ),
         ratings = ratings,
         recentlyLoved = listOf(
             LovedBook(

@@ -40,6 +40,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
@@ -327,8 +328,8 @@ private fun ReadingLifeContent(
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        GenreStackSection(
-            genres = state.readingLife?.genres.orEmpty(),
+        GenreRankingSection(
+            genres = state.readingLife?.genres ?: GenreBreakdown(),
             isLoading = readingLifeLoading,
         )
 

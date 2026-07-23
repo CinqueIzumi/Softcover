@@ -92,6 +92,7 @@ import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
+import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
@@ -745,18 +746,32 @@ private fun yearHistoryCaption(
     return "${peak.year} was your busiest year yet — ${formatGroupedNumber(peak.count)} $unit."
 }
 // endregion
-// region Genre stack
-private val GENRE_STACK_ALPHAS = listOf(1f, 0.82f, 0.64f, 0.48f, 0.34f)
+// region Genre ranking
+private val GENRE_BAR_ALPHAS = listOf(1f, 0.82f, 0.64f, 0.48f, 0.34f)
+private val GENRE_BAR_HEIGHT = 10.dp
+private const val GENRE_TRACK_ALPHA = 0.14f
+private const val GENRE_BAR_MIN_FRACTION = 0.015f
+private const val GENRE_SKELETON_ROWS = 3
 
 /**
- * "The genres you read most" — a single stepped-alpha proportion bar over a percentage legend. Both
- * read the [GenreSlice]s in the order [ReadingLife.genres] already ranks them (the domain layer keeps
- * the top five and drops the rest). A closing footnote names both reasons the percentages don't sum
- * to 100 — the top-five cut and the fact that a multi-genre book counts toward each of its genres.
+ * "The genres you read most" — one horizontal bar per genre, each filled against its own full-width
+ * **100% track**, so a bar's length reads directly as the share of the reader's books carrying that
+ * genre. Reads the [GenreSlice]s in the order [GenreBreakdown.slices] already ranks them (the domain
+ * layer keeps the top five and drops the rest).
+ *
+ * Deliberately **not** the stacked proportion bar this section used before 3.1.1. A stacked bar
+ * asserts a partition of a whole, and these shares are not parts of a whole: genres overlap, so five
+ * of them can each be 60% and the set can total well past 100. Giving every genre its own common
+ * track is the shape that survives that — each bar is read against 100%, never against its
+ * neighbours, so there is no whole to be a remainder of and no "gap" left to correct.
+ *
+ * Rank is carried by the stepping alphas this section has always used (§2.1: monochrome `primary`,
+ * shape carries the data, alpha carries emphasis) rather than by bar length alone, so two genres
+ * within a point of each other still read as first and second.
  */
 @Composable
-internal fun GenreStackSection(
-    genres: List<GenreSlice>,
+internal fun GenreRankingSection(
+    genres: GenreBreakdown,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -768,27 +783,22 @@ internal fun GenreStackSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        if (genres.isEmpty() && isLoading.not()) {
+        if (genres.slices.isEmpty() && isLoading.not()) {
             Text(
                 text = "Once a few books settle onto your shelves, this fills in.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            GenreProportionBar(
-                genres = genres,
+            GenreRankedBars(
+                slices = genres.slices,
                 isLoading = isLoading,
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            GenreLegend(genres = genres)
-
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "Your five most-read genres, as a share of all genre tags on your finished books. " +
-                    "A book tagged with several counts toward each.",
+                text = genreScopeCaption(taggedBookCount = genres.taggedBookCount),
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.shimmer(isLoading = isLoading),
@@ -797,82 +807,143 @@ internal fun GenreStackSection(
     }
 }
 
-// The bar spans the full width by design: `Row` weights normalize over their sum, and since only the
-// top five genres are shown their fractions no longer add up to 1. It therefore reads as proportion
-// *among* the reader's top genres, with the legend beneath carrying the true percentages — do not
-// "fix" the gap by weighting in a remainder segment.
-@Composable
-private fun GenreProportionBar(
-    genres: List<GenreSlice>,
-    isLoading: Boolean,
-) {
-    val shape = RoundedCornerShape(6.dp)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(18.dp)
-            .clip(shape)
-            .shimmer(shape = shape, isLoading = isLoading),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        genres.take(GENRE_STACK_ALPHAS.size).forEachIndexed { index, slice ->
-            Box(
-                modifier = Modifier
-                    .weight(slice.fraction.toFloat().coerceAtLeast(0.01f))
-                    .fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = GENRE_STACK_ALPHAS[index])),
-            )
-        }
+/**
+ * Names the denominator in words, because the bars alone can't: a share of *books* is only meaningful
+ * once the reader knows which books were counted. Untagged books are outside the scope entirely, so
+ * the sentence says so rather than leaving "your books" to be read as the whole shelf.
+ *
+ * Falls back to the scope-free wording when the count is 0 — that is either a genuinely empty library
+ * or a profile cached by a build older than 3.1.1 (the stored count defaults to 0 and fills in on the
+ * session's refresh), and naming "0 books" beneath five populated bars would be worse than saying
+ * nothing.
+ */
+private fun genreScopeCaption(taggedBookCount: Int): String {
+    val scope = when (taggedBookCount) {
+        0 -> "counted over your finished books that carry genre tags"
+        1 -> "counted over the single finished book of yours that carries genre tags"
+        else -> "counted over the ${formatGroupedNumber(taggedBookCount)} finished books of yours that carry genre tags"
     }
+
+    return "Your five most-read genres, each as a share of your books — $scope. " +
+        "A book tagged with several counts toward each, so these overlap and don't total 100%."
 }
 
 @Composable
-private fun GenreLegend(genres: List<GenreSlice>) {
-    val hairlineColor = MaterialTheme.colorScheme.outlineVariant
+private fun GenreRankedBars(
+    slices: List<GenreSlice>,
+    isLoading: Boolean,
+) {
+    val rows = slices.take(GENRE_BAR_ALPHAS.size)
 
-    Column {
-        genres.take(GENRE_STACK_ALPHAS.size).forEachIndexed { index, slice ->
-            HorizontalDivider(color = hairlineColor)
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 7.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(11.dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = GENRE_STACK_ALPHAS[index])),
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        // Keeps the section from collapsing to its intro alone through the first load: with no slices
+        // yet there is nothing to draw, and an empty Column would leave a bare headline that then
+        // jumps as the data lands. The skeleton reserves the tracks only, not the name/percentage rows
+        // above them, so the section still grows on arrival - this softens the jump rather than
+        // removing it, which is the same trade the legend-less loading state made before it.
+        if (rows.isEmpty()) {
+            repeat(GENRE_SKELETON_ROWS) { index ->
+                GenreBarTrack(
+                    fraction = 0f,
+                    alpha = GENRE_BAR_ALPHAS[index],
+                    isLoading = isLoading,
                 )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Text(
-                    text = slice.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f),
-                )
-
-                Text(
-                    text = "${(slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            }
+        } else {
+            rows.forEachIndexed { index, slice ->
+                GenreRankedBar(
+                    slice = slice,
+                    alpha = GENRE_BAR_ALPHAS[index],
+                    isLoading = isLoading,
                 )
             }
         }
     }
 }
+
+@Composable
+private fun GenreRankedBar(
+    slice: GenreSlice,
+    alpha: Float,
+    isLoading: Boolean,
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = slice.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = "${(slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        GenreBarTrack(
+            fraction = slice.fraction.toFloat(),
+            alpha = alpha,
+            isLoading = isLoading,
+        )
+    }
+}
+
+// The fill is floored so a genre that rounds to a visible percentage still draws something, and
+// capped at the full track so a share can never overrun it. Unlike the stacked bar this replaced,
+// the floor costs nothing from a neighbour — each track is its own 100%.
+@Composable
+private fun GenreBarTrack(
+    fraction: Float,
+    alpha: Float,
+    isLoading: Boolean,
+) {
+    val shape = RoundedCornerShape(3.dp)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(GENRE_BAR_HEIGHT)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = GENRE_TRACK_ALPHA))
+            .shimmer(shape = shape, isLoading = isLoading),
+    ) {
+        if (fraction > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(
+                        fraction.coerceIn(
+                            GENRE_BAR_MIN_FRACTION,
+                            1f,
+                        ),
+                    )
+                    .fillMaxHeight()
+                    .clip(shape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha)),
+            )
+        }
+    }
+}
+
 // endregion
 // region Author representation
 private val GENDER_STACK_ALPHAS = listOf(1f, 0.82f, 0.64f)
 
 /**
- * "Who you read" — a gender proportion bar + legend (mirroring [GenreStackSection]'s
- * [GenreProportionBar]/[GenreLegend]) over two three-way Yes/No/Unknown proportion bars for
+ * "Who you read" — a gender proportion bar + legend (the ranked *stack* shape, which the genre
+ * section left behind in 3.1.1 — genders partition their population, so a stack is honest there in a
+ * way it no longer was for overlapping genres) over two three-way Yes/No/Unknown proportion bars for
  * [AuthorDemographics.bipocBreakdown] and [AuthorDemographics.lgbtqBreakdown]. By default all three
  * bars are scoped to *every* distinct tagged author (not just the ones with that attribute known), so
  * the — often large — untagged population is always visible rather than hidden behind a
@@ -888,7 +959,7 @@ private val GENDER_STACK_ALPHAS = listOf(1f, 0.82f, 0.64f)
  * sits *outside* the empty-state branch on purpose, so a reader whose authors are entirely untagged
  * can always switch back rather than being stranded in an empty section.
  *
- * Mirroring [GenreStackSection]/[RatingsHistogramSection], this always renders the [SectionIntro] and
+ * Mirroring [GenreRankingSection]/[RatingsHistogramSection], this always renders the [SectionIntro] and
  * falls back to a quiet placeholder line when there is nothing to show, so the section never collapses
  * to nothing between the surrounding `Spacer`s.
  */
@@ -1034,7 +1105,7 @@ private fun emptyAuthorDemographicsCaption(hideUntaggedAuthors: Boolean): String
     "Author demographics will appear here as the authors you read get tagged."
 }
 
-// Unlike GenreProportionBar (a ranked top-five that need not sum to 1), every GenderSlice.fraction
+// Unlike GenreRankedBar (a ranked top-five whose shares overlap and need not sum to 1), every GenderSlice.fraction
 // here is a share of *all* distinct authors — including the Gender.Unknown slice pinned last — so the
 // slices already sum to (rounding aside) 1 and the bar reads as a true proportion, not a proportion
 // among known slices. genderStackIndices below keeps Unknown out of GENDER_STACK_ALPHAS indexing so
@@ -2078,7 +2149,7 @@ internal fun ReadingLife.toShareContent(profile: UserProfileData): ReadingLifeSh
         totalPagesRead = profile.totalPagesRead,
         totalBooksRead = profile.booksRead,
         // Already ranked highest-first by the mapper, so the card's leading row is the top genre.
-        topGenres = genres.take(SHARE_CARD_GENRE_LIMIT).map { slice ->
+        topGenres = genres.slices.take(SHARE_CARD_GENRE_LIMIT).map { slice ->
             ReadingLifeGenre(
                 name = slice.name,
                 percentage = (slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt(),
@@ -2194,32 +2265,37 @@ private fun previewPagesByMonth(): List<MonthCount> =
             )
         }
 
-private fun previewGenres(): List<GenreSlice> = listOf(
-    GenreSlice(
-        name = "Literary fiction",
-        count = 73,
-        fraction = 0.34,
+// Each fraction is its slice's count over the 148 genre-tagged books, so the sample reader's bars sum
+// past 100 - which is the point: overlapping genres are what the ranked-bar shape exists to show.
+private fun previewGenres(): GenreBreakdown = GenreBreakdown(
+    slices = listOf(
+        GenreSlice(
+            name = "Literary fiction",
+            count = 73,
+            fraction = 0.493,
+        ),
+        GenreSlice(
+            name = "Fantasy",
+            count = 51,
+            fraction = 0.345,
+        ),
+        GenreSlice(
+            name = "History",
+            count = 32,
+            fraction = 0.216,
+        ),
+        GenreSlice(
+            name = "Mystery",
+            count = 28,
+            fraction = 0.189,
+        ),
+        GenreSlice(
+            name = "Science fiction",
+            count = 19,
+            fraction = 0.128,
+        ),
     ),
-    GenreSlice(
-        name = "Fantasy",
-        count = 51,
-        fraction = 0.24,
-    ),
-    GenreSlice(
-        name = "History",
-        count = 32,
-        fraction = 0.15,
-    ),
-    GenreSlice(
-        name = "Mystery",
-        count = 28,
-        fraction = 0.13,
-    ),
-    GenreSlice(
-        name = "Science fiction",
-        count = 19,
-        fraction = 0.09,
-    ),
+    taggedBookCount = 148,
 )
 
 private fun previewAuthorDemographics(): AuthorDemographics = AuthorDemographics(
