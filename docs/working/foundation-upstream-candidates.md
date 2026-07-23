@@ -94,6 +94,30 @@ Filed but not yet implemented in the foundation.
   created the glom) is **deferred until this rule exists**, so the fix is applied once, by the tool,
   rather than hand-swept and left ungated.
 
+### F26 — `dismissOnEscape` that listens without taking focus
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core` (`jvmMain`, `nl.rhaydus.designsystem.modifier.DesktopKeyboard`)
+- **Status:** **Open.** `Modifier.dismissOnEscape(enabled, onDismiss)` requests focus on the node
+  whenever `enabled` flips false → true (`LaunchedEffect(enabled) { … requestFocus() }`). That is right
+  for the surfaces it was built for — a mode entered by a gesture (bulk-select, rearrange) or a viewer
+  pushed over the page — where nothing is being typed at the moment of the flip. It makes the modifier
+  **unusable gated** on any condition a *text field* drives: desktop Explore's Esc-clears-search wants
+  `enabled = state.hasActiveSearch`, but that condition flips on the first typed character, so enabling
+  it would pull focus out of the very field being typed into and swallow the rest of the word.
+- **Workaround in the app:** desktop Explore holds the modifier unconditionally enabled and guards
+  inside the callback (`ExploreScreenLayout.jvm.kt`). Correct, but it consumes every Esc keydown on the
+  screen — harmless there (no other Esc consumer; the sheets are `Dialog`/`Popup` with their own focus
+  scope), and not something to repeat on a surface that has one.
+- **What to build:** separate "catch Esc" from "grab focus" — either a `grabsFocus: Boolean = true`
+  parameter, or a sibling `Modifier.onEscape(enabled, onEscape)` that installs only the
+  `onPreviewKeyEvent` handler and leaves focus alone (it still fires whenever focus sits anywhere inside
+  the subtree, which is the persistent-field case). The gated form should also stop consuming the event
+  when it does nothing, so a disabled rung leaves Esc for whatever else wants it.
+- **Doc impact:** the foundation design-system §"Desktop Esc-to-dismiss" gains the gate-vs-guard rule;
+  Softcover's own copy carries it today (`docs/reference/design-system/foundations.md` §2.5, and the
+  search-chrome block in `design-system/layout.md` §3.1).
+
 ---
 
 # Implemented, not adopted

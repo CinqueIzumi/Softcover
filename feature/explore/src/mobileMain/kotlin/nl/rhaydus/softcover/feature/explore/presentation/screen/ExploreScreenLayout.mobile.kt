@@ -40,6 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
@@ -97,6 +100,37 @@ internal actual fun ExploreScreenLayout(
     onScanClick: () -> Unit,
     isOnline: Boolean,
 ) {
+    // Back leaves search before it leaves the screen, one rung per press. With a query or a mood
+    // browse on screen the press clears it and hands the feed straight back - OnClearSearchAction
+    // drops the chrome's focus along with the results, so there is no third rung to climb - and
+    // with only the focus surface open the press closes that. At ExploreSearchPhase.FEED neither
+    // handler is enabled, so back belongs to the shell again.
+    //
+    // Both go through an action rather than touching the field: the search chrome follows state,
+    // and clearing platform focus from this side is exactly the desync the component's contract
+    // forbids (see `SoftcoverSearchTopBar`).
+    //
+    // While the keyboard is up the platform eats the first press to put it away, so a focused
+    // search costs one press before either handler sees anything. That is the system's back, not
+    // the screen's, and is deliberately left alone.
+    val clearSearchBackState = rememberNavigationEventState(NavigationEventInfo.None)
+
+    NavigationBackHandler(
+        state = clearSearchBackState,
+        isBackEnabled = state.hasActiveSearch,
+        onBackCancelled = {},
+        onBackCompleted = { runAction(OnClearSearchAction) },
+    )
+
+    val dismissSearchFocusBackState = rememberNavigationEventState(NavigationEventInfo.None)
+
+    NavigationBackHandler(
+        state = dismissSearchFocusBackState,
+        isBackEnabled = state.searchPhase == ExploreSearchPhase.FOCUS,
+        onBackCancelled = {},
+        onBackCompleted = { runAction(OnSearchDismissedAction) },
+    )
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {

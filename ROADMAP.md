@@ -19,6 +19,7 @@ Polish shaken out of the 3.1.0 redesign.
 
 - **Swipe between shelves again.** Turn on "Swipe between shelves" under Settings, Appearance and you can flick left or right in your Library to move to the next shelf, with the shelves either side named in a quiet line just above your books (tap either name to jump one across). Off by default, so nothing changes unless you ask for it. Phone and tablet only: on desktop the shelf sidebar already does this job.
 - **The top of Explore says what it is.** The big card opening Explore now labels itself "Most anticipated, next 30 days" and tells you how many readers are already waiting on it, so it's clear that's the upcoming book with the most people watching it rather than a random pick.
+- **Back steps out of a search first.** On phone and tablet, pressing back while you're searching in Explore clears the search and puts the feed back, instead of taking you off the screen with your results still up. Press back again and you leave as usual. On desktop, Esc does the same thing.
 
 ## 3.2.0: Widgets (Android)
 

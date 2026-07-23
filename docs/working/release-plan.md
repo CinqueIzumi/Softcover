@@ -28,8 +28,9 @@ The 3.1.1 pickup list from [now.md](now.md): polish and restorations shaken out 
 
 - **B.1.14** — Swipe between shelves in the Library (S) — the `HorizontalPager` the masthead redesign retired, back with a neighbour-name rail, behind an opt-in Appearance → Display toggle (default off). Mobile only.
 - **B.3.12** — Name the Explore hero (S) — the feed-opening card labels itself in one line ("MOST ANTICIPATED · NEXT 30 DAYS" + "N readers waiting") rather than gaining a full section header. Mobile and desktop.
+- **B.3.13** — Back leaves search first (S) — back over an open Explore search clears it and returns the feed instead of leaving the screen; a second press navigates as before. Esc does the same on desktop. Mobile and desktop.
 
-*Release note:* "Turn on 'Swipe between shelves' under Appearance and you can swipe left or right in your Library to move between shelves again, with the shelves either side named just above your books. Off by default, so nothing changes unless you ask for it. The book at the top of Explore now says what it is: the most anticipated release of the next 30 days, with the number of readers already waiting on it."
+*Release note:* "Turn on 'Swipe between shelves' under Appearance and you can swipe left or right in your Library to move between shelves again, with the shelves either side named just above your books. Off by default, so nothing changes unless you ask for it. The book at the top of Explore now says what it is: the most anticipated release of the next 30 days, with the number of readers already waiting on it. Back now steps out of an Explore search before it steps off the screen, and Esc does the same on desktop."
 
 ---
 
