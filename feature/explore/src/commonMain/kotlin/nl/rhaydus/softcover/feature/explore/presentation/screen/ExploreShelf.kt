@@ -83,6 +83,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverT
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
+import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
@@ -168,7 +169,14 @@ internal fun EditorialSectionHeaderSkeleton(modifier: Modifier = Modifier) {
  * full-bleed — a 2:3 jacket crops badly in a banner. Ships with only the "Want to read" action (explore-
  * 3a deviation 1: the spec's "Remind me" pill and the release-reminder sheet are dropped — the app has no
  * future-notification scheduling infrastructure).
+ *
+ * The card **names itself** with the DS §2.3 inline 20×1 hairline eyebrow on its own top row, rather
+ * than being introduced by a full [EditorialSectionHeader] the way every rail below it is. It briefly
+ * had one: accent bar, `headline` headline and a description sentence together pushed the card most of
+ * the way down the first screen — far too much chrome for a single card whose pick rotates weekly. The
+ * inline register says the same thing in one line, which is exactly what the register exists for.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun FeaturedCard(
     book: Book,
@@ -190,9 +198,37 @@ internal fun FeaturedCard(
     ) {
         val releaseDate = book.effectiveReleaseDate
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .height(1.dp)
+                    .width(20.dp)
+                    .background(MaterialTheme.colorScheme.primary),
+            )
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            // The eyebrow states the whole pick rule: the window comes from the same domain
+            // constant the query is bounded by, and the "N readers waiting" line below supplies
+            // the ranking basis, so the two rows together say "the most-shelved book out in the
+            // next 30 days" without spending a sentence on it.
+            Text(
+                text = "Most anticipated · next $FEATURED_RELEASE_WINDOW_DAYS days".uppercase(),
+                style = MaterialTheme.editorialTypography.eyebrowSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // A FlowRow rather than a Row: the date badge and the readers line together run close to the
+        // card's inner width on a narrow phone, and a plain Row would clip the tail of "N readers
+        // waiting" outright at the larger UI scales Appearance offers. Wrapping to a second line
+        // costs nothing when there is room.
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
             if (releaseDate != null) {
                 Surface(
@@ -208,10 +244,13 @@ internal fun FeaturedCard(
                 }
             }
 
-            // "Readers" rather than "readers waiting" (explore-3a deviation 3): usersCount is an
-            // all-shelves total, not a want-to-read count, so the copy stays defensible.
+            // Explore-3a deviation 3 kept this at a bare "readers" because usersCount is an
+            // all-shelves total rather than a want-to-read count. "Waiting" is added back only
+            // because this card is exclusively the *unreleased* hero: a book that isn't out yet
+            // can only be on a shelf in anticipation, so the total and the wording agree here in a
+            // way they would not on a released book's card.
             Text(
-                text = "${formatGroupedNumber(book.usersCount)} readers",
+                text = "${formatGroupedNumber(book.usersCount)} readers waiting",
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -277,11 +316,11 @@ internal fun FeaturedCard(
 }
 
 /**
- * Mirrors [FeaturedCard]'s own anatomy - the badge/readers row, the cover-and-text row (title,
- * author, and a headline placeholder line), and the trailing button - as shimmer bars, rather than
- * just the cover-and-title pair the card's *content* leads with. Matching every row the loaded
- * card renders (including the button) keeps the two within a few dp of the same total height, so
- * [SkeletonCrossfade] swaps between them without a visible resize.
+ * Mirrors [FeaturedCard]'s own anatomy - the inline eyebrow row, the badge/readers row, the
+ * cover-and-text row (title, author, and a headline placeholder line), and the trailing button - as
+ * shimmer bars, rather than just the cover-and-title pair the card's *content* leads with. Matching
+ * every row the loaded card renders (including the button) keeps the two within a few dp of the same
+ * total height, so [SkeletonCrossfade] swaps between them without a visible resize.
  */
 @Composable
 internal fun FeaturedCardSkeleton(modifier: Modifier = Modifier) {
@@ -292,6 +331,16 @@ internal fun FeaturedCardSkeleton(modifier: Modifier = Modifier) {
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .padding(18.dp),
     ) {
+        Box(
+            modifier = Modifier
+                .height(12.dp)
+                .width(180.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .shimmer(isLoading = true),
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,

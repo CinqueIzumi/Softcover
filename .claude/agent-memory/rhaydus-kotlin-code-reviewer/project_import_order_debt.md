@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-The style guide (docs/rhaydus/0.3.0/code-style.md §Import Ordering, lines 501-505) **mandates**:
+The style guide (docs/rhaydus/0.3.1/code-style.md §Import Ordering, lines 501-505) **mandates**:
 1. Android / AndroidX, 2. third-party, 3. project (`nl.rhaydus.*`). A project import placed above the
 Android block is a genuine violation of the hand-authored guide.
 

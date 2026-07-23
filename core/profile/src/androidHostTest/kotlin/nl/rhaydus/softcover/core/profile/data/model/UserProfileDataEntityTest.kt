@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
+import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
@@ -65,15 +66,18 @@ class UserProfileDataEntityTest {
             month = 2,
             count = 450,
         ),),
-        genres = listOf(GenreSlice(
-            name = "Fantasy",
-            count = 10,
-            fraction = 0.5,
-        ), GenreSlice(
-            name = "Sci-Fi",
-            count = 10,
-            fraction = 0.5,
-        ),),
+        genres = GenreBreakdown(
+            slices = listOf(GenreSlice(
+                name = "Fantasy",
+                count = 10,
+                fraction = 0.5,
+            ), GenreSlice(
+                name = "Sci-Fi",
+                count = 10,
+                fraction = 0.5,
+            ),),
+            taggedBookCount = 20,
+        ),
         ratings = RatingsDistribution(
             average = 3.75,
             totalRatings = 8,
@@ -511,6 +515,69 @@ class UserProfileDataEntityTest {
                     4,
                     14,
                 ),
+            )
+        }
+    }
+
+    @Nested
+    inner class GenreBreakdownDecoding {
+        @Test
+        fun `a legacy entity carrying genre slices but no genreTaggedBookCount decodes to an empty GenreBreakdown`() {
+            // ----- Arrange -----
+            val entity = UserProfileDataEntity(
+                profileImageUrl = "https://example.com/avatar.png",
+                name = "Jane Doe",
+                username = "cinque",
+                bio = "Avid reader",
+                booksRead = 42,
+                totalPagesRead = 12000,
+                averageRating = 4.2,
+                readingStreak = 5,
+                genres = listOf(GenreSliceEntity(
+                    name = "Fantasy",
+                    count = 10,
+                    fraction = 0.5,
+                ),),
+            )
+
+            // ----- Act -----
+            val model = entity.toModel()
+
+            // ----- Assert -----
+            model.genres shouldBe GenreBreakdown()
+        }
+
+        @Test
+        fun `an entity carrying genre slices with a positive genreTaggedBookCount decodes intact`() {
+            // ----- Arrange -----
+            val entity = UserProfileDataEntity(
+                profileImageUrl = "https://example.com/avatar.png",
+                name = "Jane Doe",
+                username = "cinque",
+                bio = "Avid reader",
+                booksRead = 42,
+                totalPagesRead = 12000,
+                averageRating = 4.2,
+                readingStreak = 5,
+                genres = listOf(GenreSliceEntity(
+                    name = "Fantasy",
+                    count = 10,
+                    fraction = 0.5,
+                ),),
+                genreTaggedBookCount = 20,
+            )
+
+            // ----- Act -----
+            val model = entity.toModel()
+
+            // ----- Assert -----
+            model.genres shouldBe GenreBreakdown(
+                slices = listOf(GenreSlice(
+                    name = "Fantasy",
+                    count = 10,
+                    fraction = 0.5,
+                ),),
+                taggedBookCount = 20,
             )
         }
     }

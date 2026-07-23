@@ -22,6 +22,16 @@ complexity:
   LongMethod:
     # Room migration blocks and the nav host legitimately run long; accept up to 140 lines.
     threshold: 140
+    # Test sources are exempt, and this one IS a judgement call rather than detekt's own policy (unlike
+    # the test excludes in the shared baseline, which merely restore globs detekt already intends).
+    # Reason: every finding here was an Apollo fragment fixture in `core/book` — `stubMinimalUserBookFragment`
+    # and the `BookMapperTest` cases that inline one — where the length is the *width of the GraphQL
+    # fragment*, one `every { field } returns …` mockk stub per field. Two things inflate it further: the
+    # fragments are wide by nature, and this repo's own ktlint rule requires each inline mockk stub to open
+    # onto its own line, tripling every stub. Splitting such a fixture yields `…Part1` / `…Part2` halves
+    # that are strictly harder to read than the thing they replace, so the rule is asking for a change that
+    # would make the code worse. Production code keeps the full 140-line gate.
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
   CyclomaticComplexMethod:
     threshold: 25
   ComplexCondition:
@@ -34,7 +44,7 @@ complexity:
     # count has no natural ceiling, so a numeric threshold bump here would need to be revisited on
     # every future use case addition. Exclude the layer by path instead of chasing the count: every
     # TOAD screen keeps its ScreenModel + Dependencies under `presentation/screenmodel/` by convention
-    # (see docs/rhaydus/0.3.0/toad-architecture.md), so this targets exactly the DI-constructor classes
+    # (see docs/rhaydus/0.3.1/toad-architecture.md), so this targets exactly the DI-constructor classes
     # and leaves the rule at full strength (the baseline's threshold: 30) everywhere else.
     excludes: ['**/presentation/screenmodel/**']
     functionThreshold: 12

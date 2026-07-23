@@ -83,6 +83,18 @@ interface SettingsRepository {
 
     suspend fun setReadingStreakEnabled(enabled: Boolean)
 
+    val shelfSwipeEnabled: Flow<Boolean>
+
+    suspend fun setShelfSwipeEnabled(enabled: Boolean)
+
+    /**
+     * Whether the profile's author breakdown drops the authors it has no data for, per bar, so the
+     * remaining percentages are read over the tagged authors alone. Off by default.
+     */
+    val hideUntaggedAuthors: Flow<Boolean>
+
+    suspend fun setHideUntaggedAuthors(enabled: Boolean)
+
     val uiScale: Flow<UiScale>
 
     suspend fun setUiScale(scale: UiScale)

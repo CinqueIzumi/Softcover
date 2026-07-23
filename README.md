@@ -33,9 +33,11 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ## Screenshots
 
-| Library | Book Details | Explore |
+| Reading | Library | Book Details |
 |:---:|:---:|:---:|
-| ![Library](screenshots/library.png) | ![Book Details](screenshots/book-detail.png) | ![Explore](screenshots/explore.png) |
+| ![Reading](screenshots/reading.png) | ![Library](screenshots/library.png) | ![Book Details](screenshots/book-detail.png) |
+| **Explore** | **Reading Atlas** | **What you reach for** |
+| ![Explore](screenshots/explore.png) | ![Reading Atlas](screenshots/profile-stats.png) | ![What you reach for](screenshots/profile-taste.png) |
 
 <sub>The same shared UI runs on Android, iOS, and desktop from one codebase. More shots live in [`screenshots/`](screenshots/).</sub>
 
@@ -47,12 +49,15 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 - Browse books organized by status — **Want to Read**, **Currently Reading**, **Read**, **Did Not Finish**, **Owned**.
 - Add and remove books from your library.
 - Mark editions as owned.
+- Optionally **swipe between shelves** on mobile, with the neighbouring shelves peeking in from either side.
+- See a book's deadline date and the pace it asks of you right on the shelf.
 
 ### Reading
 - See currently reading books and audiobooks at a glance.
 - Track your **reading streak** — consecutive days with logged reading — shown as a strip on the Reading screen (computed in your local timezone).
 - Track progress by page number or percentage for book editions.
 - Track listening progress in `HH:MM:SS` or percentage for audiobook editions.
+- Keep an eye on any deadline you've set — the date and the required pace sit alongside the book.
 - Mark books as read in one tap, or **backdate** a progress update or a finish to a chosen past date and time.
 - On finishing a book, a **Verdict** sheet prompts for a rating and review while it's fresh.
 - Start a distraction-free **focus mode** reading session that times your reading, with pause/resume/stop controls and inline page-progress editing.
@@ -73,7 +78,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 - **Start reading in one step** — go straight to Currently Reading from the book without picking a status first.
 - Update reading or listening progress.
 - Set a reading deadline with a required pages-per-day or minutes-per-day pace, and see a **reading-pace forecast** of when you'll finish.
-- Tag your books with a **tag editor** — category-clustered suggestions from your own tag vocabulary, with a spoiler toggle for revealing tags.
+- Tag your books with a **tag editor** — category-clustered suggestions from your own tag vocabulary, every tag you've ever used behind a *see more*, and a spoiler toggle for revealing tags.
 - Share a reading update as a generated card.
 - Switch between book and audiobook editions.
 
@@ -87,6 +92,9 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ### Settings
 - Toggle between a floating and docked bottom navigation bar.
+- Follow the system's dynamic colour where the platform supports it.
+- Show or hide the reading streak, and turn swiping between Library shelves on or off.
+- Choose which statuses and lists appear as Library tabs, and drag them into the order you want.
 - Choose your preferred date format.
 - Adjust the display scale on desktop to size text and UI to your screen.
 - Stay current with in-app updates — Google Play prompts on Android, and a self-updater backed by GitHub releases on desktop.
@@ -112,7 +120,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | [Gradle (KTS)](https://gradle.org/) | 9.1.0 | Build system with version catalog |
 | [KSP](https://github.com/google/ksp) | 2.3.9 | Kotlin Symbol Processing for Room (per-target) |
 
-#### Foundation ([`nl.rhaydus`](https://central.sonatype.com/search?q=nl.rhaydus), 0.3.0 — first-party shared libraries, resolved locally via `foundation.local=true` or from Maven Central)
+#### Foundation ([`nl.rhaydus`](https://central.sonatype.com/search?q=nl.rhaydus), 0.3.1 — first-party shared libraries, resolved from Maven Central by default, or locally via `foundation.local=true`)
 | Library | Purpose |
 |---|---|
 | `nl.rhaydus:toad` | TOAD presentation runtime — `ToadScreenModel`, `UiState` / `UiAction` / `UiEvent`, `Collector`, `ActionDependencies` |
@@ -125,7 +133,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | `nl.rhaydus:ktlint-rules` | Custom ktlint ruleset (the mechanizable layout rules + gate) |
 | `nl.rhaydus:detekt-rules` | Custom type-resolved detekt ruleset + the shared detekt baseline config |
 
-These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `EditionImage`) on top. See [`docs/rhaydus/0.3.0/CAPABILITIES.md`](docs/rhaydus/0.3.0/CAPABILITIES.md).
+These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `EditionImage`) on top. See [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md).
 
 #### Data & Networking
 | Technology | Version | Purpose |
@@ -265,7 +273,7 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 | [docs/reference/module-structure.md](docs/reference/module-structure.md) | Module tiers, allowed dependency directions, and where new code belongs |
 | [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
-| [docs/rhaydus/0.3.0/](docs/rhaydus/0.3.0/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
+| [docs/rhaydus/0.3.1/](docs/rhaydus/0.3.1/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
 | [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — what's coming, by version |
 | [docs/working/](docs/working/) | Internal planning — idea catalogue, sequenced steps, release plan, and the day-to-day `now.md` |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |

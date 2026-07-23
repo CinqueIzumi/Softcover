@@ -203,36 +203,37 @@ class OnLoadMoreSearchResultsActionTest {
         }
 
         @Test
-        fun `sets loadingMoreQueriedBooks true while the launched fetch is in flight and false after`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(searchText = "dune")
-            val gate = CompletableDeferred<Unit>()
+        fun `sets loadingMoreQueriedBooks true while the launched fetch is in flight and false after`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                dependencies = stubDependencies(this)
+                stateFlow.value = stateFlow.value.copy(searchText = "dune")
+                val gate = CompletableDeferred<Unit>()
 
-            coEvery {
-                searchForNameUseCase(
-                    name = any(),
-                    sortMode = any(),
-                    page = any(),
+                coEvery {
+                    searchForNameUseCase(
+                        name = any(),
+                        sortMode = any(),
+                        page = any(),
+                    )
+                } coAnswers {
+                    gate.await()
+                    Result.success(Unit)
+                }
+
+                // ----- Act -----
+                OnLoadMoreSearchResultsAction.execute(
+                    dependencies = dependencies,
+                    scope = scope,
                 )
-            } coAnswers {
-                gate.await()
-                Result.success(Unit)
+
+                // ----- Assert -----
+                stateFlow.value.loadingMoreQueriedBooks shouldBe true
+
+                gate.complete(Unit)
+
+                stateFlow.value.loadingMoreQueriedBooks shouldBe false
             }
-
-            // ----- Act -----
-            OnLoadMoreSearchResultsAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.loadingMoreQueriedBooks shouldBe true
-
-            gate.complete(Unit)
-
-            stateFlow.value.loadingMoreQueriedBooks shouldBe false
-        }
 
         @Test
         fun `invokes executeSearch with the incremented page`() = runTest {

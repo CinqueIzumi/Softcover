@@ -142,4 +142,67 @@ class ExploreScreenUiStateTest {
             result shouldBe ExploreSearchPhase.RESULTS
         }
     }
+
+    @Nested
+    inner class HasActiveSearch {
+        @Test
+        fun `unfocused empty query with no mood filter is false`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState()
+
+            // ----- Act -----
+            val result = state.hasActiveSearch
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `focused empty query with no mood filter is false`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(searchFocused = true)
+
+            // ----- Act -----
+            val result = state.hasActiveSearch
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `non-empty searchText is true`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(searchText = "dune")
+
+            // ----- Act -----
+            val result = state.hasActiveSearch
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `active mood filter with empty searchText is true`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(activeMoodFilter = mood)
+
+            // ----- Act -----
+            val result = state.hasActiveSearch
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `isLoading is true`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(isLoading = true)
+
+            // ----- Act -----
+            val result = state.hasActiveSearch
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+    }
 }

@@ -54,10 +54,12 @@ class ReadingStreakCollectorTest {
         fun `sets readingStreakEnabledChecked to true when flow emits true`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ReadingStreakCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             readingStreakEnabledFlow.emit(true)
@@ -71,10 +73,12 @@ class ReadingStreakCollectorTest {
         fun `sets readingStreakEnabledChecked to false when flow emits false`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ReadingStreakCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             readingStreakEnabledFlow.emit(false)
@@ -85,31 +89,36 @@ class ReadingStreakCollectorTest {
         }
 
         @Test
-        fun `updates readingStreakEnabledChecked to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ReadingStreakCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+        fun `updates readingStreakEnabledChecked to the latest value when flow emits multiple times`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = ReadingStreakCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
-            // ----- Act -----
-            readingStreakEnabledFlow.emit(false)
-            readingStreakEnabledFlow.emit(true)
+                // ----- Act -----
+                readingStreakEnabledFlow.emit(false)
+                readingStreakEnabledFlow.emit(true)
 
-            // ----- Assert -----
-            stateFlow.value.readingStreakEnabledChecked shouldBe true
-            job.cancel()
-        }
+                // ----- Assert -----
+                stateFlow.value.readingStreakEnabledChecked shouldBe true
+                job.cancel()
+            }
 
         @Test
         fun `does not change readingStreakEnabledChecked before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ReadingStreakCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.readingStreakEnabledChecked shouldBe true
@@ -124,10 +133,12 @@ class ReadingStreakCollectorTest {
                 dropDownExpanded = true,
             )
             val collector = ReadingStreakCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             readingStreakEnabledFlow.emit(false)
@@ -139,18 +150,21 @@ class ReadingStreakCollectorTest {
         }
 
         @Test
-        fun `retains last emitted readingStreakEnabledChecked after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ReadingStreakCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-            readingStreakEnabledFlow.emit(false)
-            job.cancel()
+        fun `retains last emitted readingStreakEnabledChecked after the collector job is cancelled`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = ReadingStreakCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+                readingStreakEnabledFlow.emit(false)
+                job.cancel()
 
-            // ----- Act & Assert -----
-            stateFlow.value.readingStreakEnabledChecked shouldBe false
-        }
+                // ----- Act & Assert -----
+                stateFlow.value.readingStreakEnabledChecked shouldBe false
+            }
     }
 }

@@ -378,22 +378,23 @@ class ReadingPaceForecastCollectorTest {
         }
 
         @Test
-        fun `does not set featuredBookPace and never invokes the journal history use case when there is no featured book`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = emptyList())
-            val dependencies = buildDependencies(this)
-            val collector = ReadingPaceForecastCollector()
+        fun `does not set featuredBookPace and never invokes the journal history use case when there is no featured book`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                stateFlow.value = ReadingScreenUiState(books = emptyList())
+                val dependencies = buildDependencies(this)
+                val collector = ReadingPaceForecastCollector()
 
-            // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+                // ----- Act -----
+                val job = launch { collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                ) }
 
-            // ----- Assert -----
-            stateFlow.value.featuredBookPace shouldBe null
-            coVerify(exactly = 0) { getReadingJournalHistoryUseCase(bookId = any()) }
-            job.cancel()
-        }
+                // ----- Assert -----
+                stateFlow.value.featuredBookPace shouldBe null
+                coVerify(exactly = 0) { getReadingJournalHistoryUseCase(bookId = any()) }
+                job.cancel()
+            }
     }
 }

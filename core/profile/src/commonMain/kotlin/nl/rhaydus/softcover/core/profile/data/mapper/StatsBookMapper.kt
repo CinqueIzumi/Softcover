@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.profile.data.model.StatsBook
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
+import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
@@ -121,20 +122,31 @@ internal fun List<StatsBook>.toRatingHalfStarBuckets(): List<Int> {
     return buckets
 }
 
-// Each book contributes at most once to any single genre it carries, but a book with several
-// genre tags contributes to each of them - so the fractions are shares of genre *assignments*, not
-// of books, and they do not sum to 1 across the slices shown. Only the top 5 genres by assignment
-// count are returned, in descending order; genres outside the top 5 are dropped rather than folded
-// into a remainder slice, because an "everything else" share computed over overlapping assignments
-// invites a whole-of-library reading the number doesn't support. genreNames is already deduped per
-// book in toStatsBook().
-internal fun List<StatsBook>.toGenreSlices(): List<GenreSlice> {
-    val genreAssignments = flatMap { it.genreNames }
-    val total = genreAssignments.size
+// Shares of *books*, not of genre assignments: a genre's fraction is the number of the reader's
+// genre-tagged books carrying it over the number of genre-tagged books, so each slice reads directly
+// as "N% of your books". Because genreNames is deduped per book in toStatsBook(), eachCount() over
+// the flattened names is already a per-genre *book* count - only the denominator distinguishes this
+// from a share of assignments.
+//
+// The denominator was assignments (the flattened size) until 3.1.1. That capped every percentage at
+// 1/(average genres per book): a reader whose every book was Fantasy saw Fantasy at ~17%, never
+// 100%, and the ceiling sank further the more completely a book was tagged. It also made each number
+// depend on how thoroughly other people had tagged the reader's books rather than on their reading.
+//
+// Untagged books are dropped from the denominator rather than counted, so the percentages describe
+// the corpus that actually carries genre data - see GenreBreakdown for why. They contributed nothing
+// under the old assignments denominator either (a book with no genres adds no assignments), so this
+// is the first time the distinction has been visible at all.
+//
+// Only the top 5 genres are returned, in descending order; the rest are dropped rather than folded
+// into a remainder slice, because overlapping genres have no remainder to compute.
+internal fun List<StatsBook>.toGenreBreakdown(): GenreBreakdown {
+    val taggedBooks = filter { it.genreNames.isNotEmpty() }
 
-    if (total == 0) return emptyList()
+    if (taggedBooks.isEmpty()) return GenreBreakdown()
 
-    return genreAssignments
+    val slices = taggedBooks
+        .flatMap { it.genreNames }
         .groupingBy { it }
         .eachCount()
         .entries
@@ -144,9 +156,14 @@ internal fun List<StatsBook>.toGenreSlices(): List<GenreSlice> {
             GenreSlice(
                 name = name,
                 count = count,
-                fraction = count.toDouble() / total,
+                fraction = count.toDouble() / taggedBooks.size,
             )
         }
+
+    return GenreBreakdown(
+        slices = slices,
+        taggedBookCount = taggedBooks.size,
+    )
 }
 
 // Lifetime, un-windowed: the number of distinct calendar years a finished book resolves to, across
@@ -156,8 +173,8 @@ internal fun List<StatsBook>.toGenreSlices(): List<GenreSlice> {
 internal fun List<StatsBook>.toTrackedYears(): Int = mapNotNull { it.finishDate?.year }.toSet().size
 
 // Authors are deduped by id across the whole dataset before any of these stats are computed, so an
-// author who wrote many of the user's finished books is counted once - unlike toGenreSlices, which
-// counts per-book assignments, an author identity is a single, non-repeating fact about the person.
+// author who wrote many of the user's finished books is counted once - like toGenreBreakdown, which
+// counts each genre once per book, an author identity is a single, non-repeating fact about the person.
 //
 // Per docs/reference/architecture.md -> Unresolvable API enums: a null gender_id (Gender.Unknown) is
 // a distinct bucket that is never folded into a real gender or merged with Other - it surfaces as its

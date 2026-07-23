@@ -19,13 +19,9 @@ import nl.rhaydus.softcover.core.database.model.BookEditionView
 import nl.rhaydus.softcover.core.database.model.BookEditionWithAuthors
 import nl.rhaydus.softcover.core.database.model.BookEntity
 import nl.rhaydus.softcover.core.database.model.BookFullEntity
-import nl.rhaydus.softcover.core.database.model.BookListEntity
-import nl.rhaydus.softcover.core.database.model.BookListWithBooks
 import nl.rhaydus.softcover.core.database.model.BookSeriesEntity
 import nl.rhaydus.softcover.core.database.model.BookTagCrossRef
 import nl.rhaydus.softcover.core.database.model.BookTagFull
-import nl.rhaydus.softcover.core.database.model.ListBookEntity
-import nl.rhaydus.softcover.core.database.model.ListBookFull
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
@@ -34,10 +30,8 @@ import nl.rhaydus.softcover.core.database.model.UserBookWithJournals
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
-import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.ReadingJournal
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -170,67 +164,6 @@ class BookEntityMapperTest {
         every {
             this@mockk.amountOfBooks
         } returns amountOfBooks
-    }
-
-    private fun stubBookList(
-        id: Int = 20,
-        name: String = "My List",
-        slug: String = "my-list",
-        books: List<ListBook> = emptyList(),
-    ): BookList = mockk {
-        every {
-            this@mockk.id
-        } returns id
-
-        every {
-            this@mockk.name
-        } returns name
-
-        every {
-            this@mockk.slug
-        } returns slug
-
-        every {
-            this@mockk.books
-        } returns books
-    }
-
-    private fun stubListBook(
-        listId: Int = 20,
-        listBookId: Int = 99,
-        bookId: Int = 1,
-        editionId: Int = 10,
-        addedAt: String? = null,
-        book: Book? = null,
-        edition: BookEdition? = null,
-    ): ListBook = mockk {
-        every {
-            this@mockk.listId
-        } returns listId
-
-        every {
-            this@mockk.listBookId
-        } returns listBookId
-
-        every {
-            this@mockk.bookId
-        } returns bookId
-
-        every {
-            this@mockk.editionId
-        } returns editionId
-
-        every {
-            this@mockk.addedAt
-        } returns addedAt
-
-        every {
-            this@mockk.book
-        } returns book
-
-        every {
-            this@mockk.edition
-        } returns edition
     }
 
     private fun stubUserBookRead(
@@ -629,48 +562,6 @@ class BookEntityMapperTest {
         editions = editions,
         userBookWithJournals = userBookWithJournals,
         tags = tags,
-    )
-
-    private fun stubListBookEntity(
-        listId: Int = 20,
-        bookId: Int = 1,
-        editionId: Int = 10,
-        listBookId: Int = 99,
-        addedAt: String? = null,
-    ): ListBookEntity = ListBookEntity(
-        listId = listId,
-        bookId = bookId,
-        editionId = editionId,
-        listBookId = listBookId,
-        addedAt = addedAt,
-    )
-
-    private fun stubListBookFull(
-        listBook: ListBookEntity = stubListBookEntity(),
-        book: BookFullEntity? = stubBookFullEntity(),
-        edition: BookEditionWithAuthors? = stubBookEditionWithAuthors(),
-    ): ListBookFull = ListBookFull(
-        listBook = listBook,
-        book = book,
-        edition = edition,
-    )
-
-    private fun stubBookListEntity(
-        id: Int = 20,
-        name: String = "My List",
-        slug: String = "my-list",
-    ): BookListEntity = BookListEntity(
-        id = id,
-        name = name,
-        slug = slug,
-    )
-
-    private fun stubBookListWithBooks(
-        bookList: BookListEntity = stubBookListEntity(),
-        listBooks: List<ListBookFull> = emptyList(),
-    ): BookListWithBooks = BookListWithBooks(
-        bookList = bookList,
-        listBooks = listBooks,
     )
     // endregion
     // =========================================================

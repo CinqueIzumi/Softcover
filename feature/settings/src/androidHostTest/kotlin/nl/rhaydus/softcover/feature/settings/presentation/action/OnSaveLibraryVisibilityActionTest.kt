@@ -29,7 +29,11 @@ class OnSaveLibraryVisibilityActionTest {
     private lateinit var setEnabledListIdsUseCase: SetEnabledListIdsUseCase
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
-    private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
+    private lateinit var scope: ActionScope<
+        LibraryVisibilitySettingsUiState,
+        LibraryVisibilitySettingsEvent,
+        LibraryVisibilitySettingsLocalVariables,
+        >
 
     @BeforeEach
     fun setUp() {

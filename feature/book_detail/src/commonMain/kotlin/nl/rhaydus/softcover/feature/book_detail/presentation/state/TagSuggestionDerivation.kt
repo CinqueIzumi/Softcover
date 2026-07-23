@@ -10,13 +10,17 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
  * With a blank [input] the list ranks by the user's personal usage frequency ([UserTag.count] desc,
  * then name asc). Once the user types, candidates are filtered to substring matches, with
  * prefix matches ranked ahead of mid-string ones, each tier ordered by frequency then name.
+ *
+ * The result is **not** truncated: it carries every candidate in the category, ranked, because the
+ * editor's suggestion cloud lets the user reveal the whole set. How much of it is on screen at rest
+ * is a fold the layout owns (`ExpandableFlowRow`'s collapsed lines), not a cap the derivation
+ * applies — a limit here would put a ceiling on the reveal that no affordance could lift.
  */
 internal fun computeTagSuggestions(
     vocabulary: List<UserTag>,
     input: String,
     category: TagCategory,
     appliedTags: List<UserTag>,
-    limit: Int = 8,
 ): List<UserTag> {
     val appliedNames = appliedTags
         .filter { it.category == category }
@@ -29,23 +33,24 @@ internal fun computeTagSuggestions(
     val query = input.trim()
 
     if (query.isEmpty()) {
-        return candidates
-            .sortedWith(compareByDescending<UserTag> { it.count }.thenBy { it.name })
-            .take(limit)
+        return candidates.sortedWith(compareByDescending<UserTag> { it.count }.thenBy { it.name })
     }
 
     return candidates
-        .filter { it.name.contains(
-            query,
-            ignoreCase = true,
-        ) }
-        .sortedWith(
-            compareByDescending<UserTag> { it.name.startsWith(
+        .filter {
+            it.name.contains(
                 query,
                 ignoreCase = true,
-            ) }
+            )
+        }
+        .sortedWith(
+            compareByDescending<UserTag> {
+                it.name.startsWith(
+                    query,
+                    ignoreCase = true,
+                )
+            }
                 .thenByDescending { it.count }
                 .thenBy { it.name },
         )
-        .take(limit)
 }

@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCode
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibrarySortSettingsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibraryGridLayoutUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLibrarySortUseCase
 import nl.rhaydus.toad.ActionDependencies
@@ -40,6 +41,7 @@ internal class LibraryDependencies(
     val getEnabledStatusCodesAsFlowUseCase: GetEnabledStatusCodesAsFlowUseCase,
     val getEnabledListIdsAsFlowUseCase: GetEnabledListIdsAsFlowUseCase,
     val getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase,
+    val getShelfSwipeEnabledAsFlowUseCase: GetShelfSwipeEnabledAsFlowUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,

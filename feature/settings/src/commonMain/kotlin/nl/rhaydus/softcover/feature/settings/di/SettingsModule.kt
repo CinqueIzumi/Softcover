@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisib
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ReadingStreakCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
@@ -49,6 +50,8 @@ val settingsModule = module {
             setDateStyleUseCase = get(),
             getReadingStreakEnabledAsFlowUseCase = get(),
             setReadingStreakEnabledUseCase = get(),
+            getShelfSwipeEnabledAsFlowUseCase = get(),
+            setShelfSwipeEnabledUseCase = get(),
             getUiScaleAsFlowUseCase = get(),
             setUiScaleUseCase = get(),
             appVersionProvider = get(),
@@ -60,6 +63,8 @@ val settingsModule = module {
     factory { DateStyleCollector() } bind SettingsCollector::class
 
     factory { ReadingStreakCollector() } bind SettingsCollector::class
+
+    factory { ShelfSwipeCollector() } bind SettingsCollector::class
 
     factory { UiScaleCollector() } bind SettingsCollector::class
 

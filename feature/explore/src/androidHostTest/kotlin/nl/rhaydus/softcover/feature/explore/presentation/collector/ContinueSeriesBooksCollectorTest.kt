@@ -99,7 +99,6 @@ class ContinueSeriesBooksCollectorTest {
         @Test
         fun `clears loading flag and sets continueSeriesBooks to empty on failure`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val errorFlow: MutableSharedFlow<List<Book>> = MutableSharedFlow()
             every {
                 getContinueSeriesBooksUseCase()
             } returns kotlinx.coroutines.flow.flow {

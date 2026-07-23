@@ -37,9 +37,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -132,8 +133,8 @@ internal actual fun ProfileScreenLayout(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            GenreStackSection(
-                genres = state.readingLife?.genres.orEmpty(),
+            GenreRankingSection(
+                genres = state.readingLife?.genres ?: GenreBreakdown(),
                 isLoading = readingLifeLoading,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
@@ -141,8 +142,11 @@ internal actual fun ProfileScreenLayout(
             Spacer(modifier = Modifier.height(40.dp))
 
             AuthorRepresentationSection(
-                authorDemographics = state.readingLife?.authorDemographics ?: AuthorDemographics(),
+                authorDemographics = state.authorDemographics,
+                hideUntaggedAuthors = state.hideUntaggedAuthors,
+                canHideUntaggedAuthors = state.hasUntaggedAuthors,
                 isLoading = readingLifeLoading,
+                onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 

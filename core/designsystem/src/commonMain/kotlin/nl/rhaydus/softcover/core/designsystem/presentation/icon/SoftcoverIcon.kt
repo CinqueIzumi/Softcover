@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_filter_list
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_headset
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_history
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_info
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_keyboard_arrow_left
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_keyboard_arrow_right
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_library_books
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_menu_book
@@ -83,6 +84,7 @@ enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Headset(Res.drawable.ic_headset),
     History(Res.drawable.ic_history),
     Info(Res.drawable.ic_info),
+    KeyboardArrowLeft(Res.drawable.ic_keyboard_arrow_left),
     KeyboardArrowRight(Res.drawable.ic_keyboard_arrow_right),
     LibraryBooks(Res.drawable.ic_library_books),
     MenuBook(Res.drawable.ic_menu_book),

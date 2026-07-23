@@ -44,6 +44,7 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
@@ -95,7 +96,27 @@ internal actual fun ExploreScreenLayout(
         return
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    // Esc clears the search - the desktop counterpart of mobile's back rung (DS §3.1 "Back leaves
+    // search before it leaves the screen"). Only the one rung exists here: the field is persistent,
+    // so there is no focus surface to close underneath it, and it dispatches what the field's own ×
+    // dispatches rather than OnClearSearchAction, whose focus drop means nothing to a field that is
+    // never focus-driven.
+    //
+    // Held enabled unconditionally rather than gated on `hasActiveSearch`, which is what it looks
+    // like it wants: `dismissOnEscape` takes focus on the disabled -> enabled flip, and here that
+    // flip *is* the user typing their first character - gating it would pull focus straight out of
+    // the field being typed into. So the guard sits inside the callback instead, and an Esc on the
+    // resting discovery wall is a no-op. Filed upstream as F26 (a listen-without-taking-focus
+    // variant), which would let this gate the modifier properly.
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .dismissOnEscape {
+                if (state.hasActiveSearch) {
+                    runAction(OnQueryChangeAction(newQuery = ""))
+                }
+            },
+    ) {
         DesktopExploreHeader(
             isRefreshing = state.isRefreshing,
             onRefreshClick = { runAction(OnRefreshAction) },
@@ -130,14 +151,14 @@ internal actual fun ExploreScreenLayout(
                 .weight(1f)
                 .fillMaxWidth(),
         ) {
-            when {
-                state.searchText.isEmpty() && state.activeMoodFilter == null -> DesktopDiscovery(
+            if (state.hasActiveSearch) {
+                DesktopSearchResults(
                     state = state,
                     runAction = runAction,
                     onBookClick = onBookClick,
                 )
-
-                else -> DesktopSearchResults(
+            } else {
+                DesktopDiscovery(
                     state = state,
                     runAction = runAction,
                     onBookClick = onBookClick,
@@ -296,6 +317,8 @@ private fun DesktopFeaturedSection(
     // below never resizes the feed around it.
     if (isLoading.not() && book == null) return
 
+    // No SectionHeaderBar above this one - the card names itself with an inline eyebrow; see the
+    // mobile FeaturedSection for why.
     SkeletonCrossfade(
         isLoading = isLoading,
         modifier = Modifier.padding(horizontal = 24.dp),

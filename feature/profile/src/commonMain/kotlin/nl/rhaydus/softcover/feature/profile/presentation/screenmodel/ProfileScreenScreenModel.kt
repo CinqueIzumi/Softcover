@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.profile.presentation.screenmodel
 import cafe.adriel.voyager.core.model.screenModelScope
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetHideUntaggedAuthorsAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetHideUntaggedAuthorsUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
@@ -18,6 +20,8 @@ internal class ProfileScreenScreenModel(
     private val observeReadingLifeUseCase: ObserveReadingLifeUseCase,
     private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
+    private val getHideUntaggedAuthorsAsFlowUseCase: GetHideUntaggedAuthorsAsFlowUseCase,
+    private val setHideUntaggedAuthorsUseCase: SetHideUntaggedAuthorsUseCase,
     dispatchers: AppDispatchers,
     initializers: List<ProfileCollector>,
 ) : ToadScreenModel<ProfileUiState, ProfileEvent, ProfileDependencies, ProfileCollector, LocalProfileVariables>(
@@ -30,6 +34,8 @@ internal class ProfileScreenScreenModel(
         observeReadingLifeUseCase = observeReadingLifeUseCase,
         refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
         resetUserDataUseCase = resetUserDataUseCase,
+        getHideUntaggedAuthorsAsFlowUseCase = getHideUntaggedAuthorsAsFlowUseCase,
+        setHideUntaggedAuthorsUseCase = setHideUntaggedAuthorsUseCase,
         mainDispatcher = dispatchers.main,
         coroutineScope = screenModelScope,
     )

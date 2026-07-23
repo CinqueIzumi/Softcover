@@ -12,6 +12,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":core:domain"))
             implementation(project(":core:profile"))
+            implementation(project(":core:preferences"))
             implementation(project(":core:designsystem"))
 
             implementation(libs.rhaydus.coreCommon)

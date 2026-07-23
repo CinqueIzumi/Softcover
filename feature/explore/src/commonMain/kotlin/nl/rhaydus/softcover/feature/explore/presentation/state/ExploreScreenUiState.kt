@@ -61,4 +61,14 @@ internal data class ExploreScreenUiState(
             searchFocused -> ExploreSearchPhase.FOCUS
             else -> ExploreSearchPhase.FEED
         }
+
+    /**
+     * True while a text or mood search occupies the screen - [ExploreSearchPhase.LOADING] and
+     * [ExploreSearchPhase.RESULTS] together, the two phases that have something to clear. Derived
+     * from [searchPhase] rather than re-testing the underlying fields so "a search is running" has
+     * one definition: mobile's back rung, desktop's Esc rung, and desktop's results-vs-discovery
+     * branch all read this.
+     */
+    val hasActiveSearch: Boolean
+        get() = searchPhase == ExploreSearchPhase.LOADING || searchPhase == ExploreSearchPhase.RESULTS
 }

@@ -1,6 +1,6 @@
 # Architecture
 
-Clean Architecture layering, the core/feature/orchestration tiers, the TOAD pattern, DI, navigation, and dispatchers are governed by the foundation [`docs/rhaydus/0.3.0/architecture.md`](../rhaydus/0.3.0/architecture.md) and [`docs/rhaydus/0.3.0/toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md). Read those first — they are the source of truth for the two axes, the layer rules, placing a new type, the generic TOAD framework + per-feature boilerplate, Koin wiring, the `AppNavigator` contract, and the `AppDispatchers` abstraction.
+Clean Architecture layering, the core/feature/orchestration tiers, the TOAD pattern, DI, navigation, and dispatchers are governed by the foundation [`docs/rhaydus/0.3.1/architecture.md`](../rhaydus/0.3.1/architecture.md) and [`docs/rhaydus/0.3.1/toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Read those first — they are the source of truth for the two axes, the layer rules, placing a new type, the generic TOAD framework + per-feature boilerplate, Koin wiring, the `AppNavigator` contract, and the `AppDispatchers` abstraction.
 
 This file keeps only Softcover's concrete deltas.
 
@@ -29,7 +29,7 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
 ## TOAD — Softcover-specific notes
 
 The generic TOAD framework, the five generic parameters, and the per-feature boilerplate are covered
-by [`toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md). Softcover deltas:
+by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover deltas:
 
 - **TOAD is per-Voyager-screen only.** `MainActivityViewModel` is a plain `ViewModel`, not a TOAD
   `ScreenModel`. It is the one app-level view model and lives in `:orchestration`
@@ -46,7 +46,7 @@ by [`toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md). Softcover de
   (e.g. `BookDetailCollector`, in each feature's `presentation/collector/`) and implement the foundation
   `nl.rhaydus.toad.Collector` role.
 - **Error-slot convention.** A screen that can fail a load/submit follows the foundation TOAD error-slot
-  convention ([`../rhaydus/0.3.0/toad-architecture.md`](../rhaydus/0.3.0/toad-architecture.md) §Conventions):
+  convention ([`../rhaydus/0.3.1/toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md) §Conventions):
   a nullable `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,
   `OnboardingUiState.submissionError`), set by the action, cleared on any invalidating edit and on retry,
   and rendered with `InlineErrorState` whose retry re-dispatches the screen's own action. Do **not**

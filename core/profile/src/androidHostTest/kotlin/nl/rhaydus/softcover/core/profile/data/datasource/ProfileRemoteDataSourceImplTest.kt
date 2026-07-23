@@ -25,7 +25,6 @@ import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
-import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -110,10 +109,12 @@ class ProfileRemoteDataSourceImplTest {
         book = GetUserProfileDataQuery.Data.Me.Recently_loved.Book(
             __typename = "books",
             title = title,
-            image = imageUrl?.let { GetUserProfileDataQuery.Data.Me.Recently_loved.Book.Image(
-                __typename = "images",
-                url = it,
-            ) },
+            image = imageUrl?.let {
+                GetUserProfileDataQuery.Data.Me.Recently_loved.Book.Image(
+                    __typename = "images",
+                    url = it,
+                )
+            },
             contributions = authorNames.map { authorName ->
                 GetUserProfileDataQuery.Data.Me.Recently_loved.Book.Contribution(
                     __typename = "contributions",
@@ -217,10 +218,6 @@ class ProfileRemoteDataSourceImplTest {
                     GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Taggable_count.Tag(
                         __typename = "tags",
                         tag = it,
-                        tag_category = GetReadUserBooksForStatsQuery.Data.Me.User_book.Book.Taggable_count.Tag.Tag_category(
-                            __typename = "tag_categories",
-                            category = "Genre",
-                        ),
                     )
                 },
             )
@@ -290,19 +287,25 @@ class ProfileRemoteDataSourceImplTest {
                 booksRead = 42,
                 totalPagesRead = 0,
                 averageRating = 3.75,
-                pagesByMonth = (1..12).map { MonthCount(
-                    year = 2026,
-                    month = it,
-                    count = 0,
-                ) },
-                booksByYear = (2019..2026).map { YearCount(
-                    year = it,
-                    count = 0,
-                ) },
-                pagesByYear = (2019..2026).map { YearCount(
-                    year = it,
-                    count = 0,
-                ) },
+                pagesByMonth = (1..12).map {
+                    MonthCount(
+                        year = 2026,
+                        month = it,
+                        count = 0,
+                    )
+                },
+                booksByYear = (2019..2026).map {
+                    YearCount(
+                        year = it,
+                        count = 0,
+                    )
+                },
+                pagesByYear = (2019..2026).map {
+                    YearCount(
+                        year = it,
+                        count = 0,
+                    )
+                },
                 ratings = RatingsDistribution(
                     average = 0.0,
                     totalRatings = 0,
@@ -482,7 +485,7 @@ class ProfileRemoteDataSourceImplTest {
                     count = 300,
                 )
                 result.pagesByMonth.size shouldBe 12
-                result.genres.map { it.name to it.count }.toSet() shouldBe setOf(
+                result.genres.slices.map { it.name to it.count }.toSet() shouldBe setOf(
                     "Fantasy" to 1,
                     "Sci-Fi" to 1,
                     "Mystery" to 1,
@@ -620,7 +623,7 @@ class ProfileRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `a book with no resolvable date is excluded from booksByYear, pagesByYear and pagesByMonth but still counts toward totalPagesRead`() =
+        fun `a book with no resolvable date is excluded from booksByYear, pagesByYear, pagesByMonth but counts toward totalPagesRead`() =
             runTest {
                 // ----- Arrange -----
                 mockProfileQuery(me())
@@ -653,7 +656,7 @@ class ProfileRemoteDataSourceImplTest {
             }
 
         @Test
-        fun `a book whose finish year falls outside the booksByYear-pagesByYear window is dropped from those charts but still counts toward totalPagesRead`() =
+        fun `a book whose finish year falls outside the booksByYear-pagesByYear window is dropped but counts toward totalPagesRead`() =
             runTest {
                 // ----- Arrange -----
                 mockProfileQuery(me())
@@ -758,8 +761,9 @@ class ProfileRemoteDataSourceImplTest {
             val result = dataSource.getUserProfileSnapshot()
 
             // ----- Assert -----
-            result.genres.map { it.name to it.count }.toSet() shouldBe setOf("Fantasy" to 1, "Sci-Fi" to 1)
-            result.genres.sumOf { it.fraction } shouldBe (1.0 plusOrMinus 0.0001)
+            result.genres.slices.map { it.name to it.count }.toSet() shouldBe setOf("Fantasy" to 1, "Sci-Fi" to 1)
+            result.genres.taggedBookCount shouldBe 1
+            result.genres.slices.forEach { it.fraction shouldBe (1.0 plusOrMinus 0.0001) }
         }
     }
 

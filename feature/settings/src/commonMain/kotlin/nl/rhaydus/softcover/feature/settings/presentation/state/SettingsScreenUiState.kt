@@ -8,6 +8,7 @@ internal data class SettingsScreenUiState(
     val useFloatingBarChecked: Boolean = true,
     val useDynamicColorChecked: Boolean = false,
     val readingStreakEnabledChecked: Boolean = true,
+    val shelfSwipeEnabledChecked: Boolean = false,
     val userDateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val dateStyleExamples: Map<DateStyle, String> = emptyMap(),
     val dropDownExpanded: Boolean = false,

@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-The foundation code-style guide (`docs/rhaydus/0.3.0/code-style.md` §"One declaration per file") is
+The foundation code-style guide (`docs/rhaydus/0.3.1/code-style.md` §"One declaration per file") is
 explicit and shows this exact shape as a "Bad" example: "a second data class tacked onto a file
 alongside helper functions." Per Softcover's CLAUDE.md, `one-type-per-file` is one of the five
 formerly-greppable rules now promoted to a **blocking** `nl.rhaydus:ktlint-rules` check (gate-only,

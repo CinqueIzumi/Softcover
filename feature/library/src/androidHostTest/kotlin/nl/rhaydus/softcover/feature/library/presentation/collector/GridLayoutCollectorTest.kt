@@ -55,10 +55,12 @@ class GridLayoutCollectorTest {
         fun `updates gridLayout when flow emits a value`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             gridLayoutFlow.emit(LibraryGridLayout.GRID_THREE_COLUMNS)
@@ -72,10 +74,12 @@ class GridLayoutCollectorTest {
         fun `updates gridLayout to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             gridLayoutFlow.emit(LibraryGridLayout.LIST_COMPACT)
@@ -90,10 +94,12 @@ class GridLayoutCollectorTest {
         fun `does not change gridLayout before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.gridLayout shouldBe LibraryGridLayout.GRID_TWO_COLUMNS
@@ -104,10 +110,12 @@ class GridLayoutCollectorTest {
         fun `retains the last emitted layout after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             gridLayoutFlow.emit(LibraryGridLayout.LIST_COMPACT)
             job.cancel()
 
@@ -124,10 +132,12 @@ class GridLayoutCollectorTest {
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
             val collector = GridLayoutCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             gridLayoutFlow.emit(LibraryGridLayout.GRID_THREE_COLUMNS)

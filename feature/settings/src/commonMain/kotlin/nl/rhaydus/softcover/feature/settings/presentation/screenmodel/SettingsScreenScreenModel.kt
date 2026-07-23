@@ -9,9 +9,11 @@ import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
+import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
@@ -31,6 +33,8 @@ internal class SettingsScreenScreenModel(
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     private val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     private val setReadingStreakEnabledUseCase: SetReadingStreakEnabledUseCase,
+    private val getShelfSwipeEnabledAsFlowUseCase: GetShelfSwipeEnabledAsFlowUseCase,
+    private val setShelfSwipeEnabledUseCase: SetShelfSwipeEnabledUseCase,
     private val getUiScaleAsFlowUseCase: GetUiScaleAsFlowUseCase,
     private val setUiScaleUseCase: SetUiScaleUseCase,
     appVersionProvider: AppVersionProvider,
@@ -55,6 +59,8 @@ internal class SettingsScreenScreenModel(
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,
         getReadingStreakEnabledAsFlowUseCase = getReadingStreakEnabledAsFlowUseCase,
         setReadingStreakEnabledUseCase = setReadingStreakEnabledUseCase,
+        getShelfSwipeEnabledAsFlowUseCase = getShelfSwipeEnabledAsFlowUseCase,
+        setShelfSwipeEnabledUseCase = setShelfSwipeEnabledUseCase,
         getUiScaleAsFlowUseCase = getUiScaleAsFlowUseCase,
         setUiScaleUseCase = setUiScaleUseCase,
         coroutineScope = screenModelScope,

@@ -40,9 +40,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -145,12 +146,14 @@ private fun ProfileContent(
                     state = state,
                     onShareClick = { showShareSheet = true },
                     onLogOutClick = { showLogOutConfirm = true },
+                    onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
                 )
             } else {
                 SingleColumnProfile(
                     state = state,
                     onShareClick = { showShareSheet = true },
                     onLogOutClick = { showLogOutConfirm = true },
+                    onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
                 )
             }
         }
@@ -176,6 +179,7 @@ private fun TwoColumnProfile(
     state: ProfileUiState,
     onShareClick: () -> Unit,
     onLogOutClick: () -> Unit,
+    onHideUntaggedAuthorsChange: (Boolean) -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -217,6 +221,7 @@ private fun TwoColumnProfile(
                 ReadingLifeContent(
                     state = state,
                     onShareClick = onShareClick,
+                    onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
                     modifier = Modifier.widthIn(max = STATS_CONTENT_MAX_WIDTH),
                 )
             }
@@ -237,6 +242,7 @@ private fun SingleColumnProfile(
     state: ProfileUiState,
     onShareClick: () -> Unit,
     onLogOutClick: () -> Unit,
+    onHideUntaggedAuthorsChange: (Boolean) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
@@ -259,6 +265,7 @@ private fun SingleColumnProfile(
             ReadingLifeContent(
                 state = state,
                 onShareClick = onShareClick,
+                onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -290,6 +297,7 @@ private fun SingleColumnProfile(
 private fun ReadingLifeContent(
     state: ProfileUiState,
     onShareClick: () -> Unit,
+    onHideUntaggedAuthorsChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // ReadingAtlasSection reads state.isLoading directly (it is driven by userProfileData alone),
@@ -320,16 +328,19 @@ private fun ReadingLifeContent(
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        GenreStackSection(
-            genres = state.readingLife?.genres.orEmpty(),
+        GenreRankingSection(
+            genres = state.readingLife?.genres ?: GenreBreakdown(),
             isLoading = readingLifeLoading,
         )
 
         Spacer(modifier = Modifier.height(40.dp))
 
         AuthorRepresentationSection(
-            authorDemographics = state.readingLife?.authorDemographics ?: AuthorDemographics(),
+            authorDemographics = state.authorDemographics,
+            hideUntaggedAuthors = state.hideUntaggedAuthors,
+            canHideUntaggedAuthors = state.hasUntaggedAuthors,
             isLoading = readingLifeLoading,
+            onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
         )
 
         Spacer(modifier = Modifier.height(40.dp))

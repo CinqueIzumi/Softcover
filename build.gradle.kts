@@ -56,8 +56,21 @@ val extractRhaydusDetektConfig = tasks.register<Sync>("extractRhaydusDetektConfi
 // target, the Android application and the desktop JVM app get a single all-variants `detektMain`. Only
 // these can run the foundation's `rhaydus:UnguardedFlowTerminalRead` rule (F1) — it is `@RequiresTypeResolution`,
 // so it resolves `Flow.first()` apart from `Collection.first()` via the compile classpath, and is silently
-// INERT on the source-only `detekt` task. Test-source and per-variant tasks are deliberately excluded.
-val typeResolvedDetektTasks = setOf("detektAndroidMain", "detektJvmMain", "detektMain")
+// INERT on the source-only `detekt` task. Per-variant tasks are deliberately excluded.
+//
+// `detektAndroidHostTest` covers the unit tests. It was previously left out, and the cost of that showed:
+// by the time it was first run it had accumulated 3,308 findings. All but 46 came from a single stale glob —
+// detekt 1.23.8's built-in "these rules don't apply to test code" exclude lists predate AGP 9's KMP source
+// sets, so they have never heard of `androidHostTest` and fired `FunctionNaming` at 3,144 backticked test
+// names. That is repaired in the shared baseline (see the test-excludes block in the foundation
+// `config/detekt.yml`); the rest were fixed in the tests themselves. Keeping the task gated is what stops
+// it silently refilling — an ungated task is indistinguishable from a passing one right up until you run it.
+val typeResolvedDetektTasks = setOf(
+    "detektAndroidMain",
+    "detektJvmMain",
+    "detektMain",
+    "detektAndroidHostTest",
+)
 
 // Captured here because the generated `libs` accessor is scoped to this script's project and is not
 // resolvable from inside the `subprojects { }` block below.
@@ -130,6 +143,17 @@ subprojects {
                 )
 
                 "detektJvmMain" -> setSource(project.files("src/commonMain/kotlin", "src/jvmMain/kotlin"))
+
+                // The unit tests. Spelled out for the same reason as the main compilations: detekt would
+                // otherwise seed only the target's own source set, so a module that ever puts shared test
+                // code in `commonTest` would have it silently skipped. Every module's tests live in
+                // `androidHostTest` today; naming `commonTest` here means that stays true if one moves.
+                "detektAndroidHostTest" -> setSource(
+                    project.files(
+                        "src/commonTest/kotlin",
+                        "src/androidHostTest/kotlin",
+                    ),
+                )
 
                 // `:desktopApp`'s own `detektMain`, and the per-variant tasks `:app`'s aggregating
                 // `detektMain` fans out to. All three read the same non-KMP `src/main` layout.

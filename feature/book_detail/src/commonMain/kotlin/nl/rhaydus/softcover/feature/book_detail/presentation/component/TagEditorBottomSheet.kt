@@ -59,6 +59,7 @@ import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
+import nl.rhaydus.designsystem.layout.FlowRowExpansion
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
@@ -81,6 +82,13 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
  * by the caller — the sheet is a dumb renderer that reports intents through its callbacks. The book
  * title and its displayed edition are render-only inputs (for the header's naming and mini jacket); the
  * TOAD contract carries neither, both live on the caller's `BookDetailUiState`.
+ *
+ * Only the top bar and header are pinned; the add block and the collection share **one** scroll
+ * region below them. That is what lets the suggestion cloud reveal the user's entire vocabulary for
+ * a category in a single tap: an unbounded cloud in a pinned block would squeeze the collection's
+ * `weight(1f)` to nothing and clip the sheet, whereas here it simply lengthens the page. Keeping the
+ * naming field in the same scroll region as its suggestions also keeps the two adjacent, which a
+ * pinned field with a scrolling cloud would not.
  */
 private val EDITABLE_CATEGORIES: List<TagCategory> = listOf(
     TagCategory.GENRE,
@@ -183,29 +191,33 @@ internal fun TagEditorBottomSheet(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            TagEditorAddBlock(
-                selectedCategory = selectedCategory,
-                draft = draft,
-                tagSuggestions = tagSuggestions,
-                onCategorySelected = onCategorySelected,
-                onDraftChange = onDraftChange,
-                onCommit = commitDraft,
-                onSuggestionSelected = onSuggestionSelected,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-            )
-
-            TagEditorCollection(
-                groups = groups,
-                newlyAddedKeys = newlyAddedKeys,
-                onToggleSpoiler = onToggleSpoiler,
-                onRemove = onRemoveTag,
+            Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(state = rememberScrollState())
-                    .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 24.dp),
-            )
+                    .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            ) {
+                TagEditorAddBlock(
+                    selectedCategory = selectedCategory,
+                    draft = draft,
+                    tagSuggestions = tagSuggestions,
+                    onCategorySelected = onCategorySelected,
+                    onDraftChange = onDraftChange,
+                    onCommit = commitDraft,
+                    onSuggestionSelected = onSuggestionSelected,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                TagEditorCollection(
+                    groups = groups,
+                    newlyAddedKeys = newlyAddedKeys,
+                    onToggleSpoiler = onToggleSpoiler,
+                    onRemove = onRemoveTag,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                )
+            }
         }
     }
 }
@@ -377,14 +389,23 @@ private fun TagEditorAddBlock(
         if (tagSuggestions.isNotEmpty()) {
             Spacer(modifier = Modifier.height(14.dp))
 
-            ExpandableFlowRow {
-                tagSuggestions.forEach { tag ->
-                    key(tag.category, tag.name) {
-                        PillChip(
-                            label = tag.name,
-                            selected = false,
-                            onClick = { onSuggestionSelected(tag) },
-                        )
+            // Keyed on the category so the cloud's expansion does not survive a category switch:
+            // `ExpandableFlowRow` holds `maxLines` internally, and a `Full` reveal leaves it at
+            // `Int.MAX_VALUE`. Without a new key, expanding Genre would drop the user into Mood's
+            // entire vocabulary already unfurled, having never asked for it.
+            key(selectedCategory) {
+                ExpandableFlowRow(
+                    expansion = FlowRowExpansion.Full,
+                    collapsible = true,
+                ) {
+                    tagSuggestions.forEach { tag ->
+                        key(tag.category, tag.name) {
+                            PillChip(
+                                label = tag.name,
+                                selected = false,
+                                onClick = { onSuggestionSelected(tag) },
+                            )
+                        }
                     }
                 }
             }

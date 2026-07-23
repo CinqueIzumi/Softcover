@@ -197,29 +197,30 @@ class ReadingActivityCollectorTest {
         }
 
         @Test
-        fun `updates recentReadingActivity to latest emission when enabled flow emits multiple activity lists`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            coEvery {
-                refreshUserProfileDataUseCase()
-            } returns Result.success(Unit)
-            val firstList = listOf(stubActivity())
-            val secondList = listOf(stubActivity(), stubActivity(), stubActivity())
-            val dependencies = buildDependencies(this)
-            val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+        fun `updates recentReadingActivity to latest emission when enabled flow emits multiple activity lists`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                coEvery {
+                    refreshUserProfileDataUseCase()
+                } returns Result.success(Unit)
+                val firstList = listOf(stubActivity())
+                val secondList = listOf(stubActivity(), stubActivity(), stubActivity())
+                val dependencies = buildDependencies(this)
+                val collector = ReadingActivityCollector()
+                val job = launch { collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                ) }
 
-            // ----- Act -----
-            streakEnabledFlow.emit(true)
-            activityFlow.emit(firstList)
-            activityFlow.emit(secondList)
+                // ----- Act -----
+                streakEnabledFlow.emit(true)
+                activityFlow.emit(firstList)
+                activityFlow.emit(secondList)
 
-            // ----- Assert -----
-            stateFlow.value.recentReadingActivity shouldBe secondList
-            job.cancel()
-        }
+                // ----- Assert -----
+                stateFlow.value.recentReadingActivity shouldBe secondList
+                job.cancel()
+            }
 
         @Test
         fun `clears recentReadingActivity when toggled from true to false`() = runTest(UnconfinedTestDispatcher()) {

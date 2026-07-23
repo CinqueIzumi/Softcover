@@ -4,7 +4,7 @@ data class ReadingLife(
     val booksByYear: List<YearCount>,
     val pagesByYear: List<YearCount>,
     val pagesByMonth: List<MonthCount>,
-    val genres: List<GenreSlice>,
+    val genres: GenreBreakdown,
     val ratings: RatingsDistribution,
     val recentlyLoved: List<LovedBook>,
     val trackedYears: Int = 0,

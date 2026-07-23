@@ -341,7 +341,8 @@ class UserBooksFlowCollectorTest {
         }
 
         @Test
-        fun `overlay is authoritative - flips a previously-owned edition to false when it is no longer in local owned set`() = runTest(UnconfinedTestDispatcher()) {
+        fun `overlay is authoritative - flips a previously-owned edition to false when it is no longer in local owned set`() =
+            runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             // Start: remote edition is marked owned (e.g. from a prior emission)
             val remoteEdition = buildEdition(
@@ -376,7 +377,8 @@ class UserBooksFlowCollectorTest {
         }
 
         @Test
-        fun `sets owned correctly for each edition independently when multiple editions are present`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sets owned correctly for each edition independently when multiple editions are present`() =
+            runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val ownedId = 41
             val unownedId = 42
@@ -420,7 +422,8 @@ class UserBooksFlowCollectorTest {
         }
 
         @Test
-        fun `does not change state when emitted book list does not contain a book matching state book id`() = runTest(UnconfinedTestDispatcher()) {
+        fun `does not change state when emitted book list does not contain a book matching state book id`() =
+            runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val remoteBook = buildBook(id = 1)
             val unrelatedBook = buildBook(id = 99)

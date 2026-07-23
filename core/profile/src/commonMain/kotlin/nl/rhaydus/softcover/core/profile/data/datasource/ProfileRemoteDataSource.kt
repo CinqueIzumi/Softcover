@@ -18,7 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.profile.data.mapper.toAuthorDemographics
 import nl.rhaydus.softcover.core.profile.data.mapper.toBooksByYear
-import nl.rhaydus.softcover.core.profile.data.mapper.toGenreSlices
+import nl.rhaydus.softcover.core.profile.data.mapper.toGenreBreakdown
 import nl.rhaydus.softcover.core.profile.data.mapper.toPagesByMonth
 import nl.rhaydus.softcover.core.profile.data.mapper.toPagesByYear
 import nl.rhaydus.softcover.core.profile.data.mapper.toRatedCount
@@ -71,7 +71,7 @@ internal class ProfileRemoteDataSourceImpl(
             booksByYear = statsBooks.toBooksByYear(currentYear = currentYear),
             pagesByYear = statsBooks.toPagesByYear(currentYear = currentYear),
             pagesByMonth = statsBooks.toPagesByMonth(currentYear = currentYear),
-            genres = statsBooks.toGenreSlices(),
+            genres = statsBooks.toGenreBreakdown(),
             trackedYears = statsBooks.toTrackedYears(),
             authorDemographics = statsBooks.toAuthorDemographics(),
             // Scoped to the same read-books dataset as the histogram (not me.rated_books, which is

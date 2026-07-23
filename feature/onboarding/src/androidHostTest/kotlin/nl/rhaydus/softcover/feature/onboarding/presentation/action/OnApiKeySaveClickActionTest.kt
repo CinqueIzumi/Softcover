@@ -484,38 +484,39 @@ class OnApiKeySaveClickActionTest {
         }
 
         @Test
-        fun `sets submissionError to key-rejected message when initializeUserIdAndBooksUseCase fails with InvalidTokenException`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
-            dependencies = stubDependencies(this)
+        fun `sets submissionError to key-rejected message when initializeUserIdAndBooksUseCase fails with InvalidTokenException`() =
+            runTest {
+                // ----- Arrange -----
+                stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+                dependencies = stubDependencies(this)
 
-            coEvery {
-                resetUserDataUseCase()
-            } returns Result.success(Unit)
+                coEvery {
+                    resetUserDataUseCase()
+                } returns Result.success(Unit)
 
-            coEvery {
-                updateApiKeyUseCase(key = any())
-            } returns Result.success(Unit)
+                coEvery {
+                    updateApiKeyUseCase(key = any())
+                } returns Result.success(Unit)
 
-            coEvery {
-                initializeUserIdAndBooksUseCase()
-            } returns Result.failure(InvalidTokenException())
+                coEvery {
+                    initializeUserIdAndBooksUseCase()
+                } returns Result.failure(InvalidTokenException())
 
-            val action = OnApiKeySaveClickAction
+                val action = OnApiKeySaveClickAction
 
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
+                // ----- Act -----
+                action.execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
 
-            // ----- Assert -----
-            stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.progress shouldBe 0f
-            stateFlow.value.submissionError shouldBe
-                "That API key wasn't accepted. Double-check it and try again."
-        }
+                // ----- Assert -----
+                stateFlow.value.saveApiKeyButtonEnabled shouldBe true
+                stateFlow.value.isLoading shouldBe false
+                stateFlow.value.progress shouldBe 0f
+                stateFlow.value.submissionError shouldBe
+                    "That API key wasn't accepted. Double-check it and try again."
+            }
 
         @Test
         fun `sets submissionError to fallback message when initializeUserIdAndBooksUseCase fails with generic exception`() = runTest {

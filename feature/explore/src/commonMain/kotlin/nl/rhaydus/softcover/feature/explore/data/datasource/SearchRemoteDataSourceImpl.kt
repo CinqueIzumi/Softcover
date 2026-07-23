@@ -30,11 +30,8 @@ import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.feature.explore.data.mapper.toMoodTag
 import nl.rhaydus.softcover.feature.explore.data.mapper.toTypesenseSort
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
+import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
-
-// Bounds the featured card to books arriving soon rather than the single most-anticipated title
-// out of every book releasing in the next several years.
-private const val FEATURED_RELEASE_WINDOW_DAYS = 30
 
 private const val MOOD_BOOKS_LIMIT = 25
 

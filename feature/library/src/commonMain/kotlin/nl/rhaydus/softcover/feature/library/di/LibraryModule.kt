@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.DisplayListsC
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterOptionsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.SortModeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.VisibleTabsCollector
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
@@ -40,6 +41,8 @@ val libraryModule = module {
     factory { VisibleTabsCollector() } bind LibraryCollector::class
 
     factory { GridLayoutCollector() } bind LibraryCollector::class
+
+    factory { ShelfSwipeCollector() } bind LibraryCollector::class
 
     factory { SortModeCollector() } bind LibraryCollector::class
 
@@ -68,6 +71,7 @@ val libraryModule = module {
             getEnabledStatusCodesAsFlowUseCase = get(),
             getEnabledListIdsAsFlowUseCase = get(),
             getLibraryTabOrderAsFlowUseCase = get(),
+            getShelfSwipeEnabledAsFlowUseCase = get(),
             markBookAsReadUseCase = get(),
             markBookAsReadingUseCase = get(),
             markBookAsWantToReadUseCase = get(),

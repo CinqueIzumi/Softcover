@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.profile.data.model.StatsAuthor
 import nl.rhaydus.softcover.core.profile.data.model.StatsBook
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
+import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.MonthCount
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
 import org.junit.jupiter.api.Nested
@@ -479,30 +480,31 @@ class StatsBookMapperTest {
     }
 
     @Nested
-    inner class ToGenreSlices {
+    inner class ToGenreBreakdown {
         @Test
-        fun `empty list returns an empty list`() {
+        fun `empty list returns the empty GenreBreakdown`() {
             // ----- Act & Assert -----
-            emptyList<StatsBook>().toGenreSlices() shouldBe emptyList()
+            emptyList<StatsBook>().toGenreBreakdown() shouldBe GenreBreakdown()
         }
 
         @Test
         fun `books with no genre tags contribute nothing`() {
             // ----- Act & Assert -----
-            listOf(book(genreNames = emptyList())).toGenreSlices() shouldBe emptyList()
+            listOf(book(genreNames = emptyList())).toGenreBreakdown() shouldBe GenreBreakdown()
         }
 
         @Test
-        fun `a book contributes once to each of its distinct genre tags`() {
+        fun `a book contributes once to each of its distinct genre tags, each reaching a fraction of 1`() {
             // ----- Arrange -----
             val books = listOf(book(genreNames = listOf("Fantasy", "Sci-Fi")))
 
             // ----- Act -----
-            val result = books.toGenreSlices()
+            val result = books.toGenreBreakdown()
 
             // ----- Assert -----
-            result.map { it.name to it.count }.toSet() shouldBe setOf("Fantasy" to 1, "Sci-Fi" to 1)
-            result.map { it.fraction }.sum() shouldBe (1.0 plusOrMinus 0.0001)
+            result.taggedBookCount shouldBe 1
+            result.slices.map { it.name to it.count }.toSet() shouldBe setOf("Fantasy" to 1, "Sci-Fi" to 1)
+            result.slices.map { it.fraction } shouldBe listOf(1.0, 1.0)
         }
 
         @Test
@@ -517,40 +519,105 @@ class StatsBookMapperTest {
             )
 
             // ----- Act -----
-            val result = books.toGenreSlices()
+            val result = books.toGenreBreakdown()
 
             // ----- Assert -----
-            result.size shouldBe 5
-            result.none { it.name == EVERYTHING_ELSE } shouldBe true
+            result.slices.size shouldBe 5
+            result.slices.none { it.name == EVERYTHING_ELSE } shouldBe true
         }
 
         @Test
-        fun `more than 5 genres keeps only the top 5 by assignment count, dropping the rest`() {
+        fun `more than 5 genres keeps only the top 5 by book count, dropping the rest`() {
             // ----- Arrange -----
-            // Assignment counts: Fantasy 10, Mystery 9, Sci-Fi 8, Romance 7, Horror 6, Thriller 5,
-            // Comedy 4, Drama 3 - total 52 assignments across a single book's genreNames list.
-            val genreNames = List(10) { "Fantasy" } +
-                List(9) { "Mystery" } +
-                List(8) { "Sci-Fi" } +
-                List(7) { "Romance" } +
-                List(6) { "Horror" } +
-                List(5) { "Thriller" } +
-                List(4) { "Comedy" } +
-                List(3) { "Drama" }
+            // Book counts per genre: Fantasy 10, Mystery 9, Sci-Fi 8, Romance 7, Horror 6,
+            // Thriller 5, Comedy 4, Drama 3 - 52 single-genre books in total, so taggedBookCount
+            // lands on 52 and reproduces the same fractions the old assignments-denominator test did.
+            val books = List(10) { book(genreNames = listOf("Fantasy")) } +
+                List(9) { book(genreNames = listOf("Mystery")) } +
+                List(8) { book(genreNames = listOf("Sci-Fi")) } +
+                List(7) { book(genreNames = listOf("Romance")) } +
+                List(6) { book(genreNames = listOf("Horror")) } +
+                List(5) { book(genreNames = listOf("Thriller")) } +
+                List(4) { book(genreNames = listOf("Comedy")) } +
+                List(3) { book(genreNames = listOf("Drama")) }
 
             // ----- Act -----
-            val result = listOf(book(genreNames = genreNames)).toGenreSlices()
+            val result = books.toGenreBreakdown()
 
             // ----- Assert -----
-            result.size shouldBe 5
-            result.map { it.name } shouldBe listOf("Fantasy", "Mystery", "Sci-Fi", "Romance", "Horror")
-            result.none { it.name == EVERYTHING_ELSE } shouldBe true
-            result[0].fraction shouldBe (10.0 / 52.0 plusOrMinus 0.0001)
-            result[1].fraction shouldBe (9.0 / 52.0 plusOrMinus 0.0001)
-            result[2].fraction shouldBe (8.0 / 52.0 plusOrMinus 0.0001)
-            result[3].fraction shouldBe (7.0 / 52.0 plusOrMinus 0.0001)
-            result[4].fraction shouldBe (6.0 / 52.0 plusOrMinus 0.0001)
-            result.map { it.fraction }.sum() shouldBe (40.0 / 52.0 plusOrMinus 0.0001)
+            result.taggedBookCount shouldBe 52
+            result.slices.size shouldBe 5
+            result.slices.map { it.name } shouldBe listOf("Fantasy", "Mystery", "Sci-Fi", "Romance", "Horror")
+            result.slices.none { it.name == EVERYTHING_ELSE } shouldBe true
+            result.slices[0].fraction shouldBe (10.0 / 52.0 plusOrMinus 0.0001)
+            result.slices[1].fraction shouldBe (9.0 / 52.0 plusOrMinus 0.0001)
+            result.slices[2].fraction shouldBe (8.0 / 52.0 plusOrMinus 0.0001)
+            result.slices[3].fraction shouldBe (7.0 / 52.0 plusOrMinus 0.0001)
+            result.slices[4].fraction shouldBe (6.0 / 52.0 plusOrMinus 0.0001)
+        }
+
+        @Test
+        fun `the denominator is tagged books, not genre assignments - a shared genre lands at one-half, not one-tenth`() {
+            // ----- Arrange -----
+            val books = listOf(
+                book(genreNames = listOf("Fantasy", "Sci-Fi", "Mystery", "Romance", "Horror")),
+                book(genreNames = listOf("Sci-Fi", "Mystery", "Romance", "Horror", "Comedy")),
+            )
+
+            // ----- Act -----
+            val result = books.toGenreBreakdown()
+
+            // ----- Assert -----
+            result.taggedBookCount shouldBe 2
+            result.slices.first { it.name == "Fantasy" }.fraction shouldBe (0.5 plusOrMinus 0.0001)
+        }
+
+        @Test
+        fun `a genre on every tagged book reaches a fraction of 1`() {
+            // ----- Arrange -----
+            val books = listOf(
+                book(genreNames = listOf("Fantasy")),
+                book(genreNames = listOf("Fantasy", "Sci-Fi")),
+                book(genreNames = listOf("Fantasy")),
+            )
+
+            // ----- Act -----
+            val result = books.toGenreBreakdown()
+
+            // ----- Assert -----
+            result.slices.first { it.name == "Fantasy" }.fraction shouldBe (1.0 plusOrMinus 0.0001)
+        }
+
+        @Test
+        fun `untagged books are excluded from the denominator - 2 tagged and 3 untagged books divide by 2, not 5`() {
+            // ----- Arrange -----
+            val books = listOf(
+                book(genreNames = listOf("Fantasy")),
+                book(genreNames = listOf("Sci-Fi")),
+                book(genreNames = emptyList()),
+                book(genreNames = emptyList()),
+                book(genreNames = emptyList()),
+            )
+
+            // ----- Act -----
+            val result = books.toGenreBreakdown()
+
+            // ----- Assert -----
+            result.taggedBookCount shouldBe 2
+            result.slices.first { it.name == "Fantasy" }.fraction shouldBe (0.5 plusOrMinus 0.0001)
+            result.slices.first { it.name == "Sci-Fi" }.fraction shouldBe (0.5 plusOrMinus 0.0001)
+        }
+
+        @Test
+        fun `taggedBookCount is 0 and slices is empty when no book carries a genre`() {
+            // ----- Arrange -----
+            val books = listOf(book(genreNames = emptyList()), book(genreNames = emptyList()))
+
+            // ----- Act -----
+            val result = books.toGenreBreakdown()
+
+            // ----- Assert -----
+            result shouldBe GenreBreakdown()
         }
     }
 
@@ -914,7 +981,7 @@ class StatsBookMapperTest {
         }
 
         @Test
-        fun `bipocBreakdown and lgbtqBreakdown are computed independently over distinct authors, each landing in a different one of the yes-no-unknown buckets`() {
+        fun `bipocBreakdown and lgbtqBreakdown computed independently over distinct authors in different yes-no-unknown buckets`() {
             // ----- Arrange -----
             // Author 1: bipoc=true (yes), lgbtq=null (unknown)
             // Author 2: bipoc=false (no), lgbtq=true (yes)

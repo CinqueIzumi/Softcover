@@ -170,6 +170,7 @@ private fun DesktopReadingContent(
                 FeaturedBookCard(
                     book = featured,
                     deadlineProgress = featuredDeadlineProgress,
+                    dateStyle = state.dateStyle,
                     mutationFailed = featured.id in state.failedMutationBookIds,
                     paceForecast = state.featuredBookPace,
                     planTodayMessage = planTodayMessage.takeIf { isPlanTodayDismissed.not() },
@@ -195,6 +196,7 @@ private fun DesktopReadingContent(
                             modifier = controller.slideModifier(book.id),
                             book = book,
                             deadlineProgress = book.deadlineProgressFrom(state),
+                            dateStyle = state.dateStyle,
                             mutationFailed = book.id in state.failedMutationBookIds,
                             runAction = runAction,
                             onBookClick = onBookClick,

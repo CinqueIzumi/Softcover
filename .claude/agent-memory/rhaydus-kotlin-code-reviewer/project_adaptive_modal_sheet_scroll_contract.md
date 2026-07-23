@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-Confirmed from `docs/rhaydus/0.3.0/design-system-foundations.md` §5.9: `AdaptiveModalSheet`'s
+Confirmed from `docs/rhaydus/0.3.1/design-system-foundations.md` §5.9: `AdaptiveModalSheet`'s
 `content` slot is "identical to `ModalBottomSheet`'s (a `ColumnScope` body owning its own padding
 **and scroll**)". The sheet component itself only owns the width branch (bottom sheet vs. centered
 panel), the `surfaceContainerLowest` fill, scrim/back dismissal, and the panel's top inset — it does

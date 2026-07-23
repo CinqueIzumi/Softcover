@@ -39,6 +39,15 @@ internal data class LibraryUiState(
 
     val isLoading: Boolean = true,
     val gridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+
+    /**
+     * Whether the mobile shelf pager accepts a horizontal swipe, and with it whether the neighbour
+     * rail is shown. Backed by the "Swipe between shelves" preference (Settings → Appearance →
+     * Display), which is **opt-in**: the default leaves the Shelves sheet as the only switcher, so
+     * the screen matches the 3.1.0 redesign until the reader asks for the gesture. Desktop ignores
+     * it — its Library switches shelves from a permanent sidebar.
+     */
+    val shelfSwipeEnabled: Boolean = false,
     val sortModeByTab: Map<String, LibrarySortMode> = emptyMap(),
     val sortDirectionByTab: Map<String, SortDirection> = emptyMap(),
 

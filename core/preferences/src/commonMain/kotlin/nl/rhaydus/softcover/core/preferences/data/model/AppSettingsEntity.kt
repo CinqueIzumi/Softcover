@@ -25,6 +25,10 @@ internal data class AppSettingsEntity(
     val libraryTabOrder: List<String> = emptyList(),
     val desktopWindowState: DesktopWindowStateEntity = DesktopWindowStateEntity(),
     val readingStreakEnabled: Boolean = true,
+    val shelfSwipeEnabled: Boolean = false,
+    // Off by default: the author breakdown counts every author it knows about, untagged ones included,
+    // so the untagged share stays visible until the reader asks for the tagged-only reading.
+    val hideUntaggedAuthors: Boolean = false,
     val lastUsedProgressUnit: ProgressUnit = ProgressUnit.PAGE,
     val uiScale: UiScale = UiScale.DEFAULT,
     // Null means "use the auto-derived most-read genre" - see GetBecauseYouReadBooksUseCase.

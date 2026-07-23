@@ -71,6 +71,7 @@ import nl.rhaydus.designsystem.modifier.platformModifierClick
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -84,6 +85,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
@@ -611,6 +613,7 @@ internal fun BookList(
                         isSelectionMode = selectionMode,
                         isSelected = isSelected,
                         deadline = state.deadlines[book.id],
+                        dateStyle = state.dateStyle,
                         dragHandle = if (isRearranging) {
                             { DragHandle(modifier = handleModifier) }
                         } else {
@@ -835,6 +838,7 @@ private fun LayoutBookEntry(
     onLongClick: (() -> Unit)?,
     isSelectionMode: Boolean,
     isSelected: Boolean,
+    dateStyle: DateStyle,
     modifier: Modifier = Modifier,
     deadline: BookDeadline? = null,
     dragHandle: (@Composable () -> Unit)? = null,
@@ -976,6 +980,8 @@ private fun LayoutBookEntry(
                 usersCount = book.usersCount,
                 rating = book.rating,
                 progressFraction = progressFraction,
+                deadlineProgress = deadlineProgress,
+                dateStyle = dateStyle,
                 trailing = dragHandle,
             ) { coverModifier ->
                 SelectableCover(
@@ -1424,10 +1430,10 @@ private fun CompactRow(
 /**
  * The redesign's List (large) row: de-carded (no `surfaceContainer` Surface — the old card look) in
  * favour of a hairline top divider, matching the spec's flattened list anatomy. Cover, series eyebrow,
- * title, byline, meta line, and — while [progressFraction] is non-null — the wavy shelf-progress line
- * + percentage replace the row's old `DeadlineSummaryLine`, which is dropped here: the countdown badge
- * (grid cells only) and this wave now carry a book's reading state, so a third deadline-date line
- * would be redundant on the row that already reads busiest.
+ * title, byline, meta line, a [DeadlineSummaryLine] whenever the book carries a tracked deadline, and
+ * — while [progressFraction] is non-null — the wavy shelf-progress line + percentage. [dateStyle] only
+ * matters alongside a non-null [deadlineProgress]; edition rows (custom lists) have no deadlines and
+ * pass neither.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -1442,6 +1448,8 @@ private fun LargeRow(
     usersCount: Int? = null,
     rating: Double? = null,
     progressFraction: Float? = null,
+    deadlineProgress: DeadlineProgress? = null,
+    dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     trailing: (@Composable () -> Unit)? = null,
     cover: @Composable (Modifier) -> Unit,
 ) {
@@ -1456,120 +1464,132 @@ private fun LargeRow(
     ) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            cover(
-                Modifier
-                    .width(74.dp)
-                    .aspectRatio(ratio = 2f / 3f),
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+        // The deadline readout sits beneath the whole row rather than inside the weighted text
+        // column: its width is unpredictable (the reader's own date format plus an unbounded pace)
+        // and grows with the system font scale, so in that column it wrapped on narrower devices.
+        Column(modifier = Modifier.padding(vertical = 18.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                seriesText?.takeIf { it.isNotBlank() }?.let { series ->
-                    Text(
-                        text = series.uppercase(),
-                        style = MaterialTheme.editorialTypography.eyebrowSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-
-                Text(
-                    text = title,
-                    style = MaterialTheme.editorialTypography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                cover(
+                    Modifier
+                        .width(74.dp)
+                        .aspectRatio(ratio = 2f / 3f),
                 )
 
-                if (authorName.isNotBlank()) {
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    seriesText?.takeIf { it.isNotBlank() }?.let { series ->
+                        Text(
+                            text = series.uppercase(),
+                            style = MaterialTheme.editorialTypography.eyebrowSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+
                     Text(
-                        text = "By $authorName".uppercase(),
-                        style = MaterialTheme.editorialTypography.eyebrowSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
+                        text = title,
+                        style = MaterialTheme.editorialTypography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
-                }
 
-                val hasRating = rating != null && rating != 0.0
-
-                val statsLabel = listOfNotNull(
-                    releaseYear?.takeIf { it != -1 }?.toString(),
-                    usersCount?.let { "$it readers" },
-                    rating?.takeIf { it != 0.0 }?.toString(),
-                ).joinToString(separator = " · ")
-
-                if (statsLabel.isNotEmpty()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                    if (authorName.isNotBlank()) {
                         Text(
-                            text = statsLabel,
-                            style = MaterialTheme.editorialTypography.bodySmall.copy(fontFeatureSettings = "tnum"),
+                            text = "By $authorName".uppercase(),
+                            style = MaterialTheme.editorialTypography.eyebrowSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
+                    }
 
-                        if (hasRating) {
-                            Spacer(modifier = Modifier.width(4.dp))
+                    val hasRating = rating != null && rating != 0.0
 
-                            val starIcon = drawableIconResource(
-                                icon = SoftcoverIcon.StarFilled,
-                                contentDescription = "",
+                    val statsLabel = listOfNotNull(
+                        releaseYear?.takeIf { it != -1 }?.toString(),
+                        usersCount?.let { "$it readers" },
+                        rating?.takeIf { it != 0.0 }?.toString(),
+                    ).joinToString(separator = " · ")
+
+                    if (statsLabel.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = statsLabel,
+                                style = MaterialTheme.editorialTypography.bodySmall.copy(fontFeatureSettings = "tnum"),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
 
-                            Icon(
-                                painter = starIcon.getIconPainter(),
-                                contentDescription = starIcon.contentDescription,
-                                tint = RatingGold,
-                                modifier = Modifier.size(14.dp),
+                            if (hasRating) {
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                val starIcon = drawableIconResource(
+                                    icon = SoftcoverIcon.StarFilled,
+                                    contentDescription = "",
+                                )
+
+                                Icon(
+                                    painter = starIcon.getIconPainter(),
+                                    contentDescription = starIcon.contentDescription,
+                                    tint = RatingGold,
+                                    modifier = Modifier.size(14.dp),
+                                )
+                            }
+                        }
+                    }
+
+                    if (progressFraction != null) {
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            LinearWavyProgressIndicator(
+                                progress = { progressFraction.coerceIn(
+                                    0f,
+                                    1f,
+                                ) },
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.outlineVariant,
+                                modifier = Modifier
+                                    .width(120.dp)
+                                    .height(8.dp),
+                            )
+
+                            Text(
+                                text = "${(progressFraction * 100f).roundToInt()}%",
+                                style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
                 }
 
-                if (progressFraction != null) {
-                    Spacer(modifier = Modifier.height(6.dp))
+                if (trailing != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        LinearWavyProgressIndicator(
-                            progress = { progressFraction.coerceIn(
-                                0f,
-                                1f,
-                            ) },
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = MaterialTheme.colorScheme.outlineVariant,
-                            modifier = Modifier
-                                .width(120.dp)
-                                .height(8.dp),
-                        )
-
-                        Text(
-                            text = "${(progressFraction * 100f).roundToInt()}%",
-                            style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                    trailing()
                 }
             }
 
-            if (trailing != null) {
-                Spacer(modifier = Modifier.width(8.dp))
+            if (deadlineProgress != null) {
+                Spacer(modifier = Modifier.height(12.dp))
 
-                trailing()
+                DeadlineSummaryLine(
+                    progress = deadlineProgress,
+                    dateStyle = dateStyle,
+                )
             }
         }
     }

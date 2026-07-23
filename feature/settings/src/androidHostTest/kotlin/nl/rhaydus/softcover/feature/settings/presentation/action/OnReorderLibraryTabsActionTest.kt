@@ -20,7 +20,11 @@ import nl.rhaydus.toad.ActionScope
 
 class OnReorderLibraryTabsActionTest {
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
-    private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
+    private lateinit var scope: ActionScope<
+        LibraryVisibilitySettingsUiState,
+        LibraryVisibilitySettingsEvent,
+        LibraryVisibilitySettingsLocalVariables,
+        >
 
     @BeforeEach
     fun setUp() {

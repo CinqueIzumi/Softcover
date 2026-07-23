@@ -275,7 +275,8 @@ class Migration35To36Test {
 
             // ----- Assert -----
             val stmt = connection.prepare(
-                "SELECT id, bookId, statusCode, dateAdded, privacySettingId, reviewHasSpoilers, editionId, lastReadDate, rating, createdAt FROM user_books",
+                "SELECT id, bookId, statusCode, dateAdded, privacySettingId, reviewHasSpoilers, " +
+                    "editionId, lastReadDate, rating, createdAt FROM user_books",
             )
 
             try {
@@ -350,7 +351,8 @@ class Migration35To36Test {
 
             // ----- Assert -----
             val stmt = connection.prepare(
-                "SELECT kind, userBookId, userBookReadId, bookId, editionId, progressPages, rating, enqueuedAt, attempts FROM pending_user_book_writes",
+                "SELECT kind, userBookId, userBookReadId, bookId, editionId, progressPages, rating, " +
+                    "enqueuedAt, attempts FROM pending_user_book_writes",
             )
 
             try {

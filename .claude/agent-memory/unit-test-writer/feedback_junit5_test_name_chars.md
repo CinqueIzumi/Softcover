@@ -9,4 +9,4 @@ Kotlin JUnit 5 backtick test names with `:` cause a compile-time "illegal charac
 
 **Why:** The Kotlin compiler rejects `:` inside backtick identifiers at the JVM level.
 
-**How to apply:** Replace `fun \`foo: bar\`` with `fun \`foo — bar\`` (em-dash) or rephrase to avoid the colon entirely. Also applies to any other JVM-illegal characters (e.g. `<`, `>`).
+**How to apply:** Replace `fun \`foo: bar\`` with `fun \`foo — bar\`` (em-dash) or rephrase to avoid the colon entirely. Also applies to any other JVM-illegal characters (e.g. `<`, `>`, `/`, `.`, `[`, `]`) — confirmed `/` also triggers "Name contains illegal characters" (e.g. writing "mode/direction" in a test name). When trimming an over-140-char backtick test name, prefer plain words ("and"/"or") over slashes or extra punctuation.

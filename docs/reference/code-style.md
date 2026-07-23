@@ -1,6 +1,6 @@
 # Code Style Guide
 
-The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.3.0/code-style.md`](../rhaydus/0.3.0/code-style.md) (enforced by the `nl.rhaydus:ktlint-rules` ruleset + the type-resolved `nl.rhaydus:detekt-rules` ruleset). Read it first — it is the source of truth for naming, project structure, one-declaration-per-file, enums, data classes, boolean negation, visibility, if/else, Compose, comments, code organization, argument/property layout, whitespace, import ordering, data flow, dependencies, and test class / unit test structure.
+The shared Kotlin code style is governed by the foundation [`docs/rhaydus/0.3.1/code-style.md`](../rhaydus/0.3.1/code-style.md) (enforced by the `nl.rhaydus:ktlint-rules` ruleset + the type-resolved `nl.rhaydus:detekt-rules` ruleset). Read it first — it is the source of truth for naming, project structure, one-declaration-per-file, enums, data classes, boolean negation, visibility, if/else, Compose, comments, code organization, argument/property layout, whitespace, import ordering, data flow, dependencies, and test class / unit test structure.
 
 This file keeps only Softcover-specific deltas.
 

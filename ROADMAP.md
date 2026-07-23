@@ -2,7 +2,7 @@
 
 What we're building next for [Softcover](https://hardcover.app/), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: 3.0.3.** Softcover is now on iPhone, iPad and desktop as well as Android.
+**Current release: 3.1.0,** a top-to-bottom redesign: nearly every screen (Reading, your Library, book pages, Explore, your Profile, Settings and more) rebuilt with a cleaner, more editorial look and feel. Softcover runs on Android, iPhone, iPad and desktop.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
@@ -13,16 +13,16 @@ A few honest caveats:
 
 ---
 
-## 3.1.0: A fresh new look
+## 3.1.1: Redesign follow-ups
 
-A top-to-bottom redesign: nearly every screen (Reading, your Library, book pages, Explore, your Profile, Settings and more) has been rebuilt with a cleaner, more editorial look and feel.
+Polish shaken out of the 3.1.0 redesign.
 
-- Long titles on coverless books resize to stay readable.
-- When you tag a book, get suggestions based on tags you've used before.
-- When you mark a book as read, it'll ask for an optional rating and review.
-- Add a book straight to **Currently Reading** in one tap, instead of shelving it first.
-- Log a reading update against an earlier time (say you read to a page last night, not just now).
-- New reading stats on your profile: a recap of your reading life, from genres and ratings to the mix of authors you read.
+- **Swipe between shelves again.** Turn on "Swipe between shelves" under Settings, Appearance and you can flick left or right in your Library to move to the next shelf, with the shelves either side named in a quiet line just above your books (tap either name to jump one across). Off by default, so nothing changes unless you ask for it. Phone and tablet only: on desktop the shelf sidebar already does this job.
+- **The top of Explore says what it is.** The big card opening Explore now labels itself "Most anticipated, next 30 days" and tells you how many readers are already waiting on it, so it's clear that's the upcoming book with the most people watching it rather than a random pick.
+- **Back steps out of a search first.** On phone and tablet, pressing back while you're searching in Explore clears the search and puts the feed back, instead of taking you off the screen with your results still up. Press back again and you leave as usual. On desktop, Esc does the same thing.
+- **All of your tags, when you want them.** Tagging a book suggests the tags you've used before. "Show more" now opens every tag you've used in that category, rather than stopping after the first handful and leaving the rest out of reach, and "Show less" folds them away again.
+- **Read your author stats without the blanks.** "Who you read" on your profile counts every author, including the many nobody has filled in any details for, which can leave the percentages looking oddly small. A new "Hide untagged authors" switch leaves those out, so each bar reads over the authors it actually has information for (each one over its own, since a book can be missing one detail but not another). It stays where you put it, and it's off to begin with.
+- **Your deadlines say what they need again.** A book with a deadline used to tell you only whether you were on track. On your Library list and on the Reading screen it now names the date you're aiming at and the pages a day (or listening time a day) it would take to get there, which is what book detail has always shown. Nothing changed on book detail itself.
 
 ## 3.2.0: Widgets (Android)
 
@@ -77,9 +77,11 @@ An editable profile, a set of reading stats (genre & rating distributions, readi
 A long editorial **Stats Atlas**, and the payoff for everything you recorded in 3.5.0:
 
 - Streak and time-of-day heatmaps, and an optional public activity log.
+- **Pick your own window**: read every stat for the last 30 days, the last 6 months, the last 12 months, a single year (2025, 2026 and so on) or all time.
 - **Diversity & representation**: your reading by author gender, background and country, drawn from your own private tags.
 - **How you read**: whether your year leaned plot- or character-driven, your pace and writing-style mix, and the moods you reach for most.
 - **Publication & provenance**: author nationality, language and how much you read in translation, publication years, audience, and where your books came from.
+- **Every genre, not just your top five**: the genre chart stays a top five at a glance, with one tap to open the full ranking of everything you have read.
 
 ## 3.12.0: Calendars & recap
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +36,13 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -44,6 +54,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.haptics.LocalHaptics
@@ -75,12 +88,14 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExp
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnShelvesSheetExpandedChangeAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleFilterValueAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlLine
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryShelvesSheet
+import nl.rhaydus.softcover.feature.library.presentation.component.ShelfNeighbourRail
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @OptIn(
@@ -99,8 +114,64 @@ internal actual fun LibraryScreenLayout(
     gridStateFor: (String) -> LazyGridState,
     topAppBarState: TopAppBarState,
 ) {
-    val currentTab = state.visibleTabs.firstOrNull { it.id == state.selectedTabId }
-        ?: state.visibleTabs.firstOrNull()
+    val tabs = state.visibleTabs
+
+    val scope = rememberCoroutineScope()
+
+    // Re-keyed on tabsLoaded so the pager lands on the persisted shelf the moment VisibleTabsCollector
+    // resolves the real tab set — without it the pager would sit on page 0 (All) forever.
+    val initialPage = remember(state.tabsLoaded) {
+        tabs.indexOfFirst { it.id == state.selectedTabId }.coerceAtLeast(0)
+    }
+
+    val pagerState = key(state.tabsLoaded) {
+        rememberPagerState(
+            initialPage = initialPage,
+            pageCount = { tabs.size },
+        )
+    }
+
+    // Selection made elsewhere (the Shelves sheet, a tab being hidden in settings) snaps the pager
+    // across instantly: the sheet is dismissing over it, and animating a multi-shelf jump behind a
+    // closing sheet reads as a glitch. The rail animates instead — see onPreviousClick below.
+    LaunchedEffect(tabs, state.selectedTabId) {
+        val targetIndex = tabs.indexOfFirst { it.id == state.selectedTabId }
+
+        if (targetIndex >= 0 && targetIndex != pagerState.currentPage) {
+            pagerState.scrollToPage(targetIndex)
+        }
+    }
+
+    val currentTabs by rememberUpdatedState(tabs)
+    val currentSelectedTabId by rememberUpdatedState(state.selectedTabId)
+
+    // Keyed on pagerState alone, so this collector outlives every tab-list change; the two
+    // rememberUpdatedState reads above are what keep it from closing over a stale snapshot.
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }
+            .distinctUntilChanged()
+            .drop(1)
+            .collect { page ->
+                currentTabs.getOrNull(page)?.id?.let { id ->
+                    if (id != currentSelectedTabId) {
+                        runAction(OnTabSelectedAction(tabId = id))
+                    }
+                }
+            }
+    }
+
+    // The header follows the pager rather than the state: currentPage flips as the incoming shelf
+    // passes halfway, so title, stats, control line, filter chips and rail all change over with the
+    // content. The tab-select action still fires only on settle, so a cancelled swipe writes nothing.
+    //
+    // That deliberately leaves state trailing the header for the length of a fling, which anything
+    // reading selectedTabId sees — OnRefreshAction picks its RefreshScope from it, so a pull-to-refresh
+    // landed mid-fling refreshes the outgoing shelf. Accepted: it needs two overlapping gestures inside
+    // a ~300ms window and the worst case is refreshing the neighbouring scope. Threading the visible
+    // page into the action instead would give "the current tab" a second source of truth, which is the
+    // worse trade.
+    val currentTabIndex = pagerState.currentPage.coerceAtMost(tabs.lastIndex.coerceAtLeast(0))
+    val currentTab = tabs.getOrNull(currentTabIndex)
 
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -247,6 +318,34 @@ internal actual fun LibraryScreenLayout(
                         }
                     }
                 }
+
+                // Hidden while rearranging because the pager is frozen then too — the rail promises a
+                // swipe that mode does not accept. Selection mode never reaches here: this whole
+                // branch is the not-selecting header.
+                AnimatedVisibility(
+                    visible = state.shelfSwipeEnabled && tabs.size > 1 && state.isRearranging.not(),
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        ShelfNeighbourRail(
+                            previousLabel = tabs.getOrNull(currentTabIndex - 1)?.label,
+                            nextLabel = tabs.getOrNull(currentTabIndex + 1)?.label,
+                            onPreviousClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(currentTabIndex - 1)
+                                }
+                            },
+                            onNextClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(currentTabIndex + 1)
+                                }
+                            },
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -270,26 +369,36 @@ internal actual fun LibraryScreenLayout(
                     .weight(1f)
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
             ) {
-                when (val tab = currentTab) {
-                    is LibraryContentTab.CustomList -> EditionList(
-                        tab = tab,
-                        state = state,
-                        gridState = gridStateFor(tab.id),
-                        onEditionClick = onEditionClick,
-                        runAction = runAction,
-                    )
-
-                    is LibraryContentTab.All,
-                    is LibraryContentTab.Status,
-                        -> BookList(
+                // Both editing modes freeze the pager: a page swipe would fight the reorderable grid's
+                // drag, and carrying a selection across shelves makes the count subtitle lie.
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    userScrollEnabled = state.shelfSwipeEnabled &&
+                        state.selectionMode.not() &&
+                        state.isRearranging.not(),
+                ) { page ->
+                    when (val tab = tabs.getOrNull(page)) {
+                        is LibraryContentTab.CustomList -> EditionList(
                             tab = tab,
                             state = state,
                             gridState = gridStateFor(tab.id),
-                            onBookClick = onBookClick,
+                            onEditionClick = onEditionClick,
                             runAction = runAction,
                         )
 
-                    null -> Unit
+                        is LibraryContentTab.All,
+                        is LibraryContentTab.Status,
+                            -> BookList(
+                                tab = tab,
+                                state = state,
+                                gridState = gridStateFor(tab.id),
+                                onBookClick = onBookClick,
+                                runAction = runAction,
+                            )
+
+                        null -> Unit
+                    }
                 }
             }
         }

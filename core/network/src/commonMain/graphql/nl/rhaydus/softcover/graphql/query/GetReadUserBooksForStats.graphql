@@ -24,19 +24,22 @@ query GetReadUserBooksForStats($limit: Int!, $offset: Int!) {
             }
             book {
                 pages
-                # Top 5 genre tags by popularity only - a book rarely carries more genres worth
-                # counting, and capping here (rather than pulling every tag) keeps this per-book,
-                # paginated payload lean.
+                # Every genre tag on the book, deliberately uncapped: the "most-read genre" ranking
+                # is computed client-side in toGenreBreakdown, so a server-side cut here would decide
+                # the answer before the client ever sees the data. A previous `limit: 5` did exactly
+                # that - ordered by popularity, it dropped each book's niche tags, which is the end
+                # of the distribution a personal most-read ranking is supposed to surface. The
+                # ordering is kept only so the rows arrive most-agreed-upon first; nothing downstream
+                # depends on it.
                 taggable_counts(
                     where: { tag: { tag_category: { category: { _eq: "Genre" } } } }
                     order_by: { count: desc }
-                    limit: 5
                 ) {
+                    # The name alone - the where-clause above already guarantees every row is a Genre,
+                    # so selecting tag_category back would return the same constant on every row and
+                    # answer a question this query has no way of asking.
                     tag {
                         tag
-                        tag_category {
-                            category
-                        }
                     }
                 }
                 # Only the fields the author-demographics aggregation needs - id for cross-book

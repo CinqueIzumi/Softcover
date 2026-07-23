@@ -11,7 +11,7 @@ upstream and record it here.
 **Process.** With `foundation.local=true` (includeBuild against `../rhaydus-foundation`), fix it at the
 source and bump the foundation. Otherwise file it against the foundation and track it here until a
 released version carries the fix, then re-run the `rhaydus-adopt` agent. The capability surface these
-entries refer to is indexed in [`../rhaydus/0.3.0/CAPABILITIES.md`](../rhaydus/0.3.0/CAPABILITIES.md).
+entries refer to is indexed in [`../rhaydus/0.3.1/CAPABILITIES.md`](../rhaydus/0.3.1/CAPABILITIES.md).
 
 Each entry: **type** (bug / enhancement / gate), **home** (target foundation module), **status**, and
 enough context for whoever picks it up. F-numbers are stable identifiers (referenced from commits and
@@ -25,18 +25,15 @@ other docs) and are **never reused or renumbered**.
 
 ## Still pending (context)
 
-Softcover runs on the **local 0.3.0** foundation (`foundation.local=true` in `local.properties` —
-gitignored, includeBuild `../rhaydus-foundation`). Because `foundation.local` stays out of git, the
-committed state resolves catalog `0.3.0` from the **published** `nl.rhaydus:*` artifacts — so
-**foundation 0.3.0 must be published** before CI / a fresh clone (without `foundation.local=true`) can
-build.
+Softcover runs on **published foundation `0.3.1`**, resolved from `mavenCentral()` (`foundation.local=false`
+in `local.properties`, the committed default). All nine `0.3.1` artifacts are live on Central and verified
+resolving. `foundation.local=true` remains available as an inner-loop switch (`includeBuild
+"../rhaydus-foundation"`) but is off by default.
 
 **Next up:**
-1. **Publish foundation `0.3.0`** (or keep everyone on `foundation.local=true`) so non-local builds
-   resolve the catalog `0.3.0` coordinates.
-2. **Publish the foundation `build-logic` as Gradle plugins** — the only thing standing between
+1. **Publish the foundation `build-logic` as Gradle plugins** — the only thing standing between
    F18/F20/F21 and adoption.
-3. **Wire the foundation's own `detektCheck` into its `check`** — it is registered but attached to
+2. **Wire the foundation's own `detektCheck` into its `check`** — it is registered but attached to
    nothing, so the foundation does not gate on the config it ships.
 
 ---
@@ -93,6 +90,51 @@ Filed but not yet implemented in the foundation.
   2026-07-13; the wider ~300-site codebase sweep (52 files, much of it in test files where `ktlintFormat`
   created the glom) is **deferred until this rule exists**, so the fix is applied once, by the tool,
   rather than hand-swept and left ungated.
+
+### F26 — `dismissOnEscape` that listens without taking focus
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core` (`jvmMain`, `nl.rhaydus.designsystem.modifier.DesktopKeyboard`)
+- **Status:** **Open.** `Modifier.dismissOnEscape(enabled, onDismiss)` requests focus on the node
+  whenever `enabled` flips false → true (`LaunchedEffect(enabled) { … requestFocus() }`). That is right
+  for the surfaces it was built for — a mode entered by a gesture (bulk-select, rearrange) or a viewer
+  pushed over the page — where nothing is being typed at the moment of the flip. It makes the modifier
+  **unusable gated** on any condition a *text field* drives: desktop Explore's Esc-clears-search wants
+  `enabled = state.hasActiveSearch`, but that condition flips on the first typed character, so enabling
+  it would pull focus out of the very field being typed into and swallow the rest of the word.
+- **Workaround in the app:** desktop Explore holds the modifier unconditionally enabled and guards
+  inside the callback (`ExploreScreenLayout.jvm.kt`). Correct, but it consumes every Esc keydown on the
+  screen — harmless there (no other Esc consumer; the sheets are `Dialog`/`Popup` with their own focus
+  scope), and not something to repeat on a surface that has one.
+- **What to build:** separate "catch Esc" from "grab focus" — either a `grabsFocus: Boolean = true`
+  parameter, or a sibling `Modifier.onEscape(enabled, onEscape)` that installs only the
+  `onPreviewKeyEvent` handler and leaves focus alone (it still fires whenever focus sits anywhere inside
+  the subtree, which is the persistent-field case). The gated form should also stop consuming the event
+  when it does nothing, so a disabled rung leaves Esc for whatever else wants it.
+- **Doc impact:** the foundation design-system §"Desktop Esc-to-dismiss" gains the gate-vs-guard rule;
+  Softcover's own copy carries it today (`docs/reference/design-system/foundations.md` §2.5, and the
+  search-chrome block in `design-system/layout.md` §3.1).
+
+### F27 — `ExpandableFlowRow` composes every item, including the ones it never places
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.layout.ExpandableFlowRow`)
+- **Status:** **Open.** `FlowRow`'s `content` slot is composed and measured in full up front — `maxLines`
+  and the overflow indicator affect *placement* only, not composition (verified against the Compose
+  Foundation measure pass in `FlowLayout.kt`). So a collapsed `ExpandableFlowRow` showing two lines still
+  composes and lays out **every** item behind the fold. That was harmless while every call site fed it a
+  bounded set, but the tag editor's suggestion cloud (`B.4.25`, 3.1.1) now hands it the user's entire
+  per-category vocabulary uncapped, and the cloud re-derives on every keystroke in the naming field — so
+  each character recomposes the whole filtered candidate set rather than the two visible lines.
+- **Assessment:** not a live problem. `PillChip` is a cheap `Surface` + `Text`, and a realistic personal
+  vocabulary in one category runs to tens of tags. It is a genuine scaling risk only for a power user with
+  100+ tags in a single category. Filed rather than fixed because the right fix is a lazy/windowed
+  implementation in the shared component, not a cap at the call site — a cap is exactly what `B.4.25`
+  removed, and reintroducing one here would put the ceiling back by another route.
+- **What to build:** a windowed `ExpandableFlowRow` that composes only what it will place (plus the
+  indicator), so the collapsed cost is bounded by `collapsedLines` rather than by item count. Blocked in
+  practice on the same thing as the deprecation cleanup: there is no maintained Compose overflow API to
+  build it on (`FlowRowOverflow` is deprecated, `ContextualFlowRow` likewise).
 
 ---
 
