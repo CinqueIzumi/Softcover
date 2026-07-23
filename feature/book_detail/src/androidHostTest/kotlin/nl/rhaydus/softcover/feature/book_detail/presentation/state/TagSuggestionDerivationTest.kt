@@ -195,12 +195,14 @@ class TagSuggestionDerivationTest {
         }
 
         @Test
-        fun `blank input is capped to limit`() {
+        fun `blank input returns every candidate ranked by count then name`() {
             // ----- Arrange -----
-            val tags = (1..10).map { buildTag(
-                name = "Tag$it",
-                count = it,
-            ) }
+            val tags = (1..10).map {
+                buildTag(
+                    name = "Tag$it",
+                    count = it,
+                )
+            }
 
             // ----- Act -----
             val result = computeTagSuggestions(
@@ -208,24 +210,15 @@ class TagSuggestionDerivationTest {
                 input = "",
                 category = TagCategory.GENRE,
                 appliedTags = emptyList(),
-                limit = 3,
             )
 
             // ----- Assert -----
-            result shouldBe listOf(
+            result shouldBe (10 downTo 1).map {
                 buildTag(
-                    name = "Tag10",
-                    count = 10,
-                ),
-                buildTag(
-                    name = "Tag9",
-                    count = 9,
-                ),
-                buildTag(
-                    name = "Tag8",
-                    count = 8,
-                ),
-            )
+                    name = "Tag$it",
+                    count = it,
+                )
+            }
         }
 
         @Test
@@ -361,16 +354,20 @@ class TagSuggestionDerivationTest {
         }
 
         @Test
-        fun `non-blank input is capped to limit with prefix tier consumed first`() {
+        fun `non-blank input returns every match with prefix tier ahead of mid-string tier`() {
             // ----- Arrange -----
-            val prefixTags = (1..2).map { buildTag(
-                name = "Fan$it",
-                count = it,
-            ) }
-            val midTags = (1..2).map { buildTag(
-                name = "Urban Fan$it",
-                count = 100 + it,
-            ) }
+            val prefixTags = (1..2).map {
+                buildTag(
+                    name = "Fan$it",
+                    count = it,
+                )
+            }
+            val midTags = (1..2).map {
+                buildTag(
+                    name = "Urban Fan$it",
+                    count = 100 + it,
+                )
+            }
 
             // ----- Act -----
             val result = computeTagSuggestions(
@@ -378,12 +375,10 @@ class TagSuggestionDerivationTest {
                 input = "fan",
                 category = TagCategory.GENRE,
                 appliedTags = emptyList(),
-                limit = 3,
             )
 
             // ----- Assert -----
-            // Both prefix matches rank ahead of both mid-string matches regardless of count, so the
-            // cap of 3 keeps both prefix entries plus only the higher-count mid-string entry.
+            // Both prefix matches rank ahead of both mid-string matches regardless of count.
             result shouldBe listOf(
                 buildTag(
                     name = "Fan2",
@@ -396,6 +391,10 @@ class TagSuggestionDerivationTest {
                 buildTag(
                     name = "Urban Fan2",
                     count = 102,
+                ),
+                buildTag(
+                    name = "Urban Fan1",
+                    count = 101,
                 ),
             )
         }

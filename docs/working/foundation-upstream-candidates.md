@@ -118,6 +118,27 @@ Filed but not yet implemented in the foundation.
   Softcover's own copy carries it today (`docs/reference/design-system/foundations.md` §2.5, and the
   search-chrome block in `design-system/layout.md` §3.1).
 
+### F27 — `ExpandableFlowRow` composes every item, including the ones it never places
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.layout.ExpandableFlowRow`)
+- **Status:** **Open.** `FlowRow`'s `content` slot is composed and measured in full up front — `maxLines`
+  and the overflow indicator affect *placement* only, not composition (verified against the Compose
+  Foundation measure pass in `FlowLayout.kt`). So a collapsed `ExpandableFlowRow` showing two lines still
+  composes and lays out **every** item behind the fold. That was harmless while every call site fed it a
+  bounded set, but the tag editor's suggestion cloud (`B.4.25`, 3.1.1) now hands it the user's entire
+  per-category vocabulary uncapped, and the cloud re-derives on every keystroke in the naming field — so
+  each character recomposes the whole filtered candidate set rather than the two visible lines.
+- **Assessment:** not a live problem. `PillChip` is a cheap `Surface` + `Text`, and a realistic personal
+  vocabulary in one category runs to tens of tags. It is a genuine scaling risk only for a power user with
+  100+ tags in a single category. Filed rather than fixed because the right fix is a lazy/windowed
+  implementation in the shared component, not a cap at the call site — a cap is exactly what `B.4.25`
+  removed, and reintroducing one here would put the ceiling back by another route.
+- **What to build:** a windowed `ExpandableFlowRow` that composes only what it will place (plus the
+  indicator), so the collapsed cost is bounded by `collapsedLines` rather than by item count. Blocked in
+  practice on the same thing as the deprecation cleanup: there is no maintained Compose overflow API to
+  build it on (`FlowRowOverflow` is deprecated, `ContextualFlowRow` likewise).
+
 ---
 
 # Implemented, not adopted
