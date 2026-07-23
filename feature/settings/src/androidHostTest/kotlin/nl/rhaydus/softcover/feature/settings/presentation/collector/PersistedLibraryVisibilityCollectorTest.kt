@@ -28,7 +28,11 @@ class PersistedLibraryVisibilityCollectorTest {
     private lateinit var getLibraryTabOrderAsFlowUseCase: GetLibraryTabOrderAsFlowUseCase
     private lateinit var dependencies: LibraryVisibilitySettingsDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
-    private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
+    private lateinit var scope: ActionScope<
+        LibraryVisibilitySettingsUiState,
+        LibraryVisibilitySettingsEvent,
+        LibraryVisibilitySettingsLocalVariables,
+        >
     private lateinit var statusCodesFlow: MutableSharedFlow<Set<Int>>
     private lateinit var listIdsFlow: MutableSharedFlow<Set<Int>>
     private lateinit var tabOrderFlow: MutableSharedFlow<List<String>>

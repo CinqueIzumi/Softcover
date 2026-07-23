@@ -620,7 +620,7 @@ class ProfileRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `a book with no resolvable date is excluded from booksByYear, pagesByYear and pagesByMonth but still counts toward totalPagesRead`() =
+        fun `a book with no resolvable date is excluded from booksByYear, pagesByYear, pagesByMonth but counts toward totalPagesRead`() =
             runTest {
                 // ----- Arrange -----
                 mockProfileQuery(me())
@@ -653,7 +653,7 @@ class ProfileRemoteDataSourceImplTest {
             }
 
         @Test
-        fun `a book whose finish year falls outside the booksByYear-pagesByYear window is dropped from those charts but still counts toward totalPagesRead`() =
+        fun `a book whose finish year falls outside the booksByYear-pagesByYear window is dropped but counts toward totalPagesRead`() =
             runTest {
                 // ----- Arrange -----
                 mockProfileQuery(me())

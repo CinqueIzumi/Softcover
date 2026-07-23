@@ -67,26 +67,27 @@ class FeaturedUpcomingReleaseCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `clears loading and leaves featuredUpcomingRelease null when there is no qualifying book`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            coEvery {
-                getFeaturedUpcomingReleaseUseCase()
-            } returns Result.success(null)
-            val collector = FeaturedUpcomingReleaseCollector()
+        fun `clears loading and leaves featuredUpcomingRelease null when there is no qualifying book`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                coEvery {
+                    getFeaturedUpcomingReleaseUseCase()
+                } returns Result.success(null)
+                val collector = FeaturedUpcomingReleaseCollector()
 
-            // ----- Act -----
-            collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            )
+                // ----- Act -----
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
 
-            // ----- Assert -----
-            stateFlow.value.loadingFeaturedUpcomingRelease shouldBe false
-            stateFlow.value.featuredUpcomingRelease shouldBe null
-            coVerify(exactly = 0) {
-                getAllUserBooksUseCase()
+                // ----- Assert -----
+                stateFlow.value.loadingFeaturedUpcomingRelease shouldBe false
+                stateFlow.value.featuredUpcomingRelease shouldBe null
+                coVerify(exactly = 0) {
+                    getAllUserBooksUseCase()
+                }
             }
-        }
 
         @Test
         fun `clears loading and leaves featuredUpcomingRelease null when the use case fails`() = runTest(UnconfinedTestDispatcher()) {

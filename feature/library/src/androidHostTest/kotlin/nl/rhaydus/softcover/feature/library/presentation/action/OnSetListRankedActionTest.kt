@@ -119,7 +119,7 @@ class OnSetListRankedActionTest {
             }
 
         @Test
-        fun `ranked=true failure path — sort rolls back to previous mode and direction, snackbar contains enable manual ordering and list name`() =
+        fun `ranked=true failure path — rolls back to previous sort mode and direction, snackbar names enable manual ordering and list`() =
             runTest {
                 // ----- Arrange -----
                 val previousMode = LibrarySortMode.DATE_ADDED

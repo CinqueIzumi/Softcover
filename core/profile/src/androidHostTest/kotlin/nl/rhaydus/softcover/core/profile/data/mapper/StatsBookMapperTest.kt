@@ -914,7 +914,7 @@ class StatsBookMapperTest {
         }
 
         @Test
-        fun `bipocBreakdown and lgbtqBreakdown are computed independently over distinct authors, each landing in a different one of the yes-no-unknown buckets`() {
+        fun `bipocBreakdown and lgbtqBreakdown computed independently over distinct authors in different yes-no-unknown buckets`() {
             // ----- Arrange -----
             // Author 1: bipoc=true (yes), lgbtq=null (unknown)
             // Author 2: bipoc=false (no), lgbtq=true (yes)

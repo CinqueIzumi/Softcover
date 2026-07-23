@@ -107,7 +107,8 @@ class InitializeBookWithIdActionTest {
         }
 
         @Test
-        fun `sets book to null, clears loadingBookDetails, leaves editions empty, and does not stamp editionsLoadedForBookId when use case fails`() = runTest {
+        fun `sets book to null, clears loadingBookDetails, leaves editions empty, skips editionsLoadedForBookId on use case failure`() =
+            runTest {
             // ----- Arrange -----
             val bookId = 7
             dependencies = stubDependencies(this)

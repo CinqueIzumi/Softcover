@@ -136,7 +136,8 @@ class LastUsedProgressUnitCollectorTest {
         }
 
         @Test
-        fun `retains the last emitted selectedProgressSheetTab after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
+        fun `retains the last emitted selectedProgressSheetTab after the collector job is cancelled`() =
+            runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
             val job = launch { collector.onLaunch(

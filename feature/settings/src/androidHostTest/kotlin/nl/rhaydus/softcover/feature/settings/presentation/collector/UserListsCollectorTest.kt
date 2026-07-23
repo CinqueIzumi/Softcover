@@ -24,7 +24,11 @@ class UserListsCollectorTest {
     private lateinit var getAllUserListsUseCase: GetAllUserListsUseCase
     private lateinit var dependencies: LibraryVisibilitySettingsDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
-    private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
+    private lateinit var scope: ActionScope<
+        LibraryVisibilitySettingsUiState,
+        LibraryVisibilitySettingsEvent,
+        LibraryVisibilitySettingsLocalVariables,
+        >
     private lateinit var listsFlow: MutableSharedFlow<List<BookList>>
 
     @BeforeEach

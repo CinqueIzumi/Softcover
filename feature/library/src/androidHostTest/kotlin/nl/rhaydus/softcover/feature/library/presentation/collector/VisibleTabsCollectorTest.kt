@@ -347,37 +347,38 @@ class VisibleTabsCollectorTest {
         }
 
         @Test
-        fun `empty persistedOrder returns default order with All first then statuses then lists by name`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val listB = stubBookList(
-                id = 2,
-                name = "Beta",
-            )
-            val listA = stubBookList(
-                id = 1,
-                name = "Alpha",
-            )
-            val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+        fun `empty persistedOrder returns default order with All first then statuses then lists by name`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val listB = stubBookList(
+                    id = 2,
+                    name = "Beta",
+                )
+                val listA = stubBookList(
+                    id = 1,
+                    name = "Alpha",
+                )
+                val collector = VisibleTabsCollector()
+                val job = launch { collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                ) }
 
-            // ----- Act -----
-            statusCodesFlow.emit(setOf(UserBookStatus.READ.code))
-            enabledListIdsFlow.emit(setOf(1, 2))
-            listsFlow.emit(listOf(listB, listA))
-            tabOrderFlow.emit(emptyList())
+                // ----- Act -----
+                statusCodesFlow.emit(setOf(UserBookStatus.READ.code))
+                enabledListIdsFlow.emit(setOf(1, 2))
+                listsFlow.emit(listOf(listB, listA))
+                tabOrderFlow.emit(emptyList())
 
-            // ----- Assert -----
-            val tabs = stateFlow.value.visibleTabs
-            tabs[0] shouldBe LibraryTab.All
-            (tabs[1] as LibraryTab.Status).status shouldBe UserBookStatus.CURRENTLY_READING
-            (tabs[2] as LibraryTab.Status).status shouldBe UserBookStatus.READ
-            (tabs[3] as LibraryTab.CustomList).listName shouldBe "Alpha"
-            (tabs[4] as LibraryTab.CustomList).listName shouldBe "Beta"
-            job.cancel()
-        }
+                // ----- Assert -----
+                val tabs = stateFlow.value.visibleTabs
+                tabs[0] shouldBe LibraryTab.All
+                (tabs[1] as LibraryTab.Status).status shouldBe UserBookStatus.CURRENTLY_READING
+                (tabs[2] as LibraryTab.Status).status shouldBe UserBookStatus.READ
+                (tabs[3] as LibraryTab.CustomList).listName shouldBe "Alpha"
+                (tabs[4] as LibraryTab.CustomList).listName shouldBe "Beta"
+                job.cancel()
+            }
 
         @Test
         fun `persistedOrder with known ids respects that order and keeps All pinned first`() = runTest(UnconfinedTestDispatcher()) {

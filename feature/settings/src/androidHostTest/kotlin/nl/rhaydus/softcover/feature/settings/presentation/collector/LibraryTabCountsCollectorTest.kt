@@ -33,7 +33,11 @@ class LibraryTabCountsCollectorTest {
     private lateinit var getDidNotFinishUserBooksUseCase: GetDidNotFinishUserBooksUseCase
     private lateinit var dependencies: LibraryVisibilitySettingsDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
-    private lateinit var scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>
+    private lateinit var scope: ActionScope<
+        LibraryVisibilitySettingsUiState,
+        LibraryVisibilitySettingsEvent,
+        LibraryVisibilitySettingsLocalVariables,
+        >
     private lateinit var allFlow: MutableSharedFlow<List<Book>>
     private lateinit var currentlyReadingFlow: MutableSharedFlow<List<Book>>
     private lateinit var wantToReadFlow: MutableSharedFlow<List<Book>>
