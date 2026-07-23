@@ -101,6 +101,7 @@ import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
+import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.VerdictSheet
@@ -119,8 +120,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBack
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
-import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
@@ -191,6 +192,7 @@ internal fun ReadingBooksColumn(
                 FeaturedBookCard(
                     book = featured,
                     deadlineProgress = featuredDeadlineProgress,
+                    dateStyle = state.dateStyle,
                     mutationFailed = featured.id in state.failedMutationBookIds,
                     paceForecast = state.featuredBookPace,
                     planTodayMessage = planTodayMessage.takeIf { isPlanTodayDismissed.not() },
@@ -228,6 +230,7 @@ internal fun ReadingBooksColumn(
                             .then(controller.slideModifier(book.id)),
                         book = book,
                         deadlineProgress = book.deadlineProgressFrom(state),
+                        dateStyle = state.dateStyle,
                         mutationFailed = book.id in state.failedMutationBookIds,
                         runAction = runAction,
                         onBookClick = onBookClick,
@@ -363,7 +366,7 @@ internal fun ReadingOverlays(
  * The Reading screen's emotional centre (design-system.md §5 "Reading featured-hero card"): a
  * `surfaceContainerLow` card whose top band fuses the pace-nudge ribbon (when one applies) directly
  * onto the card rather than floating in-flow above it, a dark fixed-ink backdrop carrying the cover
- * + title/byline/pace meta, and a body section (page count, wavy progress, deadline status, hero
+ * + title/byline/pace meta, and a body section (page count, wavy progress, deadline readout, hero
  * actions) on the card's own surface colour.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -371,6 +374,7 @@ internal fun ReadingOverlays(
 internal fun FeaturedBookCard(
     book: Book,
     deadlineProgress: DeadlineProgress?,
+    dateStyle: DateStyle,
     mutationFailed: Boolean,
     paceForecast: ReadingPaceForecast?,
     planTodayMessage: String?,
@@ -412,6 +416,7 @@ internal fun FeaturedBookCard(
             FeaturedBackdropCard(
                 book = book,
                 deadlineProgress = deadlineProgress,
+                dateStyle = dateStyle,
                 mutationFailed = mutationFailed,
                 paceForecast = paceForecast,
                 cardColor = cardColor,
@@ -433,6 +438,7 @@ internal fun FeaturedBookCard(
 private fun FeaturedBackdropCard(
     book: Book,
     deadlineProgress: DeadlineProgress?,
+    dateStyle: DateStyle,
     mutationFailed: Boolean,
     paceForecast: ReadingPaceForecast?,
     cardColor: Color,
@@ -533,7 +539,7 @@ private fun FeaturedBackdropCard(
                 foreground = foreground,
             )
 
-            // The deadline row arrives from its own collector, independently of the progress block
+            // The deadline readout arrives from its own collector, independently of the progress block
             // above — and a book may never carry a deadline at all — so it reveals in place rather
             // than reserving height (the same register as the pace row above; design-system.md §5
             // "Book-detail in-progress stat").
@@ -556,8 +562,9 @@ private fun FeaturedBackdropCard(
                     Column {
                         Spacer(modifier = Modifier.height(15.dp))
 
-                        DeadlineStatusRow(
-                            status = progress.status,
+                        DeadlineSummaryLine(
+                            progress = progress,
+                            dateStyle = dateStyle,
                             foreground = foreground,
                         )
                     }
@@ -827,55 +834,6 @@ private fun pageCountLabel(
     }
 }
 
-/**
- * Calendar glyph + the app's own [DeadlineStatus] label — `OnTrack`/`Behind`/`Expired` — never the
- * redline spec's four-state wording (design-system.md §4 mandates the app's labels for Reading).
- * [compact] shrinks the icon/text for the secondary-row inline use. [foreground], when supplied,
- * overrides the status-tinted colour with a single fixed ink — the hero passes it because the row
- * sits on the featured card's blurred-cover backdrop rather than a flat surface; the secondary row
- * (which sits on the plain page background) omits it and keeps the status-tinted colour.
- */
-@Composable
-private fun DeadlineStatusRow(
-    status: DeadlineStatus,
-    compact: Boolean = false,
-    foreground: Color? = null,
-) {
-    val tint = foreground ?: when (status) {
-        DeadlineStatus.OnTrack -> MaterialTheme.colorScheme.primary
-        DeadlineStatus.Behind -> MaterialTheme.colorScheme.error
-        DeadlineStatus.Expired -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    val iconTint = foreground ?: MaterialTheme.colorScheme.primary
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        val calendarIcon = drawableIconResource(
-            icon = SoftcoverIcon.DateRange,
-            contentDescription = "",
-        )
-
-        Icon(
-            painter = calendarIcon.getIconPainter(),
-            contentDescription = null,
-            tint = iconTint,
-            modifier = Modifier.size(if (compact) 13.dp else 18.dp),
-        )
-
-        Text(
-            text = status.label,
-            style = if (compact) {
-                MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
-            } else {
-                MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-            },
-            color = tint,
-        )
-    }
-}
-
 @Composable
 private fun FeaturedSessionButton(
     book: Book,
@@ -988,7 +946,7 @@ private fun timeOfDayCaption(): String {
 
 /**
  * A secondary "also reading" row (design-system.md §5 "Reading secondary row"): a flat,
- * hairline-topped row (never its own card) holding a small cover, title/author/deadline-status,
+ * hairline-topped row (never its own card) holding a small cover, title/author/deadline-readout,
  * a slim wavy progress line, and a trailing compact "set progress" chip.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -996,6 +954,7 @@ private fun timeOfDayCaption(): String {
 internal fun CompactBookEntry(
     book: Book,
     deadlineProgress: DeadlineProgress?,
+    dateStyle: DateStyle,
     mutationFailed: Boolean,
     runAction: (ReadingAction) -> Unit,
     onBookClick: (Book) -> Unit,
@@ -1030,101 +989,106 @@ internal fun CompactBookEntry(
             onClick = { onBookClick(book) },
             interactionSource = interactionSource,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 18.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                DeadlineCoverOverlay(progress = deadlineProgress) {
-                    EditionImage(
-                        edition = book.currentEdition,
-                        modifier = Modifier
-                            .width(54.dp)
-                            .aspectRatio(2f / 3f),
-                        isLoading = false,
-                        defaultEdition = book.defaultEdition,
-                        fallbackCoverUrl = book.coverUrl,
-                        coverlessTitle = book.title,
-                        elevation = 4.dp,
-                        cornerRadius = 6.dp,
-                        sharedTransitionKey = bookCoverTransitionKey(
-                            editionId = book.currentEdition?.id,
-                            bookId = book.id,
-                        ),
-                    )
-                }
+            // The deadline readout is a sibling of the cover/text/chip row rather than a line inside
+            // the weighted text column: its width is unpredictable (the reader's own date format plus
+            // an unbounded pace — a short deadline on a long book reads "1149 pages/day") and grows
+            // with the system font scale, so in that column it wrapped on narrower devices. Given the
+            // row's full width it stays one line without anything having to measure or guess.
+            Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 18.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    DeadlineCoverOverlay(progress = deadlineProgress) {
+                        EditionImage(
+                            edition = book.currentEdition,
+                            modifier = Modifier
+                                .width(54.dp)
+                                .aspectRatio(2f / 3f),
+                            isLoading = false,
+                            defaultEdition = book.defaultEdition,
+                            fallbackCoverUrl = book.coverUrl,
+                            coverlessTitle = book.title,
+                            elevation = 4.dp,
+                            cornerRadius = 6.dp,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = book.currentEdition?.id,
+                                bookId = book.id,
+                            ),
+                        )
+                    }
 
-                Spacer(modifier = Modifier.width(15.dp))
+                    Spacer(modifier = Modifier.width(15.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
-                    if (mutationFailed) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        if (mutationFailed) {
+                            Text(
+                                text = "Couldn't save — tap to retry".uppercase(),
+                                style = MaterialTheme.editorialTypography.eyebrowSmall,
+                                color = MaterialTheme.colorScheme.error,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+
+                            Spacer(modifier = Modifier.height(2.dp))
+                        } else {
+                            book.seriesText?.takeIf { it.isNotBlank() }?.let { series ->
+                                Text(
+                                    text = series.uppercase(),
+                                    style = MaterialTheme.editorialTypography.eyebrowSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+
+                                Spacer(modifier = Modifier.height(2.dp))
+                            }
+                        }
+
                         Text(
-                            text = "Couldn't save — tap to retry".uppercase(),
-                            style = MaterialTheme.editorialTypography.eyebrowSmall,
-                            color = MaterialTheme.colorScheme.error,
-                            maxLines = 1,
+                            text = book.title,
+                            style = MaterialTheme.editorialTypography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
 
-                        Spacer(modifier = Modifier.height(2.dp))
-                    } else {
-                        book.seriesText?.takeIf { it.isNotBlank() }?.let { series ->
-                            Text(
-                                text = series.uppercase(),
-                                style = MaterialTheme.editorialTypography.eyebrowSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
+                        book.currentEdition?.authorString?.takeIf { it.isNotBlank() }
+                            ?.let { authors ->
+                                Spacer(modifier = Modifier.height(2.dp))
 
-                            Spacer(modifier = Modifier.height(2.dp))
-                        }
-                    }
+                                Text(
+                                    text = "By $authors",
+                                    style = MaterialTheme.editorialTypography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
 
-                    Text(
-                        text = book.title,
-                        style = MaterialTheme.editorialTypography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                    book.currentEdition?.authorString?.takeIf { it.isNotBlank() }
-                        ?.let { authors ->
-                            Spacer(modifier = Modifier.height(2.dp))
-
-                            Text(
-                                text = "By $authors",
-                                style = MaterialTheme.editorialTypography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-
-                    if (deadlineProgress != null) {
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        DeadlineStatusRow(
-                            status = deadlineProgress.status,
-                            compact = true,
+                        ProgressBlock(
+                            progressFraction = progressFraction,
+                            percentage = book.userBookRead?.progress,
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                    ProgressBlock(
-                        progressFraction = progressFraction,
-                        percentage = book.userBookRead?.progress,
+                    SetProgressChip(
+                        onClick = { runAction(OnShowProgressSheetClickAction(book = book)) },
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                if (deadlineProgress != null) {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                SetProgressChip(
-                    onClick = { runAction(OnShowProgressSheetClickAction(book = book)) },
-                )
+                    DeadlineSummaryLine(
+                        progress = deadlineProgress,
+                        dateStyle = dateStyle,
+                    )
+                }
             }
         }
     }
