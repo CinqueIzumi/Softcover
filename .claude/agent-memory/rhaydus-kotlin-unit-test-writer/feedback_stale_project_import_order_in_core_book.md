@@ -13,7 +13,7 @@ correct convention in [[feedback_import_order_convention]] (`io.* -> kotlin.* ->
 nl.rhaydus.* -> org.junit.*`, one flat ASCIIbetical sort).
 
 **Why:** these files predate the actionAt-threading pass (Step 2.15 backdating work); the doc at
-`docs/rhaydus/0.3.0/code-style.md#import-ordering` and a confirmed-correct sibling file
+`docs/rhaydus/0.3.1/code-style.md#import-ordering` and a confirmed-correct sibling file
 (`core/profile/.../ProfileRemoteDataSourceImplTest.kt`) both back the single-ASCIIbetical-sort
 convention, so the 3-group order in these `core/book` files was the stale one, not a legitimate
 alternate convention.

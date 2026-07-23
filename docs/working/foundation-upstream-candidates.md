@@ -11,7 +11,7 @@ upstream and record it here.
 **Process.** With `foundation.local=true` (includeBuild against `../rhaydus-foundation`), fix it at the
 source and bump the foundation. Otherwise file it against the foundation and track it here until a
 released version carries the fix, then re-run the `rhaydus-adopt` agent. The capability surface these
-entries refer to is indexed in [`../rhaydus/0.3.0/CAPABILITIES.md`](../rhaydus/0.3.0/CAPABILITIES.md).
+entries refer to is indexed in [`../rhaydus/0.3.1/CAPABILITIES.md`](../rhaydus/0.3.1/CAPABILITIES.md).
 
 Each entry: **type** (bug / enhancement / gate), **home** (target foundation module), **status**, and
 enough context for whoever picks it up. F-numbers are stable identifiers (referenced from commits and
@@ -25,18 +25,15 @@ other docs) and are **never reused or renumbered**.
 
 ## Still pending (context)
 
-Softcover runs on the **local 0.3.0** foundation (`foundation.local=true` in `local.properties` —
-gitignored, includeBuild `../rhaydus-foundation`). Because `foundation.local` stays out of git, the
-committed state resolves catalog `0.3.0` from the **published** `nl.rhaydus:*` artifacts — so
-**foundation 0.3.0 must be published** before CI / a fresh clone (without `foundation.local=true`) can
-build.
+Softcover runs on **published foundation `0.3.1`**, resolved from `mavenCentral()` (`foundation.local=false`
+in `local.properties`, the committed default). All nine `0.3.1` artifacts are live on Central and verified
+resolving. `foundation.local=true` remains available as an inner-loop switch (`includeBuild
+"../rhaydus-foundation"`) but is off by default.
 
 **Next up:**
-1. **Publish foundation `0.3.0`** (or keep everyone on `foundation.local=true`) so non-local builds
-   resolve the catalog `0.3.0` coordinates.
-2. **Publish the foundation `build-logic` as Gradle plugins** — the only thing standing between
+1. **Publish the foundation `build-logic` as Gradle plugins** — the only thing standing between
    F18/F20/F21 and adoption.
-3. **Wire the foundation's own `detektCheck` into its `check`** — it is registered but attached to
+2. **Wire the foundation's own `detektCheck` into its `check`** — it is registered but attached to
    nothing, so the foundation does not gate on the config it ships.
 
 ---

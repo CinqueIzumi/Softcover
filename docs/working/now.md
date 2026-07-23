@@ -43,7 +43,7 @@ _Unlike a fast-track fix, an item here is **ticked rather than deleted** when it
 
 - _(none — the "exclude books with no genre data" maybe was investigated and resolved into the ticked item above.)_
 
-> Foundation adoption onto local 0.3.0 is **done** (21 F-items landed). The only residue is the build-logic batch (F18/F20/F21), hard-blocked until the foundation publishes `build-logic` as Gradle plugins — tracked in [foundation-upstream-candidates.md](foundation-upstream-candidates.md), not here.
+> Foundation adoption is on published **0.3.1** (`foundation.local=false`, resolved from Maven Central; 21 F-items landed). The only residue is the build-logic batch (F18/F20/F21), hard-blocked until the foundation publishes `build-logic` as Gradle plugins — tracked in [foundation-upstream-candidates.md](foundation-upstream-candidates.md), not here.
 
 ---
 

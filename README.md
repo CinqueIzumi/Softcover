@@ -114,7 +114,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | [Gradle (KTS)](https://gradle.org/) | 9.1.0 | Build system with version catalog |
 | [KSP](https://github.com/google/ksp) | 2.3.9 | Kotlin Symbol Processing for Room (per-target) |
 
-#### Foundation ([`nl.rhaydus`](https://central.sonatype.com/search?q=nl.rhaydus), 0.3.0 — first-party shared libraries, resolved locally via `foundation.local=true` or from Maven Central)
+#### Foundation ([`nl.rhaydus`](https://central.sonatype.com/search?q=nl.rhaydus), 0.3.1 — first-party shared libraries, resolved from Maven Central by default, or locally via `foundation.local=true`)
 | Library | Purpose |
 |---|---|
 | `nl.rhaydus:toad` | TOAD presentation runtime — `ToadScreenModel`, `UiState` / `UiAction` / `UiEvent`, `Collector`, `ActionDependencies` |
@@ -127,7 +127,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | `nl.rhaydus:ktlint-rules` | Custom ktlint ruleset (the mechanizable layout rules + gate) |
 | `nl.rhaydus:detekt-rules` | Custom type-resolved detekt ruleset + the shared detekt baseline config |
 
-These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `EditionImage`) on top. See [`docs/rhaydus/0.3.0/CAPABILITIES.md`](docs/rhaydus/0.3.0/CAPABILITIES.md).
+These replace what was previously vendored in the app — the local TOAD runtime, the local `:ktlint-rules` module, and the duplicated design-system components/seams. Softcover keeps only its brand layer (tokens, the `SoftcoverIcon` catalog, brand components like `EditionImage`) on top. See [`docs/rhaydus/0.3.1/CAPABILITIES.md`](docs/rhaydus/0.3.1/CAPABILITIES.md).
 
 #### Data & Networking
 | Technology | Version | Purpose |
@@ -267,7 +267,7 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 | [docs/reference/module-structure.md](docs/reference/module-structure.md) | Module tiers, allowed dependency directions, and where new code belongs |
 | [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
-| [docs/rhaydus/0.3.0/](docs/rhaydus/0.3.0/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
+| [docs/rhaydus/0.3.1/](docs/rhaydus/0.3.1/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
 | [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — what's coming, by version |
 | [docs/working/](docs/working/) | Internal planning — idea catalogue, sequenced steps, release plan, and the day-to-day `now.md` |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |

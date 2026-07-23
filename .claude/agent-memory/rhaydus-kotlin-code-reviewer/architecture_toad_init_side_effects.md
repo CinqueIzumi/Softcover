@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-The foundation toad-architecture doc (docs/rhaydus/0.3.0/toad-architecture.md) documents exactly two
+The foundation toad-architecture doc (docs/rhaydus/0.3.1/toad-architecture.md) documents exactly two
 channels for state-affecting work: a `Collector.onLaunch` ("runs once when the screen model is
 created... via startInitializers()") for repo-flow observation and one-shot init work, and a
 `UiAction.execute()` ("one action = one user intent or **triggered effect**") for anything else. Every

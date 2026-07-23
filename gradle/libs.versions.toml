@@ -1,7 +1,7 @@
 [versions]
 agp = "9.0.0"
 kotlin = "2.3.21"
-rhaydusFoundation = "0.3.0"
+rhaydusFoundation = "0.3.1"
 ktlint = "1.7.1"
 coreKtx = "1.17.0"
 okio = "3.9.1"

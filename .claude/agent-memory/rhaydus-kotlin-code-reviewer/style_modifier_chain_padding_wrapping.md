@@ -8,7 +8,7 @@ metadata:
 CLAUDE.md's Code Style section describes the foundation ktlint ruleset's multi-arg one-per-line
 wrapping rule as "exempting collection factories, `Modifier.…` chains, trailing-lambda calls" from
 auto-fix/gating. That describes a **tooling gap**, not an authored style exception: the foundation's
-own `docs/rhaydus/0.3.0/code-style.md` §Argument and Property Layout has no such carve-out — any
+own `docs/rhaydus/0.3.1/code-style.md` §Argument and Property Layout has no such carve-out — any
 function call with 2+ args must wrap one-per-line with a trailing comma, full stop.
 
 **Why this matters:** grepped evidence across `feature/` + `core/` (2026-07-17): 18 files wrap a
