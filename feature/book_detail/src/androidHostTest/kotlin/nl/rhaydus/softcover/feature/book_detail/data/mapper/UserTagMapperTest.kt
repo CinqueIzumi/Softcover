@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
-import nl.rhaydus.softcover.FindTagsByUserQuery
+import nl.rhaydus.softcover.FindUserTagVocabularyQuery
 import nl.rhaydus.softcover.SaveTagsMutation
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -40,33 +40,30 @@ class UserTagMapperTest {
             tag = tag,
         )
 
-    // ----- FindTagsByUserQuery.Data.Tagging helpers -----
+    // ----- FindUserTagVocabularyQuery.Data.Tag helpers -----
 
-    private fun stubFindTagsByUserTag(
-        tag: String = "Dark",
-        count: Int = 5,
+    private fun stubVocabularyTag(
+        tag: String = "emotional",
         tagCategoryValue: String? = "Mood",
-    ): FindTagsByUserQuery.Data.Tagging.Tag =
-        FindTagsByUserQuery.Data.Tagging.Tag(
+        aggregateCount: Int? = 111,
+    ): FindUserTagVocabularyQuery.Data.Tag =
+        FindUserTagVocabularyQuery.Data.Tag(
             __typename = "tags",
             id = 1L,
             tag = tag,
-            count = count,
-            tag_category = FindTagsByUserQuery.Data.Tagging.Tag.Tag_category(
+            tag_category = FindUserTagVocabularyQuery.Data.Tag.Tag_category(
                 __typename = "tag_categories",
                 category = tagCategoryValue,
             ),
-        )
-
-    private fun stubFindTagsByUserTagging(
-        tag: FindTagsByUserQuery.Data.Tagging.Tag = stubFindTagsByUserTag(),
-        spoiler: Boolean = false,
-    ): FindTagsByUserQuery.Data.Tagging =
-        FindTagsByUserQuery.Data.Tagging(
-            __typename = "taggings",
-            id = 100L,
-            spoiler = spoiler,
-            tag = tag,
+            taggings_aggregate = FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate(
+                __typename = "taggings_aggregate",
+                aggregate = aggregateCount?.let {
+                    FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate.Aggregate(
+                        __typename = "taggings_aggregate_fields",
+                        count = it,
+                    )
+                },
+            ),
         )
 
     // ----- SaveTagsMutation.Data.UpsertTags.Tag helpers -----
@@ -137,53 +134,38 @@ class UserTagMapperTest {
     }
 
     @Nested
-    inner class FindTagsByUserTaggingToUserTag {
+    inner class FindUserTagVocabularyTagToUserTag {
         @Test
         fun `maps all fields correctly`() {
             // ----- Arrange -----
-            val tagging = stubFindTagsByUserTagging(
-                tag = stubFindTagsByUserTag(
-                    tag = "Cozy",
-                    count = 3,
-                    tagCategoryValue = "Mood",
-                ),
-                spoiler = false,
+            val tag = stubVocabularyTag(
+                tag = "emotional",
+                tagCategoryValue = "Mood",
+                aggregateCount = 111,
             )
 
             // ----- Act -----
-            val result = tagging.toUserTag()
+            val result = tag.toUserTag()
 
             // ----- Assert -----
             result shouldBe UserTag(
-                name = "Cozy",
+                name = "emotional",
                 category = TagCategory.MOOD,
-                count = 3,
+                count = 111,
                 spoiler = false,
             )
         }
 
         @Test
-        fun `maps spoiler true`() {
+        fun `defaults count to 0 when the taggings aggregate is null`() {
             // ----- Arrange -----
-            val tagging = stubFindTagsByUserTagging(spoiler = true)
+            val tag = stubVocabularyTag(aggregateCount = null)
 
             // ----- Act -----
-            val result = tagging.toUserTag()
+            val result = tag.toUserTag()
 
             // ----- Assert -----
-            result.spoiler shouldBe true
-        }
-
-        @Test
-        fun `falls back to OTHER when tag category is null`() {
-            // ----- Arrange -----
-            val tagging = stubFindTagsByUserTagging(tag = stubFindTagsByUserTag(tagCategoryValue = null))
-
-            // ----- Act -----
-            val result = tagging.toUserTag()
-
-            // ----- Assert -----
-            result.category shouldBe TagCategory.OTHER
+            result.count shouldBe 0
         }
     }
 
