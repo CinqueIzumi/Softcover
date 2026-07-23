@@ -53,3 +53,7 @@ xcuserdata/
 # Claude
 .claude/settings.local.json
 .claude/worktrees/
+
+# Full-quality captures kept as source material for the Play listing frames — the
+# committed set under screenshots/ is the cropped, compressed one the README uses.
+/screenshots/store/

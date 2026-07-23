@@ -33,9 +33,11 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ## Screenshots
 
-| Library | Book Details | Explore |
+| Reading | Library | Book Details |
 |:---:|:---:|:---:|
-| ![Library](screenshots/library.png) | ![Book Details](screenshots/book-detail.png) | ![Explore](screenshots/explore.png) |
+| ![Reading](screenshots/reading.png) | ![Library](screenshots/library.png) | ![Book Details](screenshots/book-detail.png) |
+| **Explore** | **Reading Atlas** | **What you reach for** |
+| ![Explore](screenshots/explore.png) | ![Reading Atlas](screenshots/profile-stats.png) | ![What you reach for](screenshots/profile-taste.png) |
 
 <sub>The same shared UI runs on Android, iOS, and desktop from one codebase. More shots live in [`screenshots/`](screenshots/).</sub>
 
