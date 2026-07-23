@@ -49,12 +49,15 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 - Browse books organized by status — **Want to Read**, **Currently Reading**, **Read**, **Did Not Finish**, **Owned**.
 - Add and remove books from your library.
 - Mark editions as owned.
+- Optionally **swipe between shelves** on mobile, with the neighbouring shelves peeking in from either side.
+- See a book's deadline date and the pace it asks of you right on the shelf.
 
 ### Reading
 - See currently reading books and audiobooks at a glance.
 - Track your **reading streak** — consecutive days with logged reading — shown as a strip on the Reading screen (computed in your local timezone).
 - Track progress by page number or percentage for book editions.
 - Track listening progress in `HH:MM:SS` or percentage for audiobook editions.
+- Keep an eye on any deadline you've set — the date and the required pace sit alongside the book.
 - Mark books as read in one tap, or **backdate** a progress update or a finish to a chosen past date and time.
 - On finishing a book, a **Verdict** sheet prompts for a rating and review while it's fresh.
 - Start a distraction-free **focus mode** reading session that times your reading, with pause/resume/stop controls and inline page-progress editing.
@@ -75,7 +78,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 - **Start reading in one step** — go straight to Currently Reading from the book without picking a status first.
 - Update reading or listening progress.
 - Set a reading deadline with a required pages-per-day or minutes-per-day pace, and see a **reading-pace forecast** of when you'll finish.
-- Tag your books with a **tag editor** — category-clustered suggestions from your own tag vocabulary, with a spoiler toggle for revealing tags.
+- Tag your books with a **tag editor** — category-clustered suggestions from your own tag vocabulary, every tag you've ever used behind a *see more*, and a spoiler toggle for revealing tags.
 - Share a reading update as a generated card.
 - Switch between book and audiobook editions.
 
@@ -89,6 +92,9 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 
 ### Settings
 - Toggle between a floating and docked bottom navigation bar.
+- Follow the system's dynamic colour where the platform supports it.
+- Show or hide the reading streak, and turn swiping between Library shelves on or off.
+- Choose which statuses and lists appear as Library tabs, and drag them into the order you want.
 - Choose your preferred date format.
 - Adjust the display scale on desktop to size text and UI to your screen.
 - Stay current with in-app updates — Google Play prompts on Android, and a self-updater backed by GitHub releases on desktop.
