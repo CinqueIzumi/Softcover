@@ -2,6 +2,7 @@ query GetReadingJournalHistory(
     $bookId: Int!,
     $userId: Int!,
     $limit: Int!,
+    $offset: Int!,
 ) {
     reading_journals(
         where: {
@@ -9,8 +10,16 @@ query GetReadingJournalHistory(
             user_id: { _eq: $userId }
             event: { _eq: "progress_updated" }
         }
-        order_by: { updated_at: asc }
+        # Ordered updated_at ascending so the pace-forecast consumer's per-day `.last()` picks each
+        # day's final reading position (see ReadingPaceForecastCollector.dailyUnitsRead), with the
+        # entry's own id as a unique tiebreaker. The id tiebreaker is what makes offset windows
+        # deterministic: updated_at alone can repeat across rows sharing a timestamp, which would let
+        # paging skip or duplicate entries; id is unique, so every offset window is a fixed,
+        # non-overlapping slice. (The old query capped at a client-side limit of 200, so a book with
+        # more than 200 progress updates kept only the oldest 200 and dropped the most recent.)
+        order_by: [{ updated_at: asc }, { id: asc }]
         limit: $limit
+        offset: $offset
     ) {
         updated_at
         metadata

@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
-import nl.rhaydus.softcover.FindTagsByUserQuery
+import nl.rhaydus.softcover.FindUserTagVocabularyQuery
 import nl.rhaydus.softcover.SaveTagsMutation
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -18,15 +18,16 @@ internal fun FindTagsByUserAndTaggableQuery.Data.Tagging.toUserTag(): UserTag = 
 )
 
 /**
- * The user's own tag as returned by the taggable-agnostic find-all-by-user query. [UserTag.count]
- * here still carries the tag's global popularity count from [FindTagsByUserQuery.Data.Tag] — the
- * caller overrides it with the user's personal occurrence count once taggings are aggregated.
+ * The user's own tag as returned by the tag-vocabulary query. [UserTag.count] here is the user's
+ * personal usage count, computed server-side by the nested `taggings_aggregate` rather than the
+ * tag's global popularity count. This row has no `spoiler` flag — vocabulary suggestions never
+ * carry one.
  */
-internal fun FindTagsByUserQuery.Data.Tagging.toUserTag(): UserTag = UserTag(
-    name = tag.tag,
-    category = TagCategory.fromApiString(tag.tag_category.category),
-    count = tag.count,
-    spoiler = spoiler,
+internal fun FindUserTagVocabularyQuery.Data.Tag.toUserTag(): UserTag = UserTag(
+    name = tag,
+    category = TagCategory.fromApiString(tag_category.category),
+    count = taggings_aggregate.aggregate?.count ?: 0,
+    spoiler = false,
 )
 
 /**

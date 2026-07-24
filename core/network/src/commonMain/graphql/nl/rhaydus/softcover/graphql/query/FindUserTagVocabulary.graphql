@@ -1,0 +1,37 @@
+query FindUserTagVocabulary(
+    $userId: Int!,
+    $limit: Int!,
+    $offset: Int!,
+) {
+    tags(
+        where: {
+            taggings: {
+                user_id: {
+                    _eq: $userId
+                }
+            }
+        },
+        order_by: {
+            id: asc
+        },
+        limit: $limit,
+        offset: $offset,
+    ) {
+        id
+        tag
+        tag_category {
+            category
+        }
+        taggings_aggregate(
+            where: {
+                user_id: {
+                    _eq: $userId
+                }
+            }
+        ) {
+            aggregate {
+                count
+            }
+        }
+    }
+}

@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.GetReadUserBooksForStatsQuery
 import nl.rhaydus.softcover.GetReadingActivityDaysQuery
 import nl.rhaydus.softcover.GetUserProfileDataQuery
 import nl.rhaydus.softcover.core.domain.model.Gender
+import nl.rhaydus.softcover.core.network.helper.fetchAllPages
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.profile.data.mapper.toAuthorDemographics
 import nl.rhaydus.softcover.core.profile.data.mapper.toBooksByYear
@@ -86,37 +87,18 @@ internal class ProfileRemoteDataSourceImpl(
         )
     }
 
-    // Pages through every finished book once per session (same pattern as
-    // streamReadingDaysDescending): a large page size keeps the round-trip count low, and
-    // STATS_MAX_PAGES guards against a pathological account turning this into an unbounded loop.
-    // Unlike the reading-day stream, every row is needed to compute accurate aggregates, so this
-    // collects eagerly into a list rather than staying a lazily-cancellable Flow.
-    private suspend fun fetchAllStatsBooks(): List<StatsBook> {
-        val books = mutableListOf<StatsBook>()
-        var offset = 0
-        var pages = 0
-
-        while (pages < STATS_MAX_PAGES) {
-            val data = apolloClient.safeQuery(
+    // Pages through every finished book once per session. Unlike the reading-day stream below,
+    // every row is needed to compute accurate aggregates, so this collects eagerly into a list
+    // rather than staying a lazily-cancellable Flow.
+    private suspend fun fetchAllStatsBooks(): List<StatsBook> =
+        fetchAllPages { limit, offset ->
+            apolloClient.safeQuery(
                 query = GetReadUserBooksForStatsQuery(
-                    limit = STATS_PAGE_SIZE,
+                    limit = limit,
                     offset = offset,
                 ),
-            )
-            val rows = data.me.firstOrNull()?.user_books.orEmpty()
-
-            books += rows.map { it.toStatsBook() }
-
-            offset += rows.size
-            pages++
-
-            // A partial page (including empty) means this was the last one - a full page always
-            // requests one more to confirm, but a short page already proves there's nothing left.
-            if (rows.size < STATS_PAGE_SIZE) break
-        }
-
-        return books
-    }
+            ).me.firstOrNull()?.user_books.orEmpty()
+        }.map { it.toStatsBook() }
 
     private fun GetReadUserBooksForStatsQuery.Data.Me.User_book.toStatsBook(): StatsBook {
         val journalFinishDate = user_book_read_finished_journal
@@ -216,11 +198,5 @@ internal class ProfileRemoteDataSourceImpl(
 
         // Runaway guard so a pathological account can never turn this into an unbounded loop.
         const val MAX_PAGES = 100
-
-        // Matches the app-wide per-request page size the live API is known to serve. STATS_MAX_PAGES
-        // then caps the once-per-session stats fetch at 10,000 books — a generous ceiling for a
-        // personal library — so a pathological account can never turn paging into an unbounded loop.
-        const val STATS_PAGE_SIZE = 100
-        const val STATS_MAX_PAGES = 100
     }
 }

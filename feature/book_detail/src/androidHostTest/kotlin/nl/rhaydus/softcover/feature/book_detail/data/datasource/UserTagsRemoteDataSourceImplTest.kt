@@ -3,17 +3,19 @@ package nl.rhaydus.softcover.feature.book_detail.data.datasource
 import com.apollographql.apollo.ApolloClient
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.FindTagsByUserAndTaggableQuery
-import nl.rhaydus.softcover.FindTagsByUserQuery
+import nl.rhaydus.softcover.FindUserTagVocabularyQuery
 import nl.rhaydus.softcover.SaveTagsMutation
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -270,137 +272,222 @@ class UserTagsRemoteDataSourceImplTest {
 
     @Nested
     inner class FetchUserVocabulary {
+        // These tests assert on the mapping from raw Tag fields (tag / tag_category.category /
+        // taggings_aggregate.aggregate.count) through to the resulting UserTag, so they exercise
+        // the real toUserTag() extension rather than the class-level static mock of it.
+        @BeforeEach
+        fun useRealMapper() {
+            unmockkStatic("nl.rhaydus.softcover.feature.book_detail.data.mapper.UserTagMapperKt")
+        }
+
+        private fun stubVocabularyTag(
+            tag: String,
+            category: String?,
+            aggregateCount: Int?,
+        ): FindUserTagVocabularyQuery.Data.Tag =
+            FindUserTagVocabularyQuery.Data.Tag(
+                __typename = "tags",
+                id = 1L,
+                tag = tag,
+                tag_category = FindUserTagVocabularyQuery.Data.Tag.Tag_category(
+                    __typename = "tag_categories",
+                    category = category,
+                ),
+                taggings_aggregate = FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate(
+                    __typename = "taggings_aggregate",
+                    aggregate = aggregateCount?.let {
+                        FindUserTagVocabularyQuery.Data.Tag.Taggings_aggregate.Aggregate(
+                            __typename = "taggings_aggregate_fields",
+                            count = it,
+                        )
+                    },
+                ),
+            )
+
         @Test
-        fun `aggregates multiple taggings of the same category and name into one UserTag with the occurrence count`() = runTest {
+        fun `fetches a single short page and maps counts from each tag's aggregate`() = runTest {
             // ----- Arrange -----
             val userId = 3
-            val queryData = mockk<FindTagsByUserQuery.Data>()
-            val tagging1 = mockk<FindTagsByUserQuery.Data.Tagging>()
-            val tagging2 = mockk<FindTagsByUserQuery.Data.Tagging>()
-            val tagging3 = mockk<FindTagsByUserQuery.Data.Tagging>()
+            val queryData = mockk<FindUserTagVocabularyQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = FindTagsByUserQuery(userId = userId))
+                apolloClient.safeQuery(
+                    query = FindUserTagVocabularyQuery(
+                        userId = userId,
+                        limit = 100,
+                        offset = 0,
+                    ),
+                )
             } returns queryData
 
             every {
-                queryData.taggings
-            } returns listOf(tagging1, tagging2, tagging3)
-
-            every {
-                tagging1.toUserTag()
-            } returns UserTag(
-                name = "Cozy",
-                category = TagCategory.MOOD,
-                count = 9,
-                spoiler = false,
-            )
-
-            every {
-                tagging2.toUserTag()
-            } returns UserTag(
-                name = "Cozy",
-                category = TagCategory.MOOD,
-                count = 9,
-                spoiler = true,
-            )
-
-            every {
-                tagging3.toUserTag()
-            } returns UserTag(
-                name = "Cozy",
-                category = TagCategory.MOOD,
-                count = 9,
-                spoiler = false,
+                queryData.tags
+            } returns listOf(
+                stubVocabularyTag(
+                    tag = "Cozy",
+                    category = "Mood",
+                    aggregateCount = 9,
+                ),
+                stubVocabularyTag(
+                    tag = "Romance",
+                    category = "Genre",
+                    aggregateCount = 4,
+                ),
             )
 
             // ----- Act -----
             val result = dataSource.fetchUserVocabulary(userId = userId)
 
             // ----- Assert -----
+            coVerify(exactly = 1) {
+                apolloClient.safeQuery(query = any<FindUserTagVocabularyQuery>())
+            }
+
             result shouldBe listOf(
                 UserTag(
                     name = "Cozy",
                     category = TagCategory.MOOD,
-                    count = 3,
+                    count = 9,
+                    spoiler = false,
+                ),
+                UserTag(
+                    name = "Romance",
+                    category = TagCategory.GENRE,
+                    count = 4,
                     spoiler = false,
                 ),
             )
         }
 
         @Test
-        fun `keeps different categories with the same name as separate entries`() = runTest {
+        fun `pages through multiple requests and sums aggregate counts for a tag repeated across pages`() = runTest {
             // ----- Arrange -----
             val userId = 3
-            val queryData = mockk<FindTagsByUserQuery.Data>()
-            val tagging1 = mockk<FindTagsByUserQuery.Data.Tagging>()
-            val tagging2 = mockk<FindTagsByUserQuery.Data.Tagging>()
+            val page1Data = mockk<FindUserTagVocabularyQuery.Data>()
+            val page2Data = mockk<FindUserTagVocabularyQuery.Data>()
+
+            val page1Tags = buildTagsPage(
+                size = 100,
+                namePrefix = "page1",
+                sharedAggregateCount = 2,
+            )
+            val page2Tags = buildTagsPage(
+                size = 40,
+                namePrefix = "page2",
+                sharedAggregateCount = 3,
+            )
 
             coEvery {
-                apolloClient.safeQuery(query = FindTagsByUserQuery(userId = userId))
-            } returns queryData
+                apolloClient.safeQuery(
+                    query = FindUserTagVocabularyQuery(
+                        userId = userId,
+                        limit = 100,
+                        offset = 0,
+                    ),
+                )
+            } returns page1Data
+
+            coEvery {
+                apolloClient.safeQuery(
+                    query = FindUserTagVocabularyQuery(
+                        userId = userId,
+                        limit = 100,
+                        offset = 100,
+                    ),
+                )
+            } returns page2Data
 
             every {
-                queryData.taggings
-            } returns listOf(tagging1, tagging2)
+                page1Data.tags
+            } returns page1Tags
 
             every {
-                tagging1.toUserTag()
-            } returns UserTag(
-                name = "Dark",
-                category = TagCategory.MOOD,
-                count = 5,
-                spoiler = false,
-            )
-
-            every {
-                tagging2.toUserTag()
-            } returns UserTag(
-                name = "Dark",
-                category = TagCategory.GENRE,
-                count = 5,
-                spoiler = false,
-            )
+                page2Data.tags
+            } returns page2Tags
 
             // ----- Act -----
             val result = dataSource.fetchUserVocabulary(userId = userId)
 
             // ----- Assert -----
-            result shouldBe listOf(
-                UserTag(
-                    name = "Dark",
-                    category = TagCategory.MOOD,
-                    count = 1,
-                    spoiler = false,
-                ),
-                UserTag(
-                    name = "Dark",
-                    category = TagCategory.GENRE,
-                    count = 1,
-                    spoiler = false,
-                ),
-            )
+            coVerify(exactly = 2) {
+                apolloClient.safeQuery(query = any<FindUserTagVocabularyQuery>())
+            }
+
+            coVerify {
+                apolloClient.safeQuery(
+                    query = FindUserTagVocabularyQuery(
+                        userId = userId,
+                        limit = 100,
+                        offset = 100,
+                    ),
+                )
+            }
+
+            val totalTags = page1Tags.size + page2Tags.size
+            totalTags shouldBe 140
+
+            val sharedUserTag = result.single { it.category == TagCategory.MOOD && it.name == "Cozy" }
+            sharedUserTag.count shouldBe 5
+
+            result.size shouldBe 139
         }
 
         @Test
-        fun `returns empty list when taggings is empty`() = runTest {
+        fun `returns empty list when the first page is empty`() = runTest {
             // ----- Arrange -----
             val userId = 3
-            val queryData = mockk<FindTagsByUserQuery.Data>()
+            val queryData = mockk<FindUserTagVocabularyQuery.Data>()
 
             coEvery {
-                apolloClient.safeQuery(query = FindTagsByUserQuery(userId = userId))
+                apolloClient.safeQuery(
+                    query = FindUserTagVocabularyQuery(
+                        userId = userId,
+                        limit = 100,
+                        offset = 0,
+                    ),
+                )
             } returns queryData
 
             every {
-                queryData.taggings
+                queryData.tags
             } returns emptyList()
 
             // ----- Act -----
             val result = dataSource.fetchUserVocabulary(userId = userId)
 
             // ----- Assert -----
+            coVerify(exactly = 1) {
+                apolloClient.safeQuery(query = any<FindUserTagVocabularyQuery>())
+            }
+
             result shouldBe emptyList()
+        }
+
+        // Builds a page of tags where exactly one row is the shared (MOOD, "Cozy") pair - with
+        // `sharedAggregateCount` as its per-page aggregate count - and the remainder are distinct
+        // (GENRE, "<namePrefix>-<index>") pairs. Used to prove that the same distinct tag can be
+        // returned once per page (an order_by/offset edge case the pagination guards against) and
+        // still be grouped and summed once over the full merged list rather than per page.
+        private fun buildTagsPage(
+            size: Int,
+            namePrefix: String,
+            sharedAggregateCount: Int,
+        ): List<FindUserTagVocabularyQuery.Data.Tag> {
+            val sharedTag = stubVocabularyTag(
+                tag = "Cozy",
+                category = "Mood",
+                aggregateCount = sharedAggregateCount,
+            )
+
+            val distinctTags = (0 until size - 1).map { index ->
+                stubVocabularyTag(
+                    tag = "$namePrefix-$index",
+                    category = "Genre",
+                    aggregateCount = 1,
+                )
+            }
+
+            return listOf(sharedTag) + distinctTags
         }
     }
 }

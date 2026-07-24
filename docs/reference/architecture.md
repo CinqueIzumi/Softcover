@@ -76,6 +76,34 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   kind via `Throwable.toUserMessage()` + the `Result.onApiFailure()` fold helper in `:core:designsystem`
   (see [code-style.md](code-style.md)).
 
+### Paginating list queries — the server row cap
+
+The Hardcover API cuts an unbounded list query off at a per-request row cap in the **high hundreds**
+(observed live: an account with 1,582 taggings got back ~1,000 before the response stopped). A query
+that needs the *complete* set must therefore paginate — a single unbounded query is silently
+truncated, and if it carries an `order_by`, whichever rows sort last simply never arrive (this is the
+exact bug that hid a user's Mood/Content-Warning tags: ordered by ascending category id, the Genre
+and Tag taggings filled the whole capped response and the later categories fell off the end). A large
+fixed `limit:` is **not** a fix either — it just moves the ceiling: any client `limit` below a
+collection's true size truncates it (a per-book journal `limit: 200` dropped the recent progress of
+books with more than 200 updates).
+
+- **Use the shared `fetchAllPages` helper** in `core/network/.../helper/Pagination.kt` rather than
+  hand-rolling a loop: `fetchAllPages { limit, offset -> apolloClient.safeQuery(SomeQuery(limit = limit, offset = offset)).rows }`.
+  It pages until a short page signals the end (a `pageSize` kept safely below the server cap; offset
+  advances by the page's *actual* row count, so correctness never depends on the cap's exact value; a
+  `maxPages` guard prevents a runaway loop). The `fetchPage` lambda must return the **raw** query
+  rows — do any `map`/`filter`/`mapNotNull`/aggregation on the returned list *after* it completes,
+  since the page-size comparison drives loop termination.
+- The GraphQL query it drives needs an `$limit`/`$offset` and a **stable, unique `order_by`** (e.g. the
+  row's own `id`) so offset windows don't overlap or skip rows. If a consumer depends on a meaningful
+  order (e.g. chronological), make it a composite key with `id` as the tiebreaker
+  (`order_by: [{ updated_at: asc }, { id: asc }]`).
+- Callers: `ProfileRemoteDataSource.fetchAllStatsBooks`, `UserTagsRemoteDataSource.fetchUserVocabulary`,
+  `ReadingJournalHistoryRemoteDataSource.getReadingJournalHistory`. A per-row lazily-cancellable
+  `Flow` (e.g. `streamReadingDaysDescending`) stays a hand-rolled loop — it emits as it goes rather
+  than accumulating into a list, so it can't use this helper.
+
 ### Unresolvable API enums
 
 Some Hardcover columns are integer foreign keys with **no corresponding lookup type in the GraphQL
