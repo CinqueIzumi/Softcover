@@ -4,6 +4,14 @@ on:
   pull_request:
   push:
     branches: [main]
+    # ROADMAP.md is regenerated and committed to main by the Roadmap workflow whenever a
+    # milestone description changes. Running the full Android + JVM build for a markdown
+    # commit buys nothing. Left off `pull_request` on purpose: if main ever becomes
+    # protected, a skipped required check blocks the merge queue.
+    paths-ignore:
+      - "ROADMAP.md"
+      - "docs/**"
+      - "**/*.md"
 
 # Cancel superseded runs on the same ref to save runner minutes.
 concurrency:

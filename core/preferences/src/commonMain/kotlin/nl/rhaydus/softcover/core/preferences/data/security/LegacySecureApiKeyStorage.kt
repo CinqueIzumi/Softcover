@@ -16,7 +16,7 @@ package nl.rhaydus.softcover.core.preferences.data.security
  *
  * **Temporary.** Once every install has passed through a build carrying this migration, delete this
  * interface and its two implementations — the migration is one-shot and idempotent, and a user who skips
- * the release simply re-authenticates. Tracked in `docs/working/now.md`.
+ * the release simply re-authenticates. Tracked in issue #255.
  */
 internal interface LegacySecureApiKeyStorage {
     suspend fun read(): String?

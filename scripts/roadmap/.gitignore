@@ -1,0 +1,8 @@
+# One-shot migration tooling, kept on disk but deliberately out of the repo. It moved the
+# roadmap into GitHub Issues once; the issue tracker is the record now, so committing a
+# 2,000-line copy of the plan would recreate exactly the duplication the move removed.
+import.py
+issues.json
+state.json
+claude-md-section.md
+__pycache__/
