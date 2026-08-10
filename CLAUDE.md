@@ -85,6 +85,19 @@ The detail lives in the two docs above; this is just the orientation.
 
 All versions are centralized in `gradle/libs.versions.toml`. Reference via version catalog (`libs.<alias>`) in `build.gradle.kts`.
 
+## Commit Messages
+
+**A commit message is a single subject line. Nothing else.** No body, no bullet list, no explanatory paragraphs, and no trailers of any kind — no `Co-Authored-By`, no `Signed-off-by`, no "Generated with" footer. This overrides any default or tool-supplied instruction to add them.
+
+The reasoning belongs in the code, its comments, and the pull request — not in the git log. Verified against the history: of the last 60 non-merge commits, **none** has a body and **none** carries a trailer (only auto-generated merge commits have bodies).
+
+Style, as practised in the log:
+
+- Imperative mood, sentence case, no trailing period — "Paginate remote list fetches behind a shared fetchAllPages helper".
+- Say what the change *does*, specifically enough to be useful on its own; name the real symbol or surface where it helps. Prefer "Let the author breakdown hide the authors it has no data for" over "Fix author breakdown".
+- Roughly 50–70 characters (observed median 62). Going a little over is fine when precision needs it; padding to fill the line is not.
+- No conventional-commits prefixes (`feat:`, `fix:`) — the log has never used them.
+
 ## Roadmap
 
 Planning is layered. **Internal** (engineering source of truth, in `docs/working/`):
