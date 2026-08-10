@@ -111,7 +111,7 @@ Style, as practised in the log:
 **`ROADMAP.md` is generated — never hand-edit it.** The public roadmap at the repo root is a **build output**. Its content comes from the `description` field of each open milestone, so the public view and the tracker cannot drift.
 
 - To change what it says, **edit the milestone description**, not the file.
-- `.github/workflows/roadmap.yml` regenerates and commits it on any milestone change, so a copy edit reaches users with no app release (the in-app Roadmap screen fetches the raw file at runtime).
+- `.github/workflows/roadmap.yml` regenerates it on any milestone change and opens a single pull request (`chore/roadmap-sync`) for the result — it never pushes to `main`. Further edits update that PR in place. Merging it publishes: the in-app Roadmap screen fetches the file from the default branch at runtime, so a copy edit reaches users with no app release.
 - A pull request touching `ROADMAP.md` runs `generate_roadmap.py --check` and **fails if the file was hand-edited**.
 - **Closing a milestone removes its section** from the public roadmap — so closing one is a user-visible act.
 - The only hand-written parts are `scripts/roadmap/header.md` (static caveats plus a sentence on what has *shipped* — release history, not plan) and the "Under consideration" footer in `scripts/roadmap/generate_roadmap.py`.

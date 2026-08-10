@@ -24,9 +24,20 @@ the rate limit.
 
 `.github/workflows/roadmap.yml` runs this on any milestone change — and on a push to `main`
 touching `app/build.gradle.kts` or `scripts/roadmap/**`, since the "Current release" line comes
-from `versionName` and the intro from `header.md` — then commits the result to `main`. The in-app Roadmap screen fetches the raw file at runtime, so a milestone copy edit
-reaches users with no app release. On a pull request the same workflow runs `--check`, which
-fails if someone hand-edited the file — that guard is what keeps "generated" true.
+from `versionName` and the intro from `header.md`.
+
+**It never pushes to `main`.** It regenerates the file on one long-lived branch
+(`chore/roadmap-sync`) and opens — or updates — a single pull request, so every change to
+`ROADMAP.md` arrives through review like any other. Further milestone edits update that PR in
+place rather than stacking new ones; if `main` catches up by other means, the workflow closes
+the PR as redundant. The branch is rebuilt from `main` each run rather than appended to, so the
+diff stays one file and can never conflict.
+
+Merging the PR is what publishes: the in-app Roadmap screen fetches the file from the default
+branch at runtime, so a milestone copy edit reaches users with no app release.
+
+On a pull request the same workflow runs `--check`, which fails if someone hand-edited the file
+— that guard is what keeps "generated" true.
 
 ## Two behaviours worth knowing
 

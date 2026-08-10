@@ -4,21 +4,26 @@ name: Roadmap
 # description field of each open milestone, so the public roadmap and the issue tracker
 # cannot drift: there is one source of truth and it is the milestones.
 #
-# On a milestone change this regenerates the file and commits it to main. The in-app
-# Roadmap screen fetches ROADMAP.md raw at runtime, so a copy edit on a milestone reaches
-# users without an app release.
+# Nothing here ever pushes to main. When a milestone changes, this regenerates the file on a
+# single long-lived branch and opens — or updates — one pull request for it, so every change
+# to ROADMAP.md arrives through review like any other. There is at most one such PR open at a
+# time; further milestone edits update it in place rather than stacking new ones.
 #
-# On a pull request that touches ROADMAP.md this runs --check instead, which fails if the
-# file no longer matches what the milestones would produce — i.e. if someone hand-edited
-# it. That is the guard that keeps "generated" true over time.
+# The branch is rebuilt from the default branch on every run rather than appended to, because
+# the file is derived in full each time. That keeps the PR a one-file diff that can never
+# conflict.
+#
+# On a pull request that touches ROADMAP.md this runs --check instead, which fails if the file
+# no longer matches what the milestones would produce — i.e. if someone hand-edited it. That
+# is the guard that keeps "generated" true over time.
 on:
   milestone:
     types: [created, edited, opened, closed, deleted]
   # The file also depends on two things outside the milestones: `versionName` in the app's
   # Gradle file (it fills the "Current release" line) and header.md. Without these a release
   # bump would leave the public roadmap naming the previous version, with nothing to notice.
-  # ROADMAP.md itself is deliberately not a trigger — the job commits it, so listing it here
-  # would make the workflow retrigger itself.
+  # ROADMAP.md itself is deliberately not a trigger — the sync PR changes it, and listing it
+  # here would make the workflow retrigger itself.
   push:
     branches: [main]
     paths:
@@ -31,21 +36,23 @@ on:
       - ".github/workflows/roadmap.yml"
   workflow_dispatch:
 
-# Two milestone edits in quick succession must not race to push. Queue rather than cancel,
-# so the later description still lands.
+# Two milestone edits in quick succession must not race to update the branch. Queue rather
+# than cancel, so the later description still lands.
 concurrency:
   group: roadmap-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  SYNC_BRANCH: chore/roadmap-sync
+
 jobs:
-  generate:
-    name: Regenerate ROADMAP.md
+  sync:
+    name: Sync ROADMAP.md via pull request
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    # The repository default for GITHUB_TOKEN is read-only; this elevates just this job,
-    # the same way release.yml does.
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,19 +62,51 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/roadmap/generate_roadmap.py --write
 
-      - name: Commit if changed
+      - name: Open or update the roadmap pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE: ${{ github.event.repository.default_branch }}
         run: |
+          set -euo pipefail
+
           if git diff --quiet -- ROADMAP.md; then
             echo "ROADMAP.md already matches the milestones; nothing to do."
+            # A stale sync PR can only exist if its content has since been superseded.
+            open_prs="$(gh pr list --head "$SYNC_BRANCH" --state open --json number --jq 'length')"
+            if [ "$open_prs" -gt 0 ]; then
+              echo "Closing the now-redundant sync PR."
+              gh pr close "$SYNC_BRANCH" --delete-branch \
+                --comment "Superseded: the default branch already matches the milestones."
+            fi
             exit 0
           fi
+
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Rebuild the branch from the base each run. The file is fully derived, so there is
+          # nothing to preserve from a previous attempt and a fresh branch cannot conflict.
+          git checkout -B "$SYNC_BRANCH"
           git add ROADMAP.md
           git commit -m "Regenerate ROADMAP.md from milestones"
-          # Another push may have landed while this ran; rebase rather than fail.
-          git pull --rebase --autostash origin ${{ github.event.repository.default_branch }}
-          git push origin HEAD:${{ github.event.repository.default_branch }}
+          git push --force origin "$SYNC_BRANCH"
+
+          if [ "$(gh pr list --head "$SYNC_BRANCH" --state open --json number --jq 'length')" -gt 0 ]; then
+            echo "Existing sync PR updated by the force-push."
+            gh pr list --head "$SYNC_BRANCH" --state open --json number,url \
+              --jq '.[] | "  #\(.number) \(.url)"'
+          else
+            gh pr create \
+              --base "$BASE" \
+              --head "$SYNC_BRANCH" \
+              --title "Regenerate ROADMAP.md from milestones" \
+              --body "$(printf '%s\n' \
+                'Generated by the Roadmap workflow — `ROADMAP.md` is a build output assembled from the description field of each open milestone.' \
+                '' \
+                'Review the rendered diff as you would any copy change. Merging publishes it: the in-app Roadmap screen fetches this file from the default branch at runtime.' \
+                '' \
+                'This branch is rebuilt from scratch on every milestone change, so further edits update this PR in place rather than opening another.')"
+          fi
 
   check:
     name: Verify ROADMAP.md is generated
