@@ -44,10 +44,14 @@ Only `header.md`, and within it one sentence describing what the current release
 that's release history rather than plan, which is why it doesn't belong on a milestone.
 Update it at release time; the version number itself is read from Gradle.
 
-## The one residual risk
+## The one line no machine can derive
 
-Everything about the *plan* is derived, but `header.md`'s "what the current release shipped"
-sentence is prose no machine can regenerate. The version number beside it is read from Gradle
-and a push to `app/build.gradle.kts` regenerates the file, so the number cannot go stale — but
-the sentence can. It is the only line in `ROADMAP.md` that relies on someone remembering, and
-release time is when to check it.
+Everything about the *plan* is derived from milestones. The exception is `header.md`'s
+sentence describing what the current release **shipped** — that is release history, written
+prose. The version number beside it is read from Gradle and a push to `app/build.gradle.kts`
+regenerates the file, so the number cannot go stale; the sentence could.
+
+That is now owned by the **`release` skill**, which updates it from the commits since the last
+tag, closes the shipped milestone, and regenerates this file — in that order, because the
+public roadmap is built from *open* milestones, so regenerating before the close would name
+the new version as the current release and list it as a future one in the same file.
