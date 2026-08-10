@@ -1,0 +1,68 @@
+# ROADMAP.md generation
+
+`ROADMAP.md` at the repo root is a **build output, not a document.** Do not hand-edit it.
+
+The roadmap itself lives in GitHub Issues; the public view is assembled from the
+`description` field of each open milestone, so the two cannot drift.
+
+```bash
+python3 scripts/roadmap/generate_roadmap.py            # preview to stdout
+python3 scripts/roadmap/generate_roadmap.py --write    # write ROADMAP.md
+python3 scripts/roadmap/generate_roadmap.py --check    # exit 1 if stale (used by CI)
+```
+
+Reads only public data, so no token is needed locally — one is used in CI purely to raise
+the rate limit.
+
+## How it fits together
+
+| Piece | Role |
+|---|---|
+| Milestone `description` (on GitHub) | One section of the public roadmap — including "Under consideration", which is a milestone too |
+| `header.md` | The static intro and caveats block |
+| `versionName` in `app/build.gradle.kts` | Fills the "Current release" line |
+
+`.github/workflows/roadmap.yml` runs this on any milestone change — and on a push to `main`
+touching `app/build.gradle.kts` or `scripts/roadmap/**`, since the "Current release" line comes
+from `versionName` and the intro from `header.md`.
+
+**It never pushes to `main`.** It regenerates the file on one long-lived branch
+(`chore/roadmap-sync`) and opens — or updates — a single pull request, so every change to
+`ROADMAP.md` arrives through review like any other. Further milestone edits update that PR in
+place rather than stacking new ones; if `main` catches up by other means, the workflow closes
+the PR as redundant. The branch is rebuilt from `main` each run rather than appended to, so the
+diff stays one file and can never conflict.
+
+Merging the PR is what publishes: the in-app Roadmap screen fetches the file from the default
+branch at runtime, so a milestone copy edit reaches users with no app release.
+
+On a pull request the same workflow runs `--check`, which fails if someone hand-edited the file
+— that guard is what keeps "generated" true.
+
+## Two behaviours worth knowing
+
+**Closing a milestone removes its section.** The generator reads *open* milestones only, so
+closing one on release drops it from the public roadmap. That's intended — shipped releases
+leave the roadmap — but it makes closing a milestone a user-visible act.
+
+**It refuses to run on a partial set.** If any open milestone has an empty description the
+generator exits rather than silently deleting whole releases from the public file. Give the
+milestone a description, or pass `--allow-partial` if the omission is deliberate.
+
+## What stays hand-written
+
+Only `header.md`, and within it one sentence describing what the current release *shipped* —
+that's release history rather than plan, which is why it doesn't belong on a milestone.
+Update it at release time; the version number itself is read from Gradle.
+
+## The one line no machine can derive
+
+Everything about the *plan* is derived from milestones. The exception is `header.md`'s
+sentence describing what the current release **shipped** — that is release history, written
+prose. The version number beside it is read from Gradle and a push to `app/build.gradle.kts`
+regenerates the file, so the number cannot go stale; the sentence could.
+
+That is now owned by the **`release` skill**, which updates it from the commits since the last
+tag, closes the shipped milestone, and regenerates this file — in that order, because the
+public roadmap is built from *open* milestones, so regenerating before the close would name
+the new version as the current release and list it as a future one in the same file.
