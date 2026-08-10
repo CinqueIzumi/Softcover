@@ -1,0 +1,75 @@
+name: Roadmap
+
+# ROADMAP.md is a generated file, not a hand-written one. Its content comes from the
+# description field of each open milestone, so the public roadmap and the issue tracker
+# cannot drift: there is one source of truth and it is the milestones.
+#
+# On a milestone change this regenerates the file and commits it to main. The in-app
+# Roadmap screen fetches ROADMAP.md raw at runtime, so a copy edit on a milestone reaches
+# users without an app release.
+#
+# On a pull request that touches ROADMAP.md this runs --check instead, which fails if the
+# file no longer matches what the milestones would produce — i.e. if someone hand-edited
+# it. That is the guard that keeps "generated" true over time.
+on:
+  milestone:
+    types: [created, edited, opened, closed, deleted]
+  pull_request:
+    paths:
+      - "ROADMAP.md"
+      - "scripts/roadmap/**"
+      - ".github/workflows/roadmap.yml"
+  workflow_dispatch:
+
+# Two milestone edits in quick succession must not race to push. Queue rather than cancel,
+# so the later description still lands.
+concurrency:
+  group: roadmap-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    name: Regenerate ROADMAP.md
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # The repository default for GITHUB_TOKEN is read-only; this elevates just this job,
+    # the same way release.yml does.
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Regenerate from milestones
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/roadmap/generate_roadmap.py --write
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- ROADMAP.md; then
+            echo "ROADMAP.md already matches the milestones; nothing to do."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ROADMAP.md
+          git commit -m "Regenerate ROADMAP.md from milestones"
+          # Another push may have landed while this ran; rebase rather than fail.
+          git pull --rebase --autostash origin ${{ github.event.repository.default_branch }}
+          git push origin HEAD:${{ github.event.repository.default_branch }}
+
+  check:
+    name: Verify ROADMAP.md is generated
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fail if ROADMAP.md was hand-edited
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/roadmap/generate_roadmap.py --check

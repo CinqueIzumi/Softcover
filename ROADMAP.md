@@ -2,7 +2,7 @@
 
 What we're building next for [Softcover](https://hardcover.app/), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: 3.1.0,** a top-to-bottom redesign: nearly every screen (Reading, your Library, book pages, Explore, your Profile, Settings and more) rebuilt with a cleaner, more editorial look and feel. Softcover runs on Android, iPhone, iPad and desktop.
+**Current release: 3.1.2.** Softcover runs on Android, iPhone, iPad and desktop. 3.1.0 was a top-to-bottom redesign — nearly every screen rebuilt with a cleaner, more editorial look. 3.1.1 and 3.1.2 followed it with shelf swiping, a clearer Explore, better back behaviour, your full tag vocabulary when you tag a book, author stats you can read without the blanks, and your deadlines saying what they need again.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
@@ -13,99 +13,88 @@ A few honest caveats:
 
 ---
 
-## 3.1.1: Redesign follow-ups
+## 3.2.0: Widgets, and a lot of small things
 
-Polish shaken out of the 3.1.0 redesign.
+**Home-screen widgets** (Android first): the book you're **Currently Reading**, a **random pick from Want-to-Read** for when you can't decide, **Trending this week**, and a **reading-activity calendar**. Each one configurable — which book, which stat, how often it refreshes.
 
-- **Swipe between shelves again.** Turn on "Swipe between shelves" under Settings, Appearance and you can flick left or right in your Library to move to the next shelf, with the shelves either side named in a quiet line just above your books (tap either name to jump one across). Off by default, so nothing changes unless you ask for it. Phone and tablet only: on desktop the shelf sidebar already does this job.
-- **The top of Explore says what it is.** The big card opening Explore now labels itself "Most anticipated, next 30 days" and tells you how many readers are already waiting on it, so it's clear that's the upcoming book with the most people watching it rather than a random pick.
-- **Back steps out of a search first.** On phone and tablet, pressing back while you're searching in Explore clears the search and puts the feed back, instead of taking you off the screen with your results still up. Press back again and you leave as usual. On desktop, Esc does the same thing.
-- **All of your tags, when you want them.** Tagging a book suggests the tags you've used before. "Show more" now opens every tag you've used in that category, rather than stopping after the first handful and leaving the rest out of reach, and "Show less" folds them away again.
-- **Read your author stats without the blanks.** "Who you read" on your profile counts every author, including the many nobody has filled in any details for, which can leave the percentages looking oddly small. A new "Hide untagged authors" switch leaves those out, so each bar reads over the authors it actually has information for (each one over its own, since a book can be missing one detail but not another). It stays where you put it, and it's off to begin with.
-- **Your deadlines say what they need again.** A book with a deadline used to tell you only whether you were on track. On your Library list and on the Reading screen it now names the date you're aiming at and the pages a day (or listening time a day) it would take to get there, which is what book detail has always shown. Nothing changed on book detail itself.
+Alongside them, a batch of smaller things:
 
-## 3.2.0: Widgets (Android)
-
-Home-screen widgets: **Currently Reading**, a **random pick from Want-to-Read**, **Trending this week**, and a **reading-activity calendar**. Plus per-book read-through history (re-reads) on book detail.
-
-## 3.3.0: Series, shelving & editions
-
-- A full **Series** page: a reading-order checklist and your progress through it; finishing the last book triggers a quiet celebration.
+- **Pick your theme.** Light, Dark, System — and **Dim**, a warm low-contrast palette for reading at night. Plus **Spine colour**: a handful of named accent palettes to make the app feel like yours.
+- **An About page**, with a **per-version changelog** so you can see what changed, and an **in-app Roadmap** — this page, live in the app.
+- **Re-reads.** Book detail starts keeping a history of every time you've read a book, not just the last one.
 - See each edition's **format** (ebook / physical / audiobook) when you pick one.
+- Choose which **tab the app opens on**, and which **unit progress defaults to**.
+- A shortcut straight from your profile into Settings.
 
-## 3.4.0: Richer book detail
+## 3.3.0: The reading record
 
-Genre and mood chips, awards & accolades, an opt-in content-warnings reveal (with your own private warnings), audiobook finish-date predictions, and, for romance titles, a link out to romance.io.
+Everything you might want to record about a book, and every statistic that comes out of it. Your private notes never leave your device.
 
-## 3.5.0: Make a book yours
+**Make a book yours:**
+- Log personal **moods**, overall or chapter-by-chapter, with how strongly you felt them.
+- Grade each book on **how it read**: pace, plot- or character-driven, its characters, its writing style.
+- Note **where you got it** — library, bought, borrowed, gifted, a subscription credit.
+- Keep private **notes** against a book or its characters, and tag the **representation** that matters to you.
+- **Export and import all of it** as a file you keep, from day one — so nothing you record is ever one lost phone away from gone.
 
-Everything you might want to record about a book, for your eyes only: none of it leaves your device.
+**And the payoff — a long editorial Stats Atlas:**
+- **Pick your own window.** Read every stat below for the last 30 days, 6 months, 12 months, a single year, or all time.
+- **A year at a glance**: a full-year reading grid, a streak heatmap, and the time of day you actually read. Tap any day to see what you read.
+- **Your seasons, your authors, your records**: pages by month, the authors you return to, your format split, your longest haul and quickest read.
+- **Every genre, not just your top five** — one tap opens the full ranking.
+- **How you read**: whether your year leaned plot- or character-driven, your pace and style mix, and the moods you reach for most.
+- **Diversity & publication**: your reading by author background and country, language and how much you read in translation, publication years, and where your books came from.
 
-- A **Passages** section for the highlights you save, with quick-add from Reading.
-- Tag authors and books with the identities and representation that matter to you, log personal **moods** (overall or chapter-by-chapter, with how strongly you felt them), and keep private **notes** against the book or its characters.
-- Grade each book on **how it read**: pace, plot- or character-driven, its characters, its writing style, and note **where you got it** (library, bought, borrowed, a subscription credit).
-- Filter reviews by friends, top-rated, recent or language.
+## 3.4.0: Passages, logs & the calendar
 
-## 3.6.0: Inboxes + a tidier book detail
+- A **Passages** section for the highlights you save, with quick-add while you're reading, and a **Notes & Highlights** inbox you can search across.
+- A **Reading Sessions** log of everything you've read and for how long.
+- **Edit or remove** the reading updates you've logged, and change when they happened.
+- A **Reading Activity Calendar**: every day you read, with the covers you touched, laid out as a month you can page through.
 
-- A **Notes & Highlights** inbox you can search across, and a **Reading Sessions** log.
-- Edit or remove the reading updates you've logged, and change when they happened.
-- **Export and import your private data** as a file you keep, so your tags, moods, notes and gradings survive a reinstall or a move to a new device.
-- Share a book as a plain link or a send-to-a-friend deep link (on top of the image card).
-- A cleaner book-detail layout that tames the long scroll.
+## 3.5.0: Author pages, Series & Lists
 
-## 3.7.0: Author pages & Lists
+- A full **Author** page — their works, accolades and series — reached from any byline.
+- A full **Series** page: a reading-order checklist and your progress through it. Finish the last book and it says so.
+- **Lists** as a first-class surface: rename, delete, reorder, share, and discover curated lists.
+- **Find your own tags.** Tag a book "lent to mum" and actually be able to filter your library by it.
+- Create lists straight from your library, and track who you've lent books to.
 
-- A full **Author** page: their works, accolades and series.
-- **Lists** as a first-class surface: rename, delete, reorder, share, and discover curated/community lists.
-- Tag any book and create lists right from your library; track who you've lent books to.
+## 3.6.0: Discover more
 
-## 3.8.0: Discover more
+Browse Explore by **genre or mood**; separate **New & Noteworthy** from **Most Anticipated**; an **Award winners** carousel and a curated **Lists** carousel; similar reads on every book; gentle nudges for series you've stalled on; and **Audience** (YA / Middle Grade / New Adult) as its own filter, separate from genre.
 
-Browse Explore by genre or mood; separate New & Noteworthy from Most Anticipated; an Award winners carousel and a curated Lists carousel; similar-reads on every book; gentle nudges for stalled series; and Audience (YA / Middle Grade / New Adult) as its own filter.
+## 3.7.0: Recommendations & search
 
-## 3.9.0: Recommendations & search
+**"Because you loved…"** rows keyed to individual books, a dedicated **For You** screen, proper **search filters and sorts** (year, format, rating, language, length), and a **Releases Calendar** showing when the books on your Want-to-Read shelf actually come out.
 
-"Because you read…" rows and a dedicated **For You** screen; search filters and sorts; an author spotlight; and a **Releases Calendar** for your Want-to-Read shelf.
+## 3.8.0: Richer book detail
 
-## 3.10.0: Profile & goals
+Awards & accolades, an opt-in content-warnings reveal (with your own private warnings alongside), audiobook finish-date predictions, review filters, sharing a book as a plain link or a send-to-a-friend link, a romance.io link for romance titles — and a **cleaner book-detail layout** that finally tames the long scroll.
 
-An editable profile, a set of reading stats (genre & rating distributions, reading seasons, top authors, format split, records), and a yearly **reading goal** with a setup wizard.
+## 3.9.0: Goals & recaps
 
-## 3.11.0: Reading Stats Atlas
+Set a **reading goal** with a guided wizard and track it on a dedicated screen. **Year in Books** arrives in December — and **wrap-ups for any span you like**: a day, a week, a month, since you joined. Every slide exports as an image, so you can send your month in books to a friend who doesn't track anything at all.
 
-A long editorial **Stats Atlas**, and the payoff for everything you recorded in 3.5.0:
+## 3.10.0: Account, privacy & your data
 
-- Streak and time-of-day heatmaps, and an optional public activity log.
-- **Pick your own window**: read every stat for the last 30 days, the last 6 months, the last 12 months, a single year (2025, 2026 and so on) or all time.
-- **Diversity & representation**: your reading by author gender, background and country, drawn from your own private tags.
-- **How you read**: whether your year leaned plot- or character-driven, your pace and writing-style mix, and the moods you reach for most.
-- **Publication & provenance**: author nationality, language and how much you read in translation, publication years, audience, and where your books came from.
-- **Every genre, not just your top five**: the genre chart stays a top five at a glance, with one tap to open the full ranking of everything you have read.
+An editable profile, granular **accessibility** controls, **data export**, cache management, changing your API key in-app, **privacy** controls (public/private reading, hide finish dates, hide ratings), language & region, sync settings, an optional public activity log, and exporting your library as a shelf card.
 
-## 3.12.0: Calendars & recap
+## 3.11.0: Notifications, inbox, onboarding & import
 
-A **Reading Activity Calendar** (every day you read, with covers, sessions and finishes), **Year in Books**, and shareable wrap-ups for any span: a day, a week, a month, since you joined. Every slide exports as an image, so you can send your month in books to a friend who doesn't track anything at all.
+Opt-in reminders (deadlines, release days, weekly recaps, milestones), an in-app **Activity inbox**, **import** from Goodreads / Storygraph / an ISBN list, and a guided first-run that sets up your goal, theme, imports and notifications.
 
-## 3.13.0: Make it yours (Appearance, accessibility, account)
+## 3.12.0: Read anywhere, back it up
 
-Light / Dark / Dim / System themes, a **Spine colour** picker, granular accessibility controls, notification toggles, language & region, an About screen, an **in-app Roadmap** (this page, live in the app), account/privacy controls, and data export.
-
-## 3.14.0: Notifications, inbox, onboarding & import
-
-Opt-in reminders (deadlines, release days, weekly recaps, milestones), an in-app **Activity inbox**, **import** from Goodreads / Storygraph / ISBN list, and a guided onboarding with clearer errors.
-
-## 3.15.0: Read anywhere, sync anywhere
-
-Everything you log offline queues and syncs on reconnect (conflicts surface as a gentle shake), full **backup & restore**, TalkBack polish, more widgets (streak, Quote of the Day, Year in Books), Wear OS support, and launcher long-press shortcuts.
+Everything you log offline queues and syncs on reconnect, with conflicts surfacing as a gentle shake. Full **backup & restore**. More widgets (streak, Quote of the Day, Year in Books), a **Quote of the Day** screen, TalkBack polish, **Wear OS** support, and launcher long-press shortcuts.
 
 ## 4.0.0: Friend Feed
 
-Softcover goes social: a **Friends** tab streaming what the people you follow are reading (progress, ratings, reviews, highlights and finishes), all as editorial spreads. The Releases Calendar gains author/series tints for books you follow.
+Softcover goes social: a **Friends** tab streaming what the people you follow are reading — progress, ratings, reviews, highlights and finishes — all as editorial spreads. Follow and followers, and the Releases Calendar gains tints for authors and series you follow.
 
 ## 4.1.0+: The finishing pass
 
-Motion and polish: long-press cover peek, hero parallax, a collapsing bottom bar, a cover-back flip, audiobook waveforms, more ways to log progress (voice, OCR, slider), inline edition swaps, pace cards, and library export as a shelf card.
+Motion and polish: long-press cover peek, hero parallax, a collapsing bottom bar, a cover-back flip, audiobook waveforms, more ways to log progress (voice, camera, slider), inline edition swaps, and reordering the books you're currently reading.
 
 ---
 

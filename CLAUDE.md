@@ -100,15 +100,23 @@ Style, as practised in the log:
 
 ## Roadmap
 
-Planning is layered. **Internal** (engineering source of truth, in `docs/working/`):
-- [docs/working/idea-catalogue.md](docs/working/idea-catalogue.md) — the idea catalogue (the *what*), tagged (`B.4.1`).
-- [docs/working/roadmap-steps.md](docs/working/roadmap-steps.md) — the sequenced pickup order (the *order*), scoped S/M/L. When a step is finished, **delete it from the file in the same commit** — do not renumber the remaining steps (gaps are intentional so references in commits and docs stay valid). The deletion is part of the step, not a follow-up.
-- [docs/working/release-plan.md](docs/working/release-plan.md) — steps bundled into versioned drops (the *when*), each with a user-facing release-note blurb.
-- [docs/working/now.md](docs/working/now.md) — the **day-to-day working surface**: the 1–2 topics in active focus (pointers into the steps, never forks) and a flat fast-track-fixes backlog for small things done outside the release cadence. Fixes are deleted when shipped and folded into the next release's notes rather than listed on the public roadmap.
+**The roadmap lives in GitHub Issues, not in this repo.** There is one source of truth and it is the issue tracker. The previous layered markdown planning (`idea-catalogue.md` / `roadmap-steps.md` / `release-plan.md` / `now.md`) drifted from the code and from itself — a shipped item had to be deleted from up to five places — so it was retired.
 
-**Public** (user-facing): [ROADMAP.md](ROADMAP.md) at the repo root is a curated, version-labelled projection of `release-plan.md` — plain language, no internal tags/scope/dependencies/"won't do" list. It is **derived, not authored**: app users read it on GitHub, and the in-app Roadmap screen (Step 8.12 / D.11) fetches the same raw file at runtime so the two never drift.
+- **Issue** = one unit of work. **Milestone** = the release it lands in. Clusters use **sub-issues**; blocking relationships are **native issue dependencies**, not prose.
+- Labels: `area:*`, `scope:S|M|L`, `kind:feature|polish|tech|bug`, `needs-design`.
+- Every item carries a stable tag in a hidden `<!-- sc-tag: B.4.3 -->` marker. Older commits and docs reference these tags (`B.4.3`, `C.14`), so search by tag to find an item's issue.
+- Engineering work that sits outside the release cadence is `kind:tech` with **no milestone** (what used to be the "fast-track fixes" list).
+- Work with issues via the `gh` CLI. When finishing an item, close its issue from the PR (`Closes #123`) rather than editing any file.
 
-**Maintenance rule (enforced by review).** `ROADMAP.md` is a projection of `release-plan.md`, kept in lockstep. Any change that reorders, cuts, adds, or reshapes a release in `release-plan.md` MUST update the corresponding section of `ROADMAP.md` in the same change. Never add user-facing content to `ROADMAP.md` that isn't backed by a release in `release-plan.md`.
+**`ROADMAP.md` is generated — never hand-edit it.** The public roadmap at the repo root is a **build output**. Its content comes from the `description` field of each open milestone, so the public view and the tracker cannot drift.
+
+- To change what it says, **edit the milestone description**, not the file.
+- `.github/workflows/roadmap.yml` regenerates and commits it on any milestone change, so a copy edit reaches users with no app release (the in-app Roadmap screen fetches the raw file at runtime).
+- A pull request touching `ROADMAP.md` runs `generate_roadmap.py --check` and **fails if the file was hand-edited**.
+- **Closing a milestone removes its section** from the public roadmap — so closing one is a user-visible act.
+- The only hand-written parts are `scripts/roadmap/header.md` (static caveats plus a sentence on what has *shipped* — release history, not plan) and the "Under consideration" footer in `scripts/roadmap/generate_roadmap.py`.
+
+Regenerate locally with `python3 scripts/roadmap/generate_roadmap.py --write`.
 
 <!-- rhaydus:start -->
 ## Rhaydus foundation (managed by rhaydus-adopt - do not hand-edit)
