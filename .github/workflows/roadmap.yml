@@ -14,6 +14,16 @@ name: Roadmap
 on:
   milestone:
     types: [created, edited, opened, closed, deleted]
+  # The file also depends on two things outside the milestones: `versionName` in the app's
+  # Gradle file (it fills the "Current release" line) and header.md. Without these a release
+  # bump would leave the public roadmap naming the previous version, with nothing to notice.
+  # ROADMAP.md itself is deliberately not a trigger — the job commits it, so listing it here
+  # would make the workflow retrigger itself.
+  push:
+    branches: [main]
+    paths:
+      - "app/build.gradle.kts"
+      - "scripts/roadmap/**"
   pull_request:
     paths:
       - "ROADMAP.md"

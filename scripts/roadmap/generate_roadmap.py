@@ -16,6 +16,9 @@ Sources:
   - `versionName` in app/build.gradle.kts      -> the "Current release" line
   - header.md next to this script              -> the static intro and caveats
 
+Every section, including "Under consideration", is a milestone description. Nothing about
+the plan is hardcoded here.
+
 Reads only public data, so it needs no token (a token just raises the rate limit).
 """
 
@@ -36,16 +39,6 @@ GRADLE = ROOT / "app" / "build.gradle.kts"
 
 ALLOW_PARTIAL = False
 
-FOOTER = """
----
-
-## Under consideration
-
-Ideas we like but haven't committed to a release; they may land later, change shape, or not happen:
-
-- **Smart shelves**: virtual tabs like "owned & unread" or "started but stalled" (now that library filtering has shipped, we're weighing whether these add anything on top of it).
-- **Book club / group reading**: a deliberate step further into the social arc beyond the Friend Feed.
-"""
 
 
 def version_key(title):
@@ -98,7 +91,7 @@ def build():
     header = HEADER.read_text().replace("{{CURRENT_VERSION}}", current_version())
     sections = [m["description"].strip() for m in described]
 
-    return header.rstrip() + "\n\n---\n\n" + "\n\n".join(sections) + "\n" + FOOTER
+    return header.rstrip() + "\n\n---\n\n" + "\n\n".join(sections) + "\n"
 
 
 def main():
