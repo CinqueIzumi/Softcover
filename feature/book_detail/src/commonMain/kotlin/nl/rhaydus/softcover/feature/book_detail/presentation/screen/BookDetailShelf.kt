@@ -2397,7 +2397,7 @@ private fun ReviewCard(
 
                     ReviewDocumentText(
                         document = review.reviewDocument,
-                        style = MaterialTheme.editorialTypography.bodyLarge,
+                        style = MaterialTheme.editorialTypography.review,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = if (expanded) Int.MAX_VALUE else REVIEW_COLLAPSED_LINES,
                         overflow = TextOverflow.Ellipsis,
