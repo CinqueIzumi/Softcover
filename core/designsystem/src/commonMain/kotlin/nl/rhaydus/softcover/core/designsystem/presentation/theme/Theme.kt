@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import nl.rhaydus.designsystem.editorial.EditorialTheme
 import nl.rhaydus.designsystem.theme.RhaydusTheme
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -85,18 +86,43 @@ private val darkScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
 
+/**
+ * The brand color scheme for one side of the light/dark pair, independent of what the app is
+ * currently painting in. [SoftcoverTheme] resolves its own scheme through this, and the Appearance
+ * screen's theme preview tiles paint *both* through it — which is why the two schemes are reachable
+ * from outside this file rather than being read off `MaterialTheme` at the call site (a tile has to
+ * show the theme the reader has *not* picked).
+ */
+fun softcoverColorScheme(darkTheme: Boolean): ColorScheme = if (darkTheme) darkScheme else lightScheme
+
+/**
+ * Whether this mode paints dark right now. [ThemeMode.SYSTEM] defers to the platform's own setting
+ * and therefore re-resolves whenever the device flips; the two explicit modes ignore it.
+ *
+ * Read this — or [LocalDarkTheme] once inside the theme — rather than `isSystemInDarkTheme()`: with a
+ * forced Light or Dark mode the system's answer is no longer the app's.
+ */
+@Composable
+fun ThemeMode.isDark(): Boolean = when (this) {
+    ThemeMode.LIGHT -> false
+    ThemeMode.DARK -> true
+    ThemeMode.SYSTEM -> isSystemInDarkTheme()
+}
+
 @Composable
 fun SoftcoverTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.DEFAULT,
     // Dynamic color is available on Android 12+; iOS has no equivalent and falls back to the brand scheme.
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    val darkTheme = themeMode.isDark()
+
     val colorScheme = dynamicColorSchemeOrNull(
         useDynamicColor = dynamicColor,
         darkTheme = darkTheme,
     )
-        ?: if (darkTheme) darkScheme else lightScheme
+        ?: softcoverColorScheme(darkTheme = darkTheme)
 
     // Delegates the Material 3 Expressive scaffold to the foundation RhaydusTheme (designsystem-core),
     // supplying Softcover's brand color scheme + typography. The branded editorial scale stays an
@@ -111,6 +137,7 @@ fun SoftcoverTheme(
         EditorialTheme(editorialTypography = softcoverFoundationEditorialTypography()) {
             CompositionLocalProvider(
                 LocalEditorialTypography provides defaultEditorialTypography(),
+                LocalDarkTheme provides darkTheme,
                 content = content,
             )
         }

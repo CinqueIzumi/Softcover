@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.WindowPlacement
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataSource
@@ -506,6 +507,23 @@ class SettingsRepositoryImplTest {
             // ----- Assert -----
             coVerify {
                 settingsLocalDataSource.setLastUsedProgressUnit(unit = ProgressUnit.PERCENTAGE)
+            }
+        }
+    }
+
+    @Nested
+    inner class SetThemeMode {
+        @Test
+        fun `delegates to local data source with the given mode`() = runTest {
+            // ----- Arrange -----
+            val mode = ThemeMode.DARK
+
+            // ----- Act -----
+            repository.setThemeMode(mode = mode)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setThemeMode(mode = mode)
             }
         }
     }
