@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
@@ -63,11 +64,13 @@ import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.designsystem.presentation.component.ThemePreviewTile
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDateStyleClickAction
@@ -78,6 +81,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.OnReadingStreak
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReorderLibraryTabsAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnShelfSwipeToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnStatusToggleAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnThemeModeSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnUiScaleSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
@@ -86,17 +90,24 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUi
 import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicColor
 // region Appearance content
 /**
+ * A theme tile is a picture, not a text block, so it stops growing once it is big enough to read —
+ * three of them stretched across a desktop settings pane would read as three posters.
+ */
+private val THEME_TILE_MAX_WIDTH = 128.dp
+
+/**
  * The Appearance settings body, shared by the mobile [AppearanceSettingsScreen] page and the desktop
  * Settings master–detail pane. Rows sit flat on the page background, hairline-divided — never boxed
- * cards. The Display section collapses the dynamic-colour, floating-bar, shelf-swipe, and
- * reading-streak switches into one flat toggle-row stack: dynamic colour is gated on
- * [supportsDynamicColor] (always `false` on desktop), [showBottomBarToggle] hides the
+ * cards. The theme picker leads on every platform — it is the one control that repaints the whole app
+ * — carrying the dynamic-colour switch beneath its tiles (gated on [supportsDynamicColor], always
+ * `false` on desktop). The Display section that follows collapses the floating-bar, shelf-swipe, and
+ * reading-streak switches into one flat toggle-row stack: [showBottomBarToggle] hides the
  * floating-bottom-bar row on desktop (there is no bottom bar there — it is a compact-only
  * preference), [showShelfSwipeToggle] hides the swipe-between-shelves row on desktop (whose Library
  * switches shelves from a permanent sidebar, not a pager), and reading streak always shows.
  * [showUiScaleControl] is desktop-only (hidden on mobile, where the OS handles DPI) and surfaces the
- * "Display scale" picker first, since on desktop it is the most relevant appearance control. The
- * caller supplies the scroll / width [modifier].
+ * "Display scale" picker directly after the theme picker, since on desktop it is the appearance
+ * control that matters next. The caller supplies the scroll / width [modifier].
  */
 @Composable
 internal fun AppearanceSettingsContent(
@@ -115,6 +126,13 @@ internal fun AppearanceSettingsContent(
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        ThemeSection(
+            state = state,
+            runAction = runAction,
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
 
         if (showUiScaleControl) {
             UiScaleSection(
@@ -140,6 +158,74 @@ internal fun AppearanceSettingsContent(
         )
 
         Spacer(modifier = Modifier.height(48.dp))
+    }
+}
+
+/**
+ * The theme picker: one [ThemePreviewTile] per [ThemeMode], each painting the app's own page in the
+ * scheme it would give, so the choice is made by looking rather than by reading three words. It leads
+ * the Appearance body — including on desktop, ahead of "Display scale" — because it is the one control
+ * that changes every surface in the app.
+ *
+ * Dynamic colour sits *beneath* the tiles rather than among the Display switches: it modifies the
+ * scheme the tiles preview (they re-render in the wallpaper palette the moment it goes on) instead of
+ * being a peer of "floating bottom bar". It stays gated on [supportsDynamicColor], so on iOS and
+ * desktop the section is the tiles alone.
+ */
+@Composable
+private fun ThemeSection(
+    state: SettingsScreenUiState,
+    runAction: (SettingsAction) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        EditorialSectionHeader(
+            eyebrow = "Theme",
+            headline = "The coat it wears",
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            ThemeMode.entries.forEach { mode ->
+                ThemePreviewTile(
+                    mode = mode,
+                    selected = state.themeMode == mode,
+                    dynamicColor = state.useDynamicColorChecked,
+                    onClick = { runAction(OnThemeModeSelectedAction(mode = mode)) },
+                    modifier = Modifier
+                        .weight(
+                            weight = 1f,
+                            fill = false,
+                        )
+                        .widthIn(max = THEME_TILE_MAX_WIDTH),
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        Text(
+            text = "System follows your device's own light and dark setting.",
+            style = MaterialTheme.editorialTypography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+
+        if (supportsDynamicColor()) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            SettingsToggleRow(
+                label = "Dynamic colour",
+                gloss = "Recolour Softcover from your wallpaper's palette.",
+                checked = state.useDynamicColorChecked,
+                onCheckedChange = { runAction(OnDynamicColorToggledAction(newValue = it)) },
+            )
+        }
     }
 }
 
@@ -183,9 +269,11 @@ private fun UiScaleSection(
 }
 
 /**
- * The three appearance switches, collapsed into one flat, hairline-divided stack (no boxed cards, no
- * per-row accent bar or icon). Each applicable row is built as a [ToggleRowSpec] first so the divider
- * placement (between rows, never before the first) doesn't need to special-case the platform gating.
+ * The remaining appearance switches, collapsed into one flat, hairline-divided stack (no boxed cards,
+ * no per-row accent bar or icon). Each applicable row is built as a [ToggleRowSpec] first so the
+ * divider placement (between rows, never before the first) doesn't need to special-case the platform
+ * gating. Dynamic colour is deliberately *not* here — it belongs to [ThemeSection], whose tiles it
+ * recolours.
  */
 @Composable
 private fun DisplaySection(
@@ -195,17 +283,6 @@ private fun DisplaySection(
     runAction: (SettingsAction) -> Unit,
 ) {
     val rows = buildList {
-        if (supportsDynamicColor()) {
-            add(
-                ToggleRowSpec(
-                    label = "Dynamic colour",
-                    gloss = "Recolour Softcover from your wallpaper's palette.",
-                    checked = state.useDynamicColorChecked,
-                    onCheckedChange = { runAction(OnDynamicColorToggledAction(newValue = it)) },
-                ),
-            )
-        }
-
         if (showBottomBarToggle) {
             add(
                 ToggleRowSpec(

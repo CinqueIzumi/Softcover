@@ -12,7 +12,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -116,6 +115,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.LocalBookDet
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.core.designsystem.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
@@ -1258,7 +1258,7 @@ internal fun EmptyCurrentlyReadingScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (showAdaptive) Spacer(modifier = Modifier.height(40.dp))
-        val quoteAlpha = if (isSystemInDarkTheme()) 0.15f else 0.3f
+        val quoteAlpha = if (LocalDarkTheme.current) 0.15f else 0.3f
 
         Text(
             text = "“",

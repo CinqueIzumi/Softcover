@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
 
 interface SettingsRepository {
@@ -45,6 +46,8 @@ interface SettingsRepository {
     suspend fun updateUserId(id: Int)
 
     suspend fun setBottomBarStyle(style: BottomBarStyle)
+
+    suspend fun setThemeMode(mode: ThemeMode)
 
     suspend fun setDynamicColorEnabled(enabled: Boolean)
 

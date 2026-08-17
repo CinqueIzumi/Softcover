@@ -3,11 +3,8 @@ package nl.rhaydus.softcover.orchestration.presentation
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -31,16 +28,11 @@ internal class MainActivity : ComponentActivity() {
 
         handleFocusModeIntent(intent = intent)
 
-        val transparent = Color.Transparent.toArgb()
-
-        val transparentAutoStyle = SystemBarStyle.auto(
-            lightScrim = transparent,
-            darkScrim = transparent,
-        )
-
+        // The stored theme preference hasn't loaded yet, so the bars follow the system for now;
+        // `ApplyPlatformThemeAppearance` re-applies them from inside [App] once it resolves.
         enableEdgeToEdge(
-            statusBarStyle = transparentAutoStyle,
-            navigationBarStyle = transparentAutoStyle,
+            statusBarStyle = transparentSystemBarStyle(darkTheme = null),
+            navigationBarStyle = transparentSystemBarStyle(darkTheme = null),
         )
 
         installSplashScreen().setKeepOnScreenCondition {

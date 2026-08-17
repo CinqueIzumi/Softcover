@@ -37,6 +37,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -272,7 +273,7 @@ private fun ProfileHeader(
 @StandardPreview
 @Composable
 private fun ProfileScreenLightPreview() {
-    SoftcoverTheme(darkTheme = false) {
+    SoftcoverTheme(themeMode = ThemeMode.LIGHT) {
         ProfileScreenLayout(
             state = ProfileScreenPreviewState,
             runAction = {},
@@ -284,7 +285,7 @@ private fun ProfileScreenLightPreview() {
 @StandardPreview
 @Composable
 private fun ProfileScreenDarkPreview() {
-    SoftcoverTheme(darkTheme = true) {
+    SoftcoverTheme(themeMode = ThemeMode.DARK) {
         ProfileScreenLayout(
             state = ProfileScreenPreviewState,
             runAction = {},

@@ -60,6 +60,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 
 private const val TABULAR_NUMS = "tnum"
 
@@ -1146,7 +1147,7 @@ private val ReadingLifePreviewContent = ReadingLifeShareContent(
 @StandardPreview
 @Composable
 private fun ReadingLifeShareCardLightPreview() {
-    SoftcoverTheme(darkTheme = false) {
+    SoftcoverTheme(themeMode = ThemeMode.LIGHT) {
         ShareCard(content = ReadingLifePreviewContent)
     }
 }
@@ -1154,7 +1155,7 @@ private fun ReadingLifeShareCardLightPreview() {
 @StandardPreview
 @Composable
 private fun ReadingLifeShareCardDarkPreview() {
-    SoftcoverTheme(darkTheme = true) {
+    SoftcoverTheme(themeMode = ThemeMode.DARK) {
         ShareCard(content = ReadingLifePreviewContent)
     }
 }
