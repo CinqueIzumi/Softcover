@@ -10,6 +10,8 @@ When a new surface is being built, walk this list before reaching for novelty.
 - **Need to introduce a region of content?** Editorial section (eyebrow + headline).
 - **Need to mark a region as elevated relative to its neighbour?** Step the container shade. Do not add a shadow.
 - **Need an accent on a piece of text?** Use primary colour on the eyebrow or a leading word. Do not bold or recolour body copy.
+- **Need a specific colour?** You need a *role*, not a hex — read it off the scheme, and never assume the app is warm or that the page is near-white: the reader may be in any of five spine colours (§2.1), which retint the paper as well as the ink. A colour that must survive every palette joins the fixed inks in `Color.kt` instead.
+- **Need the reader to pick a whole-app look?** Compose `PreviewTileFrame` (§4) — a miniature of the app's own page, not a colour swatch or a radio row.
 - **Need a divider?** First try a vertical gap or a tone change. Reach for a hairline divider only when neither will do.
 - **Need a custom font weight, size, or italic toggle?** Pick a different role from the editorial scale instead.
 - **Need to show progress?** Wavy progress indicator. Always.

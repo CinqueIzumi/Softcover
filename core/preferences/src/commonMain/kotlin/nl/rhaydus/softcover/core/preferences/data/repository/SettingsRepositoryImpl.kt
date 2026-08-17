@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.preferences.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -82,6 +83,10 @@ internal class SettingsRepositoryImpl(
 
     override suspend fun setThemeMode(mode: ThemeMode) {
         settingsLocalDataSource.setThemeMode(mode = mode)
+    }
+
+    override suspend fun setColorPalette(palette: ColorPalette) {
+        settingsLocalDataSource.setColorPalette(palette = palette)
     }
 
     override suspend fun setDynamicColorEnabled(enabled: Boolean) {

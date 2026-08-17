@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
@@ -351,6 +352,25 @@ class SettingsLocalDataSourceImplTest {
             dataSource.getThemeConfig().test {
                 awaitItem() shouldBe ThemeConfiguration(bottomBarStyle = BottomBarStyle.FLOATING)
                 awaitItem() shouldBe ThemeConfiguration(bottomBarStyle = BottomBarStyle.DOCKED)
+                awaitComplete()
+            }
+        }
+
+        @Test
+        fun `emits the mapped colorPalette from each entity`() = runTest {
+            // ----- Arrange -----
+            val entity = stubEntity(themeConfig = ThemeConfigurationEntity(
+                colorPalette = ColorPalette.INK,
+            ),
+            )
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            // ----- Act & Assert -----
+            dataSource.getThemeConfig().test {
+                awaitItem() shouldBe ThemeConfiguration(colorPalette = ColorPalette.INK)
                 awaitComplete()
             }
         }
@@ -1464,6 +1484,94 @@ class SettingsLocalDataSourceImplTest {
 
             // ----- Act -----
             dataSource.setThemeMode(mode = ThemeMode.DARK)
+
+            // ----- Assert -----
+            capturedResult?.apiKey shouldBe "preserve-me"
+            capturedResult?.userId shouldBe 55
+        }
+    }
+
+    @Nested
+    inner class SetColorPalette {
+        @Test
+        fun `update lambda sets colorPalette inside themeConfig`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                themeConfig = ThemeConfigurationEntity(
+                    colorPalette = ColorPalette.SOFTCOVER,
+                ),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
+            }
+
+            // ----- Act -----
+            dataSource.setColorPalette(palette = ColorPalette.VELLUM)
+
+            // ----- Assert -----
+            capturedResult?.themeConfig?.colorPalette shouldBe ColorPalette.VELLUM
+        }
+
+        @Test
+        fun `update lambda preserves other themeConfig fields`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                themeConfig = ThemeConfigurationEntity(
+                    bottomBarStyle = BottomBarStyle.DOCKED,
+                    colorPalette = ColorPalette.SOFTCOVER,
+                ),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
+            }
+
+            // ----- Act -----
+            dataSource.setColorPalette(palette = ColorPalette.VELLUM)
+
+            // ----- Assert -----
+            capturedResult?.themeConfig?.bottomBarStyle shouldBe BottomBarStyle.DOCKED
+        }
+
+        @Test
+        fun `update lambda preserves non-theme entity fields`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                apiKey = "preserve-me",
+                userId = 55,
+                themeConfig = ThemeConfigurationEntity(
+                    colorPalette = ColorPalette.SOFTCOVER,
+                ),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
+            }
+
+            // ----- Act -----
+            dataSource.setColorPalette(palette = ColorPalette.VELLUM)
 
             // ----- Assert -----
             capturedResult?.apiKey shouldBe "preserve-me"

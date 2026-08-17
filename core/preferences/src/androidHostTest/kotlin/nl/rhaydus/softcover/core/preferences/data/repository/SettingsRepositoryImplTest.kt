@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -524,6 +525,23 @@ class SettingsRepositoryImplTest {
             // ----- Assert -----
             coVerify {
                 settingsLocalDataSource.setThemeMode(mode = mode)
+            }
+        }
+    }
+
+    @Nested
+    inner class SetColorPalette {
+        @Test
+        fun `delegates to local data source with the given palette`() = runTest {
+            // ----- Arrange -----
+            val palette = ColorPalette.VELLUM
+
+            // ----- Act -----
+            repository.setColorPalette(palette = palette)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setColorPalette(palette = palette)
             }
         }
     }
