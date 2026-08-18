@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCa
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
@@ -44,6 +45,7 @@ val settingsModule = module {
             appDispatchers = get(),
             flows = getAll(),
             setBottomBarStyleUseCase = get(),
+            setThemeModeUseCase = get(),
             setDynamicColorUseCase = get(),
             getThemeConfigurationUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
@@ -69,6 +71,8 @@ val settingsModule = module {
     factory { UiScaleCollector() } bind SettingsCollector::class
 
     factory { SetBottomBarStyleUseCase(settingsRepository = get()) }
+
+    factory { SetThemeModeUseCase(settingsRepository = get()) }
 
     factory { SetDynamicColorUseCase(settingsRepository = get()) }
 

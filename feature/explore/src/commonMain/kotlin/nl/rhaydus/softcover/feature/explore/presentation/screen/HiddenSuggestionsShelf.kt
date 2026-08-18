@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.explore.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +37,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImag
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
@@ -495,7 +495,7 @@ private fun RestoreAffordance() {
  */
 @Composable
 private fun HiddenSuggestionsEmptyState() {
-    val quoteAlpha = if (isSystemInDarkTheme()) 0.15f else 0.3f
+    val quoteAlpha = if (LocalDarkTheme.current) 0.15f else 0.3f
 
     Column(
         modifier = Modifier

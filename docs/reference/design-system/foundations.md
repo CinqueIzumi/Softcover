@@ -21,6 +21,8 @@ Color is sourced from the Material 3 expressive scheme; this section defines the
 
 Dynamic color (Android 12+ Material You) is supported but **off by default**. The editorial scheme is the canonical look; dynamic color is an opt-in personalisation, not the design.
 
+**Light, dark, or the device's own.** Which of the two schemes is painted is the reader's choice (`ThemeMode` — Light / Dark / System, defaulting to System), made through the Appearance screen's theme picker (§5) and applied app-wide by `SoftcoverTheme`. Because a forced Light or Dark parts company with the device's setting, **`isSystemInDarkTheme()` is not the app's answer to "is it dark"** — a surface picking an alpha, an ink, or an asset by brightness reads `LocalDarkTheme` instead, and a composable that needs the schemes themselves (the preview tiles, which must paint the theme the reader is *not* in) reaches `softcoverColorScheme(darkTheme)` rather than `MaterialTheme.colorScheme`. Platform chrome outside Compose's reach — Android's system-bar glyph contrast, iOS's status bar — is re-pointed at the chosen mode by the app shell's `ApplyPlatformThemeAppearance` seam, so forcing Light on a dark phone doesn't leave white glyphs on a light surface.
+
 ### 2.2 Typography
 
 Two type families carry the system, split by voice. Both are bundled with the app (as Compose Multiplatform font resources) so the branded type renders identically on every platform — Android, iOS, and desktop:

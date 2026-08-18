@@ -10,6 +10,16 @@ plugins {
     alias(libs.plugins.compose.multiplatform)
 }
 
+// Pin the JDK this module compiles and runs against instead of inheriting whatever JDK happens to run
+// Gradle. Every other module gets its Java/Kotlin target from a convention plugin; this one is a plain
+// Kotlin/JVM module, so without a toolchain `compileJava` follows the local JDK while `compileKotlin`
+// falls back to the newest JVM target Kotlin supports — on a local JDK newer than that (e.g. 26) the two
+// disagree and the build fails on a JVM-target mismatch. 17 is what CI builds and packages with, and is
+// the minimum jpackage needs for the native distributions below.
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     // Orchestration tier (composes every feature + core module and hosts DesktopApp()).
     implementation(project(":orchestration"))
