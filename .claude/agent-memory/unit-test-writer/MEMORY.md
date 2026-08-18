@@ -13,3 +13,4 @@
 - [core/domain jvmTest task has NO-SOURCE](feedback_core_domain_jvmtest_no_source.md) — androidHostTest sources don't run under jvmTest; use testAndroidHostTest instead, verify against test-results XML not just "BUILD SUCCESSFUL"
 - [book_detail progress-action id stub](feedback_book_detail_progress_action_id_stub.md) — mock Book helpers need `id` stubbed once actions read it for job-cancellation tracking; red suite had two coexisting causes, not one
 - [Apollo fragment accessor is identity for insert_user_book paths](feedback_apollo_fragment_accessor_identity.md) — only stub `.toBook()` on the User_book mock; don't stub the fragment accessor extension itself
+- [designsystem palette contrast tests](project_designsystem_palette_contrast_tests.md) — WCAG helper pattern + @TestFactory/DynamicTest data-driving over ColorPalette.entries; confirms flat alphabetical import order

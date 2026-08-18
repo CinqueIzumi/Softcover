@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
@@ -31,6 +32,7 @@ internal class SettingsScreenScreenModel(
     private val setDateStyleUseCase: SetDateStyleUseCase,
     private val setBottomBarStyleUseCase: SetBottomBarStyleUseCase,
     private val setThemeModeUseCase: SetThemeModeUseCase,
+    private val setColorPaletteUseCase: SetColorPaletteUseCase,
     private val setDynamicColorUseCase: SetDynamicColorUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     private val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
@@ -57,6 +59,7 @@ internal class SettingsScreenScreenModel(
         getThemeConfigurationUseCase = getThemeConfigurationUseCase,
         setBottomBarStyleUseCase = setBottomBarStyleUseCase,
         setThemeModeUseCase = setThemeModeUseCase,
+        setColorPaletteUseCase = setColorPaletteUseCase,
         setDynamicColorUseCase = setDynamicColorUseCase,
         setDateStyleUseCase = setDateStyleUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,

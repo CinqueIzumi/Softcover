@@ -115,6 +115,7 @@ internal fun App() {
 
     SoftcoverTheme(
         themeMode = themeConfig.themeMode,
+        colorPalette = themeConfig.colorPalette,
         dynamicColor = themeConfig.useDynamicColor,
     ) {
         ClearFocusOnTapScreen {
