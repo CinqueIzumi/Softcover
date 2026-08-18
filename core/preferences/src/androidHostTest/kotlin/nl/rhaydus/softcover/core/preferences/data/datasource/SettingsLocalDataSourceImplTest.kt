@@ -13,10 +13,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.preferences.data.datastore.AppSettingsDataStore
 import nl.rhaydus.softcover.core.preferences.data.model.AppSettingsEntity
 import nl.rhaydus.softcover.core.preferences.data.model.ThemeConfigurationEntity
@@ -173,8 +175,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -351,6 +355,25 @@ class SettingsLocalDataSourceImplTest {
                 awaitComplete()
             }
         }
+
+        @Test
+        fun `emits the mapped colorPalette from each entity`() = runTest {
+            // ----- Arrange -----
+            val entity = stubEntity(themeConfig = ThemeConfigurationEntity(
+                colorPalette = ColorPalette.INK,
+            ),
+            )
+
+            every {
+                dataStore.data
+            } returns flowOf(entity)
+
+            // ----- Act & Assert -----
+            dataSource.getThemeConfig().test {
+                awaitItem() shouldBe ThemeConfiguration(colorPalette = ColorPalette.INK)
+                awaitComplete()
+            }
+        }
     }
 
     @Nested
@@ -365,8 +388,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -389,8 +414,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -521,8 +548,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -547,8 +576,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -797,8 +828,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -821,8 +854,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -846,8 +881,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -874,8 +911,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -898,8 +937,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -924,8 +965,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -952,8 +995,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -976,8 +1021,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -1002,8 +1049,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -1046,8 +1095,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -1071,8 +1122,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -1198,8 +1251,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -1219,8 +1274,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -1244,8 +1301,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -1273,8 +1332,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -1298,8 +1359,10 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
@@ -1325,12 +1388,190 @@ class SettingsLocalDataSourceImplTest {
                 dataStore.updateData(any())
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
-                capturedResult = updater(existingEntity)
-                capturedResult!!
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
             }
 
             // ----- Act -----
             dataSource.setBottomBarStyle(style = BottomBarStyle.DOCKED)
+
+            // ----- Assert -----
+            capturedResult?.apiKey shouldBe "preserve-me"
+            capturedResult?.userId shouldBe 55
+        }
+    }
+
+    @Nested
+    inner class SetThemeMode {
+        @Test
+        fun `update lambda sets themeMode inside themeConfig`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                themeConfig = ThemeConfigurationEntity(
+                    themeMode = ThemeMode.LIGHT,
+                ),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
+            }
+
+            // ----- Act -----
+            dataSource.setThemeMode(mode = ThemeMode.DARK)
+
+            // ----- Assert -----
+            capturedResult?.themeConfig?.themeMode shouldBe ThemeMode.DARK
+        }
+
+        @Test
+        fun `update lambda preserves other themeConfig fields`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                themeConfig = ThemeConfigurationEntity(
+                    bottomBarStyle = BottomBarStyle.DOCKED,
+                    themeMode = ThemeMode.LIGHT,
+                ),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
+            }
+
+            // ----- Act -----
+            dataSource.setThemeMode(mode = ThemeMode.DARK)
+
+            // ----- Assert -----
+            capturedResult?.themeConfig?.bottomBarStyle shouldBe BottomBarStyle.DOCKED
+        }
+
+        @Test
+        fun `update lambda preserves non-theme entity fields`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                apiKey = "preserve-me",
+                userId = 55,
+                themeConfig = ThemeConfigurationEntity(
+                    themeMode = ThemeMode.LIGHT,
+                ),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
+            }
+
+            // ----- Act -----
+            dataSource.setThemeMode(mode = ThemeMode.DARK)
+
+            // ----- Assert -----
+            capturedResult?.apiKey shouldBe "preserve-me"
+            capturedResult?.userId shouldBe 55
+        }
+    }
+
+    @Nested
+    inner class SetColorPalette {
+        @Test
+        fun `update lambda sets colorPalette inside themeConfig`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                themeConfig = ThemeConfigurationEntity(
+                    colorPalette = ColorPalette.SOFTCOVER,
+                ),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
+            }
+
+            // ----- Act -----
+            dataSource.setColorPalette(palette = ColorPalette.VELLUM)
+
+            // ----- Assert -----
+            capturedResult?.themeConfig?.colorPalette shouldBe ColorPalette.VELLUM
+        }
+
+        @Test
+        fun `update lambda preserves other themeConfig fields`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                themeConfig = ThemeConfigurationEntity(
+                    bottomBarStyle = BottomBarStyle.DOCKED,
+                    colorPalette = ColorPalette.SOFTCOVER,
+                ),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
+            }
+
+            // ----- Act -----
+            dataSource.setColorPalette(palette = ColorPalette.VELLUM)
+
+            // ----- Assert -----
+            capturedResult?.themeConfig?.bottomBarStyle shouldBe BottomBarStyle.DOCKED
+        }
+
+        @Test
+        fun `update lambda preserves non-theme entity fields`() = runTest {
+            // ----- Arrange -----
+            val existingEntity = stubEntity(
+                apiKey = "preserve-me",
+                userId = 55,
+                themeConfig = ThemeConfigurationEntity(
+                    colorPalette = ColorPalette.SOFTCOVER,
+                ),
+            )
+            var capturedResult: AppSettingsEntity? = null
+
+            coEvery {
+                dataStore.updateData(any())
+            } coAnswers {
+                val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
+                val updated = updater(existingEntity)
+                capturedResult = updated
+
+                updated
+            }
+
+            // ----- Act -----
+            dataSource.setColorPalette(palette = ColorPalette.VELLUM)
 
             // ----- Assert -----
             capturedResult?.apiKey shouldBe "preserve-me"

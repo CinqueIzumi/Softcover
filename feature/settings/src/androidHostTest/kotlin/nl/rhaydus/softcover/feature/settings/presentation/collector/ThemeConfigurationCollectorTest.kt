@@ -13,7 +13,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
@@ -153,6 +155,40 @@ class ThemeConfigurationCollectorTest {
 
             // ----- Act & Assert -----
             stateFlow.value.useFloatingBarChecked shouldBe false
+        }
+
+        @Test
+        fun `sets themeMode to the emitted configuration's themeMode`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ThemeConfigurationCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+
+            // ----- Act -----
+            themeConfigFlow.emit(ThemeConfiguration(themeMode = ThemeMode.DARK))
+
+            // ----- Assert -----
+            stateFlow.value.themeMode shouldBe ThemeMode.DARK
+            job.cancel()
+        }
+
+        @Test
+        fun `sets colorPalette to the emitted configuration's colorPalette`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ThemeConfigurationCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+
+            // ----- Act -----
+            themeConfigFlow.emit(ThemeConfiguration(colorPalette = ColorPalette.SEA))
+
+            // ----- Assert -----
+            stateFlow.value.colorPalette shouldBe ColorPalette.SEA
+            job.cancel()
         }
     }
 }

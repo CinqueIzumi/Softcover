@@ -11,13 +11,17 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetShelfSwipeEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
 import nl.rhaydus.toad.ActionDependencies
 
 internal data class SettingsScreenDependencies(
     val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
     val setBottomBarStyleUseCase: SetBottomBarStyleUseCase,
+    val setThemeModeUseCase: SetThemeModeUseCase,
+    val setColorPaletteUseCase: SetColorPaletteUseCase,
     val setDynamicColorUseCase: SetDynamicColorUseCase,
     val setDateStyleUseCase: SetDateStyleUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,

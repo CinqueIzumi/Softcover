@@ -13,11 +13,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.WindowPlacement
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsLocalDataSource
 import nl.rhaydus.softcover.core.preferences.data.datasource.SettingsRemoteDataSource
@@ -506,6 +508,40 @@ class SettingsRepositoryImplTest {
             // ----- Assert -----
             coVerify {
                 settingsLocalDataSource.setLastUsedProgressUnit(unit = ProgressUnit.PERCENTAGE)
+            }
+        }
+    }
+
+    @Nested
+    inner class SetThemeMode {
+        @Test
+        fun `delegates to local data source with the given mode`() = runTest {
+            // ----- Arrange -----
+            val mode = ThemeMode.DARK
+
+            // ----- Act -----
+            repository.setThemeMode(mode = mode)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setThemeMode(mode = mode)
+            }
+        }
+    }
+
+    @Nested
+    inner class SetColorPalette {
+        @Test
+        fun `delegates to local data source with the given palette`() = runTest {
+            // ----- Arrange -----
+            val palette = ColorPalette.VELLUM
+
+            // ----- Act -----
+            repository.setColorPalette(palette = palette)
+
+            // ----- Assert -----
+            coVerify {
+                settingsLocalDataSource.setColorPalette(palette = palette)
             }
         }
     }

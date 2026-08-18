@@ -40,6 +40,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -417,7 +418,7 @@ private fun ReaderIdentity(
 @StandardPreview
 @Composable
 private fun ProfileScreenDesktopLightPreview() {
-    SoftcoverTheme(darkTheme = false) {
+    SoftcoverTheme(themeMode = ThemeMode.LIGHT) {
         ProfileScreenLayout(
             state = ProfileScreenDesktopPreviewState,
             runAction = {},
@@ -429,7 +430,7 @@ private fun ProfileScreenDesktopLightPreview() {
 @StandardPreview
 @Composable
 private fun ProfileScreenDesktopDarkPreview() {
-    SoftcoverTheme(darkTheme = true) {
+    SoftcoverTheme(themeMode = ThemeMode.DARK) {
         ProfileScreenLayout(
             state = ProfileScreenDesktopPreviewState,
             runAction = {},

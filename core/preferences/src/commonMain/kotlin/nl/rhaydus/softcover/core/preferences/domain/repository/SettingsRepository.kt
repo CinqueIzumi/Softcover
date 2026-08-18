@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.preferences.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DesktopWindowState
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -10,6 +11,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortSettings
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
 
 interface SettingsRepository {
@@ -45,6 +47,10 @@ interface SettingsRepository {
     suspend fun updateUserId(id: Int)
 
     suspend fun setBottomBarStyle(style: BottomBarStyle)
+
+    suspend fun setThemeMode(mode: ThemeMode)
+
+    suspend fun setColorPalette(palette: ColorPalette)
 
     suspend fun setDynamicColorEnabled(enabled: Boolean)
 

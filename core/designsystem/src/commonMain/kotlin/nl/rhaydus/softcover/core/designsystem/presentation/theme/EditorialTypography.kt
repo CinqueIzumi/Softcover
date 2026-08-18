@@ -33,6 +33,8 @@ data class EditorialTypography(
     val body: TextStyle,
     val bodySmall: TextStyle,
 
+    val review: TextStyle,
+
     val statHero: TextStyle,
     val statLarge: TextStyle,
 
@@ -47,77 +49,81 @@ data class EditorialTypography(
 internal fun buildEditorialTypography(
     typography: Typography,
     displayFamily: FontFamily,
-): EditorialTypography = EditorialTypography(
-    eyebrow = typography.labelMedium.copy(
-        letterSpacing = 2.5.sp,
-        fontWeight = FontWeight.SemiBold,
-    ),
-    eyebrowSmall = typography.labelSmall.copy(
-        letterSpacing = 1.2.sp,
-        fontWeight = FontWeight.SemiBold,
-    ),
-
-    pageTitle = typography.displaySmall.copy(
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 30.sp,
-        lineHeight = 36.sp,
-    ),
-    display = typography.displayMedium.copy(
-        fontStyle = FontStyle.Italic,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 44.sp,
-    ),
-    headlineMedium = typography.headlineMedium.copy(
-        fontStyle = FontStyle.Italic,
-        fontWeight = FontWeight.SemiBold,
-    ),
-    headlineSmall = typography.headlineSmall.copy(
-        fontStyle = FontStyle.Italic,
-        fontWeight = FontWeight.SemiBold,
-    ),
-
-    titleLarge = typography.titleLarge.copy(
-        fontWeight = FontWeight.SemiBold,
-    ),
-    titleMedium = typography.titleMedium.copy(
-        fontWeight = FontWeight.SemiBold,
-    ),
-    titleSmall = typography.titleSmall.copy(
-        fontWeight = FontWeight.SemiBold,
-    ),
-
-    bodyLarge = typography.bodyLarge.copy(
+): EditorialTypography {
+    val bodyLarge = typography.bodyLarge.copy(
         fontFamily = displayFamily,
         fontStyle = FontStyle.Italic,
         lineHeight = 24.sp,
-    ),
-    body = typography.bodyMedium.copy(
-        fontFamily = displayFamily,
-        fontStyle = FontStyle.Italic,
-    ),
-    bodySmall = typography.bodySmall.copy(
-        fontFamily = displayFamily,
-        fontStyle = FontStyle.Italic,
-    ),
+    )
 
-    statHero = typography.displayLarge.copy(
-        fontStyle = FontStyle.Italic,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 72.sp,
-        lineHeight = 76.sp,
-        fontFeatureSettings = TABULAR_NUMS,
-    ),
-    statLarge = typography.displayMedium.copy(
-        fontStyle = FontStyle.Italic,
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 52.sp,
-        fontFeatureSettings = TABULAR_NUMS,
-    ),
+    return EditorialTypography(
+        eyebrow = typography.labelMedium.copy(
+            letterSpacing = 2.5.sp,
+            fontWeight = FontWeight.SemiBold,
+        ),
+        eyebrowSmall = typography.labelSmall.copy(
+            letterSpacing = 1.2.sp,
+            fontWeight = FontWeight.SemiBold,
+        ),
 
-    quoteGlyph = typography.displayLarge.copy(
-        fontSize = 120.sp,
-    ),
-)
+        pageTitle = typography.displaySmall.copy(
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 30.sp,
+            lineHeight = 36.sp,
+        ),
+        display = typography.displayMedium.copy(
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.SemiBold,
+            lineHeight = 44.sp,
+        ),
+        headlineMedium = typography.headlineMedium.copy(
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.SemiBold,
+        ),
+        headlineSmall = typography.headlineSmall.copy(
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.SemiBold,
+        ),
+
+        titleLarge = typography.titleLarge.copy(
+            fontWeight = FontWeight.SemiBold,
+        ),
+        titleMedium = typography.titleMedium.copy(
+            fontWeight = FontWeight.SemiBold,
+        ),
+        titleSmall = typography.titleSmall.copy(
+            fontWeight = FontWeight.SemiBold,
+        ),
+        review = bodyLarge.copy(fontStyle = FontStyle.Normal),
+        bodyLarge = bodyLarge,
+        body = typography.bodyMedium.copy(
+            fontFamily = displayFamily,
+            fontStyle = FontStyle.Italic,
+        ),
+        bodySmall = typography.bodySmall.copy(
+            fontFamily = displayFamily,
+            fontStyle = FontStyle.Italic,
+        ),
+
+        statHero = typography.displayLarge.copy(
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 72.sp,
+            lineHeight = 76.sp,
+            fontFeatureSettings = TABULAR_NUMS,
+        ),
+        statLarge = typography.displayMedium.copy(
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.SemiBold,
+            lineHeight = 52.sp,
+            fontFeatureSettings = TABULAR_NUMS,
+        ),
+
+        quoteGlyph = typography.displayLarge.copy(
+            fontSize = 120.sp,
+        ),
+    )
+}
 
 /**
  * The branded editorial type scale, resolving the bundled font resources. Provided by `SoftcoverTheme`.

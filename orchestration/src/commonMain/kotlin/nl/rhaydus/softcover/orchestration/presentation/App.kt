@@ -111,7 +111,13 @@ internal fun App() {
             }
     }
 
-    SoftcoverTheme(dynamicColor = themeConfig.useDynamicColor) {
+    ApplyPlatformThemeAppearance(themeMode = themeConfig.themeMode)
+
+    SoftcoverTheme(
+        themeMode = themeConfig.themeMode,
+        colorPalette = themeConfig.colorPalette,
+        dynamicColor = themeConfig.useDynamicColor,
+    ) {
         ClearFocusOnTapScreen {
             CompositionLocalProvider(
                 LocalThemeConfiguration provides themeConfig,
