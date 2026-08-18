@@ -62,14 +62,14 @@ internal actual val settingsUsesMasterDetail: Boolean = true
 
 /**
  * Desktop Settings: a category **source list** down the leading edge (the native desktop settings
- * idiom) beside a detail pane that swaps between Appearance and Library tabs **inline** — no push, no
- * full-page swap. Mirrors desktop Library's `[ sidebar | content ]` shape. "Your profile" is the one
- * entry that still pushes full-screen (Profile is a separate feature). The Appearance pane drives the
- * shared [settingsRunAction]; the Library-tabs pane drives [libraryVisibilityState] /
+ * idiom) beside a detail pane that swaps between Appearance, Library tabs, and About **inline** — no
+ * push, no full-page swap. Mirrors desktop Library's `[ sidebar | content ]` shape. "Your profile" is
+ * the one entry that still pushes full-screen (Profile is a separate feature). The Appearance pane
+ * drives the shared [settingsRunAction]; the Library-tabs pane drives [libraryVisibilityState] /
  * [libraryVisibilityRunAction] (its model is hosted under the Settings lifecycle in
- * [SettingsScreen.Content]) and docks a [LibraryVisibilitySaveBar] at the pane's bottom. The sub-page
- * `navigateTo*` callbacks are unused here (mobile pushes; desktop swaps) — only [navigateToProfile] is
- * wired.
+ * [SettingsScreen.Content]) and docks a [LibraryVisibilitySaveBar] at the pane's bottom; the About pane
+ * drives [openUrl]. The sub-page `navigateTo*` callbacks (including [navigateToAbout]) are unused here
+ * (mobile pushes; desktop swaps) — only [navigateToProfile] is wired.
  */
 @Composable
 internal actual fun SettingsScreenLayout(
@@ -79,11 +79,13 @@ internal actual fun SettingsScreenLayout(
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
+    navigateToAbout: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     onCreateListClick: () -> Unit,
     appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
+    openUrl: (String) -> Unit,
     debugSection: @Composable () -> Unit,
 ) {
     var selected by remember { mutableStateOf(SettingsCategory.APPEARANCE) }
@@ -91,8 +93,6 @@ internal actual fun SettingsScreenLayout(
     Row(modifier = Modifier.fillMaxSize()) {
         SettingsCategorySidebar(
             selected = selected,
-            versionName = state.appVersionName,
-            versionCode = state.appVersionCode,
             onSelect = { selected = it },
             onProfileClick = navigateToProfile,
             onHiddenSuggestionsClick = navigateToHiddenSuggestions,
@@ -125,6 +125,7 @@ internal actual fun SettingsScreenLayout(
                     versionCode = state.appVersionCode,
                     appUpdateState = appUpdateState,
                     onStartAppUpdate = onStartAppUpdate,
+                    openUrl = openUrl,
                     debugSection = debugSection,
                 )
             }
@@ -132,11 +133,13 @@ internal actual fun SettingsScreenLayout(
     }
 }
 // region Sidebar
+/**
+ * The category source list. Carries no version text of its own — the app version shows exactly once,
+ * on the `About` pane (via [AboutContent]'s `VersionFooter`), not here alongside it.
+ */
 @Composable
 private fun SettingsCategorySidebar(
     selected: SettingsCategory,
-    versionName: String,
-    versionCode: Int,
     onSelect: (SettingsCategory) -> Unit,
     onProfileClick: () -> Unit,
     onHiddenSuggestionsClick: () -> Unit,
@@ -145,7 +148,6 @@ private fun SettingsCategorySidebar(
     Column(modifier = modifier) {
         Column(
             modifier = Modifier
-                .weight(1f)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(vertical = 16.dp),
@@ -208,18 +210,6 @@ private fun SettingsCategorySidebar(
                 onClick = { onSelect(SettingsCategory.ABOUT) },
             )
         }
-
-        Text(
-            text = "Version $versionName ($versionCode)",
-            style = MaterialTheme.editorialTypography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(
-                start = 26.dp,
-                end = 16.dp,
-                top = 8.dp,
-                bottom = 16.dp + rememberBottomBarPadding(),
-            ),
-        )
     }
 }
 
@@ -436,12 +426,19 @@ private fun LibraryTabsPane(
     }
 }
 
+/**
+ * The master–detail `About` category: [AboutContent] (Credits/Source/Contact, closing with its own
+ * `VersionFooter`), then the app-update card and the debug section. [AboutContent] is the app's one and
+ * only place the version shows — the sidebar's own copy was dropped so it isn't on screen twice at once
+ * alongside this pane — so this doesn't render a second, separate `VersionFooter` of its own.
+ */
 @Composable
 private fun AboutPane(
     versionName: String,
     versionCode: Int,
     appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
+    openUrl: (String) -> Unit,
     debugSection: @Composable () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -469,6 +466,15 @@ private fun AboutPane(
 
                 Spacer(modifier = Modifier.height(28.dp))
 
+                AboutContent(
+                    versionName = versionName,
+                    versionCode = versionCode,
+                    openUrl = openUrl,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                Spacer(modifier = Modifier.height(40.dp))
+
                 if (appUpdateState != AppUpdateState.Idle) {
                     AppUpdateSection(
                         appUpdateState = appUpdateState,
@@ -479,11 +485,6 @@ private fun AboutPane(
                 }
 
                 debugSection()
-
-                VersionFooter(
-                    versionName = versionName,
-                    versionCode = versionCode,
-                )
             }
         }
 

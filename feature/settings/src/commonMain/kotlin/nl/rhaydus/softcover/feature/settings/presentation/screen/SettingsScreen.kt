@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -49,6 +50,7 @@ object SettingsScreen : Screen {
         val appUpdateState = LocalAppUpdateState.current
         val onStartAppUpdate = LocalStartAppUpdate.current
         val createListPresenter = LocalCreateListPresenter.current
+        val uriHandler = LocalUriHandler.current
 
         // Desktop hosts the Library-tabs settings inline in the master–detail pane, so it needs that
         // screen's model under the Settings lifecycle. Mobile pushes a separate screen (with its own
@@ -81,6 +83,9 @@ object SettingsScreen : Screen {
             navigateToHiddenSuggestions = {
                 navigator.parent?.push(appNavigator.screen(ScreenDestination.HiddenSuggestions))
             },
+            navigateToAbout = {
+                navigator.parent?.push(AboutScreen())
+            },
             libraryVisibilityState = libraryVisibilityState,
             libraryVisibilityRunAction = { action -> libraryVisibilityModel?.runAction(action) },
             onCreateListClick = {
@@ -88,6 +93,7 @@ object SettingsScreen : Screen {
             },
             appUpdateState = appUpdateState,
             onStartAppUpdate = onStartAppUpdate,
+            openUrl = uriHandler::openUri,
             debugSection = {
                 debugRoutesContent.Render()
 
@@ -119,11 +125,13 @@ internal expect fun SettingsScreenLayout(
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
+    navigateToAbout: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     onCreateListClick: () -> Unit,
     appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
+    openUrl: (String) -> Unit,
     debugSection: @Composable () -> Unit,
 )
 
