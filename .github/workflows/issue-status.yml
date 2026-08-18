@@ -1,0 +1,181 @@
+name: Issue status
+
+# Keeps the project board in step with the work, so no one has to remember to drag a card.
+#
+# The link this relies on already exists and costs nothing to maintain: creating a branch from
+# an issue through the GitHub UI records a *linked branch* on that issue, and names the branch
+# `<issue-number>-<slug>`. The number in the branch name is therefore not a convention we are
+# asking people to honour — it is what GitHub generates.
+#
+# What GitHub does NOT do is act on that link. Linked branches drive the Development sidebar
+# and nothing else; only a *closing reference* closes an issue, and a closing reference is only
+# recorded when the pull request targets the default branch. Under this repo's release-branch
+# flow (feature -> release/x.y.z -> main) a `Closes #123` in the body is silently inert — as
+# #267 demonstrated by merging into release/3.2.0 and leaving #259 open. That is the gap this
+# workflow fills: it closes the issue itself on merge, whatever the base branch was.
+on:
+  # Branch creation. `create` also fires for tags, so the job filters on ref_type.
+  create:
+  pull_request:
+    types: [closed]
+
+# Closing the issue is the only write GITHUB_TOKEN performs here. Project field writes are not
+# available to GITHUB_TOKEN at all and go through PROJECT_TOKEN instead — see below.
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: issue-status-${{ github.event.pull_request.number || github.event.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Move the linked issue
+    if: >-
+      (github.event_name == 'create' && github.event.ref_type == 'branch') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+    env:
+      # Branch names are user-supplied, so they are passed through the environment rather than
+      # interpolated into a shell command, where a crafted name could inject.
+      BRANCH: ${{ github.event_name == 'create' && github.event.ref || github.event.pull_request.head.ref }}
+      OWNER: ${{ github.repository_owner }}
+      REPO: ${{ github.event.repository.name }}
+      # Projects v2 is out of reach for GITHUB_TOKEN — no permission scope grants it. Board moves
+      # need a PAT with the `project` scope, stored as the PROJECT_TOKEN secret. Without it the
+      # issue still closes; only the status step is skipped. (Secrets are unavailable in `if:`
+      # conditions, which is why this is lifted into env to be tested there.)
+      PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+      PROJECT_ID: PVT_kwHOAjA1Cs4Bfs4P
+      STATUS_FIELD_ID: PVTSSF_lAHOAjA1Cs4Bfs4PzhZ96-o
+      STATUS_IN_PROGRESS: 47fc9ee4
+      STATUS_DONE: '98236657'
+    steps:
+      - name: Resolve the linked issue
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          number="${BRANCH%%-*}"
+          if ! printf '%s' "$number" | grep -qE '^[0-9]+$'; then
+            echo "Branch '$BRANCH' does not start with an issue number — nothing to do."
+            exit 0
+          fi
+
+          # Two things make this less direct than it looks. A number that is not an issue (a pull
+          # request number, a typo) answers NOT_FOUND, which is a non-zero exit — routine here,
+          # not exceptional, so the call is allowed to fail. And when a response carries an
+          # `errors` array gh ignores `--jq` and prints the raw envelope, so filtering with
+          # `--jq` would hand back the error blob as if it were an issue. Both are handled by
+          # taking the raw output and filtering locally: a NOT_FOUND envelope still has a null
+          # issue, which `// empty` collapses to the same nothing as a clean miss.
+          fetch_issue() {
+            gh api graphql \
+              -f query='
+                query($owner: String!, $repo: String!, $number: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    issue(number: $number) {
+                      id
+                      state
+                      linkedBranches(first: 50) { nodes { ref { name } } }
+                    }
+                  }
+                }' \
+              -F owner="$OWNER" -F repo="$REPO" -F number="$number" 2>/dev/null \
+              | jq -c '.data.repository.issue // empty' 2>/dev/null || true
+          }
+
+          # `linkedBranches` keeps its node but nulls the `ref` once the branch is deleted, so
+          # this matches on a name that may no longer resolve. Indexing a null yields null in
+          # jq rather than erroring, which is what makes the plain path safe.
+          is_linked() {
+            printf '%s' "$1" | jq -e --arg b "$BRANCH" \
+              '[.linkedBranches.nodes[]? | .ref.name] | index($b) != null' >/dev/null
+          }
+
+          issue="$(fetch_issue)"
+          if [ -z "$issue" ]; then
+            echo "#$number is not an issue in this repository — nothing to do."
+            exit 0
+          fi
+
+          linked=false
+          if is_linked "$issue"; then linked=true; fi
+
+          # On branch creation the link is the whole signal — an unlinked branch that merely
+          # happens to open with digits is not assumed to be the ticket. GitHub writes the link
+          # as a step separate from the branch itself, so a `create` event can arrive fractionally
+          # ahead of it; a few short retries cover that race before giving up.
+          if [ "$linked" != "true" ] && [ "${{ github.event_name }}" = "create" ]; then
+            for _ in 1 2 3; do
+              sleep 2
+              issue="$(fetch_issue)"
+              if [ -n "$issue" ] && is_linked "$issue"; then linked=true; break; fi
+            done
+
+            if [ "$linked" != "true" ]; then
+              echo "Branch '$BRANCH' is not a linked branch of #$number — not assuming it is the ticket."
+              exit 0
+            fi
+          fi
+
+          # On merge the check can only ever be advisory: branches are deleted on merge here, so
+          # by then the link has usually already lost its ref and linked=false means nothing.
+          echo "Resolved #$number (linked=$linked, state=$(printf '%s' "$issue" | jq -r .state))."
+          {
+            echo "number=$number"
+            echo "id=$(printf '%s' "$issue" | jq -r .id)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Close the issue
+        if: steps.resolve.outputs.number && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          gh issue close "${{ steps.resolve.outputs.number }}" \
+            --repo "$OWNER/$REPO" \
+            --reason completed \
+            --comment "Closed by #${{ github.event.pull_request.number }}, merged into \`${{ github.event.pull_request.base.ref }}\`."
+
+      # addProjectV2ItemById is idempotent — it returns the existing item when the issue is
+      # already on the board — so this doubles as "add it if a new issue never got added".
+      - name: Move the card
+        if: steps.resolve.outputs.number && env.PROJECT_TOKEN != ''
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          OPTION_ID: ${{ github.event_name == 'create' && env.STATUS_IN_PROGRESS || env.STATUS_DONE }}
+        run: |
+          set -euo pipefail
+
+          item="$(gh api graphql \
+            -f query='
+              mutation($project: ID!, $content: ID!) {
+                addProjectV2ItemById(input: { projectId: $project, contentId: $content }) {
+                  item { id }
+                }
+              }' \
+            -f project="$PROJECT_ID" -f content="${{ steps.resolve.outputs.id }}" \
+            --jq '.data.addProjectV2ItemById.item.id')"
+
+          gh api graphql \
+            -f query='
+              mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
+                updateProjectV2ItemFieldValue(
+                  input: {
+                    projectId: $project
+                    itemId: $item
+                    fieldId: $field
+                    value: { singleSelectOptionId: $option }
+                  }
+                ) { projectV2Item { id } }
+              }' \
+            -f project="$PROJECT_ID" -f item="$item" \
+            -f field="$STATUS_FIELD_ID" -f option="$OPTION_ID" \
+            --jq '.data.updateProjectV2ItemFieldValue.projectV2Item.id' > /dev/null
+
+          echo "#${{ steps.resolve.outputs.number }} -> $OPTION_ID"
