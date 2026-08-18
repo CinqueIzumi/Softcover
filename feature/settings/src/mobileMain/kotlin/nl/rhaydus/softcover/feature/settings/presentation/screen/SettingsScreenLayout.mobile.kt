@@ -62,9 +62,12 @@ internal actual val settingsUsesMasterDetail: Boolean = false
 
 /**
  * The mobile Settings menu pushes its sub-pages, so the desktop-only master–detail parameters
- * ([settingsRunAction], [libraryVisibilityState], [libraryVisibilityRunAction], [onCreateListClick])
- * are unused here — the toggles live on the pushed [AppearanceSettingsScreen] /
- * [LibraryVisibilitySettingsScreen], each with its own model.
+ * ([settingsRunAction], [libraryVisibilityState], [libraryVisibilityRunAction], [onCreateListClick],
+ * [openUrl]) are unused here — the toggles live on the pushed [AppearanceSettingsScreen] /
+ * [LibraryVisibilitySettingsScreen] / [AboutScreen], each with its own model (and, for About, its own
+ * `LocalUriHandler`). [state] is likewise unused: it carried nothing this menu itself renders once the
+ * app version moved off this list and onto [AboutScreen] — its sole home now — to avoid showing the
+ * version in two places.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,11 +78,13 @@ internal actual fun SettingsScreenLayout(
     navigateToAppearanceSettings: () -> Unit,
     navigateToLibraryVisibility: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
+    navigateToAbout: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     onCreateListClick: () -> Unit,
     appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
+    openUrl: (String) -> Unit,
     debugSection: @Composable () -> Unit,
 ) {
     val bottomBarPadding = rememberBottomBarPadding()
@@ -169,12 +174,26 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            debugSection()
-
-            VersionFooter(
-                versionName = state.appVersionName,
-                versionCode = state.appVersionCode,
+            EditorialSectionHeader(
+                eyebrow = "About",
+                headline = "The fine print",
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SettingsMenuRow(
+                title = "About Softcover",
+                gloss = "Credits, source, and how to reach us",
+                icon = drawableIconResource(
+                    icon = SoftcoverIcon.Info,
+                    contentDescription = "About icon",
+                ),
+                onClick = navigateToAbout,
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            debugSection()
 
             Spacer(modifier = Modifier.height(24.dp + bottomBarPadding))
         }
@@ -320,11 +339,13 @@ private fun SettingsScreenPreview() {
             navigateToAppearanceSettings = {},
             navigateToLibraryVisibility = {},
             navigateToHiddenSuggestions = {},
+            navigateToAbout = {},
             libraryVisibilityState = LibraryVisibilitySettingsUiState(),
             libraryVisibilityRunAction = {},
             onCreateListClick = {},
             appUpdateState = AppUpdateState.Idle,
             onStartAppUpdate = {},
+            openUrl = {},
             debugSection = {},
         )
     }
@@ -341,11 +362,13 @@ private fun SettingsScreenUpdateAvailablePreview() {
             navigateToAppearanceSettings = {},
             navigateToLibraryVisibility = {},
             navigateToHiddenSuggestions = {},
+            navigateToAbout = {},
             libraryVisibilityState = LibraryVisibilitySettingsUiState(),
             libraryVisibilityRunAction = {},
             onCreateListClick = {},
             appUpdateState = AppUpdateState.Available,
             onStartAppUpdate = {},
+            openUrl = {},
             debugSection = {},
         )
     }
