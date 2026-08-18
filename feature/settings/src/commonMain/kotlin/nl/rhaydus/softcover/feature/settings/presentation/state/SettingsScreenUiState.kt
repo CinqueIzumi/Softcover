@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
+import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
@@ -8,6 +9,7 @@ import nl.rhaydus.toad.UiState
 internal data class SettingsScreenUiState(
     val useFloatingBarChecked: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.DEFAULT,
+    val colorPalette: ColorPalette = ColorPalette.DEFAULT,
     val useDynamicColorChecked: Boolean = false,
     val readingStreakEnabledChecked: Boolean = true,
     val shelfSwipeEnabledChecked: Boolean = false,

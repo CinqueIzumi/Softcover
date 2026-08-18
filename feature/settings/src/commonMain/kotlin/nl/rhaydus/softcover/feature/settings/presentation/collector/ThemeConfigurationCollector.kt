@@ -18,6 +18,7 @@ internal class ThemeConfigurationCollector : SettingsCollector {
                 it.copy(
                     useFloatingBarChecked = configuration.bottomBarStyle == BottomBarStyle.FLOATING,
                     themeMode = configuration.themeMode,
+                    colorPalette = configuration.colorPalette,
                     useDynamicColorChecked = configuration.useDynamicColor,
                 )
             }

@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseC
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetBottomBarStyleUseCase
+import nl.rhaydus.softcover.feature.settings.domain.usecase.SetColorPaletteUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDateStyleUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetDynamicColorUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
@@ -46,6 +47,7 @@ val settingsModule = module {
             flows = getAll(),
             setBottomBarStyleUseCase = get(),
             setThemeModeUseCase = get(),
+            setColorPaletteUseCase = get(),
             setDynamicColorUseCase = get(),
             getThemeConfigurationUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
@@ -73,6 +75,8 @@ val settingsModule = module {
     factory { SetBottomBarStyleUseCase(settingsRepository = get()) }
 
     factory { SetThemeModeUseCase(settingsRepository = get()) }
+
+    factory { SetColorPaletteUseCase(settingsRepository = get()) }
 
     factory { SetDynamicColorUseCase(settingsRepository = get()) }
 
