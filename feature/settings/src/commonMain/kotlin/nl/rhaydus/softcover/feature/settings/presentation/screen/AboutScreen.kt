@@ -26,6 +26,7 @@ class AboutScreen : Screen {
             versionCode = state.appVersionCode,
             openUrl = uriHandler::openUri,
             onNavigateBack = navigator::pop,
+            onRoadmapClick = { navigator.push(RoadmapScreen()) },
         )
     }
 }
@@ -35,7 +36,10 @@ class AboutScreen : Screen {
  * around the shared [AboutContent]; only the chrome (top bar vs static back bar) branches. On desktop
  * this standalone page is a fallback — the primary entry is the Settings master–detail pane's `About`
  * category. `expect` cannot carry default argument values, so every parameter is supplied explicitly at
- * the single call site above.
+ * the single call site above. [onRoadmapClick] pushes [RoadmapScreen] onto this screen's own navigator —
+ * About always reaches Roadmap by pushing, even on desktop, since the master–detail pane's own `About`
+ * category swaps to `Roadmap` through a separate, locally-wired callback instead (see
+ * `SettingsScreenLayout`'s `AboutPane`).
  */
 @Composable
 internal expect fun AboutScreenLayout(
@@ -43,4 +47,5 @@ internal expect fun AboutScreenLayout(
     versionCode: Int,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    onRoadmapClick: () -> Unit,
 )

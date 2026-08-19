@@ -35,16 +35,18 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * the desktop Settings master–detail pane's `About` category. Opens with an unheaded italic intro line
  * (the page title itself is chrome the caller already renders — a top bar on mobile, a static header on
  * desktop), then three [EditorialSectionHeader] groups — **Credits**, **Source**, **Contact** — each a
- * flat, hairline-separated stack of [AboutLinkRow] / [AboutUsernameRow] — and closes with `VersionFooter`.
- * About is the app's **one and only** place the version shows: the mobile Settings menu and the desktop
- * sidebar both dropped their own copies specifically so it isn't visible in two places at once, so this
- * is the single call site for it, unconditionally, rather than a per-host toggle.
+ * flat, hairline-separated stack of [AboutLinkRow] / [AboutUsernameRow] / [AboutNavigationRow] (the
+ * Source section's `Roadmap` row, [onRoadmapClick]) — and closes with `VersionFooter`. About is the
+ * app's **one and only** place the version shows: the mobile Settings menu and the desktop sidebar both
+ * dropped their own copies specifically so it isn't visible in two places at once, so this is the single
+ * call site for it, unconditionally, rather than a per-host toggle.
  */
 @Composable
 internal fun AboutContent(
     versionName: String,
     versionCode: Int,
     openUrl: (String) -> Unit,
+    onRoadmapClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -61,7 +63,10 @@ internal fun AboutContent(
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        SourceSection(openUrl = openUrl)
+        SourceSection(
+            openUrl = openUrl,
+            onRoadmapClick = onRoadmapClick,
+        )
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -111,7 +116,10 @@ private fun CreditsSection(openUrl: (String) -> Unit) {
 }
 
 @Composable
-private fun SourceSection(openUrl: (String) -> Unit) {
+private fun SourceSection(
+    openUrl: (String) -> Unit,
+    onRoadmapClick: () -> Unit,
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         EditorialSectionHeader(
             eyebrow = "Source",
@@ -126,6 +134,13 @@ private fun SourceSection(openUrl: (String) -> Unit) {
             icon = SoftcoverIcon.History,
             url = GITHUB_REPO_URL,
             openUrl = openUrl,
+        )
+
+        AboutNavigationRow(
+            title = "Roadmap",
+            gloss = "What we're building next, in the order we plan to ship it.",
+            icon = SoftcoverIcon.Explore,
+            onClick = onRoadmapClick,
         )
     }
 }
@@ -195,6 +210,45 @@ private fun AboutLinkRow(
             val trailingIcon = drawableIconResource(
                 icon = SoftcoverIcon.OpenInNew,
                 contentDescription = "Opens in your browser",
+            )
+
+            Icon(
+                painter = trailingIcon.getIconPainter(),
+                contentDescription = trailingIcon.contentDescription,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        },
+    )
+}
+
+/**
+ * A leaf navigation row for the About screen: [SoftcoverIcon.KeyboardArrowRight] on a row that hands
+ * off to [onClick] — the internal-navigation sibling of [AboutLinkRow], which instead opens an
+ * external [url] behind [SoftcoverIcon.OpenInNew]. Shares [AboutRow]'s anatomy; see that composable for
+ * the shape itself.
+ */
+@Composable
+private fun AboutNavigationRow(
+    title: String,
+    gloss: String,
+    icon: SoftcoverIcon,
+    onClick: () -> Unit,
+) {
+    val leadingIcon = drawableIconResource(
+        icon = icon,
+        contentDescription = title,
+    )
+
+    AboutRow(
+        title = title,
+        gloss = gloss,
+        icon = leadingIcon,
+        onClick = onClick,
+        trailingContent = {
+            val trailingIcon = drawableIconResource(
+                icon = SoftcoverIcon.KeyboardArrowRight,
+                contentDescription = "",
             )
 
             Icon(

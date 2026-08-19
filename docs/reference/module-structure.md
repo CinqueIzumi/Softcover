@@ -70,7 +70,7 @@ only on modules **below** its tier.
 | `core:identity` | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:connectivity` | offline write-queue / sync infra (contracts in `core:domain/connectivity`) |
 | `core:designsystem` | TOAD framework, Material 3 theme, reusable components, modifiers, shared presentation models, and the cross-tier presentation contracts whose impls live in orchestration: nav (`AppNavigator`), `ActiveSessionController`, `SessionAuthenticator` |
-| `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation` |
+| `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation`, and the plain-HTTP seam `safeGetText` |
 | `core:database` | Room database, migrations, **all** persisted entities + DAOs (incl. those a feature's data source uses) |
 
 The `core` tier holds two **kinds** of module, and a new one should land deliberately in one bucket:

@@ -51,8 +51,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
 /**
@@ -62,12 +64,15 @@ internal actual val settingsUsesMasterDetail: Boolean = false
 
 /**
  * The mobile Settings menu pushes its sub-pages, so the desktop-only master–detail parameters
- * ([settingsRunAction], [libraryVisibilityState], [libraryVisibilityRunAction], [onCreateListClick],
- * [openUrl]) are unused here — the toggles live on the pushed [AppearanceSettingsScreen] /
- * [LibraryVisibilitySettingsScreen] / [AboutScreen], each with its own model (and, for About, its own
- * `LocalUriHandler`). [state] is likewise unused: it carried nothing this menu itself renders once the
- * app version moved off this list and onto [AboutScreen] — its sole home now — to avoid showing the
- * version in two places.
+ * ([settingsRunAction], [libraryVisibilityState], [libraryVisibilityRunAction], [roadmapState],
+ * [roadmapRunAction], [onCreateListClick], [openUrl]) are unused here — the toggles live on the pushed
+ * [AppearanceSettingsScreen] / [LibraryVisibilitySettingsScreen] / [AboutScreen] / [RoadmapScreen], each
+ * with its own model (and, for About and Roadmap, their own `LocalUriHandler`). [state] is likewise
+ * unused: it carried nothing this menu itself renders once the app version moved off this list and onto
+ * [AboutScreen] — its sole home now — to avoid showing the version in two places. [navigateToRoadmap]
+ * *is* used — this menu's own direct "Roadmap" shortcut, alongside the desktop sidebar's equivalent row
+ * (`SettingsScreenLayout.jvm.kt`'s `SettingsCategorySidebar`) — even though the same screen is also
+ * reachable a second way, via the row [AboutContent] renders once you're already on About.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,8 +84,11 @@ internal actual fun SettingsScreenLayout(
     navigateToLibraryVisibility: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
+    navigateToRoadmap: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
+    roadmapState: RoadmapUiState,
+    roadmapRunAction: (RoadmapAction) -> Unit,
     onCreateListClick: () -> Unit,
     appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
@@ -189,6 +197,16 @@ internal actual fun SettingsScreenLayout(
                     contentDescription = "About icon",
                 ),
                 onClick = navigateToAbout,
+            )
+
+            SettingsMenuRow(
+                title = "Roadmap",
+                gloss = "What we're building next, in the order we plan to ship it",
+                icon = drawableIconResource(
+                    icon = SoftcoverIcon.Explore,
+                    contentDescription = "Roadmap icon",
+                ),
+                onClick = navigateToRoadmap,
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -340,8 +358,11 @@ private fun SettingsScreenPreview() {
             navigateToLibraryVisibility = {},
             navigateToHiddenSuggestions = {},
             navigateToAbout = {},
+            navigateToRoadmap = {},
             libraryVisibilityState = LibraryVisibilitySettingsUiState(),
             libraryVisibilityRunAction = {},
+            roadmapState = RoadmapUiState(),
+            roadmapRunAction = {},
             onCreateListClick = {},
             appUpdateState = AppUpdateState.Idle,
             onStartAppUpdate = {},
@@ -363,8 +384,11 @@ private fun SettingsScreenUpdateAvailablePreview() {
             navigateToLibraryVisibility = {},
             navigateToHiddenSuggestions = {},
             navigateToAbout = {},
+            navigateToRoadmap = {},
             libraryVisibilityState = LibraryVisibilitySettingsUiState(),
             libraryVisibilityRunAction = {},
+            roadmapState = RoadmapUiState(),
+            roadmapRunAction = {},
             onCreateListClick = {},
             appUpdateState = AppUpdateState.Available,
             onStartAppUpdate = {},
