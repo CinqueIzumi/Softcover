@@ -45,14 +45,17 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
 private enum class SettingsCategory {
     APPEARANCE,
     LIBRARY_TABS,
     ABOUT,
+    ROADMAP,
 }
 
 /**
@@ -68,8 +71,11 @@ internal actual val settingsUsesMasterDetail: Boolean = true
  * drives the shared [settingsRunAction]; the Library-tabs pane drives [libraryVisibilityState] /
  * [libraryVisibilityRunAction] (its model is hosted under the Settings lifecycle in
  * [SettingsScreen.Content]) and docks a [LibraryVisibilitySaveBar] at the pane's bottom; the About pane
- * drives [openUrl]. The sub-page `navigateTo*` callbacks (including [navigateToAbout]) are unused here
- * (mobile pushes; desktop swaps) — only [navigateToProfile] is wired.
+ * drives [openUrl] and its own `Roadmap` row (which selects the `ROADMAP` category rather than pushing);
+ * the Roadmap pane drives [roadmapState] / [roadmapRunAction] (its model is likewise hosted under the
+ * Settings lifecycle). The sub-page `navigateTo*` callbacks (including [navigateToAbout] and
+ * [navigateToRoadmap]) are unused here (mobile pushes; desktop swaps) — only [navigateToProfile] and
+ * [navigateToHiddenSuggestions] are wired.
  */
 @Composable
 internal actual fun SettingsScreenLayout(
@@ -80,8 +86,11 @@ internal actual fun SettingsScreenLayout(
     navigateToLibraryVisibility: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
+    navigateToRoadmap: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
+    roadmapState: RoadmapUiState,
+    roadmapRunAction: (RoadmapAction) -> Unit,
     onCreateListClick: () -> Unit,
     appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
@@ -126,7 +135,14 @@ internal actual fun SettingsScreenLayout(
                     appUpdateState = appUpdateState,
                     onStartAppUpdate = onStartAppUpdate,
                     openUrl = openUrl,
+                    onRoadmapClick = { selected = SettingsCategory.ROADMAP },
                     debugSection = debugSection,
+                )
+
+                SettingsCategory.ROADMAP -> RoadmapPane(
+                    state = roadmapState,
+                    runAction = roadmapRunAction,
+                    openUrl = openUrl,
                 )
             }
         }
@@ -208,6 +224,14 @@ private fun SettingsCategorySidebar(
                 selected = selected == SettingsCategory.ABOUT,
                 showTrailingArrow = false,
                 onClick = { onSelect(SettingsCategory.ABOUT) },
+            )
+
+            SettingsSidebarRow(
+                label = "Roadmap",
+                icon = SoftcoverIcon.Explore,
+                selected = selected == SettingsCategory.ROADMAP,
+                showTrailingArrow = false,
+                onClick = { onSelect(SettingsCategory.ROADMAP) },
             )
         }
     }
@@ -439,6 +463,7 @@ private fun AboutPane(
     appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
     openUrl: (String) -> Unit,
+    onRoadmapClick: () -> Unit,
     debugSection: @Composable () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -470,6 +495,7 @@ private fun AboutPane(
                     versionName = versionName,
                     versionCode = versionCode,
                     openUrl = openUrl,
+                    onRoadmapClick = onRoadmapClick,
                     modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -485,6 +511,61 @@ private fun AboutPane(
                 }
 
                 debugSection()
+            }
+        }
+
+        DesktopVerticalScrollbar(
+            scrollState = scrollState,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(vertical = 4.dp),
+        )
+    }
+}
+
+/**
+ * The master–detail `Roadmap` category: a [DesktopPaneHeader] over the shared [RoadmapContent],
+ * following [AboutPane]'s shape. No pull-to-refresh here (a touch-only gesture, not a desktop one) — the
+ * retry inside a [RoadmapUiState.roadmapError] banner is the desktop refresh path.
+ */
+@Composable
+private fun RoadmapPane(
+    state: RoadmapUiState,
+    runAction: (RoadmapAction) -> Unit,
+    openUrl: (String) -> Unit,
+) {
+    val scrollState = rememberScrollState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(
+                    top = 24.dp,
+                    bottom = 24.dp + rememberBottomBarPadding(),
+                ),
+        ) {
+            Column(
+                modifier = Modifier
+                    .cappedContentWidth()
+                    .padding(horizontal = 32.dp),
+            ) {
+                DesktopPaneHeader(
+                    eyebrow = "Roadmap",
+                    title = "Roadmap",
+                    subtitle = "What we're building next, and roughly when.",
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                RoadmapContent(
+                    state = state,
+                    runAction = runAction,
+                    openUrl = openUrl,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
 

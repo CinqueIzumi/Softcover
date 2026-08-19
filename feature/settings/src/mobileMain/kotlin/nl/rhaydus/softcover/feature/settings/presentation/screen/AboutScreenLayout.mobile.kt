@@ -20,6 +20,7 @@ internal actual fun AboutScreenLayout(
     versionCode: Int,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    onRoadmapClick: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -33,6 +34,7 @@ internal actual fun AboutScreenLayout(
             versionName = versionName,
             versionCode = versionCode,
             openUrl = openUrl,
+            onRoadmapClick = onRoadmapClick,
             modifier = Modifier
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
@@ -54,6 +56,7 @@ private fun AboutScreenPreview() {
             versionCode = 1,
             openUrl = {},
             onNavigateBack = {},
+            onRoadmapClick = {},
         )
     }
 }

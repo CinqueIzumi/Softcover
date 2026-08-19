@@ -14,25 +14,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
+import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 
 /**
- * Standalone desktop About page — a fallback for a direct push (the primary desktop entry is the
- * Settings master–detail pane's `About` category). Static back bar over the shared [AboutContent],
- * capped to the reading measure, with a persistent desktop scrollbar.
+ * Standalone desktop Roadmap page — a fallback for a direct push (the primary desktop entry is the
+ * Settings master–detail pane's `Roadmap` category). Static back bar over the shared [RoadmapContent],
+ * capped to the reading measure, with a persistent desktop scrollbar. No pull-to-refresh here (a
+ * touch-only gesture); the retry inside a [RoadmapUiState.roadmapError] banner is the desktop refresh
+ * path.
  */
 @Composable
-internal actual fun AboutScreenLayout(
-    versionName: String,
-    versionCode: Int,
+internal actual fun RoadmapScreenLayout(
+    state: RoadmapUiState,
+    runAction: (RoadmapAction) -> Unit,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
-    onRoadmapClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         DesktopSettingsBackBar(
-            title = "About",
+            title = "Roadmap",
             onNavigateBack = onNavigateBack,
         )
 
@@ -41,11 +44,10 @@ internal actual fun AboutScreenLayout(
                 .weight(1f)
                 .fillMaxWidth(),
         ) {
-            AboutContent(
-                versionName = versionName,
-                versionCode = versionCode,
+            RoadmapContent(
+                state = state,
+                runAction = runAction,
                 openUrl = openUrl,
-                onRoadmapClick = onRoadmapClick,
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)

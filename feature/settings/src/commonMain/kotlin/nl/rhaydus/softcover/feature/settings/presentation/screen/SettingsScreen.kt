@@ -30,10 +30,13 @@ import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalStartAppUpd
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
 object SettingsScreen : Screen {
@@ -68,6 +71,22 @@ object SettingsScreen : Screen {
             LibraryVisibilitySettingsUiState()
         }
 
+        // Desktop hosts the Roadmap pane inline in the master–detail surface, so it needs the model
+        // under the Settings lifecycle for the same reason as Library tabs above. Mobile pushes
+        // `RoadmapScreen` (its own model) instead, and must not spin up a second one here — that would
+        // also fire a needless network refresh on every visit to Settings.
+        val roadmapModel = if (settingsUsesMasterDetail) {
+            koinScreenModel<RoadmapScreenModel>()
+        } else {
+            null
+        }
+
+        val roadmapState = if (roadmapModel != null) {
+            roadmapModel.state.collectAsStateWithLifecycle().value
+        } else {
+            RoadmapUiState()
+        }
+
         SettingsScreenLayout(
             state = state,
             settingsRunAction = screenModel::runAction,
@@ -86,8 +105,13 @@ object SettingsScreen : Screen {
             navigateToAbout = {
                 navigator.parent?.push(AboutScreen())
             },
+            navigateToRoadmap = {
+                navigator.parent?.push(RoadmapScreen())
+            },
             libraryVisibilityState = libraryVisibilityState,
             libraryVisibilityRunAction = { action -> libraryVisibilityModel?.runAction(action) },
+            roadmapState = roadmapState,
+            roadmapRunAction = { action -> roadmapModel?.runAction(action) },
             onCreateListClick = {
                 createListPresenter?.open(onListCreated = null)
             },
@@ -115,7 +139,10 @@ internal expect val settingsUsesMasterDetail: Boolean
  * `actual`: the shared `ScreenModel` / state / actions wire up identically in [SettingsScreen.Content],
  * and only the rendered layout branches — mobile keeps the scrolling editorial menu that pushes its
  * sub-pages, desktop renders a category-sidebar master–detail. `expect` cannot carry default argument
- * values, so every parameter is supplied explicitly at the single call site above.
+ * values, so every parameter is supplied explicitly at the single call site above. [roadmapState] /
+ * [roadmapRunAction] back the desktop master–detail pane's `Roadmap` category; [navigateToRoadmap]
+ * mirrors [navigateToAbout]'s shape (mobile pushes [RoadmapScreen] from its own menu row, desktop
+ * leaves it unused in favour of its sidebar's local category selection).
  */
 @Composable
 internal expect fun SettingsScreenLayout(
@@ -126,8 +153,11 @@ internal expect fun SettingsScreenLayout(
     navigateToLibraryVisibility: () -> Unit,
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
+    navigateToRoadmap: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
+    roadmapState: RoadmapUiState,
+    roadmapRunAction: (RoadmapAction) -> Unit,
     onCreateListClick: () -> Unit,
     appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,

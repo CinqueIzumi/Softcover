@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.database.dao.PendingListWriteDao
 import nl.rhaydus.softcover.core.database.dao.PendingUserBookWriteDao
 import nl.rhaydus.softcover.core.database.dao.ReadingLogDao
 import nl.rhaydus.softcover.core.database.dao.ReadingSessionDao
+import nl.rhaydus.softcover.core.database.dao.RoadmapDocumentDao
 import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
 import nl.rhaydus.softcover.core.database.model.AuthorEntity
 import nl.rhaydus.softcover.core.database.model.BookAuthorCrossRef
@@ -36,6 +37,7 @@ import nl.rhaydus.softcover.core.database.model.PendingUserBookWriteEntity
 import nl.rhaydus.softcover.core.database.model.ReadingJournalEntity
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
+import nl.rhaydus.softcover.core.database.model.RoadmapDocumentEntity
 import nl.rhaydus.softcover.core.database.model.ShelfManualOrderEntity
 import nl.rhaydus.softcover.core.database.model.TagEntity
 import nl.rhaydus.softcover.core.database.model.UserBookEntity
@@ -67,11 +69,12 @@ import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
         BookTagCrossRef::class,
         ShelfManualOrderEntity::class,
         UserTagVocabularyEntity::class,
+        RoadmapDocumentEntity::class,
     ],
     views = [
         BookEditionView::class
     ],
-    version = 49,
+    version = 50,
 )
 @ConstructedBy(SoftcoverDatabaseConstructor::class)
 abstract class SoftcoverDatabase : RoomDatabase() {
@@ -92,6 +95,8 @@ abstract class SoftcoverDatabase : RoomDatabase() {
     abstract fun readingLogDao(): ReadingLogDao
 
     abstract fun userTagVocabularyDao(): UserTagVocabularyDao
+
+    abstract fun roadmapDocumentDao(): RoadmapDocumentDao
 
     companion object {
         internal fun build(
@@ -1319,6 +1324,23 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             }
         }
 
+        // The Roadmap screen's offline cache: a single row holding the raw ROADMAP.md text (not its
+        // parsed form) plus when it was fetched, so a re-render (e.g. a parser fix) always reflows the
+        // same cached markdown rather than a re-derived structure. See RoadmapRepositoryImpl.
+        private val MIGRATION_49_50 = object : Migration(49, 50) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                        CREATE TABLE IF NOT EXISTS roadmap_documents (
+                            id INTEGER NOT NULL PRIMARY KEY,
+                            markdown TEXT NOT NULL,
+                            fetchedAtEpochMillis INTEGER NOT NULL
+                        )
+                    """.trimIndent(),
+                )
+            }
+        }
+
         // The single source of truth for the migration set, consumed by [build] and by migration
         // tests. Declared after every MIGRATION_* val so all are initialised before this references
         // them. Room selects the applicable path by version, so order here is for readability only.
@@ -1369,6 +1391,7 @@ abstract class SoftcoverDatabase : RoomDatabase() {
             MIGRATION_46_47,
             MIGRATION_47_48,
             MIGRATION_48_49,
+            MIGRATION_49_50,
         )
     }
 }

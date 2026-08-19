@@ -69,6 +69,14 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   `CacheFirst` for instant revisits. Lists that should refresh on screen entry stay on `NetworkOnly`.
   Mutations write through the cache automatically — Room remains the source of truth for user-book
   state, so Apollo cache writes on `user_books` rows are currently inert observers.
+- **Plain HTTP** (a raw file rather than a GraphQL operation — today only the Roadmap screen's
+  `ROADMAP.md`) goes through `HttpEngine.safeGetText(url)`, the sibling of `safeQuery` in the same
+  `helper/` package. It rides Apollo's multiplatform `HttpEngine` (`apollo-runtime` already ships one
+  on every target, so the app carries no second HTTP stack) and raises the *same* sealed
+  `ApiException` kinds as the GraphQL seam, sharing its `isTransientHttpStatus` /
+  `retryableTransportFailureOrNull` classifiers so the two cannot drift. The engine is bound by
+  `httpModule`, separate from the `ApolloClient`'s own. There is no 401/403 re-auth path: the seam
+  sends no credentials.
 - Network interceptors handle authentication headers.
 - Apollo errors are thrown as typed, sealed `ApiException` subtypes (`RetryableSyncException` ⊃
   `OfflineException` / `ServerUnavailableException`, `InvalidTokenException`, `UnexpectedApiException`)
