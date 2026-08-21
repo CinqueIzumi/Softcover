@@ -24,7 +24,6 @@ Alongside them, a batch of smaller things:
 - **Re-reads.** Book detail starts keeping a history of every time you've read a book, not just the last one.
 - See each edition's **format** (ebook / physical / audiobook) when you pick one.
 - Choose which **tab the app opens on**, and which **unit progress defaults to**.
-- A shortcut straight from your profile into Settings.
 
 ## 3.3.0: The reading record
 
