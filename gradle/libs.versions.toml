@@ -29,6 +29,10 @@ composeMaterial3Expressive = "1.11.0-alpha07"
 materialComponentsVersion = "1.13.0"
 kermitVersion = "2.0.6"
 kotlinxDatetime = "0.7.1"
+# Immutable collection types for Compose UI models. Stability matters: a `List` field makes a
+# UI model unstable, so every item in a lazy list recomposes each frame. `ImmutableList` is
+# compiler-checked, unlike a stability-configuration file that drifts silently.
+kotlinxCollectionsImmutable = "0.4.0"
 koinVersion = "3.5.3"
 # Multiplatform koin-compose is versioned separately from koin core; 1.1.x targets Koin 3.5.x.
 koinComposeMultiplatform = "1.1.2"
@@ -118,6 +122,7 @@ coil3-network-ktor = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", 
 ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
 kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermitVersion" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koinVersion" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinVersion" }

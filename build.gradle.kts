@@ -291,6 +291,46 @@ val allowedApiDataEdges = setOf(
     ":feature:settings" to ":core:preferences",
 )
 
+// Component-library isolation (docs/working/component-library-migration.md §6 G1). The tier rule
+// above lets any `:core:*` module depend on any other, which is too loose for the component library:
+// `:core:component` renders UI from UI models and must never reach a domain model, a use case, DI, or
+// navigation. That is the property that keeps it a *library* rather than a second god-module — the
+// exact failure `:core:designsystem` already lived through — so it is a build failure, not a
+// convention. A module listed here may depend on the named projects and nothing else.
+val componentLibraryAllowedProjects = mapOf(
+    ":core:component" to setOf(":core:designsystem"),
+)
+
+// External-coordinate ban for the same modules. DI, navigation, and the network client are the three
+// ways a component library stops being renderable in isolation.
+//
+// Note on Koin, and on the limit of this check: `KmpLibraryConventionPlugin` injects
+// `io.insert-koin:koin-core` into EVERY KMP module's commonMain, so a blanket group ban would fail on
+// a dependency the module never declared. The convention-provided coordinates are therefore skipped
+// (the same set dependency-analysis already treats as uniformly provided), and what remains caught
+// here is every Koin artifact a module must opt into to do DI from a composable — `koin-compose`,
+// `koin-android`, `koin-androidx-compose`.
+//
+// That leaves a REAL residual hole this check cannot close: `koin-core` on its own is enough for
+// `KoinComponent` / `GlobalContext.get()` service-locator DI, and because the coordinate is skipped,
+// declaring it explicitly passes. Verified empirically, not assumed. A declared-coordinate gate is
+// structurally blind to this — usage is the thing that matters, not the declaration — so it is closed
+// at the import instead, by the `ForbiddenImport` rule scoped to `:core:component` in
+// `config/detekt/detekt.yml`. The two gates are complementary: this one keeps the dependency graph
+// honest, that one keeps the source honest.
+val componentLibraryBannedGroups = setOf(
+    "io.insert-koin",
+    "cafe.adriel.voyager",
+    "com.apollographql.apollo",
+)
+
+// Injected uniformly by the convention plugins rather than declared per module, so they are not a
+// signal about what a module chose to depend on. Mirrors the dependency-analysis exclude list above.
+val conventionProvidedCoordinates = setOf(
+    "io.insert-koin:koin-core",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
+)
+
 // Mirrors settings.gradle.kts: true when developing against the local foundation checkout (the
 // nl.rhaydus:* coordinates are substituted by an includeBuild of ../rhaydus-foundation).
 val foundationLocal = Properties().apply {
@@ -415,7 +455,9 @@ dependencyAnalysis {
 
 tasks.register("checkModuleGraph") {
     group = "verification"
-    description = "Fails on any module dependency that breaks the tier DAG (MODULE_STRUCTURE_GUIDELINES §2)."
+    description = "Fails on any module dependency that breaks the tier DAG " +
+        "(MODULE_STRUCTURE_GUIDELINES §2), re-exports a data module (§10), or breaches " +
+        "component-library isolation."
 
     doLast {
         val violations = mutableListOf<String>()
@@ -456,7 +498,39 @@ tasks.register("checkModuleGraph") {
                                 "(data modules must be implementation-depended unless allowlisted — " +
                                 "MODULE_STRUCTURE_GUIDELINES §10)"
                         }
+
+                        // Component-library isolation: an explicit per-module allowlist, tighter than
+                        // the tier rule.
+                        val allowedProjects = componentLibraryAllowedProjects[module.path]
+
+                        if (allowedProjects != null && dependency.path !in allowedProjects) {
+                            violations += "${module.path} → ${dependency.path}  " +
+                                "(component library may depend only on $allowedProjects — " +
+                                "no domain, data, DI or navigation)"
+                        }
                     }
+
+                // Deliberately NOT restricted to non-test configurations, unlike the
+                // api-visibility check above. That one skips test configs because a test-only `api`
+                // edge cannot leak into a consumer's graph, which is a statement about leakage. This
+                // one is a statement about the module itself: the component library renders from UI
+                // models and needs no DI, navigation, or network client to be exercised — in tests
+                // least of all. Do not "fix" the asymmetry by adding a test exclusion.
+                if (module.path in componentLibraryAllowedProjects) {
+                    configuration.dependencies
+                        .filterIsInstance<ExternalModuleDependency>()
+                        .forEach { dependency ->
+                            val coordinate = "${dependency.group}:${dependency.name}"
+
+                            if (coordinate in conventionProvidedCoordinates) return@forEach
+
+                            if (dependency.group in componentLibraryBannedGroups) {
+                                violations += "${module.path} → $coordinate  " +
+                                    "(component library may not depend on " +
+                                    "${dependency.group} — DI, navigation and networking are banned)"
+                            }
+                        }
+                }
             }
         }
 
