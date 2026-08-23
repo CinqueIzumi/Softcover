@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug-only trust anchors. Since Android 7 an app validates TLS against the system CA store alone, so
+  an HTTPS-inspecting proxy (Proxyman) that terminates the connection and presents its own certificate
+  fails the handshake before any HTTP response exists — the proxy surfaces those dead transactions as
+  status 999. Trusting the user store as well lets a developer-installed proxy CA validate, which is
+  what makes GraphQL traffic to api.hardcover.app readable while debugging.
+
+  This file lives in app/src/debug, so it is merged into the debug variant only; release builds keep
+  system-only validation and never see a user-installed CA.
+-->
+<network-security-config xmlns:tools="http://schemas.android.com/tools">
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <!--
+              Accepting user-installed CAs is the entire purpose of this debug-only config, so the
+              AcceptsUserCertificates warning is expected here. Lint runs with warningsAsErrors, and
+              the suppression is scoped to this element rather than added to the shared lint.xml so
+              that main and release sources keep the check.
+            -->
+            <certificates
+                src="user"
+                tools:ignore="AcceptsUserCertificates" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
