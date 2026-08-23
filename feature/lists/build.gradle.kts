@@ -13,6 +13,7 @@ kotlin {
             api(project(":core:domain"))
             api(project(":core:lists"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)

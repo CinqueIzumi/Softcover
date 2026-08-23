@@ -21,6 +21,7 @@ kotlin {
             implementation(project(":core:network"))
             implementation(project(":core:personal"))
             api(project(":core:designsystem"))
+            api(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)

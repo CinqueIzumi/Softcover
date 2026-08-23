@@ -16,6 +16,7 @@ kotlin {
             implementation(project(":core:deadlines"))
             implementation(project(":core:preferences"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)

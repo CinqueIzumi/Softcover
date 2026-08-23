@@ -30,11 +30,11 @@ import org.koin.android.ext.android.inject
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.designsystem.presentation.component.resolveEditionImageSource
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppEntryPoint
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSession
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.designsystem.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
+import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
+import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
 
 /**
  * Foreground service that surfaces the active reading session as a persistent, ongoing notification:

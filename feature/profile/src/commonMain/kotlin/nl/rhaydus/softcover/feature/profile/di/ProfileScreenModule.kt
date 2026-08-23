@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.feature.profile.di
 
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.profile.presentation.collector.HideUntaggedAuthorsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
@@ -17,7 +17,7 @@ val profileScreenModule = module {
         dispatcherModule,
         profileModule,
         preferencesModule,
-        designSystemModule,
+        presentationModule,
     )
 
     factory {

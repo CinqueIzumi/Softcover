@@ -15,12 +15,12 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
-import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailOverlayNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalBookDetailPaneCloseHandler
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalCreateListPresenter
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TransientNavArg
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailOverlayNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPaneCloseHandler
+import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction

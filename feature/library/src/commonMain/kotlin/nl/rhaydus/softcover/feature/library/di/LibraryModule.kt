@@ -4,10 +4,10 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
-import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.feature.library.presentation.collector.AllBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookListsCollector
@@ -29,7 +29,7 @@ val libraryModule = module {
         listsModule,
         deadlinesModule,
         preferencesModule,
-        designSystemModule,
+        presentationModule,
     )
 
     factory { AllBooksCollector() } bind LibraryCollector::class

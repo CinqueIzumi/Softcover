@@ -21,8 +21,8 @@ import nl.rhaydus.designsystem.haptics.Haptics
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.nav.NavPulse
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.util.LibraryNavPulseKey
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 

@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.onboarding.presentation.action
 
-import nl.rhaydus.softcover.core.designsystem.presentation.error.toUserMessage
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
+import nl.rhaydus.softcover.core.presentation.error.toUserMessage
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables

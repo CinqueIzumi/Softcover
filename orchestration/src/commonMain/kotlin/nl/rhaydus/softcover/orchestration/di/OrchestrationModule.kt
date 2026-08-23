@@ -5,10 +5,6 @@ import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.connectivity.di.connectivityModule
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
-import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.AppNavigator
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
-import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.domain.account.InitializeUserIdAndBooksUseCase
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
@@ -20,6 +16,10 @@ import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.notification.di.notificationModule
 import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.presentation.di.presentationModule
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.app_update.di.appUpdateModule
 import nl.rhaydus.softcover.feature.book_detail.di.bookDetailModule
@@ -43,7 +43,7 @@ import nl.rhaydus.softcover.orchestration.usecase.ResetUserDataUseCaseImpl
 internal val orchestrationModule = module {
     includes(
         platformOrchestrationModule,
-        designSystemModule,
+        presentationModule,
         dispatcherModule,
         databaseModule,
         apolloModule,

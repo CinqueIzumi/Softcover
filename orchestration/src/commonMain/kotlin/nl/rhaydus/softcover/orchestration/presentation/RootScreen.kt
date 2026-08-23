@@ -30,11 +30,11 @@ import kotlinx.coroutines.flow.combine
 import org.koin.compose.koinInject
 import nl.rhaydus.platform.NetworkAvailabilityProvider
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ConnectivityBanner
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.CreateListPresenter
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.LocalCreateListPresenter
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
+import nl.rhaydus.softcover.core.presentation.navigation.CreateListPresenter
+import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
+import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListSheet
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 

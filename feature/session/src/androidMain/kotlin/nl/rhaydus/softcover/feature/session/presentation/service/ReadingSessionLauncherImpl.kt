@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.session.presentation.service
 
 import android.content.Context
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ReadingSessionLauncher
+import nl.rhaydus.softcover.core.presentation.session.ReadingSessionLauncher
 
 internal class ReadingSessionLauncherImpl(
     private val context: Context,

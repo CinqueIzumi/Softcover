@@ -4,11 +4,11 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
-import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.notification.di.notificationModule
 import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
+import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.reading.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.CurrentlyReadingBooksCollector
@@ -31,7 +31,7 @@ val readingModule = module {
         preferencesModule,
         profileModule,
         notificationModule,
-        designSystemModule,
+        presentationModule,
     )
 
     factory {

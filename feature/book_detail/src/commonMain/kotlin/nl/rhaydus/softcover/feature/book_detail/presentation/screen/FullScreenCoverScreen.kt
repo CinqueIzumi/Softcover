@@ -6,8 +6,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.request.ImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
-import nl.rhaydus.softcover.core.designsystem.presentation.navigation.TransientNavArg
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.presentation.navigation.TransientNavArg
 
 class FullScreenCoverScreen(
     @TransientNavArg private val edition: BookEdition?,

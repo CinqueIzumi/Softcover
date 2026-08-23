@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.session.di
 
 import org.koin.core.module.Module
-import nl.rhaydus.softcover.core.designsystem.presentation.session.ReadingSessionLauncher
+import nl.rhaydus.softcover.core.presentation.session.ReadingSessionLauncher
 
 /**
  * Platform-provided Koin binding the shared `sessionModule` pulls in via `includes(...)`. The one

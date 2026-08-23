@@ -13,9 +13,9 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.nav.NavPulse
 import nl.rhaydus.designsystem.nav.rememberPulseScale
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LibraryNavPulseKey
-import nl.rhaydus.softcover.core.designsystem.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.core.presentation.util.LibraryNavPulseKey
+import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.feature.explore.presentation.screen.ExploreTab
 import nl.rhaydus.softcover.feature.library.presentation.screen.LibraryTab
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab

@@ -175,6 +175,11 @@ fun rememberEditionImageRequest(
 ): ImageRequest? {
     val context = LocalPlatformContext.current
     val isInspection = LocalInspectionMode.current
+    // Resolved from `presentationModule` (`core/presentation/di/PresentationModule.kt`), which
+    // `includes(bookModule)`. :core:designsystem owns no Koin module of its own and does not compile
+    // against :core:presentation, so this binding arrives purely through the aggregate graph — a
+    // temporary seam that disappears when this component moves to :core:component and takes a UI model
+    // instead of a use case. `SoftcoverModulesVerificationTest` is what guards it until then.
     val persistEditionImageUseCase = if (isInspection) {
         null
     } else {

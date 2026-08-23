@@ -34,7 +34,6 @@ kotlin {
 
             api(libs.voyager.navigator)
             implementation(libs.voyager.koin)
-            api(libs.voyager.tabNavigator)
 
             api(libs.coil3)
 

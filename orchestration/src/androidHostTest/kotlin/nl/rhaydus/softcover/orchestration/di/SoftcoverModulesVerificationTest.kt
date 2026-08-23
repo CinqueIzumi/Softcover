@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.module
 import org.koin.test.verify.verify
-import nl.rhaydus.softcover.core.designsystem.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.notification.NotificationAppearance
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 
 @OptIn(KoinExperimentalAPI::class)
 class SoftcoverModulesVerificationTest {

@@ -69,10 +69,10 @@ only on modules **below** its tier.
 | `core:preferences` | `SettingsRepository`, `Get*AsFlowUseCase` readers, `AppSettingsDataStore`, `ApiKeyLocalDataSource` |
 | `core:identity` | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:connectivity` | offline write-queue / sync infra (contracts in `core:domain/connectivity`) |
-| `core:designsystem` | TOAD framework, Material 3 theme, reusable components, modifiers, shared presentation models, and the cross-tier presentation contracts whose impls live in orchestration: nav (`AppNavigator`), `ActiveSessionController`, `SessionAuthenticator`. **Being split** — see the three rows below |
+| `core:designsystem` | Material 3 theme, editorial typography, the icon/illustration catalogs, modifiers, shared-element scopes — and, until the component library lands, the reusable components themselves. **Being split** — see the three rows below |
 | `core:component` | **Scaffolded, empty.** The component library: every component the app renders, driven by a UI model. Depends on `core:designsystem` and nothing else — domain, data, DI, navigation and Apollo are build failures (`checkModuleGraph` for the dependency graph, a scoped detekt `ForbiddenImport` for the source) |
 | `core:uibinding` | **Scaffolded, empty.** Adapters mapping domain models to UI models, for mappings two or more features need. `api`-exposes `core:component` + `core:domain` |
-| `core:presentation` | **Scaffolded, empty.** Destination for the non-component residents of `core:designsystem`: TOAD wiring, nav contracts, session controllers, error mapping, DI |
+| `core:presentation` | The non-component residents evicted from `core:designsystem`: the cross-tier contracts whose impls live in orchestration (`AppNavigator`, `AppEntryPoint`, `BookDetailPresenter`, `CreateListPresenter`, `ActiveSessionController`, `SessionAuthenticator`, `ReadingSessionLauncher`), the nav destinations (`ScreenDestination`, `TabDestination`, `TransientNavArg`, `BookInitialCover`), `LibraryTab`, API-error mapping (`toUserMessage` / `onApiFailure`), `SplashState` / `ReAuthState`, `BookDetailPrefetcher`, the app-update composition locals, and `presentationModule` — the app's one Koin module below the feature tier. Depends on `core:domain` + `core:book`, **not** on `core:designsystem` |
 | `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation`, and the plain-HTTP seam `safeGetText` |
 | `core:database` | Room database, migrations, **all** persisted entities + DAOs (incl. those a feature's data source uses) |
 
@@ -85,8 +85,9 @@ The `core` tier holds two **kinds** of module, and a new one should land deliber
   `checkModuleGraph` task. That api-visibility rule is what stops a UI/infra module from quietly becoming
   a god-module (the way `:core:designsystem` once `api`-exported half the app).
 - **Infra / contract modules** — `core:{domain, database, network, notification, connectivity,
-  designsystem}`: cross-cutting plumbing (Apollo, Room, DI/UI primitives, sync) and the shared kernel
-  (`core:domain`). They may `api`-expose their own surface (and `core:domain` types) as needed.
+  designsystem, presentation, component, uibinding}`: cross-cutting plumbing (Apollo, Room, DI/UI
+  primitives, sync) and the shared kernel (`core:domain`). They may `api`-expose their own surface
+  (and `core:domain` types) as needed.
 
 ### The vertical-slice rule (Softcover concretization)
 

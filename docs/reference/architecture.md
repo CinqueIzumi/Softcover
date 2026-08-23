@@ -22,8 +22,9 @@ the roster here. Modules are Kotlin Multiplatform: shared source lives under
                       #   impls, cross-feature orchestration use cases, the softcoverModules aggregate
 :feature:*            # Leaf features: lists, profile, onboarding, explore, library, book_detail,
                       #   reading, session, scan, settings, app_update
-:core:*               # domain, database, network, designsystem, notification, preferences, identity,
-                      #   book, lists, deadlines, personal, profile, connectivity
+:core:*               # domain, database, network, designsystem, presentation, component, uibinding,
+                      #   notification, preferences, identity, book, lists, deadlines, personal,
+                      #   profile, connectivity
 ```
 
 ## TOAD — Softcover-specific notes
@@ -34,7 +35,7 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
 - **TOAD is per-Voyager-screen only.** `MainActivityViewModel` is a plain `ViewModel`, not a TOAD
   `ScreenModel`. It is the one app-level view model and lives in `:orchestration`
   (`presentation/viewmodel/`); features that only need to flip the authenticated flag depend on the
-  `SessionAuthenticator` contract in `:core:designsystem`, which the view model implements (mirroring
+  `SessionAuthenticator` contract in `:core:presentation`, which the view model implements (mirroring
   the `AppNavigator` / `ActiveSessionController` seams).
 - The Koin aggregate is named `softcoverModules`; `:app`'s `SoftCoverApp` starts Koin with
   `modules(softcoverModules + appModule)`. Each module self-declares its DI dependencies via

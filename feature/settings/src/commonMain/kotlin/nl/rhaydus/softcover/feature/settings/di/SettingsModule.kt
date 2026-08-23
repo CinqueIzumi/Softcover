@@ -5,7 +5,6 @@ import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
-import nl.rhaydus.softcover.core.designsystem.presentation.di.designSystemModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.httpModule
@@ -14,6 +13,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
+import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapBundledDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapBundledDataSourceImpl
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapLocalDataSource
@@ -55,7 +55,7 @@ val settingsModule = module {
         dispatcherModule,
         listsModule,
         preferencesModule,
-        designSystemModule,
+        presentationModule,
         bookModule,
         databaseModule,
         httpModule,

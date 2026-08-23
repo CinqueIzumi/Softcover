@@ -9,10 +9,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.core.designsystem.presentation.error.onApiFailure
-import nl.rhaydus.softcover.core.designsystem.presentation.session.SessionAuthenticator
-import nl.rhaydus.softcover.core.designsystem.presentation.state.ReAuthState
-import nl.rhaydus.softcover.core.designsystem.presentation.state.SplashState
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
@@ -22,6 +18,10 @@ import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
+import nl.rhaydus.softcover.core.presentation.error.onApiFailure
+import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
+import nl.rhaydus.softcover.core.presentation.state.ReAuthState
+import nl.rhaydus.softcover.core.presentation.state.SplashState
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 
 internal class MainActivityViewModel(

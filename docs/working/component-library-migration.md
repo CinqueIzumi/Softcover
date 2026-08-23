@@ -8,7 +8,7 @@
 **Rollout model:** one branch, one PR, merged all at once. Stages below are *commit* boundaries on
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
-**Status:** `S2 COMPLETE, REVIEWED` — next up S3 (evict non-components from `:core:designsystem`)
+**Status:** `S3 COMPLETE` — next up S4 (move the 132 designsystem components into `:core:component`)
 **Branch:** `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models`
 **Issue:** [#275](https://github.com/CinqueIzumi/Softcover/issues/275) — tag `E.1`, labels
 `area:cross-cutting` / `kind:tech` / `scope:L`, no milestone. Keep its Stages and Acceptance
@@ -89,6 +89,12 @@ There is also an existing allowlist row recording the leak:
 `":core:designsystem" to ":core:book"` in `allowedApiDataEdges` (`build.gradle.kts:281`). **That row
 disappearing is a measurable outcome of this migration.**
 
+> **As of S3, the second half of that paragraph is history.** The navigation contracts, the Koin
+> module, the prefetcher, the session controllers, the error mapping and the state holders now live in
+> `:core:presentation` (§ 5e). What remains true is the first half: components still take domain types
+> directly, `:core:designsystem` still `api`-depends on `:core:domain` and `:core:book` (`EditionImage`
+> is the last `:core:book` consumer), and the allowlist row is still there. S4 closes both.
+
 ### Confirmed duplication
 
 Same-named composables declared in multiple modules today:
@@ -121,11 +127,15 @@ Same-named composables declared in multiple modules today:
                        (decided: `api`, so a consuming feature sees both sides of a mapping
                        without re-declaring them — see § 3a).
 
-:core:presentation     The non-component residents evicted from designsystem: TOAD wiring,
-                       AppNavigator, ScreenDestination, TabDestination, TransientNavArg,
-                       BookDetailPresenter, CreateListPresenter, ActiveSessionController,
-                       SessionAuthenticator, ApiErrorMessage, SplashState, ReAuthState,
-                       BookDetailPrefetcher, LocalAppUpdate, the Koin module.
+:core:presentation     LANDED IN S3. The non-component residents evicted from designsystem:
+                       AppNavigator, AppEntryPoint, ScreenDestination, TabDestination,
+                       TransientNavArg, BookInitialCover, BookDetailPresenter,
+                       CreateListPresenter, ActiveSession(Controller), SessionAuthenticator,
+                       ReadingSessionLauncher, SessionFormatting, LibraryTab, ApiErrorMessage,
+                       ApiFailureHandling, SplashState, ReAuthState, BookDetailPrefetcher,
+                       LibraryNavPulseKey, LocalAppUpdate, and presentationModule.
+                       Depends on :core:domain + :core:book — NOT on :core:designsystem.
+                       (The "TOAD wiring" this line used to claim never existed there — § 5e.)
 ```
 
 All four are tier `core`, so `tierOf()` (`build.gradle.kts:255`) classifies them automatically from
@@ -338,9 +348,11 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       `GalleryFixture` / `GalleryFamily` scaffold in `:core:component`, and the
       `ComponentGalleryScreen` + its TOAD wiring + the easter-egg tap gesture in `feature:settings`.
       **See § 5d for the gesture spec (previously open) and three implementation notes.**
-- [ ] **S3 — Evict non-components.** Move nav / TOAD / session / error / DI / prefetch out of
-      `:core:designsystem` into `:core:presentation`; re-point every importing module. This is the
-      largest mechanical churn (nav types are imported nearly everywhere) and carries no UI change.
+- [x] **S3 — Evict non-components.** DONE. Moved nav / session / error / state / DI / prefetch, plus
+      `LocalAppUpdate`, `LibraryNavPulseKey`, `BookInitialCover` and `LibraryTab`, out of
+      `:core:designsystem` into `:core:presentation` — 27 files — and re-pointed 92 consumer files
+      across 11 modules. No UI change, no behaviour change. **See § 5e for what this stage settled,
+      including the one thing S3's own description here had wrong.**
 - [ ] **S4 — Tokens-only designsystem.** Move the 132 existing `core:designsystem` components into
       `:core:component`, converting each to a UI model as it moves (they cannot land domain-typed —
       the gate rejects it). Write their mappers per R6. Includes the `share/` package: split the six
@@ -464,6 +476,76 @@ the mobile `actual`, exactly as `navigateToAbout` / `navigateToRoadmap` are unus
 **Gates re-verified at this boundary:** `checkModuleGraph` (233 edges), `ktlintCheck`,
 `detektJvmMain` + `detektAndroidMain` on both touched modules, and `projectHealth` on both are green;
 `:feature:settings` compiles for JVM, Android **and** iOS.
+
+### 5e. S3 outcome — five decisions, a correction, and a doc hazard to watch
+
+**`:core:presentation` does not depend on `:core:designsystem`.** Nothing in the evicted set imports a
+token, a component, or a theme value — checked before the move, not assumed. The two modules sit side
+by side rather than stacking, which is why S3 could be a pure move with no adapter layer.
+
+**The Koin module was renamed and moved whole, not split.** `DesignSystemModule.kt` ->
+`core/presentation/di/PresentationModule.kt`, `designSystemModule` -> `presentationModule`, body
+unchanged, symbol renamed at all 10 include sites. The alternative considered — leave a
+`designSystemModule = module { includes(bookModule) }` behind, since `EditionImage` still
+`koinInject`s `PersistEditionImageUseCase` — was rejected: that is a `:core:designsystem` -> `:core:book`
+DI edge G2 forces us to delete in S4 anyway, and a Koin module is a non-component by S3's own
+definition. `EditionImage` keeps resolving because `presentationModule` is in the aggregate graph;
+`orchestration`'s Koin `verify()` test (`SoftcoverModulesVerificationTest`) passes unchanged, which is
+the proof.
+
+Two things made this risk-free, both verified rather than assumed: `bookModule` itself
+`includes(dispatcherModule)` (`core/book/di/BookModule.kt:46`), and all 10 includers already
+`includes(dispatcherModule)` directly. So no consumer's transitive graph shrank.
+
+**`presentation/model/` split three ways, and only two thirds of it moved.** `BookInitialCover` (a nav
+payload carried on `ScreenDestination.BookDetail`) and `LibraryTab` moved. `ProgressSheetTab`,
+`ProgressSheetTabMapping` and `VerdictSheetContext` **stayed**, because `UpdateProgressBottomSheet` and
+`VerdictSheet` consume them and do not move until S4 — moving them now would have forced a
+`:core:designsystem` -> `:core:presentation` edge, inverting the direction the split exists to
+establish. Their real homes are S4's call: the two pure enums to `:core:component`, the domain mapping
+to `:core:uibinding`, each travelling with its component.
+
+**`:core:book` stayed `implementation`, so S3 added ZERO allowlist rows.** § 3a anticipated needing
+`":core:presentation" to ":core:book"` because `BookDetailPrefetcher`'s constructor takes
+`FetchBookByIdUseCase`. It turned out not to: the constructor is only ever called by
+`rememberBookDetailPrefetcher()` in the same file, so it is now `internal` — correct encapsulation on
+its own merits — and `:core:presentation:projectHealth` accepts `implementation`. The pre-approval in
+§ 3a stands unused; do not write the row speculatively. One row **was** needed elsewhere:
+`:feature:book_detail` re-exports presentation types, so its edge is `api` — no allowlist entry, since
+`:core:presentation` is an infra/contract module, not a data-area one.
+
+**`:core:designsystem` lost `api(libs.voyager.tabNavigator)`.** `Tab` appeared only in `AppNavigator`,
+which moved. The unused-dependency check is `severity("fail")`, so this had to land in the same change.
+All five remaining tab users declare the artifact themselves. `voyager.navigator` stays — the three
+androidMain debug screens still use it.
+
+**S3's description said "TOAD wiring" moves. There was never any TOAD in `:core:designsystem`.**
+`nl.rhaydus:toad` is declared only by the 9 feature modules; the module had no TOAD-shaped code and no
+TOAD dependency. `docs/reference/module-structure.md` claimed otherwise and has been corrected. Nothing
+was missed — there was nothing there.
+
+**A documentation hazard S3 creates.** The design-system docs used `core/presentation/component` as
+shorthand for "a shared component in core" (module name elided). Now that `core/presentation/` is a
+real module that is *banned* from holding components, that path reads as a live instruction to do the
+one thing the split forbids. The four occurrences in `docs/reference/design-system/` were rewritten to
+`core/designsystem/presentation/component`. **`CLAUDE.md:32` still carries the old shorthand** and is
+left alone deliberately — it is a project instruction file, not a doc this stage owns. It should be
+corrected before S4 starts moving components for real.
+
+**Review outcome.** `rhaydus-kotlin:code-reviewer` verified the move independently (not by re-reading
+the claims above) and found no mis-pointed import, mis-scoped model, wrong source set, or doc-sync gap.
+Its one substantive note is now fixed: `EditionImage` stays in `:core:designsystem`, which has no
+build-time edge to `:core:presentation`, so its `koinInject<PersistEditionImageUseCase>()` is satisfied
+by a module it does not compile against — action at a distance that was written down only here and in
+`PresentationModule.kt`. The call site now carries a comment naming `presentationModule`, the
+verification test that guards it, and the fact that the seam disappears in S4.
+
+**Gates at this boundary:** `checkModuleGraph` (259 edges), `ktlintCheck`, `projectHealth` on
+`:core:presentation`, `:core:designsystem` and all 11 consumers, JVM compilation across every module
+including `:desktopApp`, iOS (`iosSimulatorArm64`) on the touched KMP modules, type-resolved detekt
+under JDK 21 on `:core:presentation` / `:core:designsystem` / `:orchestration`, and the full
+`androidHostTest` suites of `:core:presentation`, `:orchestration`, `:feature:library` and
+`:feature:book_detail` — all green.
 
 ### 5a. The Component Gallery — decided: shipped easter egg
 

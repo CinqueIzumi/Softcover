@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
-import nl.rhaydus.softcover.core.designsystem.presentation.error.toUserMessage
+import nl.rhaydus.softcover.core.presentation.error.toUserMessage
 import nl.rhaydus.softcover.feature.settings.presentation.event.RoadmapEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapLocalVariables

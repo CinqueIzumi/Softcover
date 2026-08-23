@@ -17,6 +17,7 @@ kotlin {
             implementation(project(":core:database"))
             implementation(project(":core:network"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:presentation"))
             api(project(":core:preferences"))
             api(project(":core:lists"))
 
