@@ -366,7 +366,8 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
 - [ ] **S9 — Statistics** (§ 7.5): stat tiles, charts, legends, progress indicators.
 - [ ] **S10 — Shelf teardown.** The six `*Shelf.kt` files shrink to layout + composition.
 - [ ] **S11 — Close out.** Final gate values, `docs/reference/design-system/` rewrite, gallery
-      completeness pass, delete this file.
+      completeness pass, trim the transitional component-path parenthetical in `CLAUDE.md`'s
+      design-system maintenance rule down to `core/component/` (§ 5e), delete this file.
 
 ### 5b. S1 findings — two things the plan had wrong
 
@@ -528,9 +529,11 @@ was missed — there was nothing there.
 shorthand for "a shared component in core" (module name elided). Now that `core/presentation/` is a
 real module that is *banned* from holding components, that path reads as a live instruction to do the
 one thing the split forbids. The four occurrences in `docs/reference/design-system/` were rewritten to
-`core/designsystem/presentation/component`. **`CLAUDE.md:32` still carries the old shorthand** and is
-left alone deliberately — it is a project instruction file, not a doc this stage owns. It should be
-corrected before S4 starts moving components for real.
+`core/designsystem/presentation/component`. **`CLAUDE.md:32` carried the same shorthand and was
+corrected too** (in a follow-up commit, since it is a project instruction file rather than a doc this
+stage owns): it now names today's path, points at `:core:component` as the destination, and says
+explicitly that `:core:presentation` is not a component home. **S11 should trim that parenthetical**
+once the migration is done and the path is simply `core/component/`.
 
 **Review outcome.** `rhaydus-kotlin:code-reviewer` verified the move independently (not by re-reading
 the claims above) and found no mis-pointed import, mis-scoped model, wrong source set, or doc-sync gap.
