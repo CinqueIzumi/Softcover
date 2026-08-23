@@ -8,8 +8,8 @@
 **Rollout model:** one branch, one PR, merged all at once. Stages below are *commit* boundaries on
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
-**Status:** `S1 COMPLETE, REVIEWED` — next up S2 (contract & gallery scaffold)
-**Branch:** `component-library-migration`
+**Status:** `S2 COMPLETE, REVIEWED` — next up S3 (evict non-components from `:core:designsystem`)
+**Branch:** `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models`
 **Issue:** [#275](https://github.com/CinqueIzumi/Softcover/issues/275) — tag `E.1`, labels
 `area:cross-cutting` / `kind:tech` / `scope:L`, no milestone. Keep its Stages and Acceptance
 checkboxes in step with § 5 and § 6 here.
@@ -193,6 +193,11 @@ Voyager. See § 5a.
 This is the decision that determines whether the library is any good. It must be written down
 **before** the first component moves, or the 21 book cards each invent their own convention.
 
+> **Canonical as of S2:** this contract now lives in
+> [`docs/reference/design-system/component-contract.md`](../reference/design-system/component-contract.md)
+> as § 7 of the design system, and that file is the one to read and to keep current. What follows is
+> the drafting record — where the two disagree, the design-system doc is right.
+
 ### 4.1 Signature
 
 ```kotlin
@@ -325,11 +330,14 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       (`softcover.kmp.library` + `softcover.kmp.compose`); added `kotlinx-collections-immutable`
       (0.4.0) to `gradle/libs.versions.toml`; extended `checkModuleGraph` with the § 6 ban list.
       Nothing moved yet. **See § 5b for two findings that changed the design.**
-- [ ] **S2 — Contract & gallery scaffold.** Write § 4 into
-      `docs/reference/design-system/component-contract.md`, citing `ShareCard` as the reference
-      implementation (§ 4.3). Land the `previews` fixture pattern, `GalleryRegistry` (empty) in
-      `:core:component`, and the `ComponentGalleryScreen` shell + easter-egg tap gesture in
-      `feature:settings` (§ 5a).
+- [x] **S2 — Contract & gallery scaffold.** DONE. § 4 is written into
+      `docs/reference/design-system/component-contract.md` as § 7 of the design system, citing
+      `ShareCard` as the reference implementation (§ 4.3) — **that doc is now canonical for the
+      contract; § 4 here is the drafting record.** Landed the `previews` fixture pattern as a
+      compile-checked interface (`UiModelPreviews<M>`), the `GalleryRegistry` / `GalleryEntry` /
+      `GalleryFixture` / `GalleryFamily` scaffold in `:core:component`, and the
+      `ComponentGalleryScreen` + its TOAD wiring + the easter-egg tap gesture in `feature:settings`.
+      **See § 5d for the gesture spec (previously open) and three implementation notes.**
 - [ ] **S3 — Evict non-components.** Move nav / TOAD / session / error / DI / prefetch out of
       `:core:designsystem` into `:core:presentation`; re-point every importing module. This is the
       largest mechanical churn (nav types are imported nearly everywhere) and carries no UI change.
@@ -417,6 +425,46 @@ asymmetry read as an oversight); a refreshed `checkModuleGraph` task description
 two rules ago; and `docs/reference/module-structure.md` updated with the three new modules, since
 `settings.gradle.kts` now includes them and that file's stated job is the concrete module roster.
 
+### 5d. S2 outcome — the gesture spec, and three notes
+
+**The easter-egg gesture is specified**, closing Appendix A's one open decision: **seven taps on
+`VersionFooter`, each within two seconds of the last, a `milestone` haptic on the seventh**, then a
+push of `ComponentGalleryScreen`. The counting lives in `SecretTapCounter`
+(`feature/settings/.../presentation/util/`) as a plain class rather than Compose state, because the
+timing edges — a tap exactly at the window boundary, a broken run restarting at 1 rather than 0 — are
+worth unit tests and this repo has no Compose UI test harness. The footer is wrapped in
+`noRippleClickable`: no ripple, no hand cursor, no press scale. It renders exactly as it did before.
+
+**1. `previews` is an interface, not a naming convention.** R5 as prose ("every UI model ships
+preview fixtures") is a review note. It is now `UiModelPreviews<M>` in `:core:component/gallery/`,
+implemented by the model's `companion object`, so a missing fixture set is a compile error. The typed
+`galleryEntry(...)` factory beside `GalleryEntry` takes that companion and erases `M` on the way in —
+which is what lets one `ImmutableList<GalleryEntry>` hold every component's fixtures without a
+generic wildcard at the registry.
+
+**2. `kotlin.time.Instant`, not `kotlinx.datetime.Instant`.** The plan assumed the latter, since
+kotlinx-datetime is already on the classpath. The repo has moved on: every `Instant` in
+`core/domain`, `core/book`, `core/profile` and `core/personal` is `kotlin.time.Instant`, and the
+kotlinx typealias is deprecated. `SecretTapCounter` uses the stdlib type and so needs no dependency
+at all.
+
+**3. `:core:component` declares exactly one dependency: `api(libs.kotlinx.collections.immutable)`.**
+`api`, because `ImmutableList` is in the public API of `UiModelPreviews`, `GalleryEntry`, and every UI
+model to come. It still declares **no project dependency** — nothing in the gallery scaffold needs a
+token yet, and per § 5b finding 2 an unused declaration fails the health gate. The
+`:core:component -> :core:designsystem` edge arrives with the first real component in S4.
+
+**The gallery screen has no nav destination and no sidebar row.** § 5a called for "its nav
+destination"; it does not need one. The push is within `feature:settings` itself (About → gallery), so
+no `ScreenDestination` entry is involved, and a visible desktop `SettingsCategory` row would defeat
+the easter egg. Desktop reaches it through the same footer gesture on the master–detail pane's About
+category, via a `navigateToComponentGallery` callback threaded onto `SettingsScreenLayout` — unused in
+the mobile `actual`, exactly as `navigateToAbout` / `navigateToRoadmap` are unused on desktop.
+
+**Gates re-verified at this boundary:** `checkModuleGraph` (233 edges), `ktlintCheck`,
+`detektJvmMain` + `detektAndroidMain` on both touched modules, and `projectHealth` on both are green;
+`:feature:settings` compiles for JVM, Android **and** iOS.
+
 ### 5a. The Component Gallery — decided: shipped easter egg
 
 Not debug-only. Consequences to build for, rather than discover late:
@@ -428,9 +476,10 @@ Not debug-only. Consequences to build for, rather than discover late:
   with its `previews` fixtures) in `:core:component/gallery/`. Screen (`ComponentGalleryScreen`, its
   TOAD wiring, its nav destination) in `feature:settings`, because G1 bans `:core:component` from
   Voyager and screens belong to features.
-- **Trigger:** N taps on `VersionFooter`
+- **Trigger:** seven taps on `VersionFooter`
   (`feature/settings/presentation/screen/SettingsShelf.kt:1303`), which already renders on the About
-  screen. Spec the tap count, the reset window, and the confirmation feedback (haptic) as part of S2.
+  screen — each within two seconds of the last, `milestone` haptic on the seventh. **Specified in S2;
+  see § 5d.**
 - **Preview fixtures ship in the release binary.** They are data classes and strings, so the size
   cost is small — but it is no longer zero, and every component added later adds to it. Worth a
   measurement at S11, not a blocker.
@@ -849,7 +898,9 @@ All three opening questions are resolved. Recorded here so they are not re-opene
 
 ### Still open
 
-- [ ] **Easter-egg gesture spec** — tap count, reset window, confirmation feedback. Decide during S2.
+- [x] **Easter-egg gesture spec** — **decided in S2:** seven taps, a two-second window between
+      consecutive taps, `milestone` haptic on unlock, `noRippleClickable` so the footer looks
+      untouched. Counting logic in `SecretTapCounter`, unit-tested. See § 5d.
 - [ ] **Fixture size in the release binary.** Measure at S11; not expected to block.
 
 ## Appendix B — GitHub issue

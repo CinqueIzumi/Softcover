@@ -27,6 +27,7 @@ class AboutScreen : Screen {
             openUrl = uriHandler::openUri,
             onNavigateBack = navigator::pop,
             onRoadmapClick = { navigator.push(RoadmapScreen()) },
+            onComponentGalleryUnlocked = { navigator.push(ComponentGalleryScreen()) },
         )
     }
 }
@@ -39,7 +40,11 @@ class AboutScreen : Screen {
  * the single call site above. [onRoadmapClick] pushes [RoadmapScreen] onto this screen's own navigator —
  * About always reaches Roadmap by pushing, even on desktop, since the master–detail pane's own `About`
  * category swaps to `Roadmap` through a separate, locally-wired callback instead (see
- * `SettingsScreenLayout`'s `AboutPane`).
+ * `SettingsScreenLayout`'s `AboutPane`). [onComponentGalleryUnlocked] fires from the version footer's
+ * seven-tap easter egg (`component-contract.md` § 7.5) and, on this standalone page, pushes
+ * [ComponentGalleryScreen] onto this screen's own navigator — the master–detail pane's `About`
+ * category wires the same gesture to its own local navigator instead (see `SettingsScreenLayout.jvm.kt`'s
+ * `AboutPane`).
  */
 @Composable
 internal expect fun AboutScreenLayout(
@@ -48,4 +53,5 @@ internal expect fun AboutScreenLayout(
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
     onRoadmapClick: () -> Unit,
+    onComponentGalleryUnlocked: () -> Unit,
 )

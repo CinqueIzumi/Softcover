@@ -4,6 +4,7 @@
 
 When a new surface is being built, walk this list before reaching for novelty.
 
+- **Building a component rather than a screen?** Read the component contract (§7) first — the signature, the UI-model rules, and where the mapper goes are settled there, and two of the rules are build gates.
 - **Need a primary action?** Filled button. One per region.
 - **Need an action with a small set of variants?** Split button.
 - **Need to edit a single bounded number?** Hero stat field inside a modal sheet.

@@ -74,8 +74,9 @@ internal actual val settingsUsesMasterDetail: Boolean = true
  * drives [openUrl] and its own `Roadmap` row (which selects the `ROADMAP` category rather than pushing);
  * the Roadmap pane drives [roadmapState] / [roadmapRunAction] (its model is likewise hosted under the
  * Settings lifecycle). The sub-page `navigateTo*` callbacks (including [navigateToAbout] and
- * [navigateToRoadmap]) are unused here (mobile pushes; desktop swaps) — only [navigateToProfile] and
- * [navigateToHiddenSuggestions] are wired.
+ * [navigateToRoadmap]) are unused here (mobile pushes; desktop swaps) — only [navigateToProfile],
+ * [navigateToHiddenSuggestions], and [navigateToComponentGallery] are wired, the last one into the
+ * `About` pane's own version-footer easter egg (`component-contract.md` § 7.5).
  */
 @Composable
 internal actual fun SettingsScreenLayout(
@@ -87,6 +88,7 @@ internal actual fun SettingsScreenLayout(
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
     navigateToRoadmap: () -> Unit,
+    navigateToComponentGallery: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     roadmapState: RoadmapUiState,
@@ -136,6 +138,7 @@ internal actual fun SettingsScreenLayout(
                     onStartAppUpdate = onStartAppUpdate,
                     openUrl = openUrl,
                     onRoadmapClick = { selected = SettingsCategory.ROADMAP },
+                    onComponentGalleryUnlocked = navigateToComponentGallery,
                     debugSection = debugSection,
                 )
 
@@ -455,6 +458,8 @@ private fun LibraryTabsPane(
  * `VersionFooter`), then the app-update card and the debug section. [AboutContent] is the app's one and
  * only place the version shows — the sidebar's own copy was dropped so it isn't on screen twice at once
  * alongside this pane — so this doesn't render a second, separate `VersionFooter` of its own.
+ * [onComponentGalleryUnlocked] is threaded straight through to that `VersionFooter` (via
+ * [AboutContent]'s own parameter of the same name) — see its KDoc for the seven-tap gesture itself.
  */
 @Composable
 private fun AboutPane(
@@ -464,6 +469,7 @@ private fun AboutPane(
     onStartAppUpdate: () -> Unit,
     openUrl: (String) -> Unit,
     onRoadmapClick: () -> Unit,
+    onComponentGalleryUnlocked: () -> Unit,
     debugSection: @Composable () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -496,6 +502,7 @@ private fun AboutPane(
                     versionCode = versionCode,
                     openUrl = openUrl,
                     onRoadmapClick = onRoadmapClick,
+                    onComponentGalleryUnlocked = onComponentGalleryUnlocked,
                     modifier = Modifier.fillMaxWidth(),
                 )
 

@@ -14,26 +14,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction
+import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState
 
 /**
- * Standalone desktop About page — a fallback for a direct push (the primary desktop entry is the
- * Settings master–detail pane's `About` category). Static back bar over the shared [AboutContent],
- * capped to the reading measure, with a persistent desktop scrollbar.
+ * Standalone desktop Component Gallery page, reached the same way as on mobile — the version
+ * footer's easter egg on the About screen, or on the master–detail `About` category. Static back bar
+ * over the shared [ComponentGalleryContent], capped to the reading measure, with a persistent desktop
+ * scrollbar — the same shape as [RoadmapScreenLayout]'s desktop fallback.
  */
 @Composable
-internal actual fun AboutScreenLayout(
-    versionName: String,
-    versionCode: Int,
-    openUrl: (String) -> Unit,
+internal actual fun ComponentGalleryScreenLayout(
+    state: ComponentGalleryUiState,
+    runAction: (ComponentGalleryAction) -> Unit,
     onNavigateBack: () -> Unit,
-    onRoadmapClick: () -> Unit,
-    onComponentGalleryUnlocked: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         DesktopSettingsBackBar(
-            title = "About",
+            title = "Component gallery",
             onNavigateBack = onNavigateBack,
         )
 
@@ -42,12 +42,9 @@ internal actual fun AboutScreenLayout(
                 .weight(1f)
                 .fillMaxWidth(),
         ) {
-            AboutContent(
-                versionName = versionName,
-                versionCode = versionCode,
-                openUrl = openUrl,
-                onRoadmapClick = onRoadmapClick,
-                onComponentGalleryUnlocked = onComponentGalleryUnlocked,
+            ComponentGalleryContent(
+                state = state,
+                runAction = runAction,
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)

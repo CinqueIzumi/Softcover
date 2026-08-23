@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,33 +13,34 @@ import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction
+import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState
 
+/**
+ * No pull-to-refresh here — the gallery has nothing to refresh, unlike [RoadmapScreenLayout]'s use of
+ * the same chrome shape.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal actual fun AboutScreenLayout(
-    versionName: String,
-    versionCode: Int,
-    openUrl: (String) -> Unit,
+internal actual fun ComponentGalleryScreenLayout(
+    state: ComponentGalleryUiState,
+    runAction: (ComponentGalleryAction) -> Unit,
     onNavigateBack: () -> Unit,
-    onRoadmapClick: () -> Unit,
-    onComponentGalleryUnlocked: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             SoftcoverTopBar(
-                title = "About",
+                title = "Component gallery",
                 onNavigateBack = onNavigateBack,
             )
         },
     ) { innerPadding ->
-        AboutContent(
-            versionName = versionName,
-            versionCode = versionCode,
-            openUrl = openUrl,
-            onRoadmapClick = onRoadmapClick,
-            onComponentGalleryUnlocked = onComponentGalleryUnlocked,
+        ComponentGalleryContent(
+            state = state,
+            runAction = runAction,
             modifier = Modifier
                 .padding(innerPadding)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .cappedContentWidth()
                 .padding(
@@ -51,15 +53,12 @@ internal actual fun AboutScreenLayout(
 
 @StandardPreview
 @Composable
-private fun AboutScreenPreview() {
+private fun ComponentGalleryScreenPreview() {
     SoftcoverTheme {
-        AboutScreenLayout(
-            versionName = "1.0.0",
-            versionCode = 1,
-            openUrl = {},
+        ComponentGalleryScreenLayout(
+            state = ComponentGalleryUiState(),
+            runAction = {},
             onNavigateBack = {},
-            onRoadmapClick = {},
-            onComponentGalleryUnlocked = {},
         )
     }
 }

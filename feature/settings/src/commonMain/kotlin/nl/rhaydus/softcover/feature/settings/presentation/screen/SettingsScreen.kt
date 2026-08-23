@@ -108,6 +108,9 @@ object SettingsScreen : Screen {
             navigateToRoadmap = {
                 navigator.parent?.push(RoadmapScreen())
             },
+            navigateToComponentGallery = {
+                navigator.parent?.push(ComponentGalleryScreen())
+            },
             libraryVisibilityState = libraryVisibilityState,
             libraryVisibilityRunAction = { action -> libraryVisibilityModel?.runAction(action) },
             roadmapState = roadmapState,
@@ -142,7 +145,10 @@ internal expect val settingsUsesMasterDetail: Boolean
  * values, so every parameter is supplied explicitly at the single call site above. [roadmapState] /
  * [roadmapRunAction] back the desktop master–detail pane's `Roadmap` category; [navigateToRoadmap]
  * mirrors [navigateToAbout]'s shape (mobile pushes [RoadmapScreen] from its own menu row, desktop
- * leaves it unused in favour of its sidebar's local category selection).
+ * leaves it unused in favour of its sidebar's local category selection). [navigateToComponentGallery]
+ * is the inverse: desktop wires it to the master–detail `About` category's own version-footer easter
+ * egg (`component-contract.md` § 7.5), while mobile leaves it unused — [AboutScreen], which mobile
+ * pushes instead, wires that same gesture to its own navigator directly.
  */
 @Composable
 internal expect fun SettingsScreenLayout(
@@ -154,6 +160,7 @@ internal expect fun SettingsScreenLayout(
     navigateToHiddenSuggestions: () -> Unit,
     navigateToAbout: () -> Unit,
     navigateToRoadmap: () -> Unit,
+    navigateToComponentGallery: () -> Unit,
     libraryVisibilityState: LibraryVisibilitySettingsUiState,
     libraryVisibilityRunAction: (LibraryVisibilityAction) -> Unit,
     roadmapState: RoadmapUiState,

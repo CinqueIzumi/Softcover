@@ -56,10 +56,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import kotlin.time.Clock
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
@@ -93,6 +95,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+import nl.rhaydus.softcover.feature.settings.presentation.util.SecretTapCounter
 import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicColor
 // region Appearance content
 /**
@@ -1298,14 +1301,33 @@ private fun UpdatePillButton(
 /**
  * The quiet, tabular-numeral build string, centred between two `outlineVariant` hairlines so it reads
  * as a plain closing rule rather than a row.
+ *
+ * [onSecretUnlocked] backs the Component Gallery easter egg (`component-contract.md` § 7.5): a
+ * [SecretTapCounter] counts taps on this row, and on its [SecretTapCounter.registerTap]'s seventh
+ * (each within its reset window of the last) fires a `milestone` haptic and calls [onSecretUnlocked].
+ * The row is wrapped in [noRippleClickable] rather than [pressScaleClickable] or a plain `clickable`
+ * deliberately — the footer must look exactly as it does today, with no ripple, no hand cursor, and no
+ * press scale hinting that anything here is interactive. Nothing in this composable's rendered output
+ * changes because of this parameter.
  */
 @Composable
 internal fun VersionFooter(
     versionName: String,
     versionCode: Int,
+    onSecretUnlocked: () -> Unit,
 ) {
+    val tapCounter = remember { SecretTapCounter() }
+    val haptics = rememberHaptics()
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .noRippleClickable {
+                if (tapCounter.registerTap(at = Clock.System.now())) {
+                    haptics.milestone()
+                    onSecretUnlocked()
+                }
+            },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         HorizontalDivider(

@@ -45,6 +45,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.ShelfSwipeCo
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
+import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentGalleryScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
@@ -175,5 +176,8 @@ val settingsModule = module {
             flows = getAll(),
         )
     }
+    // endregion
+    // region Component gallery
+    factory { ComponentGalleryScreenModel(appDispatchers = get()) }
     // endregion
 }
