@@ -2,7 +2,7 @@
 
 What we're building next for [Softcover](https://hardcover.app/), grouped by the version it's planned to land in. This is the public view of our plan.
 
-**Current release: {{CURRENT_VERSION}}.** Softcover runs on Android, iPhone, iPad and desktop. 3.1.0 was a top-to-bottom redesign — nearly every screen rebuilt with a cleaner, more editorial look. 3.1.1 and 3.1.2 followed it with shelf swiping, a clearer Explore, better back behaviour, your full tag vocabulary when you tag a book, author stats you can read without the blanks, and your deadlines saying what they need again.
+**Current release: {{CURRENT_VERSION}}.** Softcover runs on Android, iPhone, iPad and desktop. 3.1.3 smooths two rough edges in the 3.1 redesign, which rebuilt nearly every screen with a cleaner, more editorial look: deadlines now land on the day you picked no matter where in the world you are, and the app paces its requests against Hardcover's limits so busy screens load without stalling.
 
 A few honest caveats:
 - **These are plans, not promises.** Versions are listed in the order we intend to ship them, but order can shift and some items may move, merge, or change shape.
