@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +29,7 @@ class GetTrendingBooksUseCaseTest {
             val trendingBooks = listOf(mockk<Book>(relaxed = true), mockk<Book>(relaxed = true))
 
             coEvery {
-                booksRepository.fetchTrendingBooks()
+                booksRepository.fetchTrendingBooks(forceRefresh = any())
             } returns trendingBooks
 
             // ----- Act -----
@@ -45,7 +46,7 @@ class GetTrendingBooksUseCaseTest {
             val error = RuntimeException("network error")
 
             coEvery {
-                booksRepository.fetchTrendingBooks()
+                booksRepository.fetchTrendingBooks(forceRefresh = any())
             } throws error
 
             // ----- Act -----
@@ -60,7 +61,7 @@ class GetTrendingBooksUseCaseTest {
         fun `returns Result success wrapping an empty list when the repository returns no books`() = runTest {
             // ----- Arrange -----
             coEvery {
-                booksRepository.fetchTrendingBooks()
+                booksRepository.fetchTrendingBooks(forceRefresh = any())
             } returns emptyList()
 
             // ----- Act -----
@@ -69,6 +70,38 @@ class GetTrendingBooksUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe emptyList()
+        }
+
+        @Test
+        fun `default call forwards forceRefresh false to the repository`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRepository.fetchTrendingBooks(forceRefresh = any())
+            } returns emptyList()
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerify {
+                booksRepository.fetchTrendingBooks(forceRefresh = false)
+            }
+        }
+
+        @Test
+        fun `forceRefresh true is forwarded verbatim to the repository`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRepository.fetchTrendingBooks(forceRefresh = any())
+            } returns emptyList()
+
+            // ----- Act -----
+            useCase(forceRefresh = true)
+
+            // ----- Assert -----
+            coVerify {
+                booksRepository.fetchTrendingBooks(forceRefresh = true)
+            }
         }
     }
 }

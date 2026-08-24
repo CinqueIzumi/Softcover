@@ -18,7 +18,9 @@ class GetFeaturedUpcomingReleaseUseCaseTest {
     @BeforeEach
     fun setUp() {
         exploreRepository = mockk()
-        useCase = GetFeaturedUpcomingReleaseUseCase(exploreRepository = exploreRepository)
+        useCase = GetFeaturedUpcomingReleaseUseCase(
+            exploreRepository = exploreRepository,
+        )
     }
 
     private fun stubBook(id: Int = 1): Book = mockk {

@@ -19,7 +19,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollector
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -41,7 +41,7 @@ internal class ReadingScreenScreenModel(
     private val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
     private val getTrendingBooksUseCase: GetTrendingBooksUseCase,
     private val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
-    private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
+    private val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     private val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     private val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     private val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,
@@ -69,7 +69,7 @@ internal class ReadingScreenScreenModel(
         getWantToReadUserBooksUseCase = getWantToReadUserBooksUseCase,
         getTrendingBooksUseCase = getTrendingBooksUseCase,
         observeRecentReadingActivityUseCase = observeRecentReadingActivityUseCase,
-        refreshUserProfileDataUseCase = refreshUserProfileDataUseCase,
+        refreshReadingActivityUseCase = refreshReadingActivityUseCase,
         getReadingStreakEnabledAsFlowUseCase = getReadingStreakEnabledAsFlowUseCase,
         getLastUsedProgressUnitAsFlowUseCase = getLastUsedProgressUnitAsFlowUseCase,
         setLastUsedProgressUnitUseCase = setLastUsedProgressUnitUseCase,

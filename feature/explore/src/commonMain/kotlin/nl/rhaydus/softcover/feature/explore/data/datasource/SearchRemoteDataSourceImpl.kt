@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.GetIdsForQuery
 import nl.rhaydus.softcover.GetMoodTagsQuery
 import nl.rhaydus.softcover.GetNextBookInSeriesQuery
 import nl.rhaydus.softcover.GetNextBookInSeriesQuery.Data.Book_series.Book.Companion.bookDetailFragment as nextInSeriesBookDetailFragment
+import nl.rhaydus.softcover.GetNextBooksInSeriesQuery
 import nl.rhaydus.softcover.core.book.data.mapper.toBook
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.network.helper.safeQuery
@@ -32,6 +33,10 @@ import nl.rhaydus.softcover.feature.explore.data.mapper.toTypesenseSort
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import nl.rhaydus.softcover.feature.explore.domain.model.SeriesContinuationSeed
+import nl.rhaydus.softcover.type.Book_series_bool_exp
+import nl.rhaydus.softcover.type.Float8_comparison_exp
+import nl.rhaydus.softcover.type.Int_comparison_exp
 
 private const val MOOD_BOOKS_LIMIT = 25
 
@@ -108,6 +113,55 @@ internal class SearchRemoteDataSourceImpl(
         val book = response.book_series.firstOrNull()?.book ?: return null
 
         return book.nextInSeriesBookDetailFragment()?.toBook()
+    }
+
+    override suspend fun fetchNextBooksInSeries(seeds: List<SeriesContinuationSeed>): List<Book> {
+        if (seeds.isEmpty()) return emptyList()
+
+        val where = Book_series_bool_exp(
+            _or = Optional.Present(
+                seeds.map { seed ->
+                    Book_series_bool_exp(
+                        series_id = Optional.Present(
+                            Int_comparison_exp(_eq = Optional.Present(seed.seriesId)),
+                        ),
+                        position = Optional.Present(
+                            Float8_comparison_exp(_gt = Optional.Present(seed.afterPosition)),
+                        ),
+                    )
+                },
+            ),
+        )
+
+        val response = apolloClient.safeQuery(
+            query = GetNextBooksInSeriesQuery(where = where),
+            fetchPolicy = FetchPolicy.CacheFirst,
+        )
+
+        // Hasura can't limit per group, so the response holds every remaining book in every
+        // requested series. Taking the first row per series_id reproduces the single-series
+        // query's `limit: 1` semantics, relying on the query's ordering (position asc, then
+        // users_count desc) - re-sorting by position alone here would drop that tiebreak.
+        val nextBookIdBySeriesId = response.book_series
+            .groupBy { it.series_id }
+            .mapValues { (_, rows) -> rows.first().book_id }
+
+        // Seeds arrive already sorted by recency, and that ordering is the shelf's ordering -
+        // preserve it rather than the where-clause's undefined response order.
+        val bookIds = seeds.mapNotNull { nextBookIdBySeriesId[it.seriesId] }
+
+        if (bookIds.isEmpty()) return emptyList()
+
+        val idOrdered = bookIds.withIndex().associate { it.value to it.index }
+
+        return apolloClient
+            .safeQuery(
+                query = GetBooksByIdsQuery(ids = bookIds),
+                fetchPolicy = FetchPolicy.CacheFirst,
+            )
+            .books
+            .mapNotNull { it.bookDetailFragment()?.toBook() }
+            .sortedBy { book -> idOrdered[book.id] }
     }
 
     override suspend fun fetchFeaturedUpcomingRelease(): Book? {

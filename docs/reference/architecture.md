@@ -70,11 +70,58 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   Mutations write through the cache automatically — Room remains the source of truth for user-book
   state, so Apollo cache writes on `user_books` rows are currently inert observers.
 - Network interceptors handle authentication headers.
+- **Session caching is the repository's job, not a use case's.** Editorial reads that turn over at most
+  daily (trending, featured upcoming release, mood tags, books-by-genre) are served from a
+  process-lifetime `SessionValueCache` held as a **private field of the `*RepositoryImpl`** — the
+  repository is what decides which source answers a read and how fresh that answer must be, exactly as
+  it already does with `inflightRefreshes` and `hydrateReferencedBooks`' existence check. Do not inject
+  a cache into a use case: a use case is a `factory` and a cache is session state, so that combination
+  needs a Koin qualifier to smuggle shared mutable state into an object whose convention is that it has
+  none. Freshness overrides ride on the repository method as a parameter (`fetchTrendingBooks(forceRefresh)`,
+  `hydrateReferencedBooks(forceNetwork)`), and only an explicit user action (pull-to-refresh) may pass one —
+  a fetch on screen mount is not user intent. `SessionValueCache` caches on success only, so a transient
+  failure never sticks and blanks a shelf for the rest of the session.
 - Apollo errors are thrown as typed, sealed `ApiException` subtypes (`RetryableSyncException` ⊃
   `OfflineException` / `ServerUnavailableException`, `InvalidTokenException`, `UnexpectedApiException`)
   in `:core:domain/exception`. The seam does **not** author user-facing copy; presentation maps the
   kind via `Throwable.toUserMessage()` + the `Result.onApiFailure()` fold helper in `:core:designsystem`
   (see [code-style.md](code-style.md)).
+
+### Rate limits — what a request costs
+
+The API bills **per top-level query field, not per HTTP request**: `me { username }` plus
+`m2: me { name }` in one document is 2 requests; `me { name username }` is 1. Exceeding the burst
+bucket returns **429 immediately with no server-side queue** — over-budget requests fail rather than
+arriving late — and a document carrying more than 5 top-level queries (or 5 mutations, or more than
+1 `search`) is a flat 403. Free plan: 10 burst / 5,000 daily, refilling at 1/sec; Supporter: 15 /
+50,000. An outdated JWT caps the burst at **5** regardless of plan, which is where every install
+currently sits.
+
+Request count is therefore a **correctness** concern here, not a performance one. Four rules follow,
+and a change that breaks one is a defect even if it compiles:
+
+- **Batching is worthless.** Five operations in one HTTP request cost the same five requests, buy one
+  round trip, and couple five independent failures together. Do **not** add `HttpBatchingInterceptor`
+  or hand-rolled multi-operation documents.
+- **Folding under a shared root is the only real lever.** Aliased siblings *nested under one*
+  top-level field count once — `me { a: user_books(…) b: user_books(…) }` is 1 request. The shape of
+  a query, not its size, is what to optimise.
+- **Fewer, fatter queries.** A top-level field costs the same regardless of payload, so adding a field
+  to an existing query is free and **splitting one query into two doubles its cost**. This inverts the
+  usual instinct toward small focused queries; flag any change that splits one.
+- **Page-size and fan-out constants are budget, not tuning.** `fetchAllPages`' `pageSize`/`maxPages`
+  (below) and `ProfileRemoteDataSource.MAX_PAGES` are request multipliers — one runaway loop is 100
+  requests, twenty full buckets. Every uncapped `async`/`awaitAll` fan-out is the same hazard with no
+  ceiling at all.
+
+`search` accepts exactly one per request and cannot be merged with anything, so `GetIdsForQuery` is
+already optimal and must stay standalone.
+
+`RateLimitInterceptor` (`:core:network`, registered at `InsertionPoint.BeforeNetwork`) paces requests
+against this budget closed-loop, adopting the server's own `X-Ratelimit-*` headers rather than
+simulating its accounting, and `safeQuery` retries 429/408/5xx with backoff. **Read that class's KDoc
+before changing it** — it records why an open-loop token bucket built from the documented numbers
+above still drew 429s.
 
 ### Paginating list queries — the server row cap
 

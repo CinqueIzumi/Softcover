@@ -521,6 +521,148 @@ class GetBecauseYouReadBooksUseCaseTest {
                 cancelAndIgnoreRemainingEvents()
             }
         }
+
+        @Test
+        fun `switching from one genre to another fetches the newly selected genre fresh`() = runTest {
+            // ----- Arrange -----
+            val romanceBook = stubBook(id = 1)
+            val horrorBook = stubBook(id = 2)
+            val booksFlow = MutableStateFlow(
+                booksTaggedWithGenre(
+                    genre = "Romance",
+                    count = 5,
+                    startId = 10,
+                ),
+            )
+
+            every {
+                booksRepository.books
+            } returns booksFlow
+            coEvery {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Romance",
+                    limit = any(),
+                )
+            } returns listOf(romanceBook)
+            coEvery {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Horror",
+                    limit = any(),
+                )
+            } returns listOf(horrorBook)
+
+            // ----- Act & Assert -----
+            useCase().test {
+                var recommendation = awaitItem()
+                while (recommendation == null || recommendation.genre != "Romance" || recommendation.loading) {
+                    recommendation = awaitItem()
+                }
+
+                booksFlow.value = booksTaggedWithGenre(
+                    genre = "Horror",
+                    count = 9,
+                    startId = 100,
+                )
+
+                recommendation = awaitItem()
+                while (recommendation == null || recommendation.genre != "Horror" || recommendation.loading) {
+                    recommendation = awaitItem()
+                }
+
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            coVerify(exactly = 1) {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Romance",
+                    limit = any(),
+                )
+            }
+            coVerify(exactly = 1) {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Horror",
+                    limit = any(),
+                )
+            }
+        }
+
+        @Test
+        fun `a failed fetch for a genre is not cached and retries on the next selection of that genre`() = runTest {
+            // ----- Arrange -----
+            val romanceBook = stubBook(id = 1)
+            val horrorBook = stubBook(id = 2)
+            val booksFlow = MutableStateFlow(
+                booksTaggedWithGenre(
+                    genre = "Romance",
+                    count = 5,
+                    startId = 10,
+                ),
+            )
+
+            every {
+                booksRepository.books
+            } returns booksFlow
+            coEvery {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Romance",
+                    limit = any(),
+                )
+            } throws RuntimeException("network error")
+            coEvery {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Horror",
+                    limit = any(),
+                )
+            } returns listOf(horrorBook)
+
+            // ----- Act & Assert -----
+            useCase().test {
+                var recommendation = awaitItem()
+                while (recommendation == null || recommendation.genre != "Romance" || recommendation.loading) {
+                    recommendation = awaitItem()
+                }
+                recommendation.books shouldBe emptyList()
+
+                booksFlow.value = booksTaggedWithGenre(
+                    genre = "Horror",
+                    count = 9,
+                    startId = 100,
+                )
+
+                recommendation = awaitItem()
+                while (recommendation == null || recommendation.genre != "Horror" || recommendation.loading) {
+                    recommendation = awaitItem()
+                }
+
+                coEvery {
+                    exploreRepository.fetchBooksByGenre(
+                        genre = "Romance",
+                        limit = any(),
+                    )
+                } returns listOf(romanceBook)
+
+                booksFlow.value = booksTaggedWithGenre(
+                    genre = "Romance",
+                    count = 5,
+                    startId = 10,
+                )
+
+                recommendation = awaitItem()
+                while (recommendation == null || recommendation.genre != "Romance" || recommendation.loading) {
+                    recommendation = awaitItem()
+                }
+                recommendation.books shouldBe listOf(romanceBook)
+
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            coVerify(exactly = 2) {
+                exploreRepository.fetchBooksByGenre(
+                    genre = "Romance",
+                    limit = any(),
+                )
+            }
+        }
     }
 
     // ----- Genre options -----

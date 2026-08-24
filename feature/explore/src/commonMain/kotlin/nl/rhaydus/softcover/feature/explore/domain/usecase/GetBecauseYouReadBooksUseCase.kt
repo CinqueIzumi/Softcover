@@ -66,6 +66,11 @@ private const val GENRE_BOOKS_FETCH_LIMIT = GENRE_BOOKS_DISPLAY_LIMIT * 3
  * placeholder instead of the old genre's settled result. The very first resolution (`index == 0`,
  * i.e. initial screen load) skips the placeholder - there is no previous settled recommendation for
  * it to clobber, and `loadingBecauseYouReadBooks` already defaults to true for that case.
+ *
+ * The network fetch itself is gated by a per-genre session cache inside the repository (see
+ * [ExploreRepository.fetchBooksByGenre]), so re-selecting a genre already seen this session is free
+ * while a new genre still fetches. That is the repository's decision to make, not this use case's;
+ * what stays here is the flow orchestration above, which is genuinely presentation-facing logic.
  */
 class GetBecauseYouReadBooksUseCase(
     private val booksRepository: BooksRepository,

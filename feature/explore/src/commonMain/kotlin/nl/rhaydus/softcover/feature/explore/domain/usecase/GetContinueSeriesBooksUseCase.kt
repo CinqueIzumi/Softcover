@@ -1,9 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.domain.usecase
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -15,6 +12,23 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.model.SeriesContinuationSeed
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
+
+// Seeds are deliberately uncapped: the shelf shows every series the reader is mid-stream on.
+//
+// This was briefly trimmed to the 8 most recently read while the API's rate limit had no
+// client-side handling, because `fetchNextBooks` used to issue one `GetNextBookInSeries` request
+// per seed concurrently, and a series reader would spend the whole burst bucket - and roughly one
+// second of loading per seed under `RateLimitInterceptor`'s pacing - on this one shelf. See
+// the Network Layer section of `docs/reference/architecture.md` for what a request costs.
+//
+// `fetchNextBooks` now resolves every seed through `ExploreRepository.fetchNextBooksInSeries` in
+// a single batched request (`GetNextBooksInSeries` + one `GetBooksByIdsQuery`), regardless of seed
+// count, so neither the burst-bucket cost nor the per-seed latency applies any more. The trade is
+// error isolation: the old fan-out wrapped each seed in its own `runCatchingLogged`, so one failing
+// series never affected the rest; a single batched request now succeeds or fails as a whole, so a
+// failure costs the entire shelf rather than one card. That is an acceptable trade for 2 requests
+// instead of N - the rate limiter and the read retry both sit underneath it - but it is a real
+// behavior change, not an oversight.
 
 class GetContinueSeriesBooksUseCase(
     private val booksRepository: BooksRepository,
@@ -76,11 +90,22 @@ class GetContinueSeriesBooksUseCase(
 
                 if (cursor >= series.amountOfBooks) return@mapNotNull null
 
-                SeriesContinuationSeed(
+                // `lastReadDate` (set on finish/progress) is the most defensible recency signal the
+                // domain model exposes for "which series is this user mid-stream on right now" -
+                // it is what LibraryStats/SortSql already use for the same purpose. A series with no
+                // read book yet (Reading-only, never finished) sorts last via the empty fallback.
+                val mostRecentReadDate = group
+                    .mapNotNull { it.userBook?.lastReadDate }
+                    .maxOrNull()
+                    .orEmpty()
+
+                mostRecentReadDate to SeriesContinuationSeed(
                     seriesId = seriesId,
                     afterPosition = cursor,
                 )
             }
+            .sortedByDescending { (mostRecentReadDate, _) -> mostRecentReadDate }
+            .map { (_, seed) -> seed }
     }
 
     /**
@@ -101,19 +126,8 @@ class GetContinueSeriesBooksUseCase(
         )
         .mapValues { (_, positions) -> positions.max() }
 
-    private suspend fun fetchNextBooks(seeds: List<SeriesContinuationSeed>): List<Book> = coroutineScope {
-        seeds
-            .map { seed ->
-                async {
-                    runCatchingLogged {
-                        exploreRepository.fetchNextInSeries(
-                            seriesId = seed.seriesId,
-                            afterPosition = seed.afterPosition,
-                        )
-                    }.getOrNull()
-                }
-            }
-            .awaitAll()
-            .filterNotNull()
-    }
+    private suspend fun fetchNextBooks(seeds: List<SeriesContinuationSeed>): List<Book> =
+        runCatchingLogged {
+            exploreRepository.fetchNextBooksInSeries(seeds = seeds)
+        }.getOrNull().orEmpty()
 }

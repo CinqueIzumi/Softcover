@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.profile.di
 
 import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
@@ -18,7 +19,15 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.MarkReadingActivityToday
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
+
+// The activity half (streak + recent reading days) and the stats half (everything the Profile tab
+// renders) refresh independently, each skipped at most once per session - see
+// RefreshReadingActivityUseCase / RefreshUserProfileStatsUseCase.
+private val activityRefreshGateQualifier = named("activityRefreshGate")
+private val statsRefreshGateQualifier = named("statsRefreshGate")
 
 val profileModule = module {
     includes(
@@ -40,13 +49,15 @@ val profileModule = module {
         ProfileLocalDataSourceImpl(profileCacheDataStore = get())
     }
 
-    single { ProfileRefreshGate() }
+    single(activityRefreshGateQualifier) { ProfileRefreshGate() }
+    single(statsRefreshGateQualifier) { ProfileRefreshGate() }
 
     single<ProfileRepository> {
         ProfileRepositoryImpl(
             profileRemoteDataSource = get(),
             profileLocalDataSource = get(),
-            profileRefreshGate = get(),
+            activityRefreshGate = get(activityRefreshGateQualifier),
+            statsRefreshGate = get(statsRefreshGateQualifier),
         )
     }
 
@@ -75,12 +86,26 @@ val profileModule = module {
     }
 
     factory {
-        RefreshUserProfileDataUseCase(
+        RefreshReadingActivityUseCase(
             profileRepository = get(),
             getUserIdUseCase = get(),
-            profileRefreshGate = get(),
+            activityRefreshGate = get(activityRefreshGateQualifier),
             clock = get(),
             timeZone = get(),
+        )
+    }
+
+    factory {
+        RefreshUserProfileStatsUseCase(
+            profileRepository = get(),
+            statsRefreshGate = get(statsRefreshGateQualifier),
+        )
+    }
+
+    factory {
+        RefreshUserProfileDataUseCase(
+            refreshReadingActivityUseCase = get(),
+            refreshUserProfileStatsUseCase = get(),
         )
     }
 
