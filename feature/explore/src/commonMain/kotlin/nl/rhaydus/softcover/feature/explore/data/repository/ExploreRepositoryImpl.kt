@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.explore.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.util.SessionValueCache
+import nl.rhaydus.softcover.core.domain.util.getOrPut
 import nl.rhaydus.softcover.feature.explore.data.datasource.DismissedContinueSeriesLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchLocalDataSource
 import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSource
@@ -12,6 +14,7 @@ import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import nl.rhaydus.softcover.feature.explore.domain.model.SeriesContinuationSeed
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
 // Matches the mood grid's fixed 2x2 tile layout (explore-3a spec).
@@ -22,6 +25,14 @@ internal class ExploreRepositoryImpl(
     private val searchLocalDataSource: SearchLocalDataSource,
     private val dismissedContinueSeriesLocalDataSource: DismissedContinueSeriesLocalDataSource,
 ) : ExploreRepository {
+    // Owned here, not injected: which source answers a read is this class's decision, and the
+    // primitive has no dependencies of its own, so a Koin binding plus a qualifier would only route a
+    // singleton into the singleton that already owns it. Three separate instances rather than one
+    // shared cache because the values are unrelated and only the genre one is keyed.
+    private val featuredUpcomingReleaseCache = SessionValueCache<Unit, Book?>()
+    private val moodTagsCache = SessionValueCache<Unit, List<MoodTag>>()
+    private val booksByGenreCache = SessionValueCache<String, List<Book>>()
+
     override val previousSearchQueries: Flow<List<String>> =
         searchLocalDataSource.previousSearchQueries
 
@@ -50,6 +61,9 @@ internal class ExploreRepositoryImpl(
         afterPosition = afterPosition,
     )
 
+    override suspend fun fetchNextBooksInSeries(seeds: List<SeriesContinuationSeed>): List<Book> =
+        searchRemoteDataSource.fetchNextBooksInSeries(seeds = seeds)
+
     override suspend fun searchForName(
         name: String,
         userId: Int,
@@ -64,18 +78,23 @@ internal class ExploreRepositoryImpl(
         )
     }
 
-    override suspend fun fetchFeaturedUpcomingRelease(): Book? =
+    override suspend fun fetchFeaturedUpcomingRelease(): Book? = featuredUpcomingReleaseCache.getOrPut {
         searchRemoteDataSource.fetchFeaturedUpcomingRelease()
+    }
 
     override suspend fun fetchBooksByGenre(
         genre: String,
         limit: Int,
-    ): List<Book> = searchRemoteDataSource.fetchBooksByGenre(
-        genre = genre,
-        limit = limit,
-    )
+    ): List<Book> = booksByGenreCache.getOrPut(key = genre) {
+        searchRemoteDataSource.fetchBooksByGenre(
+            genre = genre,
+            limit = limit,
+        )
+    }
 
-    override suspend fun fetchMoodTags(): List<MoodTag> = searchRemoteDataSource.fetchMoodTags(limit = MOOD_TAGS_LIMIT)
+    override suspend fun fetchMoodTags(): List<MoodTag> = moodTagsCache.getOrPut {
+        searchRemoteDataSource.fetchMoodTags(limit = MOOD_TAGS_LIMIT)
+    }
 
     override suspend fun searchByMood(
         mood: MoodTag,

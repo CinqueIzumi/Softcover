@@ -55,6 +55,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooks
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsScreenModel
 
+
 val exploreModule = module {
     includes(
         platformExploreModule,

@@ -10,9 +10,12 @@ import com.apollographql.apollo.exception.ApolloNetworkException
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.fetchPolicy
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
@@ -20,6 +23,12 @@ import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
+
+// Bounded so a genuinely unavailable server still surfaces `ServerUnavailableException` instead of
+// retrying forever; small so a startup burst does not turn one 429 into a multi-second stall. Doubles
+// each attempt (1s, 2s, 4s) when the server gives no `Retry-After` hint.
+private const val MAX_TRANSIENT_RETRIES = 3
+private val BASE_RETRY_BACKOFF = 1.seconds
 
 /**
  * True when [statusCode] reflects the server failing to process the request rather than rejecting it:
@@ -67,6 +76,46 @@ private fun authFailureOrNull(exception: Throwable): InvalidTokenException? =
         null
     }
 
+/**
+ * Retries [block] when it throws [ServerUnavailableException] — the app's only classification for a
+ * 429/408/5xx or an unreachable-but-online server (see [retryableTransportFailureOrNull]). Reads have
+ * no other replay path (only the offline write queue replays a failed write), so a refused read must
+ * recover here or the fetch is simply lost. Honours the server's `Retry-After` header when the
+ * underlying failure carried one, otherwise backs off exponentially from [BASE_RETRY_BACKOFF].
+ *
+ * Deliberately does not catch [OfflineException]: retrying while the device itself is offline is
+ * pointless without a connectivity signal, so that failure still surfaces immediately.
+ *
+ * Each retry calls [block] again from scratch, so it re-enters the `ApolloClient` and passes back
+ * through the token-bucket rate limiter — re-acquiring a token before hitting the network again is
+ * the correct behaviour, not a bypass of the gate.
+ */
+private suspend fun <T> retryTransientFailures(block: suspend () -> T): T {
+    var attempt = 0
+
+    while (true) {
+        try {
+            return block()
+        } catch (exception: ServerUnavailableException) {
+            if (attempt >= MAX_TRANSIENT_RETRIES) throw exception
+
+            delay(retryDelayFor(
+                exception,
+                attempt,
+            ),)
+            attempt++
+        }
+    }
+}
+
+private fun retryDelayFor(
+    exception: ServerUnavailableException,
+    attempt: Int,
+): Duration = exception.retryAfterDurationOrNull() ?: BASE_RETRY_BACKOFF * (1 shl attempt)
+
+private fun ServerUnavailableException.retryAfterDurationOrNull(): Duration? =
+    (cause as? ApolloHttpException)?.retryAfterOrNull()
+
 // Each throw is a distinct, deliberate failure path mapped to the sealed `ApiException` hierarchy
 // (retryable transport, auth-rejected, and unexpected/GraphQL), so the count is over the threshold by
 // design. Suppressed rather than gated.
@@ -111,22 +160,37 @@ private fun <T : Operation.Data> requireData(response: ApolloResponse<T>): T {
 
 private suspend fun <T : Operation.Data> executeCall(
     requireNetwork: Boolean,
+    retryOnTransientFailure: Boolean,
     call: suspend () -> ApolloResponse<T>,
 ): T {
     if (requireNetwork && NetworkAvailability.isOnline().not()) {
         throw OfflineException()
     }
 
-    return requireData(call())
+    return if (retryOnTransientFailure) {
+        retryTransientFailures { requireData(call()) }
+    } else {
+        requireData(call())
+    }
 }
 
+// Writes are never retried here: an optimistic write that hits a transient failure is already
+// captured by the offline write queue, which owns replay. Retrying it here too would double-apply it.
 suspend fun <T : Mutation.Data> ApolloClient.safeMutation(mutation: Mutation<T>): T =
-    executeCall(requireNetwork = true) { this.mutation(mutation).execute() }
+    executeCall(
+        requireNetwork = true,
+        retryOnTransientFailure = false,
+    ) {
+        this.mutation(mutation).execute()
+    }
 
 suspend fun <T : Query.Data> ApolloClient.safeQuery(
     query: Query<T>,
     fetchPolicy: FetchPolicy = FetchPolicy.NetworkOnly,
-): T = executeCall(requireNetwork = fetchPolicy == FetchPolicy.NetworkOnly) {
+): T = executeCall(
+    requireNetwork = fetchPolicy == FetchPolicy.NetworkOnly,
+    retryOnTransientFailure = true,
+) {
     // Apollo Kotlin v4's CacheFirst/NetworkFirst interceptors emit TWO responses
     // on the failure path (the failed-stage response, then the fallback). Calling
     // .execute() surfaces the first emission, so a cache miss reaches us as a
@@ -143,45 +207,49 @@ internal fun <T : Query.Data> ApolloClient.safeQueryFlow(
     query: Query<T>,
     fetchPolicy: FetchPolicy = FetchPolicy.CacheAndNetwork,
 ): Flow<T> = flow {
-    var lastFailure: Throwable? = null
-    var emittedAny = false
+    // Retrying re-runs this whole block, which is only reachable when nothing was emitted yet (see
+    // the throw below) — so a retry never re-emits data a caller already received.
+    retryTransientFailures {
+        var lastFailure: Throwable? = null
+        var emittedAny = false
 
-    this@safeQueryFlow.query(query).fetchPolicy(fetchPolicy).toFlow().collect { response ->
-        val data = response.data
+        this@safeQueryFlow.query(query).fetchPolicy(fetchPolicy).toFlow().collect { response ->
+            val data = response.data
 
-        if (data != null && response.errors.isNullOrEmpty()) {
-            emit(data)
-            emittedAny = true
-        } else {
-            response.exception?.let { exception ->
-                if (exception !is CacheMissException) {
-                    lastFailure = exception
+            if (data != null && response.errors.isNullOrEmpty()) {
+                emit(data)
+                emittedAny = true
+            } else {
+                response.exception?.let { exception ->
+                    if (exception !is CacheMissException) {
+                        lastFailure = exception
+                    }
                 }
             }
         }
-    }
 
-    val failure = lastFailure
+        val failure = lastFailure
 
-    // Surface a rejected token regardless of whether cached data was already emitted — a
-    // CacheAndNetwork hit must still raise re-auth when the network leg returns 401/403. Only throw
-    // when nothing was emitted; otherwise the cached data stands and we just signal re-auth.
-    failure?.let { authFailureOrNull(it) }?.let { invalid ->
-        SessionExpiredNotifier.notifySessionExpired()
+        // Surface a rejected token regardless of whether cached data was already emitted — a
+        // CacheAndNetwork hit must still raise re-auth when the network leg returns 401/403. Only
+        // throw when nothing was emitted; otherwise the cached data stands and we just signal re-auth.
+        failure?.let { authFailureOrNull(it) }?.let { invalid ->
+            SessionExpiredNotifier.notifySessionExpired()
 
-        if (emittedAny.not()) throw invalid
+            if (emittedAny.not()) throw invalid
 
-        return@flow
-    }
-
-    if (emittedAny.not()) {
-        if (failure != null) {
-            retryableTransportFailureOrNull(failure)?.let { throw it }
+            return@retryTransientFailures
         }
 
-        throw UnexpectedApiException(
-            message = "Apollo flow failed: ${failure?.message ?: "completed with no data"}",
-            cause = failure,
-        )
+        if (emittedAny.not()) {
+            if (failure != null) {
+                retryableTransportFailureOrNull(failure)?.let { throw it }
+            }
+
+            throw UnexpectedApiException(
+                message = "Apollo flow failed: ${failure?.message ?: "completed with no data"}",
+                cause = failure,
+            )
+        }
     }
 }

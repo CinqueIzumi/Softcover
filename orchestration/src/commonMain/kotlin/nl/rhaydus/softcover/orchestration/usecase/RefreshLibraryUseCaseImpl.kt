@@ -72,6 +72,15 @@ internal class RefreshLibraryUseCaseImpl(
 
         booksJob.join()
 
+        // forceNetwork = true, deliberately: the cache check inside hydrateReferencedBooks is
+        // existence-only, not freshness-based, so consulting it would skip a book already cached by
+        // id even when its own fields (rating, reviews, cover, page count) changed server-side
+        // without a list-membership change. Serving a stale book is worse than spending the
+        // requests. This is the largest term in the refresh's request count (ceil(B/200) +
+        // ceil(E/200)); it is affordable because RateLimitInterceptor now paces the burst instead of
+        // letting the API refuse it. The reduction to chase later is skipping the ids that
+        // refreshUserBooks just cached in this same pass - those are provably fresh, so refetching
+        // them is pure waste - rather than trading freshness away wholesale.
         booksRepository.hydrateReferencedBooks(
             bookIds = changedLists.flatMap { it.books.map(ListBook::bookId) },
             editionIds = changedLists.flatMap { it.books.map(ListBook::editionId) },
@@ -93,6 +102,7 @@ internal class RefreshLibraryUseCaseImpl(
             listIds = setOf(listId),
         )
 
+        // forceNetwork = true: same freshness reasoning as refreshAll above.
         booksRepository.hydrateReferencedBooks(
             bookIds = fetched.flatMap { it.books.map(ListBook::bookId) },
             editionIds = fetched.flatMap { it.books.map(ListBook::editionId) },

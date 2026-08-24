@@ -19,7 +19,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnab
 import nl.rhaydus.softcover.core.preferences.domain.usecase.ObservePlanTodayDismissalsUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveRecentReadingActivityUseCase
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.toad.ActionDependencies
 
 internal data class ReadingScreenDependencies(
@@ -36,7 +36,7 @@ internal data class ReadingScreenDependencies(
     val getWantToReadUserBooksUseCase: GetWantToReadUserBooksUseCase,
     val getTrendingBooksUseCase: GetTrendingBooksUseCase,
     val observeRecentReadingActivityUseCase: ObserveRecentReadingActivityUseCase,
-    val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
+    val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     val getReadingStreakEnabledAsFlowUseCase: GetReadingStreakEnabledAsFlowUseCase,
     val getLastUsedProgressUnitAsFlowUseCase: GetLastUsedProgressUnitAsFlowUseCase,
     val setLastUsedProgressUnitUseCase: SetLastUsedProgressUnitUseCase,

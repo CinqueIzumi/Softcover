@@ -23,18 +23,21 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
 class ProfileRepositoryImplTest {
     private lateinit var profileRemoteDataSource: ProfileRemoteDataSource
     private lateinit var profileLocalDataSource: ProfileLocalDataSource
-    private lateinit var profileRefreshGate: ProfileRefreshGate
+    private lateinit var activityRefreshGate: ProfileRefreshGate
+    private lateinit var statsRefreshGate: ProfileRefreshGate
     private lateinit var repository: ProfileRepositoryImpl
 
     @BeforeEach
     fun setUp() {
         profileRemoteDataSource = mockk(relaxed = true)
         profileLocalDataSource = mockk(relaxed = true)
-        profileRefreshGate = mockk(relaxed = true)
+        activityRefreshGate = mockk(relaxed = true)
+        statsRefreshGate = mockk(relaxed = true)
         repository = ProfileRepositoryImpl(
             profileRemoteDataSource = profileRemoteDataSource,
             profileLocalDataSource = profileLocalDataSource,
-            profileRefreshGate = profileRefreshGate,
+            activityRefreshGate = activityRefreshGate,
+            statsRefreshGate = statsRefreshGate,
         )
     }
 
@@ -131,65 +134,6 @@ class ProfileRepositoryImplTest {
     }
 
     @Nested
-    inner class GetActiveReadingDaysSince {
-        @Test
-        fun `returns dates on or after the since date, excluding earlier dates`() = runTest {
-            // ----- Arrange -----
-            val since = LocalDate(
-                2026,
-                6,
-                10,
-            )
-            val dates = listOf(
-                LocalDate(
-                    2026,
-                    6,
-                    19,
-                ),
-                LocalDate(
-                    2026,
-                    6,
-                    10,
-                ),
-                LocalDate(
-                    2026,
-                    6,
-                    1,
-                ),
-                LocalDate(
-                    2026,
-                    5,
-                    4,
-                ),
-            )
-
-            every {
-                profileRemoteDataSource.streamReadingDaysDescending(userId = 7)
-            } returns flowOf(*dates.toTypedArray())
-
-            // ----- Act -----
-            val result = repository.getActiveReadingDaysSince(
-                userId = 7,
-                since = since,
-            )
-
-            // ----- Assert -----
-            result shouldBe setOf(
-                LocalDate(
-                    2026,
-                    6,
-                    19,
-                ),
-                LocalDate(
-                    2026,
-                    6,
-                    10,
-                ),
-            )
-        }
-    }
-
-    @Nested
     inner class ObserveUserProfileData {
         @Test
         fun `delegates to local data source and returns its flow`() = runTest {
@@ -210,17 +154,46 @@ class ProfileRepositoryImplTest {
     }
 
     @Nested
-    inner class CacheUserProfileData {
+    inner class CacheUserProfileActivity {
         @Test
-        fun `delegates to local data source`() = runTest {
+        fun `delegates to local data source with the given streak and recent days`() = runTest {
             // ----- Arrange -----
-            val profileData = buildProfileData()
+            val recentReadingDays = setOf(
+                LocalDate(
+                    2026,
+                    6,
+                    19,
+                ),
+            )
 
             // ----- Act -----
-            repository.cacheUserProfileData(data = profileData)
+            repository.cacheUserProfileActivity(
+                readingStreak = 7,
+                recentReadingDays = recentReadingDays,
+            )
 
             // ----- Assert -----
-            coVerify(exactly = 1) { profileLocalDataSource.cacheUserProfileData(data = profileData) }
+            coVerify(exactly = 1) {
+                profileLocalDataSource.cacheUserProfileActivity(
+                    readingStreak = 7,
+                    recentReadingDays = recentReadingDays,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class CacheUserProfileStats {
+        @Test
+        fun `delegates to local data source with the given snapshot`() = runTest {
+            // ----- Arrange -----
+            val snapshot = buildSnapshot()
+
+            // ----- Act -----
+            repository.cacheUserProfileStats(snapshot = snapshot)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { profileLocalDataSource.cacheUserProfileStats(snapshot = snapshot) }
         }
     }
 
@@ -239,7 +212,7 @@ class ProfileRepositoryImplTest {
         }
 
         @Test
-        fun `resets the refresh gate so the next session can refetch`() = runTest {
+        fun `resets the activity refresh gate so the next session can refetch`() = runTest {
             // ----- Arrange -----
             // (refresh gate is relaxed)
 
@@ -247,7 +220,19 @@ class ProfileRepositoryImplTest {
             repository.clearProfileCache()
 
             // ----- Assert -----
-            coVerify(exactly = 1) { profileRefreshGate.reset() }
+            coVerify(exactly = 1) { activityRefreshGate.reset() }
+        }
+
+        @Test
+        fun `resets the stats refresh gate so the next session can refetch`() = runTest {
+            // ----- Arrange -----
+            // (refresh gate is relaxed)
+
+            // ----- Act -----
+            repository.clearProfileCache()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { statsRefreshGate.reset() }
         }
     }
 
