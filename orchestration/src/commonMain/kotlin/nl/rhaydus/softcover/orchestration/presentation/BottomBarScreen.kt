@@ -41,12 +41,12 @@ import nl.rhaydus.designsystem.layout.TwoPaneScaffold
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.BookDetailPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
 

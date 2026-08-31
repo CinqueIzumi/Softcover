@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorScheme
-import nl.rhaydus.softcover.core.domain.model.ColorPalette
 
 /**
  * One choice in the Appearance screen's spine-colour picker: the same page miniature the theme tiles
@@ -37,14 +37,14 @@ import nl.rhaydus.softcover.core.domain.model.ColorPalette
  */
 @Composable
 fun ColorPalettePreviewTile(
-    palette: ColorPalette,
+    palette: SpinePalette,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scheme = softcoverColorScheme(
         darkTheme = LocalDarkTheme.current,
-        colorPalette = palette,
+        palette = palette,
     )
 
     PreviewTileFrame(

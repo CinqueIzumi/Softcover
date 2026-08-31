@@ -48,6 +48,7 @@ kotlin {
             api(project(":core:preferences"))
             implementation(project(":core:designsystem"))
             implementation(project(":core:presentation"))
+            implementation(project(":core:uibinding"))
 
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)

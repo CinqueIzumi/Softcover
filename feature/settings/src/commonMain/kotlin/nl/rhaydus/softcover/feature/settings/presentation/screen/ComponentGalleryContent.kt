@@ -26,11 +26,13 @@ import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
+import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
+import nl.rhaydus.softcover.core.presentation.theme.isDark
+import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 import nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnGalleryFamilySelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnGalleryPaletteSelectedAction
@@ -118,7 +120,7 @@ private fun GalleryOverrideControls(
 
         GalleryChipRow(
             options = ColorPalette.entries,
-            label = { it.label },
+            label = { it.toSpinePalette().label },
             isSelected = { it == state.paletteOverride },
             onSelect = { palette -> runAction(OnGalleryPaletteSelectedAction(palette = palette)) },
         )
@@ -211,8 +213,8 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
     val dynamicColor = configuration.useDynamicColor && state.paletteOverride == null
 
     SoftcoverTheme(
-        themeMode = themeMode,
-        colorPalette = colorPalette,
+        palette = colorPalette.toSpinePalette(),
+        darkTheme = themeMode.isDark(),
         dynamicColor = dynamicColor,
     ) {
         Surface(

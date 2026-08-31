@@ -29,11 +29,13 @@ import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
+import nl.rhaydus.softcover.core.presentation.theme.isDark
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
+import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
@@ -114,8 +116,8 @@ internal fun App() {
     ApplyPlatformThemeAppearance(themeMode = themeConfig.themeMode)
 
     SoftcoverTheme(
-        themeMode = themeConfig.themeMode,
-        colorPalette = themeConfig.colorPalette,
+        palette = themeConfig.colorPalette.toSpinePalette(),
+        darkTheme = themeConfig.themeMode.isDark(),
         dynamicColor = themeConfig.useDynamicColor,
     ) {
         ClearFocusOnTapScreen {

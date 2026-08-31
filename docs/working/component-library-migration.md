@@ -8,7 +8,8 @@
 **Rollout model:** one branch, one PR, merged all at once. Stages below are *commit* boundaries on
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
-**Status:** `S3 COMPLETE` — next up S4 (move the 132 designsystem components into `:core:component`)
+**Status:** `S4 IN PROGRESS` — S4-1 (theme tokens) done; next up S4-2 (rich text). S4 runs as seven
+compiling sub-commits — see § 5 and § 5f.
 **Branch:** `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models`
 **Issue:** [#275](https://github.com/CinqueIzumi/Softcover/issues/275) — tag `E.1`, labels
 `area:cross-cutting` / `kind:tech` / `scope:L`, no milestone. Keep its Stages and Acceptance
@@ -24,11 +25,11 @@ checkboxes in step with § 5 and § 6 here.
 >    with JDK 21 —
 >    `JAVA_HOME=/Users/bartpeereboom/Library/Java/JavaVirtualMachines/jbr-21.0.11/Contents/Home ./gradlew styleCheck`
 >
-> Also note: **`styleCheck` is already red at this branch point** for a reason unrelated to the
-> migration — `SoftcoverColorSchemeTest.kt:171` has an `UnusedParameter` finding. Reproduced with the
-> branch stashed. Not fixed here (nothing in the migration touches that file, so the on-touch
-> compliance policy does not reach it), but it means `styleCheck` is not a clean signal until someone
-> clears it. Per-module detekt is: all three new modules pass.
+> Also note: `styleCheck` **was** red from S1 to S3 for a reason unrelated to the migration —
+> `SoftcoverColorSchemeTest.kt:171` had an `UnusedParameter` finding, reproduced with the branch
+> stashed, and out of the on-touch compliance policy's reach because nothing in the migration touched
+> that file. **S4-1 does touch it** (it re-points the test onto `SpinePalette`), so the finding is
+> fixed — see § 5f. Per-module detekt is green everywhere the migration has been.
 >
 > Reliable per-change gates: `checkModuleGraph`, `<module>:projectHealth`,
 > `<module>:compileKotlinJvm`, `ktlintCheck`, and `<module>:detektJvmMain` under JDK 21.
@@ -353,12 +354,35 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       `:core:designsystem` into `:core:presentation` — 27 files — and re-pointed 92 consumer files
       across 11 modules. No UI change, no behaviour change. **See § 5e for what this stage settled,
       including the one thing S3's own description here had wrong.**
-- [ ] **S4 — Tokens-only designsystem.** Move the 132 existing `core:designsystem` components into
+- [ ] **S4 — Tokens-only designsystem.** Move the existing `core:designsystem` components into
       `:core:component`, converting each to a UI model as it moves (they cannot land domain-typed —
       the gate rejects it). Write their mappers per R6. Includes the `share/` package: split the six
       card bodies one-per-file, rename `*ShareContent` -> `*ShareCardUiModel` per R8, and close its
       R4 gap via the rich-text item in § 7.0. `:core:designsystem` ends at zero project
       dependencies; delete the `":core:designsystem" to ":core:book"` allowlist row.
+
+      **Measured before starting** (§ 2's "132 components" was a `@Composable`-count estimate; these
+      are the files): 44 `commonMain` files leave, plus 3 `EditionImage` platform actuals and 3
+      `androidMain` debug screens — 105 `@Composable` declarations of the module's 118, ~7,700 lines,
+      of which 2,364 are two files (`UpdateProgressBottomSheet` 1,203, `ShareCard` 1,161). **66
+      consumer files** across 11 modules (122 import lines) get re-pointed. Seven sub-commits, each
+      compiling; § 5f records what each settled.
+
+      - [x] **S4-1 — Break the theme's domain coupling.** `SpinePalette` token, `SoftcoverTheme` on a
+            resolved `darkTheme: Boolean`, `LocalThemeConfiguration` + `ThemeMode.isDark()` to
+            `:core:presentation`, `ColorPalette.toSpinePalette()` as `:core:uibinding`'s first
+            resident. **See § 5f.**
+      - [ ] **S4-2 — Rich text** (§ 7.0): `RichTextUiModel` + the bidirectional `:core:uibinding`
+            mapper; the six `Review*` / `Verdict*` components. Blocks S4-5 and S4-6.
+      - [ ] **S4-3 — Primitives and pure movers**: ~20 domain-free files into their § 3 family
+            packages, `:core:component`'s own `compose.resources`, the two `koinInject` helpers
+            hoisted to `:core:presentation`.
+      - [ ] **S4-4 — `EditionImage` -> `cover/`**: `CoverImageUiModel`, `LocalCoverImagePersister`,
+            the `:core:uibinding` mapper, 38 call sites in 9 files. Kills the `:core:book` edge.
+      - [ ] **S4-5 — Share cards** (§ 7.0): split, rename per R8, close the R4 gap.
+      - [ ] **S4-6 — The three big sheets**, `PreviewData` -> `:core:domain`, `DebugRoutesContent` ->
+            `:core:presentation`, the three debug screens -> `app/src/debug/`.
+      - [ ] **S4-7 — Close the boundary**: zero project deps, G2, G3, the doc rewrite.
 - [ ] **S5 — Primitives** (§ 7.1): chips/pills, badges/overlays, headers/labels, dividers, skeletons.
 - [ ] **S6 — Rows & sheet chrome** (§ 7.2).
 - [ ] **S7 — `BookCard`** (§ 7.3). The main event, and the risk concentration point.
@@ -549,6 +573,83 @@ including `:desktopApp`, iOS (`iosSimulatorArm64`) on the touched KMP modules, t
 under JDK 21 on `:core:presentation` / `:core:designsystem` / `:orchestration`, and the full
 `androidHostTest` suites of `:core:presentation`, `:orchestration`, `:feature:library` and
 `:feature:book_detail` — all green.
+
+### 5f. S4-1 outcome — the theme was domain-typed, and four other things the plan missed
+
+**G2 was unreachable as written, and not for the reason § 2 gives.** § 2 indicts the *components* for
+taking domain types. The **theme package itself** did too: `Theme.kt`, `PaletteColors.kt` and
+`LocalThemeConfiguration.kt` — none of which ever leave the token module — imported `ColorPalette`,
+`ThemeMode` and `ThemeConfiguration`. Independently, `ThemePreviewTile` and `ColorPalettePreviewTile`
+are components, so R4 forbids them the domain enums, yet their whole job is selecting a palette's
+hexes — and they cannot map, because the mapper lives in `:core:uibinding`, which depends *on*
+`:core:designsystem`. Both pressures forced the same answer: **the design system owns a palette token
+of its own.**
+
+**`SpinePalette` is the token; `ColorPalette` is now a bare persisted identifier.** The token carries
+the hex table, the palette's `label` and its `gloss`; the domain enum carries five names and
+`DEFAULT`. `ColorPalette.toSpinePalette()` in `:core:uibinding` is the only bridge, and its `when` is
+exhaustive, so a sixth palette that has no hex table is a compile error rather than a
+`getValue`-missing-key crash at runtime. Moving the copy off the domain enum was a decision taken
+before starting, not a side effect: `label`/`gloss` are user-facing strings, and they now sit beside
+the hexes they describe.
+
+**`SoftcoverTheme` takes `darkTheme: Boolean`, not `ThemeMode`.** Resolving `SYSTEM` needs the
+reader's stored preference, so it belongs above the token layer — `ThemeMode.isDark()` is now in
+`:core:presentation`. The parameter defaults to `isSystemInDarkTheme()`, which keeps a bare
+`SoftcoverTheme { }` (the shape every `@Preview` uses) behaving exactly as before; the four
+`SoftcoverTheme(themeMode = ThemeMode.LIGHT/DARK)` preview call sites became
+`SoftcoverTheme(darkTheme = false/true)`.
+
+**`ThemePreviewTile` takes a `ThemeTilePainting`, not a mode.** `LIGHT` / `DARK` / `SPLIT`, plus a
+plain `label` — one enum rather than a `darkTheme` + `split` boolean pair, because "dark" and "split
+down the diagonal" are mutually exclusive and a pair would let a caller ask for both. Deciding that a
+`SYSTEM` choice reads as `SPLIT` is the Appearance screen's job, and its mapping stays feature-local
+per R6 (one consumer). The enum sits beside the component and travels with it to `:core:component`
+in S4-3, where it becomes a field of the tile's UI model.
+
+**`:core:presentation` still does not depend on `:core:designsystem`.** § 5e's finding survives S4-1:
+`LocalThemeConfiguration` holds a domain type and `isDark()` reads a Compose foundation API, so
+neither needs a token. The two modules still sit side by side rather than stacking.
+
+**The pre-existing `styleCheck` red is cleared.** The header's caveat named
+`SoftcoverColorSchemeTest.kt:171`'s `UnusedParameter` as out of reach, since nothing in the migration
+touched that file. S4-1 re-points that very file onto `SpinePalette`, so the on-touch compliance
+policy now reaches it: `assertPairPasses`'s `scheme` parameter (passed nine times, read never) is
+gone. `:core:designsystem:detektAndroidHostTest` is green.
+
+**Review outcome.** `rhaydus-kotlin:code-reviewer` verified behavioural equivalence independently —
+the new `darkTheme: Boolean = isSystemInDarkTheme()` default is exactly the old
+`ThemeMode.DEFAULT` -> `SYSTEM` -> `isDark()` path, the palette->scheme maps are re-keyed and not
+rebuilt, and `ComponentGalleryContent`'s override fallback is untouched. It confirmed the two-enum
+split is the right call, that `ThemeTilePainting` is correctly component-adjacent, and that the
+`ThemeMode` -> `ThemeTilePainting` reading correctly stays feature-local under R6.
+
+**It also caught a claim in this stage's own KDoc that was false in one direction, and that matters
+beyond the wording.** `SpinePalette.kt` said the mapper's exhaustive `when` makes forgetting a
+palette a compile error. It does — *one way only*. The `when` is exhaustive over `ColorPalette`, its
+receiver, so a new **preference** entry cannot compile until the mapper (and therefore the token) has
+one too. A new **token** entry added first compiles happily and becomes a look nothing can ever
+select, with no build signal at all. No `when` can see that direction, so the guarantee is now stated
+honestly and backed by `SpinePaletteMapperTest`'s bijection assertion — the only thing that actually
+catches it. Three smaller fixes also applied: `Theme.kt`'s KDoc named `[lightScheme]`/`[darkScheme]`,
+neither of which has ever existed in that file; `Color.kt` and `LocalDarkTheme.kt` carried the theme
+package's last two references to domain types (in KDoc, so invisible to both gates, and directly
+against the boundary this sub-commit exists to draw); and a stray comma in `patterns.md`.
+
+**Gates at this boundary:** `checkModuleGraph` (267 edges), `ktlintCheck`, `projectHealth` on
+`:core:{domain, designsystem, uibinding, presentation}` + `:feature:{settings, profile}` +
+`:orchestration`, `compileKotlinJvm` across **every** module plus `:desktopApp:compileKotlin`,
+`compileKotlinIosSimulatorArm64` on all seven touched KMP modules, type-resolved detekt under JDK 21
+(`detektJvmMain` / `detektAndroidMain` / `detektAndroidHostTest` as applicable on all seven), and the
+`androidHostTest` suites of `:core:designsystem`, `:core:domain`, `:core:uibinding` and
+`:feature:settings` — all green. `:core:uibinding` had no tests before this sub-commit; it now has
+`SpinePaletteMapperTest` (3 tests, passing), whose bijection assertion is the drift guard the `when`
+cannot be.
+
+**One unrelated red, verified pre-existing.** `:core:preferences:testAndroidHostTest` fails 5 of 192 —
+every one in `AndroidLegacySecureApiKeyStorageTest`, with
+`java.security.KeyStoreException: NoSuchAlgorithmException` (no Android Keystore provider on the JVM
+host). Reproduced 5/5 with the branch stashed. Nothing in S4-1 touches that module's sources.
 
 ### 5a. The Component Gallery — decided: shipped easter egg
 

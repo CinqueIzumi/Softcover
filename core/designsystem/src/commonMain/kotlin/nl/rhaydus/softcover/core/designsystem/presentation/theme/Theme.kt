@@ -9,11 +9,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import nl.rhaydus.designsystem.editorial.EditorialTheme
 import nl.rhaydus.designsystem.theme.RhaydusTheme
-import nl.rhaydus.softcover.core.domain.model.ColorPalette
-import nl.rhaydus.softcover.core.domain.model.ThemeMode
 
 /**
- * The light half of one [ColorPalette]: the palette's three accent families over the palette's own
+ * The light half of one [SpinePalette]: the palette's three accent families over the palette's own
  * paper. Every slot but the error family and the scrim comes from the palette, which is why swapping
  * one repaints the page and not only its accents — see [NeutralFamily] for the tone-to-slot map.
  */
@@ -97,61 +95,53 @@ private fun darkSchemeFor(palette: PaletteColors) = darkColorScheme(
 // Both halves of every palette are built once, at class-init, rather than per call: the schemes are
 // read during composition (by the theme itself and by all eight Appearance preview tiles), and a
 // freshly-built ColorScheme each time would hand the theme a new identity on every recomposition.
-private val lightSchemes: Map<ColorPalette, ColorScheme> = ColorPalette.entries
+private val lightSchemes: Map<SpinePalette, ColorScheme> = SpinePalette.entries
     .associateWith { lightSchemeFor(palette = it.colors) }
 
-private val darkSchemes: Map<ColorPalette, ColorScheme> = ColorPalette.entries
+private val darkSchemes: Map<SpinePalette, ColorScheme> = SpinePalette.entries
     .associateWith { darkSchemeFor(palette = it.colors) }
 
 /**
- * The brand color scheme for one side of the light/dark pair in one [colorPalette], independent of
- * what the app is currently painting in. [SoftcoverTheme] resolves its own scheme through this, and
- * the Appearance screen's preview tiles paint *other* palettes and *the other* brightness through it
+ * The brand color scheme for one side of the light/dark pair in one [palette], independent of what
+ * the app is currently painting in. [SoftcoverTheme] resolves its own scheme through this, and the
+ * Appearance screen's preview tiles paint *other* palettes and *the other* brightness through it
  * — which is why the schemes are reachable from outside this file rather than being read off
  * `MaterialTheme` at the call site (a tile has to show the look the reader has *not* picked).
  */
 fun softcoverColorScheme(
     darkTheme: Boolean,
-    colorPalette: ColorPalette = ColorPalette.DEFAULT,
+    palette: SpinePalette = SpinePalette.DEFAULT,
 ): ColorScheme = if (darkTheme) {
-    darkSchemes.getValue(colorPalette)
+    darkSchemes.getValue(palette)
 } else {
-    lightSchemes.getValue(colorPalette)
+    lightSchemes.getValue(palette)
 }
 
 /**
- * Whether this mode paints dark right now. [ThemeMode.SYSTEM] defers to the platform's own setting
- * and therefore re-resolves whenever the device flips; the two explicit modes ignore it.
+ * The app's theme, resolved from a [palette] token and an already-decided brightness.
  *
- * Read this — or [LocalDarkTheme] once inside the theme — rather than `isSystemInDarkTheme()`: with a
- * forced Light or Dark mode the system's answer is no longer the app's.
+ * [darkTheme] is a `Boolean` rather than a three-way mode because "follow the device" is a *reader
+ * preference*, not a token: resolving it needs the persisted setting, so it belongs one layer up
+ * (`:core:presentation`'s `ThemeMode.isDark()`). Defaulting to `isSystemInDarkTheme()` keeps a
+ * bare `SoftcoverTheme { }` — the shape every `@Preview` uses — painting the way the host does.
  */
 @Composable
-fun ThemeMode.isDark(): Boolean = when (this) {
-    ThemeMode.LIGHT -> false
-    ThemeMode.DARK -> true
-    ThemeMode.SYSTEM -> isSystemInDarkTheme()
-}
-
-@Composable
 fun SoftcoverTheme(
-    themeMode: ThemeMode = ThemeMode.DEFAULT,
-    colorPalette: ColorPalette = ColorPalette.DEFAULT,
+    palette: SpinePalette = SpinePalette.DEFAULT,
+    darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+; iOS has no equivalent and falls back to the brand scheme.
     // While it is on it *replaces* the chosen palette outright — the wallpaper's own scheme is the whole
     // point of it — which is why picking a palette turns it back off (SetColorPaletteUseCase).
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val darkTheme = themeMode.isDark()
-
     val colorScheme = dynamicColorSchemeOrNull(
         useDynamicColor = dynamicColor,
         darkTheme = darkTheme,
     )
         ?: softcoverColorScheme(
             darkTheme = darkTheme,
-            colorPalette = colorPalette,
+            palette = palette,
         )
 
     // Delegates the Material 3 Expressive scaffold to the foundation RhaydusTheme (designsystem-core),
@@ -177,7 +167,7 @@ fun SoftcoverTheme(
 /**
  * The platform's Material You / dynamic color scheme, or `null` when dynamic color is unavailable or
  * unrequested (Android < 12, [useDynamicColor] off, or iOS — which has no dynamic-color equivalent).
- * Callers fall back to the brand [lightScheme]/[darkScheme].
+ * Callers fall back to the brand [softcoverColorScheme].
  */
 @Composable
 expect fun dynamicColorSchemeOrNull(

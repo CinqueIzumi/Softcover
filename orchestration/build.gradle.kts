@@ -39,6 +39,7 @@ kotlin {
             implementation(project(":core:notification"))
             implementation(project(":core:designsystem"))
             implementation(project(":core:presentation"))
+            implementation(project(":core:uibinding"))
 
             // Feature modules (orchestration composes them all)
             implementation(project(":feature:book_detail"))

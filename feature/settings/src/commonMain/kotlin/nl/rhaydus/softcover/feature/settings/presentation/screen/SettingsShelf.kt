@@ -71,6 +71,7 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ColorPalettePreviewTile
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ThemePreviewTile
+import nl.rhaydus.softcover.core.designsystem.presentation.component.ThemeTilePainting
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -79,6 +80,7 @@ import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
+import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnColorPaletteSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDateStyleClickAction
@@ -217,9 +219,10 @@ private fun ThemeSection(
         ) {
             ThemeMode.entries.forEach { mode ->
                 ThemePreviewTile(
-                    mode = mode,
+                    label = mode.label,
+                    painting = mode.toTilePainting(),
                     selected = state.themeMode == mode,
-                    colorPalette = state.colorPalette,
+                    palette = state.colorPalette.toSpinePalette(),
                     dynamicColor = state.useDynamicColorChecked,
                     onClick = { runAction(OnThemeModeSelectedAction(mode = mode)) },
                     modifier = Modifier
@@ -241,6 +244,20 @@ private fun ThemeSection(
             modifier = Modifier.padding(horizontal = 4.dp),
         )
     }
+}
+
+/**
+ * Which of the light/dark pair each theme choice paints in its preview tile: the two explicit modes
+ * paint themselves, and `SYSTEM` — which has no single colour — paints the diagonal split.
+ *
+ * Feature-local by R6: the Appearance screen is the only consumer, and it is the only place that
+ * knows a `SYSTEM` choice reads as "whichever your device is". It is promoted to `:core:uibinding`
+ * if a second surface ever needs the same reading.
+ */
+private fun ThemeMode.toTilePainting(): ThemeTilePainting = when (this) {
+    ThemeMode.LIGHT -> ThemeTilePainting.LIGHT
+    ThemeMode.DARK -> ThemeTilePainting.DARK
+    ThemeMode.SYSTEM -> ThemeTilePainting.SPLIT
 }
 
 /**
@@ -287,7 +304,7 @@ private fun SpineColourSection(
             ) {
                 ColorPalette.entries.forEach { palette ->
                     ColorPalettePreviewTile(
-                        palette = palette,
+                        palette = palette.toSpinePalette(),
                         selected = state.colorPalette == palette,
                         onClick = { runAction(OnColorPaletteSelectedAction(palette = palette)) },
                         modifier = Modifier.width(tileWidth),
@@ -302,7 +319,7 @@ private fun SpineColourSection(
             text = if (state.useDynamicColorChecked) {
                 "Dynamic colour is painting the app — pick a spine colour to take it back."
             } else {
-                state.colorPalette.gloss
+                state.colorPalette.toSpinePalette().gloss
             },
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

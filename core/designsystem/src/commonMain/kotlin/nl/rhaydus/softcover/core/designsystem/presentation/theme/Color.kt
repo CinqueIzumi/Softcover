@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * The house palette — the warm clay, old gold, and warm-white paper Softcover has always worn, and
- * the default [nl.rhaydus.softcover.core.domain.model.ColorPalette]. Its five accent tones per family
+ * the default look ([SpinePalette.DEFAULT]). Its five accent tones per family
  * are the exact hexes the flat `primaryLight` / `primaryDark` / … pairs used to spell out one role at
  * a time, and its neutral ramp is the exact paper the app shipped with, so nothing about the default
  * look changed when palettes arrived.
