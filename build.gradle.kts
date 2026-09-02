@@ -155,10 +155,36 @@ subprojects {
                     ),
                 )
 
-                // `:desktopApp`'s own `detektMain`, and the per-variant tasks `:app`'s aggregating
-                // `detektMain` fans out to. All three read the same non-KMP `src/main` layout.
-                "detektMain", "detektDebug", "detektRelease" ->
-                    setSource(project.files("src/main/java", "src/main/kotlin"))
+                // `:desktopApp`'s own `detektMain`, and the aggregating `detektMain` that `:app`'s
+                // per-variant tasks fan out from — the shared, variant-neutral `src/main` layout.
+                "detektMain" -> setSource(project.files("src/main/java", "src/main/kotlin"))
+
+                // `:app`'s per-variant tasks additionally read that variant's OWN source set, which is
+                // where the build-type-specific code lives: the debug-routes bindings and (since the
+                // component-library migration moved them out of `:core:designsystem`) the debug screens
+                // themselves. Without this they would be silently unscanned — `:app` is the only module
+                // with build types, so it is the only place this applies.
+                //
+                // Each variant gets only its own source set, never both: `src/debug` and `src/release`
+                // each declare `nl.rhaydus.softcover.di.debugRoutesModule`, so putting them in one
+                // scope would hand type resolution two conflicting declarations of the same symbol.
+                "detektDebug" -> setSource(
+                    project.files(
+                        "src/main/java",
+                        "src/main/kotlin",
+                        "src/debug/java",
+                        "src/debug/kotlin",
+                    ),
+                )
+
+                "detektRelease" -> setSource(
+                    project.files(
+                        "src/main/java",
+                        "src/main/kotlin",
+                        "src/release/java",
+                        "src/release/kotlin",
+                    ),
+                )
             }
         }
     }

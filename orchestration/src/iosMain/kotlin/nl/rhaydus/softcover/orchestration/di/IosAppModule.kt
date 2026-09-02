@@ -2,11 +2,11 @@ package nl.rhaydus.softcover.orchestration.di
 
 import androidx.compose.runtime.Composable
 import org.koin.dsl.module
-import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.notification.NotificationAccentColor
 import nl.rhaydus.softcover.core.notification.NotificationAppearance
 import nl.rhaydus.softcover.core.notification.NotificationIcon
+import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.orchestration.IosAppVersionProvider
 
 /**

@@ -8,8 +8,9 @@
 **Rollout model:** one branch, one PR, merged all at once. Stages below are *commit* boundaries on
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
-**Status:** `S4 IN PROGRESS` — S4-1 (theme tokens) done; next up S4-2 (rich text). S4 runs as seven
-compiling sub-commits — see § 5 and § 5f.
+**Status:** `S4 IN PROGRESS` — S4-1 (theme tokens) and S4-2a (debug screens out) done; next up S4-2b
+(the review / verdict / share block). **§ 5g is the most important thing to read before continuing:**
+the direction rule re-cut S4's sub-commits, and the original ordering was impossible.
 **Branch:** `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models`
 **Issue:** [#275](https://github.com/CinqueIzumi/Softcover/issues/275) — tag `E.1`, labels
 `area:cross-cutting` / `kind:tech` / `scope:L`, no milestone. Keep its Stages and Acceptance
@@ -100,7 +101,7 @@ disappearing is a measurable outcome of this migration.**
 
 Same-named composables declared in multiple modules today:
 
-- `SectionLabel` × 4 — `core/designsystem/.../debug/MotionDebugScreen.kt:349`,
+- `SectionLabel` × 4 — `app/src/debug/.../MotionDebugScreen.kt` (was `core/designsystem/.../debug/`),
   `feature/book_detail/.../BookDetailShelf.kt:2535`, `feature/profile/.../ProfileShelf.kt:136`,
   `feature/reading/.../ReadingShelf.kt:1178`
 - `EditorialHeader` × 2 — `core/designsystem/.../component/UpdateProgressBottomSheet.kt:250`,
@@ -368,21 +369,36 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       consumer files** across 11 modules (122 import lines) get re-pointed. Seven sub-commits, each
       compiling; § 5f records what each settled.
 
+      **Re-cut after § 5g** — the original ordering moved shared leaves before their consumers, which
+      the direction rule makes impossible. Six sub-commits, ordered consumer-first:
+
       - [x] **S4-1 — Break the theme's domain coupling.** `SpinePalette` token, `SoftcoverTheme` on a
             resolved `darkTheme: Boolean`, `LocalThemeConfiguration` + `ThemeMode.isDark()` to
             `:core:presentation`, `ColorPalette.toSpinePalette()` as `:core:uibinding`'s first
             resident. **See § 5f.**
-      - [ ] **S4-2 — Rich text** (§ 7.0): `RichTextUiModel` + the bidirectional `:core:uibinding`
-            mapper; the six `Review*` / `Verdict*` components. Blocks S4-5 and S4-6.
-      - [ ] **S4-3 — Primitives and pure movers**: ~20 domain-free files into their § 3 family
-            packages, `:core:component`'s own `compose.resources`, the two `koinInject` helpers
-            hoisted to `:core:presentation`.
+      - [x] **S4-2a — Debug screens out of `:core:designsystem`.** `MotionDebugScreen`,
+            `ShareCardDebugScreen`, `DebugRoutesSection` -> `app/src/debug/`; `DebugRoutesContent` ->
+            `:core:presentation`. Pure relocation, no UI models. Drops them out of S4-2b's closure,
+            removes them from the release binary, and lets `:core:designsystem` drop Voyager.
+            **See § 5g.**
+      - [ ] **S4-2b — The review / verdict / share block** (~2,660 lines): `RichTextUiModel` + the
+            bidirectional `:core:uibinding` mapper, `ReviewDocumentText`, the editor helpers
+            (`ReviewMark` / `ReviewMarkType` / `ReviewEditorBuffer` / `ReviewRichText`),
+            `ReviewFormattingToolbar`, `VerdictBlock`, `VerdictSheet`, `VerdictSheetContext`, and the
+            whole `share/` package with its R8 rename and R4 fix. **They move together because the
+            direction rule leaves no alternative** (§ 5g), not because it is convenient.
+      - [ ] **S4-3 — The two remaining big sheets**: `UpdateProgressBottomSheet` (+ `ProgressSheetTab`,
+            `ProgressSheetTabMapping` -> `:core:uibinding`), `ChooseListsBottomSheet` (+
+            `ListMembership`), `PreviewData` -> `:core:domain`.
       - [ ] **S4-4 — `EditionImage` -> `cover/`**: `CoverImageUiModel`, `LocalCoverImagePersister`,
-            the `:core:uibinding` mapper, 38 call sites in 9 files. Kills the `:core:book` edge.
-      - [ ] **S4-5 — Share cards** (§ 7.0): split, rename per R8, close the R4 gap.
-      - [ ] **S4-6 — The three big sheets**, `PreviewData` -> `:core:domain`, `DebugRoutesContent` ->
-            `:core:presentation`, the three debug screens -> `app/src/debug/`.
-      - [ ] **S4-7 — Close the boundary**: zero project deps, G2, G3, the doc rewrite.
+            the `:core:uibinding` mapper, `CoverlessTitleCover` + `MonogramCoverMetrics`, the three
+            platform actuals, 38 call sites in 9 files. Kills the `:core:book` edge.
+      - [ ] **S4-5 — The remaining primitives**: `PillChip`, `SoftcoverTopBar(Action)`,
+            `AnimatedStatNumber`, `PreviewTile`, `MarkAsReadBurst`, `ClickableText`,
+            `SoftcoverLoadingDialog`, `ConnectivityBanner`, `OfflineGuard`, the `Deadline*` trio, the
+            `Unreleased*` pair, the two preview tiles + `ThemeTilePainting`; `:core:component`'s own
+            `compose.resources`; the two `koinInject` helpers hoisted to `:core:presentation`.
+      - [ ] **S4-6 — Close the boundary**: zero project deps, G2, G3, the doc rewrite.
 - [ ] **S5 — Primitives** (§ 7.1): chips/pills, badges/overlays, headers/labels, dividers, skeletons.
 - [ ] **S6 — Rows & sheet chrome** (§ 7.2).
 - [ ] **S7 — `BookCard`** (§ 7.3). The main event, and the risk concentration point.
@@ -651,13 +667,105 @@ every one in `AndroidLegacySecureApiKeyStorageTest`, with
 `java.security.KeyStoreException: NoSuchAlgorithmException` (no Android Keystore provider on the JVM
 host). Reproduced 5/5 with the branch stashed. Nothing in S4-1 touches that module's sources.
 
+### 5g. S4-2a outcome — the direction rule, and why S4's ordering was impossible
+
+**This is the finding that re-cut S4.** `:core:component` -> `:core:designsystem` is the allowed
+direction, so the reverse is a dependency *cycle*, not merely a smell. That gives one rule with
+teeth:
+
+> **A mover may depend on a stayer. A stayer may never depend on a mover.**
+> A component can leave `:core:designsystem` only once nothing left in `:core:designsystem` uses it.
+
+S4's original sub-commits ran the other way — rich text and the primitives (the shared *leaves*)
+before the sheets and share cards that consume them. Every one of those sub-commits would have failed
+at Gradle configuration time. The correct order is **consumer-first, leaves last**, which is the
+inverse of how the plan was written.
+
+**What the graph actually says.** Layering `:core:designsystem`'s ~50 moving files by "whose
+consumers have already left" gives six layers, and the leaves — `ShareContent`, `ReviewMarkType`, the
+`*ShareContent` models — sit in the *last* one. Two things make it worse than a pure reordering:
+
+- **`internal` visibility.** The editor helpers (`ReviewMark`, `ReviewMarkType`, `ReviewEditorBuffer`
+  and all of `ReviewRichText.kt`) are `internal`. A consumer that moves ahead of them cannot see them
+  at all, so the choice is to widen a dozen symbols to public and move them a commit later, or move
+  the family whole. Whole is right.
+- **The closure is transitive.** Moving the rich-text cluster drags in `VerdictBlock` (renders
+  `ReviewDocumentText`), `VerdictSheet` (uses every editor helper), `ShareCard` (its quote body renders
+  `ReviewDocumentText`), and then `ShareCardDebugScreen` + `DebugRoutesSection` (they render
+  `ShareCard`) — **11 files, 2,857 lines**, versus the ~800 the plan assumed.
+
+**S4-2a exists to shrink that closure.** Relocating the three debug screens is a pure move with no
+UI-model work, and it takes 381 lines out of S4-2b while doing three other things worth having:
+
+**The debug screens now ship in no release binary.** They were in `:core:designsystem`'s `androidMain`
+— a KMP Android library, which produces a **single variant** — so only their *binding* was
+build-type-stripped; the screens themselves shipped to every user. `app/src/debug/` on
+`debugImplementation` is the first time that is actually true. `:app` is the only module with build
+types, and the tier rule (`build.gradle.kts:252`) forbids `:app` -> `:feature:settings`, so the shell
+is the only home available — the Settings surface that reveals them cannot host them.
+
+**`:core:designsystem` dropped Voyager.** `voyager-navigator` was `api`-exposed for these three screens
+alone; `voyager-koin` was already unused and only survived because it sits on the dependency-analysis
+exclude list. Both are gone. `:app` declares `voyager-navigator` on `debugImplementation` itself rather
+than leaning on `:core:presentation` to re-export it.
+
+**Three `*ShareContent` models became public** — `QuoteShareContent`, `StatShareContent`,
+`YearRecapShareContent`. They were `internal` because the only cross-file consumer was the debug screen
+inside the same module. This is not churn: they are library models that S4-2b makes public anyway, and
+a public `sealed interface ShareContent` whose members were internal could never be `when`-ed
+exhaustively from outside the module in the first place.
+
+**A gate that would have gone quietly blind, now closed and proved.** `:app`'s detekt tasks read
+`src/main` only, so moving Compose out of `androidMain` into `app/src/debug/java` would have dropped
+381 lines out of type-resolved detekt entirely. `detektDebug` / `detektRelease` now read `src/main`
+plus that variant's own source set — each variant only its own, because `src/debug` and `src/release`
+both declare `nl.rhaydus.softcover.di.debugRoutesModule` and one scope holding both hands type
+resolution two conflicting declarations of one symbol. **Verified against a deliberate violation:** an
+empty private function in `app/src/debug/.../DebugRoutesSection.kt` was rejected
+(`EmptyFunctionBlock`, `UnusedPrivateMember`), and the file passes clean once reverted.
+
+**`:app:projectHealth` is unreachable on this machine**, because it depends on
+`:app:compileDebugJavaWithJavac` — the pre-existing `JdkImageTransform` failure in the header's
+caveats. So `:app`'s new declarations were checked by hand instead: `designsystem-image` was in the
+first draft and is **not** used (`nl.rhaydus.designsystem.share`, which the share-card debug screen
+needs, is in `designsystem-**core**` — confirmed by listing the AAR's packages, not by guessing), so it
+was removed. Both material3 coordinates are already on the dependency-analysis exclude list, so the
+pinned `compose-material3-expressive` cannot be misreported. `:app:compileDebugKotlin` and
+`:app:compileReleaseKotlin` both pass — only the *Java* step is broken, so the Kotlin half of `:app`
+is genuinely verified.
+
+**Review outcome.** `rhaydus-kotlin:code-reviewer` re-derived the dependency reasoning by hand rather
+than trusting § 5g, and confirmed the `internal` -> public widening is required (not a leak — the
+family was already public in the contract doc), that `implementation(project(":core:presentation"))`
+is correctly not debug-only, and that the per-variant detekt split never puts the two
+`debugRoutesModule` declarations in one scope. It also confirmed the "381 lines" figure is precise
+rather than directional: `MotionDebugScreen` moved too, but was never in S4-2b's closure, so only
+`ShareCardDebugScreen` (270) + `DebugRoutesSection` (111) come off it.
+
+Three fixes applied. **One redundant dependency it caught that no gate could:**
+`debugImplementation(libs.rhaydus.designsystemCore)` was pointless — `:app` already sees
+`designsystem-core` in every variant through `:core:designsystem`'s `api` edge, and the
+used-transitive check is `severity("ignore")` repo-wide, so even a reachable `:app:projectHealth`
+would not have flagged it. Dropped, and the remaining three are now commented with why each is
+needed. Also: four **brace-glomming** sites in `ShareCardDebugScreen.kt` (pre-existing, carried in by
+the `git mv`, invisible to ktlint because the rule exempts trailing-lambda calls) unwrapped under the
+on-touch policy; and the release `DebugRoutesModule`'s KDoc still said the tooling was "compiled into
+the design system", which this sub-commit is precisely what stops being true.
+
+**Gates at this boundary:** `checkModuleGraph` (270 edges), `ktlintCheck`, repo-wide
+`compileKotlinJvm` + `:desktopApp:compileKotlin` + `:app:compileDebugKotlin` +
+`:app:compileReleaseKotlin`, `compileKotlinIosSimulatorArm64` on the four touched KMP modules,
+`projectHealth` on `:core:designsystem` / `:core:presentation` / `:orchestration` /
+`:feature:settings`, and type-resolved detekt under JDK 21 including `:app:detektMain` (which fans out
+to `detektDebug` + `detektRelease`) — all green. `:app:projectHealth` unreachable, as above.
+
 ### 5a. The Component Gallery — decided: shipped easter egg
 
 Not debug-only. Consequences to build for, rather than discover late:
 
-- **It must be `commonMain`.** `MotionDebugScreen` / `ShareCardDebugScreen` /
-  `DebugRoutesSection` live in `core/designsystem/src/androidMain/.../debug/` and are Android-only.
-  A shipped gallery has to render on iOS and desktop too.
+- **It must be `commonMain`.** `MotionDebugScreen` / `ShareCardDebugScreen` / `DebugRoutesSection`
+  are Android-only (and, as of S4-2a, live in `app/src/debug/` — § 5g). A shipped gallery has to
+  render on iOS and desktop too.
 - **Split across two modules.** Registry (`GalleryRegistry`, `GalleryEntry` — every component paired
   with its `previews` fixtures) in `:core:component/gallery/`. Screen (`ComponentGalleryScreen`, its
   TOAD wiring, its nav destination) in `feature:settings`, because G1 bans `:core:component` from
@@ -811,7 +919,7 @@ early in S4 — `QuoteShareCardBody` and `VerdictSheet` both block on it.
 
 Kills all three cross-module name collisions.
 
-- [ ] `SectionLabel` × 4 — `core/designsystem/presentation/debug/MotionDebugScreen.kt:349`, `feature/book_detail/presentation/screen/BookDetailShelf.kt:2535`, `feature/profile/presentation/screen/ProfileShelf.kt:136`, `feature/reading/presentation/screen/ReadingShelf.kt:1178`
+- [ ] `SectionLabel` × 4 — `app/src/debug/.../MotionDebugScreen.kt`, `feature/book_detail/presentation/screen/BookDetailShelf.kt:2535`, `feature/profile/presentation/screen/ProfileShelf.kt:136`, `feature/reading/presentation/screen/ReadingShelf.kt:1178`
 - [ ] `EditorialHeader` × 2 — `core/designsystem/presentation/component/UpdateProgressBottomSheet.kt:250`, `feature/reading/presentation/screen/ReadingScreenLayout.mobile.kt:158`
 - [ ] `SidebarSectionLabel` × 2 — `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:416`, `feature/settings/presentation/screen/SettingsScreenLayout.jvm.kt:260`
 - [ ] `SmallSectionLabel`, `InlineAccentLabel` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:1128,1100`
@@ -850,7 +958,7 @@ Kills all three cross-module name collisions.
 
 #### Dividers & rules — 5 -> `Divider` + `DividerUiModel`
 
-- [ ] `DebugRowDivider` — `core/designsystem/presentation/debug/DebugRoutesSection.kt:106`
+- [ ] `DebugRowDivider` — `app/src/debug/.../DebugRoutesSection.kt:106`
 - [ ] `ReadingLifeDivider` — `core/designsystem/presentation/share/ShareCard.kt:924`
 - [ ] `HorizontalBreak` — `feature/settings/presentation/screen/RoadmapContent.kt:379`
 - [ ] `QuoteRule` — `feature/lists/presentation/screen/CreateListSheetContent.kt:176`
@@ -862,8 +970,8 @@ Kills all three cross-module name collisions.
 
 - [ ] `ChooseListsRow`, `NewListRow` — `core/designsystem/presentation/component/ChooseListsBottomSheet.kt:330,594`
 - [ ] `WhenReadRow` — `core/designsystem/presentation/component/UpdateProgressBottomSheet.kt:372`
-- [ ] `DebugNavigationRow` — `core/designsystem/presentation/debug/DebugRoutesSection.kt:68`
-- [ ] `HapticRow` — `core/designsystem/presentation/debug/MotionDebugScreen.kt:137`
+- [ ] `DebugNavigationRow` — `app/src/debug/.../DebugRoutesSection.kt:68`
+- [ ] `HapticRow` — `app/src/debug/.../MotionDebugScreen.kt:137`
 - [ ] `AboutLinkRow`, `AboutNavigationRow`, `AboutUsernameRow`, `AboutRow` — `feature/settings/presentation/screen/AboutContent.kt:192,232,275,307`
 - [ ] `SettingsToggleRow`, `SettingsSelectableRow`, `ReorderableRow` — `feature/settings/presentation/screen/SettingsShelf.kt:445,517,853`
 - [ ] `SettingsMenuRow` — `feature/settings/presentation/screen/SettingsScreenLayout.mobile.kt:248`
@@ -1035,8 +1143,12 @@ gaps.
 - **Platform `expect`/`actual`** — `BarcodeScanner` (common/android/ios/jvm),
   `isCameraAvailable`, `isCameraPermissionGranted`, `rememberCameraPermissionRequester`,
   `EditionImage` platform bodies, `Theme.{android,ios,jvm}`, `TransientNavArg.{android,jvm}`.
-- **Debug screens** — `MotionDebugScreen`, `ShareCardDebugScreen`, `DebugRoutesSection`. These
-  become gallery *consumers*, and `ComponentGalleryScreen` joins them.
+- **Debug screens** — `MotionDebugScreen`, `ShareCardDebugScreen`, `DebugRoutesSection`. Not
+  components, so they are not converted to UI models — but they did **not** stay where they were, as
+  this bullet originally claimed. S4-2a relocated all three to `app/src/debug/` (§ 5g): they consume
+  Voyager and the components that are moving out, and `:core:designsystem` cannot depend on
+  `:core:component`. `DebugRoutesContent`, the seam that binds them per build type, moved to
+  `:core:presentation`.
 - **Share cards are IN scope** — see § 7.0. (Earlier draft deferred them; § 4.3 explains why that
   was wrong.) They keep their own family — do not fold them into `BookCard` — but they migrate in S4
   with everything else in `:core:designsystem`.

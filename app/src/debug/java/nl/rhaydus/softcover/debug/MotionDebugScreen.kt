@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.debug
+package nl.rhaydus.softcover.debug
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

@@ -32,9 +32,6 @@ kotlin {
 
             implementation(libs.koin.compose.multiplatform)
 
-            api(libs.voyager.navigator)
-            implementation(libs.voyager.koin)
-
             api(libs.coil3)
 
             api(libs.kotlinx.datetime)

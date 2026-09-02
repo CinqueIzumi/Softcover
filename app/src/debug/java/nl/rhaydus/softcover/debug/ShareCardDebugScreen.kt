@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.debug
+package nl.rhaydus.softcover.debug
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -144,10 +144,12 @@ object ShareCardDebugScreen : Screen {
                     label = "Book",
                     capture = bookCapture,
                     content = SampleBook,
-                    onSaveClick = { onSaveClick(
-                        bookCapture,
-                        "book",
-                    ) },
+                    onSaveClick = {
+                        onSaveClick(
+                            bookCapture,
+                            "book",
+                        )
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -156,10 +158,12 @@ object ShareCardDebugScreen : Screen {
                     label = "Stat",
                     capture = statCapture,
                     content = SampleStat,
-                    onSaveClick = { onSaveClick(
-                        statCapture,
-                        "stat",
-                    ) },
+                    onSaveClick = {
+                        onSaveClick(
+                            statCapture,
+                            "stat",
+                        )
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -168,10 +172,12 @@ object ShareCardDebugScreen : Screen {
                     label = "Quote",
                     capture = quoteCapture,
                     content = SampleQuote,
-                    onSaveClick = { onSaveClick(
-                        quoteCapture,
-                        "quote",
-                    ) },
+                    onSaveClick = {
+                        onSaveClick(
+                            quoteCapture,
+                            "quote",
+                        )
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -180,10 +186,12 @@ object ShareCardDebugScreen : Screen {
                     label = "Year recap",
                     capture = recapCapture,
                     content = SampleRecap,
-                    onSaveClick = { onSaveClick(
-                        recapCapture,
-                        "year-recap",
-                    ) },
+                    onSaveClick = {
+                        onSaveClick(
+                            recapCapture,
+                            "year-recap",
+                        )
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(48.dp))

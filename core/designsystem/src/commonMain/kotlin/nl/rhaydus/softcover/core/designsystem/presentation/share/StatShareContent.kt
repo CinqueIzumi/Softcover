@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.share
 
-internal data class StatShareContent(
+data class StatShareContent(
     val eyebrow: String,
     val value: Long,
     val caption: String,

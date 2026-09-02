@@ -72,7 +72,7 @@ only on modules **below** its tier.
 | `core:designsystem` | Material 3 theme, editorial typography, the icon/illustration catalogs, modifiers, shared-element scopes — and, until the component library lands, the reusable components themselves. **Being split** — see the three rows below |
 | `core:component` | **Scaffolded, empty.** The component library: every component the app renders, driven by a UI model. Depends on `core:designsystem` and nothing else — domain, data, DI, navigation and Apollo are build failures (`checkModuleGraph` for the dependency graph, a scoped detekt `ForbiddenImport` for the source) |
 | `core:uibinding` | Adapters mapping a domain model to the UI type that renders it, for mappings two or more consumers need. `api`-exposes both sides of every mapping — `core:domain` and (as they arrive) `core:designsystem` / `core:component` — so a consumer sees the type it maps from and the type it maps to without re-declaring either. First resident: `ColorPalette.toSpinePalette()`, the reader's persisted spine colour as the design system's palette token |
-| `core:presentation` | The non-component residents evicted from `core:designsystem`: the cross-tier contracts whose impls live in orchestration (`AppNavigator`, `AppEntryPoint`, `BookDetailPresenter`, `CreateListPresenter`, `ActiveSessionController`, `SessionAuthenticator`, `ReadingSessionLauncher`), the nav destinations (`ScreenDestination`, `TabDestination`, `TransientNavArg`, `BookInitialCover`), `LibraryTab`, API-error mapping (`toUserMessage` / `onApiFailure`), `SplashState` / `ReAuthState`, `BookDetailPrefetcher`, the app-update composition locals, the reader's appearance preference as composition state (`LocalThemeConfiguration`, `ThemeMode.isDark()`), and `presentationModule` — the app's one Koin module below the feature tier. Depends on `core:domain` + `core:book`, **not** on `core:designsystem` |
+| `core:presentation` | The non-component residents evicted from `core:designsystem`: the cross-tier contracts whose impls live in orchestration (`AppNavigator`, `AppEntryPoint`, `BookDetailPresenter`, `CreateListPresenter`, `ActiveSessionController`, `SessionAuthenticator`, `ReadingSessionLauncher`), the nav destinations (`ScreenDestination`, `TabDestination`, `TransientNavArg`, `BookInitialCover`), `LibraryTab`, API-error mapping (`toUserMessage` / `onApiFailure`), `SplashState` / `ReAuthState`, `BookDetailPrefetcher`, the app-update composition locals, the reader's appearance preference as composition state (`LocalThemeConfiguration`, `ThemeMode.isDark()`), the `DebugRoutesContent` seam, and `presentationModule` — the app's one Koin module below the feature tier. Depends on `core:domain` + `core:book`, **not** on `core:designsystem` |
 | `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation`, and the plain-HTTP seam `safeGetText` |
 | `core:database` | Room database, migrations, **all** persisted entities + DAOs (incl. those a feature's data source uses) |
 
@@ -113,7 +113,14 @@ Room DB.
     Compose UI wiring AndroidX Compose into `androidMain`) used by modules that have migrated to
     Kotlin Multiplatform.
   - `:app` is the lone `com.android.application` and stays Android-only (it owns build-type-conditional
-    wiring).
+    wiring). Because it is the **only** module with build types — the KMP Android library plugin
+    produces a single variant — it is also where **debug-only UI** lives: `src/debug/` holds the
+    motion / share-card / routes debug screens plus the `DebugRoutesContent` binding that reveals
+    them, on `debugImplementation` so none of it reaches a release binary. The same code in a library
+    module shipped in release even when its binding was stripped. It cannot live beside the Settings
+    surface that reveals it, because `:app → :feature:*` is not an allowed edge. Its detekt coverage
+    is explicit: `detektDebug` / `detektRelease` read `src/main` plus that variant's own source set
+    (never both — the two `debugRoutesModule` declarations share an FQN).
 
   Do **not** re-declare what a convention plugin already provides, and do **not** enable
   `buildConfig` / `room` / `ksp` in a feature (Room/Apollo are core-only).

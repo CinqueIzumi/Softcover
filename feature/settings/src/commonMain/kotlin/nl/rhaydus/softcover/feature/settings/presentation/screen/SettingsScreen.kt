@@ -21,9 +21,9 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
