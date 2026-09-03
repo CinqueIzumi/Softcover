@@ -20,7 +20,9 @@ kotlin {
             implementation(project(":core:database"))
             implementation(project(":core:network"))
             implementation(project(":core:personal"))
+            implementation(project(":core:component"))
             api(project(":core:designsystem"))
+            implementation(project(":core:uibinding"))
             api(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)

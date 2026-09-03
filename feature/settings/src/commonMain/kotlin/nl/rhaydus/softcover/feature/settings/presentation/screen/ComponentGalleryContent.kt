@@ -28,11 +28,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSw
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.theme.isDark
-import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 import nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnGalleryFamilySelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnGalleryPaletteSelectedAction
@@ -119,10 +117,10 @@ private fun GalleryOverrideControls(
         Spacer(modifier = Modifier.height(10.dp))
 
         GalleryChipRow(
-            options = ColorPalette.entries,
-            label = { it.toSpinePalette().label },
-            isSelected = { it == state.paletteOverride },
-            onSelect = { palette -> runAction(OnGalleryPaletteSelectedAction(palette = palette)) },
+            options = state.paletteChipOptions,
+            label = { it.label },
+            isSelected = { it.selected },
+            onSelect = { choice -> runAction(OnGalleryPaletteSelectedAction(palette = choice.palette)) },
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -205,7 +203,6 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
     val configuration = LocalThemeConfiguration.current
 
     val themeMode = state.themeModeOverride ?: configuration.themeMode
-    val colorPalette = state.paletteOverride ?: configuration.colorPalette
 
     // Dynamic colour replaces the chosen palette outright (see SoftcoverTheme's KDoc) — so once a
     // palette override is in effect here, dynamic colour must step aside, or the wallpaper scheme
@@ -213,7 +210,7 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
     val dynamicColor = configuration.useDynamicColor && state.paletteOverride == null
 
     SoftcoverTheme(
-        palette = colorPalette.toSpinePalette(),
+        palette = state.resolvedPalette,
         darkTheme = themeMode.isDark(),
         dynamicColor = dynamicColor,
     ) {

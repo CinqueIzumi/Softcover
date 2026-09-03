@@ -46,6 +46,17 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   vendored in the app. Softcover's per-feature flow-collector interfaces are named `XxxCollector`
   (e.g. `BookDetailCollector`, in each feature's `presentation/collector/`) and implement the foundation
   `nl.rhaydus.toad.Collector` role.
+- **UI models are mapped off the composition.** A `UiState` exposes presentation-ready values; the
+  domain -> UI mapping that produced them runs in the ScreenModel, an `Action`, a `Collector`, or a
+  dependency injected into one of those — never in a `@Composable`. A render forwards
+  `state.verdictReview`; it does not call `state.book?.userBook?.reviewDocument?.toRichTextUiModel()`.
+  The reverse direction follows the same rule: an editor's output travels out through the `Action`,
+  which maps it back to the domain type before the use case sees it, so the mapping lives in one place
+  rather than at every call site. Shared mappings live in `:core:uibinding` (promoted on their second
+  consumer); a feature's own live in its `presentation/mapper/`. This is **R9** in
+  [`design-system/component-contract.md`](design-system/component-contract.md), where the reasoning and
+  the one carve-out (reading a *platform* signal in composition — `isSystemInDarkTheme()`, a window
+  size class, a `CompositionLocal` — is not mapping) are written out.
 - **Error-slot convention.** A screen that can fail a load/submit follows the foundation TOAD error-slot
   convention ([`../rhaydus/0.3.1/toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md) §Conventions):
   a nullable `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,

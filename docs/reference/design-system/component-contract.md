@@ -127,33 +127,73 @@ The event type is `*Event`; the identity type is `*Key`; the variant type is `*V
 that exist only to group fields of one model take that model's prefix (`BookCardContent`,
 `BookCardDecorations`).
 
+**R9 — Mapping happens in the ScreenModel. A composable never calls a mapper.**
+
+A domain -> UI mapping is invoked **once, off the composition**: in the ScreenModel, in an `Action`, in
+a `Collector`, or in a dependency injected into one of those. The `UiState` a screen exposes carries
+the *result*. A `@Composable` never calls `toXUiModel()`, and a component never receives a domain
+value for it to convert.
+
+```kotlin
+// WRONG — the render maps
+VerdictBlock(review = state.book?.userBook?.reviewDocument?.toRichTextUiModel())
+
+// RIGHT — the collector mapped; the render forwards
+VerdictBlock(review = state.verdictReview)
+```
+
+Three reasons, in order of how much they bite:
+
+1. **It is a layering rule.** The render's job is to draw what it is given. A mapper in a composable
+   puts a decision — *what* to show — inside the code that decides *how* to show it, which is the
+   split the whole architecture exists to keep.
+2. **It is a correctness rule for the reverse direction.** An editor's output must travel back out to
+   be persisted. If the render maps, the mapping is spread across every call site; if the `Action`
+   maps, there is one place, and it is the place that already owns talking to the domain.
+3. **It is a performance rule.** A mapper called in composition re-runs on every recomposition,
+   allocating a fresh model each time — and a fresh model breaks the equality check that lets Compose
+   skip the component it was built for. `remember` patches the symptom; moving the call fixes it.
+
+**The carve-out, so the rule is not read too widely.** Reading a *platform* signal in composition is
+not mapping: `ThemeMode.isDark()` is `@Composable` because "follow the device" resolves through
+`isSystemInDarkTheme()`, which only exists in composition. Resolving a `CompositionLocal`, measuring a
+window size class, and asking the platform for its brightness all stay where they are. The rule is
+about domain data, not about every function a composable may call.
+
 ### 7.3 Reference implementation — `ShareCard`
 
-`core/designsystem/presentation/share/` is a shipped instance of this contract under an older name.
-Read it before writing a new component.
+`core/component/share/` is the contract's worked example. Read it before writing a new component.
 
 ```kotlin
 // A sealed model whose members are the variants
-sealed interface ShareContent
+sealed interface ShareCardUiModel
 
 // Presentation-ready primitives only — no domain types
-data class BookShareContent(
+data class BookShareCardUiModel(
     val coverUrl: String?,
     val title: String,
     val author: String,
     val communityRating: Double?,
     …
-) : ShareContent
+) : ShareCardUiModel
 
 // ONE public symbol; `when` dispatch to private per-variant bodies
 @Composable
-fun ShareCard(content: ShareContent, modifier: Modifier = Modifier) { … }
+fun ShareCard(content: ShareCardUiModel, modifier: Modifier = Modifier) { … }
 ```
 
 It satisfies R1 (no callbacks at all — a share card is inert), R2 (sealed variant, single public
-symbol, private bodies, per-variant sizing table), and R4 for five of its six variants. Its two gaps
-are being closed as it moves into `:core:component`: the `*ShareContent` naming (R8) and the
-`ReviewDocument` import in the quote card (R4).
+symbol, private bodies, per-variant sizing table), R3 (`ImmutableList` throughout), R4 (its last
+domain type, the `ReviewDocument` on the reading-update card, is now a `RichTextUiModel`), R5 (its
+`companion object : UiModelPreviews<ShareCardUiModel>` is the gallery's data *and* what its nine
+`@Preview` functions render, so the two cannot drift), and R8 (the `*ShareContent` family became
+`*ShareCardUiModel`). It is the first family the Component Gallery renders.
+
+**The one thing it does not satisfy is a lesson, not an oversight.** A share card sets its own width
+— it is an export artefact at fixed dimensions, not a component that fills its parent — so the
+gallery cannot simply hand it the fixture tile's width. The gallery pans it instead. When a component
+genuinely owns its metrics, say so in a per-variant table (`ShareCardDimensions.forContent`) and let
+the surrounding surface adapt; do not add a "gallery mode" parameter to the component.
 
 ### 7.4 What the build enforces
 

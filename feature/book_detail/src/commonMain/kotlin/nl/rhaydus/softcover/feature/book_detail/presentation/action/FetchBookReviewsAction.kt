@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toBookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -26,6 +28,8 @@ internal class FetchBookReviewsAction(
                 .getTopBookReviewsUseCase(bookId = bookId)
                 .onApiFailure()
                 .getOrDefault(emptyList())
+                .map { it.toBookReviewUiModel() }
+                .toImmutableList()
 
             scope.setState {
                 it.copy(

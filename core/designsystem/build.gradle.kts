@@ -28,7 +28,6 @@ kotlin {
             api(libs.rhaydus.coreCommon)
             api(libs.rhaydus.designsystemCore)
             implementation(libs.rhaydus.designsystemEditorial)
-            implementation(libs.rhaydus.designsystemImage)
 
             implementation(libs.koin.compose.multiplatform)
 

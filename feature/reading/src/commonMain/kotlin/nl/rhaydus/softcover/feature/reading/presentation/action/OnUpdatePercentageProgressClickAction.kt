@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.action
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -63,7 +64,12 @@ internal data class OnUpdatePercentageProgressClickAction(
                     // Only a genuine finish transition raises the verdict prompt — re-recording the
                     // last position on an already-read book returns NoChange and must stay silent.
                     if (outcome == ShelfMutationOutcome.Applied) {
-                        scope.setState { it.copy(verdictPromptBook = bookToUpdate) }
+                        scope.setState {
+                            it.copy(
+                                verdictPromptBook = bookToUpdate,
+                                verdictReview = bookToUpdate.userBook?.reviewDocument?.toRichTextUiModel(),
+                            )
+                        }
                     }
                 }
                 .onFailure { error ->

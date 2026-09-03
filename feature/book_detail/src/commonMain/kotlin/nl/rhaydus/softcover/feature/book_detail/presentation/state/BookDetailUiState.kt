@@ -1,7 +1,12 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
-import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -12,7 +17,7 @@ import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
-import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
+import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class BookDetailUiState(
@@ -38,11 +43,12 @@ internal data class BookDetailUiState(
     val readingPaceForecast: ReadingPaceForecast? = null,
     val showDeadlinePicker: Boolean = false,
 
-    val reviews: List<BookReview> = emptyList(),
+    val reviews: ImmutableList<BookReviewUiModel> = persistentListOf(),
     val loadingReviews: Boolean = false,
     val revealedSpoilerReviewIds: Set<Int> = emptySet(),
 
     val verdictSheetContext: VerdictSheetContext? = null,
+    val verdictReview: RichTextUiModel? = null,
 
     val failedMutationBookIds: Set<Int> = emptySet(),
     val failedMutationEditionIds: Set<Int> = emptySet(),
@@ -50,6 +56,8 @@ internal data class BookDetailUiState(
     val isShareSheetVisible: Boolean = false,
     val currentUsername: String? = null,
     val currentUserAvatarUrl: String? = null,
+    val shareBookCard: BookShareCardUiModel? = null,
+    val shareUpdateCard: ReadingUpdateShareCardUiModel? = null,
 
     val showChooseListsSheet: Boolean = false,
     val userLists: List<BookList> = emptyList(),

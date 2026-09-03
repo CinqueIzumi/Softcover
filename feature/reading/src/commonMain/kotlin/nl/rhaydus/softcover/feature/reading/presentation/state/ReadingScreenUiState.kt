@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -30,4 +31,5 @@ internal data class ReadingScreenUiState(
     val featuredBookPace: ReadingPaceForecast? = null,
 
     val verdictPromptBook: Book? = null,
+    val verdictReview: RichTextUiModel? = null,
 ) : UiState

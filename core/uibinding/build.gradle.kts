@@ -15,6 +15,7 @@ kotlin {
             // without re-declaring either. No `allowedApiDataEdges` row is needed — `:core:domain` is
             // a contract module, not a data-area one.
             api(project(":core:domain"))
+            api(project(":core:component"))
             api(project(":core:designsystem"))
         }
     }

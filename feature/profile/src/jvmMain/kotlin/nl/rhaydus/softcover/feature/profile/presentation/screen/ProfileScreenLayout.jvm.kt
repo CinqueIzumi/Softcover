@@ -96,12 +96,7 @@ private fun ProfileContent(
     var showShareSheet by remember { mutableStateOf(false) }
     var showLogOutConfirm by remember { mutableStateOf(false) }
 
-    val shareContent = remember(state.readingLife, state.userProfileData) {
-        val life = state.readingLife
-        val profile = state.userProfileData
-
-        if (life != null && profile != null) life.toShareContent(profile) else null
-    }
+    val shareContent = state.readingLifeShareCard
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(verticalAlignment = Alignment.CenterVertically) {

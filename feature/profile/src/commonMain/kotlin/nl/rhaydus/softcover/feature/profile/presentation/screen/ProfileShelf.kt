@@ -79,13 +79,12 @@ import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.ShareOutcome
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCard
+import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedStatNumber
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ReadingLifeGenre
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ReadingLifeShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCard
-import nl.rhaydus.softcover.core.designsystem.presentation.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Gender
@@ -1883,12 +1882,12 @@ internal fun AccountFootSection(
 // region Share sheet
 /**
  * The reading-life share sheet: the canonical mini header, a scaled preview of the exportable
- * [ReadingLifeShareContent] card, and Save/Share actions. The save/share/[ShareOutcome] handling is
+ * [ReadingLifeShareCardUiModel] card, and Save/Share actions. The save/share/[ShareOutcome] handling is
  * copied from `feature/book_detail`'s `ShareBookBottomSheet`.
  */
 @Composable
 internal fun ProfileShareBottomSheet(
-    content: ReadingLifeShareContent,
+    content: ReadingLifeShareCardUiModel,
     onDismissRequest: () -> Unit,
 ) {
     val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
@@ -2019,7 +2018,7 @@ internal fun ProfileShareBottomSheet(
 
 @Composable
 private fun ReadingLifeSharePreview(
-    content: ReadingLifeShareContent,
+    content: ReadingLifeShareCardUiModel,
     capture: ShareCardCapture,
 ) {
     val maxPreviewWidth = 240.dp
@@ -2132,41 +2131,9 @@ internal fun LogOutConfirmBottomSheet(
     }
 }
 // endregion
-// region Reading life mapping
-private const val PERCENTAGE_MULTIPLIER = 100
-private const val SHARE_CARD_GENRE_LIMIT = 3
-private const val MONTHS_IN_YEAR = 12
-
-/**
- * Maps [ReadingLife] + [UserProfileData] onto the exportable [ReadingLifeShareContent] the share sheet
- * renders. [ReadingLifeShareContent] deliberately carries no `core:profile` dependency, so this mapping
- * — not a shared use case — is where the two meet.
- */
-internal fun ReadingLife.toShareContent(profile: UserProfileData): ReadingLifeShareContent =
-    ReadingLifeShareContent(
-        readerName = profile.name,
-        avatarUrl = profile.profileImageUrl.takeIf { it.isNotBlank() },
-        totalPagesRead = profile.totalPagesRead,
-        totalBooksRead = profile.booksRead,
-        // Already ranked highest-first by the mapper, so the card's leading row is the top genre.
-        topGenres = genres.slices.take(SHARE_CARD_GENRE_LIMIT).map { slice ->
-            ReadingLifeGenre(
-                name = slice.name,
-                percentage = (slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt(),
-            )
-        },
-        pagesByMonth = currentYearMonthlyPages(),
-        averageRating = ratings.average,
-        dayStreak = profile.readingStreak,
-        trackedYears = trackedYears,
-    )
-
-private fun ReadingLife.currentYearMonthlyPages(): List<Int> {
-    val year = pagesByMonth.maxOfOrNull { it.year } ?: return List(MONTHS_IN_YEAR) { 0 }
-    val countByMonth = pagesByMonth.filter { it.year == year }.associate { it.month to it.count }
-
-    return (1..MONTHS_IN_YEAR).map { month -> countByMonth[month] ?: 0 }
-}
+// region Shared constants
+// Shared with `presentation/mapper/ReadingLifeShareCardMapper.kt`, hence internal rather than private.
+internal const val PERCENTAGE_MULTIPLIER = 100
 // endregion
 // region Preview data
 /**

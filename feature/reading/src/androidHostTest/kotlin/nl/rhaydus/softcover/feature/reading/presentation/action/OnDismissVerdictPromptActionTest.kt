@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -38,7 +39,10 @@ class OnDismissVerdictPromptActionTest {
         @Test
         fun `sets verdictPromptBook to null when it was previously set to a book`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(verdictPromptBook = stubBook())
+            stateFlow.value = ReadingScreenUiState(
+                verdictPromptBook = stubBook(),
+                verdictReview = RichTextUiModel.EMPTY,
+            )
 
             // ----- Act -----
             OnDismissVerdictPromptAction().execute(
@@ -48,6 +52,7 @@ class OnDismissVerdictPromptActionTest {
 
             // ----- Assert -----
             stateFlow.value.verdictPromptBook shouldBe null
+            stateFlow.value.verdictReview shouldBe null
         }
 
         @Test

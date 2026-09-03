@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -12,11 +13,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
-import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
+import nl.rhaydus.softcover.core.component.richtext.RichTextParagraph
+import nl.rhaydus.softcover.core.component.richtext.RichTextRun
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.ReviewDocument
-import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
-import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.uibinding.richtext.toReviewDocument
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -54,8 +56,8 @@ class OnSaveVerdictActionTest {
         } returns id
     }
 
-    private fun stubReview(): ReviewDocument = ReviewDocument(
-        paragraphs = listOf(ReviewParagraph(runs = listOf(ReviewRun(text = "A great read")))),
+    private fun stubReview(): RichTextUiModel = RichTextUiModel(
+        paragraphs = persistentListOf(RichTextParagraph(runs = persistentListOf(RichTextRun(text = "A great read")))),
     )
 
     @Nested
@@ -71,7 +73,7 @@ class OnSaveVerdictActionTest {
                 saveBookVerdictUseCase(
                     book = book,
                     rating = 4.0,
-                    review = review,
+                    review = review.toReviewDocument(),
                     hasSpoilers = false,
                 )
             } returns Result.success(Unit)
@@ -104,7 +106,7 @@ class OnSaveVerdictActionTest {
                 saveBookVerdictUseCase(
                     book = book,
                     rating = 3.5,
-                    review = review,
+                    review = review.toReviewDocument(),
                     hasSpoilers = true,
                 )
             } returns Result.success(Unit)
@@ -127,7 +129,7 @@ class OnSaveVerdictActionTest {
                 saveBookVerdictUseCase(
                     book = book,
                     rating = 3.5,
-                    review = review,
+                    review = review.toReviewDocument(),
                     hasSpoilers = true,
                 )
             }
@@ -144,7 +146,7 @@ class OnSaveVerdictActionTest {
                 saveBookVerdictUseCase(
                     book = book,
                     rating = null,
-                    review = review,
+                    review = review.toReviewDocument(),
                     hasSpoilers = false,
                 )
             } returns Result.success(Unit)
@@ -177,7 +179,7 @@ class OnSaveVerdictActionTest {
                 saveBookVerdictUseCase(
                     book = book,
                     rating = null,
-                    review = review,
+                    review = review.toReviewDocument(),
                     hasSpoilers = false,
                 )
             } returns Result.failure(RuntimeException("api error"))
@@ -211,7 +213,7 @@ class OnSaveVerdictActionTest {
                 saveBookVerdictUseCase(
                     book = book,
                     rating = null,
-                    review = review,
+                    review = review.toReviewDocument(),
                     hasSpoilers = false,
                 )
             } returns Result.failure(RuntimeException("api error"))

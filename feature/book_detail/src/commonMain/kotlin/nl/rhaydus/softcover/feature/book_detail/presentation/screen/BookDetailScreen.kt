@@ -14,8 +14,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
-import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailOverlayNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPaneCloseHandler
@@ -62,10 +62,12 @@ class BookDetailScreen(
         val overlayNavigator = LocalBookDetailOverlayNavigator.current ?: navigator
 
         val screenModel: BookDetailScreenScreenModel =
-            koinScreenModel<BookDetailScreenScreenModel> { parametersOf(
-                id,
-                initialCover,
-            ) }
+            koinScreenModel<BookDetailScreenScreenModel> {
+                parametersOf(
+                    id,
+                    initialCover,
+                )
+            }
 
         val state: BookDetailUiState by screenModel.state.collectAsStateWithLifecycle()
 

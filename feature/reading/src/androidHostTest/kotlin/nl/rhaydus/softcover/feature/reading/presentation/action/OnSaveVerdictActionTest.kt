@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -55,7 +56,10 @@ class OnSaveVerdictActionTest {
         fun `sets verdictPromptBook to null after execute on success`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
-            stateFlow.value = ReadingScreenUiState(verdictPromptBook = book)
+            stateFlow.value = ReadingScreenUiState(
+                verdictPromptBook = book,
+                verdictReview = RichTextUiModel.EMPTY,
+            )
 
             coEvery {
                 saveBookVerdictUseCase(
@@ -69,7 +73,7 @@ class OnSaveVerdictActionTest {
             val action = OnSaveVerdictAction(
                 book = book,
                 rating = 4.5,
-                review = ReviewDocument.EMPTY,
+                review = RichTextUiModel.EMPTY,
                 hasSpoilers = false,
             )
 
@@ -81,13 +85,17 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.verdictPromptBook shouldBe null
+            stateFlow.value.verdictReview shouldBe null
         }
 
         @Test
         fun `sets verdictPromptBook to null after execute on failure`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
-            stateFlow.value = ReadingScreenUiState(verdictPromptBook = book)
+            stateFlow.value = ReadingScreenUiState(
+                verdictPromptBook = book,
+                verdictReview = RichTextUiModel.EMPTY,
+            )
 
             coEvery {
                 saveBookVerdictUseCase(
@@ -101,7 +109,7 @@ class OnSaveVerdictActionTest {
             val action = OnSaveVerdictAction(
                 book = book,
                 rating = 4.5,
-                review = ReviewDocument.EMPTY,
+                review = RichTextUiModel.EMPTY,
                 hasSpoilers = false,
             )
 
@@ -113,6 +121,7 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.verdictPromptBook shouldBe null
+            stateFlow.value.verdictReview shouldBe null
         }
 
         @Test
@@ -132,7 +141,7 @@ class OnSaveVerdictActionTest {
             val action = OnSaveVerdictAction(
                 book = book,
                 rating = 3.0,
-                review = ReviewDocument.EMPTY,
+                review = RichTextUiModel.EMPTY,
                 hasSpoilers = true,
             )
 
@@ -170,7 +179,7 @@ class OnSaveVerdictActionTest {
             val action = OnSaveVerdictAction(
                 book = book,
                 rating = 4.5,
-                review = ReviewDocument.EMPTY,
+                review = RichTextUiModel.EMPTY,
                 hasSpoilers = false,
             )
 
@@ -201,7 +210,7 @@ class OnSaveVerdictActionTest {
             val action = OnSaveVerdictAction(
                 book = book,
                 rating = 4.5,
-                review = ReviewDocument.EMPTY,
+                review = RichTextUiModel.EMPTY,
                 hasSpoilers = false,
             )
 

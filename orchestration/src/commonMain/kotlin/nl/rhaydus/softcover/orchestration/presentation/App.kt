@@ -35,7 +35,6 @@ import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.theme.isDark
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
-import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
@@ -60,6 +59,7 @@ internal fun App() {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val themeConfig by viewModel.themeState.collectAsStateWithLifecycle()
+    val spinePalette by viewModel.spinePalette.collectAsStateWithLifecycle()
     val reAuthState by viewModel.reAuthState.collectAsStateWithLifecycle()
     val snackBarState by SnackBarManager.snackBarState.collectAsStateWithLifecycle()
 
@@ -116,7 +116,10 @@ internal fun App() {
     ApplyPlatformThemeAppearance(themeMode = themeConfig.themeMode)
 
     SoftcoverTheme(
-        palette = themeConfig.colorPalette.toSpinePalette(),
+        palette = spinePalette,
+        // `isDark()` stays in composition on purpose: "follow the device" resolves through
+        // `isSystemInDarkTheme()`, which only exists here. Reading a platform signal is not mapping —
+        // `component-contract.md` R9 names this as its one carve-out.
         darkTheme = themeConfig.themeMode.isDark(),
         dynamicColor = themeConfig.useDynamicColor,
     ) {

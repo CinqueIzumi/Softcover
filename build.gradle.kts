@@ -287,12 +287,30 @@ fun tierOf(path: String): String? = when {
 }
 
 // api-visibility rule (MODULE_STRUCTURE_GUIDELINES §10). The tier check above proves an edge is
-// *allowed*; it does not constrain whether a data-area module is re-exported (`api`) or kept private
-// (`implementation`). An `api` edge to a data module transitively republishes that whole feature's
-// data/use-case layer to every downstream consumer — which is exactly how `:core:designsystem` became
-// a god-module. `implementation` is therefore the default for these; every `api(project(<data>))` edge
-// must be an explicit, reviewed entry below so a new one is a conscious decision, not a silent leak.
-val dataAreaModules = setOf(
+// *allowed*; it does not constrain whether the target is re-exported (`api`) or kept private
+// (`implementation`). An `api` edge republishes the target's whole public surface to every downstream
+// consumer — which is exactly how `:core:designsystem` became a god-module. `implementation` is
+// therefore the default for the modules below; every `api(project(<one of these>))` edge must be an
+// explicit, reviewed entry in `allowedApiDataEdges` so a new one is a conscious decision, not a
+// silent leak.
+//
+// The set is **not** just the data-area modules. It started that way, and the component-library
+// migration walked straight into the gap: `:feature:book_detail` declared
+// `api(project(":core:component"))` on a mistaken belief that it re-exported a component type, the
+// two features doing the identical integration used `implementation`, and nothing failed — because
+// `:core:component` was not in this set. The rule's own rationale applies verbatim to a library whose
+// entire surface is components, so it is in the set now.
+//
+// Deliberately NOT in the set, so the omissions are decisions rather than oversights:
+//
+//  - `:core:domain` — a pure contract module with no dependencies of its own. Re-exporting it leaks
+//    nothing a consumer could not already reach, and the migration tracker's § 3a settled that it may
+//    be `api`-exposed freely. Putting it in the set would mean allowlisting ~15 legitimate edges.
+//  - `:core:designsystem` — tokens. Once S4 finishes it has zero project dependencies (G2), so an
+//    `api` edge to it republishes a leaf. Revisit only if it ever grows a dependency again.
+//  - `:core:network`, `:core:database` — infra, and their `api` edges are load-bearing for the
+//    Apollo/Room types that cross module boundaries by design.
+val apiSignOffModules = setOf(
     ":core:book",
     ":core:lists",
     ":core:deadlines",
@@ -300,6 +318,11 @@ val dataAreaModules = setOf(
     ":core:profile",
     ":core:identity",
     ":core:preferences",
+
+    // Added by the component-library migration — see the note above.
+    ":core:component",
+    ":core:presentation",
+    ":core:uibinding",
 )
 
 // Allowlisted (source → data module) `api` edges: each genuinely renders/returns the data module's
@@ -315,6 +338,35 @@ val allowedApiDataEdges = setOf(
     ":feature:explore" to ":core:preferences",
     ":feature:lists" to ":core:lists",
     ":feature:settings" to ":core:preferences",
+
+    // `:core:uibinding` exists to map a domain model onto the UI type that renders it, so a consumer
+    // needs to see *both sides* of a mapping without re-declaring them — that is the whole point of
+    // the module, decided in the migration tracker's § 3a. `api` is the design, not a leak.
+    ":core:uibinding" to ":core:component",
+
+    // `:feature:book_detail` re-exports presentation types through its own public surface (its
+    // `BookDetailScreen` is constructed by orchestration with a `BookInitialCover`), settled in § 5e.
+    // Contrast `:core:component`, which it depends on with `implementation`: nothing public in that
+    // module names a component type, and an `api` edge there republished the whole library by mistake
+    // — the mistake that widened this rule's scope in the first place.
+    ":feature:book_detail" to ":core:presentation",
+)
+
+// Layering direction inside the UI stack (docs/working/component-library-migration.md § 5g). The
+// tier rule lets any `:core:*` module depend on any other, so it has nothing to say about the one
+// direction that matters here: `:core:component` -> `:core:designsystem`, `:core:uibinding` ->
+// `:core:component`, and **never** the reverse.
+//
+// A reverse edge is a Gradle dependency cycle, so it does fail the build — but with a task-graph
+// error that says nothing about why it is wrong. This exists for the error message: the direction
+// rule is what forced S4's sub-commits to be re-cut consumer-first, and someone hitting it should be
+// told that rather than left reading a cycle trace. It also catches the non-cyclic case:
+// `:core:designsystem` -> `:core:presentation` is not a cycle, and is still forbidden — the whole
+// point of S3's split was to establish that those two sit side by side rather than stacking.
+val bannedReverseEdges = setOf(
+    ":core:designsystem" to ":core:component",
+    ":core:designsystem" to ":core:uibinding",
+    ":core:designsystem" to ":core:presentation",
 )
 
 // Component-library isolation (docs/working/component-library-migration.md §6 G1). The tier rule
@@ -517,12 +569,19 @@ tasks.register("checkModuleGraph") {
 
                         if (
                             isApiEdge &&
-                            dependency.path in dataAreaModules &&
+                            dependency.path in apiSignOffModules &&
                             (module.path to dependency.path) !in allowedApiDataEdges
                         ) {
                             violations += "${module.path} → api(${dependency.path})  " +
-                                "(data modules must be implementation-depended unless allowlisted — " +
-                                "MODULE_STRUCTURE_GUIDELINES §10)"
+                                "(must be implementation-depended unless allowlisted in " +
+                                "allowedApiDataEdges — MODULE_STRUCTURE_GUIDELINES §10)"
+                        }
+
+                        if ((module.path to dependency.path) in bannedReverseEdges) {
+                            violations += "${module.path} → ${dependency.path}  " +
+                                "(wrong direction — the UI stack layers component → designsystem and " +
+                                "uibinding → component; a stayer may never depend on a mover. See " +
+                                "docs/working/component-library-migration.md § 5g)"
                         }
 
                         // Component-library isolation: an explicit per-module allowlist, tighter than

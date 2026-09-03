@@ -302,7 +302,7 @@ val RatingGold = Color(0xFFFBBF23)
 val ColorScheme.spoilerEditorHighlight: Color
     get() = onSurfaceVariant.copy(alpha = 0.20f)
 
-internal val ColorScheme.spoilerCover: Color
+val ColorScheme.spoilerCover: Color
     get() = onSurfaceVariant.copy(alpha = 0.90f)
 
 /**

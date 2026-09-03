@@ -32,7 +32,9 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUse
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
+import nl.rhaydus.softcover.feature.settings.presentation.collector.ComponentGalleryCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.GalleryThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
@@ -178,6 +180,14 @@ val settingsModule = module {
     }
     // endregion
     // region Component gallery
-    factory { ComponentGalleryScreenModel(appDispatchers = get()) }
+    factory { GalleryThemeConfigurationCollector() } bind ComponentGalleryCollector::class
+
+    factory {
+        ComponentGalleryScreenModel(
+            getThemeConfigurationUseCase = get(),
+            appDispatchers = get(),
+            flows = getAll(),
+        )
+    }
     // endregion
 }

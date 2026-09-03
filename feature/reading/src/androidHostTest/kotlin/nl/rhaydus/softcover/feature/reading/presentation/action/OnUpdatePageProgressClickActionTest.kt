@@ -17,6 +17,11 @@ import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -74,6 +79,9 @@ class OnUpdatePageProgressClickActionTest {
         every {
             mock.id
         } returns id
+        every {
+            mock.userBook
+        } returns null
     }
 
     @Nested
@@ -375,6 +383,51 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.verdictPromptBook shouldBe book
+            stateFlow.value.verdictReview shouldBe null
+        }
+
+        @Test
+        fun `sets verdictReview to the mapped review document when updateBookProgress outcome is Applied`() = runTest {
+            // ----- Arrange -----
+            val reviewDocument = ReviewDocument(
+                paragraphs = listOf(
+                    ReviewParagraph(
+                        runs = listOf(
+                            ReviewRun(text = "Loved it."),
+                        ),
+                    ),
+                ),
+            )
+            val userBook = mockk<UserBook>().also { mock ->
+                every {
+                    mock.reviewDocument
+                } returns reviewDocument
+            }
+            val book = stubBook(id = 7)
+            every {
+                book.userBook
+            } returns userBook
+            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookProgress(
+                    book = book,
+                    newPage = any(),
+                    newSeconds = any(),
+                )
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnUpdatePageProgressClickAction(newPage = "50")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.verdictReview shouldBe reviewDocument.toRichTextUiModel()
         }
 
         @Test

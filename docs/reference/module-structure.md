@@ -70,8 +70,8 @@ only on modules **below** its tier.
 | `core:identity` | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:connectivity` | offline write-queue / sync infra (contracts in `core:domain/connectivity`) |
 | `core:designsystem` | Material 3 theme, editorial typography, the icon/illustration catalogs, modifiers, shared-element scopes — and, until the component library lands, the reusable components themselves. **Being split** — see the three rows below |
-| `core:component` | **Scaffolded, empty.** The component library: every component the app renders, driven by a UI model. Depends on `core:designsystem` and nothing else — domain, data, DI, navigation and Apollo are build failures (`checkModuleGraph` for the dependency graph, a scoped detekt `ForbiddenImport` for the source) |
-| `core:uibinding` | Adapters mapping a domain model to the UI type that renders it, for mappings two or more consumers need. `api`-exposes both sides of every mapping — `core:domain` and (as they arrive) `core:designsystem` / `core:component` — so a consumer sees the type it maps from and the type it maps to without re-declaring either. First resident: `ColorPalette.toSpinePalette()`, the reader's persisted spine colour as the design system's palette token |
+| `core:component` | The component library: every component the app renders, driven by a UI model. Depends on `core:designsystem` and nothing else — domain, data, DI, navigation and Apollo are build failures (`checkModuleGraph` for the dependency graph, a scoped detekt `ForbiddenImport` for the source). One directory per family, model + component + fixtures together: `richtext/`, `share/`, `verdict/`, `control/`, `gallery/` so far |
+| `core:uibinding` | Adapters mapping a domain model to the UI type that renders it, for mappings two or more consumers need. `api`-exposes both sides of every mapping — `core:domain`, `core:component`, `core:designsystem` — so a consumer sees the type it maps from and the type it maps to without re-declaring either. Residents: `ColorPalette.toSpinePalette()` (the reader's persisted spine colour as the design system's palette token) and the `ReviewDocument` ↔ `RichTextUiModel` pair, which is **bidirectional** because the verdict sheet is an editor and the edited model has to travel back out to be persisted |
 | `core:presentation` | The non-component residents evicted from `core:designsystem`: the cross-tier contracts whose impls live in orchestration (`AppNavigator`, `AppEntryPoint`, `BookDetailPresenter`, `CreateListPresenter`, `ActiveSessionController`, `SessionAuthenticator`, `ReadingSessionLauncher`), the nav destinations (`ScreenDestination`, `TabDestination`, `TransientNavArg`, `BookInitialCover`), `LibraryTab`, API-error mapping (`toUserMessage` / `onApiFailure`), `SplashState` / `ReAuthState`, `BookDetailPrefetcher`, the app-update composition locals, the reader's appearance preference as composition state (`LocalThemeConfiguration`, `ThemeMode.isDark()`), the `DebugRoutesContent` seam, and `presentationModule` — the app's one Koin module below the feature tier. Depends on `core:domain` + `core:book`, **not** on `core:designsystem` |
 | `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation`, and the plain-HTTP seam `safeGetText` |
 | `core:database` | Room database, migrations, **all** persisted entities + DAOs (incl. those a feature's data source uses) |
@@ -87,7 +87,12 @@ The `core` tier holds two **kinds** of module, and a new one should land deliber
 - **Infra / contract modules** — `core:{domain, database, network, notification, connectivity,
   designsystem, presentation, component, uibinding}`: cross-cutting plumbing (Apollo, Room, DI/UI
   primitives, sync) and the shared kernel (`core:domain`). They may `api`-expose their own surface
-  (and `core:domain` types) as needed.
+  (and `core:domain` types) as needed — **except** `core:{component, presentation, uibinding}`, which
+  sit under the same api-visibility sign-off as the data modules above. They are big public surfaces
+  (a whole component library; every navigation and session contract), so re-exporting one has the same
+  god-module effect that rule exists to prevent. `core:domain` and `core:designsystem` deliberately
+  stay outside it: domain is a dependency-free contract module, and designsystem is a leaf once S4
+  finishes.
 
 ### The vertical-slice rule (Softcover concretization)
 
@@ -146,10 +151,14 @@ Room DB.
   its presentation DI (`profileScreenModule`, `listsScreenModule`) so the two are distinguishable. The
   two infra modules named for their tech rather than their path — `dispatcherModule` (`core:domain`) and
   `apolloModule` (`core:network`) — are deliberate.
-- The tier rules and the data-module **api-visibility** rule are **enforced automatically** by the
+- The tier rules and the **api-visibility** rule are **enforced automatically** by the
   `checkModuleGraph` Gradle task (wired into `check`): it derives each module's tier from its path and
   fails the build on any `project(...)` dependency pointing sideways or upward, and on any
-  `api(project(":core:<data-module>"))` edge that is not on the task's explicit allowlist (§10).
+  `api(project(...))` edge into `apiSignOffModules` that is not on the task's explicit allowlist (§10).
+  It also fails on a **wrong-direction** edge inside the UI stack (`core:designsystem` depending on
+  `core:{component, uibinding, presentation}`) and on any breach of the component library's own
+  dependency ban. Every one of those rules has been verified by deliberately introducing a violation
+  and watching it fail — an ungated task is indistinguishable from a passing one until you try it.
 
 ### Kotlin Multiplatform
 

@@ -4,11 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
@@ -23,6 +28,7 @@ import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.presentation.state.SplashState
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 
 internal class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
@@ -37,6 +43,23 @@ internal class MainActivityViewModel(
 
     private val _themeState = MutableStateFlow(ThemeConfiguration())
     val themeState = _themeState.asStateFlow()
+
+    /**
+     * The reader's spine colour as the design system's palette token, mapped here rather than in
+     * `App` (`component-contract.md` R9 — a composable never calls a mapper).
+     *
+     * **Derived from [themeState] rather than held as a second `MutableStateFlow`.** Two flows that
+     * have to be updated in lockstep are one forgotten `update` away from silently disagreeing, and
+     * the failure mode is invisible: the app would simply paint the default palette forever while the
+     * preference read correctly everywhere else. `map` cannot forget.
+     */
+    val spinePalette: StateFlow<SpinePalette> = themeState
+        .map { it.colorPalette.toSpinePalette() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = ThemeConfiguration().colorPalette.toSpinePalette(),
+        )
 
     private val _reAuthState = MutableStateFlow(ReAuthState())
     val reAuthState = _reAuthState.asStateFlow()

@@ -1,9 +1,15 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.paletteChoicesFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.themeChoicesFor
+import nl.rhaydus.softcover.feature.settings.presentation.model.PaletteChoice
+import nl.rhaydus.softcover.feature.settings.presentation.model.ThemeChoice
 import nl.rhaydus.toad.UiState
 
 internal data class SettingsScreenUiState(
@@ -19,4 +25,8 @@ internal data class SettingsScreenUiState(
     val appVersionName: String = "",
     val appVersionCode: Int = 0,
     val uiScale: UiScale = UiScale.DEFAULT,
+    val spinePalette: SpinePalette = SpinePalette.DEFAULT,
+    val paletteGloss: String = SpinePalette.DEFAULT.gloss,
+    val themeChoices: ImmutableList<ThemeChoice> = themeChoicesFor(selected = ThemeMode.DEFAULT),
+    val paletteChoices: ImmutableList<PaletteChoice> = paletteChoicesFor(selected = ColorPalette.DEFAULT),
 ) : UiState

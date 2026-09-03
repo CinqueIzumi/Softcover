@@ -99,15 +99,17 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetCoverDefaults
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
-import nl.rhaydus.softcover.core.designsystem.presentation.component.VerdictSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
@@ -118,7 +120,6 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
-import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
@@ -333,10 +334,8 @@ internal fun ReadingOverlays(
         VerdictSheet(
             context = VerdictSheetContext.FINISHED,
             bookTitle = verdictBook.title,
-            coverEdition = verdictBook.currentEdition,
-            fallbackCoverUrl = verdictBook.coverUrl,
             initialRating = verdictBook.userBook?.rating?.takeIf { it > 0.0 },
-            initialReview = verdictBook.userBook?.reviewDocument ?: ReviewDocument.EMPTY,
+            initialReview = state.verdictReview ?: RichTextUiModel.EMPTY,
             initialHasSpoilers = verdictBook.userBook?.reviewHasSpoilers == true,
             canDelete = false,
             onSave = { rating, review, hasSpoilers ->
@@ -351,6 +350,18 @@ internal fun ReadingOverlays(
             },
             onDelete = {},
             onDismissRequest = { runAction(OnDismissVerdictPromptAction()) },
+            cover = {
+                EditionImage(
+                    edition = verdictBook.currentEdition,
+                    defaultEdition = verdictBook.currentEdition,
+                    isLoading = false,
+                    coverlessTitle = verdictBook.title,
+                    fallbackCoverUrl = verdictBook.coverUrl,
+                    cornerRadius = VerdictSheetCoverDefaults.CornerRadius,
+                    elevation = VerdictSheetCoverDefaults.Elevation,
+                    shadowColor = Color.Black.copy(alpha = VerdictSheetCoverDefaults.SHADOW_ALPHA),
+                )
+            },
         )
     }
 

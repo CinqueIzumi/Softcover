@@ -7,10 +7,11 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGallery
 import nl.rhaydus.toad.Collector
 
 /**
- * The gallery observes nothing — [GalleryRegistry][nl.rhaydus.softcover.core.component.gallery.GalleryRegistry]
- * is static data, not a flow — so this sealed type never gains an implementation. It exists only so
- * [nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentGalleryScreenModel] can
- * pass `initializers = emptyList()` with a concrete `Collector` type parameter.
+ * [GalleryRegistry][nl.rhaydus.softcover.core.component.gallery.GalleryRegistry] itself is static
+ * data, not a flow, so the only implementation is
+ * [GalleryThemeConfigurationCollector][nl.rhaydus.softcover.feature.settings.presentation.collector.GalleryThemeConfigurationCollector] —
+ * it maps the app's live theme configuration into the gallery's own state, off the composition
+ * (`component-contract.md` R9).
  */
 internal sealed interface ComponentGalleryCollector : Collector<
         ComponentGalleryUiState,

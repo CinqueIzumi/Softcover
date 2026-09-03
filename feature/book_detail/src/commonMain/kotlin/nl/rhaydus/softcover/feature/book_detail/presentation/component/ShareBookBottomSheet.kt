@@ -44,35 +44,19 @@ import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.ShareOutcome
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.designsystem.presentation.share.BookShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCard
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.softcoverShareCardCaptureConfig
+import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCard
+import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.UserTag
 
 @Composable
 internal fun ShareBookBottomSheet(
-    book: Book,
-    edition: BookEdition?,
-    currentUsername: String?,
-    currentUserAvatarUrl: String?,
-    userTags: List<UserTag>,
+    shareBookCard: BookShareCardUiModel,
+    shareUpdateCard: ReadingUpdateShareCardUiModel?,
     onDismissRequest: () -> Unit,
 ) {
-    val bookContent = remember(book, edition) { book.toShareContent(edition = edition) }
-
-    val updateContent = remember(book, edition, currentUsername, currentUserAvatarUrl, userTags) {
-        book.toReadingUpdateContent(
-            edition = edition,
-            username = currentUsername,
-            avatarUrl = currentUserAvatarUrl,
-            userTags = userTags,
-        )
-    }
-
     val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
     val coroutineScope = rememberCoroutineScope()
 
@@ -80,19 +64,19 @@ internal fun ShareBookBottomSheet(
     var isSavingToGallery by remember { mutableStateOf(false) }
     val isBusy = isSharing || isSavingToGallery
 
-    var selectedVariant by remember(updateContent != null) {
-        mutableStateOf(if (updateContent != null) ShareCardVariant.MY_UPDATE else ShareCardVariant.BOOK)
+    var selectedVariant by remember(shareUpdateCard != null) {
+        mutableStateOf(if (shareUpdateCard != null) ShareCardVariant.MY_UPDATE else ShareCardVariant.BOOK)
     }
 
-    val displayedContent: ShareContent = when (selectedVariant) {
-        ShareCardVariant.MY_UPDATE -> updateContent ?: bookContent
-        ShareCardVariant.BOOK -> bookContent
+    val displayedContent: ShareCardUiModel = when (selectedVariant) {
+        ShareCardVariant.MY_UPDATE -> shareUpdateCard ?: shareBookCard
+        ShareCardVariant.BOOK -> shareBookCard
     }
 
-    val subtitle = if (updateContent != null && selectedVariant == ShareCardVariant.MY_UPDATE) {
-        "Your reading update for ${book.title}"
+    val subtitle = if (shareUpdateCard != null && selectedVariant == ShareCardVariant.MY_UPDATE) {
+        "Your reading update for ${shareBookCard.title}"
     } else {
-        "An editorial card of ${book.title}"
+        "An editorial card of ${shareBookCard.title}"
     }
 
     AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
@@ -120,7 +104,7 @@ internal fun ShareBookBottomSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            if (updateContent != null) {
+            if (shareUpdateCard != null) {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 ShareCardVariantToggle(
@@ -160,7 +144,7 @@ internal fun ShareBookBottomSheet(
                         isSharing = true
 
                         coroutineScope.launch {
-                            when (val outcome = capture.share(displayName = book.title)) {
+                            when (val outcome = capture.share(displayName = shareBookCard.title)) {
                                 is ShareOutcome.Shared -> Unit
 
                                 is ShareOutcome.Cancelled -> Unit
@@ -194,7 +178,7 @@ internal fun ShareBookBottomSheet(
 
                     coroutineScope.launch {
                         val saved = runCatching {
-                            capture.saveToGallery(displayName = book.title)
+                            capture.saveToGallery(displayName = shareBookCard.title)
                         }.onFailure {
                             AppLog.e("$it")
                         }.getOrNull()
@@ -253,7 +237,7 @@ private fun ShareCardVariantToggle(
 
 @Composable
 private fun ShareCardPreview(
-    content: ShareContent,
+    content: ShareCardUiModel,
     capture: ShareCardCapture,
 ) {
     val maxPreviewWidth = 280.dp
@@ -296,22 +280,4 @@ private fun ShareCardPreview(
             ShareCard(content = content)
         }
     }
-}
-
-private fun Book.toShareContent(edition: BookEdition?): BookShareContent {
-    val resolvedEdition = edition ?: defaultEdition
-
-    return BookShareContent(
-        coverUrl = resolvedEdition?.localImagePath
-            ?: resolvedEdition?.url
-            ?: coverUrl,
-        title = title,
-        author = authors.firstOrNull()?.name.orEmpty(),
-        communityRating = rating.takeIf { it > 0.0 },
-        userRating = userBook?.rating?.toInt(),
-        releaseYear = resolvedEdition?.releaseYear?.takeIf { it != -1 } ?: releaseYear.takeIf { it != -1 },
-        pageCount = resolvedEdition?.pages,
-        description = description.takeIf { it.isNotBlank() },
-        quote = null,
-    )
 }

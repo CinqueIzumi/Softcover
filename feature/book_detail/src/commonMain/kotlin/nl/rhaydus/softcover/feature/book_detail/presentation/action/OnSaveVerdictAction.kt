@@ -1,8 +1,9 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.uibinding.richtext.toReviewDocument
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -12,7 +13,7 @@ import nl.rhaydus.toad.ActionScope
 internal data class OnSaveVerdictAction(
     private val book: Book,
     private val rating: Double?,
-    private val review: ReviewDocument,
+    private val review: RichTextUiModel,
     private val hasSpoilers: Boolean,
 ) : BookDetailAction {
     override suspend fun execute(
@@ -24,7 +25,7 @@ internal data class OnSaveVerdictAction(
         dependencies.saveBookVerdictUseCase(
             book = book,
             rating = rating,
-            review = review,
+            review = review.toReviewDocument(),
             hasSpoilers = hasSpoilers,
         ).onFailure { error ->
             AppLog.e("$error")

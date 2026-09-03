@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
+import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -8,6 +9,7 @@ import nl.rhaydus.toad.UiState
 internal data class ProfileUiState(
     val userProfileData: UserProfileData? = null,
     val readingLife: ReadingLife? = null,
+    val readingLifeShareCard: ReadingLifeShareCardUiModel? = null,
     val hideUntaggedAuthors: Boolean = false,
     val isLoading: Boolean = true,
 ) : UiState {

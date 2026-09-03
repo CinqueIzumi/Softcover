@@ -8,9 +8,9 @@
 **Rollout model:** one branch, one PR, merged all at once. Stages below are *commit* boundaries on
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
-**Status:** `S4 IN PROGRESS` — S4-1 (theme tokens) and S4-2a (debug screens out) done; next up S4-2b
-(the review / verdict / share block). **§ 5g is the most important thing to read before continuing:**
-the direction rule re-cut S4's sub-commits, and the original ordering was impossible.
+**Status:** `S4 IN PROGRESS` — S4-1, S4-2a and S4-2b done (S4-2b includes the **R9 correction**,
+§ 5i); next up S4-3 (the two remaining big sheets). **§ 5g is the most important thing to read before continuing:** the direction rule re-cut
+S4's sub-commits, and the original ordering was impossible.
 **Branch:** `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models`
 **Issue:** [#275](https://github.com/CinqueIzumi/Softcover/issues/275) — tag `E.1`, labels
 `area:cross-cutting` / `kind:tech` / `scope:L`, no milestone. Keep its Stages and Acceptance
@@ -381,12 +381,11 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
             `:core:presentation`. Pure relocation, no UI models. Drops them out of S4-2b's closure,
             removes them from the release binary, and lets `:core:designsystem` drop Voyager.
             **See § 5g.**
-      - [ ] **S4-2b — The review / verdict / share block** (~2,660 lines): `RichTextUiModel` + the
-            bidirectional `:core:uibinding` mapper, `ReviewDocumentText`, the editor helpers
-            (`ReviewMark` / `ReviewMarkType` / `ReviewEditorBuffer` / `ReviewRichText`),
-            `ReviewFormattingToolbar`, `VerdictBlock`, `VerdictSheet`, `VerdictSheetContext`, and the
-            whole `share/` package with its R8 rename and R4 fix. **They move together because the
-            direction rule leaves no alternative** (§ 5g), not because it is convenient.
+      - [x] **S4-2b — The review / verdict / share block.** `RichTextUiModel` + the bidirectional
+            `:core:uibinding` mapper, `RichText` (ex-`ReviewDocumentText`), the editor helpers,
+            `RichTextFormattingToolbar`, `VerdictBlock`, `VerdictSheet`, `VerdictSheetContext`, and the
+            whole `share/` package with its R8 rename and R4 fix. **They moved together because the
+            direction rule left no alternative** (§ 5g), not because it was convenient. **See § 5h.**
       - [ ] **S4-3 — The two remaining big sheets**: `UpdateProgressBottomSheet` (+ `ProgressSheetTab`,
             `ProgressSheetTabMapping` -> `:core:uibinding`), `ChooseListsBottomSheet` (+
             `ListMembership`), `PreviewData` -> `:core:domain`.
@@ -759,6 +758,180 @@ the design system", which this sub-commit is precisely what stops being true.
 `:feature:settings`, and type-resolved detekt under JDK 21 including `:app:detektMain` (which fans out
 to `detektDebug` + `detektRelease`) — all green. `:app:projectHealth` unreachable, as above.
 
+### 5h. S4-2b outcome — the first real components in the library, and one deferral recorded
+
+25 files, the first components to actually land in `:core:component`. What it settled:
+
+**`RichTextUiModel` is named for what it holds, not where it came from.** The R4 conversion § 7.0
+called for is a rename in shape but not in meaning: the library now owns `RichTextUiModel` /
+`RichTextParagraph` / `RichTextRun` plus the editor's `RichTextMark` / `RichTextMarkType` /
+`RichTextEditorBuffer`, all `ImmutableList`-typed per R3. Nothing about formatted prose is specific to
+a review — the quote share card renders one with no review in sight — so `Review*` would have been the
+wrong name to carry across the boundary.
+
+**The mapper is a pair, and that is the interesting part.** Most UI models are write-once: a feature
+maps domain -> UI and the component renders. The verdict sheet is an **editor**, so the edited model
+must travel back out through `onSave` to be persisted. A one-way mapper would have forced the sheet to
+keep emitting `ReviewDocument` — exactly the domain type R4 exists to keep out. Hence
+`toRichTextUiModel()` **and** `toReviewDocument()` in `:core:uibinding`, promoted straight past R6's
+usual feature-local start because they landed with two consumers already.
+
+**`VerdictSheet`'s last domain type became a slot, not a model.** It took a `BookEdition` purely to
+render `EditionImage`. Resolving a book's cover needs the reader's chosen edition, the book's default,
+a fallback URL *and* a locally persisted file — none of which a component may know. So it takes
+`cover: @Composable () -> Unit`, owns only the slot's width, and each caller passes the cover surface
+it already uses. This is the § 7.1 escape hatch ("a component that needs a slot takes a trailing
+`content`") used for its actual purpose, and it means the sheet needs **no rework** when `Cover` lands
+in S4-4 — the caller swaps what it puts in the slot.
+
+**A deferral, recorded as a decision rather than left as a silent gap.** `VerdictBlock`,
+`VerdictSheet` and `RichTextFormattingToolbar` landed **R4-clean and R8-named, but not R1/R2-shaped**:
+they still take loose parameters and, in the sheet's case, three separate callbacks rather than one
+model plus one sealed event lambda. That is deliberate. What forced them into this sub-commit was the
+direction rule, not their own readiness, and § 7.2 puts the verdict family's chrome consolidation in
+S6 — restructuring them now would collide with that and mean doing it twice. The consequence to accept
+knowingly: **they cannot be registered in the Component Gallery yet**, because `GalleryRegistry` is
+keyed on a UI model's `previews` and they have no model. `GalleryFamily.VERDICT` exists (its package
+does), holds no entry, and `GalleryRegistry.families` filters empty families out, so the gallery simply
+does not show it until S6.
+
+**The gallery renders its first two families.** `RICHTEXT` (5 fixtures) and `SHARE` (8, one per variant
+plus the two anatomy outliers — a minimal book card and the in-progress reading update). The share
+fixtures were **lifted from `ShareCard.kt`'s nine existing `@Preview` literals**, and those `@Preview`
+functions now render *from* `ShareCardUiModel.previews` rather than re-declaring the same values — which
+is R5's stated point: the preview set and the gallery set cannot drift because they are one list.
+
+**A share card cannot be handed the gallery's width, and that is a lesson worth keeping.** It sets its
+own width (`ShareCardDimensions`, 300–420dp) because it is an export artefact at fixed dimensions, so
+on a phone it is wider than the fixture tile. The gallery pans it (`horizontalScroll`) rather than the
+card learning about the gallery. No "gallery mode" parameter was added, and `component-contract.md`
+§ 7.3 now records the rule: when a component genuinely owns its metrics, let the surrounding surface
+adapt.
+
+**Four visibility widenings, all of them the end state arriving on time.** `spoilerCover` (a
+`:core:designsystem` colour role) went public because its renderer now lives in `:core:component`; the
+editor helpers in `RichTextEditing.kt` went from `internal` to public because their consumer crossed a
+module boundary. Neither is a leak — a public `sealed interface ShareCardUiModel` whose members were
+`internal` could never have been `when`-ed exhaustively from outside the module anyway.
+
+**The dependency gate earned its keep again.** `:core:designsystem:projectHealth` failed on
+`implementation(libs.rhaydus.designsystemImage)` the moment `ShareCard` left — `RhaydusShimmerImage`
+was its only user in that module. Dropped, and `:core:component` declares it instead, along with
+`designsystem-editorial` (which `:core:designsystem` holds on `implementation`, so it is not
+transitively visible).
+
+**Gates at this boundary:** `checkModuleGraph` (287 edges), `ktlintCheck`, repo-wide `compileKotlinJvm`
++ `:desktopApp:compileKotlin` + both `:app` variants' Kotlin compilation,
+`compileKotlinIosSimulatorArm64` on `:core:{component, uibinding, designsystem}` and
+`:feature:{book_detail, reading, profile}`, `projectHealth` on all six touched modules, type-resolved
+detekt under JDK 21 across the six plus `:app:detektMain`, and the `androidHostTest` suites of
+`:core:{component, uibinding, designsystem}`, `:feature:{book_detail, reading, profile}` and
+`:orchestration` — all green.
+
+**Not verified:** no visual pass. `RichText`'s spoiler-reveal tap, the verdict sheet's cover slot, and
+the share cards' capture path are all render-time behaviour that compilation cannot speak to, and this
+repo has no Compose UI tests by decision (§ 6 "Test posture"). The gallery is now non-empty, so a
+desktop run is finally worth something — it is the next thing to do, ahead of S4-3.
+
+### 5i. The R9 correction — mapping had leaked into the render, and the contract had no rule against it
+
+**Raised by the user against S4-2b, before it was committed.** The R4 conversions in S4-1 and S4-2b
+each replaced a domain-typed component parameter with a UI model — and then called the mapper *at the
+call site*, inside the composable. Fourteen sites across six files. That is a layering violation the
+contract did not forbid, because nobody had written the rule down: R1–R8 govern a component's
+*signature* and its *model*, and say nothing about where the mapping runs.
+
+**`component-contract.md` now carries R9**, and `architecture.md` points at it: *mapping happens in
+the ScreenModel; a composable never calls a mapper.* The `UiState` carries the result. Three reasons,
+in the order they bite: it is a **layering** rule (deciding *what* to show does not belong in the code
+that decides *how*), a **correctness** rule for the reverse direction (an editor's output has one
+place to be mapped, not one per call site), and a **performance** rule — a mapper in composition
+re-runs every recomposition and allocates a fresh model, which then breaks the equality check that
+would have let Compose skip the component it was built for.
+
+**The independent confirmation is worth recording.** `rhaydus-kotlin:code-reviewer`, reviewing the
+same diff without knowing R9 was coming, flagged the identical call sites from the performance angle
+alone — and found that in `VerdictSheet`'s case the mapped value was consumed by an **unkeyed**
+`remember`, so only the first computed value was ever used and every recomputation after it was
+provably wasted. `remember` at the call site would have hidden that; moving the call removed it.
+
+**What moved.** `UiState` gained the mapped fields, populated where the source already lands:
+`verdictReview` (book_detail, reading) in the actions/collectors that resolve the book;
+`reviews: ImmutableList<BookReviewUiModel>` — a new feature-local presentation model — replacing the
+domain list outright; `shareBookCard` / `shareUpdateCard` (book_detail) via a new `ShareCardsCollector`;
+`readingLifeShareCard` (profile) combined across two collectors; and `themeChoices` / `paletteChoices` /
+`paletteGloss` / the gallery's `paletteChipOptions` (settings) built in the theme collectors. Feature
+mappers moved out of `presentation/component/` into `presentation/mapper/` and were renamed for their
+R8 target types. The reverse direction went into the actions: `OnSaveVerdictAction` maps
+`RichTextUiModel -> ReviewDocument` itself, in both features.
+
+**A feature-local presentation model MAY hold a domain enum as its event payload.** R4 governs
+`:core:component`, not a feature's own `presentation/model/`. So `PaletteChoice` carries both the
+`SpinePalette` the tile renders and the `ColorPalette` its tap dispatches. R9 is about *where the
+mapping runs*, and that is satisfied: the render neither maps nor labels.
+
+**The carve-out, written into R9 so the rule is not read too widely.** `ThemeMode.isDark()` stays in
+composition. "Follow the device" resolves through `isSystemInDarkTheme()`, which exists only in
+composition — reading a *platform* signal is not mapping, and the same goes for `CompositionLocal`
+reads and window size classes. Trying to move it would have been a regression dressed as compliance.
+
+**One silent bug this correction introduced and the verification caught.** The agent refactoring
+settings/orchestration stalled mid-task. It had declared `MainActivityViewModel._spinePalette` as a
+second `MutableStateFlow` and never wired its update — which **compiles perfectly** and would have
+pinned the app to the default palette forever while the preference read correctly everywhere else.
+It is now *derived* from `themeState` with `map` + `stateIn`: two flows that must be updated in
+lockstep are one forgotten `update` away from disagreeing, and `map` cannot forget. **The lesson for
+the remaining stages: a state field added but never populated passes every gate this repo has.** After
+an agent-assisted state change, grep that each new field is both declared and assigned.
+
+**Also closed here, from the same review:** the `ShareCard` R3 violation (four collection fields came
+over from `:core:designsystem` as plain `List`, where R3 did not apply, and nothing converted them —
+`ShareCard` was recomposing needlessly for three variants); the **phantom test** (`RichTextMapper`'s
+KDoc claimed `RichTextMapperTest` covered round-tripping and the tracker's "with tests" box was ticked
+— neither was true; there are now 10 round-trip / fidelity / ordering tests, verified from the results
+XML); the verdict cover slot's treatment, which the two callers had begun to duplicate asymmetrically,
+centralised as `VerdictSheetCoverDefaults` in `:core:component/verdict/`; and a KDoc claiming
+`RichTextUiModel` used to live in `:core:domain`, which it never did.
+
+**Review outcome, and the two things it caught that were mine.** `rhaydus-kotlin:code-reviewer`
+re-reviewed the combined S4-2b + R9 state and confirmed R9 is satisfied everywhere it traced —
+including the two paths flagged as least-trusted: profile's two-collector combine is order-independent
+(each collector reads the other half off current state inside the same synchronous `setState`), and
+`BookReviewUiModel.id` is a stable key with nothing dropped from the domain model.
+
+It found two errors of mine worth recording, because both are the *kind* that recurs:
+
+- **A global `replace()` caught a second call site.** Centralising the verdict cover treatment into
+  `VerdictSheetCoverDefaults` also rewrote the book page's unrelated **hero** jacket, which merely
+  happened to share `16.dp`. That coupled the hero to a verdict-sheet constant, so tuning the sheet
+  would silently move the hero with it. The hero has its own constant again, with a comment saying why
+  it deliberately is not the shared one. **Scripted renames need their match count checked, not just
+  their result compiled.**
+- **An `api` edge with no justification, on a gate that cannot see it.** `:feature:book_detail`
+  declared `api(project(":core:component"))` on the reasoning that `BookDetailUiState` exposes
+  `VerdictSheetContext` publicly. `BookDetailUiState` is `internal`. The two features doing the
+  identical integration used `implementation`. And `checkModuleGraph`'s api-visibility rule only covers
+  `dataAreaModules`, which `:core:component` is not in — so this was a silent leak of exactly the shape
+  that rule's own comment warns about. Now `implementation`.
+
+Also fixed from that review: `canDelete` still read the domain `reviewDocument` rather than the
+`state.verdictReview` this change consolidated; brace glomming in two reading actions; a stray
+blank-line run.
+
+**The test gap it found was the real one, and it is now closed.** The six reading action tests had
+been patched only far enough to keep their mocks compiling — **zero** assertions on `verdictReview` —
+and the two new `book_detail` collectors plus profile's combine had no tests at all. That is precisely
+the gap the `MainActivityViewModel` bug above exploited. Added: `verdictReview` assertions across all
+six reading actions, `VerdictReviewCollectorTest` (5) and `ShareCardsCollectorTest` (6 — covering
+staggered input arrival and the spoiler-tag exclusion), `ReadingLifeCollectorTest` (5) and
+`UserInformationCollectorTest` (6 — both arrival orders, single-half-null, recombination). No
+production bug surfaced. Counts verified from the results XML, not from an agent's report.
+
+**Explicitly NOT done.** `UiState` still holds domain models — `BookDetailUiState` alone carries
+`Book`, `BookEdition`, `BookList`, `UserTag`, `DeadlineProgress`. R9 stops the *render* from mapping;
+it does not stop the state from carrying domain types. That is S7 (`BookCard`) and S10 (shelf
+teardown), and pulling it into S4 would mean re-planning the remaining stages.
+
 ### 5a. The Component Gallery — decided: shipped easter egg
 
 Not debug-only. Consequences to build for, rather than discover late:
@@ -807,9 +980,24 @@ already says so in a comment. Every rule below is a build failure.
           "io.insert-koin", "cafe.adriel.voyager", "com.apollographql.apollo",
       )
       ```
-- [ ] **G2 — `:core:designsystem` has zero project dependencies.** Assert in the same task.
+- [ ] **G2 — `:core:designsystem` has zero project dependencies.** Assert in the same task,
+      alongside `bannedReverseEdges` and the `apiSignOffModules` check (§ 6a). Lands in S4-6, once
+      `EditionImage` has moved and taken the `:core:domain` / `:core:book` edges with it. **Two
+      halves, and they land together:**
+      - [ ] the **dependency** gate — `checkModuleGraph` fails if `:core:designsystem` declares any
+            `project(...)` dependency at all
+      - [ ] the **source** gate — a detekt `ForbiddenImport` on
+            `nl.rhaydus.softcover.core.domain.**` scoped to `**/core/designsystem/**`, pairing with
+            G2 exactly as § 5c pairs one with G1. **Not belt-and-braces: the two catch different
+            things, verified the hard way.** S4-1 left fully-qualified
+            `nl.rhaydus.softcover.core.domain.model.*` references in `Color.kt` and
+            `LocalDarkTheme.kt`'s KDoc, and *both* gates were blind to them — they are neither
+            imports nor declared dependencies. A reviewer caught them, not a gate. The import-level
+            rule at least closes the case where a stray `import` survives a dependency removal
+            (possible while another module on the compile classpath still `api`-exposes the type).
 - [ ] **G3 — The `:core:designsystem` -> `:core:book` api allowlist row is gone** from
-      `allowedApiDataEdges` (`build.gradle.kts:281`).
+      `allowedApiDataEdges` (`build.gradle.kts:281` — note the row list has since grown two rows and
+      the set that drives it was renamed `apiSignOffModules`; see § 6a).
 - [ ] **G4 — Composable budget ratchet.** A `checkComponentBudget` task counting `@Composable`
       declarations outside `:core:component`, excluding only (a) functions whose name ends in
       `Preview` and (b) platform `expect`/`actual` composables (`BarcodeScanner`). Ceiling set to
@@ -820,6 +1008,58 @@ already says so in a comment. Every rule below is a build failure.
       § 3 package layout.
 - [ ] **G6 — `./gradlew check` green**, including `styleCheck` (type-resolved detekt across every
       module) and `ktlintCheck`.
+
+### 6a. Gate audit — what the restructure outgrew, and what is still pending
+
+Prompted by the `api(project(":core:component"))` mistake in § 5i slipping past every gate. The
+question worth asking was not "is `checkModuleGraph` broken" — it does exactly what it says — but
+"has the restructure outgrown what it was told to check". It had, in two places. Both are now closed
+and **both were verified by deliberately reintroducing the violation and watching the build fail**,
+because an ungated rule reads exactly like a passing one.
+
+**1. The api-visibility rule was scoped to data modules only.** Its own rationale — an `api` edge
+republishes the target's whole surface downstream, "exactly how `:core:designsystem` became a
+god-module" — applies verbatim to a module whose entire surface is a component library. `dataAreaModules`
+is now `apiSignOffModules`, adding `:core:{component, presentation, uibinding}`. Widening it surfaced
+exactly two edges, both deliberate and both now allowlisted with their reason: `:core:uibinding ->
+api(:core:component)` (§ 3a — seeing both sides of a mapping *is* the module) and
+`:feature:book_detail -> api(:core:presentation)` (§ 5e). `:core:domain` and `:core:designsystem` are
+deliberately left out: domain is a dependency-free contract module (§ 3a settled that it may
+`api`-expose freely, and gating it would mean allowlisting ~15 legitimate edges), and designsystem is a
+leaf once G2 lands.
+
+**2. The direction rule (§ 5g) had no gate at all** — the rule that re-cut this entire stage. A
+reverse edge inside the UI stack is usually a Gradle *cycle*, so it did fail, but with a task-graph
+trace that says nothing about why it is wrong. `bannedReverseEdges` now names them and points at § 5g.
+It also catches the non-cyclic case: `:core:designsystem -> :core:presentation` is not a cycle and is
+still forbidden, since establishing that those two sit side by side rather than stacking was the whole
+point of S3.
+
+**Pending, and already scheduled — not blind spots:** G2 (`:core:designsystem` zero project
+dependencies) and G3 (delete the `-> :core:book` allowlist row) land in S4-6, because designsystem
+still `api`-depends on `:core:domain` and `:core:book` until `EditionImage` moves in S4-4. G4
+(`checkComponentBudget`) is S11's, since the count is still falling.
+
+**New follow-up this audit surfaced**, and it is now tracked as work rather than prose: G2 is a
+**pair** of gates, not one — the dependency assertion plus a source-level `ForbiddenImport` scoped to
+`**/core/designsystem/**`. Both halves are checkboxes under G2 above, with the reason they are not
+redundant.
+
+**Known and accepted gaps, recorded so they are decisions:**
+
+- **R9 has no mechanical gate.** A detekt rule on mapper calls inside a `@Composable` was offered and
+  declined in favour of the contract doc plus review; the pattern is awkward to express precisely and
+  risks false positives. Worth knowing that it is the one contract rule with zero enforcement, and
+  that a violation of it did reach the tree silently before a human caught it.
+- **detekt does not scan `iosMain`** (no type resolution for native targets — § 5c). `:core:component`
+  has no `iosMain` at all today, so the `ForbiddenImport` gap is theoretical; it stops being
+  theoretical the first time a component needs a platform actual.
+- **`:app:projectHealth` is unreachable on this machine** (the pre-existing `JdkImageTransform`
+  failure), so `:app`'s dependency declarations are ungated locally — which matters more since S4-2a
+  gave it a `debugImplementation` block. CI on a working toolchain would cover it.
+- **A `UiState` field declared but never populated passes every gate here** (§ 5i). No gate is
+  proposed; the mitigation is the unit tests added in S4-2b and the habit of grepping that each new
+  field is assigned, not just declared.
 
 ### Test posture — a decision, not an omission
 
@@ -856,6 +1096,12 @@ These two land in S4, before every family below. The share cards are the referen
 
 #### Share cards — 1,161 lines -> `share/` in `:core:component`, one file per body
 
+> **The per-body file split is still open.** S4-2b moved `share/` and did the R8 rename and the R4
+> fix, but `ShareCard.kt` is still one file — splitting it was not needed to satisfy any gate, and
+> doing it in the same change as the module move would have made an already-large diff harder to read
+> against the original. The seven items below are the remaining work; they are pure file surgery with
+> no type changes, so they can land in any later sub-commit of S4.
+
 **Recommendation: do this in S4, not S11, and split the bodies while renaming.** S4 already touches
 every `:core:designsystem` component; leaving this file whole means either it does not get UI models
 in S4 (and then fails G1, since it imports `:core:domain`) or it does and stays a 1,161-line
@@ -864,15 +1110,15 @@ monolith that S11 has to re-open. One pass, not two.
 The dispatch and the `*ShareContent` types are already correct (§ 4.3) — this is a rename plus a
 mechanical split plus one real piece of work (rich text, below).
 
-- [ ] Keep `ShareCard(content:)` dispatch + `ShareCardSignOff` + `ShareCardDimensions` in `ShareCard.kt` (`share/ShareCard.kt:68,959`)
+- [x] Keep `ShareCard(content:)` dispatch + `ShareCardSignOff` + `ShareCardDimensions` in `ShareCard.kt` (`share/ShareCard.kt:68,959`)
 - [ ] `BookShareCardBody` -> own file (`share/ShareCard.kt:132`, + `buildBookStatsLine:226`)
 - [ ] `ReadingUpdateShareCardBody`, `ReadingUpdateReaderIdentity` -> own file (`:243,377`)
 - [ ] `StatShareCardBody` -> own file (`:408`)
 - [ ] `QuoteShareCardBody` -> own file (`:433`) — carries the R4 rich-text gap
 - [ ] `YearRecapShareCardBody` -> own file (`:472`)
 - [ ] `ReadingLifeShareCardBody` + its parts (`MiniScallopPortrait:677`, `ReadingLifeRidgeline:721`, `ReadingLifeGenreRanking:824`, `ReadingLifeGenreRow:851`, `ReadingLifeFooterStat:887`, `ReadingLifeDivider:924`, `normalizedReadingLifeMonths:933`, `readingLifeInitials:943`) -> own file
-- [ ] Rename per R8: `ShareContent` -> `ShareCardUiModel`; `BookShareContent`, `QuoteShareContent`, `StatShareContent`, `YearRecapShareContent`, `ReadingLifeShareContent`, `ReadingUpdateShareContent` -> `*ShareCardUiModel`
-- [ ] Update the two mappers that build them: `feature/book_detail/presentation/component/ReadingUpdateShareContentMapper.kt` (and its existing test) and the `ProfileShareBottomSheet` / `ReadingLifeSharePreview` construction sites in `feature/profile`
+- [x] Rename per R8: `ShareContent` -> `ShareCardUiModel`; `BookShareContent`, `QuoteShareContent`, `StatShareContent`, `YearRecapShareContent`, `ReadingLifeShareContent`, `ReadingUpdateShareContent` -> `*ShareCardUiModel`
+- [x] Update the two mappers that build them: `feature/book_detail/presentation/component/ReadingUpdateShareContentMapper.kt` (and its existing test) and the `ProfileShareBottomSheet` / `ReadingLifeSharePreview` construction sites in `feature/profile`
 
 #### Rich text — the one non-mechanical R4 conversion
 
@@ -885,15 +1131,15 @@ immediately).
 This is the only place in the migration where R4 is a design problem rather than a rename. Do it
 early in S4 — `QuoteShareCardBody` and `VerdictSheet` both block on it.
 
-- [ ] `RichTextUiModel` / `RichTextRun` / `RichTextMark` in `:core:component`
-- [ ] `ReviewDocument` -> `RichTextUiModel` mapper in `:core:uibinding`, with tests
-- [ ] `ReviewRichText` — `core/designsystem/presentation/component/ReviewRichText.kt`
-- [ ] `ReviewDocumentText` — `core/designsystem/presentation/component/ReviewDocumentText.kt`
-- [ ] `ReviewMark` / `ReviewMarkType` — `core/designsystem/presentation/component/ReviewMark.kt`, `ReviewMarkType.kt`
-- [ ] `ReviewEditorBuffer` — `core/designsystem/presentation/component/ReviewEditorBuffer.kt`
-- [ ] `VerdictBlock`, `VerdictScoreAndCaption` — `core/designsystem/presentation/component/VerdictBlock.kt`
+- [x] `RichTextUiModel` / `RichTextRun` / `RichTextMark` in `:core:component`
+- [x] `ReviewDocument` -> `RichTextUiModel` mapper in `:core:uibinding`, with tests
+- [x] `ReviewRichText` — `core/designsystem/presentation/component/ReviewRichText.kt`
+- [x] `ReviewDocumentText` — `core/designsystem/presentation/component/ReviewDocumentText.kt`
+- [x] `ReviewMark` / `ReviewMarkType` — `core/designsystem/presentation/component/ReviewMark.kt`, `ReviewMarkType.kt`
+- [x] `ReviewEditorBuffer` — `core/designsystem/presentation/component/ReviewEditorBuffer.kt`
+- [x] `VerdictBlock`, `VerdictScoreAndCaption` — `core/designsystem/presentation/component/VerdictBlock.kt`
 - [ ] `ReviewCard` — `feature/book_detail/presentation/screen/BookDetailShelf.kt`
-- [ ] Existing `ReviewRichTextTest` re-pointed at the new model (it currently asserts on `ReviewDocument`)
+- [x] Existing `ReviewRichTextTest` re-pointed at the new model (it currently asserts on `ReviewDocument`)
 
 ### 7.1 Primitives (S5)
 

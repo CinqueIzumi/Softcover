@@ -115,21 +115,24 @@ import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
+import nl.rhaydus.softcover.core.component.richtext.RichText
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.richtext.isBlank
+import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetCoverDefaults
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ReviewDocumentText
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
-import nl.rhaydus.softcover.core.designsystem.presentation.component.VerdictBlock
-import nl.rhaydus.softcover.core.designsystem.presentation.component.VerdictSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.model.VerdictSheetContext
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -141,11 +144,9 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.isBlank
-import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnAddUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearDeadlineAction
@@ -190,10 +191,17 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToSc
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
+import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLens
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 private const val REVIEW_COLLAPSED_LINES = 8
+
+// The book-page hero jacket's own radius. Deliberately not the verdict sheet's cover default: the two
+// happen to share a value today, and borrowing that constant would drag this cover along the next time
+// the sheet's jacket is tuned.
+private val HERO_COVER_CORNER_RADIUS = 16.dp
+
 // region Hero
 @Composable
 internal fun GeneralBookInfoSection(
@@ -283,7 +291,7 @@ internal fun GeneralBookInfoSection(
                     isLoading = coverIsLoading,
                     coverlessTitle = title,
                     modifier = Modifier.height(imageHeight * 0.8f),
-                    cornerRadius = 16.dp,
+                    cornerRadius = HERO_COVER_CORNER_RADIUS,
                     sharedTransitionKey = bookCoverTransitionKey(
                         editionId = edition?.id,
                         bookId = bookId,
@@ -1738,7 +1746,7 @@ internal fun YoursLensContent(
 
             VerdictBlock(
                 rating = book.userBook?.rating?.takeIf { it > 0.0 },
-                review = book.userBook?.reviewDocument,
+                review = state.verdictReview,
                 hasSpoilers = book.userBook?.reviewHasSpoilers == true,
                 onEditClick = { runAction(OnOpenVerdictSheetAction(context = VerdictSheetContext.EDIT)) },
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -2353,7 +2361,7 @@ internal fun ReviewsSection(
 
 @Composable
 private fun ReviewCard(
-    review: BookReview,
+    review: BookReviewUiModel,
     isSpoilerRevealed: Boolean,
     onRevealSpoilerClick: () -> Unit,
 ) {
@@ -2395,8 +2403,8 @@ private fun ReviewCard(
                     var expanded by rememberSaveable(review.id) { mutableStateOf(false) }
                     var hasOverflow by rememberSaveable(review.id) { mutableStateOf(false) }
 
-                    ReviewDocumentText(
-                        document = review.reviewDocument,
+                    RichText(
+                        model = review.body,
                         style = MaterialTheme.editorialTypography.review,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = if (expanded) Int.MAX_VALUE else REVIEW_COLLAPSED_LINES,
@@ -2422,7 +2430,7 @@ private fun ReviewCard(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RhaydusShimmerImage(
-                        model = review.reviewer.avatarUrl,
+                        model = review.reviewerAvatarUrl,
                         contentDescription = "Reviewer avatar",
                         modifier = Modifier
                             .size(36.dp)
@@ -2433,17 +2441,14 @@ private fun ReviewCard(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
-                        val reviewerName = review.reviewer.name?.takeIf { it.isNotBlank() }
-                            ?: review.reviewer.username
-
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = reviewerName.uppercase(),
+                                text = review.reviewerName.uppercase(),
                                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                                 color = MaterialTheme.colorScheme.primary,
                             )
 
-                            review.getReviewedMonthYear()?.let { monthYear ->
+                            review.reviewedMonthYear?.let { monthYear ->
                                 Spacer(modifier = Modifier.width(6.dp))
 
                                 Text(
@@ -2684,13 +2689,11 @@ internal fun BookDetailOverlays(
     runAction: (BookDetailAction) -> Unit,
     onCreateNewListClick: () -> Unit,
 ) {
-    if (state.isShareSheetVisible && state.book != null) {
+    val shareBookCard = state.shareBookCard
+    if (state.isShareSheetVisible && shareBookCard != null) {
         ShareBookBottomSheet(
-            book = state.book,
-            edition = state.displayedEdition,
-            currentUsername = state.currentUsername,
-            currentUserAvatarUrl = state.currentUserAvatarUrl,
-            userTags = state.userTags,
+            shareBookCard = shareBookCard,
+            shareUpdateCard = state.shareUpdateCard,
             onDismissRequest = { runAction(OnDismissShareSheetAction()) },
         )
     }
@@ -2754,13 +2757,11 @@ internal fun BookDetailOverlays(
         VerdictSheet(
             context = verdictContext,
             bookTitle = verdictBook.title,
-            coverEdition = state.displayedEdition,
-            fallbackCoverUrl = verdictBook.coverUrl,
             initialRating = verdictBook.userBook?.rating?.takeIf { it > 0.0 },
-            initialReview = verdictBook.userBook?.reviewDocument ?: ReviewDocument.EMPTY,
+            initialReview = state.verdictReview ?: RichTextUiModel.EMPTY,
             initialHasSpoilers = verdictBook.userBook?.reviewHasSpoilers == true,
             canDelete = verdictContext == VerdictSheetContext.EDIT &&
-                verdictBook.userBook?.reviewDocument?.isBlank() == false,
+                state.verdictReview?.isBlank() == false,
             onSave = { rating, review, hasSpoilers ->
                 runAction(
                     OnSaveVerdictAction(
@@ -2773,6 +2774,18 @@ internal fun BookDetailOverlays(
             },
             onDelete = { runAction(OnDeleteReviewAction(book = verdictBook)) },
             onDismissRequest = { runAction(OnDismissVerdictSheetAction()) },
+            cover = {
+                EditionImage(
+                    edition = state.displayedEdition,
+                    defaultEdition = state.displayedEdition,
+                    isLoading = false,
+                    coverlessTitle = verdictBook.title,
+                    fallbackCoverUrl = verdictBook.coverUrl,
+                    cornerRadius = VerdictSheetCoverDefaults.CornerRadius,
+                    elevation = VerdictSheetCoverDefaults.Elevation,
+                    shadowColor = Color.Black.copy(alpha = VerdictSheetCoverDefaults.SHADOW_ALPHA),
+                )
+            },
         )
     }
 

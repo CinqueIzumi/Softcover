@@ -13,6 +13,7 @@ kotlin {
             implementation(project(":core:domain"))
             implementation(project(":core:profile"))
             implementation(project(":core:preferences"))
+            implementation(project(":core:component"))
             implementation(project(":core:designsystem"))
             implementation(project(":core:presentation"))
 

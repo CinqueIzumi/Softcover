@@ -55,12 +55,7 @@ internal actual fun ProfileScreenLayout(
     var showShareSheet by remember { mutableStateOf(false) }
     var showLogOutConfirm by remember { mutableStateOf(false) }
 
-    val shareContent = remember(state.readingLife, state.userProfileData) {
-        val life = state.readingLife
-        val profile = state.userProfileData
-
-        if (life != null && profile != null) life.toShareContent(profile) else null
-    }
+    val shareContent = state.readingLifeShareCard
 
     // ReadingAtlasSection reads state.isLoading directly (it is driven by userProfileData alone),
     // but every reading-life section below also needs readingLife to have arrived — the two land

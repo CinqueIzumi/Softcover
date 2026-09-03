@@ -119,6 +119,7 @@ dependencies {
     // editorial` is not, because that module holds it on `implementation`. `voyager-navigator` is
     // declared rather than taken from `:core:presentation`'s `api` edge, so the debug screens do not
     // silently depend on another module's choice to re-export it.
+    debugImplementation(project(":core:component"))
     debugImplementation(libs.compose.material3.expressive)
     debugImplementation(libs.voyager.navigator)
     debugImplementation(libs.rhaydus.designsystemEditorial)

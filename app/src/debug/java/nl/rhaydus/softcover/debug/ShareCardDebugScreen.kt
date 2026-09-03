@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingCancellable
@@ -39,14 +40,14 @@ import nl.rhaydus.designsystem.share.SaveOutcome
 import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.rememberGalleryWritePermissionRequester
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
+import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.QuoteShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCard
+import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.StatShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.YearRecapShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
-import nl.rhaydus.softcover.core.designsystem.presentation.share.BookShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.QuoteShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareCard
-import nl.rhaydus.softcover.core.designsystem.presentation.share.ShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.StatShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.YearRecapShareContent
-import nl.rhaydus.softcover.core.designsystem.presentation.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 object ShareCardDebugScreen : Screen {
@@ -203,7 +204,7 @@ object ShareCardDebugScreen : Screen {
     private fun VariantBlock(
         label: String,
         capture: ShareCardCapture,
-        content: ShareContent,
+        content: ShareCardUiModel,
         onSaveClick: () -> Unit,
     ) {
         Column(
@@ -239,7 +240,7 @@ object ShareCardDebugScreen : Screen {
         }
     }
 
-    private val SampleBook = BookShareContent(
+    private val SampleBook = BookShareCardUiModel(
         coverUrl = null,
         title = "Lonesome Dove",
         author = "Larry McMurtry",
@@ -252,24 +253,24 @@ object ShareCardDebugScreen : Screen {
         quote = "It's a fine world, though rich in hardships at times.",
     )
 
-    private val SampleStat = StatShareContent(
+    private val SampleStat = StatShareCardUiModel(
         eyebrow = "Pages read in 2026",
         value = 8_402L,
         caption = "across 14 books, mostly on Sunday afternoons.",
     )
 
-    private val SampleQuote = QuoteShareContent(
+    private val SampleQuote = QuoteShareCardUiModel(
         quote = "The reader is the protagonist; the page is the stage.",
         sourceTitle = "Piranesi",
         sourceAuthor = "Susanna Clarke",
         page = 142,
     )
 
-    private val SampleRecap = YearRecapShareContent(
+    private val SampleRecap = YearRecapShareCardUiModel(
         year = 2026,
         eyebrow = "Your year in books",
         headline = "14 books, 8,402 pages.",
-        highlights = listOf(
+        highlights = persistentListOf(
             "Longest haul — The Power Broker, 1,296 pp.",
             "Most-read author — Larry McMurtry.",
             "Highest rating — Piranesi, 10/10.",

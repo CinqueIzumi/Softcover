@@ -17,7 +17,9 @@ kotlin {
             implementation(project(":core:preferences"))
             implementation(project(":core:profile"))
             implementation(project(":core:notification"))
+            implementation(project(":core:component"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:uibinding"))
             implementation(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)
