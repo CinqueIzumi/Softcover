@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
-import nl.rhaydus.softcover.core.designsystem.presentation.model.toProgressSheetTab
+import nl.rhaydus.softcover.core.uibinding.progress.toProgressSheetTab
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables

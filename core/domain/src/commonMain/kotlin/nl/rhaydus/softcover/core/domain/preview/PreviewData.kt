@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.preview
+package nl.rhaydus.softcover.core.domain.preview
 
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book

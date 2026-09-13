@@ -6,8 +6,9 @@ Every component in `:core:component` is driven by a **UI model**. This section i
 makes the library one system rather than 132 individually-reasonable components: what a component's
 signature looks like, what its model may hold, and where the domain → UI mapping lives.
 
-It is normative. A component that does not satisfy R1–R8 does not belong in `:core:component`, and
-two of the rules are enforced by the build rather than by review (see § 7.4).
+It is normative. A component that does not satisfy R1–R9 does not belong in `:core:component`, and
+two of the rules are enforced by the build rather than by review (see § 7.4). The library's only
+standing exceptions are listed in § 7.4a.
 
 > **Read `share/` before writing a new component.** `ShareCard` is the reference implementation —
 > shipped, working, and already the shape described below. § 7.3 walks it.
@@ -39,6 +40,32 @@ lambda and reads the key off the event; it does not build a fresh `onClick = { �
 
 This is a performance rule, not a taste rule: a per-item lambda allocates on every recomposition and
 defeats skippability across a 500-item library grid. One hoisted lambda plus a key does not.
+
+**The shipped example is `ProgressSheetEvent`** (`core:component`, `progress/`), not `BookCard` —
+that one is still ahead of us. `UpdateProgressBottomSheet` replaced six hoisted callbacks with it:
+
+```kotlin
+sealed interface ProgressSheetEvent {
+    data class TabSelected(val tab: ProgressSheetTab) : ProgressSheetEvent
+    data class PagesSubmitted(val page: String, val actionAt: String?) : ProgressSheetEvent
+    …
+    data class MarkAsReadRequested(val actionAt: String?) : ProgressSheetEvent
+    data object Dismissed : ProgressSheetEvent
+}
+```
+
+Two things that conversion settled, worth knowing before the next one:
+
+- **Screen state the component renders belongs on the model.** The progress sheet's selected tab was
+  a second parameter beside the model; § 7.1 admits no such thing, so it moved onto
+  `ProgressSheetUiModel`. Its *stored* home stays in the feature's `UiState` and the model field is
+  derived from it in one collector — one writer, so the two cannot disagree (the § 5i hazard). The
+  cost is one extra state emission on a tab tap, which is the right trade for a single source.
+- **An exhaustive `when` is a stronger guarantee than a required parameter.** The sheet's mark-as-read
+  used to be documented as "a required parameter, not optional, every call site must wire it". With a
+  sealed event, a call site that fails to handle the branch does not compile. But note the limit: the
+  compiler catches a *missing* branch, not an *empty* one — a branch left blank to "wire later" passes
+  every gate here, `EmptyFunctionBlock` included, because detekt does not see `when` arms.
 
 **R2 — Sealed variants, not a flat enum beside nullable soup.**
 
@@ -216,6 +243,20 @@ Consequences worth internalising before designing a component:
   a review matter only for components still living in a feature.
 - **detekt does not scan `iosMain`** (no type resolution for native targets). Components live in
   `commonMain`; do not put one in `iosMain` and assume the gate saw it.
+
+### 7.4a Known exceptions to R1
+
+Two, both recorded so neither reads as an oversight:
+
+- **`VerdictSheet`, `VerdictBlock` and `RichTextFormattingToolbar`** still take loose parameters and
+  N callbacks. They were pulled into the library by the layering direction rule before they were
+  ready, not because they were designed this way, and the verdict family's chrome consolidation is
+  scheduled with the rest of the sheet chrome. Until then they are the library's only R1 holdouts —
+  do not copy their shape.
+- **Neither migrated sheet has a gallery entry**, because a fixture tile cannot render a modal
+  inline. Their models still ship compile-checked `previews` (R5), and the components' own `@Preview`
+  functions render *from* that list, so the two sets cannot drift. A "tap to open" fixture is a
+  gallery *feature*, and it wants designing once for all eighteen sheets rather than invented twice.
 
 ### 7.5 The Component Gallery
 

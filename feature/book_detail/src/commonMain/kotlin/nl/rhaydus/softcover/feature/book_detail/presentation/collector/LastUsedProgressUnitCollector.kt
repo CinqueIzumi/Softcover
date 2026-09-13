@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
-import nl.rhaydus.softcover.core.designsystem.presentation.model.toProgressSheetTab
+import nl.rhaydus.softcover.core.uibinding.progress.toProgressSheetTab
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables

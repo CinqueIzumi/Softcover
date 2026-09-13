@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.lists
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.modifier.conditional
@@ -44,76 +45,76 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.BookList
+
+// The jacket treatment the sheet hands to its `jacket` slot. Kept here, not published as defaults a
+// caller reads, so the two consuming features cannot drift apart applying it themselves — the
+// lesson `VerdictSheetCoverDefaults` was extracted for. The stack sits a touch flatter than the lone
+// upright jacket because three overlapping shadows at the single jacket's depth read as mud.
+private val SINGLE_JACKET_CORNER_RADIUS: Dp = 4.dp
+private val SINGLE_JACKET_ELEVATION: Dp = 4.dp
+private const val SINGLE_JACKET_SHADOW_ALPHA: Float = 0.5f
+
+private val STACK_JACKET_CORNER_RADIUS: Dp = 4.dp
+private val STACK_JACKET_ELEVATION: Dp = 3.dp
+private const val STACK_JACKET_SHADOW_ALPHA: Float = 0.35f
 
 /**
  * The editorial "index of shelves" (redesign brief): a shared surface for adding/removing one or more
- * books to the user's custom lists, consumed by both `book_detail` (single book, [bookTitle] set) and
- * the library **bulk-select** pattern ([bookTitle] left `null`, a `Set<bookId>`). The header names the
- * act ("Shelve {book}" / "Shelve {n} books") with the book's own jacket at top; the list rows read like
- * a ruled index — italic chapter-style names, a leading bookmark that fills when the list already holds
- * the selection, and a reversible trailing control (a removable `primaryContainer` "On the list ×" chip,
- * a quiet outline "+ Add", or — in bulk, for a part-filled list — a filled "+ Add the other N"). Every
- * toggle is instant/optimistic; there is no save button.
+ * books to the user's custom lists, consumed by both `book_detail` and the library **bulk-select**
+ * pattern — which of the two is [ChooseListsUiModel.variant], a sealed `SingleBook | ManyBooks`. The
+ * header names the act ("Shelve {book}" / "Shelve {n} books") with the book's own jacket at top; the
+ * list rows read like a ruled index — italic chapter-style names, a leading bookmark that fills when
+ * the list already holds the selection, and a reversible trailing control (a removable
+ * `primaryContainer` "On the list ×" chip, a quiet outline "+ Add", or — in bulk, for a part-filled
+ * list — a filled "+ Add the other N"). Every toggle is instant/optimistic; there is no save button.
  *
- * [bookCovers] supplies the header jacket(s): a single edition for the single-book case, up to three for
- * the bulk rotated stack. Callers pass whichever edition already resolves the cover they want shown
- * (typically `Book.currentEdition`) — the same [BookEdition] type `EditionImage` already renders
- * elsewhere, so no new cover-carrier type is needed.
+ * The header jacket(s) come from the [jacket] slot — one upright cover for the single-book case, up
+ * to three for the bulk rotated stack. Resolving a cover needs the reader's chosen edition, the
+ * book's default, a fallback URL and a locally persisted file, none of which a component may know
+ * (R4), so the caller supplies the image and the sheet supplies the treatment (see
+ * [ChooseListsJacket]).
  */
 @Composable
 fun ChooseListsBottomSheet(
-    bookIds: Set<Int>,
-    customLists: List<BookList>,
-    listsBeingMutated: Set<Int>,
-    onDismissRequest: () -> Unit,
-    onToggleMembership: (listId: Int, membership: ListMembership) -> Unit,
-    onCreateNewListClick: () -> Unit,
-    bookTitle: String? = null,
-    bookCovers: List<BookEdition> = emptyList(),
+    model: ChooseListsUiModel,
+    onEvent: (ChooseListsEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    jacket: @Composable (ChooseListsJacket, Modifier) -> Unit,
 ) {
-    val isBulk = bookTitle == null
-
-    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+    AdaptiveModalSheet(
+        onDismissRequest = { onEvent(ChooseListsEvent.Dismissed) },
+        modifier = modifier,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 8.dp),
         ) {
             ChooseListsHeader(
-                bookTitle = bookTitle,
-                bookIdsCount = bookIds.size,
-                bookCovers = bookCovers,
-                isBulk = isBulk,
+                variant = model.variant,
+                jacket = jacket,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            if (customLists.isEmpty()) {
+            if (model.rows.isEmpty()) {
                 ChooseListsEmptyState()
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
                     contentPadding = PaddingValues(bottom = 4.dp),
                 ) {
-                    items(items = customLists, key = { it.id }) { list ->
-                        val info = list.membershipFor(bookIds = bookIds)
-                        val isPending = list.id in listsBeingMutated
-
+                    items(items = model.rows, key = { it.listId }) { row ->
                         ChooseListsRow(
-                            list = list,
-                            membership = info.membership,
-                            matchingCount = info.matchingCount,
-                            totalCount = bookIds.size,
-                            isBulk = isBulk,
-                            isPending = isPending,
+                            row = row,
                             onClick = {
-                                if (isPending.not()) {
-                                    onToggleMembership(
-                                        list.id,
-                                        info.membership,
+                                if (row.isPending.not()) {
+                                    onEvent(
+                                        ChooseListsEvent.MembershipToggled(
+                                            listId = row.listId,
+                                            membership = row.membership,
+                                        ),
                                     )
                                 }
                             },
@@ -123,42 +124,13 @@ fun ChooseListsBottomSheet(
             }
 
             NewListRow(
-                onClick = onCreateNewListClick,
+                onClick = { onEvent(ChooseListsEvent.NewListRequested) },
                 modifier = Modifier.padding(top = 20.dp),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
-}
-
-/** Membership plus how many of [ChooseListsBottomSheet]'s selected books are already in the list. */
-private data class ListMembershipInfo(
-    val membership: ListMembership,
-    val matchingCount: Int,
-)
-
-private fun BookList.membershipFor(bookIds: Set<Int>): ListMembershipInfo {
-    if (bookIds.isEmpty()) {
-        return ListMembershipInfo(
-            membership = ListMembership.NONE,
-            matchingCount = 0,
-        )
-    }
-
-    val listBookIds = books.mapTo(mutableSetOf()) { it.bookId }
-    val matching = bookIds.count { it in listBookIds }
-
-    val membership = when (matching) {
-        0 -> ListMembership.NONE
-        bookIds.size -> ListMembership.ALL
-        else -> ListMembership.PARTIAL
-    }
-
-    return ListMembershipInfo(
-        membership = membership,
-        matchingCount = matching,
-    )
 }
 
 /**
@@ -169,10 +141,8 @@ private fun BookList.membershipFor(bookIds: Set<Int>): ListMembershipInfo {
  */
 @Composable
 private fun ChooseListsHeader(
-    bookTitle: String?,
-    bookIdsCount: Int,
-    bookCovers: List<BookEdition>,
-    isBulk: Boolean,
+    variant: ChooseListsVariant,
+    jacket: @Composable (ChooseListsJacket, Modifier) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -200,10 +170,7 @@ private fun ChooseListsHeader(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = chooseListsHeadline(
-                    bookTitle = bookTitle,
-                    bookIdsCount = bookIdsCount,
-                ),
+                text = chooseListsHeadline(name = variant.name),
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -211,62 +178,70 @@ private fun ChooseListsHeader(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = if (isBulk) {
-                    "A part-filled list adds the rest first — then a second tap takes all three off."
-                } else {
-                    "Tap a list to file it here — tap a filled one to take it off. Saved as you go."
+                text = when (variant) {
+                    is ChooseListsVariant.ManyBooks ->
+                        "A part-filled list adds the rest first — then a second tap takes all three off."
+
+                    is ChooseListsVariant.SingleBook ->
+                        "Tap a list to file it here — tap a filled one to take it off. Saved as you go."
                 },
                 style = MaterialTheme.editorialTypography.body,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
-        if (isBulk) {
-            StackedJackets(
-                covers = bookCovers,
-                fallbackTitle = "$bookIdsCount books",
+        when (variant) {
+            is ChooseListsVariant.ManyBooks -> StackedJackets(
+                coverCount = variant.coverCount,
+                jacket = jacket,
             )
-        } else {
-            EditionImage(
-                edition = bookCovers.firstOrNull(),
-                defaultEdition = bookCovers.firstOrNull(),
-                isLoading = false,
-                coverlessTitle = bookTitle,
-                cornerRadius = 4.dp,
-                elevation = 4.dp,
-                shadowColor = Color.Black.copy(alpha = 0.5f),
-                modifier = Modifier.width(56.dp),
+
+            is ChooseListsVariant.SingleBook -> jacket(
+                ChooseListsJacket(
+                    index = 0,
+                    cornerRadius = SINGLE_JACKET_CORNER_RADIUS,
+                    elevation = SINGLE_JACKET_ELEVATION,
+                    shadowColor = Color.Black.copy(alpha = SINGLE_JACKET_SHADOW_ALPHA),
+                ),
+                Modifier.width(56.dp),
             )
         }
     }
 }
 
 @Composable
-private fun chooseListsHeadline(
-    bookTitle: String?,
-    bookIdsCount: Int,
-): AnnotatedString {
+private fun chooseListsHeadline(name: String): AnnotatedString {
     val primary = MaterialTheme.colorScheme.primary
-    val namedSpan = bookTitle ?: "$bookIdsCount books"
 
-    return remember(namedSpan, primary) {
+    return remember(name, primary) {
         buildAnnotatedString {
             append("Shelve ")
             withStyle(SpanStyle(color = primary)) {
-                append(namedSpan)
+                append(name)
             }
         }
     }
 }
 
-/** The bulk header's rotated 3-jacket stack (behind → front: −8°, +4°, 0°), each a 52×78dp cover. */
+/**
+ * The bulk header's rotated jacket stack (behind → front: −8°, +4°, 0°), each a 52×78dp cover.
+ *
+ * The sheet owns the width and the rotation — they are handed to the slot in its `Modifier` — so a
+ * caller that resolves the wrong cover can still not draw the stack wrong.
+ */
 @Composable
 private fun StackedJackets(
-    covers: List<BookEdition>,
-    fallbackTitle: String,
+    coverCount: Int,
+    jacket: @Composable (ChooseListsJacket, Modifier) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val rotations = listOf(-8f, 4f, 0f)
+    val treatment = ChooseListsJacket(
+        index = 0,
+        cornerRadius = STACK_JACKET_CORNER_RADIUS,
+        elevation = STACK_JACKET_ELEVATION,
+        shadowColor = Color.Black.copy(alpha = STACK_JACKET_SHADOW_ALPHA),
+    )
 
     Box(
         modifier = modifier.size(
@@ -275,30 +250,21 @@ private fun StackedJackets(
         ),
         contentAlignment = Alignment.Center,
     ) {
-        if (covers.isEmpty()) {
-            EditionImage(
-                edition = null,
-                defaultEdition = null,
-                isLoading = false,
-                coverlessTitle = fallbackTitle,
-                cornerRadius = 4.dp,
-                elevation = 3.dp,
-                shadowColor = Color.Black.copy(alpha = 0.35f),
-                modifier = Modifier.width(52.dp),
+        if (coverCount == 0) {
+            // No cover resolved for any selected book: one jacket, and deliberately **not** rotated.
+            // A single tilted placeholder reads as a rendering mistake rather than as a stack, so the
+            // rotation only applies once there is more than a placeholder to stack.
+            jacket(
+                treatment,
+                Modifier.width(52.dp),
             )
         } else {
-            covers.take(3).forEachIndexed { index, edition ->
-                EditionImage(
-                    edition = edition,
-                    defaultEdition = edition,
-                    isLoading = false,
-                    coverlessTitle = edition.title ?: fallbackTitle,
-                    cornerRadius = 4.dp,
-                    elevation = 3.dp,
-                    shadowColor = Color.Black.copy(alpha = 0.35f),
-                    modifier = Modifier
+            repeat(coverCount.coerceAtMost(rotations.size)) { index ->
+                jacket(
+                    treatment.copy(index = index),
+                    Modifier
                         .width(52.dp)
-                        .rotate(rotations.getOrElse(index) { 0f }),
+                        .rotate(rotations[index]),
                 )
             }
         }
@@ -328,12 +294,7 @@ private fun ChooseListsEmptyState(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ChooseListsRow(
-    list: BookList,
-    membership: ListMembership,
-    matchingCount: Int,
-    totalCount: Int,
-    isBulk: Boolean,
-    isPending: Boolean,
+    row: ChooseListsRowUiModel,
     onClick: () -> Unit,
 ) {
     Column {
@@ -343,18 +304,18 @@ private fun ChooseListsRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .conditional(
-                    condition = isPending.not(),
+                    condition = row.isPending.not(),
                     ifTrue = { Modifier.pointerHandCursor().pressScaleClickable(onClick = onClick) },
                 )
                 .padding(vertical = 17.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            BookmarkGlyph(membership = membership)
+            BookmarkGlyph(membership = row.membership)
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = list.name,
+                    text = row.name,
                     style = MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
@@ -364,15 +325,9 @@ private fun ChooseListsRow(
                 Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
-                    text = captionFor(
-                        list = list,
-                        isBulk = isBulk,
-                        membership = membership,
-                        matchingCount = matchingCount,
-                        totalCount = totalCount,
-                    ),
+                    text = row.caption,
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
-                    color = if (membership == ListMembership.PARTIAL) {
+                    color = if (row.membership == ListMembership.PARTIAL) {
                         MaterialTheme.colorScheme.primary
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
@@ -380,38 +335,16 @@ private fun ChooseListsRow(
                 )
             }
 
-            if (isPending) {
+            if (row.isPending) {
                 CircularWavyProgressIndicator(modifier = Modifier.size(20.dp))
             } else {
                 MembershipPill(
-                    membership = membership,
-                    isBulk = isBulk,
-                    matchingCount = matchingCount,
-                    totalCount = totalCount,
+                    membership = row.membership,
+                    label = row.actionLabel,
                 )
             }
         }
     }
-}
-
-private fun captionFor(
-    list: BookList,
-    isBulk: Boolean,
-    membership: ListMembership,
-    matchingCount: Int,
-    totalCount: Int,
-): String {
-    val booksCount = "${list.books.size} BOOKS"
-
-    if (isBulk.not()) return booksCount
-
-    val phrase = when (membership) {
-        ListMembership.ALL -> "ALL $totalCount HERE"
-        ListMembership.PARTIAL -> "$matchingCount OF $totalCount HERE"
-        ListMembership.NONE -> "NONE YET"
-    }
-
-    return "$booksCount · $phrase"
 }
 
 @Composable
@@ -479,22 +412,12 @@ private fun PartialBookmarkMark() {
 @Composable
 private fun MembershipPill(
     membership: ListMembership,
-    isBulk: Boolean,
-    matchingCount: Int,
-    totalCount: Int,
+    label: String,
 ) {
     when (membership) {
-        ListMembership.ALL -> OnListChip(
-            label = if (isBulk) "On all $totalCount" else "On the list",
-        )
-
-        ListMembership.PARTIAL -> AddFilledPill(
-            label = "Add the other ${totalCount - matchingCount}",
-        )
-
-        ListMembership.NONE -> AddOutlinePill(
-            label = if (isBulk) "Add all $totalCount" else "Add",
-        )
+        ListMembership.ALL -> OnListChip(label = label)
+        ListMembership.PARTIAL -> AddFilledPill(label = label)
+        ListMembership.NONE -> AddOutlinePill(label = label)
     }
 }
 

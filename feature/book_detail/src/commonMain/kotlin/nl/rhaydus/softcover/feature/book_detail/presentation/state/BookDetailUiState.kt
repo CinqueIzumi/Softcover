@@ -2,11 +2,13 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -35,6 +37,13 @@ internal data class BookDetailUiState(
     val isUpdatingScannedEdition: Boolean = false,
     val showUpdateProgressSheet: Boolean = false,
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
+
+    /**
+     * What the progress sheet renders, mapped off the composition by `ProgressSheetCollector`
+     * (R9) from [book] and [selectedProgressSheetTab]. The tab's stored home is
+     * [selectedProgressSheetTab]; this is derived from it, so the two cannot disagree.
+     */
+    val progressSheet: ProgressSheetUiModel? = null,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val selectedLens: BookDetailLens = BookDetailLens.THE_BOOK,
 
@@ -62,6 +71,9 @@ internal data class BookDetailUiState(
     val showChooseListsSheet: Boolean = false,
     val userLists: List<BookList> = emptyList(),
     val listsBeingMutated: Set<Int> = emptySet(),
+
+    /** The choose-lists sheet's rows and header, mapped by `ChooseListsCollector` (R9). */
+    val chooseListsSheet: ChooseListsUiModel? = null,
 
     val userTags: List<UserTag> = emptyList(),
     val showTagEditorSheet: Boolean = false,

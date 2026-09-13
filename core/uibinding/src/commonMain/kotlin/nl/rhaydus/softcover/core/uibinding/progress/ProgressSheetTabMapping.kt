@@ -1,5 +1,6 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.model
+package nl.rhaydus.softcover.core.uibinding.progress
 
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
 
 fun ProgressSheetTab.toProgressUnit(): ProgressUnit = when (this) {

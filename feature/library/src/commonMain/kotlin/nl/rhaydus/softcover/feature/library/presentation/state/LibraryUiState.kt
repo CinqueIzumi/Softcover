@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -124,6 +125,18 @@ internal data class LibraryUiState(
 
     /** List ids whose bulk add/remove mutation is in flight; rows render a spinner instead of the indicator. */
     val listsBeingMutated: Set<Int> = emptySet(),
+
+    /**
+     * The bulk "Add to list" sheet's rows and header, mapped by [ChooseListsCollector] (R9).
+     */
+    val chooseListsSheet: ChooseListsUiModel? = null,
+
+    /**
+     * Covers for that sheet's rotated header stack, resolved by [ChooseListsCollector] in the
+     * same pass as [chooseListsSheet] — the render indexes into this by the jacket slot's index
+     * rather than calling [resolveSelectedBooks] itself on every frame.
+     */
+    val chooseListsJacketEditions: List<BookEdition> = emptyList(),
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
         sortModeByTab[tabId] ?: LibraryTab.defaultSortMode(tabId = tabId)

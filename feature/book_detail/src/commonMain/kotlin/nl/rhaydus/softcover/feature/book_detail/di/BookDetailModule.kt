@@ -36,9 +36,11 @@ import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCa
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadlineCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ChooseListsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagSuggestionsCollector
@@ -76,6 +78,8 @@ val bookDetailModule = module {
     factory { TagVocabularySyncCollector() } bind BookDetailCollector::class
     factory { VerdictReviewCollector() } bind BookDetailCollector::class
     factory { ShareCardsCollector() } bind BookDetailCollector::class
+    factory { ProgressSheetCollector() } bind BookDetailCollector::class
+    factory { ChooseListsCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.progress
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -65,7 +65,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
-import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -90,60 +89,42 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
-import nl.rhaydus.softcover.core.designsystem.presentation.preview.PreviewData
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.Book
 
 @Composable
 fun UpdateProgressBottomSheet(
-    bookToUpdate: Book,
-    selectedTab: ProgressSheetTab,
-    onProgressTabClick: (ProgressSheetTab) -> Unit,
-    onUpdatePercentageClick: (percentage: String, actionAt: String?) -> Unit,
-    onUpdatePageProgressClick: (page: String, actionAt: String?) -> Unit,
-    onUpdateTimeProgressClick: (hours: String, minutes: String, seconds: String, actionAt: String?) -> Unit,
-    onDismissRequest: () -> Unit,
-    onMarkAsReadClick: (actionAt: String?) -> Unit,
+    model: ProgressSheetUiModel,
+    onEvent: (ProgressSheetEvent) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+    AdaptiveModalSheet(
+        onDismissRequest = { onEvent(ProgressSheetEvent.Dismissed) },
+        modifier = modifier,
+    ) {
         ProgressBottomSheetContent(
-            book = bookToUpdate,
-            progressSheetTab = selectedTab,
-            onProgressTabClick = onProgressTabClick,
-            onUpdatePercentageClick = onUpdatePercentageClick,
-            onUpdatePageProgressClick = onUpdatePageProgressClick,
-            onUpdateTimeProgressClick = onUpdateTimeProgressClick,
-            onMarkAsReadClick = onMarkAsReadClick,
+            model = model,
+            onEvent = onEvent,
         )
     }
 }
 
 @Composable
 private fun ProgressBottomSheetContent(
-    progressSheetTab: ProgressSheetTab,
-    book: Book,
-    onProgressTabClick: (ProgressSheetTab) -> Unit,
-    onUpdatePercentageClick: (percentage: String, actionAt: String?) -> Unit,
-    onUpdatePageProgressClick: (page: String, actionAt: String?) -> Unit,
-    onUpdateTimeProgressClick: (hours: String, minutes: String, seconds: String, actionAt: String?) -> Unit =
-        { _, _, _, _ -> },
-    onMarkAsReadClick: (actionAt: String?) -> Unit = {},
+    model: ProgressSheetUiModel,
+    onEvent: (ProgressSheetEvent) -> Unit,
 ) {
-    val edition = book.currentEdition
-    val isAudiobook = edition?.isAudiobook == true
+    val medium = model.medium
 
     // Percentage entry needs a known total to convert a fraction into pages (or seconds); without one
     // it can only ever record 0, so it's offered only when that total is known. The primary unit —
     // time for an audiobook, pages otherwise — always stays, allowing free entry even with no total.
-    val primaryTab = if (isAudiobook) ProgressSheetTab.TIME else ProgressSheetTab.PAGE
+    val primaryTab = when (medium) {
+        is ProgressSheetMedium.Timed -> ProgressSheetTab.TIME
+        is ProgressSheetMedium.Paged -> ProgressSheetTab.PAGE
+    }
 
-    val totalPages = edition?.pages ?: book.defaultEdition?.pages ?: 0
-    val totalSeconds = edition?.audioSeconds ?: 0
-    val hasKnownTotal = if (isAudiobook) totalSeconds > 0 else totalPages > 0
-
-    val visibleTabs = if (hasKnownTotal) {
+    val visibleTabs = if (medium.hasKnownTotal) {
         listOf(primaryTab, ProgressSheetTab.PERCENTAGE)
     } else {
         listOf(primaryTab)
@@ -151,7 +132,7 @@ private fun ProgressBottomSheetContent(
 
     // A stored unit that isn't valid for this book (e.g. PAGE on an audiobook) falls back to the
     // primary tab, which is always the first visible one.
-    val activeTab = if (progressSheetTab in visibleTabs) progressSheetTab else primaryTab
+    val activeTab = if (model.selectedTab in visibleTabs) model.selectedTab else primaryTab
 
     val focusManager = LocalFocusManager.current
 
@@ -182,14 +163,14 @@ private fun ProgressBottomSheetContent(
             .padding(horizontal = 24.dp)
             .padding(bottom = 16.dp),
     ) {
-        EditorialHeader(book = book)
+        EditorialHeader(title = model.bookTitle)
 
         Spacer(modifier = Modifier.height(32.dp))
 
         TabSwitcher(
             activeTab = activeTab,
             visibleTabs = visibleTabs,
-            onProgressTabClick = onProgressTabClick,
+            onEvent = onEvent,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -201,31 +182,30 @@ private fun ProgressBottomSheetContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        when (activeTab) {
-            ProgressSheetTab.PAGE -> {
-                ProgressBottomSheetPageContent(
-                    book = book,
+        // Percentage is the one tab both media share; the other two are the medium's own, so the
+        // `when` on the sealed medium carries the compiler's exhaustiveness check rather than an
+        // `activeTab` branch that would need an unreachable else.
+        if (activeTab == ProgressSheetTab.PERCENTAGE) {
+            ProgressBottomSheetPercentageContent(
+                progressPercent = model.progressPercent,
+                buttonSize = actionButtonSize,
+                actionAt = actionAt,
+                onEvent = onEvent,
+            )
+        } else {
+            when (medium) {
+                is ProgressSheetMedium.Paged -> ProgressBottomSheetPageContent(
+                    medium = medium,
                     buttonSize = actionButtonSize,
                     actionAt = actionAt,
-                    onUpdatePageProgressClick = onUpdatePageProgressClick,
+                    onEvent = onEvent,
                 )
-            }
 
-            ProgressSheetTab.TIME -> {
-                ProgressBottomSheetTimeContent(
-                    book = book,
+                is ProgressSheetMedium.Timed -> ProgressBottomSheetTimeContent(
+                    medium = medium,
                     buttonSize = actionButtonSize,
                     actionAt = actionAt,
-                    onUpdateTimeProgressClick = onUpdateTimeProgressClick,
-                )
-            }
-
-            ProgressSheetTab.PERCENTAGE -> {
-                ProgressBottomSheetPercentageContent(
-                    book = book,
-                    buttonSize = actionButtonSize,
-                    actionAt = actionAt,
-                    onUpdatePercentageClick = onUpdatePercentageClick,
+                    onEvent = onEvent,
                 )
             }
         }
@@ -240,14 +220,14 @@ private fun ProgressBottomSheetContent(
                 icon = SoftcoverIcon.Check,
                 contentDescription = "Mark as read icon",
             ),
-            onClick = { onMarkAsReadClick(actionAt) },
+            onClick = { onEvent(ProgressSheetEvent.MarkAsReadRequested(actionAt = actionAt)) },
             modifier = Modifier.fillMaxWidth(),
         )
     }
 }
 
 @Composable
-private fun EditorialHeader(book: Book) {
+private fun EditorialHeader(title: String) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
@@ -270,7 +250,7 @@ private fun EditorialHeader(book: Book) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = book.title,
+            text = title,
             style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 2,
@@ -283,13 +263,13 @@ private fun EditorialHeader(book: Book) {
 private fun TabSwitcher(
     activeTab: ProgressSheetTab,
     visibleTabs: List<ProgressSheetTab>,
-    onProgressTabClick: (ProgressSheetTab) -> Unit,
+    onEvent: (ProgressSheetEvent) -> Unit,
 ) {
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         visibleTabs.forEachIndexed { index, tab ->
             SegmentedButton(
                 selected = tab == activeTab,
-                onClick = { onProgressTabClick(tab) },
+                onClick = { onEvent(ProgressSheetEvent.TabSelected(tab = tab)) },
                 shape = SegmentedButtonDefaults.itemShape(
                     index = index,
                     count = visibleTabs.size,
@@ -628,18 +608,16 @@ private fun WhenReadEditor(
 
 @Composable
 private fun ColumnScope.ProgressBottomSheetPageContent(
-    book: Book,
+    medium: ProgressSheetMedium.Paged,
     buttonSize: ButtonSize,
     actionAt: String?,
-    onUpdatePageProgressClick: (page: String, actionAt: String?) -> Unit,
+    onEvent: (ProgressSheetEvent) -> Unit,
 ) {
-    val totalPages = book.currentEdition?.pages ?: book.defaultEdition?.pages ?: 0
-    val hasTotal = totalPages > 0
+    val totalPages = medium.totalPages
+    val hasTotal = medium.hasKnownTotal
 
     var number by remember {
-        val currentPage = book.userBookRead?.currentPage ?: 0
-
-        mutableStateOf(TextFieldValue(text = currentPage.toString()))
+        mutableStateOf(TextFieldValue(text = medium.currentPage.toString()))
     }
 
     var firstTimeFocusedGained by remember { mutableStateOf(true) }
@@ -760,9 +738,11 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
     RhaydusButton(
         label = "Update progress",
         onClick = {
-            onUpdatePageProgressClick(
-                number.text,
-                actionAt,
+            onEvent(
+                ProgressSheetEvent.PagesSubmitted(
+                    page = number.text,
+                    actionAt = actionAt,
+                ),
             )
         },
         modifier = Modifier.fillMaxWidth(),
@@ -775,15 +755,13 @@ private fun ColumnScope.ProgressBottomSheetPageContent(
 
 @Composable
 private fun ColumnScope.ProgressBottomSheetPercentageContent(
-    book: Book,
+    progressPercent: Int,
     buttonSize: ButtonSize,
     actionAt: String?,
-    onUpdatePercentageClick: (percentage: String, actionAt: String?) -> Unit,
+    onEvent: (ProgressSheetEvent) -> Unit,
 ) {
     var number by remember {
-        val currentProgress = book.userBookRead?.progress?.roundToInt() ?: 0
-
-        mutableStateOf(TextFieldValue(text = currentProgress.toString()))
+        mutableStateOf(TextFieldValue(text = progressPercent.toString()))
     }
 
     var firstTimeFocusedGained by remember { mutableStateOf(true) }
@@ -900,9 +878,11 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
         style = ButtonStyle.FILLED,
         size = buttonSize,
         onClick = {
-            onUpdatePercentageClick(
-                number.text,
-                actionAt,
+            onEvent(
+                ProgressSheetEvent.PercentageSubmitted(
+                    percentage = number.text,
+                    actionAt = actionAt,
+                ),
             )
         },
     )
@@ -912,14 +892,14 @@ private fun ColumnScope.ProgressBottomSheetPercentageContent(
 
 @Composable
 private fun ColumnScope.ProgressBottomSheetTimeContent(
-    book: Book,
+    medium: ProgressSheetMedium.Timed,
     buttonSize: ButtonSize,
     actionAt: String?,
-    onUpdateTimeProgressClick: (hours: String, minutes: String, seconds: String, actionAt: String?) -> Unit,
+    onEvent: (ProgressSheetEvent) -> Unit,
 ) {
-    val initial = (book.userBookRead?.currentSeconds ?: 0).toHoursMinutesSeconds()
-    val totalSeconds = book.currentEdition?.audioSeconds ?: 0
-    val hasTotal = totalSeconds > 0
+    val initial = medium.currentSeconds.toHoursMinutesSeconds()
+    val totalSeconds = medium.totalSeconds
+    val hasTotal = medium.hasKnownTotal
     val totalHms = totalSeconds.toHoursMinutesSeconds()
 
     var hours by remember { mutableStateOf(TextFieldValue(text = initial.hours.toString())) }
@@ -1058,11 +1038,13 @@ private fun ColumnScope.ProgressBottomSheetTimeContent(
     RhaydusButton(
         label = "Update progress",
         onClick = {
-            onUpdateTimeProgressClick(
-                hours.text,
-                minutes.text,
-                seconds.text,
-                actionAt,
+            onEvent(
+                ProgressSheetEvent.TimeSubmitted(
+                    hours = hours.text,
+                    minutes = minutes.text,
+                    seconds = seconds.text,
+                    actionAt = actionAt,
+                ),
             )
         },
         modifier = Modifier.fillMaxWidth(),
@@ -1159,22 +1141,21 @@ private fun TimeField(
     )
 }
 
+/**
+ * The previews render `ProgressSheetUiModel.previews` rather than re-declaring their own values, so
+ * the preview set and the Component Gallery's fixture set are one list and cannot drift (R5). The
+ * fixtures are selected by what they demonstrate rather than by index, so reordering `previews`
+ * cannot silently repoint a preview at a different case.
+ */
 @StandardPreview
 @Composable
 private fun ProgressSheetContentPagePreview() {
     SoftcoverTheme {
         ProgressBottomSheetContent(
-            onUpdatePageProgressClick = { _, _ -> },
-            onProgressTabClick = {},
-            onUpdatePercentageClick = { _, _ -> },
-            progressSheetTab = ProgressSheetTab.PAGE,
-            book = PreviewData.baseBook.copy(
-                title = "The Dungeon Anarchist's Cookbook",
-                editions = listOf(
-                    PreviewData.baseEdition.copy(pages = 534),
-                ),
-                userBookRead = PreviewData.baseBook.userBookRead?.copy(currentPage = 80),
-            ),
+            model = ProgressSheetUiModel.previews.first {
+                it.selectedTab == ProgressSheetTab.PAGE && it.medium.hasKnownTotal
+            },
+            onEvent = {},
         )
     }
 }
@@ -1184,20 +1165,36 @@ private fun ProgressSheetContentPagePreview() {
 private fun ProgressSheetContentPercentagePreview() {
     SoftcoverTheme {
         ProgressBottomSheetContent(
-            onUpdatePageProgressClick = { _, _ -> },
-            onProgressTabClick = {},
-            onUpdatePercentageClick = { _, _ -> },
-            progressSheetTab = ProgressSheetTab.PERCENTAGE,
-            book = PreviewData.baseBook.copy(
-                title = "The Dungeon Anarchist's Cookbook",
-                editions = listOf(
-                    PreviewData.baseEdition.copy(pages = 534),
-                ),
-                userBookRead = PreviewData.baseBook.userBookRead?.copy(
-                    currentPage = 80,
-                    progress = 35f,
-                ),
-            ),
+            model = ProgressSheetUiModel.previews.first { it.selectedTab == ProgressSheetTab.PERCENTAGE },
+            onEvent = {},
+        )
+    }
+}
+
+/** The audiobook layout — three time fields and an hh:mm:ss suffix — which had no preview before. */
+@StandardPreview
+@Composable
+private fun ProgressSheetContentTimePreview() {
+    SoftcoverTheme {
+        ProgressBottomSheetContent(
+            model = ProgressSheetUiModel.previews.first {
+                it.selectedTab == ProgressSheetTab.TIME && it.medium.hasKnownTotal
+            },
+            onEvent = {},
+        )
+    }
+}
+
+/** No page count known: the Percentage tab disappears and the suffix + indicator drop out. */
+@StandardPreview
+@Composable
+private fun ProgressSheetContentNoTotalPreview() {
+    SoftcoverTheme {
+        ProgressBottomSheetContent(
+            model = ProgressSheetUiModel.previews.first {
+                it.medium is ProgressSheetMedium.Paged && it.medium.hasKnownTotal.not()
+            },
+            onEvent = {},
         )
     }
 }

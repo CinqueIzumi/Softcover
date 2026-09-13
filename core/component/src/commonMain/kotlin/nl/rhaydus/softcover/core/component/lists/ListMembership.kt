@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.lists
 
 /**
  * Membership of a list relative to the set of books currently being acted on.

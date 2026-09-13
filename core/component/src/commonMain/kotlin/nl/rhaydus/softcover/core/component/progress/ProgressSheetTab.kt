@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.model
+package nl.rhaydus.softcover.core.component.progress
 
 enum class ProgressSheetTab(val tabName: String) {
     PAGE(tabName = "Page"),

@@ -99,6 +99,8 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
+import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
@@ -106,7 +108,6 @@ import nl.rhaydus.softcover.core.component.verdict.VerdictSheetCoverDefaults
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -260,56 +261,56 @@ internal fun ReadingOverlays(
 ) {
     val haptics = rememberHaptics()
 
-    if (state.bookToUpdate != null && state.showProgressSheet) {
+    val progressSheet = state.progressSheet
+
+    if (state.bookToUpdate != null && state.showProgressSheet && progressSheet != null) {
         val updatingBook = state.bookToUpdate
 
         UpdateProgressBottomSheet(
-            bookToUpdate = updatingBook,
-            selectedTab = state.progressSheetTab,
-            onDismissRequest = {
-                runAction(DismissProgressSheetAction)
-            },
-            onProgressTabClick = {
-                runAction(OnProgressTabClickAction(it))
-            },
-            onUpdatePercentageClick = { percentage, actionAt ->
-                runAction(
-                    OnUpdatePercentageProgressClickAction(
-                        newPercentage = percentage,
-                        actionAt = actionAt,
-                    ),
-                )
-            },
-            onUpdatePageProgressClick = { pages, actionAt ->
-                runAction(
-                    OnUpdatePageProgressClickAction(
-                        newPage = pages,
-                        actionAt = actionAt,
-                    ),
-                )
-            },
-            onUpdateTimeProgressClick = { h, m, s, actionAt ->
-                runAction(
-                    OnUpdateTimeProgressClickAction(
-                        hours = h,
-                        minutes = m,
-                        seconds = s,
-                        actionAt = actionAt,
-                    ),
-                )
-            },
-            onMarkAsReadClick = { actionAt ->
-                // Routes through the same controller the row/hero "mark as read" affordances used
-                // to drive directly, so the sheet-triggered path keeps the full commit choreography
-                // (haptic, burst, bottom-bar pulse, and — when motion is enabled — the "slide to
-                // shelf" follow-through, §2.5) rather than only the haptic + burst a bare dispatch
-                // would give it. The picked backdate travels with it, same as the progress tabs.
-                controller.requestMarkAsRead(
-                    book = updatingBook,
-                    actionAt = actionAt,
-                )
+            model = progressSheet,
+            onEvent = { event ->
+                when (event) {
+                    is ProgressSheetEvent.TabSelected -> runAction(OnProgressTabClickAction(event.tab))
 
-                runAction(DismissProgressSheetAction)
+                    is ProgressSheetEvent.PagesSubmitted -> runAction(
+                        OnUpdatePageProgressClickAction(
+                            newPage = event.page,
+                            actionAt = event.actionAt,
+                        ),
+                    )
+
+                    is ProgressSheetEvent.PercentageSubmitted -> runAction(
+                        OnUpdatePercentageProgressClickAction(
+                            newPercentage = event.percentage,
+                            actionAt = event.actionAt,
+                        ),
+                    )
+
+                    is ProgressSheetEvent.TimeSubmitted -> runAction(
+                        OnUpdateTimeProgressClickAction(
+                            hours = event.hours,
+                            minutes = event.minutes,
+                            seconds = event.seconds,
+                            actionAt = event.actionAt,
+                        ),
+                    )
+
+                    is ProgressSheetEvent.MarkAsReadRequested -> {
+                        // Routes through the same controller the row/hero "mark as read" affordances used
+                        // to drive directly, so the sheet-triggered path keeps the full commit choreography
+                        // (haptic, burst, bottom-bar pulse, and — when motion is enabled — the "slide to
+                        // shelf" follow-through, §2.5) rather than only the haptic + burst a bare dispatch
+                        // would give it. The picked backdate travels with it, same as the progress tabs.
+                        controller.requestMarkAsRead(
+                            book = updatingBook,
+                            actionAt = event.actionAt,
+                        )
+
+                        runAction(DismissProgressSheetAction)
+                    }
+
+                    ProgressSheetEvent.Dismissed -> runAction(DismissProgressSheetAction)
+                }
             },
         )
     }

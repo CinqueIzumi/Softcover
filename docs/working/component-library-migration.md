@@ -8,9 +8,11 @@
 **Rollout model:** one branch, one PR, merged all at once. Stages below are *commit* boundaries on
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
-**Status:** `S4 IN PROGRESS` — S4-1, S4-2a and S4-2b done (S4-2b includes the **R9 correction**,
-§ 5i); next up S4-3 (the two remaining big sheets). **§ 5g is the most important thing to read before continuing:** the direction rule re-cut
-S4's sub-commits, and the original ordering was impossible.
+**Status:** `S4 IN PROGRESS` — S4-1, S4-2a, S4-2b (incl. the **R9 correction**, § 5i) and S4-3 done;
+next up S4-4 (`EditionImage` -> `cover/`). **§ 5g is the most important thing to read before continuing:** the direction rule re-cut
+S4's sub-commits, and the original ordering was impossible. **§ 5j** records S4-3's outcome — the two
+sheets are the library's first R1-shaped components, and it corrects the reasoning that nearly
+deferred that.
 **Branch:** `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models`
 **Issue:** [#275](https://github.com/CinqueIzumi/Softcover/issues/275) — tag `E.1`, labels
 `area:cross-cutting` / `kind:tech` / `scope:L`, no milestone. Keep its Stages and Acceptance
@@ -386,9 +388,10 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
             `RichTextFormattingToolbar`, `VerdictBlock`, `VerdictSheet`, `VerdictSheetContext`, and the
             whole `share/` package with its R8 rename and R4 fix. **They moved together because the
             direction rule left no alternative** (§ 5g), not because it was convenient. **See § 5h.**
-      - [ ] **S4-3 — The two remaining big sheets**: `UpdateProgressBottomSheet` (+ `ProgressSheetTab`,
+      - [x] **S4-3 — The two remaining big sheets**: `UpdateProgressBottomSheet` (+ `ProgressSheetTab`,
             `ProgressSheetTabMapping` -> `:core:uibinding`), `ChooseListsBottomSheet` (+
-            `ListMembership`), `PreviewData` -> `:core:domain`.
+            `ListMembership`), `PreviewData` -> `:core:domain`. Both landed **fully R1–R9 compliant**,
+            not just R4-clean — the library's first sealed event lambdas. **See § 5j.**
       - [ ] **S4-4 — `EditionImage` -> `cover/`**: `CoverImageUiModel`, `LocalCoverImagePersister`,
             the `:core:uibinding` mapper, `CoverlessTitleCover` + `MonogramCoverMetrics`, the three
             platform actuals, 38 call sites in 9 files. Kills the `:core:book` edge.
@@ -795,6 +798,11 @@ keyed on a UI model's `previews` and they have no model. `GalleryFamily.VERDICT`
 does), holds no entry, and `GalleryRegistry.families` filters empty families out, so the gallery simply
 does not show it until S6.
 
+> **Updated by S4-3.** These three are now the library's **only** R1 holdouts, and the reasoning above
+> does not generalise: what forced them here was the direction rule, whereas S4-3's two sheets were in
+> their own scheduled slot and took the full contract. § 5j has the correction. S6 owes R1 to
+> `VerdictBlock`, `VerdictSheet` and `RichTextFormattingToolbar`, and nothing else.
+
 **The gallery renders its first two families.** `RICHTEXT` (5 fixtures) and `SHARE` (8, one per variant
 plus the two anatomy outliers — a minimal book card and the in-progress reading update). The share
 fixtures were **lifted from `ShareCard.kt`'s nine existing `@Preview` literals**, and those `@Preview`
@@ -931,6 +939,160 @@ production bug surfaced. Counts verified from the results XML, not from an agent
 `Book`, `BookEdition`, `BookList`, `UserTag`, `DeadlineProgress`. R9 stops the *render* from mapping;
 it does not stop the state from carrying domain types. That is S7 (`BookCard`) and S10 (shelf
 teardown), and pulling it into S4 would mean re-planning the remaining stages.
+
+### 5j. S4-3 outcome — the first R1 components, and a cost argument that was wrong
+
+Two sheets, 1,987 lines, six new library types, two promoted mappers, four new collectors. What it
+settled:
+
+**They landed R1-shaped, and the reasoning that nearly deferred that was wrong.** The first plan for
+S4-3 kept today's callback parameters and left R1/R2 to S6, on the stated ground that § 7.2 re-cuts
+these sheets in S6 anyway, so the call sites would be rewritten twice. **That conflated two different
+things.** S6's work is *chrome extraction* — pulling `SheetScaffold` / `SheetHeader` / `SheetRow` /
+`SheetFooter` out of the sheets' internals. It does not touch their outer signature. An `onEvent`
+surface survives S6 intact, so the double-work cost did not exist. The user pushed back on the
+lambda soup, the cost was re-derived, and both sheets took the full contract instead:
+
+```kotlin
+fun UpdateProgressBottomSheet(model: ProgressSheetUiModel, onEvent: (ProgressSheetEvent) -> Unit, modifier: Modifier = Modifier)
+fun ChooseListsBottomSheet(model: ChooseListsUiModel, onEvent: (ChooseListsEvent) -> Unit, modifier: Modifier = Modifier, jacket: @Composable (ChooseListsJacket, Modifier) -> Unit)
+```
+
+**The generalisable lesson: § 5h's deferral was not a precedent.** `VerdictSheet` and friends are
+R1-less because the direction rule dragged them into S4-2b before they were ready. S4-3's sheets were
+in their own scheduled slot. Same-shaped exception, entirely different justification — and reading the
+first as licence for the second is how one recorded deferral becomes a house style. § 5h now says so,
+and names the three components S6 still owes R1 to.
+
+**R1 had no shipped instance before this.** Worth stating plainly, because the contract reads as
+though it did: `ShareCard` satisfies R1 by being inert (no callbacks at all), `RichText` mirrors
+`Text`'s own signature, and § 7.2's illustration is `BookCard`, which does not exist yet. The closest
+thing was `RichTextFormattingToolbar`'s `onToggle: (RichTextMarkType) -> Unit` — the pattern in
+miniature. So these two sheets are where the pattern gets exercised, on four call sites, *before* S7
+bets `BookCard`'s 21 on it. `component-contract.md` § 7.2 now cites `ProgressSheetEvent` rather than a
+hypothetical.
+
+**Where a component's own screen state goes — decided.** The progress sheet's selected tab was a
+second parameter beside the model, which § 7.1 forbids. It moved onto `ProgressSheetUiModel`. Its
+*stored* home stays `UiState.selectedProgressSheetTab`; the model field is derived from it inside
+`ProgressSheetCollector`, so there is exactly one writer and § 5i's "two fields one forgotten update
+apart" hazard does not apply. **The cost, accepted knowingly:** a tab tap now travels state ->
+collector -> state, so the segmented switcher updates on the second emission rather than the first.
+Same shape `ShareCardsCollector` already has. If it ever reads laggy, the fix is for
+`OnProgressTabClickAction` to write both the stored tab and the derived model in its one `setState` —
+a second writer, and worth it only against a real symptom, not pre-emptively.
+
+**The jacket slot, and why the treatment travels *into* it.** `ChooseListsBottomSheet` draws up to
+three rotated covers through `EditionImage`, which takes a `BookEdition` — a domain type G1 forbids
+the library from naming. So it became a slot, the same § 7.1 escape hatch as `VerdictSheet`'s `cover`.
+The design choice worth recording is the *direction*: the sheet hands the caller a
+`ChooseListsJacket` (index, corner radius, elevation, shadow) plus a `Modifier` already carrying the
+52/56dp width and the −8°/+4°/0° rotations. It does **not** publish a `ChooseListsJacketDefaults`
+object for the caller to read. That is § 5i's `VerdictSheetCoverDefaults` lesson applied before the
+fact — two callers left to apply the same treatment themselves drift apart. Here neither caller has
+anything to decide. When `Cover` lands in S4-4 the carrier is deleted and the slot becomes
+`covers: ImmutableList<CoverImageUiModel>`.
+
+**A sealed subject killed a boolean that was being re-derived six times.** `ChooseListsBottomSheet`
+signalled "this is the bulk case" with `bookTitle == null`, immediately re-derived as
+`val isBulk = bookTitle == null` and then threaded through six private composables, any of which could
+be handed the wrong one. It is now `ChooseListsVariant.SingleBook | ManyBooks` — the branch is the
+type. This is R2 doing what R2 is for, on a component nobody had thought of as having variants.
+
+**Collectors, not actions — and the reason is § 5i, not taste.** `book` is written by
+`UserBooksFlowCollector` plus eight actions in book_detail; `bookToUpdate` by five actions in reading.
+A derived field patched into each write site is one forgotten `copy` from a stale sheet, and that bug
+passes every gate this repo has. Four collectors derive the models off `scope.state` instead
+(`ProgressSheetCollector` ×2, `ChooseListsCollector` ×2), each with a `*Snapshot` data class and
+`distinctUntilChanged`, copying `ShareCardsCollector` exactly. `progressSheet` is now null precisely
+when its source book is.
+
+**R9 bought a real performance fix, not just a layering one.** `LibraryUiState.resolveSelectedBooks()`
+scans every book in every collected shelf, and **both** Library layouts called it inside composition,
+on every frame the bulk sheet was open, to resolve three cover images. It now runs once per state
+change in `ChooseListsCollector`, which writes `chooseListsSheet` and `chooseListsJacketEditions` in
+one `setState` so the model's jacket count and the editions the render indexes into can never describe
+different selections. The collector also skips the whole per-list membership pass while
+`selectedBookIds` is empty — outside selection mode there is no sheet to feed.
+
+**Two resolution asymmetries preserved on purpose, and now locked by tests.** `toProgressSheetUiModel`
+falls back to `defaultEdition.pages` for the page total but **not** to `defaultEdition.audioSeconds`
+for the audio total, and it picks the medium off `currentEdition` alone — so a print edition shelved
+against a book whose default is an audiobook still logs pages. Both look like bugs and are today's
+behaviour; "tidying" either would silently change which tabs a book offers. The mapper's KDoc says so
+and `ProgressSheetMapperTest` asserts both directions.
+
+**One pre-existing dead KDoc link, surfaced by the move.** `SoftcoverIcon`'s KDoc pointed at
+`nl.rhaydus.softcover.core.designsystem.presentation.model.RhaydusIconResource.Drawable`. That type
+has always lived in the foundation (`nl.rhaydus.designsystem.icon`), so the reference was wrong from
+the start — and invisible to both G1's gates for exactly the reason § 6a records: a fully-qualified
+name in KDoc is neither an import nor a declared dependency. Deleting the `presentation/model/`
+package made it unambiguously dangle. It now names the sibling `drawableIconResource` helper, which
+is what a caller actually reaches for.
+
+**Deferred, and recorded rather than left as a gap:** neither sheet is in the Component Gallery. A
+fixture tile cannot render a modal inline, and a "tap to open" fixture is a gallery *feature* that
+wants designing once for all eighteen sheets in S6, not invented twice against a sample of two. Both
+models ship compile-checked `previews` regardless (R5), and the components' own `@Preview`s render
+*from* that list — including two cases the pre-migration sheet never previewed at all: the audiobook
+time layout and the no-page-count layout.
+
+**Gates at this boundary:** `checkModuleGraph` (291 edges), `ktlintCheck`, repo-wide `compileKotlinJvm`
++ `:desktopApp:compileKotlin` + both `:app` variants' Kotlin compilation,
+`compileKotlinIosSimulatorArm64` on `:core:{component, uibinding, designsystem, domain}` and
+`:feature:{book_detail, reading, library}`, `projectHealth` on all seven touched modules, and
+type-resolved detekt under JDK 21 (`styleCheck`, whole repo) — all green. **1,085 unit tests across
+the five touched modules, 0 failures**, counts read off the results XML rather than an agent's report:
+48 new (12 `ProgressSheetMapperTest`, 20 `ChooseListsMapperTest`, 16 across the four collector tests)
+plus the 9-test `ProgressSheetTabMappingTest` carried into `:core:uibinding`. `:core:component` needed no
+new external declaration: `kotlinx-datetime` reaches it through `:core:designsystem`'s `api` edge.
+`feature:library` gained `:core:component` and `:core:uibinding`, both on `implementation` — § 5i's
+`api` mistake not repeated.
+
+**Review outcome, and the one real regression it caught.** `rhaydus-kotlin:code-reviewer` ran three
+independent passes and cross-checked each of eight specific claims against the pre-migration file via
+`git show HEAD:`. It confirmed the `selectedTab` single-writer claim, the `when`-exhaustiveness of the
+tab dispatch, byte-identical behaviour in all three tab bodies, both mapper asymmetries, and
+byte-identical caption/pill strings. No blockers. It found one genuine regression and two things worth
+fixing:
+
+- **A coverless bulk jacket was being tilted.** `ChooseListsMapper` clamped the header's cover count
+  to a *minimum of one*, on the reasoning that the header shows a placeholder rather than a gap. But
+  `StackedJackets` then rotated that lone placeholder by −8°, where the pre-migration code
+  special-cased `covers.isEmpty()` and drew it upright. So a bulk selection none of whose books
+  resolve a cover would have rendered a single tilted jacket, which reads as a rendering fault rather
+  than as a stack. The field is now `coverCount`, honestly clamped to **0..3**, and the component
+  branches on zero. **The lesson is about the clamp, not the rotation:** `coerceIn(1, 3)` looked like
+  defensive hygiene and was actually the bug — it erased the distinction the render needed. A clamp
+  that narrows a domain is a decision, not a safety net.
+- **`ChooseListsSubject` became `ChooseListsVariant`.** R8 names the variant type `*Variant`, and this
+  is the type the header's `when` dispatches on. "Subject" was the more descriptive name and the wrong
+  one — R8 exists so that this is not a judgement call per component.
+- **An action imported a composable for a KDoc link.** `OnBulkToggleListMembershipAction` imported
+  `ChooseListsBottomSheet` purely to make `[ChooseListsBottomSheet]` resolve — a presentation-action →
+  UI edge that existed only for a doc link. Pre-existing, carried in by the path rename, now a plain
+  code-span reference with the import gone.
+
+**One efficiency caveat left in place deliberately, and documented rather than papered over.**
+`resolveSelectedBooks()` sits inside the collector's `map`, so it runs per state emission, *ahead* of
+`distinctUntilChanged` — while selection mode is active an unrelated change (a search keystroke, a
+sort) still re-runs the scan even though the snapshot is about to be deduped. Moving it behind the
+dedupe means either carrying `booksByTab`/`bookByBookId` into the snapshot (whose own structural
+comparison is the cost being avoided) or reimplementing the lookup in the collector, away from the
+state it belongs to. Per-frame was the problem worth fixing; per-emission-during-a-transient-mode is
+not. `ChooseListsSnapshot`'s KDoc now says exactly that, because the first version of it overclaimed.
+
+**Partly verified by a desktop launch, and it is worth being precise about what that proved.** The
+app was started (`:desktopApp:run`) and reached seven GraphQL requests with **no Koin failure**, which
+does establish that the DI graph resolves and that all four new collectors are bound — a missing
+`bind …Collector::class` would have thrown at ScreenModel creation, and that is the one silent-wiring
+failure mode this stage could plausibly have introduced. It proves nothing about pixels: the run could
+not get past the network layer on this machine (a JDK cert-path failure reaching the API, unrelated to
+this branch and reproducible on `main`).
+
+**So still not verified:** the tab switcher's response to a tap (the one thing the derived
+`selectedTab` could plausibly regress), the jacket slot in both its single and three-jacket forms, and
+the audiobook time layout are all render-time behaviour compilation cannot speak to.
 
 ### 5a. The Component Gallery — decided: shipped easter egg
 
@@ -1146,7 +1308,7 @@ early in S4 — `QuoteShareCardBody` and `VerdictSheet` both block on it.
 #### Chips & pills — 29 -> `Chip` + `ChipUiModel`
 
 - [ ] `PillChip`, `PillChipLabel` — `core/designsystem/presentation/component/PillChip.kt:31,81`
-- [ ] `AddFilledPill`, `AddOutlinePill`, `MembershipPill`, `OnListChip` — `core/designsystem/presentation/component/ChooseListsBottomSheet.kt:540,559,480,502`
+- [ ] `AddFilledPill`, `AddOutlinePill`, `MembershipPill`, `OnListChip` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; `MembershipPill` now takes a resolved label, so only the three pill chromes are left to consolidate)
 - [ ] `FormatChip` — `core/designsystem/presentation/component/ReviewFormattingToolbar.kt:65`
 - [ ] `SearchChromePill` — `core/designsystem/presentation/component/SoftcoverTopBar.kt:126`
 - [ ] `ActiveFilterChip`, `ClearAllChip`, `LibraryFilterChipRow` — `feature/library/presentation/component/LibraryFilterChipRow.kt:96,136,40`
@@ -1166,7 +1328,7 @@ early in S4 — `QuoteShareCardBody` and `VerdictSheet` both block on it.
 Kills all three cross-module name collisions.
 
 - [ ] `SectionLabel` × 4 — `app/src/debug/.../MotionDebugScreen.kt`, `feature/book_detail/presentation/screen/BookDetailShelf.kt:2535`, `feature/profile/presentation/screen/ProfileShelf.kt:136`, `feature/reading/presentation/screen/ReadingShelf.kt:1178`
-- [ ] `EditorialHeader` × 2 — `core/designsystem/presentation/component/UpdateProgressBottomSheet.kt:250`, `feature/reading/presentation/screen/ReadingScreenLayout.mobile.kt:158`
+- [ ] `EditorialHeader` × 2 — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3; now takes a `title: String`), `feature/reading/presentation/screen/ReadingScreenLayout.mobile.kt:158`
 - [ ] `SidebarSectionLabel` × 2 — `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:416`, `feature/settings/presentation/screen/SettingsScreenLayout.jvm.kt:260`
 - [ ] `SmallSectionLabel`, `InlineAccentLabel` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:1128,1100`
 - [ ] `SectionIntro` — `feature/profile/presentation/screen/ProfileShelf.kt:402`
@@ -1179,7 +1341,7 @@ Kills all three cross-module name collisions.
 - [ ] `DesktopExploreHeader`, `DesktopLibraryHeader`, `DesktopReadingHeader` — `feature/explore/presentation/screen/ExploreScreenLayout.jvm.kt:172`, `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:481`, `feature/reading/presentation/screen/ReadingScreenLayout.jvm.kt:220`
 - [ ] `ArrangeSubLabel` — `feature/library/presentation/component/LibraryArrangeSheet.kt:191`
 - [ ] `ChangeEditionHeader` — `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:208`
-- [ ] `ChooseListsHeader` — `core/designsystem/presentation/component/ChooseListsBottomSheet.kt:171`
+- [ ] `ChooseListsHeader` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; now takes a `ChooseListsVariant` + the jacket slot)
 - [ ] `ShelvesSheetHeader` — `feature/library/presentation/component/LibraryShelvesSheet.kt:90`
 - [ ] `TagEditorHeader` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:281`
 - [ ] `SelectionHeader` — `feature/library/presentation/screen/LibraryShelf.kt:1793`
@@ -1189,7 +1351,7 @@ Kills all three cross-module name collisions.
 - [ ] `DeadlineBadge` — `core/designsystem/presentation/component/DeadlineBadge.kt:15` (drop the `DeadlineStatus` parameter per R4)
 - [ ] `DeadlineCoverOverlay` — `core/designsystem/presentation/component/DeadlineCoverOverlay.kt:15`
 - [ ] `UnreleasedBadge` (+ `UnreleasedBadgeStyle`) — `core/designsystem/presentation/component/UnreleasedBadge.kt:45`
-- [ ] `BookmarkGlyph` — `core/designsystem/presentation/component/ChooseListsBottomSheet.kt:418`
+- [ ] `BookmarkGlyph` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3)
 - [ ] `LibraryDeadlineCountdownBadge`, `CoverGridOverlay`, `SelectionCircleIndicator` — `feature/library/presentation/screen/LibraryShelf.kt:1083,1020,1658`
 - [ ] `OwnedCoverBadge` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:585`
 - [ ] `SelectedCheckBadge` — `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:414`
@@ -1205,7 +1367,7 @@ Kills all three cross-module name collisions.
 #### Dividers & rules — 5 -> `Divider` + `DividerUiModel`
 
 - [ ] `DebugRowDivider` — `app/src/debug/.../DebugRoutesSection.kt:106`
-- [ ] `ReadingLifeDivider` — `core/designsystem/presentation/share/ShareCard.kt:924`
+- [ ] `ReadingLifeDivider` — `core/component/share/ShareCard.kt`
 - [ ] `HorizontalBreak` — `feature/settings/presentation/screen/RoadmapContent.kt:379`
 - [ ] `QuoteRule` — `feature/lists/presentation/screen/CreateListSheetContent.kt:176`
 - [ ] `OrTypeItDivider` — `feature/onboarding/presentation/screen/OnboardingShelf.kt:237`
@@ -1214,8 +1376,8 @@ Kills all three cross-module name collisions.
 
 #### List rows — 22 -> `ListRow` + `ListRowUiModel`
 
-- [ ] `ChooseListsRow`, `NewListRow` — `core/designsystem/presentation/component/ChooseListsBottomSheet.kt:330,594`
-- [ ] `WhenReadRow` — `core/designsystem/presentation/component/UpdateProgressBottomSheet.kt:372`
+- [ ] `ChooseListsRow`, `NewListRow` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; `ChooseListsRow` now takes one `ChooseListsRowUiModel`)
+- [ ] `WhenReadRow` — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3, unchanged)
 - [ ] `DebugNavigationRow` — `app/src/debug/.../DebugRoutesSection.kt:68`
 - [ ] `HapticRow` — `app/src/debug/.../MotionDebugScreen.kt:137`
 - [ ] `AboutLinkRow`, `AboutNavigationRow`, `AboutUsernameRow`, `AboutRow` — `feature/settings/presentation/screen/AboutContent.kt:192,232,275,307`
@@ -1234,9 +1396,9 @@ Kills all three cross-module name collisions.
 
 Chrome only; each sheet's **body** stays a feature composable (§ 4.4).
 
-- [ ] `ChooseListsBottomSheet` — `core/designsystem/presentation/component/ChooseListsBottomSheet.kt:66`
-- [ ] `UpdateProgressBottomSheet`, `ProgressBottomSheetContent`, `TabSwitcher` — `core/designsystem/presentation/component/UpdateProgressBottomSheet.kt:100,124,283`
-- [ ] `VerdictSheet` — `core/designsystem/presentation/component/VerdictSheet.kt:99`
+- [ ] `ChooseListsBottomSheet` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; already R1/R2-shaped, so S6 owes it chrome extraction only)
+- [ ] `UpdateProgressBottomSheet`, `ProgressBottomSheetContent`, `TabSwitcher` — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3; already R1/R2-shaped, so S6 owes it chrome extraction only)
+- [ ] `VerdictSheet` — `core/component/verdict/VerdictSheet.kt` — **also owes R1** (§ 5h, § 5j)
 - [ ] `SoftcoverLoadingDialog`, `SoftcoverLoadingSheet` — `core/designsystem/presentation/component/SoftcoverLoadingDialog.kt:25,35`
 - [ ] `LibraryFilterSheet`, `FilterSheetFooter`, `EmptyFacetMessage`, `TagSearchField` — `feature/library/presentation/component/LibraryFilterSheet.kt:76,394,442,309`
 - [ ] `LibraryArrangeSheet` — `feature/library/presentation/component/LibraryArrangeSheet.kt:81`

@@ -55,9 +55,8 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_visibility_
  * The design system's bundled icon catalog. Each entry maps a stable name to a Compose Multiplatform
  * [DrawableResource], so consumers reference icons through this type (`SoftcoverIcon.Search`) rather
  * than the platform resource system — the icons resolve identically on Android and iOS, and the
- * underlying CMP `Res` stays internal to this module. Wrap
- * in [nl.rhaydus.softcover.core.designsystem.presentation.model.RhaydusIconResource.Drawable] when
- * a content description is needed.
+ * underlying CMP `Res` stays internal to this module. Wrap with [drawableIconResource] when a
+ * content description is needed.
  */
 enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Account(Res.drawable.ic_account),

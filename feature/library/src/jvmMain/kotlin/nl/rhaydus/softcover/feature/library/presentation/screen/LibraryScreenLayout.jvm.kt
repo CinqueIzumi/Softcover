@@ -45,7 +45,9 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
+import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
+import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -332,26 +334,43 @@ internal actual fun LibraryScreenLayout(
         )
     }
 
-    if (state.isBulkAddToListSheetShown && state.selectedBookIds.isNotEmpty()) {
-        ChooseListsBottomSheet(
-            bookIds = state.selectedBookIds,
-            customLists = state.customLists.filter { it.isOwned.not() },
-            listsBeingMutated = state.listsBeingMutated,
-            bookCovers = state.resolveSelectedBooks().take(3).mapNotNull { it.currentEdition },
-            onDismissRequest = {
-                runAction(OnBulkAddToListSheetShownAction(shown = false))
-            },
-            onToggleMembership = { listId, membership ->
-                haptics.commit()
+    val chooseListsSheet = state.chooseListsSheet
 
-                runAction(
-                    OnBulkToggleListMembershipAction(
-                        listId = listId,
-                        currentMembership = membership,
-                    ),
+    if (state.isBulkAddToListSheetShown && state.selectedBookIds.isNotEmpty() && chooseListsSheet != null) {
+        ChooseListsBottomSheet(
+            model = chooseListsSheet,
+            onEvent = { event ->
+                when (event) {
+                    is ChooseListsEvent.MembershipToggled -> {
+                        haptics.commit()
+
+                        runAction(
+                            OnBulkToggleListMembershipAction(
+                                listId = event.listId,
+                                currentMembership = event.membership,
+                            ),
+                        )
+                    }
+
+                    ChooseListsEvent.NewListRequested -> onCreateNewListClick()
+
+                    ChooseListsEvent.Dismissed -> runAction(OnBulkAddToListSheetShownAction(shown = false))
+                }
+            },
+            jacket = { jacket, jacketModifier ->
+                val edition = state.chooseListsJacketEditions.getOrNull(jacket.index)
+
+                EditionImage(
+                    edition = edition,
+                    defaultEdition = edition,
+                    isLoading = false,
+                    coverlessTitle = edition?.title ?: chooseListsSheet.variant.name,
+                    cornerRadius = jacket.cornerRadius,
+                    elevation = jacket.elevation,
+                    shadowColor = jacket.shadowColor,
+                    modifier = jacketModifier,
                 )
             },
-            onCreateNewListClick = onCreateNewListClick,
         )
     }
 }

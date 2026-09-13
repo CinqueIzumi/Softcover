@@ -115,6 +115,11 @@ import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
+import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
+import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
+import nl.rhaydus.softcover.core.component.lists.ListMembership
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
+import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.isBlank
@@ -122,15 +127,12 @@ import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetCoverDefaults
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
-import nl.rhaydus.softcover.core.designsystem.presentation.component.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -2731,23 +2733,37 @@ internal fun BookDetailOverlays(
         )
     }
 
-    if (state.showChooseListsSheet && state.book != null) {
+    val chooseListsSheet = state.chooseListsSheet
+
+    if (state.showChooseListsSheet && state.book != null && chooseListsSheet != null) {
         ChooseListsBottomSheet(
-            bookIds = setOf(state.book.id),
-            customLists = state.userLists.filter { it.isOwned.not() },
-            listsBeingMutated = state.listsBeingMutated,
-            bookTitle = state.book.title,
-            bookCovers = listOfNotNull(state.book.currentEdition),
-            onDismissRequest = { runAction(OnDismissChooseListsSheetAction()) },
-            onToggleMembership = { listId, membership ->
-                runAction(
-                    OnToggleListMembershipAction(
-                        listId = listId,
-                        isMember = membership == ListMembership.ALL,
-                    ),
+            model = chooseListsSheet,
+            onEvent = { event ->
+                when (event) {
+                    is ChooseListsEvent.MembershipToggled -> runAction(
+                        OnToggleListMembershipAction(
+                            listId = event.listId,
+                            isMember = event.membership == ListMembership.ALL,
+                        ),
+                    )
+
+                    ChooseListsEvent.NewListRequested -> onCreateNewListClick()
+
+                    ChooseListsEvent.Dismissed -> runAction(OnDismissChooseListsSheetAction())
+                }
+            },
+            jacket = { jacket, jacketModifier ->
+                EditionImage(
+                    edition = state.book.currentEdition,
+                    defaultEdition = state.book.currentEdition,
+                    isLoading = false,
+                    coverlessTitle = state.book.title,
+                    cornerRadius = jacket.cornerRadius,
+                    elevation = jacket.elevation,
+                    shadowColor = jacket.shadowColor,
+                    modifier = jacketModifier,
                 )
             },
-            onCreateNewListClick = onCreateNewListClick,
         )
     }
 
@@ -2819,57 +2835,56 @@ internal fun BookDetailOverlays(
     }
 
     val bookToUpdate = state.book
+    val progressSheet = state.progressSheet
 
-    if (state.showUpdateProgressSheet && bookToUpdate != null) {
+    if (state.showUpdateProgressSheet && bookToUpdate != null && progressSheet != null) {
         UpdateProgressBottomSheet(
-            bookToUpdate = bookToUpdate,
-            selectedTab = state.selectedProgressSheetTab,
-            onDismissRequest = {
-                runAction(OnDismissProgressSheetAction())
-            },
-            onProgressTabClick = {
-                runAction(OnProgressTabClickAction(tab = it))
-            },
-            onUpdatePercentageClick = { percentage, actionAt ->
-                runAction(
-                    OnUpdatePercentageProgressClickAction(
-                        newPercentage = percentage,
-                        actionAt = actionAt,
-                    ),
-                )
-            },
-            onUpdatePageProgressClick = { page, actionAt ->
-                runAction(
-                    OnUpdatePageProgressClickAction(
-                        newPage = page,
-                        actionAt = actionAt,
-                    ),
-                )
-            },
-            onUpdateTimeProgressClick = { h, m, s, actionAt ->
-                runAction(
-                    OnUpdateTimeProgressClickAction(
-                        hours = h,
-                        minutes = m,
-                        seconds = s,
-                        actionAt = actionAt,
-                    ),
-                )
-            },
-            onMarkAsReadClick = { actionAt ->
-                // The same dispatchable action the Shelve control's "Read" row fires. Its celebration
-                // (commit haptic + MarkAsReadBurst) is driven screen-wide off the ScreenModel's
-                // BookMarkedAsReadEvent (BookDetailScreen.Content's ObserveAsEvents), not by anything
-                // local to that row, so dispatching it from the sheet gets the same commit haptic +
-                // burst for free — no new action/state needed. The picked backdate travels with it.
-                runAction(
-                    OnMarkBookAsReadClickAction(
-                        book = bookToUpdate,
-                        actionAt = actionAt,
-                    ),
-                )
+            model = progressSheet,
+            onEvent = { event ->
+                when (event) {
+                    is ProgressSheetEvent.TabSelected -> runAction(OnProgressTabClickAction(tab = event.tab))
 
-                runAction(OnDismissProgressSheetAction())
+                    is ProgressSheetEvent.PagesSubmitted -> runAction(
+                        OnUpdatePageProgressClickAction(
+                            newPage = event.page,
+                            actionAt = event.actionAt,
+                        ),
+                    )
+
+                    is ProgressSheetEvent.PercentageSubmitted -> runAction(
+                        OnUpdatePercentageProgressClickAction(
+                            newPercentage = event.percentage,
+                            actionAt = event.actionAt,
+                        ),
+                    )
+
+                    is ProgressSheetEvent.TimeSubmitted -> runAction(
+                        OnUpdateTimeProgressClickAction(
+                            hours = event.hours,
+                            minutes = event.minutes,
+                            seconds = event.seconds,
+                            actionAt = event.actionAt,
+                        ),
+                    )
+
+                    is ProgressSheetEvent.MarkAsReadRequested -> {
+                        // The same dispatchable action the Shelve control's "Read" row fires. Its celebration
+                        // (commit haptic + MarkAsReadBurst) is driven screen-wide off the ScreenModel's
+                        // BookMarkedAsReadEvent (BookDetailScreen.Content's ObserveAsEvents), not by anything
+                        // local to that row, so dispatching it from the sheet gets the same commit haptic +
+                        // burst for free — no new action/state needed. The picked backdate travels with it.
+                        runAction(
+                            OnMarkBookAsReadClickAction(
+                                book = bookToUpdate,
+                                actionAt = event.actionAt,
+                            ),
+                        )
+
+                        runAction(OnDismissProgressSheetAction())
+                    }
+
+                    ProgressSheetEvent.Dismissed -> runAction(OnDismissProgressSheetAction())
+                }
             },
         )
     }

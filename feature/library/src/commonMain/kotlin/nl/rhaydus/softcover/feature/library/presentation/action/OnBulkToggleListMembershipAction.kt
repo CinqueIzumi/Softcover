@@ -2,8 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ChooseListsBottomSheet
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ListMembership
+import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -12,7 +11,7 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Add or remove the current selection to/from a custom list. Membership semantics mirror the
- * tristate pattern in [ChooseListsBottomSheet]:
+ * tristate pattern in `ChooseListsBottomSheet`:
  *
  * - [ListMembership.ALL] → remove every selected book from the list.
  * - [ListMembership.NONE] or [ListMembership.PARTIAL] → add the books that are not already on

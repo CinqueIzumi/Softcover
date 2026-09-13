@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.model.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -15,6 +16,12 @@ internal data class ReadingScreenUiState(
     val bookToUpdate: Book? = null,
     val progressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val showProgressSheet: Boolean = false,
+
+    /**
+     * What the progress sheet renders, mapped off the composition by `ProgressSheetCollector`
+     * (R9) from [bookToUpdate] and [progressSheetTab] — never by the render.
+     */
+    val progressSheet: ProgressSheetUiModel? = null,
 
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,

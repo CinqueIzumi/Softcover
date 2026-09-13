@@ -15,7 +15,9 @@ kotlin {
             implementation(project(":core:lists"))
             implementation(project(":core:deadlines"))
             implementation(project(":core:preferences"))
+            implementation(project(":core:component"))
             implementation(project(":core:designsystem"))
+            implementation(project(":core:uibinding"))
             implementation(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)
