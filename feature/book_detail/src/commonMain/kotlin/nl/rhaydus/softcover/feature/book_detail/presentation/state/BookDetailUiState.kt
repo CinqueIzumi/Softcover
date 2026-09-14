@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
@@ -23,6 +24,15 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiM
 import nl.rhaydus.toad.UiState
 
 internal data class BookDetailUiState(
+    /**
+     * The screen's own identity and morph surface, seeded from the screen's constructor. They live on
+     * the state so `CoverModelsCollector` can resolve the hero's shared-element key off the
+     * composition (R7/R9) — a composable must not compute a transition key, and a collector cannot
+     * see a nav argument that only exists as a screen parameter.
+     */
+    val bookId: Int? = null,
+    val transitionSurface: String? = null,
+
     val loadingBookDetails: Boolean = true,
     val book: Book? = null,
     val initialCover: BookInitialCover? = null,
@@ -67,6 +77,22 @@ internal data class BookDetailUiState(
     val currentUserAvatarUrl: String? = null,
     val shareBookCard: BookShareCardUiModel? = null,
     val shareUpdateCard: ReadingUpdateShareCardUiModel? = null,
+
+    /**
+     * The book's covers, mapped by `CoverModelsCollector` (R9) so no composable ever resolves an
+     * edition into a cover. [heroBackdropCover] deliberately carries a null `coverlessTitle`: it is
+     * the blurred decorative layer behind the hero, not a cover the user reads, so a typographic
+     * jacket there would only be blurred noise.
+     */
+    val heroCover: CoverUiModel? = null,
+    val heroBackdropCover: CoverUiModel? = null,
+    val fullScreenCover: CoverUiModel? = null,
+    val verdictCover: CoverUiModel? = null,
+    val editionSheetHeaderCover: CoverUiModel? = null,
+
+    /** Keyed by [BookEdition.id]. Mapped from [editions], never from the derived `filteredEditions`. */
+    val editionCovers: Map<Int, CoverUiModel> = emptyMap(),
+    val tagEditorCover: CoverUiModel? = null,
 
     val showChooseListsSheet: Boolean = false,
     val userLists: List<BookList> = emptyList(),

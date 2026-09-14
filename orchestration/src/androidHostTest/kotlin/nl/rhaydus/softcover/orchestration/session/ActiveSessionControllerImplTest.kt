@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
@@ -89,6 +90,18 @@ class ActiveSessionControllerImplTest {
         every {
             book.id
         } returns id
+        every {
+            book.title
+        } returns "Stub Book"
+        every {
+            book.currentEdition
+        } returns null
+        every {
+            book.defaultEdition
+        } returns null
+        every {
+            book.coverUrl
+        } returns ""
 
         val userBookRead = mockk<UserBookRead> {
             every {
@@ -165,10 +178,10 @@ class ActiveSessionControllerImplTest {
             // ----- Assert -----
             val active = controller.activeSession.value
 
-            active shouldBe ActiveSession(
-                session = session,
-                book = book,
-            )
+            active?.session shouldBe session
+            active?.book shouldBe book
+            active?.peekBarCover?.variant shouldBe CoverVariant.SessionPeekBar
+            active?.focusCover?.variant shouldBe CoverVariant.SessionFocus
         }
 
         @Test

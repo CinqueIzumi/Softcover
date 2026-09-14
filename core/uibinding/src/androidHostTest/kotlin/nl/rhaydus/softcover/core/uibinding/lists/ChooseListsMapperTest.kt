@@ -3,12 +3,20 @@ package nl.rhaydus.softcover.core.uibinding.lists
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.lists.ChooseListsVariant
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 
 class ChooseListsMapperTest {
+    private fun coverUiModel(): CoverUiModel = CoverUiModel(
+        source = null,
+        coverlessTitle = "Cover",
+        variant = CoverVariant.ChooseListsStackJacket,
+    )
+
     private fun listBook(
         bookId: Int,
         listId: Int,
@@ -41,16 +49,21 @@ class ChooseListsMapperTest {
                 id = 1,
                 bookIds = emptyList(),
             ),)
+            val cover = coverUiModel()
 
             // ----- Act -----
             val result = lists.toChooseListsUiModel(
                 bookId = 42,
                 bookTitle = "Piranesi",
+                cover = cover,
                 listsBeingMutated = emptySet(),
             )
 
             // ----- Assert -----
-            result.variant shouldBe ChooseListsVariant.SingleBook(name = "Piranesi")
+            result.variant shouldBe ChooseListsVariant.SingleBook(
+                name = "Piranesi",
+                cover = cover,
+            )
         }
 
         @Test
@@ -65,6 +78,7 @@ class ChooseListsMapperTest {
             val result = lists.toChooseListsUiModel(
                 bookId = 42,
                 bookTitle = "Piranesi",
+                cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -84,6 +98,7 @@ class ChooseListsMapperTest {
             val result = lists.toChooseListsUiModel(
                 bookId = 42,
                 bookTitle = "Piranesi",
+                cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -103,6 +118,7 @@ class ChooseListsMapperTest {
             val result = lists.toChooseListsUiModel(
                 bookId = 42,
                 bookTitle = "Piranesi",
+                cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -124,7 +140,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(1, 2, 3),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -143,7 +159,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(1, 2, 3),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -162,7 +178,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(1, 2, 3),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -184,7 +200,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(0, 1, 2, 3, 4),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -203,7 +219,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(0, 1, 2, 3, 4),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -222,7 +238,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(0, 1, 2, 3, 4),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -244,7 +260,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(0, 1, 2, 3, 4),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -263,7 +279,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(0, 1, 2, 3, 4),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -282,7 +298,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(0, 1, 2, 3, 4),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -310,7 +326,7 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = emptySet(),
-                coverCount = 3,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -320,13 +336,11 @@ class ChooseListsMapperTest {
     }
 
     @Nested
-    inner class CoverCountClamping {
+    inner class CoversCapping {
         @Test
-        fun `coverCount of 0 is preserved rather than clamped up`() {
+        fun `covers above 3 are capped down to the first 3`() {
             // ----- Arrange -----
-            // Zero is legitimate: the header draws one upright coverless jacket for it. Clamping it
-            // up to 1 would make the header treat that lone jacket as a tilted stack, which is the
-            // regression this test guards against.
+            val covers = List(5) { coverUiModel() }
             val lists = listOf(bookList(
                 id = 1,
                 bookIds = emptyList(),
@@ -335,17 +349,22 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(1),
-                coverCount = 0,
+                covers = covers,
                 listsBeingMutated = emptySet(),
             )
 
             // ----- Assert -----
-            (result.variant as ChooseListsVariant.ManyBooks).coverCount shouldBe 0
+            val manyBooks = result.variant as ChooseListsVariant.ManyBooks
+            manyBooks.covers.size shouldBe 3
+            manyBooks.covers.toList() shouldBe covers.take(3)
         }
 
         @Test
-        fun `negative coverCount is clamped up to 0`() {
+        fun `an empty covers list is preserved rather than padded`() {
             // ----- Arrange -----
+            // Empty is legitimate: the header draws one upright coverless jacket for it. Padding it
+            // up to one cover would make the header treat that lone jacket as a tilted stack, which
+            // is the regression this test guards against.
             val lists = listOf(bookList(
                 id = 1,
                 bookIds = emptyList(),
@@ -354,31 +373,12 @@ class ChooseListsMapperTest {
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
                 bookIds = setOf(1),
-                coverCount = -1,
+                covers = emptyList(),
                 listsBeingMutated = emptySet(),
             )
 
             // ----- Assert -----
-            (result.variant as ChooseListsVariant.ManyBooks).coverCount shouldBe 0
-        }
-
-        @Test
-        fun `coverCount above 3 is clamped down to 3`() {
-            // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = emptyList(),
-            ),)
-
-            // ----- Act -----
-            val result = lists.toBulkChooseListsUiModel(
-                bookIds = setOf(1),
-                coverCount = 5,
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            (result.variant as ChooseListsVariant.ManyBooks).coverCount shouldBe 3
+            (result.variant as ChooseListsVariant.ManyBooks).covers.isEmpty() shouldBe true
         }
     }
 
@@ -406,6 +406,7 @@ class ChooseListsMapperTest {
             val result = lists.toChooseListsUiModel(
                 bookId = 42,
                 bookTitle = "Piranesi",
+                cover = coverUiModel(),
                 listsBeingMutated = setOf(2),
             )
 
@@ -442,6 +443,7 @@ class ChooseListsMapperTest {
             val result = lists.toChooseListsUiModel(
                 bookId = 42,
                 bookTitle = "Piranesi",
+                cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
             )
 
@@ -458,6 +460,7 @@ class ChooseListsMapperTest {
             val result = lists.toChooseListsUiModel(
                 bookId = 42,
                 bookTitle = "Piranesi",
+                cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
             )
 

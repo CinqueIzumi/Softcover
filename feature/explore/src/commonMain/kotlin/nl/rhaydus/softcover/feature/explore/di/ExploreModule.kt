@@ -40,6 +40,7 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBoo
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouReadCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesBooksCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedSeriesCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichDismissedMetadataCollector
@@ -114,6 +115,8 @@ val exploreModule = module {
     factory { BecauseYouReadCollector() } bind ExploreCollector::class
 
     factory { MoodTagsCollector() } bind ExploreCollector::class
+
+    factory { CoverModelsCollector() } bind ExploreCollector::class
 
     factory {
         HiddenSuggestionsScreenModel(

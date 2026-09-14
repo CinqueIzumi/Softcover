@@ -106,6 +106,8 @@ internal actual fun ReadingScreenLayout(
                     else -> EmptyCurrentlyReadingScreen(
                         wantToReadBooks = state.wantToReadBooks,
                         trendingBooks = state.trendingBooks,
+                        pickUpNextCovers = state.pickUpNextCovers,
+                        trendingTileCover = state.trendingTileCover,
                         streakEnabled = state.streakEnabled,
                         recentReadingActivity = state.recentReadingActivity,
                         onExpandStreak = { showStreakSheet = true },
@@ -169,6 +171,8 @@ private fun DesktopReadingContent(
             ) {
                 FeaturedBookCard(
                     book = featured,
+                    backdropCover = state.featuredBackdropCover,
+                    heroCover = state.featuredCover,
                     deadlineProgress = featuredDeadlineProgress,
                     dateStyle = state.dateStyle,
                     mutationFailed = featured.id in state.failedMutationBookIds,
@@ -195,6 +199,7 @@ private fun DesktopReadingContent(
                         CompactBookEntry(
                             modifier = controller.slideModifier(book.id),
                             book = book,
+                            cover = state.bookCovers[book.id],
                             deadlineProgress = book.deadlineProgressFrom(state),
                             dateStyle = state.dateStyle,
                             mutationFailed = book.id in state.failedMutationBookIds,

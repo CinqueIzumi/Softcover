@@ -53,8 +53,6 @@ internal actual fun BookDetailScreenLayout(
     onCoverClick: () -> Unit,
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
-    bookId: Int,
-    transitionSurface: String?,
     celebrationKey: Int,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -160,9 +158,9 @@ internal actual fun BookDetailScreenLayout(
                 ) {
                     GeneralBookInfoSection(
                         edition = state.displayedEdition,
+                        heroCover = state.heroCover,
+                        backdropCover = state.heroBackdropCover,
                         isLoading = state.loadingBookDetails && state.book == null,
-                        fallBackEdition = state.book?.defaultEdition ?: state.initialCover?.defaultEdition,
-                        fallbackCoverUrl = state.book?.coverUrl ?: state.initialCover?.fallbackCoverUrl,
                         isExpired = state.deadlineProgress?.isExpired == true,
                         rating = state.book?.rating,
                         title = state.book?.title,
@@ -171,8 +169,6 @@ internal actual fun BookDetailScreenLayout(
                             ?: state.book?.releaseYear,
                         unreleasedDate = state.book?.takeIf { it.isUnreleased }?.effectiveReleaseDate,
                         isOwned = state.isEditionOwned(edition = state.displayedEdition),
-                        bookId = bookId,
-                        transitionSurface = transitionSurface,
                         onCoverClick = onCoverClick,
                     )
                 }
@@ -294,8 +290,6 @@ private fun BookDetailScreenReadingPreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
                 celebrationKey = 0,
             )
         }
@@ -325,8 +319,6 @@ private fun BookDetailScreenNonePreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
                 celebrationKey = 0,
             )
         }
@@ -356,8 +348,6 @@ private fun BookDetailScreenDnfPreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
                 celebrationKey = 0,
             )
         }
@@ -387,8 +377,6 @@ private fun BookDetailScreenWantToReadPreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
                 celebrationKey = 0,
             )
         }
@@ -418,8 +406,6 @@ private fun BookDetailScreenReadPreview() {
                 onCoverClick = {},
                 onCreateNewListClick = {},
                 isOnline = true,
-                bookId = 1,
-                transitionSurface = null,
                 celebrationKey = 0,
             )
         }

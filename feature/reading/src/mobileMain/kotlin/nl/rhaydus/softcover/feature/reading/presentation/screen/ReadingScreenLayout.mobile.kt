@@ -39,6 +39,7 @@ import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -48,6 +49,7 @@ import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
@@ -125,6 +127,8 @@ internal actual fun ReadingScreenLayout(
                         else -> EmptyCurrentlyReadingScreen(
                             wantToReadBooks = state.wantToReadBooks,
                             trendingBooks = state.trendingBooks,
+                            pickUpNextCovers = state.pickUpNextCovers,
+                            trendingTileCover = state.trendingTileCover,
                             streakEnabled = state.streakEnabled,
                             recentReadingActivity = state.recentReadingActivity,
                             onExpandStreak = { showStreakSheet = true },
@@ -320,15 +324,36 @@ private fun ReadingScreenEmptyPreview() {
     }
 }
 
+/**
+ * The two empty-screen preview states, built as top-level `val`s so the cover mapping a
+ * `CoverModelsCollector` performs at runtime happens off the composition here too
+ * (component-contract.md § 7.2 R9) — mirroring `ExploreScreenLayout.mobile.kt`'s
+ * `toPreviewCoverModels`. Without the covers the tiles would render blank placeholders.
+ *
+ * Declared **after** [previewBooks]: top-level properties initialise in file order, so reading it
+ * from above would see an uninitialised list.
+ */
+private val previewEmptyWithPickUpNextState = ReadingScreenUiState(
+    isLoading = false,
+    wantToReadBooks = previewBooks.take(3),
+    pickUpNextCovers = previewBooks.take(3).associate {
+        it.id to it.toCoverUiModel(variant = CoverVariant.ReadingPickUpNextTile)
+    },
+)
+
+private val previewEmptyWithTrendingState = ReadingScreenUiState(
+    isLoading = false,
+    trendingBooks = listOf(previewBooks.first()),
+    trendingTileCover = previewBooks.first()
+        .toCoverUiModel(variant = CoverVariant.ReadingTrendingTile),
+)
+
 @StandardPreview
 @Composable
 private fun ReadingScreenEmptyWithPickUpNextPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
-            state = ReadingScreenUiState(
-                isLoading = false,
-                wantToReadBooks = previewBooks.take(3),
-            ),
+            state = previewEmptyWithPickUpNextState,
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},
@@ -341,10 +366,7 @@ private fun ReadingScreenEmptyWithPickUpNextPreview() {
 private fun ReadingScreenEmptyWithTrendingPreview() {
     SoftcoverTheme {
         ReadingScreenLayout(
-            state = ReadingScreenUiState(
-                isLoading = false,
-                trendingBooks = listOf(previewBooks.first()),
-            ),
+            state = previewEmptyWithTrendingState,
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},

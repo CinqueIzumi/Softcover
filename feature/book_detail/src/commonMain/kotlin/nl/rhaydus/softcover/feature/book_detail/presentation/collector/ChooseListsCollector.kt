@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.lists.toChooseListsUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -26,6 +28,7 @@ internal class ChooseListsCollector : BookDetailCollector {
                 ChooseListsSnapshot(
                     bookId = it.book?.id,
                     bookTitle = it.book?.title,
+                    currentEdition = it.book?.currentEdition,
                     userLists = it.userLists,
                     listsBeingMutated = it.listsBeingMutated,
                 )
@@ -41,6 +44,11 @@ internal class ChooseListsCollector : BookDetailCollector {
                         .toChooseListsUiModel(
                             bookId = bookId,
                             bookTitle = bookTitle,
+                            cover = snapshot.currentEdition.toCoverUiModel(
+                                defaultEdition = snapshot.currentEdition,
+                                coverlessTitle = bookTitle,
+                                variant = CoverVariant.ChooseListsSingleJacket,
+                            ),
                             listsBeingMutated = snapshot.listsBeingMutated,
                         )
                 } else {

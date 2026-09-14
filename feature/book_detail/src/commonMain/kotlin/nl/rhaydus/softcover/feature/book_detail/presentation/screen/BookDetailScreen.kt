@@ -66,6 +66,7 @@ class BookDetailScreen(
                 parametersOf(
                     id,
                     initialCover,
+                    transitionSurface,
                 )
             }
 
@@ -111,15 +112,12 @@ class BookDetailScreen(
             runAction = screenModel::runAction,
             onNavigateBack = onNavigateBack,
             onCoverClick = {
-                val book = state.book ?: return@BookDetailScreenLayout
+                // Reads the model the collector already mapped rather than mapping here: this lambda
+                // only runs on tap, but it is lexically inside a composable and captures composition
+                // state, which is exactly the shape R9 forbids.
+                val cover = state.fullScreenCover ?: return@BookDetailScreenLayout
 
-                overlayNavigator.push(
-                    FullScreenCoverScreen(
-                        edition = state.displayedEdition,
-                        defaultEdition = book.defaultEdition,
-                        fallbackCoverUrl = book.coverUrl,
-                    ),
-                )
+                overlayNavigator.push(FullScreenCoverScreen(cover = cover))
             },
             onCreateNewListClick = {
                 // Same detour-and-return as Library's bulk path: the reader reached for a new list
@@ -143,8 +141,6 @@ class BookDetailScreen(
                 screenModel.runAction(OnDismissChooseListsSheetAction())
             },
             isOnline = isOnline,
-            bookId = id,
-            transitionSurface = transitionSurface,
             celebrationKey = celebrationKey,
         )
     }
@@ -156,8 +152,8 @@ class BookDetailScreen(
  * [BookDetailScreen.Content], and only the rendered layout branches — mobile is a single scrolling
  * column, desktop is a fixed identity sidebar beside a scrolling content column. `expect` cannot carry
  * default argument values, so every parameter is supplied explicitly at the single call site above.
- * [bookId] and [transitionSurface] flow through from the screen's constructor (the cover's shared-
- * element key needs them before the book itself has loaded).
+ * The screen's id and morph surface are **not** parameters here: the cover's shared-element key is
+ * resolved by `CoverModelsCollector` and arrives on `BookDetailUiState.heroCover` (R7/R9).
  */
 @Composable
 internal expect fun BookDetailScreenLayout(
@@ -167,7 +163,5 @@ internal expect fun BookDetailScreenLayout(
     onCoverClick: () -> Unit,
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
-    bookId: Int,
-    transitionSurface: String?,
     celebrationKey: Int,
 )

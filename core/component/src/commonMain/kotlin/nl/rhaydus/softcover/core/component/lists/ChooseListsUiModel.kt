@@ -3,6 +3,9 @@ package nl.rhaydus.softcover.core.component.lists
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -26,7 +29,14 @@ data class ChooseListsUiModel(
          */
         override val previews: ImmutableList<ChooseListsUiModel> = persistentListOf(
             ChooseListsUiModel(
-                variant = ChooseListsVariant.SingleBook(name = "Piranesi"),
+                variant = ChooseListsVariant.SingleBook(
+                    name = "Piranesi",
+                    cover = CoverUiModel(
+                        source = null,
+                        coverlessTitle = "Piranesi",
+                        variant = CoverVariant.ChooseListsSingleJacket,
+                    ),
+                ),
                 rows = persistentListOf(
                     ChooseListsRowUiModel(
                         listId = 1,
@@ -57,7 +67,13 @@ data class ChooseListsUiModel(
             ChooseListsUiModel(
                 variant = ChooseListsVariant.ManyBooks(
                     bookCount = 5,
-                    coverCount = 3,
+                    covers = listOf("Piranesi", "It", "The Name of the Wind").map { title ->
+                        CoverUiModel(
+                            source = null,
+                            coverlessTitle = title,
+                            variant = CoverVariant.ChooseListsStackJacket,
+                        )
+                    }.toImmutableList(),
                 ),
                 rows = persistentListOf(
                     ChooseListsRowUiModel(
@@ -87,7 +103,14 @@ data class ChooseListsUiModel(
                 ),
             ),
             ChooseListsUiModel(
-                variant = ChooseListsVariant.SingleBook(name = "The Name of the Wind"),
+                variant = ChooseListsVariant.SingleBook(
+                    name = "The Name of the Wind",
+                    cover = CoverUiModel(
+                        source = null,
+                        coverlessTitle = "The Name of the Wind",
+                        variant = CoverVariant.ChooseListsSingleJacket,
+                    ),
+                ),
                 rows = persistentListOf(),
             ),
         )

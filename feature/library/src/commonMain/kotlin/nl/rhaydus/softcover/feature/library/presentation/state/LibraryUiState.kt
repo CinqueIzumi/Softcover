@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -22,6 +23,20 @@ internal data class LibraryUiState(
     val selectedTabId: String = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id,
     val booksByTab: Map<String, List<Book>> = emptyMap(),
     val editionsByTab: Map<String, List<BookEdition>> = emptyMap(),
+
+    /**
+     * Book covers keyed by [Book.id], mapped by `CoverModelsCollector` (R9) off every shelf
+     * collected into [booksByTab]. Id-keyed rather than paired index-for-index with a shelf's
+     * render order: the render's `renderIds` is a `MutableStateList` the reorder library permutes
+     * live during a drag, and an id-keyed map cannot desync from a list being mutated mid-gesture.
+     */
+    val bookCovers: Map<Int, CoverUiModel> = emptyMap(),
+
+    /**
+     * Edition covers keyed by [BookEdition.id], mapped by `CoverModelsCollector` (R9) off every
+     * custom-list shelf collected into [editionsByTab]. See [bookCovers] for why this is id-keyed.
+     */
+    val editionCovers: Map<Int, CoverUiModel> = emptyMap(),
 
     /**
      * Custom-list `list_books.created_at` keyed by tab id, then edition id. Populated by
@@ -130,13 +145,6 @@ internal data class LibraryUiState(
      * The bulk "Add to list" sheet's rows and header, mapped by [ChooseListsCollector] (R9).
      */
     val chooseListsSheet: ChooseListsUiModel? = null,
-
-    /**
-     * Covers for that sheet's rotated header stack, resolved by [ChooseListsCollector] in the
-     * same pass as [chooseListsSheet] — the render indexes into this by the jacket slot's index
-     * rather than calling [resolveSelectedBooks] itself on every frame.
-     */
-    val chooseListsJacketEditions: List<BookEdition> = emptyList(),
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
         sortModeByTab[tabId] ?: LibraryTab.defaultSortMode(tabId = tabId)

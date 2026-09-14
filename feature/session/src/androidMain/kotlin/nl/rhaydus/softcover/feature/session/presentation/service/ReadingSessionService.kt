@@ -28,13 +28,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.designsystem.R
-import nl.rhaydus.softcover.core.designsystem.presentation.component.resolveEditionImageSource
 import nl.rhaydus.softcover.core.notification.SoftcoverNotificationChannel
 import nl.rhaydus.softcover.core.presentation.navigation.AppEntryPoint
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
+import nl.rhaydus.softcover.core.uibinding.cover.resolveCoverSource
 
 /**
  * Foreground service that surfaces the active reading session as a persistent, ongoing notification:
@@ -56,7 +57,7 @@ internal class ReadingSessionService : Service() {
 
     private var coverBitmap: Bitmap? = null
 
-    private var coverSource: Any? = null
+    private var coverSource: CoverSource? = null
 
     override fun onBind(intent: Intent): IBinder? = null
 
@@ -124,7 +125,7 @@ internal class ReadingSessionService : Service() {
     }
 
     private fun ensureCover(active: ActiveSession) {
-        val source = resolveEditionImageSource(
+        val source = resolveCoverSource(
             edition = active.book.currentEdition,
             defaultEdition = active.book.defaultEdition,
             fallbackCoverUrl = active.book.coverUrl.takeIf { it.isNotBlank() },
@@ -140,9 +141,14 @@ internal class ReadingSessionService : Service() {
             return
         }
 
+        val data = when (source) {
+            is CoverSource.Local -> source.path
+            is CoverSource.Remote -> source.url
+        }
+
         serviceScope.launch {
             val request = ImageRequest.Builder(this@ReadingSessionService)
-                .data(source)
+                .data(data)
                 .allowHardware(false)
                 .size(COVER_SIZE_PX)
                 .build()

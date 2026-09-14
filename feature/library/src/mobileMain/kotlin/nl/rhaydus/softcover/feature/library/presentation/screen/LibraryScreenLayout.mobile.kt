@@ -65,7 +65,6 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -480,20 +479,6 @@ internal actual fun LibraryScreenLayout(
 
                     ChooseListsEvent.Dismissed -> runAction(OnBulkAddToListSheetShownAction(shown = false))
                 }
-            },
-            jacket = { jacket, jacketModifier ->
-                val edition = state.chooseListsJacketEditions.getOrNull(jacket.index)
-
-                EditionImage(
-                    edition = edition,
-                    defaultEdition = edition,
-                    isLoading = false,
-                    coverlessTitle = edition?.title ?: chooseListsSheet.variant.name,
-                    cornerRadius = jacket.cornerRadius,
-                    elevation = jacket.elevation,
-                    shadowColor = jacket.shadowColor,
-                    modifier = jacketModifier,
-                )
             },
         )
     }

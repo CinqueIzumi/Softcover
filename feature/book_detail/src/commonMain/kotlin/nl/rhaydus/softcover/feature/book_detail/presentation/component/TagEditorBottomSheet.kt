@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -45,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -63,14 +63,14 @@ import nl.rhaydus.designsystem.layout.FlowRowExpansion
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
-import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 
@@ -80,8 +80,9 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
  * name or mints a new one server-side. Tags already on the book render below, grouped by category like
  * a contents page, each removable and with a per-tag spoiler flag. Every change is committed immediately
  * by the caller — the sheet is a dumb renderer that reports intents through its callbacks. The book
- * title and its displayed edition are render-only inputs (for the header's naming and mini jacket); the
- * TOAD contract carries neither, both live on the caller's `BookDetailUiState`.
+ * title and the header's mini jacket [CoverUiModel] are render-only inputs, already mapped off the
+ * composition by the caller's `CoverModelsCollector` (R9); the TOAD contract carries neither, both
+ * live on the caller's `BookDetailUiState`.
  *
  * Only the top bar and header are pinned; the add block and the collection share **one** scroll
  * region below them. That is what lets the suggestion cloud reveal the user's entire vocabulary for
@@ -148,8 +149,7 @@ private fun List<UserTag>.groupedForCollection(): List<TagGroup> {
 @Composable
 internal fun TagEditorBottomSheet(
     bookTitle: String,
-    edition: BookEdition?,
-    defaultEdition: BookEdition?,
+    cover: CoverUiModel?,
     userTags: List<UserTag>,
     tagSuggestions: List<UserTag>,
     selectedCategory: TagCategory,
@@ -182,8 +182,7 @@ internal fun TagEditorBottomSheet(
 
             TagEditorHeader(
                 bookTitle = bookTitle,
-                edition = edition,
-                defaultEdition = defaultEdition,
+                cover = cover,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
@@ -280,8 +279,7 @@ private fun TagEditorTopBar(
 @Composable
 private fun TagEditorHeader(
     bookTitle: String,
-    edition: BookEdition?,
-    defaultEdition: BookEdition?,
+    cover: CoverUiModel?,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -323,14 +321,8 @@ private fun TagEditorHeader(
             )
         }
 
-        EditionImage(
-            edition = edition,
-            defaultEdition = defaultEdition,
-            isLoading = false,
-            coverlessTitle = bookTitle,
-            cornerRadius = 4.dp,
-            elevation = 4.dp,
-            shadowColor = Color.Black.copy(alpha = 0.5f),
+        Cover(
+            model = cover,
             modifier = Modifier.width(52.dp),
         )
     }

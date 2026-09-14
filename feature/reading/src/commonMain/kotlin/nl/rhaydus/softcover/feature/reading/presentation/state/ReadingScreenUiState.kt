@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
@@ -39,4 +40,22 @@ internal data class ReadingScreenUiState(
 
     val verdictPromptBook: Book? = null,
     val verdictReview: RichTextUiModel? = null,
+
+    /**
+     * Every cover surface on this screen, mapped off the composition by `CoverModelsCollector`
+     * (R9) from [books], [wantToReadBooks], [trendingBooks] and [verdictPromptBook] — never by the
+     * render.
+     */
+    val featuredBackdropCover: CoverUiModel? = null,
+    val featuredCover: CoverUiModel? = null,
+    val bookCovers: Map<Int, CoverUiModel> = emptyMap(),
+
+    /**
+     * Mirrors [nl.rhaydus.softcover.feature.reading.presentation.screen.EmptyCurrentlyReadingScreen]'s
+     * own `wantToReadBooks.take(3)` — kept in step here because that render decision is duplicated,
+     * not derived from this map, so a change to the empty screen's tile count must update both.
+     */
+    val pickUpNextCovers: Map<Int, CoverUiModel> = emptyMap(),
+    val trendingTileCover: CoverUiModel? = null,
+    val verdictCover: CoverUiModel? = null,
 ) : UiState

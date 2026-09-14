@@ -69,16 +69,16 @@ import nl.rhaydus.designsystem.modifier.grayscale
 import nl.rhaydus.designsystem.modifier.platformModifierClick
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -245,6 +245,7 @@ internal fun EditionList(
             val gridItemScope = this
 
             val edition = editionsById[id] ?: return@itemsIndexed
+            val cover = state.editionCovers[id]
 
             ReorderableItem(state = reorderableState, key = id) {
                 // Built unconditionally so the per-item composable structure is identical whether
@@ -303,6 +304,7 @@ internal fun EditionList(
                             index = index,
                         ),
                     edition = edition,
+                    cover = cover,
                     layout = state.gridLayout,
                     onEditionClick = if (isRearranging) {
                         {}
@@ -451,6 +453,7 @@ internal fun BookList(
             val gridItemScope = this
 
             val book = booksById[id] ?: return@itemsIndexed
+            val cover = state.bookCovers[id]
 
             ReorderableItem(state = reorderableState, key = id) {
                 // Built unconditionally so the per-item composable structure is identical in and
@@ -607,6 +610,7 @@ internal fun BookList(
                     LayoutBookEntry(
                         modifier = entryModifier,
                         book = book,
+                        cover = cover,
                         layout = state.gridLayout,
                         onClick = onClick,
                         onLongClick = onLongClick,
@@ -833,6 +837,7 @@ private fun LayoutGrid(
 @Composable
 private fun LayoutBookEntry(
     book: Book,
+    cover: CoverUiModel?,
     layout: LibraryGridLayout,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)?,
@@ -896,20 +901,9 @@ private fun LayoutBookEntry(
                         isSelected = isSelected,
                     ) {
                         LibraryGridCover(deadlineProgress = deadlineProgress) { innerModifier ->
-                            EditionImage(
-                                edition = currentEdition,
+                            Cover(
+                               model = cover,
                                 modifier = innerModifier,
-                                isLoading = false,
-                                defaultEdition = book.defaultEdition,
-                                fallbackCoverUrl = book.coverUrl,
-                                coverlessTitle = book.title,
-                                elevation = 6.dp,
-                                cornerRadius = LIBRARY_COVER_CORNER_RADIUS,
-                                sharedTransitionKey = bookCoverTransitionKey(
-                                    editionId = currentEdition?.id,
-                                    bookId = book.id,
-                                ),
-                                maxDecodePx = 600,
                             )
                         }
                     }
@@ -933,20 +927,9 @@ private fun LayoutBookEntry(
                         isSelected = isSelected,
                     ) {
                         LibraryGridCover(deadlineProgress = deadlineProgress) { innerModifier ->
-                            EditionImage(
-                                edition = currentEdition,
+                            Cover(
+                               model = cover,
                                 modifier = innerModifier,
-                                isLoading = false,
-                                defaultEdition = book.defaultEdition,
-                                fallbackCoverUrl = book.coverUrl,
-                                coverlessTitle = book.title,
-                                elevation = 6.dp,
-                                cornerRadius = LIBRARY_COVER_CORNER_RADIUS,
-                                sharedTransitionKey = bookCoverTransitionKey(
-                                    editionId = currentEdition?.id,
-                                    bookId = book.id,
-                                ),
-                                maxDecodePx = 600,
                             )
                         }
                     }
@@ -989,20 +972,9 @@ private fun LayoutBookEntry(
                     isSelectionMode = isSelectionMode,
                     isSelected = isSelected,
                 ) {
-                    EditionImage(
-                        edition = currentEdition,
+                    Cover(
+                       model = cover,
                         modifier = Modifier.fillMaxSize(),
-                        isLoading = false,
-                        defaultEdition = book.defaultEdition,
-                        fallbackCoverUrl = book.coverUrl,
-                        coverlessTitle = book.title,
-                        elevation = 6.dp,
-                        cornerRadius = LIBRARY_COVER_CORNER_RADIUS,
-                        sharedTransitionKey = bookCoverTransitionKey(
-                            editionId = currentEdition?.id,
-                            bookId = book.id,
-                        ),
-                        maxDecodePx = 600,
                     )
                 }
             }
@@ -1035,9 +1007,12 @@ private fun CoverGridOverlay(
 }
 
 /**
- * The cover radius shared by every Library cover — grid, cover-only, and list-large — so the
- * countdown badge / selection ring overlays below can hard-code the same clip shape `EditionImage`
- * itself uses.
+ * The cover radius the selection-ring overlay ([SelectableCover]) hard-codes so its clip shape
+ * matches the cover underneath. [Cover] itself now sources its corner radius from
+ * `CoverDimensions.forVariant(CoverVariant.LibraryShelfItem)` rather than a parameter here — this
+ * constant is **not** wired to that table, so if `LibraryShelfItem`'s radius in `CoverDimensions`
+ * ever changes, this must be updated to match or the overlay will silently drift from the cover's
+ * clip.
  */
 private val LIBRARY_COVER_CORNER_RADIUS = 10.dp
 
@@ -1164,6 +1139,7 @@ private fun LibraryWaveProgressRow(
 @Composable
 private fun LayoutEditionEntry(
     edition: BookEdition,
+    cover: CoverUiModel?,
     layout: LibraryGridLayout,
     onEditionClick: (BookEdition) -> Unit,
     modifier: Modifier = Modifier,
@@ -1185,20 +1161,9 @@ private fun LayoutEditionEntry(
                     authorName = authorName,
                     onClick = { onEditionClick(edition) },
                 ) { coverModifier ->
-                    EditionImage(
-                        edition = edition,
+                    Cover(
+                       model = cover,
                         modifier = coverModifier,
-                        isLoading = false,
-                        defaultEdition = edition,
-                        coverlessTitle = title,
-                        elevation = 6.dp,
-                        cornerRadius = 10.dp,
-                        sharedTransitionKey = bookCoverTransitionKey(
-                            editionId = edition.id,
-                            bookId = edition.bookId,
-                            surface = "edition-${edition.id}",
-                        ),
-                        maxDecodePx = 600,
                     )
                 }
             }
@@ -1212,20 +1177,9 @@ private fun LayoutEditionEntry(
                     modifier = entryModifier,
                     onClick = { onEditionClick(edition) },
                 ) { coverModifier ->
-                    EditionImage(
-                        edition = edition,
+                    Cover(
+                       model = cover,
                         modifier = coverModifier,
-                        isLoading = false,
-                        defaultEdition = edition,
-                        coverlessTitle = title,
-                        elevation = 6.dp,
-                        cornerRadius = 10.dp,
-                        sharedTransitionKey = bookCoverTransitionKey(
-                            editionId = edition.id,
-                            bookId = edition.bookId,
-                            surface = "edition-${edition.id}",
-                        ),
-                        maxDecodePx = 600,
                     )
                 }
             }
@@ -1249,20 +1203,9 @@ private fun LayoutEditionEntry(
                 onClick = { onEditionClick(edition) },
                 trailing = dragHandle,
             ) { coverModifier ->
-                EditionImage(
-                    edition = edition,
+                Cover(
+                   model = cover,
                     modifier = coverModifier,
-                    isLoading = false,
-                    defaultEdition = edition,
-                    coverlessTitle = title,
-                    elevation = 6.dp,
-                    cornerRadius = 10.dp,
-                    sharedTransitionKey = bookCoverTransitionKey(
-                        editionId = edition.id,
-                        bookId = edition.bookId,
-                        surface = "edition-${edition.id}",
-                    ),
-                    maxDecodePx = 600,
                 )
             }
         }

@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.uibinding.lists
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsRowUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsVariant
@@ -23,9 +24,13 @@ private const val MAX_STACKED_COVERS: Int = 3
 fun List<BookList>.toChooseListsUiModel(
     bookId: Int,
     bookTitle: String,
+    cover: CoverUiModel,
     listsBeingMutated: Set<Int>,
 ): ChooseListsUiModel = ChooseListsUiModel(
-    variant = ChooseListsVariant.SingleBook(name = bookTitle),
+    variant = ChooseListsVariant.SingleBook(
+        name = bookTitle,
+        cover = cover,
+    ),
     rows = rowsFor(
         bookIds = setOf(bookId),
         listsBeingMutated = listsBeingMutated,
@@ -37,21 +42,18 @@ fun List<BookList>.toChooseListsUiModel(
  * Maps the reader's custom lists onto the choose-lists sheet for a **bulk selection**, where each
  * row's membership is tri-state across [bookIds] and the captions count the selection.
  *
- * [coverCount] is how many of the selected books actually resolved a cover for the header stack,
- * capped at three. **Zero is a legitimate value** — the header then draws one upright coverless
- * jacket, so clamping it up to one here would tilt that placeholder as though it were a stack.
+ * [covers] are the selected books that actually resolved a cover, for the header stack, capped at
+ * three. **An empty list is a legitimate value** — the header then draws one upright coverless
+ * jacket, so padding it up to one here would tilt that placeholder as though it were a stack.
  */
 fun List<BookList>.toBulkChooseListsUiModel(
     bookIds: Set<Int>,
-    coverCount: Int,
+    covers: List<CoverUiModel>,
     listsBeingMutated: Set<Int>,
 ): ChooseListsUiModel = ChooseListsUiModel(
     variant = ChooseListsVariant.ManyBooks(
         bookCount = bookIds.size,
-        coverCount = coverCount.coerceIn(
-            minimumValue = 0,
-            maximumValue = MAX_STACKED_COVERS,
-        ),
+        covers = covers.take(MAX_STACKED_COVERS).toImmutableList(),
     ),
     rows = rowsFor(
         bookIds = bookIds,

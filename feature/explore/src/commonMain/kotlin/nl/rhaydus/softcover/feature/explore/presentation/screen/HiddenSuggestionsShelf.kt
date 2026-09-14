@@ -33,7 +33,8 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -88,6 +89,7 @@ internal fun HiddenSuggestionsContent(
             if (state.hiddenBooks.isNotEmpty()) {
                 HiddenBooksSection(
                     books = state.hiddenBooks,
+                    covers = state.hiddenBookCovers,
                     runAction = runAction,
                 )
 
@@ -97,6 +99,7 @@ internal fun HiddenSuggestionsContent(
             if (state.hiddenSeries.isNotEmpty()) {
                 HiddenSeriesSection(
                     series = state.hiddenSeries,
+                    covers = state.hiddenSeriesCovers,
                     runAction = runAction,
                 )
             }
@@ -109,6 +112,7 @@ internal fun HiddenSuggestionsContent(
 @Composable
 private fun HiddenBooksSection(
     books: List<DismissedSeriesBook>,
+    covers: Map<Int, CoverUiModel>,
     runAction: (HiddenSuggestionsAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -121,8 +125,11 @@ private fun HiddenBooksSection(
         Spacer(modifier = Modifier.height(8.dp))
 
         books.forEach { book ->
+            val cover = covers[book.bookId]
+
             HiddenBookRow(
                 book = book,
+                cover = cover,
                 onRestore = {
                     runAction(OnUnblockBookAction(book = book))
                 },
@@ -134,6 +141,7 @@ private fun HiddenBooksSection(
 @Composable
 private fun HiddenSeriesSection(
     series: List<DismissedSeries>,
+    covers: Map<Int, CoverUiModel>,
     runAction: (HiddenSuggestionsAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -146,8 +154,11 @@ private fun HiddenSeriesSection(
         Spacer(modifier = Modifier.height(8.dp))
 
         series.forEach { entry ->
+            val cover = covers[entry.seriesId]
+
             HiddenSeriesRow(
                 series = entry,
+                cover = cover,
                 onRestore = {
                     runAction(
                         OnUnblockSeriesAction(
@@ -226,6 +237,7 @@ private fun HiddenSuggestionsGroupHeader(
 @Composable
 private fun HiddenBookRow(
     book: DismissedSeriesBook,
+    cover: CoverUiModel?,
     onRestore: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -265,13 +277,8 @@ private fun HiddenBookRow(
                     .padding(vertical = ROW_VERTICAL_PADDING),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                EditionImage(
-                    edition = null,
-                    defaultEdition = null,
-                    isLoading = false,
-                    fallbackCoverUrl = book.coverUrl,
-                    coverlessTitle = book.title ?: "Hidden book",
-                    cornerRadius = 4.dp,
+                Cover(
+                   model = cover,
                     modifier = Modifier.width(BOOK_COVER_WIDTH),
                 )
 
@@ -316,6 +323,7 @@ private fun HiddenBookRow(
 @Composable
 private fun HiddenSeriesRow(
     series: DismissedSeries,
+    cover: CoverUiModel?,
     onRestore: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -343,10 +351,7 @@ private fun HiddenSeriesRow(
                     .padding(vertical = ROW_VERTICAL_PADDING),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                SeriesCoverStack(
-                    coverUrl = series.coverUrl,
-                    coverlessTitle = series.seriesName ?: "Hidden series",
-                )
+                SeriesCoverStack(cover = cover)
 
                 Spacer(modifier = Modifier.width(14.dp))
 
@@ -403,17 +408,14 @@ private fun seriesCaption(
 }
 
 /**
- * The three-cover silhouette that leads a hidden-series row: the real [EditionImage] front face, over
+ * The three-cover silhouette that leads a hidden-series row: the real [Cover] front face, over
  * two offset, stepped-alpha under-layers in `surfaceContainerHigh` (DS token map — the cover-stack
  * under-layer tone) — so a series reads as a stack at a glance, distinct from a single book cover.
  * Screen-local for the same reason as [HiddenSuggestionsGroupHeader]; promote only once a second screen
  * needs to represent a series as a stack of covers.
  */
 @Composable
-private fun SeriesCoverStack(
-    coverUrl: String?,
-    coverlessTitle: String,
-) {
+private fun SeriesCoverStack(cover: CoverUiModel?) {
     Box(
         modifier = Modifier
             .width(SERIES_COVER_WIDTH + SERIES_STACK_LAYER_OFFSET * 2)
@@ -429,13 +431,8 @@ private fun SeriesCoverStack(
             modifier = Modifier.offset(x = SERIES_STACK_LAYER_OFFSET),
         )
 
-        EditionImage(
-            edition = null,
-            defaultEdition = null,
-            isLoading = false,
-            fallbackCoverUrl = coverUrl,
-            coverlessTitle = coverlessTitle,
-            cornerRadius = 3.dp,
+        Cover(
+           model = cover,
             modifier = Modifier.width(SERIES_COVER_WIDTH),
         )
     }

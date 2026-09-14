@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.cover
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit

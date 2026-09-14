@@ -12,11 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntSize
-import coil3.request.ImageRequest
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 
 @Composable
 internal actual fun FullScreenCoverScreenLayout(
-    request: ImageRequest?,
+    model: CoverUiModel,
     onNavigateUp: () -> Unit,
 ) {
     var scale by remember { mutableFloatStateOf(MIN_SCALE) }
@@ -24,7 +24,7 @@ internal actual fun FullScreenCoverScreenLayout(
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
 
     FullScreenCoverViewer(
-        request = request,
+        model = model,
         scale = scale,
         offset = offset,
         onSizeChanged = { containerSize = it },

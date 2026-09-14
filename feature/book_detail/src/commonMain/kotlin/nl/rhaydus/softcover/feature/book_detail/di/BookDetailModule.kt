@@ -37,6 +37,7 @@ import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabu
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadlineCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ChooseListsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
@@ -67,6 +68,7 @@ val bookDetailModule = module {
     )
 
     factory { UserBooksFlowCollector() } bind BookDetailCollector::class
+    factory { CoverModelsCollector() } bind BookDetailCollector::class
     factory { DateStyleCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class
     factory { UserListsFlowCollector() } bind BookDetailCollector::class
@@ -150,6 +152,7 @@ val bookDetailModule = module {
         BookDetailScreenScreenModel(
             bookId = params.get(),
             initialCover = params.getOrNull<BookInitialCover>(),
+            transitionSurface = params.getOrNull<String>(),
             fetchBookByIdUseCase = get(),
             getEditionsByBookIdUseCase = get(),
             updateBookEditionUseCase = get(),

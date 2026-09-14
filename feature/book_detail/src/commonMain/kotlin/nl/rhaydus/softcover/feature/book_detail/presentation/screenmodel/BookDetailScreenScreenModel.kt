@@ -44,6 +44,7 @@ import nl.rhaydus.toad.ToadScreenModel
 internal class BookDetailScreenScreenModel(
     private val bookId: Int,
     initialCover: BookInitialCover?,
+    transitionSurface: String?,
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,
     private val getEditionsByBookIdUseCase: GetEditionsByBookIdUseCase,
     private val updateBookEditionUseCase: UpdateBookEditionUseCase,
@@ -77,6 +78,8 @@ internal class BookDetailScreenScreenModel(
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailCollector, BookDetailLocalVariables>(
     initialState = BookDetailUiState(
+        bookId = bookId,
+        transitionSurface = transitionSurface,
         initialCover = initialCover,
         scannedEditionId = initialCover?.scannedEditionId,
     ),

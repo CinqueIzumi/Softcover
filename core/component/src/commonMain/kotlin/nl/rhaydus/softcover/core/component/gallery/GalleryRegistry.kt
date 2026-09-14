@@ -2,10 +2,15 @@ package nl.rhaydus.softcover.core.component.gallery
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
@@ -40,6 +45,23 @@ object GalleryRegistry {
                 RichText(
                     model = model,
                     modifier = modifier,
+                )
+            },
+        ),
+        galleryEntry(
+            name = "Cover",
+            family = GalleryFamily.COVER,
+            blurb = "A book/edition cover jacket — loaded art, or a monogram fallback that degrades " +
+                "to a single initial on a thumbnail-sized tile. No fixture here carries a live network " +
+                "URL, matching every other family in this gallery.",
+            previews = CoverUiModel,
+            label = ::coverFixtureLabel,
+            content = { model, modifier ->
+                val width = if (model.variant == CoverVariant.EditionListRow) 48.dp else 140.dp
+
+                Cover(
+                    model = model,
+                    modifier = modifier.width(width),
                 )
             },
         ),
@@ -95,6 +117,17 @@ private fun richTextFixtureLabel(model: RichTextUiModel): String {
         else -> marks.joinToString(separator = " + ") { it.replaceFirstChar(Char::uppercase) }
     }
 }
+
+/** Names what a [CoverUiModel] fixture demonstrates, derived from its anatomy branch. */
+private fun coverFixtureLabel(model: CoverUiModel): String = when {
+    model.isLoading -> "Loading"
+    model.source != null -> "With cover art"
+    model.variant == CoverVariant.EditionListRow -> "Coverless, thumbnail-sized"
+    model.coverlessTitle.orEmpty().length > COVERLESS_LONG_TITLE_LABEL_FLOOR -> "Coverless, long title"
+    else -> "Coverless, short title"
+}
+
+private const val COVERLESS_LONG_TITLE_LABEL_FLOOR = 30
 
 /** Names which [ShareCardUiModel] variant a fixture is, distinguishing the two anatomy outliers. */
 private fun shareCardFixtureLabel(model: ShareCardUiModel): String = when (model) {

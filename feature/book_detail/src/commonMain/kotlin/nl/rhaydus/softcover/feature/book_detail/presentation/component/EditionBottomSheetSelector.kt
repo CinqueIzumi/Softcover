@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,7 +47,9 @@ import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -60,8 +62,9 @@ import nl.rhaydus.softcover.core.domain.preview.PreviewData
 internal fun EditionBottomSheetSelector(
     bookTitle: String,
     currentEdition: BookEdition,
-    defaultEdition: BookEdition?,
+    headerCover: CoverUiModel?,
     editions: List<BookEdition>,
+    editionCovers: Map<Int, CoverUiModel>,
     isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
@@ -72,8 +75,9 @@ internal fun EditionBottomSheetSelector(
         EditionBottomSheetContent(
             bookTitle = bookTitle,
             currentEdition = currentEdition,
-            defaultEdition = defaultEdition,
+            headerCover = headerCover,
             editions = editions,
+            editionCovers = editionCovers,
             isLoading = isLoading,
             searchQuery = searchQuery,
             onSearchQueryChange = onSearchQueryChange,
@@ -87,8 +91,9 @@ internal fun EditionBottomSheetSelector(
 private fun EditionBottomSheetContent(
     bookTitle: String,
     currentEdition: BookEdition,
-    defaultEdition: BookEdition?,
+    headerCover: CoverUiModel?,
     editions: List<BookEdition>,
+    editionCovers: Map<Int, CoverUiModel>,
     isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
@@ -107,7 +112,7 @@ private fun EditionBottomSheetContent(
         ChangeEditionHeader(
             bookTitle = bookTitle,
             currentEdition = currentEdition,
-            defaultEdition = defaultEdition,
+            headerCover = headerCover,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
@@ -176,7 +181,7 @@ private fun EditionBottomSheetContent(
                         currentEdition = currentEdition,
                         selected = edition.id == selectedEdition.id,
                         onEditionClick = { selectedEdition = edition },
-                        defaultEdition = defaultEdition ?: edition,
+                        cover = editionCovers[edition.id],
                     )
                 }
             }
@@ -208,7 +213,7 @@ private fun EditionBottomSheetContent(
 private fun ChangeEditionHeader(
     bookTitle: String,
     currentEdition: BookEdition,
-    defaultEdition: BookEdition?,
+    headerCover: CoverUiModel?,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -253,14 +258,8 @@ private fun ChangeEditionHeader(
             )
         }
 
-        EditionImage(
-            edition = currentEdition,
-            defaultEdition = defaultEdition,
-            isLoading = false,
-            coverlessTitle = bookTitle,
-            cornerRadius = 4.dp,
-            elevation = 4.dp,
-            shadowColor = Color.Black.copy(alpha = 0.5f),
+        Cover(
+            model = headerCover,
             modifier = Modifier.width(56.dp),
         )
     }
@@ -275,7 +274,7 @@ private fun editionsDescription(
 private fun EditionItem(
     edition: BookEdition,
     currentEdition: BookEdition,
-    defaultEdition: BookEdition,
+    cover: CoverUiModel?,
     selected: Boolean,
     onEditionClick: () -> Unit,
 ) {
@@ -312,12 +311,9 @@ private fun EditionItem(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.Top,
         ) {
-            EditionImage(
-                edition = edition,
+            Cover(
+                model = cover,
                 modifier = Modifier.width(44.dp),
-                isLoading = false,
-                defaultEdition = defaultEdition,
-                coverlessTitle = edition.title,
             )
 
             Spacer(modifier = Modifier.width(13.dp))
@@ -556,12 +552,21 @@ private fun EditionBottomSheetContentPreview() {
         ),
     )
 
+    val editionCovers = editions.associate { edition ->
+        edition.id to CoverUiModel(
+            source = null,
+            coverlessTitle = edition.title,
+            variant = CoverVariant.EditionListRow,
+        )
+    }
+
     SoftcoverTheme {
         EditionBottomSheetContent(
             bookTitle = "King Sorrow",
             currentEdition = editions[1],
-            defaultEdition = editions[1],
+            headerCover = editionCovers[editions[1].id],
             editions = editions,
+            editionCovers = editionCovers,
             isLoading = false,
             searchQuery = "",
             onSearchQueryChange = {},

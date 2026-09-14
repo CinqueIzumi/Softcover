@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.lists.toBulkChooseListsUiModel
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
@@ -44,21 +46,24 @@ internal class ChooseListsCollector : LibraryCollector {
                 val model = if (snapshot.selectedBookIds.isEmpty()) {
                     null
                 } else {
+                    val covers = snapshot.jacketEditions.map { edition ->
+                        edition.toCoverUiModel(
+                            defaultEdition = edition,
+                            coverlessTitle = edition.title ?: "${snapshot.selectedBookIds.size} books",
+                            variant = CoverVariant.ChooseListsStackJacket,
+                        )
+                    }
+
                     snapshot.customLists
                         .filter { it.isOwned.not() }
                         .toBulkChooseListsUiModel(
                             bookIds = snapshot.selectedBookIds,
-                            coverCount = snapshot.jacketEditions.size,
+                            covers = covers,
                             listsBeingMutated = snapshot.listsBeingMutated,
                         )
                 }
 
-                scope.setState {
-                    it.copy(
-                        chooseListsSheet = model,
-                        chooseListsJacketEditions = snapshot.jacketEditions,
-                    )
-                }
+                scope.setState { it.copy(chooseListsSheet = model) }
             }
     }
 }

@@ -88,6 +88,15 @@ which combinations are real.
 Where a variant needs its own metrics, give it a lookup keyed off the variant rather than branching
 inside the layout — `ShareCardDimensions.forContent(content)` is the pattern to copy.
 
+**`CoverVariant` is that pattern's second, and larger, instance.** `EditionImage` took `elevation`,
+`cornerRadius`, `shadowColor` and `maxDecodePx` as loose parameters, and its 29 call sites had
+drifted into 14 distinct combinations — including a 3dp corner radius where everything else used
+4dp, and three Reading thumbnails at 6/8/10dp. Those are now surface-named `CoverVariant` entries
+resolved through `CoverDimensions.forVariant`, reproducing every value exactly. Two consequences
+worth copying: several entries share a metric tuple and are **still kept separate**, because the
+point of the table is that tuning one surface cannot move another; and the taxonomy itself is the
+audit — drift that lived invisibly across five features is now a list you can read in one file.
+
 **R3 — Stability is a hard requirement.**
 
 Every collection in a UI model is typed as `ImmutableList` / `ImmutableSet` / `ImmutableMap`
@@ -257,6 +266,11 @@ Two, both recorded so neither reads as an oversight:
   inline. Their models still ship compile-checked `previews` (R5), and the components' own `@Preview`
   functions render *from* that list, so the two sets cannot drift. A "tap to open" fixture is a
   gallery *feature*, and it wants designing once for all eighteen sheets rather than invented twice.
+
+**One exception closed.** The choose-lists sheet used to take a `jacket` slot because the library had
+no cover type of its own to name. With `Cover` and `CoverUiModel` in `:core:component`, the covers
+ride on `ChooseListsVariant` and the slot is gone. The verdict sheet's `cover` slot stays a slot on
+purpose: it is a genuine composition hole the caller fills, not a workaround for a missing type.
 
 ### 7.5 The Component Gallery
 

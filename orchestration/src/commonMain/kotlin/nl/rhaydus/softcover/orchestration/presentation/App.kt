@@ -31,6 +31,7 @@ import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
+import nl.rhaydus.softcover.core.presentation.cover.ProvideCoverImagePersister
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.theme.isDark
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
@@ -124,59 +125,61 @@ internal fun App() {
         dynamicColor = themeConfig.useDynamicColor,
     ) {
         ClearFocusOnTapScreen {
-            CompositionLocalProvider(
-                LocalThemeConfiguration provides themeConfig,
-                LocalAppUpdateState provides appUpdateState,
-                LocalStartAppUpdate provides onStartAppUpdate,
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    // Gate the first navigation on resolved auth state. Until the splash check
-                    // finishes `authenticated` defaults to false, so building the navigator eagerly
-                    // would mount OnboardingScreen and only swap to RootScreen once auth resolves.
-                    // Android hides that frame behind the system splash; desktop has no such splash,
-                    // so it flashed the login screen.
-                    if (state.isLoading) {
-                        Surface(modifier = Modifier.fillMaxSize()) {}
-                    } else {
-                        key(state.authenticated) {
-                            Navigator(
-                                screen = if (state.authenticated) RootScreen else OnboardingScreen,
+            ProvideCoverImagePersister {
+                CompositionLocalProvider(
+                    LocalThemeConfiguration provides themeConfig,
+                    LocalAppUpdateState provides appUpdateState,
+                    LocalStartAppUpdate provides onStartAppUpdate,
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        // Gate the first navigation on resolved auth state. Until the splash check
+                        // finishes `authenticated` defaults to false, so building the navigator eagerly
+                        // would mount OnboardingScreen and only swap to RootScreen once auth resolves.
+                        // Android hides that frame behind the system splash; desktop has no such splash,
+                        // so it flashed the login screen.
+                        if (state.isLoading) {
+                            Surface(modifier = Modifier.fillMaxSize()) {}
+                        } else {
+                            key(state.authenticated) {
+                                Navigator(
+                                    screen = if (state.authenticated) RootScreen else OnboardingScreen,
+                                )
+                            }
+                        }
+
+                        // On an expanded (desktop / large) window a bottom-centre toast floats far from
+                        // the action; anchor it bottom-end with a constrained width — the desktop
+                        // convention — and keep the phone bottom-centre otherwise.
+                        val onWideWindow =
+                            rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
+
+                        val snackbarModifier = if (onWideWindow) {
+                            Modifier
+                                .align(Alignment.BottomEnd)
+                                .navigationBarsPadding()
+                                .padding(16.dp)
+                                .widthIn(max = SNACKBAR_DESKTOP_MAX_WIDTH)
+                        } else {
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .navigationBarsPadding()
+                        }
+
+                        SnackbarHost(
+                            hostState = snackBarState,
+                            modifier = snackbarModifier,
+                        )
+
+                        // Show the re-auth overlay only during an authenticated session — if the user
+                        // is already on onboarding they can enter a token through the normal flow.
+                        if (reAuthState.visible && state.authenticated) {
+                            ReAuthDialog(
+                                isSubmitting = reAuthState.isSubmitting,
+                                errorMessage = reAuthState.errorMessage,
+                                onSubmit = viewModel::reAuthenticate,
+                                onLogOut = viewModel::logOutFromReAuth,
                             )
                         }
-                    }
-
-                    // On an expanded (desktop / large) window a bottom-centre toast floats far from
-                    // the action; anchor it bottom-end with a constrained width — the desktop
-                    // convention — and keep the phone bottom-centre otherwise.
-                    val onWideWindow =
-                        rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
-
-                    val snackbarModifier = if (onWideWindow) {
-                        Modifier
-                            .align(Alignment.BottomEnd)
-                            .navigationBarsPadding()
-                            .padding(16.dp)
-                            .widthIn(max = SNACKBAR_DESKTOP_MAX_WIDTH)
-                    } else {
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .navigationBarsPadding()
-                    }
-
-                    SnackbarHost(
-                        hostState = snackBarState,
-                        modifier = snackbarModifier,
-                    )
-
-                    // Show the re-auth overlay only during an authenticated session — if the user
-                    // is already on onboarding they can enter a token through the normal flow.
-                    if (reAuthState.visible && state.authenticated) {
-                        ReAuthDialog(
-                            isSubmitting = reAuthState.isSubmitting,
-                            errorMessage = reAuthState.errorMessage,
-                            onSubmit = viewModel::reAuthenticate,
-                            onLogOut = viewModel::logOutFromReAuth,
-                        )
                     }
                 }
             }

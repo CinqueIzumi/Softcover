@@ -328,7 +328,6 @@ val apiSignOffModules = setOf(
 // Allowlisted (source → data module) `api` edges: each genuinely renders/returns the data module's
 // types in its own public surface. Adding a row is the deliberate sign-off the rule exists to force.
 val allowedApiDataEdges = setOf(
-    ":core:designsystem" to ":core:book",
     ":core:identity" to ":core:preferences",
     ":core:profile" to ":core:identity",
     ":feature:book_detail" to ":core:identity",
@@ -343,6 +342,12 @@ val allowedApiDataEdges = setOf(
     // needs to see *both sides* of a mapping without re-declaring them — that is the whole point of
     // the module, decided in the migration tracker's § 3a. `api` is the design, not a leak.
     ":core:uibinding" to ":core:component",
+
+    // `ActiveSession` — `:core:presentation`'s cross-tier session model, consumed by `:feature:session`
+    // through `ActiveSessionController` — carries a `CoverUiModel` per surface (S4-4). A consumer that
+    // sees `ActiveSession` must see the type of its own properties, so this is the same "both sides of
+    // a public type" shape as the `:core:uibinding` row above, not a leak of the whole library.
+    ":core:presentation" to ":core:component",
 
     // `:feature:book_detail` re-exports presentation types through its own public surface (its
     // `BookDetailScreen` is constructed by orchestration with a `BookInitialCover`), settled in § 5e.

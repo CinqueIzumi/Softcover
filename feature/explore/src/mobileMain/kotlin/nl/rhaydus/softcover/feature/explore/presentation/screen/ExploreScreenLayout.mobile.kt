@@ -50,13 +50,17 @@ import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSearchTopBar
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.explore.data.mock.ExploreMockData
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
@@ -254,6 +258,7 @@ private fun EditorialContent(
         ) {
             FeaturedSection(
                 book = state.featuredUpcomingRelease,
+                cover = state.featuredCover,
                 isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -261,6 +266,7 @@ private fun EditorialContent(
 
             ContinueSeriesSection(
                 books = state.continueSeriesBooks,
+                covers = state.continueSeriesCovers,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -270,6 +276,7 @@ private fun EditorialContent(
                 genre = state.becauseYouReadGenre,
                 genreOptions = state.becauseYouReadGenreOptions,
                 books = state.becauseYouReadBooks,
+                covers = state.becauseYouReadCovers,
                 isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -277,6 +284,7 @@ private fun EditorialContent(
 
             TrendingSection(
                 books = state.trendingBooks,
+                covers = state.trendingCovers,
                 isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
                 onBookClick = onBookClick,
             )
@@ -300,6 +308,7 @@ private fun EditorialContent(
 @Composable
 private fun FeaturedSection(
     book: Book?,
+    cover: CoverUiModel?,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -322,6 +331,7 @@ private fun FeaturedSection(
         } else if (book != null) {
             FeaturedCard(
                 book = book,
+                cover = cover,
                 onClick = {
                     onBookClick(
                         book,
@@ -338,6 +348,7 @@ private fun FeaturedSection(
 @Composable
 private fun TrendingSection(
     books: List<Book>,
+    covers: Map<Int, CoverUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
 ) {
@@ -378,11 +389,14 @@ private fun TrendingSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
+                        val cover = covers[book.id]
+
                         TrendingCard(
                             modifier = Modifier
                                 .width(TRENDING_CARD_WIDTH)
                                 .staggeredEntry(coordinator = entry, index = index),
                             book = book,
+                            cover = cover,
                             onClick = {
                                 onBookClick(
                                     book,
@@ -402,6 +416,7 @@ private fun BecauseYouReadSection(
     genre: String?,
     genreOptions: List<String>,
     books: List<Book>,
+    covers: Map<Int, CoverUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -472,11 +487,14 @@ private fun BecauseYouReadSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
+                        val cover = covers[book.id]
+
                         BecauseYouReadCard(
                             modifier = Modifier
                                 .width(BECAUSE_YOU_READ_CARD_WIDTH)
                                 .staggeredEntry(coordinator = entry, index = index),
                             book = book,
+                            cover = cover,
                             onClick = {
                                 onBookClick(
                                     book,
@@ -494,6 +512,7 @@ private fun BecauseYouReadSection(
 @Composable
 private fun ContinueSeriesSection(
     books: List<Book>,
+    covers: Map<Int, CoverUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -532,6 +551,7 @@ private fun ContinueSeriesSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
+                        val cover = covers[book.id]
                         val cardModifier = Modifier
                             .width(UP_NEXT_CARD_WIDTH)
                             .staggeredEntry(coordinator = entry, index = index)
@@ -540,6 +560,7 @@ private fun ContinueSeriesSection(
                             UnreleasedSeriesCard(
                                 modifier = cardModifier,
                                 book = book,
+                                cover = cover,
                                 onClick = {
                                     onBookClick(
                                         book,
@@ -552,6 +573,7 @@ private fun ContinueSeriesSection(
                             SeriesCard(
                                 modifier = cardModifier,
                                 book = book,
+                                cover = cover,
                                 onClick = {
                                     onBookClick(
                                         book,
@@ -653,8 +675,11 @@ private fun ActiveSearchContent(
             contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
         ) {
             items(state.queriedBooks, key = { it.id }) { book ->
+                val cover = state.queriedBookCovers[book.id]
+
                 SearchResultRow(
                     book = book,
+                    cover = cover,
                     onBookClick = onBookClick,
                     runAction = runAction,
                 )
@@ -676,6 +701,25 @@ private fun ActiveSearchContent(
     }
 }
 
+/**
+ * Builds preview-only cover UI models off the composition, mirroring what `CoverModelsCollector`
+ * does at runtime (component-contract.md § 7.2 R9) — a top-level `val`/`private fun`, never called
+ * from inside a `@Composable`.
+ */
+private fun List<Book>.toPreviewCoverModels(
+    variant: CoverVariant,
+    surface: String? = null,
+): Map<Int, CoverUiModel> = associate { book ->
+    book.id to book.toCoverUiModel(
+        variant = variant,
+        sharedTransitionKey = bookCoverTransitionKey(
+            editionId = book.currentEdition?.id,
+            bookId = book.id,
+            surface = surface,
+        ),
+    )
+}
+
 private val previewMockState = ExploreScreenUiState(
     previousSearchQueries = listOf(
         "Bubblegum",
@@ -685,8 +729,16 @@ private val previewMockState = ExploreScreenUiState(
         "Piranesi",
     ),
     trendingBooks = ExploreMockData.trending,
+    trendingCovers = ExploreMockData.trending.toPreviewCoverModels(
+        CoverVariant.ExploreRail,
+        SURFACE_TRENDING,
+    ),
     loadingTrendingBooks = false,
     continueSeriesBooks = ExploreMockData.continueSeries,
+    continueSeriesCovers = ExploreMockData.continueSeries.toPreviewCoverModels(
+        CoverVariant.ExploreSeriesCard,
+        SURFACE_UP_NEXT,
+    ),
     loadingContinueSeriesBooks = false,
     loadingFeaturedUpcomingRelease = false,
     loadingBecauseYouReadBooks = false,
@@ -718,6 +770,10 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
+                trendingCovers = ExploreMockData.trending.toPreviewCoverModels(
+                    CoverVariant.ExploreRail,
+                    SURFACE_TRENDING,
+                ),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = emptyList(),
                 loadingContinueSeriesBooks = false,
@@ -743,6 +799,10 @@ private fun LoadingTrendingExploreScreenPreview() {
                 trendingBooks = emptyList(),
                 loadingTrendingBooks = true,
                 continueSeriesBooks = ExploreMockData.continueSeries,
+                continueSeriesCovers = ExploreMockData.continueSeries.toPreviewCoverModels(
+                    CoverVariant.ExploreSeriesCard,
+                    SURFACE_UP_NEXT,
+                ),
                 loadingContinueSeriesBooks = false,
                 previousSearchQueries = listOf("Bubblegum", "Earthlings"),
                 loadingFeaturedUpcomingRelease = false,
@@ -764,6 +824,10 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
+                trendingCovers = ExploreMockData.trending.toPreviewCoverModels(
+                    CoverVariant.ExploreRail,
+                    SURFACE_TRENDING,
+                ),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = emptyList(),
                 loadingContinueSeriesBooks = true,
@@ -823,6 +887,44 @@ private fun OfflineExploreScreenPreview() {
 @StandardPreview
 @Composable
 private fun ActiveExploreScreenPreview() {
+    val queriedBooks = listOf(
+        PreviewData.baseBook.copy(
+            title = "Last to Leave the Room",
+            defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2023),
+            rating = 3.7,
+            bookSeries = BookSeries(
+                id = 1,
+                name = "Starling",
+                amountOfBooks = 20,
+            ),
+        ),
+        PreviewData.baseBook.copy(
+            id = 2,
+            title = "The Last to Leave",
+            defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2021),
+            rating = 4.2,
+            userBook = PreviewData.baseBook.userBook,
+            bookSeries = BookSeries(
+                id = 1,
+                name = "Starling",
+                amountOfBooks = 20,
+            ),
+            positionsInSeries = listOf(2.0),
+        ),
+        PreviewData.baseBook.copy(
+            id = 3,
+            title = "Last One to Leave",
+            defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2022),
+            rating = 4.0,
+        ),
+        PreviewData.baseBook.copy(
+            id = 4,
+            title = "Will the Last Person To Leave the Planet Please Shut Off the Sun",
+            defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2021),
+            rating = 0.0,
+        ),
+    )
+
     SoftcoverTheme {
         ExploreScreenLayout(
             runAction = {},
@@ -831,43 +933,8 @@ private fun ActiveExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 searchText = "Last to leave",
-                queriedBooks = listOf(
-                    PreviewData.baseBook.copy(
-                        title = "Last to Leave the Room",
-                        defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2023),
-                        rating = 3.7,
-                        bookSeries = BookSeries(
-                            id = 1,
-                            name = "Starling",
-                            amountOfBooks = 20,
-                        ),
-                    ),
-                    PreviewData.baseBook.copy(
-                        id = 2,
-                        title = "The Last to Leave",
-                        defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2021),
-                        rating = 4.2,
-                        userBook = PreviewData.baseBook.userBook,
-                        bookSeries = BookSeries(
-                            id = 1,
-                            name = "Starling",
-                            amountOfBooks = 20,
-                        ),
-                        positionsInSeries = listOf(2.0),
-                    ),
-                    PreviewData.baseBook.copy(
-                        id = 3,
-                        title = "Last One to Leave",
-                        defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2022),
-                        rating = 4.0,
-                    ),
-                    PreviewData.baseBook.copy(
-                        id = 4,
-                        title = "Will the Last Person To Leave the Planet Please Shut Off the Sun",
-                        defaultEdition = PreviewData.baseEdition.copy(releaseYear = 2021),
-                        rating = 0.0,
-                    ),
-                ),
+                queriedBooks = queriedBooks,
+                queriedBookCovers = queriedBooks.toPreviewCoverModels(CoverVariant.ExploreSearchRow),
             ),
         )
     }

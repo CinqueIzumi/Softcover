@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -38,7 +37,7 @@ import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -89,15 +88,8 @@ internal fun FocusReadingPanel(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        EditionImage(
-            edition = active.book.currentEdition,
-            defaultEdition = active.book.defaultEdition,
-            isLoading = false,
-            fallbackCoverUrl = active.book.coverUrl,
-            coverlessTitle = active.book.title,
-            elevation = 20.dp,
-            cornerRadius = 8.dp,
-            shadowColor = Color.Black.copy(alpha = 0.5f),
+        Cover(
+            model = active.focusCover,
             modifier = Modifier
                 .width(coverWidth)
                 .aspectRatio(2f / 3f),

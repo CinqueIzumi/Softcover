@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
@@ -8,6 +9,17 @@ import nl.rhaydus.toad.UiState
 internal data class ExploreScreenUiState(
     val previousSearchQueries: List<String> = emptyList(),
     val queriedBooks: List<Book> = emptyList(),
+    // Cover UI models, keyed by book id, mapped off composition by CoverModelsCollector
+    // (`component-contract.md` § 7.2 R9). Five separate maps rather than one keyed by book id:
+    // the same book can appear in more than one rail at once (e.g. trending *and* because-you-
+    // read), each rail stamping a different `sharedTransitionKey` surface — see ExploreShelf.kt's
+    // SURFACE_* constants — and a collapsed map would hand the wrong transition key to one of the
+    // two rails.
+    val featuredCover: CoverUiModel? = null,
+    val trendingCovers: Map<Int, CoverUiModel> = emptyMap(),
+    val becauseYouReadCovers: Map<Int, CoverUiModel> = emptyMap(),
+    val continueSeriesCovers: Map<Int, CoverUiModel> = emptyMap(),
+    val queriedBookCovers: Map<Int, CoverUiModel> = emptyMap(),
     // Search paging (explore-3a feedback item 7). The Typesense `search` endpoint returns no
     // total hit count, so `queriedBooksHasMore` is a "maybe more" signal derived from whether the
     // last fetched page came back full, not an authoritative total. `loadingMoreQueriedBooks` is

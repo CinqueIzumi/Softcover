@@ -23,15 +23,12 @@ kotlin {
         commonMain.dependencies {
             api(libs.rhaydus.corePlatform)
             api(project(":core:domain"))
-            api(project(":core:book"))
 
             api(libs.rhaydus.coreCommon)
             api(libs.rhaydus.designsystemCore)
             implementation(libs.rhaydus.designsystemEditorial)
 
             implementation(libs.koin.compose.multiplatform)
-
-            api(libs.coil3)
 
             api(libs.kotlinx.datetime)
         }

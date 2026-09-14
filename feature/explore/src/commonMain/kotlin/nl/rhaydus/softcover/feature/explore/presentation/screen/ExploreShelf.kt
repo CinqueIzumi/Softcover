@@ -62,7 +62,8 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.formatCompactRelease
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -78,7 +79,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkHeartWre
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkHeartWrenchForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
@@ -180,6 +180,9 @@ internal fun EditorialSectionHeaderSkeleton(modifier: Modifier = Modifier) {
 @Composable
 internal fun FeaturedCard(
     book: Book,
+    // Nullable for the one frame between `featuredUpcomingRelease` landing and `CoverModelsCollector`
+    // deriving its cover: the hero must keep its footprint rather than vanish and pop back in.
+    cover: CoverUiModel?,
     onClick: () -> Unit,
     onWantToReadClick: () -> Unit,
     onRemoveFromLibraryClick: () -> Unit,
@@ -262,20 +265,9 @@ internal fun FeaturedCard(
             horizontalArrangement = Arrangement.spacedBy(18.dp),
             verticalAlignment = Alignment.Top,
         ) {
-            EditionImage(
-                edition = book.currentEdition,
-                defaultEdition = book.defaultEdition,
-                isLoading = false,
-                fallbackCoverUrl = book.coverUrl,
-                coverlessTitle = book.title,
+            Cover(
+               model = cover,
                 modifier = Modifier.width(96.dp),
-                elevation = 6.dp,
-                cornerRadius = 4.dp,
-                sharedTransitionKey = bookCoverTransitionKey(
-                    editionId = book.currentEdition?.id,
-                    bookId = book.id,
-                    surface = SURFACE_FEATURED,
-                ),
             )
 
             Column(modifier = Modifier.weight(1f)) {
@@ -427,8 +419,8 @@ internal fun FeaturedCardSkeleton(modifier: Modifier = Modifier) {
 @Composable
 private fun DiscoveryRailCard(
     book: Book,
+    cover: CoverUiModel?,
     onClick: () -> Unit,
-    surface: String,
     modifier: Modifier = Modifier,
     subline: @Composable () -> Unit,
 ) {
@@ -440,20 +432,9 @@ private fun DiscoveryRailCard(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            EditionImage(
-                edition = book.currentEdition,
-                defaultEdition = book.defaultEdition,
-                isLoading = false,
-                fallbackCoverUrl = book.coverUrl,
-                coverlessTitle = book.title,
+            Cover(
+               model = cover,
                 modifier = Modifier.fillMaxWidth(),
-                elevation = 6.dp,
-                cornerRadius = 4.dp,
-                sharedTransitionKey = bookCoverTransitionKey(
-                    editionId = book.currentEdition?.id,
-                    bookId = book.id,
-                    surface = surface,
-                ),
             )
 
             if (book.isUnreleased) {
@@ -539,13 +520,14 @@ private fun RailCardSkeleton(modifier: Modifier = Modifier) {
 @Composable
 internal fun TrendingCard(
     book: Book,
+    cover: CoverUiModel?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     DiscoveryRailCard(
         book = book,
+        cover = cover,
         onClick = onClick,
-        surface = SURFACE_TRENDING,
         modifier = modifier,
     ) {
         if (book.rating != 0.0) {
@@ -582,13 +564,14 @@ internal fun TrendingCardSkeleton(modifier: Modifier = Modifier) = RailCardSkele
 @Composable
 internal fun BecauseYouReadCard(
     book: Book,
+    cover: CoverUiModel?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     DiscoveryRailCard(
         book = book,
+        cover = cover,
         onClick = onClick,
-        surface = SURFACE_BECAUSE_YOU_READ,
         modifier = modifier,
     ) {
         Text(
@@ -612,6 +595,7 @@ internal fun BecauseYouReadCardSkeleton(modifier: Modifier = Modifier) = RailCar
 @Composable
 internal fun SeriesCard(
     book: Book,
+    cover: CoverUiModel?,
     onClick: () -> Unit,
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -624,20 +608,9 @@ internal fun SeriesCard(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            EditionImage(
-                edition = book.currentEdition,
-                defaultEdition = book.defaultEdition,
-                isLoading = false,
-                fallbackCoverUrl = book.coverUrl,
-                coverlessTitle = book.title,
+            Cover(
+               model = cover,
                 modifier = Modifier.fillMaxWidth(),
-                elevation = 4.dp,
-                cornerRadius = 4.dp,
-                sharedTransitionKey = bookCoverTransitionKey(
-                    editionId = book.currentEdition?.id,
-                    bookId = book.id,
-                    surface = SURFACE_UP_NEXT,
-                ),
             )
 
             SeriesCardOverflowButton(
@@ -735,7 +708,7 @@ internal fun SeriesCardSkeleton(modifier: Modifier = Modifier) {
 
 /**
  * The lead card of "Up next in your series" when the next book hasn't released yet (explore-3a §4
- * "Unreleased card"): the same [EditionImage] every other card uses — real art when the edition has
+ * "Unreleased card"): the same [Cover] every other card uses — real art when the edition has
  * it, the shared monogram fallback when it doesn't (explore-3a feedback item 1: an unreleased book is
  * never keyed off release status for its cover, only off whether art actually resolves) — plus a dated
  * [UnreleasedBadge]. Otherwise it renders exactly like a released [SeriesCard] — same overflow
@@ -745,6 +718,7 @@ internal fun SeriesCardSkeleton(modifier: Modifier = Modifier) {
 @Composable
 internal fun UnreleasedSeriesCard(
     book: Book,
+    cover: CoverUiModel?,
     onClick: () -> Unit,
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -757,20 +731,9 @@ internal fun UnreleasedSeriesCard(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            EditionImage(
-                edition = book.currentEdition,
-                defaultEdition = book.defaultEdition,
-                isLoading = false,
-                fallbackCoverUrl = book.coverUrl,
-                coverlessTitle = book.title,
+            Cover(
+               model = cover,
                 modifier = Modifier.fillMaxWidth(),
-                elevation = 4.dp,
-                cornerRadius = 4.dp,
-                sharedTransitionKey = bookCoverTransitionKey(
-                    editionId = book.currentEdition?.id,
-                    bookId = book.id,
-                    surface = SURFACE_UP_NEXT,
-                ),
             )
 
             // The dated badge (explore-3a feedback item 8: names the release date, e.g. "Out Sep 2" —
@@ -1511,6 +1474,7 @@ internal fun SearchResultsHeader(
 @Composable
 internal fun SearchResultRow(
     book: Book,
+    cover: CoverUiModel?,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
@@ -1531,18 +1495,9 @@ internal fun SearchResultRow(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        EditionImage(
-            edition = book.currentEdition,
+        Cover(
+           model = cover,
             modifier = Modifier.width(54.dp),
-            isLoading = false,
-            defaultEdition = book.defaultEdition,
-            fallbackCoverUrl = book.coverUrl,
-            coverlessTitle = book.title,
-            cornerRadius = 4.dp,
-            sharedTransitionKey = bookCoverTransitionKey(
-                editionId = book.currentEdition?.id,
-                bookId = book.id,
-            ),
         )
 
         Column(modifier = Modifier.weight(1f)) {

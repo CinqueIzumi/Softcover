@@ -11,6 +11,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":core:designsystem"))
+            implementation(project(":core:component"))
             implementation(project(":core:presentation"))
 
             implementation(libs.rhaydus.coreCommon)
@@ -24,6 +25,7 @@ kotlin {
 
         androidMain.dependencies {
             implementation(project(":core:notification"))
+            implementation(project(":core:uibinding"))
 
             implementation(libs.koin.android)
         }

@@ -47,6 +47,7 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -256,6 +257,7 @@ private fun DesktopDiscovery(
         ) {
             DesktopFeaturedSection(
                 book = state.featuredUpcomingRelease,
+                cover = state.featuredCover,
                 isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -263,6 +265,7 @@ private fun DesktopDiscovery(
 
             DesktopUpNextSection(
                 books = state.continueSeriesBooks,
+                covers = state.continueSeriesCovers,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -272,6 +275,7 @@ private fun DesktopDiscovery(
                 genre = state.becauseYouReadGenre,
                 genreOptions = state.becauseYouReadGenreOptions,
                 books = state.becauseYouReadBooks,
+                covers = state.becauseYouReadCovers,
                 isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -279,6 +283,7 @@ private fun DesktopDiscovery(
 
             DesktopTrendingSection(
                 books = state.trendingBooks,
+                covers = state.trendingCovers,
                 isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
                 onBookClick = onBookClick,
             )
@@ -308,6 +313,7 @@ private fun DesktopDiscovery(
 @Composable
 private fun DesktopFeaturedSection(
     book: Book?,
+    cover: CoverUiModel?,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -329,6 +335,7 @@ private fun DesktopFeaturedSection(
         } else if (book != null) {
             FeaturedCard(
                 book = book,
+                cover = cover,
                 onClick = {
                     onBookClick(
                         book,
@@ -346,6 +353,7 @@ private fun DesktopFeaturedSection(
 @Composable
 private fun DesktopTrendingSection(
     books: List<Book>,
+    covers: Map<Int, CoverUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
 ) {
@@ -374,9 +382,12 @@ private fun DesktopTrendingSection(
                     }
                 } else {
                     books.forEach { book ->
+                        val cover = covers[book.id]
+
                         TrendingCard(
                             modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
                             book = book,
+                            cover = cover,
                             onClick = {
                                 onBookClick(
                                     book,
@@ -397,6 +408,7 @@ private fun DesktopBecauseYouReadSection(
     genre: String?,
     genreOptions: List<String>,
     books: List<Book>,
+    covers: Map<Int, CoverUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -458,9 +470,12 @@ private fun DesktopBecauseYouReadSection(
                     }
                 } else {
                     books.forEach { book ->
+                        val cover = covers[book.id]
+
                         BecauseYouReadCard(
                             modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
                             book = book,
+                            cover = cover,
                             onClick = {
                                 onBookClick(
                                     book,
@@ -479,6 +494,7 @@ private fun DesktopBecauseYouReadSection(
 @Composable
 private fun DesktopUpNextSection(
     books: List<Book>,
+    covers: Map<Int, CoverUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -510,12 +526,14 @@ private fun DesktopUpNextSection(
                     }
                 } else {
                     books.forEach { book ->
+                        val cover = covers[book.id]
                         val cardModifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH)
 
                         if (book.isUnreleased) {
                             UnreleasedSeriesCard(
                                 modifier = cardModifier,
                                 book = book,
+                                cover = cover,
                                 onClick = {
                                     onBookClick(
                                         book,
@@ -528,6 +546,7 @@ private fun DesktopUpNextSection(
                             SeriesCard(
                                 modifier = cardModifier,
                                 book = book,
+                                cover = cover,
                                 onClick = {
                                     onBookClick(
                                         book,
@@ -628,8 +647,11 @@ private fun DesktopSearchResults(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 items(state.queriedBooks, key = { it.id }) { book ->
+                    val cover = state.queriedBookCovers[book.id]
+
                     SearchResultRow(
                         book = book,
+                        cover = cover,
                         onBookClick = onBookClick,
                         runAction = runAction,
                     )

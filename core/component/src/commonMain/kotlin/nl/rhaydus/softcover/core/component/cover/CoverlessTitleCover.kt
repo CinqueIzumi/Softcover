@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.cover
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,7 +31,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 /**
  * A book without a resolvable cover, rendered as a fixed-ink **monogram jacket** — a dark
  * [MonogramCoverInk] panel with an inset hairline border and the [title] set large in italic
- * Fraunces, centred and wrapped across lines — rather than a blank tile. This is [EditionImage]'s
+ * Fraunces, centred and wrapped across lines — rather than a blank tile. This is [Cover]'s
  * final fallback rung, reached when no cover source resolves, or a known URL fails to load, and the
  * data is not still loading. A cover slot is never blank: every non-decorative call site reaches
  * this component through that fallback rung (the tag-editor jacket and the explore
@@ -56,7 +56,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * §2.1) — they read identically in light and dark, unlike a themed container shade.
  *
  * Imposes **no aspect ratio of its own**; it fills whatever box [modifier] and the surrounding
- * layout give it. [EditionImage] applies the 2:3 cover aspect on its own container before falling
+ * layout give it. [Cover] applies the 2:3 cover aspect on its own container before falling
  * back here.
  */
 @Composable

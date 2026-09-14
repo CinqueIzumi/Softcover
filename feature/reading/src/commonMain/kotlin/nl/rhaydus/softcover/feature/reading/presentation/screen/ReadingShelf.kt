@@ -99,23 +99,22 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.rememberCoverImageRequest
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
-import nl.rhaydus.softcover.core.component.verdict.VerdictSheetCoverDefaults
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberEditionImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
@@ -193,6 +192,8 @@ internal fun ReadingBooksColumn(
             item(key = "featured-${featured.id}") {
                 FeaturedBookCard(
                     book = featured,
+                    backdropCover = state.featuredBackdropCover,
+                    heroCover = state.featuredCover,
                     deadlineProgress = featuredDeadlineProgress,
                     dateStyle = state.dateStyle,
                     mutationFailed = featured.id in state.failedMutationBookIds,
@@ -231,6 +232,7 @@ internal fun ReadingBooksColumn(
                             )
                             .then(controller.slideModifier(book.id)),
                         book = book,
+                        cover = state.bookCovers[book.id],
                         deadlineProgress = book.deadlineProgressFrom(state),
                         dateStyle = state.dateStyle,
                         mutationFailed = book.id in state.failedMutationBookIds,
@@ -316,6 +318,7 @@ internal fun ReadingOverlays(
     }
 
     val verdictBook = state.verdictPromptBook
+    val verdictCover = state.verdictCover
 
     // A finish reached through the progress sheet (any of page/percentage/time) has no synchronous
     // "finished" moment to burst from, so the celebration rides the same Applied outcome that opens
@@ -331,7 +334,7 @@ internal fun ReadingOverlays(
         }
     }
 
-    if (verdictBook != null) {
+    if (verdictBook != null && verdictCover != null) {
         VerdictSheet(
             context = VerdictSheetContext.FINISHED,
             bookTitle = verdictBook.title,
@@ -352,16 +355,7 @@ internal fun ReadingOverlays(
             onDelete = {},
             onDismissRequest = { runAction(OnDismissVerdictPromptAction()) },
             cover = {
-                EditionImage(
-                    edition = verdictBook.currentEdition,
-                    defaultEdition = verdictBook.currentEdition,
-                    isLoading = false,
-                    coverlessTitle = verdictBook.title,
-                    fallbackCoverUrl = verdictBook.coverUrl,
-                    cornerRadius = VerdictSheetCoverDefaults.CornerRadius,
-                    elevation = VerdictSheetCoverDefaults.Elevation,
-                    shadowColor = Color.Black.copy(alpha = VerdictSheetCoverDefaults.SHADOW_ALPHA),
-                )
+                Cover(model = verdictCover)
             },
         )
     }
@@ -385,6 +379,8 @@ internal fun ReadingOverlays(
 @Composable
 internal fun FeaturedBookCard(
     book: Book,
+    backdropCover: CoverUiModel?,
+    heroCover: CoverUiModel?,
     deadlineProgress: DeadlineProgress?,
     dateStyle: DateStyle,
     mutationFailed: Boolean,
@@ -427,6 +423,8 @@ internal fun FeaturedBookCard(
 
             FeaturedBackdropCard(
                 book = book,
+                backdropCover = backdropCover,
+                heroCover = heroCover,
                 deadlineProgress = deadlineProgress,
                 dateStyle = dateStyle,
                 mutationFailed = mutationFailed,
@@ -449,6 +447,8 @@ internal fun FeaturedBookCard(
 @Composable
 private fun FeaturedBackdropCard(
     book: Book,
+    backdropCover: CoverUiModel?,
+    heroCover: CoverUiModel?,
     deadlineProgress: DeadlineProgress?,
     dateStyle: DateStyle,
     mutationFailed: Boolean,
@@ -457,11 +457,13 @@ private fun FeaturedBackdropCard(
     runAction: (ReadingAction) -> Unit,
 ) {
     val isInspection = LocalInspectionMode.current
-    val backdropRequest = rememberEditionImageRequest(
-        edition = book.currentEdition,
-        defaultEdition = book.defaultEdition,
-        fallbackCoverUrl = book.coverUrl,
-    )
+    // ReadingHeroBackdrop never renders through Cover (component-contract.md's note on
+    // rememberCoverImageRequest) — it needs Crop + blur with no shimmer and no coverless rung.
+    val backdropRequest = if (backdropCover != null) {
+        rememberCoverImageRequest(model = backdropCover)
+    } else {
+        null
+    }
     val foreground = ReadingHeroBackdropForeground
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -532,7 +534,7 @@ private fun FeaturedBackdropCard(
                 horizontalArrangement = Arrangement.spacedBy(18.dp),
             ) {
                 FeaturedCover(
-                    book = book,
+                    cover = heroCover,
                     deadlineProgress = deadlineProgress,
                 )
 
@@ -618,26 +620,13 @@ private fun FeaturedBackdropCard(
 /** The featured cover, 2:3 at 108dp wide, with the deadline badge overlay. */
 @Composable
 private fun FeaturedCover(
-    book: Book,
+    cover: CoverUiModel?,
     deadlineProgress: DeadlineProgress?,
 ) {
     DeadlineCoverOverlay(progress = deadlineProgress) {
-        EditionImage(
-            edition = book.currentEdition,
-            modifier = Modifier
-                .width(108.dp)
-                .aspectRatio(2f / 3f),
-            isLoading = false,
-            defaultEdition = book.defaultEdition,
-            fallbackCoverUrl = book.coverUrl,
-            coverlessTitle = book.title,
-            elevation = 12.dp,
-            cornerRadius = 4.dp,
-            shadowColor = Color.Black.copy(alpha = 0.6f),
-            sharedTransitionKey = bookCoverTransitionKey(
-                editionId = book.currentEdition?.id,
-                bookId = book.id,
-            ),
+        Cover(
+            model = cover,
+            modifier = Modifier.width(108.dp),
         )
     }
 }
@@ -965,6 +954,7 @@ private fun timeOfDayCaption(): String {
 @Composable
 internal fun CompactBookEntry(
     book: Book,
+    cover: CoverUiModel?,
     deadlineProgress: DeadlineProgress?,
     dateStyle: DateStyle,
     mutationFailed: Boolean,
@@ -1012,21 +1002,9 @@ internal fun CompactBookEntry(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     DeadlineCoverOverlay(progress = deadlineProgress) {
-                        EditionImage(
-                            edition = book.currentEdition,
-                            modifier = Modifier
-                                .width(54.dp)
-                                .aspectRatio(2f / 3f),
-                            isLoading = false,
-                            defaultEdition = book.defaultEdition,
-                            fallbackCoverUrl = book.coverUrl,
-                            coverlessTitle = book.title,
-                            elevation = 4.dp,
-                            cornerRadius = 6.dp,
-                            sharedTransitionKey = bookCoverTransitionKey(
-                                editionId = book.currentEdition?.id,
-                                bookId = book.id,
-                            ),
+                        Cover(
+                            model = cover,
+                            modifier = Modifier.width(54.dp),
                         )
                     }
 
@@ -1250,12 +1228,17 @@ private fun alsoReadingEyebrowText(count: Int): String =
 internal fun EmptyCurrentlyReadingScreen(
     wantToReadBooks: List<Book> = emptyList(),
     trendingBooks: List<Book> = emptyList(),
+    pickUpNextCovers: Map<Int, CoverUiModel> = emptyMap(),
+    trendingTileCover: CoverUiModel? = null,
     streakEnabled: Boolean = false,
     recentReadingActivity: List<ReadingDayActivity> = emptyList(),
     onExpandStreak: () -> Unit = {},
     onBookClick: (Book) -> Unit = {},
     onNavigateToSearch: () -> Unit,
 ) {
+    // Mirrors CoverModelsCollector's own wantToReadBooks.take(3) / firstOrNull() — kept in step
+    // here, not derived from the cover maps, so a change to this screen's tile count must update
+    // both places.
     val pickUpNext = wantToReadBooks.take(3)
     val trendingTile = trendingBooks.firstOrNull()
     val showAdaptive = pickUpNext.isNotEmpty() || trendingTile != null
@@ -1353,6 +1336,7 @@ internal fun EmptyCurrentlyReadingScreen(
 
             PickUpNextSection(
                 books = pickUpNext,
+                covers = pickUpNextCovers,
                 onBookClick = onBookClick,
             )
         } else if (trendingTile != null) {
@@ -1360,6 +1344,7 @@ internal fun EmptyCurrentlyReadingScreen(
 
             TrendingTileSection(
                 book = trendingTile,
+                cover = trendingTileCover,
                 onBookClick = onBookClick,
             )
         }
@@ -1369,6 +1354,7 @@ internal fun EmptyCurrentlyReadingScreen(
 @Composable
 private fun PickUpNextSection(
     books: List<Book>,
+    covers: Map<Int, CoverUiModel>,
     onBookClick: (Book) -> Unit,
 ) {
     Column(
@@ -1389,6 +1375,7 @@ private fun PickUpNextSection(
             books.forEach { book ->
                 PickUpNextTile(
                     book = book,
+                    cover = covers[book.id],
                     onClick = { onBookClick(book) },
                 )
             }
@@ -1399,6 +1386,7 @@ private fun PickUpNextSection(
 @Composable
 private fun PickUpNextTile(
     book: Book,
+    cover: CoverUiModel?,
     onClick: () -> Unit,
 ) {
     Column(
@@ -1413,21 +1401,9 @@ private fun PickUpNextTile(
             color = MaterialTheme.colorScheme.surfaceContainer,
             modifier = Modifier.pointerHandCursor(),
         ) {
-            EditionImage(
-                edition = book.currentEdition,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(ratio = 2f / 3f),
-                isLoading = false,
-                defaultEdition = book.defaultEdition,
-                fallbackCoverUrl = book.coverUrl,
-                coverlessTitle = book.title,
-                elevation = 4.dp,
-                cornerRadius = 10.dp,
-                sharedTransitionKey = bookCoverTransitionKey(
-                    editionId = book.currentEdition?.id,
-                    bookId = book.id,
-                ),
+            Cover(
+                model = cover,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
@@ -1447,6 +1423,7 @@ private fun PickUpNextTile(
 @Composable
 private fun TrendingTileSection(
     book: Book,
+    cover: CoverUiModel?,
     onBookClick: (Book) -> Unit,
 ) {
     Column(
@@ -1469,21 +1446,9 @@ private fun TrendingTileSection(
                 modifier = Modifier.padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                EditionImage(
-                    edition = book.currentEdition,
-                    modifier = Modifier
-                        .width(80.dp)
-                        .aspectRatio(ratio = 2f / 3f),
-                    isLoading = false,
-                    defaultEdition = book.defaultEdition,
-                    fallbackCoverUrl = book.coverUrl,
-                    coverlessTitle = book.title,
-                    elevation = 4.dp,
-                    cornerRadius = 8.dp,
-                    sharedTransitionKey = bookCoverTransitionKey(
-                        editionId = book.currentEdition?.id,
-                        bookId = book.id,
-                    ),
+                Cover(
+                    model = cover,
+                    modifier = Modifier.width(80.dp),
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))

@@ -71,7 +71,7 @@ class ChooseListsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `non-empty selection populates the sheet and the jacket editions in the same emission`() =
+        fun `non-empty selection populates the sheet with one cover per resolved jacket edition`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val book1 = bookWithId(id = 1)
@@ -94,11 +94,9 @@ class ChooseListsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.chooseListsSheet shouldNotBe null
-                stateFlow.value.chooseListsSheet?.variant shouldBe ChooseListsVariant.ManyBooks(
-                    bookCount = 2,
-                    coverCount = 2,
-                )
-                stateFlow.value.chooseListsJacketEditions shouldBe listOf(book1.currentEdition, book2.currentEdition)
+                val variant = stateFlow.value.chooseListsSheet?.variant as ChooseListsVariant.ManyBooks
+                variant.bookCount shouldBe 2
+                variant.covers.size shouldBe 2
                 job.cancel()
             }
 
@@ -143,8 +141,8 @@ class ChooseListsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.chooseListsJacketEditions.size shouldBe 3
-            stateFlow.value.chooseListsJacketEditions shouldBe books.take(3).map { it.currentEdition }
+            val variant = stateFlow.value.chooseListsSheet?.variant as ChooseListsVariant.ManyBooks
+            variant.covers.size shouldBe 3
             job.cancel()
         }
 

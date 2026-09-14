@@ -7,9 +7,9 @@ import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 
 val presentationModule = module {
     // Shared composables resolve these at runtime via koinInject: [BookDetailPrefetcher] here pulls a
-    // book use case (bookModule) and ApplicationScope (dispatcherModule), and `EditionImage` — still in
-    // :core:designsystem until the component library lands — pulls a book use case of its own. This is
-    // the app's only Koin module below the feature tier, so both resolve through it.
+    // book use case (bookModule) and ApplicationScope (dispatcherModule), and `ProvideCoverImagePersister`
+    // pulls a book use case of its own to satisfy `:core:component`'s `LocalCoverImagePersister` seam.
+    // This is the app's only Koin module below the feature tier, so both resolve through it.
     includes(
         dispatcherModule,
         bookModule,

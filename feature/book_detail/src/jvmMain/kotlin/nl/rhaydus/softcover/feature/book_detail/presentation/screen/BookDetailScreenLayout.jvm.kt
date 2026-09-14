@@ -69,8 +69,6 @@ internal actual fun BookDetailScreenLayout(
     onCoverClick: () -> Unit,
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
-    bookId: Int,
-    transitionSurface: String?,
     celebrationKey: Int,
 ) {
     val showOfflinePlaceholder =
@@ -104,8 +102,6 @@ internal actual fun BookDetailScreenLayout(
                         TwoColumnContent(
                             state = state,
                             runAction = runAction,
-                            bookId = bookId,
-                            transitionSurface = transitionSurface,
                             celebrationKey = celebrationKey,
                             onCoverClick = onCoverClick,
                         )
@@ -113,8 +109,6 @@ internal actual fun BookDetailScreenLayout(
                         SingleColumnContent(
                             state = state,
                             runAction = runAction,
-                            bookId = bookId,
-                            transitionSurface = transitionSurface,
                             celebrationKey = celebrationKey,
                             onCoverClick = onCoverClick,
                         )
@@ -175,8 +169,6 @@ private fun DesktopBookDetailTopBar(
 private fun TwoColumnContent(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
-    bookId: Int,
-    transitionSurface: String?,
     celebrationKey: Int,
     onCoverClick: () -> Unit,
 ) {
@@ -190,8 +182,6 @@ private fun TwoColumnContent(
             BookHero(
                 state = state,
                 runAction = runAction,
-                bookId = bookId,
-                transitionSurface = transitionSurface,
                 onCoverClick = onCoverClick,
             )
 
@@ -271,8 +261,6 @@ private fun NarrativeColumn(
 private fun SingleColumnContent(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
-    bookId: Int,
-    transitionSurface: String?,
     celebrationKey: Int,
     onCoverClick: () -> Unit,
 ) {
@@ -289,8 +277,6 @@ private fun SingleColumnContent(
                 BookHero(
                     state = state,
                     runAction = runAction,
-                    bookId = bookId,
-                    transitionSurface = transitionSurface,
                     onCoverClick = onCoverClick,
                 )
             }
@@ -351,8 +337,6 @@ private fun SingleColumnContent(
 private fun BookHero(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
-    bookId: Int,
-    transitionSurface: String?,
     onCoverClick: () -> Unit,
 ) {
     val currentEditionId = state.book?.currentEdition?.id
@@ -374,9 +358,9 @@ private fun BookHero(
     ) {
         GeneralBookInfoSection(
             edition = state.displayedEdition,
+            heroCover = state.heroCover,
+            backdropCover = state.heroBackdropCover,
             isLoading = state.loadingBookDetails && state.book == null,
-            fallBackEdition = state.book?.defaultEdition ?: state.initialCover?.defaultEdition,
-            fallbackCoverUrl = state.book?.coverUrl ?: state.initialCover?.fallbackCoverUrl,
             isExpired = state.deadlineProgress?.isExpired == true,
             rating = state.book?.rating,
             title = state.book?.title,
@@ -385,8 +369,6 @@ private fun BookHero(
                 ?: state.book?.releaseYear,
             unreleasedDate = state.book?.takeIf { it.isUnreleased }?.effectiveReleaseDate,
             isOwned = state.isEditionOwned(edition = state.displayedEdition),
-            bookId = bookId,
-            transitionSurface = transitionSurface,
             onCoverClick = onCoverClick,
         )
     }

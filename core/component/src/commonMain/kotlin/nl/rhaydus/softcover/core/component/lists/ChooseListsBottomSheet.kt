@@ -42,21 +42,17 @@ import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-// The jacket treatment the sheet hands to its `jacket` slot. Kept here, not published as defaults a
-// caller reads, so the two consuming features cannot drift apart applying it themselves — the
-// lesson `VerdictSheetCoverDefaults` was extracted for. The stack sits a touch flatter than the lone
-// upright jacket because three overlapping shadows at the single jacket's depth read as mud.
-private val SINGLE_JACKET_CORNER_RADIUS: Dp = 4.dp
-private val SINGLE_JACKET_ELEVATION: Dp = 4.dp
-private const val SINGLE_JACKET_SHADOW_ALPHA: Float = 0.5f
-
-private val STACK_JACKET_CORNER_RADIUS: Dp = 4.dp
-private val STACK_JACKET_ELEVATION: Dp = 3.dp
-private const val STACK_JACKET_SHADOW_ALPHA: Float = 0.35f
+// The jacket treatment now rides on the cover's own variant — `CoverVariant.ChooseListsSingleJacket`
+// and `ChooseListsStackJacket` in `CoverDimensions`. The stack sits a touch flatter than the lone
+// upright jacket because three overlapping shadows at the single jacket's depth read as mud. The
+// sheet still owns the widths and the rotations below: those are layout, not cover treatment.
 
 /**
  * The editorial "index of shelves" (redesign brief): a shared surface for adding/removing one or more
@@ -68,18 +64,17 @@ private const val STACK_JACKET_SHADOW_ALPHA: Float = 0.35f
  * `primaryContainer` "On the list ×" chip, a quiet outline "+ Add", or — in bulk, for a part-filled
  * list — a filled "+ Add the other N"). Every toggle is instant/optimistic; there is no save button.
  *
- * The header jacket(s) come from the [jacket] slot — one upright cover for the single-book case, up
- * to three for the bulk rotated stack. Resolving a cover needs the reader's chosen edition, the
- * book's default, a fallback URL and a locally persisted file, none of which a component may know
- * (R4), so the caller supplies the image and the sheet supplies the treatment (see
- * [ChooseListsJacket]).
+ * The header jacket(s) come from the variant's own cover models — one upright cover for the
+ * single-book case, up to three for the bulk rotated stack. They arrive already resolved on the
+ * variant: resolving a cover needs the reader's chosen edition, the book's default, a fallback URL
+ * and a locally persisted file, none of which a component may know (R4). The sheet still owns the
+ * widths and the rotations.
  */
 @Composable
 fun ChooseListsBottomSheet(
     model: ChooseListsUiModel,
     onEvent: (ChooseListsEvent) -> Unit,
     modifier: Modifier = Modifier,
-    jacket: @Composable (ChooseListsJacket, Modifier) -> Unit,
 ) {
     AdaptiveModalSheet(
         onDismissRequest = { onEvent(ChooseListsEvent.Dismissed) },
@@ -92,7 +87,6 @@ fun ChooseListsBottomSheet(
         ) {
             ChooseListsHeader(
                 variant = model.variant,
-                jacket = jacket,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -142,7 +136,6 @@ fun ChooseListsBottomSheet(
 @Composable
 private fun ChooseListsHeader(
     variant: ChooseListsVariant,
-    jacket: @Composable (ChooseListsJacket, Modifier) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -192,18 +185,12 @@ private fun ChooseListsHeader(
 
         when (variant) {
             is ChooseListsVariant.ManyBooks -> StackedJackets(
-                coverCount = variant.coverCount,
-                jacket = jacket,
+                variant = variant,
             )
 
-            is ChooseListsVariant.SingleBook -> jacket(
-                ChooseListsJacket(
-                    index = 0,
-                    cornerRadius = SINGLE_JACKET_CORNER_RADIUS,
-                    elevation = SINGLE_JACKET_ELEVATION,
-                    shadowColor = Color.Black.copy(alpha = SINGLE_JACKET_SHADOW_ALPHA),
-                ),
-                Modifier.width(56.dp),
+            is ChooseListsVariant.SingleBook -> Cover(
+                model = variant.cover,
+                modifier = Modifier.width(56.dp),
             )
         }
     }
@@ -231,17 +218,20 @@ private fun chooseListsHeadline(name: String): AnnotatedString {
  */
 @Composable
 private fun StackedJackets(
-    coverCount: Int,
-    jacket: @Composable (ChooseListsJacket, Modifier) -> Unit,
+    variant: ChooseListsVariant.ManyBooks,
     modifier: Modifier = Modifier,
 ) {
     val rotations = listOf(-8f, 4f, 0f)
-    val treatment = ChooseListsJacket(
-        index = 0,
-        cornerRadius = STACK_JACKET_CORNER_RADIUS,
-        elevation = STACK_JACKET_ELEVATION,
-        shadowColor = Color.Black.copy(alpha = STACK_JACKET_SHADOW_ALPHA),
-    )
+
+    // Built here rather than mapped in, so `covers` stays the single source of truth for the stack.
+    // Constructing a library model out of library data is not a domain mapping, so R9 is untouched.
+    val emptyStackCover = remember(variant.name) {
+        CoverUiModel(
+            source = null,
+            coverlessTitle = variant.name,
+            variant = CoverVariant.ChooseListsStackJacket,
+        )
+    }
 
     Box(
         modifier = modifier.size(
@@ -250,19 +240,19 @@ private fun StackedJackets(
         ),
         contentAlignment = Alignment.Center,
     ) {
-        if (coverCount == 0) {
+        if (variant.covers.isEmpty()) {
             // No cover resolved for any selected book: one jacket, and deliberately **not** rotated.
             // A single tilted placeholder reads as a rendering mistake rather than as a stack, so the
             // rotation only applies once there is more than a placeholder to stack.
-            jacket(
-                treatment,
-                Modifier.width(52.dp),
+            Cover(
+                model = emptyStackCover,
+                modifier = Modifier.width(52.dp),
             )
         } else {
-            repeat(coverCount.coerceAtMost(rotations.size)) { index ->
-                jacket(
-                    treatment.copy(index = index),
-                    Modifier
+            variant.covers.take(rotations.size).forEachIndexed { index, cover ->
+                Cover(
+                    model = cover,
+                    modifier = Modifier
                         .width(52.dp)
                         .rotate(rotations[index]),
                 )

@@ -36,7 +36,7 @@ import org.koin.compose.koinInject
 import nl.rhaydus.common.currentInstant
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.haptics.rememberHaptics
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
+import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -129,13 +129,8 @@ private fun SessionPeekBarContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                EditionImage(
-                    edition = active.book.currentEdition,
-                    defaultEdition = active.book.defaultEdition,
-                    isLoading = false,
-                    fallbackCoverUrl = active.book.coverUrl,
-                    coverlessTitle = active.book.title,
-                    cornerRadius = 4.dp,
+                Cover(
+                    model = active.peekBarCover,
                     modifier = Modifier.width(32.dp),
                 )
 

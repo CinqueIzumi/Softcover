@@ -15,9 +15,9 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntSize
-import coil3.request.ImageRequest
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 
 // Each wheel notch multiplies / divides the zoom by this factor (between [MIN_SCALE] and [MAX_SCALE]).
 private const val WHEEL_ZOOM_STEP = 1.15f
@@ -31,7 +31,7 @@ private const val WHEEL_ZOOM_STEP = 1.15f
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal actual fun FullScreenCoverScreenLayout(
-    request: ImageRequest?,
+    model: CoverUiModel,
     onNavigateUp: () -> Unit,
 ) {
     var scale by remember { mutableFloatStateOf(MIN_SCALE) }
@@ -39,7 +39,7 @@ internal actual fun FullScreenCoverScreenLayout(
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
 
     FullScreenCoverViewer(
-        request = request,
+        model = model,
         scale = scale,
         offset = offset,
         onSizeChanged = { containerSize = it },

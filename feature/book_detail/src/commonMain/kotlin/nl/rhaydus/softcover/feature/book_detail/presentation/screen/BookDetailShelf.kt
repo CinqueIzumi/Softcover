@@ -115,6 +115,8 @@ import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
+import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
@@ -126,9 +128,7 @@ import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
-import nl.rhaydus.softcover.core.component.verdict.VerdictSheetCoverDefaults
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.EditionImage
 import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
 import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
@@ -199,35 +199,27 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 
 private const val REVIEW_COLLAPSED_LINES = 8
 
-// The book-page hero jacket's own radius. Deliberately not the verdict sheet's cover default: the two
-// happen to share a value today, and borrowing that constant would drag this cover along the next time
-// the sheet's jacket is tuned.
-private val HERO_COVER_CORNER_RADIUS = 16.dp
-
 // region Hero
 @Composable
 internal fun GeneralBookInfoSection(
+    // Still the domain edition: the byline, format and length metadata below read it. Only the
+    // cover resolution moved out, into `CoverModelsCollector`.
     edition: BookEdition?,
-    fallBackEdition: BookEdition?,
+    heroCover: CoverUiModel?,
+    backdropCover: CoverUiModel?,
     title: String?,
     seriesText: String?,
     rating: Double?,
     releaseYear: Int?,
     unreleasedDate: LocalDate?,
     isLoading: Boolean,
-    fallbackCoverUrl: String?,
     isExpired: Boolean,
     isOwned: Boolean,
-    bookId: Int,
-    transitionSurface: String?,
     onCoverClick: () -> Unit,
 ) {
     val imageHeight = with(LocalDensity.current) {
         (LocalWindowInfo.current.containerSize.height * 0.3f).toDp()
     }
-
-    val coverHasContent = edition != null || fallBackEdition != null || fallbackCoverUrl != null
-    val coverIsLoading = isLoading && coverHasContent.not()
 
     Box(
         modifier = Modifier
@@ -237,21 +229,15 @@ internal fun GeneralBookInfoSection(
                 ifTrue = { Modifier.grayscale() },
             ),
     ) {
-        EditionImage(
-            edition = edition,
-            defaultEdition = fallBackEdition,
-            isLoading = coverIsLoading,
-            // No coverlessTitle here on purpose: this is the blurred decorative backdrop behind
-            // the hero cover below, not a cover the user reads. A typographic jacket rendered
-            // here would just be blurred noise — the readable cover (with its own
-            // coverlessTitle) is the one at the hero EditionImage below.
-            coverlessTitle = null,
-            fallbackCoverUrl = fallbackCoverUrl,
-            modifier = Modifier
-                .matchParentSize()
-                .blur(8.dp)
-                .scale(1.8f),
-        )
+        if (backdropCover != null) {
+            Cover(
+                model = backdropCover,
+                modifier = Modifier
+                    .matchParentSize()
+                    .blur(8.dp)
+                    .scale(1.8f),
+            )
+        }
 
         Box(
             modifier = Modifier
@@ -286,20 +272,12 @@ internal fun GeneralBookInfoSection(
                     Modifier
                 },
             ) {
-                EditionImage(
-                    edition = edition,
-                    defaultEdition = fallBackEdition,
-                    fallbackCoverUrl = fallbackCoverUrl,
-                    isLoading = coverIsLoading,
-                    coverlessTitle = title,
-                    modifier = Modifier.height(imageHeight * 0.8f),
-                    cornerRadius = HERO_COVER_CORNER_RADIUS,
-                    sharedTransitionKey = bookCoverTransitionKey(
-                        editionId = edition?.id,
-                        bookId = bookId,
-                        surface = transitionSurface,
-                    ),
-                )
+                if (heroCover != null) {
+                    Cover(
+                        model = heroCover,
+                        modifier = Modifier.height(imageHeight * 0.8f),
+                    )
+                }
 
                 val navScope = LocalNavAnimatedVisibilityScope.current
 
@@ -2703,8 +2681,7 @@ internal fun BookDetailOverlays(
     if (state.showTagEditorSheet && state.book != null) {
         TagEditorBottomSheet(
             bookTitle = state.book.title,
-            edition = state.displayedEdition,
-            defaultEdition = state.book.defaultEdition,
+            cover = state.tagEditorCover,
             userTags = state.userTags,
             tagSuggestions = state.tagSuggestions,
             selectedCategory = state.tagEditorCategory,
@@ -2752,18 +2729,6 @@ internal fun BookDetailOverlays(
                     ChooseListsEvent.Dismissed -> runAction(OnDismissChooseListsSheetAction())
                 }
             },
-            jacket = { jacket, jacketModifier ->
-                EditionImage(
-                    edition = state.book.currentEdition,
-                    defaultEdition = state.book.currentEdition,
-                    isLoading = false,
-                    coverlessTitle = state.book.title,
-                    cornerRadius = jacket.cornerRadius,
-                    elevation = jacket.elevation,
-                    shadowColor = jacket.shadowColor,
-                    modifier = jacketModifier,
-                )
-            },
         )
     }
 
@@ -2791,16 +2756,7 @@ internal fun BookDetailOverlays(
             onDelete = { runAction(OnDeleteReviewAction(book = verdictBook)) },
             onDismissRequest = { runAction(OnDismissVerdictSheetAction()) },
             cover = {
-                EditionImage(
-                    edition = state.displayedEdition,
-                    defaultEdition = state.displayedEdition,
-                    isLoading = false,
-                    coverlessTitle = verdictBook.title,
-                    fallbackCoverUrl = verdictBook.coverUrl,
-                    cornerRadius = VerdictSheetCoverDefaults.CornerRadius,
-                    elevation = VerdictSheetCoverDefaults.Elevation,
-                    shadowColor = Color.Black.copy(alpha = VerdictSheetCoverDefaults.SHADOW_ALPHA),
-                )
+                state.verdictCover?.let { Cover(model = it) }
             },
         )
     }
@@ -2810,7 +2766,8 @@ internal fun BookDetailOverlays(
         EditionBottomSheetSelector(
             bookTitle = state.book.title,
             currentEdition = currentEditionForSheet,
-            defaultEdition = state.book.defaultEdition,
+            headerCover = state.editionSheetHeaderCover,
+            editionCovers = state.editionCovers,
             editions = state.filteredEditions,
             isLoading = state.loadingEditions,
             searchQuery = state.editionSearchQuery,

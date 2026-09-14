@@ -18,9 +18,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import coil3.request.ImageRequest
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.rememberCoverImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
@@ -66,7 +67,7 @@ internal fun clampCoverOffset(
  */
 @Composable
 internal fun FullScreenCoverViewer(
-    request: ImageRequest?,
+    model: CoverUiModel,
     scale: Float,
     offset: Offset,
     onSizeChanged: (IntSize) -> Unit,
@@ -80,7 +81,7 @@ internal fun FullScreenCoverViewer(
             .onSizeChanged(onSizeChanged),
     ) {
         RhaydusShimmerImage(
-            model = request,
+            model = rememberCoverImageRequest(model = model),
             contentDescription = "Full screen book cover",
             contentScale = ContentScale.Fit,
             modifier = Modifier

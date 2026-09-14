@@ -8,11 +8,12 @@
 **Rollout model:** one branch, one PR, merged all at once. Stages below are *commit* boundaries on
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
-**Status:** `S4 IN PROGRESS` — S4-1, S4-2a, S4-2b (incl. the **R9 correction**, § 5i) and S4-3 done;
-next up S4-4 (`EditionImage` -> `cover/`). **§ 5g is the most important thing to read before continuing:** the direction rule re-cut
-S4's sub-commits, and the original ordering was impossible. **§ 5j** records S4-3's outcome — the two
-sheets are the library's first R1-shaped components, and it corrects the reasoning that nearly
-deferred that.
+**Status:** `S4 IN PROGRESS` — S4-1, S4-2a, S4-2b (incl. the **R9 correction**, § 5i), S4-3 and
+S4-4 done; next up S4-5 (the remaining primitives). **§ 5g is the most important thing to read before
+continuing:** the direction rule re-cut S4's sub-commits, and the original ordering was impossible.
+**§ 5k** records S4-4's outcome — the `:core:book` edge is dead and **G3 is closed**, `CoverVariant`
+is the second and larger instance of R2's per-variant metrics table, and R9 finally reached the
+list-shaped surfaces.
 **Branch:** `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models`
 **Issue:** [#275](https://github.com/CinqueIzumi/Softcover/issues/275) — tag `E.1`, labels
 `area:cross-cutting` / `kind:tech` / `scope:L`, no milestone. Keep its Stages and Acceptance
@@ -392,9 +393,13 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
             `ProgressSheetTabMapping` -> `:core:uibinding`), `ChooseListsBottomSheet` (+
             `ListMembership`), `PreviewData` -> `:core:domain`. Both landed **fully R1–R9 compliant**,
             not just R4-clean — the library's first sealed event lambdas. **See § 5j.**
-      - [ ] **S4-4 — `EditionImage` -> `cover/`**: `CoverImageUiModel`, `LocalCoverImagePersister`,
-            the `:core:uibinding` mapper, `CoverlessTitleCover` + `MonogramCoverMetrics`, the three
-            platform actuals, 38 call sites in 9 files. Kills the `:core:book` edge.
+      - [x] **S4-4 — `EditionImage` -> `Cover`**: `CoverUiModel` / `CoverSource` / `CoverVariant` /
+            `CoverDimensions`, `LocalCoverImagePersister`, the `:core:uibinding` resolver + mappers,
+            `CoverlessTitleCover` + `MonogramCoverMetrics`, the three platform actuals, and **29 call
+            sites in 11 files across 5 features** (plus 2 `rememberEditionImageRequest` and 1
+            non-Compose `resolveEditionImageSource` — 32 across 13 files; the "38 in 9" this line used
+            to claim was wrong in both directions). Killed the `:core:book` edge and **closed G3**.
+            **See § 5k.**
       - [ ] **S4-5 — The remaining primitives**: `PillChip`, `SoftcoverTopBar(Action)`,
             `AnimatedStatNumber`, `PreviewTile`, `MarkAsReadBurst`, `ClickableText`,
             `SoftcoverLoadingDialog`, `ConnectivityBanner`, `OfflineGuard`, the `Deadline*` trio, the
@@ -1094,6 +1099,102 @@ this branch and reproducible on `main`).
 `selectedTab` could plausibly regress), the jacket slot in both its single and three-jacket forms, and
 the audiobook time layout are all render-time behaviour compilation cannot speak to.
 
+### 5k. S4-4 outcome — the `:core:book` edge is dead, and R9 finally reached the lists
+
+The last component out of `:core:designsystem` that mattered. What it settled:
+
+**G3 landed here, not in S4-6, and the tracker was wrong to schedule it later.** § 6 said G3 waits
+for S4-6. It cannot: `onUnusedDependencies` is `severity("fail")`, so the moment `EditionImage.kt`
+is deleted, `api(project(":core:book"))` and `api(libs.coil3)` are unused and the build is red until
+they go — and the allowlist row goes with them. S4-4's own checklist line ("Kills the `:core:book`
+edge") was the correct one. **`:core:designsystem` now has exactly one project dependency left**
+(`:core:domain`, for the `Deadline*` trio), so G2 genuinely is S4-6's.
+
+**`CoverVariant` is R2's per-variant metrics table at scale, and the taxonomy *is* the audit.**
+`EditionImage` took `elevation` / `cornerRadius` / `shadowColor` / `maxDecodePx` as loose parameters;
+§ 7.1 admits no parameter beside the model, so they had to move. Auditing all 29 call sites turned up
+**14 distinct metric tuples**, expressed as surface-named entries resolved through
+`CoverDimensions.forVariant`. Every value is reproduced exactly — this commit changes no pixels.
+Several entries share a tuple and are **kept separate anyway**, because the point of the table is
+that tuning one surface cannot move another.
+
+**It surfaced real drift, which was recorded rather than fixed.** `HiddenSeriesStack` uses a 3dp
+corner radius where every other flat cover uses 4dp, and Reading's three thumbnails sit at 6/8/10dp.
+Collapsing those is a design decision for `docs/reference/design-system/`, with a deliberate choice
+of value — not something to smuggle into a structural move. The table makes the drift readable in one
+file for the first time.
+
+**The Koin seam § 5e complained about is closed.** `EditionImage` reached
+`PersistEditionImageUseCase` through the aggregate Koin graph from a module it did not compile
+against — action at a distance written down only in a KDoc. It is now a `CoverImagePersister` fun
+interface behind `LocalCoverImagePersister`, provided by `:core:presentation`'s
+`ProvideCoverImagePersister` and mounted once in `App.kt`. The `null` default also deleted the
+`LocalInspectionMode` guard the old code needed to keep previews working.
+
+**Resolution and rendering split cleanly, and the awkward consumer proved the split was right.**
+`ReadingSessionService` is an Android foreground service with no composition at all, and it needs the
+same cover the UI shows for its notification. Because the ladder lives in `:core:uibinding` as a plain
+`resolveCoverSource(...)`, it kept working with a one-line unwrap. Had the resolution followed the
+component into `:core:component`, that consumer would have had nowhere to go.
+
+**`rememberCoverImageRequest` is public, and that was not the first plan.** Two surfaces cannot route
+through `Cover`: the full-screen viewer fills the screen with a zoom/pan `graphicsLayer`, and the
+Reading hero's backdrop uses `ContentScale.Crop` + `blur(64.dp)` with no shimmer and no coverless
+rung. Forcing either through the component would have changed pixels. Exposing the request builder
+costs `:core:component` an `api(libs.coil3)` and keeps both surfaces honest.
+
+**`FullScreenCoverScreen` stopped carrying domain objects.** It held two `@TransientNavArg
+BookEdition?`s and leaked `coil3.request.ImageRequest` through its own `expect`/`actual`. It now
+carries one `CoverUiModel` — a small immutable value, so no `TransientNavArg` — and `:feature:book_detail`
+no longer imports Coil anywhere.
+
+**The choose-lists jacket slot is gone, and the covers went on the *variant*, not the model.** § 5j
+said the slot would become `covers: ImmutableList<CoverUiModel>` on `ChooseListsUiModel`. That would
+have been R2-wrong: a `SingleBook` holding three covers is a state the type should not admit. It is
+`SingleBook(name, cover)` / `ManyBooks(bookCount, covers)`, and **`coverCount` is deleted rather than
+kept alongside** — `covers.size` is the count, and two fields one forgotten update apart is the § 5i
+hazard on the exact field whose clamp the S4-3 review already caught once. The empty-stack
+placeholder is built by the component from library data, so `covers` stays the single source of truth.
+
+**A behaviour change to know about: covers now land one state emission after their books.** R9 moves
+the mapping into collectors, so a list renders its items before their cover models exist. Three
+different answers to that got written concurrently — a blank placeholder, skipping the item, and
+drawing nothing — and **skipping was the dangerous one**: the whole shelf or rail renders empty for a
+frame and then pops in, a visible layout jump, and library's collector hops to `defaultDispatcher` so
+its lag is certain rather than theoretical.
+
+**The first fix was itself the wrong shape, and the user caught it.** Unifying the three answers on
+"blank placeholder" left *four features each holding a private `CoverOrPlaceholder`* plus seven inline
+`if (cover != null)` guards — ten copies of one rule, inside the migration whose entire purpose is to
+delete duplication like that. **`Cover(model: CoverUiModel?)` now takes the nullable model and owns
+the placeholder itself**, so all ten sites collapsed to a plain `Cover(model = covers[id], …)`. The
+subtlety worth keeping: the null branch must apply the same 2:3 aspect the loaded branch does, or the
+placeholder takes the caller's width and no height and collapses the layout it exists to hold open.
+If the lag ever reads badly, the fix is for the source writer to set both fields in one `setState` —
+the same escape hatch § 5j recorded for the progress sheet's tab.
+
+**Two pre-existing oddities preserved on purpose.** Reading's verdict sheet passes the *same* edition
+as both `edition` and `defaultEdition`, disabling the fallback rung every other Reading cover uses;
+book_detail's verdict cover does the same. Both are today's behaviour, both are now commented at the
+mapping site. "Tidying" either would silently change which cover a verdict sheet shows.
+
+**One design wrinkle the plan missed.** The hero's shared-element key needs `bookId` and
+`transitionSurface`, which were screen constructor arguments — invisible to a collector. Stamping the
+key in composition would allocate a fresh model per recomposition, which is exactly what R9's third
+reason forbids, so both are now seeded into `BookDetailUiState` from the ScreenModel the same way
+`initialCover` already was.
+
+**Gates at this boundary:** `checkModuleGraph`, `ktlintCheck`, repo-wide `compileKotlinJvm` +
+`:desktopApp:compileKotlin` + both `:app` variants, **repo-wide `compileKotlinIosSimulatorArm64`**
+(the gate that matters most here — `:core:uibinding` gained its first platform source sets), and
+`projectHealth` on all ten touched modules. Tests: `ChooseListsMapperTest` reworked onto `covers`
+(19), `ChooseListsCollectorTest` re-pointed (4), the new `CoverSourceResolverTest` (8 — **the
+resolution ladder had never had a single test before this**), and `MonogramCoverMetricsTest` extended
+from 6 to 15 to cover `showFullTitle` / `titleFontSize` / `titleMaxLines`.
+
+**Not verified:** no visual pass. The cover is the most-rendered component in the app and the gallery
+now has a `COVER` family, so a desktop run is worth more here than at any previous boundary.
+
 ### 5a. The Component Gallery — decided: shipped easter egg
 
 Not debug-only. Consequences to build for, rather than discover late:
@@ -1157,7 +1258,7 @@ already says so in a comment. Every rule below is a build failure.
             imports nor declared dependencies. A reviewer caught them, not a gate. The import-level
             rule at least closes the case where a stray `import` survives a dependency removal
             (possible while another module on the compile classpath still `api`-exposes the type).
-- [ ] **G3 — The `:core:designsystem` -> `:core:book` api allowlist row is gone** from
+- [x] **G3 — DONE in S4-4. The `:core:designsystem` -> `:core:book` api allowlist row is gone** from
       `allowedApiDataEdges` (`build.gradle.kts:281` — note the row list has since grown two rows and
       the set that drives it was renamed `apiSignOffModules`; see § 6a).
 - [ ] **G4 — Composable budget ratchet.** A `checkComponentBudget` task counting `@Composable`
@@ -1198,8 +1299,11 @@ still forbidden, since establishing that those two sit side by side rather than 
 point of S3.
 
 **Pending, and already scheduled — not blind spots:** G2 (`:core:designsystem` zero project
-dependencies) and G3 (delete the `-> :core:book` allowlist row) land in S4-6, because designsystem
-still `api`-depends on `:core:domain` and `:core:book` until `EditionImage` moves in S4-4. G4
+dependencies) lands in S4-6, because designsystem still `api`-depends on `:core:domain` for the
+`Deadline*` trio until S4-5. **G3 did not wait for S4-6 and could not have:** `onUnusedDependencies`
+is `severity("fail")`, so deleting `EditionImage.kt` made `api(project(":core:book"))` and
+`api(libs.coil3)` unused in the same commit — dropping them, and the allowlist row with them, was
+required for S4-4 to be green rather than optional cleanup. G4
 (`checkComponentBudget`) is S11's, since the count is still falling.
 
 **New follow-up this audit surfaced**, and it is now tracked as work rather than prose: G2 is a
