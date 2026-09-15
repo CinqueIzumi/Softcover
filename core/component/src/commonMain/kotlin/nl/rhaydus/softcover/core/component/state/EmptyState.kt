@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.state
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,27 +7,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
-import nl.rhaydus.platform.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
-import nl.rhaydus.softcover.core.designsystem.generated.resources.connectivity_offline_screen_body
-import nl.rhaydus.softcover.core.designsystem.generated.resources.connectivity_offline_screen_title
 
+/**
+ * The centred headline-and-body message a screen shows in place of content it has nothing to draw —
+ * today the offline screen, and the shape the rest of the app's empty states consolidate onto.
+ *
+ * It fills the space its [modifier] gives it and centres within it; the caller decides what that
+ * space is (the whole screen, a pane, a sheet body).
+ */
 @Composable
-fun rememberIsOnline(provider: NetworkAvailabilityProvider = koinInject()): Boolean {
-    val isOnline by provider.isOnline.collectAsState()
-    return isOnline
-}
-
-@Composable
-fun OfflineScreenContent(modifier: Modifier = Modifier) {
+fun EmptyState(
+    model: EmptyStateUiModel,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -36,14 +32,14 @@ fun OfflineScreenContent(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = stringResource(Res.string.connectivity_offline_screen_title),
+            text = model.title,
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
 
         Text(
-            text = stringResource(Res.string.connectivity_offline_screen_body),
+            text = model.body,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

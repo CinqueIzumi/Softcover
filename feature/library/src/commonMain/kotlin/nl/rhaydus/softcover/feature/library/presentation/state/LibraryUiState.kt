@@ -84,6 +84,21 @@ internal data class LibraryUiState(
     val filterOptionsByTab: Map<String, LibraryFilterOptions> = emptyMap(),
 
     /**
+     * The Filter sheet's chip models per tab, mapped by `FilterChipModelsCollector` (R9) off
+     * [filterOptionsByTab]. See [LibraryFilterChips]'s KDoc for why none of these chips carry
+     * `selected` — the sheet resolves that against its own local draft.
+     */
+    val filterChipsByTab: Map<String, LibraryFilterChips> = emptyMap(),
+
+    /**
+     * Every chip key in [filterChipsByTab] resolved back to the [LibraryFilterValue] dispatching it
+     * would toggle — kept beside the models rather than rebuilt in composition. Flat across every
+     * tab: a chip key already encodes its facet (`"tag:42"`, `"format:Hardcover"`, …), so two tabs
+     * offering the same value share one entry.
+     */
+    val filterValueByChipKey: Map<String, LibraryFilterValue> = emptyMap(),
+
+    /**
      * Search + filter-chip results per tab for book shelves (year-finished narrowing lives inside
      * [LibraryFilters.readYear]), precomputed off the main thread by [DisplayListsCollector] so
      * composition just does a map lookup on every frame.
@@ -163,6 +178,13 @@ internal data class LibraryUiState(
      */
     fun availableFilterOptionsFor(tabId: String): LibraryFilterOptions =
         filterOptionsByTab[tabId] ?: LibraryFilterOptions()
+
+    /**
+     * Filter sheet chip models for [tabId]. Falls back to an empty [LibraryFilterChips] for the same
+     * cold-start/not-yet-collected reasons as [availableFilterOptionsFor].
+     */
+    fun filterChipsFor(tabId: String): LibraryFilterChips =
+        filterChipsByTab[tabId] ?: LibraryFilterChips()
 
     /**
      * Books to render for [tabId], precomputed by [DisplayListsCollector] and served as an O(1)

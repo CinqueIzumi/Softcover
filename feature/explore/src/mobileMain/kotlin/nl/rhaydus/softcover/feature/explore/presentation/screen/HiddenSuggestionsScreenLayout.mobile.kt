@@ -10,10 +10,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
+
+/** The bar is fixed for this screen, so the model is a constant rather than rebuilt per frame. */
+private val HIDDEN_SUGGESTIONS_TOP_BAR = TopBarUiModel(
+    title = "Hidden suggestions",
+    navigation = TopBarNavigation.Back,
+)
 
 /**
  * Mobile Hidden-suggestions page — a pushed sub-screen of Settings. Uses the standard [SoftcoverTopBar]
@@ -30,9 +39,13 @@ internal actual fun HiddenSuggestionsScreenLayout(
 ) {
     Scaffold(
         topBar = {
-            SoftcoverTopBar(
-                title = "Hidden suggestions",
-                onNavigateBack = onNavigateBack,
+            TopBar(
+                model = HIDDEN_SUGGESTIONS_TOP_BAR,
+                onEvent = { event ->
+                    when (event) {
+                        TopBarEvent.BackClicked -> onNavigateBack()
+                    }
+                },
             )
         },
     ) { innerPadding ->

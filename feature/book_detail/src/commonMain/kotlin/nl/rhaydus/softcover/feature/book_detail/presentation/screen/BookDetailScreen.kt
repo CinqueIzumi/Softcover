@@ -15,7 +15,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
+import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailOverlayNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPaneCloseHandler

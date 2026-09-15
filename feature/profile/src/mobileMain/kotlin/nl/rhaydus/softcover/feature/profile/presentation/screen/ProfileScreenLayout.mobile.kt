@@ -32,7 +32,10 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -44,6 +47,15 @@ import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAu
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+
+/**
+ * The profile bar carries no title — the page's own masthead names it — so the model is a
+ * constant rather than something rebuilt per frame.
+ */
+private val PROFILE_TOP_BAR = TopBarUiModel(
+    title = "",
+    navigation = TopBarNavigation.Back,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,10 +77,14 @@ internal actual fun ProfileScreenLayout(
 
     Scaffold(
         topBar = {
-            SoftcoverTopBar(
-                title = "",
-                onNavigateBack = onNavigateUp,
-                additionalActions = {
+            TopBar(
+                model = PROFILE_TOP_BAR,
+                onEvent = { event ->
+                    when (event) {
+                        TopBarEvent.BackClicked -> onNavigateUp()
+                    }
+                },
+                actions = {
                     IconButton(
                         onClick = { showShareSheet = true },
                         enabled = shareContent != null,

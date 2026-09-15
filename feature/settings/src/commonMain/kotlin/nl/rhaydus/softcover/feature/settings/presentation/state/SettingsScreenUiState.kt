@@ -27,6 +27,10 @@ internal data class SettingsScreenUiState(
     val uiScale: UiScale = UiScale.DEFAULT,
     val spinePalette: SpinePalette = SpinePalette.DEFAULT,
     val paletteGloss: String = SpinePalette.DEFAULT.gloss,
-    val themeChoices: ImmutableList<ThemeChoice> = themeChoicesFor(selected = ThemeMode.DEFAULT),
+    val themeChoices: ImmutableList<ThemeChoice> = themeChoicesFor(
+        selected = ThemeMode.DEFAULT,
+        palette = SpinePalette.DEFAULT,
+        dynamicColor = false,
+    ),
     val paletteChoices: ImmutableList<PaletteChoice> = paletteChoicesFor(selected = ColorPalette.DEFAULT),
 ) : UiState

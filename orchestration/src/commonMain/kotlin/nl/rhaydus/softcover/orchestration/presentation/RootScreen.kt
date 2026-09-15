@@ -17,7 +17,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,10 +27,11 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.ScreenTransition
 import kotlinx.coroutines.flow.combine
 import org.koin.compose.koinInject
-import nl.rhaydus.platform.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ConnectivityBanner
+import nl.rhaydus.softcover.core.component.callout.Banner
+import nl.rhaydus.softcover.core.component.callout.offlineBannerUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
+import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.navigation.CreateListPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
@@ -42,8 +42,7 @@ internal object RootScreen : Screen {
     @OptIn(ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Content() {
-        val networkAvailabilityProvider = koinInject<NetworkAvailabilityProvider>()
-        val isOnline by networkAvailabilityProvider.isOnline.collectAsState()
+        val isOnline = rememberIsOnline()
 
         val activeSessionController = koinInject<ActiveSessionController>()
 
@@ -76,7 +75,10 @@ internal object RootScreen : Screen {
                         .consumeWindowInsets(innerPadding),
                 ) {
                     Column {
-                        ConnectivityBanner(modifier = Modifier.statusBarsPadding())
+                        Banner(
+                            model = offlineBannerUiModel(visible = isOnline.not()),
+                            modifier = Modifier.statusBarsPadding(),
+                        )
 
                         Box(
                             modifier = if (isOnline.not()) {

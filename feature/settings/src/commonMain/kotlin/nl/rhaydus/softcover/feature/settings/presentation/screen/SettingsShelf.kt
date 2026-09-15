@@ -69,8 +69,10 @@ import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ColorPalettePreviewTile
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ThemePreviewTile
+import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTile
+import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileEvent
+import nl.rhaydus.softcover.core.component.control.ThemePreviewTile
+import nl.rhaydus.softcover.core.component.control.ThemePreviewTileEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -215,12 +217,13 @@ private fun ThemeSection(
         ) {
             state.themeChoices.forEach { choice ->
                 ThemePreviewTile(
-                    label = choice.label,
-                    painting = choice.painting,
-                    selected = choice.selected,
-                    palette = state.spinePalette,
-                    dynamicColor = state.useDynamicColorChecked,
-                    onClick = { runAction(OnThemeModeSelectedAction(mode = choice.mode)) },
+                    model = choice.tile,
+                    onEvent = { event ->
+                        when (event) {
+                            ThemePreviewTileEvent.Clicked ->
+                                runAction(OnThemeModeSelectedAction(mode = choice.mode))
+                        }
+                    },
                     modifier = Modifier
                         .weight(
                             weight = 1f,
@@ -286,10 +289,12 @@ private fun SpineColourSection(
             ) {
                 state.paletteChoices.forEach { choice ->
                     ColorPalettePreviewTile(
-                        palette = choice.palette,
-                        selected = choice.selected,
-                        onClick = {
-                            runAction(OnColorPaletteSelectedAction(palette = choice.colorPalette))
+                        model = choice.tile,
+                        onEvent = { event ->
+                            when (event) {
+                                ColorPalettePreviewTileEvent.Clicked ->
+                                    runAction(OnColorPaletteSelectedAction(palette = choice.colorPalette))
+                            }
                         },
                         modifier = Modifier.width(tileWidth),
                     )
@@ -1270,7 +1275,7 @@ internal fun AppUpdateSection(
 /**
  * The update card's fully-rounded call to action. Hand-rolled (rather than [RhaydusButton]) so the
  * pill is guaranteed fully rounded at any label width — the same `Surface(onClick, shape = percent(50))`
- * shape already used for [PillChip][nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip]
+ * shape already used for [Chip][nl.rhaydus.softcover.core.component.chip.Chip]
  * and the Library control-line pills.
  */
 @Composable

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.callout
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -9,37 +9,44 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
-import nl.rhaydus.platform.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
-import nl.rhaydus.softcover.core.designsystem.generated.resources.connectivity_offline_banner
 
+/**
+ * A full-width line of chrome that slides in above a screen's content to report a condition the
+ * reader should know about — today the offline notice, raised once at the app root rather than per
+ * screen.
+ *
+ * It owns its own expand/shrink transition, so a caller flips [BannerUiModel.visible] and the banner
+ * handles arriving and leaving.
+ */
 @Composable
-fun ConnectivityBanner(
+fun Banner(
+    model: BannerUiModel,
     modifier: Modifier = Modifier,
-    provider: NetworkAvailabilityProvider = koinInject(),
 ) {
-    val isOnline by provider.isOnline.collectAsState()
+    val container = when (model.tone) {
+        BannerTone.WARNING -> MaterialTheme.colorScheme.errorContainer
+    }
+
+    val content = when (model.tone) {
+        BannerTone.WARNING -> MaterialTheme.colorScheme.onErrorContainer
+    }
 
     AnimatedVisibility(
-        visible = isOnline.not(),
+        visible = model.visible,
         enter = expandVertically(),
         exit = shrinkVertically(),
     ) {
         Text(
-            text = stringResource(Res.string.connectivity_offline_banner),
+            text = model.message,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onErrorContainer,
+            color = content,
             textAlign = TextAlign.Center,
             modifier = modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.errorContainer)
+                .background(container)
                 .padding(
                     horizontal = 16.dp,
                     vertical = 8.dp,

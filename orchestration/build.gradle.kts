@@ -37,6 +37,7 @@ kotlin {
             implementation(project(":core:profile"))
             implementation(project(":core:connectivity"))
             implementation(project(":core:notification"))
+            implementation(project(":core:component"))
             implementation(project(":core:designsystem"))
             implementation(project(":core:presentation"))
             implementation(project(":core:uibinding"))

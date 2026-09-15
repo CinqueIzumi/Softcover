@@ -18,11 +18,20 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.feature.settings.presentation.action.RefreshRoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
+
+/** The bar is fixed for this screen, so the model is a constant rather than rebuilt per frame. */
+private val ROADMAP_TOP_BAR = TopBarUiModel(
+    title = "Roadmap",
+    navigation = TopBarNavigation.Back,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,9 +45,13 @@ internal actual fun RoadmapScreenLayout(
 
     Scaffold(
         topBar = {
-            SoftcoverTopBar(
-                title = "Roadmap",
-                onNavigateBack = onNavigateBack,
+            TopBar(
+                model = ROADMAP_TOP_BAR,
+                onEvent = { event ->
+                    when (event) {
+                        TopBarEvent.BackClicked -> onNavigateBack()
+                    }
+                },
             )
         },
     ) { innerPadding ->

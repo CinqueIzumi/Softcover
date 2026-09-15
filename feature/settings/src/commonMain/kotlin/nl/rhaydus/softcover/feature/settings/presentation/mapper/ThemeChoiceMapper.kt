@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.feature.settings.presentation.mapper
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ThemeTilePainting
+import nl.rhaydus.softcover.core.component.control.ThemePreviewTileUiModel
+import nl.rhaydus.softcover.core.component.control.ThemeTilePainting
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.feature.settings.presentation.model.ThemeChoice
 
@@ -21,18 +23,27 @@ private fun ThemeMode.toTilePainting(): ThemeTilePainting = when (this) {
 }
 
 /**
- * One [ThemeChoice] per [ThemeMode], marking [selected] as the reader's chosen mode. Invoked off the
- * composition — in [nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector]
+ * One [ThemeChoice] per [ThemeMode], marking [selected] as the reader's chosen mode and building its
+ * [ThemePreviewTileUiModel] from [palette] and [dynamicColor]. Invoked off the composition — in
+ * [nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector]
  * and as [nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState]'s own
- * default — so the Appearance screen's render never calls [toTilePainting] itself
- * (`component-contract.md` R9).
+ * default — so the Appearance screen's render never calls [toTilePainting] itself, nor assembles the
+ * tile model itself (`component-contract.md` R9).
  */
-internal fun themeChoicesFor(selected: ThemeMode): ImmutableList<ThemeChoice> = ThemeMode.entries
+internal fun themeChoicesFor(
+    selected: ThemeMode,
+    palette: SpinePalette,
+    dynamicColor: Boolean,
+): ImmutableList<ThemeChoice> = ThemeMode.entries
     .map { mode ->
         ThemeChoice(
-            label = mode.label,
-            painting = mode.toTilePainting(),
-            selected = mode == selected,
+            tile = ThemePreviewTileUiModel(
+                label = mode.label,
+                painting = mode.toTilePainting(),
+                selected = mode == selected,
+                palette = palette,
+                dynamicColor = dynamicColor,
+            ),
             mode = mode,
         )
     }

@@ -52,6 +52,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTagsColle
 import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueriesCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchTopBarCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsScreenModel
@@ -99,6 +100,8 @@ val exploreModule = module {
     }
 
     factory { PreviousQueriesCollector() } bind ExploreCollector::class
+
+    factory { SearchTopBarCollector() } bind ExploreCollector::class
 
     factory { QueriedBooksCollector() } bind ExploreCollector::class
 

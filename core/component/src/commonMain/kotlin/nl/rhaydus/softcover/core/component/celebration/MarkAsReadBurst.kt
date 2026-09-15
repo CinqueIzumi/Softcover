@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.celebration
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -21,40 +21,42 @@ import kotlin.random.Random
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 /**
- * A radial particle burst played on a successful mark-as-read commit. Caller composes
- * this as a sibling in a `Box` and sets [modifier] to `Modifier.matchParentSize()` (or a
- * fixed footprint) — particles travel outward from the centre of that footprint.
+ * A radial particle burst played on a successful mark-as-read commit. The caller composes this as a
+ * sibling in a `Box` and sets [modifier] to `Modifier.matchParentSize()` (or a fixed footprint) —
+ * particles travel outward from the centre of that footprint.
  *
- * The burst replays whenever [triggerKey] changes to a non-zero value, including on
- * repeat commits. Suppressed when the user has disabled system animations.
+ * The burst replays whenever [MarkAsReadBurstUiModel.triggerKey] changes to a non-zero value,
+ * including on repeat commits. Suppressed when the user has disabled system animations.
+ *
+ * [color] and [secondaryColor] stay parameters rather than model fields: they default to the theme
+ * roles the burst is specified in, and the one caller that overrides them is overriding a *tint*,
+ * not describing different data.
  */
 @Composable
 fun MarkAsReadBurst(
-    triggerKey: Int,
+    model: MarkAsReadBurstUiModel,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
     secondaryColor: Color = MaterialTheme.colorScheme.tertiary,
-    particleCount: Int = 16,
-    durationMillis: Int = 800,
 ) {
     val playMotion = playDecorativeMotion()
 
     val progress = remember { Animatable(initialValue = 0f) }
 
-    LaunchedEffect(triggerKey) {
-        if (triggerKey == 0 || playMotion.not()) return@LaunchedEffect
+    LaunchedEffect(model.triggerKey) {
+        if (model.triggerKey == 0 || playMotion.not()) return@LaunchedEffect
 
         progress.snapTo(targetValue = 0f)
         progress.animateTo(
             targetValue = 1f,
             animationSpec = tween(
-                durationMillis = durationMillis,
+                durationMillis = model.durationMillis,
                 easing = FastOutSlowInEasing,
             ),
         )
     }
 
-    val particles = remember(particleCount) { buildParticleSeeds(count = particleCount) }
+    val particles = remember(model.particleCount) { buildParticleSeeds(count = model.particleCount) }
 
     Canvas(modifier = modifier) {
         val current = progress.value

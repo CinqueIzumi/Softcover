@@ -30,8 +30,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
@@ -70,26 +75,27 @@ internal actual fun BookDetailScreenLayout(
         }
     }
 
-    val containerColor by animateColorAsState(
-        if (shouldBeExpanded.not()) {
-            Color.Transparent
-        } else {
-            Color.Unspecified
-        },
-    )
+    // Until the hero has scrolled away the bar sits *over* the cover art, so it goes transparent and
+    // its controls take a scrim. `TopBar` derives all of that from this one field — before the
+    // component library the bar's fill, the back button's ink and the overflow menu's ink were three
+    // separate derivations of this same flag, any one of which could have been forgotten.
+    val topBar = remember(title, shouldBeExpanded) {
+        TopBarUiModel(
+            title = title,
+            navigation = TopBarNavigation.Back,
+            surface = if (shouldBeExpanded) TopBarSurface.OPAQUE else TopBarSurface.OVER_MEDIA,
+        )
+    }
 
-    val defaultIconButtonColors = IconButtonDefaults.iconButtonColors()
-    val iconButtonColorsWithScrim = IconButtonDefaults.iconButtonColors(
-        containerColor = Color.Black.copy(alpha = 0.35f),
-        contentColor = Color.White,
-    )
-
-    val backButtonColors = remember(shouldBeExpanded) {
-        if (shouldBeExpanded) {
-            defaultIconButtonColors
-        } else {
-            iconButtonColorsWithScrim
-        }
+    // The offline placeholder has no hero for the bar to sit over, and no `LazyColumn` either — so
+    // `shouldBeExpanded` never leaves `false` on that branch and [topBar] above would pin it to
+    // OVER_MEDIA, drawing a transparent bar with scrimmed controls over a plain empty state. It gets
+    // its own model instead, matching the opaque default the branch had before the bar took a model.
+    val offlineTopBar = remember {
+        TopBarUiModel(
+            title = "",
+            navigation = TopBarNavigation.Back,
+        )
     }
 
     val showOfflinePlaceholder =
@@ -99,29 +105,18 @@ internal actual fun BookDetailScreenLayout(
         contentWindowInsets = WindowInsets(),
     ) { innerPadding ->
         if (showOfflinePlaceholder) {
-            OfflineScreenContent(
+            EmptyState(
+                model = offlineEmptyStateUiModel(),
                 modifier = Modifier
                     .padding(innerPadding)
                     .padding(bottom = bottomChromePadding()),
             )
 
-            SoftcoverTopBar(
-                title = "",
-                onNavigateBack = onNavigateBack,
-                navigateBackButton = {
-                    IconButton(
-                        onClick = onNavigateBack,
-                        colors = backButtonColors,
-                    ) {
-                        val backIcon = drawableIconResource(
-                            icon = SoftcoverIcon.ArrowBack,
-                            contentDescription = "Navigate back icon",
-                        )
-
-                        Icon(
-                            painter = backIcon.getIconPainter(),
-                            contentDescription = backIcon.contentDescription,
-                        )
+            TopBar(
+                model = offlineTopBar,
+                onEvent = { event ->
+                    when (event) {
+                        TopBarEvent.BackClicked -> onNavigateBack()
                     }
                 },
                 scrollBehavior = topAppBarScrollBehavior,
@@ -218,38 +213,22 @@ internal actual fun BookDetailScreenLayout(
             item { Spacer(modifier = Modifier.height(bottomChromePadding())) }
         }
 
-        SoftcoverTopBar(
-            title = title,
-            onNavigateBack = onNavigateBack,
-            navigateBackButton = {
-                IconButton(
-                    onClick = onNavigateBack,
-                    colors = backButtonColors,
-                ) {
-                    val backIcon = drawableIconResource(
-                        icon = SoftcoverIcon.ArrowBack,
-                        contentDescription = "Navigate back icon",
-                    )
-
-                    Icon(
-                        painter = backIcon.getIconPainter(),
-                        contentDescription = backIcon.contentDescription,
-                    )
+        TopBar(
+            model = topBar,
+            onEvent = { event ->
+                when (event) {
+                    TopBarEvent.BackClicked -> onNavigateBack()
                 }
             },
-            additionalActions = {
-                BookOverflowMenu(
-                    state = state,
-                    runAction = runAction,
-                    isOnline = isOnline,
-                    iconColors = backButtonColors,
-                )
-            },
             scrollBehavior = topAppBarScrollBehavior,
-            colors = TopAppBarDefaults.topAppBarColors().copy(
-                containerColor = containerColor,
-            ),
-        )
+        ) { controlColors ->
+            BookOverflowMenu(
+                state = state,
+                runAction = runAction,
+                isOnline = isOnline,
+                iconColors = controlColors,
+            )
+        }
 
         BookDetailOverlays(
             state = state,

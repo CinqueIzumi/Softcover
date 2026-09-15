@@ -56,7 +56,10 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   consumer); a feature's own live in its `presentation/mapper/`. This is **R9** in
   [`design-system/component-contract.md`](design-system/component-contract.md), where the reasoning and
   the one carve-out (reading a *platform* signal in composition — `isSystemInDarkTheme()`, a window
-  size class, a `CompositionLocal` — is not mapping) are written out.
+  size class, a `CompositionLocal` — is not mapping) are written out. **R10** there goes one step
+  further — a composable does not *construct* a UI model either, even from literals; it arrives on the
+  `UiState`. That rule is normative for new work and has a scheduled retrofit for the call sites that
+  predate it.
 - **Error-slot convention.** A screen that can fail a load/submit follows the foundation TOAD error-slot
   convention ([`../rhaydus/0.3.1/toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md) §Conventions):
   a nullable `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,

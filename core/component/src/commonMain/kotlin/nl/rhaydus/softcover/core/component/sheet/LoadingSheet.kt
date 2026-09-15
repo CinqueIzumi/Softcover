@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.runtime.Composable
@@ -14,38 +13,30 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 
+/**
+ * A blocking, undismissable sheet that reports the progress of a long-running setup step — today,
+ * the initial library sync. [LoadingSheetUiModel.isLoading] governs whether it shows at all; while
+ * showing it cannot be tapped or backed out of, since there is nothing sensible to return to mid-sync.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun SoftcoverLoadingDialog(isLoading: Boolean) {
-    if (isLoading) {
-        Dialog(onDismissRequest = {}) {
-            ContainedLoadingIndicator()
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun SoftcoverLoadingSheet(
-    eyebrow: String,
-    headline: String,
-    isLoading: Boolean,
-    progress: Float?,
-    onLoaderFinished: () -> Unit,
-    description: String? = null,
+fun LoadingSheet(
+    model: LoadingSheetUiModel,
+    onEvent: (LoadingSheetEvent) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    if (isLoading.not()) return
+    if (model.isLoading.not()) return
 
     AdaptiveModalSheet(
         onDismissRequest = {},
         dismissOnTapOutside = false,
         dismissOnBackPress = false,
+        modifier = modifier,
     ) {
         Column(
             modifier = Modifier
@@ -53,21 +44,21 @@ fun SoftcoverLoadingSheet(
                 .padding(bottom = 32.dp),
         ) {
             EditorialSectionHeader(
-                eyebrow = eyebrow,
-                headline = headline,
-                description = description,
+                eyebrow = model.eyebrow,
+                headline = model.headline,
+                description = model.description,
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (progress != null) {
-                val animatedProgress by animateFloatAsState(targetValue = progress)
+            if (model.progress != null) {
+                val animatedProgress by animateFloatAsState(targetValue = model.progress)
 
                 LaunchedEffect(animatedProgress) {
                     if (animatedProgress >= 1f) {
                         delay(1.seconds)
 
-                        onLoaderFinished()
+                        onEvent(LoadingSheetEvent.LoaderFinished)
                     }
                 }
 

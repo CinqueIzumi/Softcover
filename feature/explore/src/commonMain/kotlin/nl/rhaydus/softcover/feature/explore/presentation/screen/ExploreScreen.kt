@@ -9,8 +9,8 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.koin.compose.koinInject
-import nl.rhaydus.softcover.core.designsystem.presentation.component.rememberIsOnline
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPresenter

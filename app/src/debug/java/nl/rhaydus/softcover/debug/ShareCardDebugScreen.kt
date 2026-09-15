@@ -47,8 +47,17 @@ import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.StatShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.YearRecapShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+
+/** Fixed for this screen, so the model is a constant rather than rebuilt per frame. */
+private val SHARE_DEBUG_TOP_BAR = TopBarUiModel(
+    title = "Share previews",
+    navigation = TopBarNavigation.Back,
+)
 
 object ShareCardDebugScreen : Screen {
     @Composable
@@ -115,9 +124,13 @@ object ShareCardDebugScreen : Screen {
 
         Scaffold(
             topBar = {
-                SoftcoverTopBar(
-                    title = "Share previews",
-                    onNavigateBack = onNavigateBack,
+                TopBar(
+                    model = SHARE_DEBUG_TOP_BAR,
+                    onEvent = { event ->
+                        when (event) {
+                            TopBarEvent.BackClicked -> onNavigateBack()
+                        }
+                    },
                 )
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },

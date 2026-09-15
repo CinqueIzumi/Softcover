@@ -115,6 +115,10 @@ import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
@@ -129,8 +133,6 @@ import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
-import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
 import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -146,8 +148,6 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.core.domain.model.Tag
-import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnAddUserTagAction
@@ -908,7 +908,7 @@ internal fun ShelveControlCard(
                     }
 
                     MarkAsReadBurst(
-                        triggerKey = celebrationKey,
+                        model = remember(celebrationKey) { MarkAsReadBurstUiModel(triggerKey = celebrationKey) },
                         modifier = Modifier.matchParentSize(),
                     )
                 }
@@ -1892,14 +1892,14 @@ internal fun UserTagsSection(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
-    val tags = state.userTags
+    val chips = state.userTagChips
 
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
         SmallSectionLabel(text = "Your tags")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (tags.isEmpty()) {
+        if (chips.isEmpty()) {
             DashedTagOpenerChip(
                 label = "+ Add tags",
                 onClick = { runAction(OnOpenTagEditorAction()) },
@@ -1910,9 +1910,9 @@ internal fun UserTagsSection(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
-                tags.forEach { tag ->
-                    key(tag.category, tag.name) {
-                        PillChip(label = tag.name)
+                chips.forEach { chip ->
+                    key(chip.key) {
+                        Chip(model = chip)
                     }
                 }
 
@@ -1928,7 +1928,7 @@ internal fun UserTagsSection(
 /**
  * A dashed-`outline` pill with a primary label (design-system.md's "your tags" opener) — the "+ Add
  * tags" / "Edit tags" affordance that opens [TagEditorBottomSheet]. Distinct from the solid
- * [PillChip] used for read-only tags.
+ * [Chip][nl.rhaydus.softcover.core.component.chip.Chip] used for read-only tags.
  */
 @Composable
 private fun DashedTagOpenerChip(
@@ -1973,24 +1973,7 @@ private fun DashedTagOpenerChip(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TagsSection(state: BookDetailUiState) {
-    val tags = state.book?.tags.orEmpty()
-
-    val groups: List<Pair<TagCategory, List<Tag>>> = remember(tags) {
-        listOf(
-            TagCategory.GENRE,
-            TagCategory.MOOD,
-            TagCategory.CONTENT_WARNING,
-        ).mapNotNull { category ->
-            // The remote query orders by count desc, but the Room (offline) read does not
-            // preserve that order — sort here so both paths rank identically.
-            val top = tags
-                .filter { it.category == category }
-                .sortedByDescending { it.count }
-                .take(5)
-
-            top.takeIf { it.isNotEmpty() }?.let { category to it }
-        }
-    }
+    val groups = state.communityTagGroups
 
     val edition = state.displayedEdition
     val colophon = editionColophonLine(edition = edition)
@@ -2016,11 +1999,11 @@ internal fun TagsSection(state: BookDetailUiState) {
                 SmallSectionLabel(text = "Tags")
             }
 
-            groups.forEach { (category, categoryTags) ->
+            groups.forEach { group ->
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = category.label,
+                    text = group.category.label,
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                     ),
@@ -2033,13 +2016,13 @@ internal fun TagsSection(state: BookDetailUiState) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    categoryTags.forEach { tag ->
-                        if (category == TagCategory.CONTENT_WARNING) {
-                            key(tag.id) {
-                                ConcealableTagChip(label = tag.name)
+                    group.chips.forEach { chip ->
+                        key(chip.key) {
+                            if (chip.concealed) {
+                                ConcealableTagChip(model = chip)
+                            } else {
+                                Chip(model = chip)
                             }
-                        } else {
-                            PillChip(label = tag.name)
                         }
                     }
                 }
@@ -2084,14 +2067,14 @@ private fun editionColophonLine(edition: BookEdition?): String? {
 }
 
 @Composable
-private fun ConcealableTagChip(label: String) {
+private fun ConcealableTagChip(model: ChipUiModel) {
     var revealed by rememberSaveable { mutableStateOf(false) }
 
     if (revealed) {
-        PillChip(label = label)
+        Chip(model = model.copy(concealed = false))
     } else {
-        PillChip(
-            label = label,
+        Chip(
+            model = model,
             modifier = Modifier
                 .clip(RoundedCornerShape(percent = 50))
                 .clickable(
@@ -2100,7 +2083,6 @@ private fun ConcealableTagChip(label: String) {
                 ) {
                     revealed = true
                 },
-            concealed = true,
         )
     }
 }
@@ -2683,7 +2665,9 @@ internal fun BookDetailOverlays(
             bookTitle = state.book.title,
             cover = state.tagEditorCover,
             userTags = state.userTags,
-            tagSuggestions = state.tagSuggestions,
+            categoryChips = state.tagEditorCategoryChips,
+            suggestionChips = state.tagSuggestionChips,
+            suggestionByChipKey = state.tagSuggestionByChipKey,
             selectedCategory = state.tagEditorCategory,
             draft = state.tagEditorInput,
             onCategorySelected = { runAction(OnTagEditorCategoryChangeAction(category = it)) },

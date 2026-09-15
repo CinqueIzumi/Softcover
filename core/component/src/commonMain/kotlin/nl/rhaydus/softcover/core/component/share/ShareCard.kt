@@ -50,8 +50,9 @@ import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
-import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -313,7 +314,13 @@ private fun ReadingUpdateShareCardBody(content: ReadingUpdateShareCardUiModel) {
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 content.tags.forEach { tag ->
-                    PillChip(label = tag)
+                    Chip(
+                        model = ChipUiModel(
+                            key = tag,
+                            label = tag,
+                            clickable = false,
+                        ),
+                    )
                 }
             }
         }

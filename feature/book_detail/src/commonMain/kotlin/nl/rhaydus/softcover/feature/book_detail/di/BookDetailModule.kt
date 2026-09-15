@@ -44,6 +44,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedP
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagChipModelsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagSuggestionsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagVocabularySyncCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserBooksFlowCollector
@@ -77,6 +79,8 @@ val bookDetailModule = module {
     factory { LastUsedProgressUnitCollector() } bind BookDetailCollector::class
     factory { ReadingPaceForecastCollector() } bind BookDetailCollector::class
     factory { TagSuggestionsCollector() } bind BookDetailCollector::class
+    factory { TagChipModelsCollector() } bind BookDetailCollector::class
+    factory { TagEditorChipModelsCollector() } bind BookDetailCollector::class
     factory { TagVocabularySyncCollector() } bind BookDetailCollector::class
     factory { VerdictReviewCollector() } bind BookDetailCollector::class
     factory { ShareCardsCollector() } bind BookDetailCollector::class

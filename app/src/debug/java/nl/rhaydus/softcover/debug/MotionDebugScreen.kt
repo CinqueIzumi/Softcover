@@ -41,10 +41,21 @@ import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.shakeOnError
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedStatNumber
-import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+
+/** Fixed for this screen, so the model is a constant rather than rebuilt per frame. */
+private val MOTION_DEBUG_TOP_BAR = TopBarUiModel(
+    title = "Motion & haptics",
+    navigation = TopBarNavigation.Back,
+)
 
 object MotionDebugScreen : Screen {
     @Composable
@@ -59,9 +70,13 @@ object MotionDebugScreen : Screen {
     fun Screen(onNavigateBack: () -> Unit) {
         Scaffold(
             topBar = {
-                SoftcoverTopBar(
-                    title = "Motion & haptics",
-                    onNavigateBack = onNavigateBack,
+                TopBar(
+                    model = MOTION_DEBUG_TOP_BAR,
+                    onEvent = { event ->
+                        when (event) {
+                            TopBarEvent.BackClicked -> onNavigateBack()
+                        }
+                    },
                 )
             },
         ) { innerPadding ->
@@ -205,7 +220,7 @@ object MotionDebugScreen : Screen {
             ) {}
 
             MarkAsReadBurst(
-                triggerKey = triggerKey,
+                model = remember(triggerKey) { MarkAsReadBurstUiModel(triggerKey = triggerKey) },
                 modifier = Modifier.size(160.dp),
             )
 
@@ -283,8 +298,8 @@ object MotionDebugScreen : Screen {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                AnimatedStatNumber(
-                    value = value,
+                StatNumber(
+                    model = remember(value) { StatNumberUiModel(value = value.toDouble()) },
                     style = MaterialTheme.editorialTypography.statHero,
                     color = MaterialTheme.colorScheme.primary,
                 )

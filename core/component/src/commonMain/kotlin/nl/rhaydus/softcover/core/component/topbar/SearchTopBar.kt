@@ -1,13 +1,11 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.topbar
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,20 +18,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,43 +46,31 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 
 /**
  * The Explore search chrome (explore-3a §4 "Search chrome"): a rounded pill (search glyph, inline
- * text field, and a trailing clear/loading affordance) beside a square barcode-scan button. [active]
- * — true whenever the caller's `searchPhase` is not the plain feed (focused, loading, or showing
- * results/a mood browse) — grows a 1.5dp primary border on the pill and reveals the clear (×); the
- * feed's resting pill carries neither.
+ * text field, and a trailing clear/loading affordance) beside a square barcode-scan button.
  *
- * **The caller's state owns the focus, not the platform field.** [focused] is the caller's
- * search-chrome state and the field *follows* it: entering it requests focus and shows the
- * keyboard, leaving it clears focus and hides the keyboard. The callbacks are therefore intents,
- * not focus notifications — [onSearchActivated] fires on every tap of the pill (and on a focus gain
- * from elsewhere, e.g. a desktop Tab key), [onSearchDismissed] on a focus loss, [onClearSearch] on
- * the ×. The tap intent is what keeps the chrome recoverable: `onFocusChanged` is edge-triggered,
- * so a field that still holds platform focus while the caller's state says otherwise would never
- * report anything again — leaving a live cursor and an open keyboard over a screen that refuses to
- * open its search surface.
+ * It stays a component of its own rather than a variant of [TopBar] (§ 7.6): the focus contract
+ * below has no counterpart on the plain bar, so merged they would be one component with two disjoint
+ * parameter sets.
+ *
+ * **The caller's state owns the focus, not the platform field.** [SearchTopBarUiModel.focused] is the
+ * caller's search-chrome state and the field *follows* it: entering it requests focus and shows the
+ * keyboard, leaving it clears focus and hides the keyboard. The events are therefore intents rather
+ * than focus notifications — see [SearchTopBarEvent], which records why the tap intent is what keeps
+ * the chrome recoverable.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun SoftcoverSearchTopBar(
-    searchText: String,
-    onSearchValueChange: (String) -> Unit,
-    onScanClick: () -> Unit,
-    isLoading: Boolean,
-    active: Boolean,
-    focused: Boolean,
-    onSearchActivated: () -> Unit,
-    onSearchDismissed: () -> Unit,
-    onClearSearch: () -> Unit,
-    placeholder: String = "Search books, authors…",
+fun SearchTopBar(
+    model: SearchTopBarUiModel,
+    onEvent: (SearchTopBarEvent) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Surface(modifier = Modifier.fillMaxWidth()) {
+    Surface(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -104,19 +83,19 @@ fun SoftcoverSearchTopBar(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             SearchChromePill(
-                query = searchText,
-                onQueryChange = onSearchValueChange,
-                focused = focused,
-                onSearchActivated = onSearchActivated,
-                onSearchDismissed = onSearchDismissed,
-                onClearSearch = onClearSearch,
-                isLoading = isLoading,
-                active = active,
-                placeholder = placeholder,
+                query = model.query,
+                onQueryChange = { query -> onEvent(SearchTopBarEvent.QueryChanged(query = query)) },
+                focused = model.focused,
+                onSearchActivated = { onEvent(SearchTopBarEvent.SearchActivated) },
+                onSearchDismissed = { onEvent(SearchTopBarEvent.SearchDismissed) },
+                onClearSearch = { onEvent(SearchTopBarEvent.SearchCleared) },
+                isLoading = model.isLoading,
+                active = model.active,
+                placeholder = model.placeholder,
                 modifier = Modifier.weight(1f),
             )
 
-            SearchChromeBarcodeButton(onClick = onScanClick)
+            SearchChromeBarcodeButton(onClick = { onEvent(SearchTopBarEvent.ScanRequested) })
         }
     }
 }
@@ -339,145 +318,6 @@ private fun SearchChromeBarcodeButton(onClick: () -> Unit) {
                 contentDescription = scanIcon.contentDescription,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp),
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun SoftcoverTopBar(
-    title: String,
-    subTitle: String? = null,
-    actions: List<SoftcoverTopBarAction> = emptyList(),
-    titleAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
-    onNavigateBack: (() -> Unit)? = null,
-    colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
-    scrollBehavior: TopAppBarScrollBehavior? = null,
-    navigateBackButton: @Composable () -> Unit = {
-        onNavigateBack?.let {
-            IconButton(onClick = onNavigateBack) {
-                val icon = drawableIconResource(
-                    icon = SoftcoverIcon.ArrowBack,
-                    contentDescription = "Navigate back icon",
-                )
-
-                Icon(
-                    painter = icon.getIconPainter(),
-                    contentDescription = icon.contentDescription,
-                )
-            }
-        }
-    },
-    additionalActions: @Composable RowScope.() -> Unit = {},
-) {
-    val givenSubtitle: @Composable () -> Unit = { subTitle?.let { Text(text = subTitle) } }
-
-    TopAppBar(
-        title = {
-            Text(
-                text = title,
-                autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.titleLarge.fontSize),
-                maxLines = 2,
-            )
-        },
-        subtitle = givenSubtitle,
-        scrollBehavior = scrollBehavior,
-        titleHorizontalAlignment = titleAlignment,
-        colors = colors,
-        actions = {
-            additionalActions()
-
-            actions.forEach { action ->
-                IconButton(onClick = action.onClick) {
-                    val resource = action.iconResource
-
-                    Icon(
-                        painter = resource.getIconPainter(),
-                        contentDescription = resource.contentDescription,
-                    )
-                }
-            }
-        },
-        navigationIcon = navigateBackButton,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@StandardPreview
-@Composable
-private fun SoftcoverTopBarPreview() {
-    SoftcoverTheme() {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            SoftcoverTopBar(
-                title = "given title",
-                titleAlignment = Alignment.Start,
-            )
-
-            SoftcoverTopBar(
-                title = "given title",
-                onNavigateBack = {},
-                subTitle = "subtitle",
-                actions = List(2) {
-                    SoftcoverTopBarAction(
-                        iconResource = drawableIconResource(
-                            icon = SoftcoverIcon.Palette,
-                            contentDescription = "",
-                        ),
-                        onClick = {},
-                    )
-                },
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@StandardPreview
-@Composable
-private fun SoftcoverSearchTopBarPreview() {
-    SoftcoverTheme() {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            SoftcoverSearchTopBar(
-                searchText = "",
-                onSearchValueChange = {},
-                onScanClick = {},
-                onSearchActivated = {},
-                onSearchDismissed = {},
-                onClearSearch = {},
-                focused = false,
-                active = false,
-                isLoading = false,
-            )
-
-            SoftcoverSearchTopBar(
-                searchText = "",
-                onSearchValueChange = {},
-                onScanClick = {},
-                onSearchActivated = {},
-                onSearchDismissed = {},
-                onClearSearch = {},
-                focused = true,
-                active = true,
-                isLoading = false,
-            )
-
-            SoftcoverSearchTopBar(
-                searchText = "Piranesi",
-                onSearchValueChange = {},
-                onScanClick = {},
-                onSearchActivated = {},
-                onSearchDismissed = {},
-                onClearSearch = {},
-                focused = true,
-                active = true,
-                isLoading = true,
             )
         }
     }

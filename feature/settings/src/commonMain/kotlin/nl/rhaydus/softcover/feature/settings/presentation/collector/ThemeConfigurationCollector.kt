@@ -35,7 +35,11 @@ internal class ThemeConfigurationCollector : SettingsCollector {
                     useDynamicColorChecked = configuration.useDynamicColor,
                     spinePalette = spinePalette,
                     paletteGloss = spinePalette.gloss,
-                    themeChoices = themeChoicesFor(selected = configuration.themeMode),
+                    themeChoices = themeChoicesFor(
+                        selected = configuration.themeMode,
+                        palette = spinePalette,
+                        dynamicColor = configuration.useDynamicColor,
+                    ),
                     paletteChoices = paletteChoicesFor(selected = configuration.colorPalette),
                 )
             }

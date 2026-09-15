@@ -3,6 +3,15 @@ plugins {
     id("softcover.kmp.compose")
 }
 
+// Compose Multiplatform resource accessor: keep `Res` internal to this module (a consumer reaches a
+// component's copy through the component, never through CMP's resource runtime directly). The library
+// owns the copy that belongs to a component rather than to a feature — the offline banner and the
+// offline screen say the same thing on every surface that shows them.
+compose.resources {
+    publicResClass = false
+    packageOfResClass = "nl.rhaydus.softcover.core.component.generated.resources"
+}
+
 kotlin {
     androidLibrary {
         namespace = "nl.rhaydus.softcover.core.component"
@@ -15,7 +24,13 @@ kotlin {
             // Tokens only — theme, icon catalog, illustrations, modifiers, shared-element scopes. This
             // is the ONE project dependency the library is allowed (`componentLibraryAllowedProjects`
             // in the root build); everything else it needs arrives in a UI model or an event lambda.
-            implementation(project(":core:designsystem"))
+            //
+            // `api` rather than `implementation` because the Appearance picker tiles' UI models name a
+            // token in their own public surface (`ThemePreviewTileUiModel.palette: SpinePalette`), so a
+            // consumer holding one needs the type. The root build deliberately keeps
+            // `:core:designsystem` out of `apiSignOffModules` for exactly this reason: once G2 lands it
+            // is a leaf, so re-exporting it republishes nothing a consumer could not already reach.
+            api(project(":core:designsystem"))
 
             // Foundation UI kit. `core-common` and `designsystem-core` arrive through
             // `:core:designsystem`'s `api` edges; these it holds on `implementation`, so they are

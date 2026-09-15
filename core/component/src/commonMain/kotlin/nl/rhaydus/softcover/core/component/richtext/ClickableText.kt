@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.richtext
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.text.InlineTextContent
@@ -10,22 +10,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 
 /**
- * A [Text] that resolves `url` string annotations in [annotatedText] to taps and forwards them to
- * [handleUrlClick]. [inlineContent] is forwarded to the underlying [Text] unchanged — pass it to glue
- * a small glyph (e.g. an external-link icon) directly onto a run of text via
- * [androidx.compose.foundation.text.appendInlineContent] at the call site; empty by default so existing
- * callers are unaffected.
+ * A [Text] that resolves `url` string annotations in [ClickableTextUiModel.text] to taps and reports
+ * them as [ClickableTextEvent.LinkClicked], so a screen never wires its own `pointerInput` /
+ * `detectTapGestures` for an inline link.
+ *
+ * [inlineContent] is forwarded to the underlying [Text] unchanged — pass it to glue a small glyph
+ * (e.g. an external-link icon) directly onto a run of text via
+ * [androidx.compose.foundation.text.appendInlineContent] at the call site. It stays a parameter
+ * rather than a model field because its values are composable slots, not data.
+ *
+ * Like `RichText`, it takes the `Text`-shaped render parameters after the model: which face prose is
+ * set in belongs to the surface rather than to the words.
  */
 @Composable
 fun ClickableText(
-    annotatedText: AnnotatedString,
+    model: ClickableTextUiModel,
+    onEvent: (ClickableTextEvent) -> Unit,
     style: TextStyle,
-    handleUrlClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
     inlineContent: Map<String, InlineTextContent> = emptyMap(),
 ) {
     var textLayoutResult by remember {
@@ -33,23 +39,23 @@ fun ClickableText(
     }
 
     Text(
-        text = annotatedText,
+        text = model.text,
         style = style,
         inlineContent = inlineContent,
-        modifier = Modifier
+        modifier = modifier
             .pointerInput(Unit) {
                 detectTapGestures { tapOffset ->
                     val layoutResult = textLayoutResult ?: return@detectTapGestures
 
                     val position = layoutResult.getOffsetForPosition(tapOffset)
 
-                    annotatedText
+                    model.text
                         .getStringAnnotations(
                             start = position,
                             end = position,
                         )
                         .firstOrNull()
-                        ?.let { annotation -> handleUrlClick(annotation.item) }
+                        ?.let { annotation -> onEvent(ClickableTextEvent.LinkClicked(url = annotation.item)) }
                 }
             },
         onTextLayout = { layout ->

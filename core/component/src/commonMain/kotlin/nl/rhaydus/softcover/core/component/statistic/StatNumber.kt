@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.statistic
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
@@ -21,82 +21,46 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.common.formatDecimalNumber
+import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 private const val TABULAR_NUMS = "tnum"
 private const val PULSE_DURATION_MS = 220
 
 /**
- * Renders a numeric stat that tweens between values when [value] changes.
+ * Renders a numeric stat that tweens between values when [StatNumberUiModel.value] changes.
  *
- * The display is locked to tabular figures so individual digits don't shift width
- * mid-tween. When the user has disabled system animations the number snaps —
- * tweening here is decorative, the value itself is the source of truth.
+ * The display is locked to tabular figures so individual digits don't shift width mid-tween. When the
+ * user has disabled system animations the number snaps — tweening here is decorative, the value
+ * itself is the source of truth.
  *
- * Each integer crossing during the tween fires a brief 1dp primary-tinted hairline pulse
- * under the number — a quiet ledger-style tick that makes the count feel earned rather
- * than rolled. Suppressed under reduced motion.
+ * Each integer crossing during the tween fires a brief 1dp hairline pulse under the number, tinted
+ * with the number's own content colour so the tick reads against any surface — a quiet ledger tick
+ * that makes a count feel earned rather than rolled. Suppressed under reduced motion.
+ *
+ * It takes the `Text`-shaped render parameters after the model, the same way `RichText` does: a
+ * number is type, and which face it is set in belongs to the surface rather than to the datum.
  */
 @Composable
-fun AnimatedStatNumber(
-    value: Int,
+fun StatNumber(
+    model: StatNumberUiModel,
     style: TextStyle,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
-    formatter: (Int) -> String = Int::toString,
     autoSize: TextAutoSize? = null,
     maxLines: Int = 1,
 ) {
     val playMotion = playDecorativeMotion()
 
     val animated by animateFloatAsState(
-        targetValue = value.toFloat(),
-        label = "AnimatedStatNumber",
+        targetValue = model.value.toFloat(),
+        label = "StatNumber",
     )
 
-    val displayValue = if (playMotion) animated.toInt() else value
+    val displayValue = if (playMotion) animated.toDouble() else model.value
 
-    val formatted = remember(displayValue) { formatter(displayValue) }
-
-    val resolvedColor = color.takeOrUnspecified(LocalContentColor.current)
-
-    StatPulseText(
-        text = formatted,
-        integerKey = displayValue,
-        style = style,
-        color = resolvedColor,
-        modifier = modifier,
-        autoSize = autoSize,
-        maxLines = maxLines,
-    )
-}
-
-/**
- * Float-valued variant for stats with fractional precision (e.g. an average rating).
- * The [formatter] is responsible for rounding/locale formatting; the tween still
- * runs on the raw [value], so partial-digit motion remains smooth. The hairline pulse
- * fires on each integer crossing of the tweened value.
- */
-@Composable
-fun AnimatedStatNumber(
-    value: Float,
-    style: TextStyle,
-    modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
-    formatter: (Float) -> String,
-    autoSize: TextAutoSize? = null,
-    maxLines: Int = 1,
-) {
-    val playMotion = playDecorativeMotion()
-
-    val animated by animateFloatAsState(
-        targetValue = value,
-        label = "AnimatedStatNumber",
-    )
-
-    val displayValue = if (playMotion) animated else value
-
-    val formatted = remember(displayValue) { formatter(displayValue) }
+    val formatted = remember(displayValue, model.format) { model.format.render(displayValue) }
 
     val resolvedColor = color.takeOrUnspecified(LocalContentColor.current)
 
@@ -108,6 +72,16 @@ fun AnimatedStatNumber(
         modifier = modifier,
         autoSize = autoSize,
         maxLines = maxLines,
+    )
+}
+
+private fun StatNumberFormat.render(value: Double): String = when (this) {
+    StatNumberFormat.Grouped -> formatGroupedNumber(value.toInt())
+    StatNumberFormat.Plain -> value.toInt().toString()
+
+    is StatNumberFormat.Decimal -> formatDecimalNumber(
+        value = value,
+        fractionDigits = fractionDigits,
     )
 }
 

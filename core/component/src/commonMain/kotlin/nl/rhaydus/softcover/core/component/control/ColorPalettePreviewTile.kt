@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,13 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorScheme
 
 /**
  * One choice in the Appearance screen's spine-colour picker: the same page miniature the theme tiles
- * show, painted in [palette] entire — its paper as well as its ink. Selection, press feedback, and
- * semantics come from [PreviewTileFrame], so a palette tile and a theme tile are the same object.
+ * show, painted in [model]'s palette entire — its paper as well as its ink. Selection, press feedback,
+ * and semantics come from [PreviewTileFrame], so a palette tile and a theme tile are the same object.
  *
  * The miniature leans harder on the accent than [ThemePreviewTile]'s does — its card is a
  * `primary`-**filled** hero (the app's real hero-stat treatment) and it carries a `tertiaryContainer`
@@ -37,20 +36,19 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorS
  */
 @Composable
 fun ColorPalettePreviewTile(
-    palette: SpinePalette,
-    selected: Boolean,
-    onClick: () -> Unit,
+    model: ColorPalettePreviewTileUiModel,
+    onEvent: (ColorPalettePreviewTileEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scheme = softcoverColorScheme(
         darkTheme = LocalDarkTheme.current,
-        palette = palette,
+        palette = model.palette,
     )
 
     PreviewTileFrame(
-        label = palette.label,
-        selected = selected,
-        onClick = onClick,
+        label = model.palette.label,
+        selected = model.selected,
+        onClick = { onEvent(ColorPalettePreviewTileEvent.Clicked) },
         modifier = modifier,
     ) {
         AccentMiniature(

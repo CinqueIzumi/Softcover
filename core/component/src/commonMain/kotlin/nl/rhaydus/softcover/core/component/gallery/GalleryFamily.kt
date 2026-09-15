@@ -16,6 +16,7 @@ enum class GalleryFamily(val label: String) {
     HEADER(label = "Headers"),
     CONTROL(label = "Controls"),
     STATE(label = "States"),
+    CELEBRATION(label = "Celebrations"),
     RICHTEXT(label = "Rich text"),
     PROGRESS(label = "Progress"),
     COVER(label = "Covers"),

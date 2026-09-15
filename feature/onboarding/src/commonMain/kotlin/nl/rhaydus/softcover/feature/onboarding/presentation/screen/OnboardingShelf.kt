@@ -41,7 +41,9 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ClickableText
+import nl.rhaydus.softcover.core.component.richtext.ClickableText
+import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
+import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -333,13 +335,17 @@ private fun HelperLine(openUrl: (String) -> Unit) {
     )
 
     ClickableText(
-        annotatedText = annotatedString,
+        model = ClickableTextUiModel(text = annotatedString),
+        onEvent = { event ->
+            when (event) {
+                is ClickableTextEvent.LinkClicked -> openUrl(event.url)
+            }
+        },
         style = MaterialTheme.editorialTypography.bodySmall.copy(
             fontSize = 13.sp,
             lineHeight = 19.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-        handleUrlClick = openUrl,
         inlineContent = mapOf(
             OPEN_IN_NEW_INLINE_CONTENT_ID to InlineTextContent(
                 placeholder = Placeholder(

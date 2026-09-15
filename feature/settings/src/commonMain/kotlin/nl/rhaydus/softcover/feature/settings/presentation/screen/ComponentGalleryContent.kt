@@ -19,11 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.gallery.GalleryEntry
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.component.gallery.GalleryFixture
 import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
-import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -179,11 +180,14 @@ private fun <T> GalleryChipRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        options.forEach { option ->
-            PillChip(
-                label = label(option),
-                selected = isSelected(option),
-                onClick = { onSelect(option) },
+        options.forEachIndexed { index, option ->
+            Chip(
+                model = ChipUiModel(
+                    key = index.toString(),
+                    label = label(option),
+                    selected = isSelected(option),
+                ),
+                onEvent = { onSelect(option) },
             )
         }
     }

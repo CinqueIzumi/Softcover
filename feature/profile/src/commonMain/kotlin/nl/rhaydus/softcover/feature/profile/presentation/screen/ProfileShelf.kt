@@ -82,7 +82,9 @@ import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
-import nl.rhaydus.softcover.core.designsystem.presentation.component.AnimatedStatNumber
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -100,6 +102,9 @@ import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
+
+/** A rating reads to one decimal everywhere it appears — the tile and the ratings row agree. */
+private const val RATING_FRACTION_DIGITS = 1
 
 /**
  * Shared Profile content reused by both the mobile ([ProfileScreenLayout] in `mobileMain`) and desktop
@@ -170,8 +175,7 @@ internal fun ReadingAtlasSection(
 
         HeroStatCard(
             eyebrow = "Total pages read",
-            value = userProfileData?.totalPagesRead ?: 0,
-            formatter = { formatGroupedNumber(it) },
+            stat = StatNumberUiModel(value = (userProfileData?.totalPagesRead ?: 0).toDouble()),
             caption = "Every page a step further into the story.",
             isLoading = isLoading,
         )
@@ -189,8 +193,7 @@ internal fun ReadingAtlasSection(
                     .weight(1f)
                     .fillMaxHeight(),
                 eyebrow = "Volumes",
-                value = userProfileData?.booksRead ?: 0,
-                formatter = { formatGroupedNumber(it) },
+                stat = StatNumberUiModel(value = (userProfileData?.booksRead ?: 0).toDouble()),
                 caption = "books read",
                 isLoading = isLoading,
             )
@@ -201,21 +204,20 @@ internal fun ReadingAtlasSection(
             ) {
                 SmallStatTile(
                     eyebrow = "Avg. rating",
-                    value = (userProfileData?.averageRating ?: 0.0).toFloat(),
-                    formatter = {
-                        formatDecimalNumber(
-                            value = it.toDouble(),
-                            fractionDigits = 1,
-                        )
-                    },
+                    stat = StatNumberUiModel(
+                        value = userProfileData?.averageRating ?: 0.0,
+                        format = StatNumberFormat.Decimal(fractionDigits = RATING_FRACTION_DIGITS),
+                    ),
                     trailing = "★",
                     isLoading = isLoading,
                 )
 
                 SmallStatTile(
                     eyebrow = "Streak",
-                    value = (userProfileData?.readingStreak ?: 0).toFloat(),
-                    formatter = { it.toInt().toString() },
+                    stat = StatNumberUiModel(
+                        value = (userProfileData?.readingStreak ?: 0).toDouble(),
+                        format = StatNumberFormat.Plain,
+                    ),
                     trailing = "days",
                     isLoading = isLoading,
                 )
@@ -228,8 +230,7 @@ internal fun ReadingAtlasSection(
 @Composable
 private fun HeroStatCard(
     eyebrow: String,
-    value: Int,
-    formatter: (Int) -> String,
+    stat: StatNumberUiModel,
     caption: String,
     isLoading: Boolean,
 ) {
@@ -258,9 +259,8 @@ private fun HeroStatCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            AnimatedStatNumber(
-                value = value,
-                formatter = formatter,
+            StatNumber(
+                model = stat,
                 style = MaterialTheme.editorialTypography.statHero,
                 autoSize = TextAutoSize.StepBased(
                     minFontSize = 44.sp,
@@ -290,8 +290,7 @@ private fun HeroStatCard(
 @Composable
 private fun StatTile(
     eyebrow: String,
-    value: Int,
-    formatter: (Int) -> String,
+    stat: StatNumberUiModel,
     caption: String,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
@@ -320,9 +319,8 @@ private fun StatTile(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            AnimatedStatNumber(
-                value = value,
-                formatter = formatter,
+            StatNumber(
+                model = stat,
                 style = MaterialTheme.editorialTypography.statLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -339,8 +337,7 @@ private fun StatTile(
 @Composable
 private fun SmallStatTile(
     eyebrow: String,
-    value: Float,
-    formatter: (Float) -> String,
+    stat: StatNumberUiModel,
     trailing: String,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
@@ -371,9 +368,8 @@ private fun SmallStatTile(
             Spacer(modifier = Modifier.height(6.dp))
 
             Row(verticalAlignment = Alignment.Bottom) {
-                AnimatedStatNumber(
-                    value = value,
-                    formatter = formatter,
+                StatNumber(
+                    model = stat,
                     style = MaterialTheme.editorialTypography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -1579,14 +1575,11 @@ private fun RatingsAverageRow(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Row(verticalAlignment = Alignment.Bottom) {
-            AnimatedStatNumber(
-                value = ratings.average.toFloat(),
-                formatter = {
-                    formatDecimalNumber(
-                        value = it.toDouble(),
-                        fractionDigits = 1,
-                    )
-                },
+            StatNumber(
+                model = StatNumberUiModel(
+                    value = ratings.average,
+                    format = StatNumberFormat.Decimal(fractionDigits = RATING_FRACTION_DIGITS),
+                ),
                 style = MaterialTheme.editorialTypography.statLarge.copy(
                     fontSize = 52.sp,
                     lineHeight = 52.sp,

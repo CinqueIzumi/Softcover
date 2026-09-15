@@ -18,13 +18,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverLoadingSheet
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheetUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
@@ -41,7 +44,7 @@ private val PANEL_MAX_WIDTH = 520.dp
  * instead of bleeding to a phone's edges) above the shared [ApiKeyEntrySection] — no pager, no folio, no
  * top-bar chrome (those are mobile-pager-only concerns) and no separate Back/Skip footer: desktop keeps
  * a single "Save API key" button flow via the shared section. The whole surface paints an opaque
- * [Surface] background, and the [SoftcoverLoadingSheet] overlay still covers the setup progress.
+ * [Surface] background, and the [LoadingSheet] overlay still covers the setup progress.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -131,13 +134,25 @@ internal actual fun OnboardingScreenLayout(
             )
         }
 
-        SoftcoverLoadingSheet(
-            isLoading = state.isLoading,
-            progress = state.progress,
-            onLoaderFinished = onInitializingComplete,
-            eyebrow = "Setting up",
-            headline = "Pulling your library together.",
-            description = "Depending on its size, this might take a moment.",
+        // The literal copy is the caller's (component-contract.md R4/R9), so it is built once here
+        // rather than on every recomposition; only the loading/progress fields actually vary.
+        val loadingSheetModel = remember(state.isLoading, state.progress) {
+            LoadingSheetUiModel(
+                eyebrow = "Setting up",
+                headline = "Pulling your library together.",
+                description = "Depending on its size, this might take a moment.",
+                progress = state.progress,
+                isLoading = state.isLoading,
+            )
+        }
+
+        LoadingSheet(
+            model = loadingSheetModel,
+            onEvent = { event ->
+                when (event) {
+                    LoadingSheetEvent.LoaderFinished -> onInitializingComplete()
+                }
+            },
         )
     }
 }

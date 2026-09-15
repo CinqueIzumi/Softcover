@@ -29,7 +29,8 @@ import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.designsystem.presentation.component.MarkAsReadBurst
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
@@ -40,6 +41,10 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+
+/** The reading screen celebrates at full-screen scale, so its burst is bigger and slower. */
+private const val READING_BURST_PARTICLES = 28
+private const val READING_BURST_DURATION_MS = 1000
 
 private val readingScrollState = ScrollState(initial = 0)
 
@@ -127,10 +132,14 @@ internal actual fun ReadingScreenLayout(
         }
 
         MarkAsReadBurst(
-            triggerKey = controller.celebrationKey,
+            model = remember(controller.celebrationKey) {
+                MarkAsReadBurstUiModel(
+                    triggerKey = controller.celebrationKey,
+                    particleCount = READING_BURST_PARTICLES,
+                    durationMillis = READING_BURST_DURATION_MS,
+                )
+            },
             modifier = Modifier.fillMaxSize(),
-            particleCount = 28,
-            durationMillis = 1000,
         )
     }
 }

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,7 +38,7 @@ private const val TILE_ASPECT_RATIO = 0.78f
  *
  * It is shared by [ThemePreviewTile] and [ColorPalettePreviewTile] so the two pickers read as one
  * row of the same object rather than as two lookalikes that drift apart. It stays internal to the
- * design system — a feature composes the finished tiles, never the frame.
+ * component library — a feature composes the finished tiles, never the frame.
  *
  * Selection is carried by a `primary` ring (2dp, against 1dp `outlineVariant` at rest) plus the
  * `primary` label beneath — no check badge, since the ring already says it once — and by

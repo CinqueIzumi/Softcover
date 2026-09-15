@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +50,9 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverLoadingSheet
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheetUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
@@ -135,13 +138,25 @@ internal actual fun OnboardingScreenLayout(
             }
         }
 
-        SoftcoverLoadingSheet(
-            isLoading = state.isLoading,
-            progress = state.progress,
-            onLoaderFinished = onInitializingComplete,
-            eyebrow = "Setting up",
-            headline = "Pulling your library together.",
-            description = "Depending on its size, this might take a moment.",
+        // The literal copy is the caller's (component-contract.md R4/R9), so it is built once here
+        // rather than on every recomposition; only the loading/progress fields actually vary.
+        val loadingSheetModel = remember(state.isLoading, state.progress) {
+            LoadingSheetUiModel(
+                eyebrow = "Setting up",
+                headline = "Pulling your library together.",
+                description = "Depending on its size, this might take a moment.",
+                progress = state.progress,
+                isLoading = state.isLoading,
+            )
+        }
+
+        LoadingSheet(
+            model = loadingSheetModel,
+            onEvent = { event ->
+                when (event) {
+                    LoadingSheetEvent.LoaderFinished -> onInitializingComplete()
+                }
+            },
         )
     }
 }
@@ -353,7 +368,7 @@ private fun SecondIntroScreen(
  * The mandated sine motif that literally links the two wordmarks: a static `outlineVariant` track with
  * a `primary` wave drawn over it. No reusable static wavy-line primitive exists in the foundation or
  * this app — the only wavy component is Material3's `LinearWavyProgressIndicator`, which is tied to
- * animated progress state (used unchanged in `SoftcoverLoadingSheet`) and not a fit for a static
+ * animated progress state (used unchanged in `LoadingSheet`) and not a fit for a static
  * decorative connector — so this is a small bespoke `Canvas`, scoped to this single screen.
  */
 @Composable

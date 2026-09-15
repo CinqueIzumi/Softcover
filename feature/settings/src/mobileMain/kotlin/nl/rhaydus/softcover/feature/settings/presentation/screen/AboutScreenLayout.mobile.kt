@@ -10,8 +10,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+
+/** The bar is fixed for this screen, so the model is a constant rather than rebuilt per frame. */
+private val ABOUT_TOP_BAR = TopBarUiModel(
+    title = "About",
+    navigation = TopBarNavigation.Back,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,9 +34,13 @@ internal actual fun AboutScreenLayout(
 ) {
     Scaffold(
         topBar = {
-            SoftcoverTopBar(
-                title = "About",
-                onNavigateBack = onNavigateBack,
+            TopBar(
+                model = ABOUT_TOP_BAR,
+                onEvent = { event ->
+                    when (event) {
+                        TopBarEvent.BackClicked -> onNavigateBack()
+                    }
+                },
             )
         },
     ) { innerPadding ->

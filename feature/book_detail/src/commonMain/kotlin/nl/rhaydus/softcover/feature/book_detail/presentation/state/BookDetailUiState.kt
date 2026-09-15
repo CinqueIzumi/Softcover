@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
@@ -106,6 +107,32 @@ internal data class BookDetailUiState(
     val tagEditorCategory: TagCategory = TagCategory.TAG,
     val tagEditorInput: String = "",
     val tagSuggestions: List<UserTag> = emptyList(),
+
+    /** "Your tags" (`UserTagsSection`), mapped by `TagChipModelsCollector` (R9) off [userTags]. Read-only. */
+    val userTagChips: List<ChipUiModel> = emptyList(),
+
+    /**
+     * The community tag block (`TagsSection`, The Book lens), mapped by `TagChipModelsCollector`
+     * (R9) off [book]'s tags — grouped by category, top-5 per category, content-warning tags
+     * flagged [ChipUiModel.concealed]. Read-only.
+     */
+    val communityTagGroups: List<TagCategoryChipGroup> = emptyList(),
+
+    /**
+     * The tag editor's category picker chips, mapped by `TagEditorChipModelsCollector` (R9) — one
+     * per editable [TagCategory], `selected` following [tagEditorCategory].
+     */
+    val tagEditorCategoryChips: List<ChipUiModel> = emptyList(),
+
+    /** [tagSuggestions] mapped to chips by `TagEditorChipModelsCollector` (R9). */
+    val tagSuggestionChips: List<ChipUiModel> = emptyList(),
+
+    /**
+     * Every [tagSuggestionChips] key resolved back to the [UserTag] `OnAddUserTagAction`'s call site
+     * needs — kept beside the models rather than rebuilt in composition, mapped by
+     * `TagEditorChipModelsCollector` (R9).
+     */
+    val tagSuggestionByChipKey: Map<String, UserTag> = emptyMap(),
 ) : UiState {
     /**
      * The edition pinned by an external entry point (a barcode scan), if any. It wins over every

@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.chip
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,48 +18,47 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
  * to [secondaryContainer][androidx.compose.material3.ColorScheme.secondaryContainer]; idle sits on
  * [surfaceContainerHigh][androidx.compose.material3.ColorScheme.surfaceContainerHigh].
  *
- * Pass [onClick] for an interactive chip (library facets, toggles); leave it null for a read-only,
- * inert chip (book-detail tags) — the surface then carries no ripple and no click role.
+ * [ChipUiModel.clickable] `= false` renders a read-only, inert chip (book-detail tags): the surface
+ * then carries no ripple and no click role. A tap on an interactive chip (library facets, toggles)
+ * reports [ChipEvent.Clicked] with [ChipUiModel.key].
  *
- * Set [concealed] to render the chip as a spoiler redaction (§2.1 spoiler register): the label is
- * drawn transparent so it reserves its width but cannot be read, beneath a solid
+ * [ChipUiModel.concealed] renders the chip as a spoiler redaction (§2.1 spoiler register): the label
+ * is drawn transparent so it reserves its width but cannot be read, beneath a solid
  * [spoilerCover][nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover] fill — the same
- * treatment `ReviewDocumentText` uses for an inline spoiler run. Because the label still measures at
+ * treatment `RichText` gives an inline spoiler run. Because the label still measures at
  * its real width, revealing it (re-render with `concealed = false`) does not reflow the row.
  */
 @Composable
-fun PillChip(
-    label: String,
+fun Chip(
+    model: ChipUiModel,
+    onEvent: (ChipEvent) -> Unit = {},
     modifier: Modifier = Modifier,
-    selected: Boolean = false,
-    concealed: Boolean = false,
-    onClick: (() -> Unit)? = null,
 ) {
     val container = when {
-        concealed -> MaterialTheme.colorScheme.spoilerCover
-        selected -> MaterialTheme.colorScheme.secondaryContainer
+        model.concealed -> MaterialTheme.colorScheme.spoilerCover
+        model.selected -> MaterialTheme.colorScheme.secondaryContainer
         else -> MaterialTheme.colorScheme.surfaceContainerHigh
     }
 
     val content = when {
-        concealed -> Color.Transparent
-        selected -> MaterialTheme.colorScheme.onSecondaryContainer
+        model.concealed -> Color.Transparent
+        model.selected -> MaterialTheme.colorScheme.onSecondaryContainer
         else -> MaterialTheme.colorScheme.onSurface
     }
 
     val shape = RoundedCornerShape(percent = 50)
 
-    if (onClick != null) {
+    if (model.clickable) {
         Surface(
             modifier = modifier,
             color = container,
             contentColor = content,
             shape = shape,
-            onClick = onClick,
+            onClick = { onEvent(ChipEvent.Clicked(key = model.key)) },
         ) {
             PillChipLabel(
-                label = label,
-                selected = selected,
+                label = model.label,
+                selected = model.selected,
             )
         }
     } else {
@@ -70,8 +69,8 @@ fun PillChip(
             shape = shape,
         ) {
             PillChipLabel(
-                label = label,
-                selected = selected,
+                label = model.label,
+                selected = model.selected,
             )
         }
     }

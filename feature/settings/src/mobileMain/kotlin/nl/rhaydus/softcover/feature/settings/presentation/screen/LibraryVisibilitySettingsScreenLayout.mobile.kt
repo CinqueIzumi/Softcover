@@ -12,10 +12,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverTopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBar
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+
+/** The bar is fixed for this screen, so the model is a constant rather than rebuilt per frame. */
+private val LIBRARY_TABS_TOP_BAR = TopBarUiModel(
+    title = "Library tabs",
+    navigation = TopBarNavigation.Back,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,9 +36,13 @@ internal actual fun LibraryVisibilitySettingsScreenLayout(
 ) {
     Scaffold(
         topBar = {
-            SoftcoverTopBar(
-                title = "Library tabs",
-                onNavigateBack = onNavigateBack,
+            TopBar(
+                model = LIBRARY_TABS_TOP_BAR,
+                onEvent = { event ->
+                    when (event) {
+                        TopBarEvent.BackClicked -> onNavigateBack()
+                    }
+                },
             )
         },
         bottomBar = {

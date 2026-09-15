@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
@@ -32,6 +33,13 @@ internal data class ExploreScreenUiState(
     val continueSeriesBooks: List<Book> = emptyList(),
     val loadingContinueSeriesBooks: Boolean = true,
     val searchText: String = "",
+    /** The search chrome, derived off the four fields below by `SearchTopBarCollector` (R9). */
+    val searchTopBar: SearchTopBarUiModel = SearchTopBarUiModel(
+        query = "",
+        active = false,
+        focused = false,
+        isLoading = false,
+    ),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val searchError: String? = null,

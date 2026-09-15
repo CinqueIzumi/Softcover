@@ -48,7 +48,8 @@ import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -89,7 +90,8 @@ internal actual fun ExploreScreenLayout(
     isOnline: Boolean,
 ) {
     if (isOnline.not()) {
-        OfflineScreenContent(
+        EmptyState(
+            model = offlineEmptyStateUiModel(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = rememberBottomBarPadding()),

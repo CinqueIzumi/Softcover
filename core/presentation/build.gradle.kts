@@ -15,6 +15,9 @@ kotlin {
             implementation(project(":core:book"))
 
             implementation(libs.rhaydus.coreCommon)
+            // `rememberIsOnline`'s injection seam names `NetworkAvailabilityProvider` in its own
+            // signature, so a consumer sees the type without redeclaring the coordinate.
+            api(libs.rhaydus.corePlatform)
             implementation(libs.rhaydus.designsystemCore)
 
             implementation(libs.koin.compose.multiplatform)

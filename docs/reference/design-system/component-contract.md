@@ -6,9 +6,11 @@ Every component in `:core:component` is driven by a **UI model**. This section i
 makes the library one system rather than 132 individually-reasonable components: what a component's
 signature looks like, what its model may hold, and where the domain → UI mapping lives.
 
-It is normative. A component that does not satisfy R1–R9 does not belong in `:core:component`, and
+It is normative. A component that does not satisfy R1–R11 does not belong in `:core:component`, and
 two of the rules are enforced by the build rather than by review (see § 7.4). The library's only
-standing exceptions are listed in § 7.4a.
+standing exceptions are listed in § 7.4a. **R10 and R11 are the two rules the library does not
+satisfy yet** — both were written after the fact, and they share one scheduled retrofit stage,
+because both are fixed at the same call sites. See the rules themselves.
 
 > **Read `share/` before writing a new component.** `ShareCard` is the reference implementation —
 > shipped, working, and already the shape described below. § 7.3 walks it.
@@ -29,6 +31,11 @@ fun BookCard(
 Three parameters, in that order. A component that renders nothing interactive drops `onEvent`; a
 component that needs a slot takes a trailing `content: @Composable () -> Unit`. Nothing else is
 added to the front of the list — no loose `title: String` beside the model, no second callback.
+
+**Nothing is added to the back of the list either.** A trailing `style: TextStyle = …` or
+`color: Color = …` is the same violation wearing a default value: it is a property of what the
+component shows, so it belongs on the model. R11 states that in full, with the two narrow things it
+does not forbid.
 
 ### 7.2 The rules
 
@@ -196,6 +203,88 @@ not mapping: `ThemeMode.isDark()` is `@Composable` because "follow the device" r
 window size class, and asking the platform for its brightness all stay where they are. The rule is
 about domain data, not about every function a composable may call.
 
+**R10 — A UI model is never built in composition. It arrives on the `UiState`.**
+
+R9 closes the door on a composable calling a *mapper*. R10 closes the rest of it: a composable never
+**constructs** a UI model at all — not from domain data, not from feature state, not from literals.
+The model is assembled where the state is assembled (the ScreenModel, an `Action`, a `Collector`) and
+reaches the render as a field on `UiState`.
+
+```kotlin
+// WRONG — the render assembles the model
+StatNumber(model = StatNumberUiModel(value = state.pagesRead.toDouble()))
+TopBar(model = remember(title) { TopBarUiModel(title = title) })
+
+// RIGHT — the collector assembled it; the render forwards
+StatNumber(model = state.pagesReadStat)
+TopBar(model = state.topBar)
+```
+
+Why this goes further than R9's three reasons: **the model exists to be the single, testable
+description of what a component shows.** A model assembled at the call site cannot be asserted in a
+unit test, cannot be reused by a second surface that should show the same thing, and puts the
+decision of *what* to show back inside the code that decides *how* to draw it — which is the thing
+introducing a model was meant to prevent. A `remember` at the call site hides the allocation, not the
+layering. Building the model at the call site keeps the component's signature honest while making the
+model itself decorative, which is the worst of both shapes.
+
+> **The library does not satisfy this yet, and that is scheduled rather than ignored.** R10 was
+> written during S4-5 of the component-library migration, after the same call-site construction had
+> been reinvented in five features, and it is deliberately **not** applied retroactively in that
+> stage. `docs/working/component-library-migration.md` carries a dedicated stage for the retrofit,
+> immediately before the migration's final verification. Until it runs, write new components to R10
+> and do not take an existing call site as a precedent.
+>
+> Three edges that stage settles rather than this rule pre-deciding them: a component whose copy the
+> **library itself owns** and resolves from its own `composeResources` (`offlineBannerUiModel()`),
+> since a resource read exists only in composition; **preview fixtures and the Component Gallery**,
+> which construct models by definition; and a model that genuinely depends on a value only
+> composition has (a scroll position, a window size class, a `CompositionLocal`).
+
+**R11 — The signature is the model, the event lambda and the modifier. Nothing else.**
+
+R10 says the model must arrive from the `UiState`. R11 says the model must be **all of it**: a
+component takes `model`, `onEvent` if it is interactive, and `modifier`, and no other parameter.
+Anything a call site would otherwise pass — a `TextStyle`, a `Color`, `maxLines`, an autosize spec, a
+particle count, a duration — is a **property of the UI model**.
+
+```kotlin
+// WRONG — the surface hands the component its treatment
+StatNumber(model = state.pagesRead, style = editorialTypography.statHero, color = onSurface)
+RichText(model = state.review, style = editorialTypography.body, maxLines = 8)
+
+// RIGHT — the treatment rides on the model
+StatNumber(model = state.pagesRead)     // model.variant / model.tone decide the face and the ink
+RichText(model = state.review)          // model.variant decides the face and the line cap
+```
+
+This is the same argument as R2's per-variant metrics table (`CoverDimensions.forVariant`,
+`ShareCardDimensions.forContent`), applied to the rest of a component's surface. **A loose render
+parameter is drift with a default value**: it is invisible to the model, so nothing can enumerate it,
+nothing can test it, and two surfaces that should look alike quietly diverge — which is exactly what
+`EditionImage`'s four loose metrics did before `CoverVariant` collected them into fourteen readable
+entries. Where the treatment genuinely differs per surface, name the surfaces in a variant and resolve
+them in a table; where it does not, the component simply decides.
+
+Two things R11 does **not** forbid, so the line stays clear:
+
+- **A trailing `content` slot** (§ 7.1) is a composition hole, not a parameter — the caller supplies a
+  *composable*, which a data model cannot hold. `VerdictSheet`'s `cover` slot is the worked example.
+- **Compose plumbing that cannot live in an immutable value**: a hoisted mutable state object shared
+  with the surrounding scaffold, such as a `TopAppBarScrollBehavior`. `modifier` is in this category
+  too. If in doubt, ask whether the thing could be serialised alongside the rest of the model; a
+  `TextStyle` could, a `ScrollState` could not.
+
+> **The library does not satisfy this yet either.** R11 was written after S4-5a, against components
+> that had just landed carrying `Text`-shaped parameters on the reasoning that `RichText` already did
+> — which turned out to be describing the problem rather than a precedent. It shares the **S11
+> retrofit** with R10, since both are fixed at the same call sites. Current holdouts, all scheduled:
+> `RichText` (`style`, `color`, `maxLines`, `overflow`, `onClick`, `onTextLayout`), `StatNumber`
+> (`style`, `color`, `autoSize`, `maxLines`), `ClickableText` (`style`, `inlineContent`),
+> `MarkAsReadBurst` (`color`, `secondaryColor`), `CoverlessTitleCover` (`title`), and the two R1
+> holdouts `VerdictBlock` / `VerdictSheet`, whose loose parameters R11 condemns for the same reason
+> R1 already does. Write new components to R11; do not read an existing signature as licence.
+
 ### 7.3 Reference implementation — `ShareCard`
 
 `core/component/share/` is the contract's worked example. Read it before writing a new component.
@@ -293,7 +382,7 @@ alike from `commonMain`:
   screen.
 
 **Anatomy, as built.** An intro line names what the surface is, then two override chip rows —
-**Brightness** (`ThemeMode`) and **Spine colour** (`ColorPalette`) — each a wrapping row of `PillChip`s
+**Brightness** (`ThemeMode`) and **Spine colour** (`ColorPalette`) — each a wrapping row of `Chip`s
 under a bar-less `eyebrowSmall` sub-label, sitting inside one `EditorialSectionHeader`-opened "Preview
 controls" region. Both rows render unconditionally, even with an empty registry, because they retint
 the framed region below on their own and that retinting *is* the point of the override. Selecting an
@@ -331,7 +420,7 @@ noun in their name but disjoint parameter sets are two components.
 
 | Collapse | Keep separate | Why |
 |---|---|---|
-| The four `*InfoCallout`s → one `Callout` with a tone variant | `SoftcoverTopBar` and `SoftcoverSearchTopBar` | The search bar's focus contract (§3.1) — caller-driven `focused`, intents for activate/dismiss/clear — has no counterpart on the plain bar. Merged, it is one component with two disjoint parameter sets. |
+| The four `*InfoCallout`s → one `Callout` with a tone variant | `TopBar` and `SearchTopBar` | The search bar's focus contract (§3.1) — caller-driven `focused`, intents for activate/dismiss/clear — has no counterpart on the plain bar. Merged, it is one component with two disjoint parameter sets. |
 | The 21 book cards → one `BookCard` with a sealed variant | The 18 sheet **bodies** | Consolidate sheet *chrome* (`SheetScaffold` / `SheetHeader` / `SheetRow` / `SheetFooter`) and leave each body a feature composable built from those parts. `LibraryFilterSheet` and `TagEditorBottomSheet` share no anatomy; a variant enum over them would be a component in name only. |
 
 The test to apply: **can the two share a layout, with the variant choosing only which parts appear?**

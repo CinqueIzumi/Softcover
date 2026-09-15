@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.designsystem.presentation.component
+package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.dynamicColorSchemeOrNull
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorScheme
 
@@ -39,53 +38,48 @@ private val DIAGONAL_LOWER_HALF: Shape = GenericShape { size, _ ->
 
 /**
  * One choice in the Appearance screen's theme picker: a miniature of the app's own page — accent bar,
- * headline, two lines of body, one card — painted in the scheme [painting] would actually give, over
- * [label] beneath. Selection, press feedback, and semantics come from [PreviewTileFrame].
+ * headline, two lines of body, one card — painted in the scheme [model]'s painting would actually
+ * give, over its label beneath. Selection, press feedback, and semantics come from [PreviewTileFrame].
  *
  * The tile shows the theme the reader is *not* in, so it can't read colours off `MaterialTheme`; it
- * resolves both sides of the pair itself through [softcoverColorScheme] — in the reader's chosen
- * [palette], so the tiles wear the same spine colour the app does — and through
- * [dynamicColorSchemeOrNull] when [dynamicColor] is on, so what the tile promises is what picking it
- * delivers. [ThemeTilePainting.SPLIT] is drawn as one tile split on the diagonal — light above the
- * seam, dark below — rather than as a third flat swatch, because "whichever your device is" has no
- * single colour.
+ * resolves both sides of the pair itself through [softcoverColorScheme] — in [model]'s chosen spine
+ * colour, so the tiles wear the same palette the app does — and through [dynamicColorSchemeOrNull]
+ * when [model]'s dynamic colour flag is on, so what the tile promises is what picking it delivers.
+ * [ThemeTilePainting.SPLIT] is drawn as one tile split on the diagonal — light above the seam, dark
+ * below — rather than as a third flat swatch, because "whichever your device is" has no single colour.
  */
 @Composable
 fun ThemePreviewTile(
-    label: String,
-    painting: ThemeTilePainting,
-    selected: Boolean,
-    palette: SpinePalette,
-    dynamicColor: Boolean,
-    onClick: () -> Unit,
+    model: ThemePreviewTileUiModel,
+    onEvent: (ThemePreviewTileEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lightScheme = dynamicColorSchemeOrNull(
-        useDynamicColor = dynamicColor,
+        useDynamicColor = model.dynamicColor,
         darkTheme = false,
     )
         ?: softcoverColorScheme(
             darkTheme = false,
-            palette = palette,
+            palette = model.palette,
         )
 
     val darkScheme = dynamicColorSchemeOrNull(
-        useDynamicColor = dynamicColor,
+        useDynamicColor = model.dynamicColor,
         darkTheme = true,
     )
         ?: softcoverColorScheme(
             darkTheme = true,
-            palette = palette,
+            palette = model.palette,
         )
 
     // The split tile paints the light scheme underneath and clips the dark one over its lower half,
     // so its base is the light one; the other two paintings are simply themselves.
-    val baseScheme = if (painting == ThemeTilePainting.DARK) darkScheme else lightScheme
+    val baseScheme = if (model.painting == ThemeTilePainting.DARK) darkScheme else lightScheme
 
     PreviewTileFrame(
-        label = label,
-        selected = selected,
-        onClick = onClick,
+        label = model.label,
+        selected = model.selected,
+        onClick = { onEvent(ThemePreviewTileEvent.Clicked) },
         modifier = modifier,
     ) {
         ThemeMiniature(
@@ -93,7 +87,7 @@ fun ThemePreviewTile(
             modifier = Modifier.matchParentSize(),
         )
 
-        if (painting == ThemeTilePainting.SPLIT) {
+        if (model.painting == ThemeTilePainting.SPLIT) {
             ThemeMiniature(
                 scheme = darkScheme,
                 modifier = Modifier

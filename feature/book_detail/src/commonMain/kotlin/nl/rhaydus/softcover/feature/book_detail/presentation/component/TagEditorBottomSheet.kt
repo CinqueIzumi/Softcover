@@ -63,9 +63,11 @@ import nl.rhaydus.designsystem.layout.FlowRowExpansion
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -73,6 +75,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.EDITABLE_CATEGORIES
 
 /**
  * The canonical surface for managing the user's own tags on a book (§3.5 modal sheet). The user picks
@@ -91,12 +94,6 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
  * naming field in the same scroll region as its suggestions also keeps the two adjacent, which a
  * pinned field with a scrolling cloud would not.
  */
-private val EDITABLE_CATEGORIES: List<TagCategory> = listOf(
-    TagCategory.GENRE,
-    TagCategory.MOOD,
-    TagCategory.TAG,
-    TagCategory.CONTENT_WARNING,
-)
 
 /**
  * The name-field hint per category. Deliberately not "Name a ${'$'}{label} tag" — that template
@@ -151,7 +148,9 @@ internal fun TagEditorBottomSheet(
     bookTitle: String,
     cover: CoverUiModel?,
     userTags: List<UserTag>,
-    tagSuggestions: List<UserTag>,
+    categoryChips: List<ChipUiModel>,
+    suggestionChips: List<ChipUiModel>,
+    suggestionByChipKey: Map<String, UserTag>,
     selectedCategory: TagCategory,
     draft: String,
     onCategorySelected: (TagCategory) -> Unit,
@@ -171,6 +170,16 @@ internal fun TagEditorBottomSheet(
                 draft,
                 selectedCategory,
             )
+        }
+
+        val onCategoryChipEvent: (ChipEvent) -> Unit = { event ->
+            if (event is ChipEvent.Clicked) onCategorySelected(TagCategory.fromName(event.key))
+        }
+
+        val onSuggestionChipEvent: (ChipEvent) -> Unit = { event ->
+            if (event is ChipEvent.Clicked) {
+                suggestionByChipKey[event.key]?.let(onSuggestionSelected)
+            }
         }
 
         Column(
@@ -198,12 +207,13 @@ internal fun TagEditorBottomSheet(
             ) {
                 TagEditorAddBlock(
                     selectedCategory = selectedCategory,
+                    categoryChips = categoryChips,
                     draft = draft,
-                    tagSuggestions = tagSuggestions,
-                    onCategorySelected = onCategorySelected,
+                    suggestionChips = suggestionChips,
+                    onCategoryChipEvent = onCategoryChipEvent,
                     onDraftChange = onDraftChange,
                     onCommit = commitDraft,
-                    onSuggestionSelected = onSuggestionSelected,
+                    onSuggestionChipEvent = onSuggestionChipEvent,
                     modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -347,12 +357,13 @@ private fun tagEditorDescription(bookTitle: String): AnnotatedString {
 @Composable
 private fun TagEditorAddBlock(
     selectedCategory: TagCategory,
+    categoryChips: List<ChipUiModel>,
     draft: String,
-    tagSuggestions: List<UserTag>,
-    onCategorySelected: (TagCategory) -> Unit,
+    suggestionChips: List<ChipUiModel>,
+    onCategoryChipEvent: (ChipEvent) -> Unit,
     onDraftChange: (String) -> Unit,
     onCommit: () -> Unit,
-    onSuggestionSelected: (UserTag) -> Unit,
+    onSuggestionChipEvent: (ChipEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -360,11 +371,10 @@ private fun TagEditorAddBlock(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            EDITABLE_CATEGORIES.forEach { category ->
-                PillChip(
-                    label = category.label,
-                    selected = category == selectedCategory,
-                    onClick = { onCategorySelected(category) },
+            categoryChips.forEach { chip ->
+                Chip(
+                    model = chip,
+                    onEvent = onCategoryChipEvent,
                 )
             }
         }
@@ -378,7 +388,7 @@ private fun TagEditorAddBlock(
             onCommit = onCommit,
         )
 
-        if (tagSuggestions.isNotEmpty()) {
+        if (suggestionChips.isNotEmpty()) {
             Spacer(modifier = Modifier.height(14.dp))
 
             // Keyed on the category so the cloud's expansion does not survive a category switch:
@@ -390,12 +400,11 @@ private fun TagEditorAddBlock(
                     expansion = FlowRowExpansion.Progressive(linesPerExpand = 3),
                     collapsible = true,
                 ) {
-                    tagSuggestions.forEach { tag ->
-                        key(tag.category, tag.name) {
-                            PillChip(
-                                label = tag.name,
-                                selected = false,
-                                onClick = { onSuggestionSelected(tag) },
+                    suggestionChips.forEach { chip ->
+                        key(chip.key) {
+                            Chip(
+                                model = chip,
+                                onEvent = onSuggestionChipEvent,
                             )
                         }
                     }

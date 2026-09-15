@@ -41,14 +41,15 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.model.ModalSheetForm
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.softcover.core.designsystem.presentation.component.PillChip
+import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyFiltersAction
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterOptions
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -84,7 +85,7 @@ internal fun LibraryFilterSheet(
 
         var draft by remember(tabId) { mutableStateOf(state.filtersFor(tabId = tabId)) }
 
-        val options = state.availableFilterOptionsFor(tabId = tabId)
+        val chips = state.filterChipsFor(tabId = tabId)
         val resultCount = libraryPreviewCount(
             state = state,
             tabId = tabId,
@@ -106,12 +107,13 @@ internal fun LibraryFilterSheet(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                if (options.isEmpty) {
+                if (chips.isEmpty) {
                     EmptyFacetMessage()
                 } else {
                     FacetSections(
+                        chips = chips,
                         filters = draft,
-                        options = options,
+                        valueByChipKey = state.filterValueByChipKey,
                         onToggle = { value -> draft = draft.toggle(value = value) },
                     )
                 }
@@ -140,31 +142,26 @@ internal fun LibraryFilterSheet(
 
 @Composable
 private fun FacetSections(
+    chips: LibraryFilterChips,
     filters: LibraryFilters,
-    options: LibraryFilterOptions,
+    valueByChipKey: Map<String, LibraryFilterValue>,
     onToggle: (LibraryFilterValue) -> Unit,
 ) {
-    if (options.formats.isNotEmpty() || options.supportsOwnedFilter) {
+    val onChipEvent: (ChipEvent) -> Unit = { event ->
+        when (event) {
+            is ChipEvent.Clicked -> valueByChipKey[event.key]?.let(onToggle)
+        }
+    }
+
+    if (chips.ownershipChips.isNotEmpty() || chips.formatChips.isNotEmpty()) {
         FacetSection(title = "Ownership · Format") {
-            if (options.supportsOwnedFilter) {
-                PillChip(
-                    label = "Owned",
-                    selected = filters.owned == true,
-                    onClick = { onToggle(LibraryFilterValue.Owned(owned = true)) },
-                )
-
-                PillChip(
-                    label = "Unowned",
-                    selected = filters.owned == false,
-                    onClick = { onToggle(LibraryFilterValue.Owned(owned = false)) },
-                )
-            }
-
-            options.formats.forEach { format ->
-                PillChip(
-                    label = format,
-                    selected = format in filters.formats,
-                    onClick = { onToggle(LibraryFilterValue.Format(value = format)) },
+            (chips.ownershipChips + chips.formatChips).forEach { chip ->
+                Chip(
+                    model = chip.selectedFor(
+                        filters = filters,
+                        valueByChipKey = valueByChipKey,
+                    ),
+                    onEvent = onChipEvent,
                 )
             }
         }
@@ -172,13 +169,15 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    if (options.releaseYears.isNotEmpty()) {
+    if (chips.releaseYearChips.isNotEmpty()) {
         FacetSection(title = "Release year") {
-            options.releaseYears.forEach { year ->
-                PillChip(
-                    label = year.toString(),
-                    selected = year in filters.releaseYears,
-                    onClick = { onToggle(LibraryFilterValue.ReleaseYear(year = year)) },
+            chips.releaseYearChips.forEach { chip ->
+                Chip(
+                    model = chip.selectedFor(
+                        filters = filters,
+                        valueByChipKey = valueByChipKey,
+                    ),
+                    onEvent = onChipEvent,
                 )
             }
         }
@@ -186,13 +185,15 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    if (options.readYears.isNotEmpty()) {
+    if (chips.readYearChips.isNotEmpty()) {
         FacetSection(title = "Year finished") {
-            options.readYears.forEach { year ->
-                PillChip(
-                    label = year.toString(),
-                    selected = filters.readYear == year,
-                    onClick = { onToggle(LibraryFilterValue.ReadYear(year = year)) },
+            chips.readYearChips.forEach { chip ->
+                Chip(
+                    model = chip.selectedFor(
+                        filters = filters,
+                        valueByChipKey = valueByChipKey,
+                    ),
+                    onEvent = onChipEvent,
                 )
             }
         }
@@ -200,27 +201,55 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    if (options.tags.isNotEmpty()) {
+    if (chips.tagChips.isNotEmpty()) {
         TagsFacetSection(
-            tags = options.tags,
-            selectedTagIds = filters.tags.mapTo(mutableSetOf()) { it.id },
-            onToggle = onToggle,
+            chips = chips.tagChips,
+            filters = filters,
+            valueByChipKey = valueByChipKey,
+            onChipEvent = onChipEvent,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    if (options.ratingBuckets.isNotEmpty()) {
+    if (chips.ratingChips.isNotEmpty()) {
         FacetSection(title = "Rating") {
-            options.ratingBuckets.forEach { threshold ->
-                PillChip(
-                    label = formatRatingLabel(threshold = threshold),
-                    selected = filters.ratingMin == threshold,
-                    onClick = { onToggle(LibraryFilterValue.RatingMin(threshold = threshold)) },
+            chips.ratingChips.forEach { chip ->
+                Chip(
+                    model = chip.selectedFor(
+                        filters = filters,
+                        valueByChipKey = valueByChipKey,
+                    ),
+                    onEvent = onChipEvent,
                 )
             }
         }
     }
+}
+
+/**
+ * Combines a facet chip's ready [ChipUiModel] with the sheet's local draft [LibraryFilters] to
+ * resolve `selected` — deliberately absent from the model itself (`LibraryFilterChips`'s KDoc),
+ * since which chip reads selected depends on this composition-local draft rather than on anything
+ * committed to [LibraryUiState]. Combining a ready model with draft state like this is not mapping
+ * (`component-contract.md` § 7.2 R9's carve-out); building the model from a domain type would be.
+ */
+private fun ChipUiModel.selectedFor(
+    filters: LibraryFilters,
+    valueByChipKey: Map<String, LibraryFilterValue>,
+): ChipUiModel {
+    val value = valueByChipKey[key] ?: return this
+
+    return copy(selected = filters.isSelected(value = value))
+}
+
+private fun LibraryFilters.isSelected(value: LibraryFilterValue): Boolean = when (value) {
+    is LibraryFilterValue.Tag -> value.tag.id in tags.mapTo(mutableSetOf()) { it.id }
+    is LibraryFilterValue.Format -> value.value in formats
+    is LibraryFilterValue.ReleaseYear -> value.year in releaseYears
+    is LibraryFilterValue.ReadYear -> readYear == value.year
+    is LibraryFilterValue.Owned -> owned == value.owned
+    is LibraryFilterValue.RatingMin -> ratingMin == value.threshold
 }
 
 /**
@@ -232,9 +261,10 @@ private fun FacetSections(
  */
 @Composable
 private fun TagsFacetSection(
-    tags: List<Tag>,
-    selectedTagIds: Set<Int>,
-    onToggle: (LibraryFilterValue) -> Unit,
+    chips: List<ChipUiModel>,
+    filters: LibraryFilters,
+    valueByChipKey: Map<String, LibraryFilterValue>,
+    onChipEvent: (ChipEvent) -> Unit,
 ) {
     var tagSearch by remember { mutableStateOf("") }
 
@@ -250,7 +280,7 @@ private fun TagsFacetSection(
             )
 
             Text(
-                text = "${tags.size} available",
+                text = "${chips.size} available",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -265,18 +295,22 @@ private fun TagsFacetSection(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        val visibleTags = tags.filter { it.name.contains(
-            tagSearch,
-            ignoreCase = true,
-        ) }
+        val visibleChips = chips.filter { chip ->
+            chip.label.contains(
+                other = tagSearch,
+                ignoreCase = true,
+            )
+        }
 
         if (LocalModalSheetForm.current == ModalSheetForm.PANEL) {
             ExpandableFlowRow {
-                visibleTags.forEach { tag ->
-                    PillChip(
-                        label = tag.name,
-                        selected = tag.id in selectedTagIds,
-                        onClick = { onToggle(LibraryFilterValue.Tag(tag = tag)) },
+                visibleChips.forEach { chip ->
+                    Chip(
+                        model = chip.selectedFor(
+                            filters = filters,
+                            valueByChipKey = valueByChipKey,
+                        ),
+                        onEvent = onChipEvent,
                     )
                 }
             }
@@ -286,11 +320,13 @@ private fun TagsFacetSection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                visibleTags.forEach { tag ->
-                    PillChip(
-                        label = tag.name,
-                        selected = tag.id in selectedTagIds,
-                        onClick = { onToggle(LibraryFilterValue.Tag(tag = tag)) },
+                visibleChips.forEach { chip ->
+                    Chip(
+                        model = chip.selectedFor(
+                            filters = filters,
+                            valueByChipKey = valueByChipKey,
+                        ),
+                        onEvent = onChipEvent,
                     )
                 }
             }
@@ -465,10 +501,4 @@ private fun EmptyFacetMessage() {
             )
         }
     }
-}
-
-private fun formatRatingLabel(threshold: Double): String {
-    val rounded = if (threshold % 1.0 == 0.0) threshold.toInt().toString() else threshold.toString()
-
-    return "$rounded★ and up"
 }

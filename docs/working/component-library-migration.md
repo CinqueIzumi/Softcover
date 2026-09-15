@@ -9,7 +9,8 @@
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
 **Status:** `S4 IN PROGRESS` — S4-1, S4-2a, S4-2b (incl. the **R9 correction**, § 5i), S4-3 and
-S4-4 done; next up S4-5 (the remaining primitives). **§ 5g is the most important thing to read before
+S4-4 done; **S4-5 is landing in two commits** (§ 5l) — the first, the domain-free primitives, is
+described below; the second takes the `Deadline*` / `Unreleased*` family and asserts G2. **§ 5g is the most important thing to read before
 continuing:** the direction rule re-cut S4's sub-commits, and the original ordering was impossible.
 **§ 5k** records S4-4's outcome — the `:core:book` edge is dead and **G3 is closed**, `CoverVariant`
 is the second and larger instance of R2's per-variant metrics table, and R9 finally reached the
@@ -400,11 +401,18 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
             non-Compose `resolveEditionImageSource` — 32 across 13 files; the "38 in 9" this line used
             to claim was wrong in both directions). Killed the `:core:book` edge and **closed G3**.
             **See § 5k.**
-      - [ ] **S4-5 — The remaining primitives**: `PillChip`, `SoftcoverTopBar(Action)`,
-            `AnimatedStatNumber`, `PreviewTile`, `MarkAsReadBurst`, `ClickableText`,
-            `SoftcoverLoadingDialog`, `ConnectivityBanner`, `OfflineGuard`, the `Deadline*` trio, the
-            `Unreleased*` pair, the two preview tiles + `ThemeTilePainting`; `:core:component`'s own
-            `compose.resources`; the two `koinInject` helpers hoisted to `:core:presentation`.
+      - [ ] **S4-5 — The remaining primitives**, in two commits (§ 5l):
+            - [x] **S4-5a — the domain-free primitives.** `PillChip` -> `Chip`, `SoftcoverTopBar` ->
+                  `TopBar` (+ `SearchTopBar`), `AnimatedStatNumber` -> `StatNumber`,
+                  `ConnectivityBanner` -> `Banner`, `OfflineScreenContent` -> `EmptyState`,
+                  `SoftcoverLoadingSheet` -> `LoadingSheet`, `MarkAsReadBurst`, `ClickableText`, and
+                  the two Appearance preview tiles + `PreviewTileFrame` / `MiniBar` /
+                  `ThemeTilePainting`; `:core:component`'s own `compose.resources`; `rememberIsOnline`
+                  hoisted to `:core:presentation`; `SoftcoverLoadingDialog` and `SoftcoverTopBarAction`
+                  deleted as dead.
+            - [ ] **S4-5b — the domain-typed family**: the `Deadline*` trio and the `Unreleased*`
+                  pair, their `:core:uibinding` mappers and R9 collectors — which empties
+                  `:core:designsystem`'s dependency block and so lands **G2**.
       - [ ] **S4-6 — Close the boundary**: zero project deps, G2, G3, the doc rewrite.
 - [ ] **S5 — Primitives** (§ 7.1): chips/pills, badges/overlays, headers/labels, dividers, skeletons.
 - [ ] **S6 — Rows & sheet chrome** (§ 7.2).
@@ -412,7 +420,38 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
 - [ ] **S8 — Screen states** (§ 7.4): empty states, callouts, banners, offline/error, top bars.
 - [ ] **S9 — Statistics** (§ 7.5): stat tiles, charts, legends, progress indicators.
 - [ ] **S10 — Shelf teardown.** The six `*Shelf.kt` files shrink to layout + composition.
-- [ ] **S11 — Close out.** Final gate values, `docs/reference/design-system/` rewrite, gallery
+- [ ] **S11 — Contract retrofit (R10 + R11).** The two rules written mid-migration, swept in one
+      pass because they are fixed at the same call sites.
+
+      **R10 — no UI model is built in composition.** Every model arrives on the `UiState` that feeds
+      it. The call sites that predate the rule: `StatNumberUiModel` at profile's four stat sites,
+      `MarkAsReadBurstUiModel` in book detail / reading / the motion debug screen, the file-constant
+      `TopBarUiModel`s on the nine static bars, `ClickableTextUiModel` in onboarding and the roadmap,
+      `ChipUiModel`'s `copy(selected = …)` against the Library filter sheet's composition-local draft,
+      `LoadingSheetUiModel` in onboarding, and the `ChipUiModel`s built inline in `ShareCard` and the
+      Component Gallery screen.
+
+      **R11 — a component takes only its model, its event lambda and a modifier.** Every loose render
+      parameter becomes a model property, expressed as a surface-named variant plus a metrics table
+      wherever the treatment genuinely differs per surface (`CoverDimensions.forVariant` is the
+      pattern). The holdouts, all of them landed before the rule existed: `RichText` (`style`,
+      `color`, `maxLines`, `overflow`, `onClick`, `onTextLayout`), `StatNumber` (`style`, `color`,
+      `autoSize`, `maxLines`), `ClickableText` (`style`, `inlineContent`), `MarkAsReadBurst` (`color`,
+      `secondaryColor`), `CoverlessTitleCover` (`title`), and `VerdictBlock` / `VerdictSheet`, whose
+      loose parameters R11 condemns for the same reason R1 already does — so S11 closes that R1
+      exception at the same time, and § 7.4a should end up naming **no** standing exceptions.
+
+      **This stage runs before S12**, so the migration's final verification is verifying a library
+      that actually satisfies its own contract. Two edges R10 names and deliberately leaves open are
+      this stage's to settle: a component whose copy the **library** owns and resolves from its own
+      `composeResources` (`offlineBannerUiModel()`, `offlineEmptyStateUiModel()`), since a resource
+      read exists only in composition; and the **preview fixtures and the Component Gallery**, which
+      construct models by definition. The third — a model depending on a value only composition has
+      (book detail's scroll-derived `TopBarSurface`) — is the one to think hardest about, since R11
+      also sends `TopBar`'s `scrollBehavior` looking for a home. Decide each, write the decision into
+      the rule, and make the code match.
+
+- [ ] **S12 — Close out.** Final gate values, `docs/reference/design-system/` rewrite, gallery
       completeness pass, trim the transitional component-path parenthetical in `CLAUDE.md`'s
       design-system maintenance rule down to `core/component/` (§ 5e), delete this file.
 
@@ -579,7 +618,7 @@ one thing the split forbids. The four occurrences in `docs/reference/design-syst
 `core/designsystem/presentation/component`. **`CLAUDE.md:32` carried the same shorthand and was
 corrected too** (in a follow-up commit, since it is a project instruction file rather than a doc this
 stage owns): it now names today's path, points at `:core:component` as the destination, and says
-explicitly that `:core:presentation` is not a component home. **S11 should trim that parenthetical**
+explicitly that `:core:presentation` is not a component home. **S12 should trim that parenthetical**
 once the migration is done and the path is simply `core/component/`.
 
 **Review outcome.** `rhaydus-kotlin:code-reviewer` verified the move independently (not by re-reading
@@ -1195,6 +1234,164 @@ from 6 to 15 to cover `showFullTitle` / `titleFontSize` / `titleMaxLines`.
 **Not verified:** no visual pass. The cover is the most-rendered component in the app and the gallery
 now has a `COVER` family, so a desktop run is worth more here than at any previous boundary.
 
+### 5l. S4-5a outcome — the library's copy, its own resources, and the rule R10 came out of
+
+The first of S4-5's two commits: **13 files out of `:core:designsystem`, every component in them
+either already domain- and DI-free or made so here**, leaving only the `Deadline*` trio and the `Unreleased*` pair
+for S4-5b. What it settled:
+
+**Every mover took the full contract, and that was the user's call rather than the cheap one.** Three
+options were put up: a gate-clean move keeping today's signatures (smallest diff, ~15 new entries in
+`component-contract.md` § 7.4a), a hybrid, or the full contract now with each model **named for the
+family it will become** — `ChipUiModel`, `TopBarUiModel`, `BadgeUiModel`, `StatNumberUiModel`,
+`BannerUiModel`, `EmptyStateUiModel` — so S5–S9 extend them with variants rather than replace them.
+The last was chosen. The consequence worth stating: **§ 7.4a still lists exactly three exceptions**,
+the same three S4-2b left there, and the gallery went from three families to ten in one commit.
+
+**A text component was given the `Text`-shaped parameters after its model, and that was the wrong
+call — corrected, by the user, into R11.** The plan called for a surface-named `StatNumberVariant`
+metrics table on the `CoverVariant` precedent. I dropped it, reasoning that `RichText` — shipped in
+S4-2b — already takes `model` first and then `style` / `color` / `maxLines` / `overflow`, so a table
+over five editorial type styles would be typography masquerading as anatomy. `StatNumber` and
+`ClickableText` followed `RichText` instead. **That read an existing violation as a precedent**: a
+loose render parameter is drift with a default value, invisible to the model, untestable, and free to
+diverge between two surfaces that should match — the exact failure `CoverVariant` was created to end.
+`component-contract.md` now carries **R11** (a component takes only its model, its event lambda and a
+modifier), the plan's variant table is the right answer after all, and `RichText`, `StatNumber`,
+`ClickableText`, `MarkAsReadBurst` and `CoverlessTitleCover` are named holdouts in the S11 retrofit.
+The lesson generalises past this family: **the library is young enough that "X already does it" is as
+likely to be an unswept violation as a pattern** — check the rule, not the neighbour.
+
+**`StatNumberFormat` is the real R3 lesson here, and it is a different one from R3's usual.**
+`AnimatedStatNumber` took `formatter: (Int) -> String`. R3 is normally about collections, but a
+**lambda field is worse than an unstable list**: it allocates fresh on every recomposition and is never
+equal to itself, so it defeats the skipping the model exists to enable. The replacement is a
+descriptor — `Grouped` / `Plain` / `Decimal(digits)` — resolved inside the component through the
+foundation's own `formatGroupedNumber` / `formatDecimalNumber`. Three entries because three is what
+the five call sites actually asked for. The Int/Float overload pair collapsed into one `Double`, since
+the tween always ran on a float anyway and the format is what decides whether a fraction is ever seen.
+
+**`TopBarSurface` collapsed three parallel derivations of one flag into one field.** The book page
+derived a container colour (`animateColorAsState` to `Transparent`), a back-button `IconButtonColors`
+pair, and an overflow-menu colour pair — all three from `shouldBeExpanded`, all three at the call site,
+any one of which could have been forgotten or updated alone. `TopBarUiModel.surface` is now
+`OPAQUE | OVER_MEDIA` and the component derives all three. The trailing `actions` slot **receives the
+resolved `IconButtonColors`**, so the feature's own overflow menu — which owns its own dropdown state
+and therefore cannot be a model entry — takes the same treatment without re-deriving it.
+
+**Two dead symbols were deleted rather than migrated.** `SoftcoverLoadingDialog` was `internal` with
+no call site anywhere, including inside its own module; `SoftcoverTopBarAction` and the `actions:
+List<SoftcoverTopBarAction>` parameter it fed had **no call site either** — every consumer used the
+`additionalActions` slot. `titleAlignment` and `colors` were likewise unused at all eleven call sites
+and did not cross. Carrying dead API across a module boundary is how a library starts its life with
+debt.
+
+**`:core:component` owns its own copy now, and the module's whole string table moved.**
+`:core:designsystem`'s `composeResources/values/strings.xml` held **four strings, all connectivity**,
+owned entirely by the two components leaving. Three moved; `connectivity_offline_action_blocked` had
+**no reader anywhere** — `publicResClass = false` means only its own module could read it, and nothing
+did — so it was deleted rather than carried. The library's `compose.resources` block mirrors the
+design system's, `publicResClass` included. The principle written into the doc: **copy that belongs to
+a component rather than to a feature lives in the library**, because every surface reporting "you're
+offline" reports it identically, and `offlineBannerUiModel()` / `offlineEmptyStateUiModel()` resolve
+it. A resource read is a composition-scoped platform read, so it sits in R9's existing carve-out.
+
+**The connectivity pair split cleanly across the two modules.** `rememberIsOnline()` — the half that
+resolves a `NetworkAvailabilityProvider` out of Koin — moved to `:core:presentation`
+(`connectivity/`), and the render halves became `Banner` and `EmptyState` taking the resolved flag.
+`RootScreen` had been resolving the provider itself *and* rendering a component that resolved it
+again; it now reads the state once. `:core:presentation` gained `api(libs.rhaydus.corePlatform)` — the
+gate caught that `implementation` was wrong, because the injection seam names the provider type in its
+own signature.
+
+**`:core:designsystem` lost Koin and `core-platform` here, and nothing else could have made it.**
+`onUnusedDependencies` is `severity("fail")`, so both dropped in the same commit that emptied them —
+the § 5k pattern repeating. `api(project(":core:domain"))` and `kotlinx-datetime` survive into S4-5b,
+which is where G2 lands.
+
+**`:feature:onboarding` and `:feature:scan` got an explicit `:core:component` edge they did not
+strictly need.** Both compile without one, because `:core:presentation` `api`-exposes the library
+(§ 6a's row, added in S4-4 for `ActiveSession`). Leaning on that would have made two features' use of
+the component library invisible in their own build files and dependent on an edge that exists for an
+unrelated reason. Both declare it, both on `implementation`, and `projectHealth` is green on each.
+
+**One deliberate deviation from the collector precedent, and it is the interesting one.** Every other
+UI model in this commit is derived off `scope.state` in a collector. The **Library filter sheet's chips
+cannot be**: the sheet holds a composition-local `LibraryFilters` draft and commits only on "Show N
+titles", so which chip reads selected depends on state that deliberately never reaches `LibraryUiState`
+— that draft/commit behaviour is the documented pattern (§ 3.5 in the design system), not an oversight.
+The collector therefore writes the chips *without* `selected`, plus a `filterValueByChipKey` lookup,
+and the render combines the two. Recorded here because it looks like a gap in the R9 story and is not.
+
+**R10 was written because of this commit, and deliberately not applied in it.** Converting thirteen
+components surfaced the same shape in five features: the model reaches the contract-shaped signature,
+and then the *call site* builds it — `StatNumberUiModel(...)` inline, `remember { TopBarUiModel(...) }`,
+a file-level constant model, `ClickableTextUiModel(text = ...)` at the point of use. That satisfies
+R1–R9 and still puts the "what does this component show" decision back inside the render, which is
+what the model was introduced to prevent. **R10 now says a UI model is never built in composition; it
+arrives on the `UiState`.** The user's instruction was to document it and schedule it rather than widen
+this commit, so it is normative for new work, `docs/reference/architecture.md` points at it, and the
+new **S11 — contract retrofit** stage sweeps the existing call sites *before* the migration's final
+verification. **R11 joined it in the same review round** (§ 7.1 / R11), from the same user reading of
+this commit. The three edges R10 leaves open — library-owned copy resolved from `composeResources`,
+the gallery's own fixtures, and a model depending on a value only composition has (book detail's
+scroll-derived top-bar surface) — are S11's to settle, not this commit's to pre-decide.
+
+**Gallery.** Eight new entries and one new family (`CELEBRATION`) — `TopBar`, `SearchTopBar`, `Chip`,
+`StatNumber`, `ThemePreviewTile`, `ColorPalettePreviewTile`, `ClickableText`, `MarkAsReadBurst`,
+`Banner`, `EmptyState`. Two carry the same caveat S4-3's sheets do: `MarkAsReadBurst` is an animation a
+still fixture cannot show, and `LoadingSheet` is a modal, so neither reads honestly inline. `EmptyState`
+fills whatever it is given, so the fixture tile lends it a height rather than the component learning
+about the gallery (§ 7.3's rule, applied in the other direction from `ShareCard`).
+
+**The `:core:component` -> `:core:designsystem` edge became `api`, and the gate is right that it
+should.** The Appearance picker tiles' models name a token in their own public surface
+(`ThemePreviewTileUiModel.palette: SpinePalette`), so a consumer holding one needs the type.
+`projectHealth` caught it. Worth recording because it looks like the kind of `api` edge § 6a exists to
+stop, and is not: the root build deliberately keeps `:core:designsystem` out of `apiSignOffModules`
+precisely because it is a leaf once G2 lands, so re-exporting it republishes nothing a consumer could
+not already reach. The library's *own* surface stays sign-off-gated.
+
+**Gates at this boundary:** `checkModuleGraph`, `ktlintCheck`, repo-wide `compileKotlinJvm` +
+`:desktopApp:compileKotlin` + both `:app` variants' Kotlin compilation, **repo-wide
+`compileKotlinIosSimulatorArm64`**, `projectHealth` on all thirteen touched modules, and type-resolved
+detekt under JDK 21 (`styleCheck`, whole repo) — all green. **3,346 unit tests, 5 failures**, counts
+read off the results XML: all five are the pre-existing `AndroidLegacySecureApiKeyStorageTest` cases in
+the untouched `:core:preferences` (no Android Keystore on the JVM host), reproduced on `main` and
+recorded in this file's header. 46 tests are new — `SearchTopBarCollectorTest` (7),
+`ThemeChoiceMapperTest` + `PaletteChoiceMapperTest` (11, on two mappers that had **no** coverage at all
+before this commit changed their signatures), `LibraryFilterChipsBuilderTest` +
+`FilterChipModelsCollectorTest` (15), and `TagChipModelsCollectorTest` +
+`TagEditorChipModelsCollectorTest` (13).
+
+**Not verified: no visual pass.** The top bar's scrim over the book-detail hero, the Explore search
+chrome's focus contract, the two Appearance picker rows and the offline banner are all render-time
+behaviour compilation cannot speak to, and this repo has no Compose UI tests by decision (§ 6 "Test
+posture"). The gallery now carries ten families, so a desktop run is worth more than at any previous
+boundary.
+
+**Review outcome, and the one real regression it caught.** `rhaydus-kotlin:code-reviewer` re-derived
+every moved component against `git show HEAD:<old-path>` rather than trusting this section, and ran
+two independent passes that converged on the same defect. It confirmed the hard parts — `TopBar`'s
+main-path colour and scrim derivation, `SearchTopBar`'s focus contract line-for-line, `Chip`'s
+read-only branch (no `onClick` argument at all, not `enabled = false`), the filter sheet's
+draft/commit split and its ownership/format gating, all five collectors' fields actually written and
+Koin-registered, and all three deleted-as-dead claims.
+
+**The regression: the book page's offline placeholder lost its opaque bar.** One `TopBarUiModel` was
+built from `shouldBeExpanded` and reused on both branches — but the offline branch returns before the
+`LazyColumn` that owns `lazyListState` ever composes, so `shouldBeExpanded` is pinned to `false`
+there, resolving to `OVER_MEDIA`: a transparent bar with scrimmed white controls over a plain empty
+state. Pre-migration that branch passed no `colors` at all and therefore always got the opaque
+default. **The lesson is about the collapse itself:** folding three call-site derivations into one
+model field is right, and it makes the model's *inputs* the thing to check — a value derived from
+scroll state is meaningless on a branch that never scrolls. The offline branch now builds its own
+`TopBarUiModel`, with a comment saying why. Three smaller fixes also applied: two stale doc entries
+(`ClickableText`'s path in `patterns.md`, a `badge/` family in `module-structure.md` that S4-5b has
+not created yet), 24 `) }` trailing-lambda glomming sites across the four new test files and one
+production line this commit had touched, and a comment on `FilterChipModelsSnapshot`'s cross-tab merge
+recording that it is safe only because chip keys are facet-namespaced.
+
 ### 5a. The Component Gallery — decided: shipped easter egg
 
 Not debug-only. Consequences to build for, rather than discover late:
@@ -1212,7 +1409,7 @@ Not debug-only. Consequences to build for, rather than discover late:
   see § 5d.**
 - **Preview fixtures ship in the release binary.** They are data classes and strings, so the size
   cost is small — but it is no longer zero, and every component added later adds to it. Worth a
-  measurement at S11, not a blocker.
+  measurement at S12, not a blocker.
 - **It is now a user-visible surface**, so it needs a design pass and a
   `docs/reference/design-system/` entry. G5 applies to it like any other screen.
 
@@ -1304,7 +1501,7 @@ dependencies) lands in S4-6, because designsystem still `api`-depends on `:core:
 is `severity("fail")`, so deleting `EditionImage.kt` made `api(project(":core:book"))` and
 `api(libs.coil3)` unused in the same commit — dropping them, and the allowlist row with them, was
 required for S4-4 to be green rather than optional cleanup. G4
-(`checkComponentBudget`) is S11's, since the count is still falling.
+(`checkComponentBudget`) is S12's, since the count is still falling.
 
 **New follow-up this audit surfaced**, and it is now tracked as work rather than prose: G2 is a
 **pair** of gates, not one — the dependency assertion plus a source-level `ForbiddenImport` scoped to
@@ -1368,10 +1565,10 @@ These two land in S4, before every family below. The share cards are the referen
 > against the original. The seven items below are the remaining work; they are pure file surgery with
 > no type changes, so they can land in any later sub-commit of S4.
 
-**Recommendation: do this in S4, not S11, and split the bodies while renaming.** S4 already touches
+**Recommendation: do this in S4, not S12, and split the bodies while renaming.** S4 already touches
 every `:core:designsystem` component; leaving this file whole means either it does not get UI models
 in S4 (and then fails G1, since it imports `:core:domain`) or it does and stays a 1,161-line
-monolith that S11 has to re-open. One pass, not two.
+monolith that S12 has to re-open. One pass, not two.
 
 The dispatch and the `*ShareContent` types are already correct (§ 4.3) — this is a rename plus a
 mechanical split plus one real piece of work (rich text, below).
@@ -1672,12 +1869,12 @@ gaps.
 
 | Risk | Where | Mitigation |
 |---|---|---|
-| **Compose stability regression** — a `List` in a UI model makes every grid item recompose per frame | S7, library grid + explore rails | R3: `kotlinx-collections-immutable`, `ImmutableList` everywhere. Verify with the compiler metrics report before S11. |
+| **Compose stability regression** — a `List` in a UI model makes every grid item recompose per frame | S7, library grid + explore rails | R3: `kotlinx-collections-immutable`, `ImmutableList` everywhere. Verify with the compiler metrics report before S12. |
 | **Lambda-allocation regression** — per-item `onClick` defeats skipping | S7 | R1: one hoisted `onEvent`, key on the model. |
 | **Shared-element transitions break** | S7 | R7: key resolved by the mapper, carried on `BookCardKey`. Manually verify library -> detail and explore -> detail. |
 | **Long-lived red branch.** All-at-once means the module split's compile breakage is resolved inside the branch. | S3, S4 | Stage boundaries must compile. Commit per stage so the PR is reviewable commit-by-commit even though it merges once. |
 | **Session loss mid-migration** | any | This file. Update checkboxes in the same commit as the work, and record the branch name in the header. |
-| **`docs/reference/design-system/components.md` is 83KB** and will be substantially rewritten | S11 | Split per family mirroring the § 3 package layout. G5 blocks merge without it. |
+| **`docs/reference/design-system/components.md` is 83KB** and will be substantially rewritten | S12 | Split per family mirroring the § 3 package layout. G5 blocks merge without it. |
 | **Reviewer load.** A single PR of this size is not reviewable in the normal way. | merge | Commit-per-stage discipline; run `rhaydus-kotlin:code-reviewer` per stage, not once at the end. |
 
 ---
@@ -1704,14 +1901,14 @@ All three opening questions are resolved. Recorded here so they are not re-opene
 |---|---|---|
 | Gallery reachability | **Shipped easter egg**, not debug-only. N taps on `VersionFooter`. Registry in `:core:component`, screen in `feature:settings`, `commonMain` so it works on all three platforms. | § 5a, S2 |
 | `:core:uibinding` dependency visibility | **`api`.** Costs nothing at the gate — all 44 domain models live in `:core:domain`, which is not a data-area module, so no allowlist row is required. A `:core:uibinding -> :core:<data>` row is **pre-approved** if a mapper ever needs one; write it when the edge exists, not speculatively. | § 3a, S1 |
-| `ShareCard.kt` (1,161 lines) | **S4, split per body while renaming** — not deferred to S11. It is already the contract's reference implementation; one pass, not two. | § 4.3, § 7.0 |
+| `ShareCard.kt` (1,161 lines) | **S4, split per body while renaming** — not deferred to S12. It is already the contract's reference implementation; one pass, not two. | § 4.3, § 7.0 |
 
 ### Still open
 
 - [x] **Easter-egg gesture spec** — **decided in S2:** seven taps, a two-second window between
       consecutive taps, `milestone` haptic on unlock, `noRippleClickable` so the footer looks
       untouched. Counting logic in `SecretTapCounter`, unit-tested. See § 5d.
-- [ ] **Fixture size in the release binary.** Measure at S11; not expected to block.
+- [ ] **Fixture size in the release binary.** Measure at S12; not expected to block.
 
 ## Appendix B — GitHub issue
 

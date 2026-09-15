@@ -31,7 +31,8 @@ import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shakeOnError
-import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
+import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
@@ -87,7 +88,8 @@ internal actual fun BookDetailScreenLayout(
             )
 
             if (showOfflinePlaceholder) {
-                OfflineScreenContent(
+                EmptyState(
+                    model = offlineEmptyStateUiModel(),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(bottom = bottomChromePadding()),

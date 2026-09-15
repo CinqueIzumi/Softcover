@@ -52,8 +52,10 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.component.OfflineScreenContent
-import nl.rhaydus.softcover.core.designsystem.presentation.component.SoftcoverSearchTopBar
+import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
+import nl.rhaydus.softcover.core.component.topbar.SearchTopBar
+import nl.rhaydus.softcover.core.component.topbar.SearchTopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
@@ -138,21 +140,23 @@ internal actual fun ExploreScreenLayout(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            SoftcoverSearchTopBar(
-                searchText = state.searchText,
-                onSearchValueChange = { runAction(OnQueryChangeAction(newQuery = it)) },
-                onScanClick = onScanClick,
-                isLoading = state.isLoading,
-                active = state.searchPhase != ExploreSearchPhase.FEED,
-                focused = state.searchFocused,
-                onSearchActivated = { runAction(OnSearchActivatedAction) },
-                onSearchDismissed = { runAction(OnSearchDismissedAction) },
-                onClearSearch = { runAction(OnClearSearchAction) },
+            SearchTopBar(
+                model = state.searchTopBar,
+                onEvent = { event ->
+                    when (event) {
+                        is SearchTopBarEvent.QueryChanged -> runAction(OnQueryChangeAction(newQuery = event.query))
+                        SearchTopBarEvent.SearchActivated -> runAction(OnSearchActivatedAction)
+                        SearchTopBarEvent.SearchDismissed -> runAction(OnSearchDismissedAction)
+                        SearchTopBarEvent.SearchCleared -> runAction(OnClearSearchAction)
+                        SearchTopBarEvent.ScanRequested -> onScanClick()
+                    }
+                },
             )
         },
     ) { padding ->
         if (isOnline.not()) {
-            OfflineScreenContent(
+            EmptyState(
+                model = offlineEmptyStateUiModel(),
                 modifier = Modifier
                     .padding(padding)
                     .padding(bottom = rememberBottomBarPadding()),

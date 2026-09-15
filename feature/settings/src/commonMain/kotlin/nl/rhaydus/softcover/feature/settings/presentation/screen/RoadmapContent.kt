@@ -38,7 +38,9 @@ import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.designsystem.presentation.component.ClickableText
+import nl.rhaydus.softcover.core.component.richtext.ClickableText
+import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
+import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.component.formatLongRelease
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
@@ -306,9 +308,13 @@ private fun RoadmapParagraph(
     openUrl: (String) -> Unit,
 ) {
     ClickableText(
-        annotatedText = roadmapAnnotatedString(spans = spans),
+        model = ClickableTextUiModel(text = roadmapAnnotatedString(spans = spans)),
+        onEvent = { event ->
+            when (event) {
+                is ClickableTextEvent.LinkClicked -> openUrl(event.url)
+            }
+        },
         style = MaterialTheme.editorialTypography.review.copy(color = MaterialTheme.colorScheme.onSurface),
-        handleUrlClick = openUrl,
     )
 }
 
@@ -332,12 +338,18 @@ private fun RoadmapList(
             }
 
             ClickableText(
-                annotatedText = roadmapAnnotatedString(
-                    spans = spans,
-                    leadingMarker = marker,
+                model = ClickableTextUiModel(
+                    text = roadmapAnnotatedString(
+                        spans = spans,
+                        leadingMarker = marker,
+                    ),
                 ),
+                onEvent = { event ->
+                    when (event) {
+                        is ClickableTextEvent.LinkClicked -> openUrl(event.url)
+                    }
+                },
                 style = MaterialTheme.editorialTypography.review.copy(color = MaterialTheme.colorScheme.onSurface),
-                handleUrlClick = openUrl,
             )
         }
     }
@@ -368,9 +380,13 @@ private fun RoadmapBlockQuote(
         Spacer(modifier = Modifier.width(16.dp))
 
         ClickableText(
-            annotatedText = roadmapAnnotatedString(spans = spans),
+            model = ClickableTextUiModel(text = roadmapAnnotatedString(spans = spans)),
+            onEvent = { event ->
+                when (event) {
+                    is ClickableTextEvent.LinkClicked -> openUrl(event.url)
+                }
+            },
             style = MaterialTheme.editorialTypography.body.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
-            handleUrlClick = openUrl,
         )
     }
 }

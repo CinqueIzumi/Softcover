@@ -12,6 +12,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":core:domain"))
             implementation(project(":core:identity"))
+            implementation(project(":core:component"))
             implementation(project(":core:designsystem"))
             implementation(project(":core:presentation"))
 
