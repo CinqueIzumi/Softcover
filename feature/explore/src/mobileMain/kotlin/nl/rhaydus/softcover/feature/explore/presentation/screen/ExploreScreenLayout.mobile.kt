@@ -92,7 +92,7 @@ private val BECAUSE_YOU_READ_CARD_WIDTH = 118.dp
 private val UP_NEXT_CARD_WIDTH = 126.dp
 
 /**
- * Mobile Explore (explore-3a): a [SoftcoverSearchTopBar] search chrome over one of four bodies,
+ * Mobile Explore (explore-3a): a [SearchTopBar] search chrome over one of four bodies,
  * branched on [ExploreScreenUiState.searchPhase] — the editorial feed, the search-focus overlay
  * (recent + "try a mood"), the loading state, or the results list. The cards, the dismiss sheet, the
  * mood grid, and the recent-searches block are the shared shelf pieces (`ExploreShelf.kt`); only this
@@ -115,7 +115,7 @@ internal actual fun ExploreScreenLayout(
     //
     // Both go through an action rather than touching the field: the search chrome follows state,
     // and clearing platform focus from this side is exactly the desync the component's contract
-    // forbids (see `SoftcoverSearchTopBar`).
+    // forbids (see `SearchTopBar`).
     //
     // While the keyboard is up the platform eats the first press to put it away, so a focused
     // search costs one press before either handler sees anything. That is the system's back, not
@@ -198,7 +198,7 @@ private fun SearchFocusScreen(
     Box(
         // Feedback item 11: tapping outside the focused field dismisses the focus surface. Only the
         // state is dismissed here - the top bar owns the platform focus and the keyboard, and lets
-        // go of both off the back of this action (see `SoftcoverSearchTopBar`). Clearing focus from
+        // go of both off the back of this action (see `SearchTopBar`). Clearing focus from
         // this side as well is what used to leave the two out of step.
         modifier = Modifier
             .padding(contentPadding)

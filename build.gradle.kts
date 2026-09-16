@@ -309,7 +309,7 @@ fun tierOf(path: String): String? = when {
 //  - `:core:domain` — a pure contract module with no dependencies of its own. Re-exporting it leaks
 //    nothing a consumer could not already reach, and the migration tracker's § 3a settled that it may
 //    be `api`-exposed freely. Putting it in the set would mean allowlisting ~15 legitimate edges.
-//  - `:core:designsystem` — tokens. Once S4 finishes it has zero project dependencies (G2), so an
+//  - `:core:designsystem` — tokens. It has zero project dependencies (G2, closed in S4-5b), so an
 //    `api` edge to it republishes a leaf. Revisit only if it ever grows a dependency again.
 //  - `:core:network`, `:core:database` — infra, and their `api` edges are load-bearing for the
 //    Apollo/Room types that cross module boundaries by design.

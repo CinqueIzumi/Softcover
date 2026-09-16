@@ -8,18 +8,17 @@
 **Rollout model:** one branch, one PR, merged all at once. Stages below are *commit* boundaries on
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
-**Status:** `S4 IN PROGRESS` — S4-1, S4-2a, S4-2b (incl. the **R9 correction**, § 5i), S4-3, S4-4
-and **both halves of S4-5** done. **`:core:designsystem` is now tokens only, with zero project
-dependencies — G2 is closed** (§ 5m). Only **S4-6** remains in this stage: the `ShareCard.kt` split
-and the closing doc sweep. **§ 5g is the most important thing to read before continuing:** the
+**Status:** `S4 DONE — S5 NEXT`. Every sub-commit of S4 has landed. `:core:designsystem` is tokens
+only with zero project dependencies, and **G1, G2 and G3 are all closed**. It took **ten commits
+against the six the re-cut below planned** — S4-2 and S4-5 each split into a/b, and the
+Compose-resource packaging incident (§ 5m) cost two more. The two plan counts at lines 377 and 381
+are left as the record of what was planned; neither is the outcome. The next stage is
+**S5 — Primitives** (§ 7.1). **§ 5g is the most important thing to read before continuing:** the
 direction rule re-cut S4's sub-commits, and the original ordering was impossible. **§ 5k** records
 S4-4's outcome — the `:core:book` edge is dead and **G3 is closed**, `CoverVariant` is the second and
 larger instance of R2's per-variant metrics table, and R9 finally reached the list-shaped surfaces.
-**§ 5m** records S4-5b's — G2, and the three dependencies that had to leave in one commit.
-> **S4-6 still has a hand-off doc:**
-> [`s4-5b-and-s4-6-handoff.md`](s4-5b-and-s4-6-handoff.md) — its S4-5b half is now spent, but the
-> `ShareCard.kt` split's file/line inventory is still current. It is a hand-off, not a second source
-> of truth; **this file wins** where they disagree, and S4-6 deletes it.
+**§ 5m** records S4-5b's — G2, and the three dependencies that had to leave in one commit. **§ 5n**
+records S4-6's — the `ShareCard.kt` split, and why a stage kept shrinking under its own gates.
 
 **Branch:** `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models`
 **Issue:** [#275](https://github.com/CinqueIzumi/Softcover/issues/275) — tag `E.1`, labels
@@ -55,6 +54,14 @@ collapse into **one** component that renders differently based on the model pass
 
 ## 2. Baseline (measured 2026-08-21, `release/3.2.0` @ `ada51050`)
 
+> **Frozen snapshot — do not edit forward.** Every number, path and line reference in § 2 describes
+> the tree at `ada51050`, before the first migration commit. Several are now false by design: the
+> repo had **0** `*UiModel` types then and has ~30 now; `:core:designsystem` had 132 `@Composable`
+> declarations and has 16. That is the migration working, and a baseline edited to match the present
+> measures nothing. **§ 5's outcome sections and § 7's checkboxes are the live state**; read those for
+> what is true today. The one instruction in § 2 that *has* expired is the re-measure prompt below —
+> it was written for someone about to start, and the migration is five stages in.
+
 Re-measure before starting; if these numbers have moved materially, the checklists below need a
 refresh pass first.
 
@@ -66,7 +73,7 @@ refresh pass first.
 | Lines in composable-bearing `commonMain` files | 29,159 |
 | …concentrated in six `*Shelf.kt` files | 12,182 |
 | Types named `*UiModel` in the repo | **0** |
-| Working instances of the pattern under another name | **1** — the `share/` package (§ 4.3) |
+| Working instances of the pattern under another name | **1** — the `share/` package |
 
 Reproduce the count with:
 
@@ -98,14 +105,16 @@ and `SplashState`/`ReAuthState`. Components take domain types directly —
 library while it imports use cases.
 
 There is also an existing allowlist row recording the leak:
-`":core:designsystem" to ":core:book"` in `allowedApiDataEdges` (`build.gradle.kts:281`). **That row
-disappearing is a measurable outcome of this migration.**
+`":core:designsystem" to ":core:book"` in `allowedApiDataEdges`. **That row disappearing is a
+measurable outcome of this migration.**
 
-> **As of S3, the second half of that paragraph is history.** The navigation contracts, the Koin
-> module, the prefetcher, the session controllers, the error mapping and the state holders now live in
-> `:core:presentation` (§ 5e). What remains true is the first half: components still take domain types
-> directly, `:core:designsystem` still `api`-depends on `:core:domain` and `:core:book` (`EditionImage`
-> is the last `:core:book` consumer), and the allowlist row is still there. S4 closes both.
+> **All of that paragraph is now history — the whole section describes a module that no longer
+> exists in this shape.** S3 moved the navigation contracts, the Koin module, the prefetcher, the
+> session controllers, the error mapping and the state holders into `:core:presentation` (§ 5e). S4
+> finished the job: `:core:designsystem` declares **zero** `project(...)` dependencies, the
+> `:core:book` allowlist row is gone (G3, S4-4), the `:core:domain` edge went with the `Deadline*`
+> trio (G2, S4-5b), and no component takes a domain type because no component lives there at all.
+> `EditionImage` itself is gone — it became `Cover` in `:core:component` during S4-4.
 
 ### Confirmed duplication
 
@@ -146,11 +155,13 @@ Same-named composables declared in multiple modules today:
                        ReadingSessionLauncher, SessionFormatting, LibraryTab, ApiErrorMessage,
                        ApiFailureHandling, SplashState, ReAuthState, BookDetailPrefetcher,
                        LibraryNavPulseKey, LocalAppUpdate, and presentationModule.
-                       Depends on :core:domain + :core:book — NOT on :core:designsystem.
+                       `api`-depends on :core:domain and :core:component (the latter added in
+                       S4-4, for ActiveSession's CoverUiModel — it carries an allowlist row);
+                       `implementation` on :core:book. NOT on :core:designsystem.
                        (The "TOAD wiring" this line used to claim never existed there — § 5e.)
 ```
 
-All four are tier `core`, so `tierOf()` (`build.gradle.kts:255`) classifies them automatically from
+All four are tier `core`, so `tierOf()` in the root build classifies them automatically from
 their path. No tier-map change is needed; the new **ban list** is (see § 6).
 
 ### 3a. `:core:uibinding` dependency visibility — decided: `api`
@@ -158,50 +169,94 @@ their path. No tier-map change is needed; the new **ban list** is (see § 6).
 `:core:uibinding` re-exposes its edges with `api`, so a feature depending on it sees the domain type,
 the UI model, and the tokens without re-declaring all three.
 
-**What that costs at the gate: nothing.** The api-visibility rule (`build.gradle.kts:281`) only
-covers `dataAreaModules` — `:core:{book, lists, deadlines, personal, profile, identity, preferences}`.
-All **44** domain models live in `:core:domain`, which is an *infra/contract* module and may
-`api`-expose freely. `:core:book` owns only two of its own models (`IsbnEditionMatch`,
-`CreatedBook`) alongside its repository and use cases. So the mappers this migration needs —
-`Book`, `BookEdition`, `UserBook`, `BookList`, `DeadlineStatus`, `ColorPalette`, `ReviewDocument`,
-all in `:core:domain` — require **no allowlist row at all**.
+**What that was predicted to cost at the gate: nothing. It cost two rows, and the rule itself was
+rewritten.** The prediction held only for the *domain* edge: all **44** domain models live in
+`:core:domain`, which is an infra/contract module and may `api`-expose freely, and `:core:book` owns
+only two models of its own (`IsbnEditionMatch`, `CreatedBook`) alongside its repository and use
+cases. That part is still true and still means no `:core:<data>` row was needed.
+
+What the prediction missed is that the **rule's scope was not fixed**. It covered only
+`dataAreaModules` when this was written; § 6a's audit widened it and renamed it **`apiSignOffModules`**,
+which now includes `:core:component`, `:core:presentation` and `:core:uibinding` — added *by this
+migration*, after `:feature:book_detail` declared `api(project(":core:component"))` with no
+justification and no gate noticed. So the migration's own `api` edges became sign-off-bearing, and
+two rows were written:
+
+- **`":core:uibinding" to ":core:component"`** — the deliberate re-export this section decided on.
+- **`":core:presentation" to ":core:component"`** — `ActiveSession`'s `CoverUiModel` (S4-4), which
+  this section did not anticipate at all.
+
+**The transferable point:** "no allowlist row needed" is a claim about a rule, not about the code,
+and a rule that a migration is actively rewriting cannot be quoted as a fixed cost. State the edge
+you intend; re-check the gate that governs it at the commit that adds the edge.
 
 Policy recorded so nothing blocks mid-migration:
 
 - `api(project(":core:domain"))`, `api(project(":core:component"))`,
-  `api(project(":core:designsystem"))` from `:core:uibinding` — no row needed, none to be written.
+  `api(project(":core:designsystem"))` from `:core:uibinding` — the `:core:component` row is written
+  and cites this section; the other two need none.
 - Should a shared mapper genuinely need a *data-area* type (realistically only `:core:book`'s
   `IsbnEditionMatch` / `CreatedBook`), **this decision pre-approves adding the
   `":core:uibinding" to ":core:<data>"` row** to `allowedApiDataEdges` without further sign-off.
   Write the row when the edge exists — not speculatively, or the allowlist rots into noise the way
   the designsystem row did.
-- The row that **does** need writing is for `:core:presentation`: the evicted `BookDetailPrefetcher`
-  consumes `FetchBookByIdUseCase` and `PersistEditionImageUseCase` from `:core:book`. That is the
-  real reason `":core:designsystem" to ":core:book"` exists today. Prefer `implementation` there; add
-  `":core:presentation" to ":core:book"` only if the use-case types surface in its public API.
+- The row anticipated for `:core:presentation` -> `:core:book` was **never needed**: the evicted
+  `BookDetailPrefetcher` consumes `FetchBookByIdUseCase` and `PersistEditionImageUseCase`, but
+  `implementation(project(":core:book"))` was enough — the use-case types never surfaced in its public
+  API. The row `:core:presentation` *did* need was to `:core:component`, for a reason this section
+  never saw coming.
 
 ### Package layout inside `:core:component`
 
 One directory per family. Model, component, and preview fixtures live together.
 
+One directory per family; model, component and fixtures live together. **`+` = landed, `·` = planned.**
+Kept in step with `GalleryFamily` (`gallery/GalleryFamily.kt`), whose KDoc points back here.
+
 ```
 component/
-  bookcard/    BookCard.kt        BookCardUiModel.kt        BookCardPreviews.kt
-  cover/       Cover.kt           CoverUiModel.kt           CoverPreviews.kt
-  chip/        Chip.kt            ChipUiModel.kt            ChipPreviews.kt
-  row/         ListRow.kt         ListRowUiModel.kt         ListRowPreviews.kt
-  header/      SectionHeader.kt   PageMasthead.kt           SidebarLabel.kt
-  badge/       Badge.kt           CoverOverlay.kt
-  callout/     Callout.kt         Banner.kt
-  state/       EmptyState.kt      Skeleton.kt               ErrorState.kt
-  statistic/   StatTile.kt        Chart.kt                  Legend.kt
-  progress/    ProgressIndicator.kt
-  sheet/       SheetScaffold.kt   SheetHeader.kt            SheetRow.kt   SheetFooter.kt
-  topbar/      TopBar.kt          SearchTopBar.kt           BackBar.kt
-  control/     Toggle.kt          SegmentedControl.kt       TextField.kt  Divider.kt
-  share/       ShareCard.kt       + one file per card body  (§ 7.0)
-  gallery/     GalleryRegistry.kt GalleryEntry.kt
++ badge/       Badge  BadgeUiModel/Tone/Variant/Dimensions  CoverOverlay(+UiModel)
++              DeadlineSummaryLine(+UiModel, +Tone)                          S4-5b
++ callout/     Banner  BannerUiModel  BannerTone            · Callout        S4-5a
++ celebration/ MarkAsReadBurst  MarkAsReadBurstUiModel                       S4-5a
++ chip/        Chip  ChipUiModel  ChipEvent                                  S4-5a
++ control/     ThemePreviewTile  ColorPalettePreviewTile  PreviewTile
++              ThemeTilePainting  RichTextFormattingToolbar                  S4-2b/S4-5a
++              · Toggle  · SegmentedControl  · TextField                     S8
++ cover/       Cover  CoverUiModel  CoverVariant  CoverSource
++              CoverDimensions  CoverlessTitleCover  MonogramCoverMetrics    S4-4
++ gallery/     GalleryRegistry  GalleryEntry  GalleryFamily
++              GalleryFixture  UiModelPreviews                               S2
++ lists/       ChooseListsBottomSheet  ChooseListsUiModel/RowUiModel
++              ChooseListsVariant  ChooseListsEvent  ListMembership          S4-3
++ progress/    UpdateProgressBottomSheet  ProgressSheetUiModel
++              ProgressSheetEvent  ProgressSheetTab  ProgressSheetMedium     S4-3
++              · ProgressIndicator                                           S9
++ richtext/    RichText  RichTextUiModel  RichTextRun/Mark/Paragraph
++              RichTextEditing  RichTextEditorBuffer  ClickableText(+UiModel) S4-2b
++ share/       ShareCard  ShareCardUiModel  ShareCardDimensions
++              one file per card body  ShareCardNumerals                     S4-2b/S4-6
++ sheet/       LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent          S4-5a
++              · SheetScaffold  · SheetHeader  · SheetRow  · SheetFooter     S6
++ state/       EmptyState  EmptyStateUiModel   · Skeleton  · ErrorState      S4-5a
++ statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
++              · StatTile  · Chart  · Legend                                 S4-5a
++ topbar/      TopBar  TopBarUiModel/Event/Navigation/Surface
++              SearchTopBar(+UiModel, +Event)   · BackBar                    S4-5a
++ verdict/     VerdictBlock  VerdictSheet  VerdictSheetContext               S4-2b
+· bookcard/    BookCard  BookCardUiModel/Variant/Content/Decorations
+·              BookCardEvent  BookCardKey                                    S7
+· row/         ListRow  ListRowUiModel                                       S6
+· header/      SectionHeader  PageMasthead  SidebarLabel                     S5/S6
 ```
+
+**No `*Previews.kt` third file.** The original plan gave each family one; S2 landed R5 as the
+`UiModelPreviews<T>` interface instead, so fixtures live on the model's companion inside the model's
+own file and forgetting them is a compile error rather than a missing file.
+
+Two directories now mean something other than the plan intended, which is fine but worth saying out
+loud: `control/` holds the Appearance preview tiles and the rich-text toolbar rather than form
+controls, and `sheet/` holds `LoadingSheet` rather than the chrome primitives S6 will add beside it.
 
 **The gallery splits across two modules.** The *registry* — the list of every component paired with
 its `previews` fixtures — is pure data and lives in `:core:component/gallery/`. The *screen* lives in
@@ -210,138 +265,40 @@ Voyager. See § 5a.
 
 ---
 
-## 4. The UI model contract
+## 4. The UI model contract — moved
 
-This is the decision that determines whether the library is any good. It must be written down
-**before** the first component moves, or the 21 book cards each invent their own convention.
+**The contract is normative and lives in
+[`docs/reference/design-system/component-contract.md`](../reference/design-system/component-contract.md)
+§ 7 (R1–R11). Read it there.**
 
-> **Canonical as of S2:** this contract now lives in
-> [`docs/reference/design-system/component-contract.md`](../reference/design-system/component-contract.md)
-> as § 7 of the design system, and that file is the one to read and to keep current. What follows is
-> the drafting record — where the two disagree, the design-system doc is right.
+This section used to carry a drafting copy alongside it, marked "canonical as of S2" but kept for the
+record. By S4-6 the copy had drifted far enough to be actively misleading, so it was deleted rather
+than re-synced:
 
-### 4.1 Signature
+- it never gained **R9** (mapping happens off the composition), **R10** (a model is never built in
+  composition) or **R11** (model, `onEvent`, `modifier` — nothing else), all three written mid-migration;
+- its R3 said `kotlinx-collections-immutable` was not in the version catalog and had to be added — it
+  went in during **S1**, which this file's own § 5 bullet records twenty lines further down;
+- its R5 predated `UiModelPreviews<T>`, so it described fixtures as a plain companion property rather
+  than the compile-checked interface that shipped in S2;
+- its § 4.3 worked example — the part explicitly sold as *"read it before writing any new
+  component"* — still pointed at `core/designsystem/presentation/share/`, a directory deleted in
+  S4-2b, named types (`ShareContent`, `BookShareContent`) renamed by R8 in the same commit, and
+  listed two "gaps to close" that are both closed.
 
-```kotlin
-@Composable
-fun BookCard(
-    model: BookCardUiModel,
-    onEvent: (BookCardEvent) -> Unit,
-    modifier: Modifier = Modifier,
-)
-```
+**The lesson, which is the reason this is a deletion and not an update.** A normative rule set with
+two homes has one real home and one trap; the trap is the copy that is *nearly* right, because it
+reads as authoritative and nothing fails when it rots. This repo already made that call once — the
+Roadmap section of `CLAUDE.md` records retiring four layered planning docs because a shipped item had
+to be deleted from up to five places. The same argument applies to a contract. **Do not re-copy the
+rules here.** Where this tracker needs to talk about a rule, it cites the number and links.
 
-### 4.2 Rules
-
-**R1 — One sealed event lambda, never N callbacks.**
-`onEvent: (BookCardEvent) -> Unit` with `BookCardEvent` sealed (`Click`, `LongClick`,
-`ToggleSelected`, `Bookmark`, `Overflow`), each event carrying the model's key. A per-item
-`onClick = { ... }` lambda allocates fresh on every recomposition and kills skippability across a
-500-item library grid; one hoisted lambda plus a key does not.
-
-**R2 — Sealed variants, not a flat enum beside nullable soup.**
-
-```kotlin
-data class BookCardUiModel(
-    val key: BookCardKey,                  // identity + shared-element transition key
-    val content: BookCardContent,          // cover, title, subtitle, badges — always present
-    val variant: BookCardVariant,          // sealed: Grid | CoverOnly | Row(density) |
-                                           //         Rail | Featured(backdrop) | Tile
-    val decorations: BookCardDecorations,   // progress?, selection?, trailing?
-)
-```
-
-`BookCard` does `when (model.variant)` and dispatches to private per-variant layout composables. The
-public surface stays one symbol. This makes illegal states unrepresentable — `CoverOnly` cannot carry
-a subtitle, `Featured` cannot carry a selection circle — where the flat-enum shape would allow both
-and every caller would have to remember not to.
-
-**R3 — Stability is a hard requirement.**
-There is no `stabilityConfigurationFile` in the build and no `kotlinx-collections-immutable` in
-`gradle/libs.versions.toml` today. A UI model holding `List<Badge>` is unstable, so every card in
-every grid recomposes every frame. **Add `kotlinx-collections-immutable`** and type every collection
-in a UI model as `ImmutableList` — compiler-checked, versus a stability config file that drifts
-silently.
-
-**R4 — Presentation-ready values only.**
-Formatted strings, resolved icon tokens, computed fractions. No `Instant`, no `DeadlineStatus`, no
-`UserBook`. `DeadlineBadge(status: DeadlineStatus)` becomes `Badge(model: BadgeUiModel)` where the
-*feature* already decided the label and the tone.
-
-**R5 — Every UI model ships preview fixtures.**
-`BookCardUiModel.Companion.previews: ImmutableList<BookCardUiModel>` in `:core:component`. These are
-the Component Gallery's data **and** the mappers' expected outputs, so a component's preview set and
-its test set cannot diverge.
-
-**R6 — Mapper placement.**
-A mapper starts in the consuming feature's `presentation/mapper/`. It is promoted to
-`:core:uibinding` **on its second consumer**. Two features independently writing the identical
-mapper is the promotion signal; two features needing *different* mappings onto the same UI model is
-the system working as intended.
-
-**R8 — Suffix is `*UiModel`, not `*Content`.**
-The `share/` package already names these types `*ShareContent` (§ 4.3). Standardize on `*UiModel`
-and rename them during S4. Reason: `Content` is heavily overloaded here as a *composable* name —
-every feature has a `Content`, plus `AboutContent`, `RoadmapContent`, `EditionBottomSheetContent`,
-`ProgressBottomSheetContent`, `SessionPeekBarContent`, `ReadingLifeContent`, `ProfileContent`. Using
-it as a data-type suffix as well makes the two concepts unreadable in imports. `*UiModel` is
-unambiguous.
-
-**R7 — Shared-element keys travel in the model.**
-`bookCoverTransitionKey(editionId, bookId, surface)` lives in
-`core/designsystem/.../transition/SharedElementScopes.kt` and stays in the token module. The
-resolved key string is a field on `BookCardKey`; the component never computes it.
-
-### 4.3 Reference implementation — `ShareCard` already does this
-
-**Correction to an earlier reading of this codebase:** the contract above is *not* net-new. No type
-is named `*UiModel`, but `core/designsystem/presentation/share/` is a working, shipped instance of
-R2 under a different name. Read it before writing any new component — it is the model to copy.
-
-```kotlin
-// share/ShareContent.kt
-sealed interface ShareContent
-
-// share/BookShareContent.kt — presentation-ready primitives only, zero domain types
-data class BookShareContent(
-    val coverUrl: String?,
-    val title: String,
-    val author: String,
-    val communityRating: Double?,
-    val userRating: Int?,
-    val releaseYear: Int?,
-    val pageCount: Int?,
-    val description: String?,
-    val quote: String?,
-) : ShareContent
-
-// share/ShareCard.kt:68 — ONE public symbol, `when` dispatch to private per-variant bodies
-@Composable
-fun ShareCard(content: ShareContent, modifier: Modifier = Modifier) { ... }
-```
-
-It satisfies R2 (sealed variant, single public symbol, private per-variant bodies) and R4 for five of
-its six variants, and it even carries a per-variant sizing table
-(`ShareCardDimensions.forContent(content)`) — the pattern to reuse wherever a variant needs its own
-metrics.
-
-Two gaps to close, not two reasons to distrust it:
-
-- **R4 gap:** `ShareCard.kt` still imports `ReviewDocument`, `ReviewParagraph`, `ReviewRun`, and
-  `ThemeMode` from `:core:domain`. See the rich-text item in § 7.0.
-- **R8 gap:** the `*ShareContent` naming. Renamed in S4.
-
-### 4.4 Where consolidation is the wrong call
-
-Families consolidate on **shared anatomy, not shared category name.** Record the judgement calls
-here so they are not re-litigated mid-migration:
-
-| Do collapse | Do **not** collapse | Why |
-|---|---|---|
-| The four `*InfoCallout`s -> one `Callout` with a tone variant | `SoftcoverTopBar` and `SoftcoverSearchTopBar` | The design-system doc already specifies the search bar's bespoke focus contract (`focused` driven by the caller, `onSearchActivated`/`onSearchDismissed`/`onClearSearch` as intents). Merged, it is one component with two disjoint parameter sets. |
-| The 21 book cards -> one `BookCard` | The 18 sheet **bodies** | Consolidate sheet *chrome* (`SheetScaffold`/`SheetHeader`/`SheetRow`/`SheetFooter`); leave each body a feature composable built from those parts. `LibraryFilterSheet` and `TagEditorBottomSheet` share no anatomy — a variant enum over them would be a component in name only. |
+What stays here is the *history* the canonical doc does not carry: § 5i records why R9 had to be
+written mid-migration, § 5l why R10 did, § 5m why `DeadlineSummaryTone` exists instead of a
+`foreground` parameter, and the **S11** stage (§ 5) carries the R10/R11 retrofit with its holdout list.
 
 ---
+
 
 ## 5. Stages
 
@@ -352,10 +309,10 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       (`softcover.kmp.library` + `softcover.kmp.compose`); added `kotlinx-collections-immutable`
       (0.4.0) to `gradle/libs.versions.toml`; extended `checkModuleGraph` with the § 6 ban list.
       Nothing moved yet. **See § 5b for two findings that changed the design.**
-- [x] **S2 — Contract & gallery scaffold.** DONE. § 4 is written into
+- [x] **S2 — Contract & gallery scaffold.** DONE. The contract is written into
       `docs/reference/design-system/component-contract.md` as § 7 of the design system, citing
-      `ShareCard` as the reference implementation (§ 4.3) — **that doc is now canonical for the
-      contract; § 4 here is the drafting record.** Landed the `previews` fixture pattern as a
+      `ShareCard` as the reference implementation (its § 7.3) — **that doc is the only home for the
+      contract; § 4 here kept a drafting copy until S4-6 deleted it.** Landed the `previews` fixture pattern as a
       compile-checked interface (`UiModelPreviews<M>`), the `GalleryRegistry` / `GalleryEntry` /
       `GalleryFixture` / `GalleryFamily` scaffold in `:core:component`, and the
       `ComponentGalleryScreen` + its TOAD wiring + the easter-egg tap gesture in `feature:settings`.
@@ -365,7 +322,7 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       `:core:designsystem` into `:core:presentation` — 27 files — and re-pointed 92 consumer files
       across 11 modules. No UI change, no behaviour change. **See § 5e for what this stage settled,
       including the one thing S3's own description here had wrong.**
-- [ ] **S4 — Tokens-only designsystem.** *(S4-1 … S4-5b done; only S4-6 remains.)* Move the existing `core:designsystem` components into
+- [x] **S4 — Tokens-only designsystem.** DONE. Move the existing `core:designsystem` components into
       `:core:component`, converting each to a UI model as it moves (they cannot land domain-typed —
       the gate rejects it). Write their mappers per R6. Includes the `share/` package: split the six
       card bodies one-per-file, rename `*ShareContent` -> `*ShareCardUiModel` per R8, and close its
@@ -380,7 +337,8 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       compiling; § 5f records what each settled.
 
       **Re-cut after § 5g** — the original ordering moved shared leaves before their consumers, which
-      the direction rule makes impossible. Six sub-commits, ordered consumer-first:
+      the direction rule makes impossible. Six sub-commits, ordered consumer-first (it took ten —
+      see the status header):
 
       - [x] **S4-1 — Break the theme's domain coupling.** `SpinePalette` token, `SoftcoverTheme` on a
             resolved `darkTheme: Boolean`, `LocalThemeConfiguration` + `ThemeMode.isDark()` to
@@ -407,7 +365,7 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
             non-Compose `resolveEditionImageSource` — 32 across 13 files; the "38 in 9" this line used
             to claim was wrong in both directions). Killed the `:core:book` edge and **closed G3**.
             **See § 5k.**
-      - [ ] **S4-5 — The remaining primitives**, in two commits (§ 5l):
+      - [x] **S4-5 — The remaining primitives**, in two commits (§ 5l):
             - [x] **S4-5a — the domain-free primitives.** `PillChip` -> `Chip`, `SoftcoverTopBar` ->
                   `TopBar` (+ `SearchTopBar`), `AnimatedStatNumber` -> `StatNumber`,
                   `ConnectivityBanner` -> `Banner`, `OfflineScreenContent` -> `EmptyState`,
@@ -421,7 +379,12 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
                   `:core:component`'s `badge/`, with their `:core:uibinding` mappers and six R9/R10
                   collectors across five features. Emptied `:core:designsystem`'s dependency block
                   and landed **G2**, both halves. **See § 5m.**
-      - [ ] **S4-6 — Close the boundary**: zero project deps, G2, G3, the doc rewrite.
+      - [x] **S4-6 — Close the stage.** DONE. Its gate work had all been forced early (G3 by S4-4,
+            G2 by S4-5b), so what landed was the `ShareCard.kt` per-body split (§ 7.0) plus a close-out
+            that turned out to be the larger half: an audit of **this file** against the tree deleted
+            § 4's drifted second copy of the component contract, corrected § 3a's inverted
+            allowlist analysis, ticked seven § 7 boxes whose work had landed in S4-5a, and re-pointed
+            a dozen dead module paths. The hand-off doc is deleted. **See § 5n.**
 - [ ] **S5 — Primitives** (§ 7.1): chips/pills, badges/overlays, headers/labels, dividers, skeletons.
 - [ ] **S6 — Rows & sheet chrome** (§ 7.2).
 - [ ] **S7 — `BookCard`** (§ 7.3). The main event, and the risk concentration point.
@@ -436,8 +399,8 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       `MarkAsReadBurstUiModel` in book detail / reading / the motion debug screen, the file-constant
       `TopBarUiModel`s on the nine static bars, `ClickableTextUiModel` in onboarding and the roadmap,
       `ChipUiModel`'s `copy(selected = …)` against the Library filter sheet's composition-local draft,
-      `LoadingSheetUiModel` in onboarding, and the `ChipUiModel`s built inline in `ShareCard` and the
-      Component Gallery screen.
+      `LoadingSheetUiModel` in onboarding, and the `ChipUiModel`s built inline in the share cards
+      (`share/ReadingUpdateShareCardBody.kt` since S4-6's split) and the Component Gallery screen.
 
       **R11 — a component takes only its model, its event lambda and a modifier.** Every loose render
       parameter becomes a model property, expressed as a surface-named variant plus a metrics table
@@ -477,7 +440,7 @@ Koin artifact a module must *opt into* to do DI from UI (`koin-compose`, `koin-a
 the injected `koin-core`.
 
 **2. Scaffolded modules must declare ZERO project dependencies.**
-The unused-dependency check is `severity("fail")` (root build file, ~line 311), so a
+The unused-dependency check is `severity("fail")` (the `dependencyAnalysis` block in the root build), so a
 declared-but-unused `api(project(":core:designsystem"))` in an empty module breaks the dependency
 health gate. Dependencies are therefore declared by the stage that first *uses* them —
 `:core:component -> :core:designsystem` in S2, the `:core:presentation` edges in S3, the
@@ -755,7 +718,7 @@ UI-model work, and it takes 381 lines out of S4-2b while doing three other thing
 — a KMP Android library, which produces a **single variant** — so only their *binding* was
 build-type-stripped; the screens themselves shipped to every user. `app/src/debug/` on
 `debugImplementation` is the first time that is actually true. `:app` is the only module with build
-types, and the tier rule (`build.gradle.kts:252`) forbids `:app` -> `:feature:settings`, so the shell
+types, and the tier rule (`tierOf` / `tierAllowances` in the root build) forbids `:app` -> `:feature:settings`, so the shell
 is the only home available — the Settings surface that reveals them cannot host them.
 
 **`:core:designsystem` dropped Voyager.** `voyager-navigator` was `api`-exposed for these three screens
@@ -1529,6 +1492,138 @@ investigation above. The rest is still unseen: no deadline-carrying book was on 
 cover-overlay / summary-line trio has not been watched rendering from its new models. The gallery now
 carries a `BADGE` family with three entries, which is the cheapest way to close that.
 
+### 5n. S4-6 outcome — a stage that kept shrinking, and what "pure file surgery" still costs
+
+S4-6 closed S4. It was a third of the size this file advertised for it, and the reason is worth
+writing down because it happened three times in a row.
+
+**The stage kept being overtaken by its own gates.** § 5 scheduled S4-6 as "zero project deps, G2,
+G3, the doc rewrite". By the time it ran, all four were done. `onUnusedDependencies` is
+`severity("fail")`, so a commit that deletes the last user of a dependency *cannot* leave the
+dependency declared — the build is red until it goes. S4-4 deleted `EditionImage.kt` and was forced
+to drop `:core:book` (G3); S4-5b deleted the `Deadline*` trio and was forced to empty the block
+entirely (G2). § 6a even predicted the opposite in prose — it said G2 "lands in S4-6" — and was
+wrong for the same reason twice over. **The generalisable rule: a gate that asserts the absence of
+something cannot be scheduled independently of the commit that removes the last of it.** Where a
+gate and a deletion describe the same fact, the deletion sets the date. Plan the gate's *wording*
+early; do not plan its *commit*.
+
+The doc sweep went the other way, and this is the finding worth carrying forward. S4-5b's close-out
+had already brought the *reference* docs current — `components.md` and `module-structure.md` needed
+nothing — so the "doc rewrite" looked like four lines of stale scheduling prose plus one future-tense
+comment in the root build. An audit of **this file** against the tree found far more, because nothing
+had ever checked it:
+
+- **§ 4 carried a second copy of the component contract.** It never gained R9, R10 or R11; its R3
+  claimed `kotlinx-collections-immutable` still had to be added to the version catalog, which S1 had
+  done and which this file's own § 5 bullet says twenty lines below it; its R5 predated
+  `UiModelPreviews<T>`; and its § 4.3 worked example — the part billed as *"read it before writing any
+  new component"* — pointed at a directory deleted in S4-2b, named two types renamed in that same
+  commit, and listed two "gaps to close" that were both closed. **Deleted, not re-synced**, and § 4
+  now says why.
+- **§ 3a's cost analysis was inverted.** It said the migration's `api` edges needed "no allowlist row
+  at all". Two rows exist, and the rule they answer to was renamed `apiSignOffModules` and *widened to
+  include the migration's own three modules* by § 6a's audit. The prediction was about a rule the
+  migration then changed.
+- **Seven § 7 boxes were unticked for work that had landed**, mostly in S4-5a: `PillChip`→`Chip`,
+  `SoftcoverTopBar`→`TopBar`, `AnimatedStatNumber`→`StatNumber`, `ConnectivityBanner`→`Banner`,
+  `OfflineScreenContent`→`EmptyState`, `SoftcoverLoadingSheet`→`LoadingSheet`, and
+  `SoftcoverTopBarAction`, which was deleted rather than migrated and had no box for that outcome.
+  Two more (`ConcealableTagChip`, `Cover`) were half-done and are now split so the remainder is
+  visible.
+- **Roughly a dozen open items pointed at `core/designsystem/presentation/component/`**, a directory
+  that no longer exists. § 7's preamble licenses *line* drift; it does not license a dead module path,
+  which sends a reader looking for a file rather than a line.
+- **§ 7.6 still excluded `EditionImage`'s platform bodies as out of scope.** They went into
+  `:core:uibinding` in S4-4. That is the *second* "it stays put" exclusion in that section to be
+  wrong, after the debug screens.
+
+**The pattern behind all five: a working tracker rots in exactly the places nothing reads back.**
+Checkboxes get ticked by whoever does the work; prose written once at the top, and checklist entries
+for stages still years away, are read by nobody until someone needs them — which is the moment they
+mislead. Two cheap habits fall out of it, and both are now this file's practice: **cite symbols, not
+line numbers** (every `build.gradle.kts:NNN` in here was wrong, so they are gone), and **never keep a
+second copy of a normative rule** — `CLAUDE.md`'s Roadmap section already retired four planning docs
+over that exact failure, and § 4 was the same bug wearing a contract.
+
+**So what actually landed was the `ShareCard.kt` split.** 1,061 lines became eight files — the
+§ 2 baseline's 1,161 had already lost about a hundred to S4-2b's rename, and the baseline figures in
+§ 2, § 7.0 and Appendix A are left alone on purpose, because a baseline that gets edited forward
+stops being one. The dispatch and `ShareCardSignOff` stayed in `ShareCard.kt` (~100 lines), each of
+the six card bodies took its own file with its private parts and its `@Preview`s, and `TABULAR_NUMS`
+took a `ShareCardNumerals.kt` of its own. Every declaration moved byte-for-byte; the split was
+verified by sorting the old file's non-import lines against the new files' and diffing, which left
+exactly three intended differences and nothing else.
+
+Review then found a fourth, which the diff could not: a dead
+`@OptIn(ExperimentalLayoutApi::class)` on `ReadingLifeShareCardBody`, whose only remaining reference
+was the annotation's own import. It has been dead since before the split — the body uses no
+`FlowRow` — and it survived precisely because a sorted-line diff proves *equality*, not *necessity*.
+Removed, and it is the one change here that is not byte-for-byte.
+
+**"Pure file surgery" is not visibility-neutral, and that is the one thing to expect next time.** A
+top-level `private` in Kotlin is *file*-scoped, so the moment `ShareCard`'s dispatch `when` calls a
+body across a file boundary, that body cannot stay private. The six bodies are now `internal` —
+still invisible outside `:core:component`, but no longer invisible outside their own file. Nothing
+else widened: every file-local helper (`buildBookStatsLine`, `ReadingUpdateReaderIdentity`, the seven
+`ReadingLife*` parts, the fixture `val`s, all nine previews) stayed `private` in its new home. Worth
+knowing before the next split is proposed as cost-free: **splitting a file always widens something,
+and the question is only how much.** Here the answer was six symbols and no public surface, which is
+why it was still the right call.
+
+**Two things left standing on purpose, so neither reads as an oversight:**
+
+- **`ShareCard`'s two parallel colour `when`s.** The dispatcher resolves `surfaceColor` and
+  `contentColor` with two separate six-arm `when (content)` blocks — precisely the shape R2 says to
+  replace with a per-variant lookup, and `ShareCardDimensions.forContent` is sitting in the same
+  package as the pattern to copy. Folding them into a `ShareCardPalette` is a *type* change, and this
+  commit was scoped as file surgery; mixing the two would have made the diff unreadable against the
+  original, which is the same reason S4-2b did not split the file in the first place. It is a
+  candidate for S11, which is already opening these call sites.
+- **`TABULAR_NUMS` is now the family's fourth copy.** Splitting the file forced the constant out of
+  `ShareCard.kt`, and doing so surfaced that `"tnum"` already exists as three identical `private
+  const`s (`EditorialTypography.kt`, `statistic/StatNumber.kt`, and here) plus roughly fourteen inline
+  literals across six feature modules. The honest fix is one token in `:core:designsystem`, ~17 call
+  sites, and a `foundations.md` bullet — a real cross-cutting change that does not belong inside a
+  file move. Recorded here rather than done, which is the same call § 5k made about `CoverVariant`'s
+  3dp/4dp drift.
+
+**One box was stale rather than open.** § 7.0's `ReviewCard` entry had never been ticked, but the
+work landed in S4-2b: it takes `BookReviewUiModel`, whose `body` is a `RichTextUiModel`, so no domain
+type reaches it. The component itself stays in `feature:book_detail` — it never lived in
+`:core:designsystem`, so only the R4 conversion was ever in S4's scope. Checking an unticked box
+against the code before believing it is cheaper than the alternative, and this file has now been
+wrong in both directions.
+
+**Not attempted, and named so it is not mistaken for an omission:** `progress/UpdateProgressBottomSheet.kt`
+is 1,200 lines — larger than `ShareCard.kt` was — and is on no checklist. It is one component with
+one public symbol, so it breaks no rule; but if the per-body split was worth doing here, that file is
+the next place to ask the question. S10 or S12, not S5.
+
+**Gates:** `checkModuleGraph` (303 edges), `ktlintCheck`, repo-wide `compileKotlinJvm` +
+`:desktopApp:compileKotlin` + both `:app` variants, repo-wide `compileKotlinIosSimulatorArm64`,
+`:core:component:projectHealth`, and whole-repo `styleCheck` under JDK 21 — all green.
+
+**Tests: 3,519 completed, 0 failed — and the standing "5 pre-existing failures" caveat is retired.**
+§ 5m recorded five `AndroidLegacySecureApiKeyStorageTest` failures in the untouched
+`:core:preferences` as an unavoidable baseline ("no Android Keystore on the JVM host"). They do not
+reproduce: run under the same JDK 21 that detekt already needs, all five pass and the suite is
+wholly green. They were a JDK 26 artefact, like the two toolchain problems in this file's header,
+not a property of the tests. Two practical consequences: **use
+`JAVA_HOME=…/jbr-21.0.11/… ./gradlew testAndroidHostTest --continue`**, and do not compare a future
+run against "3,519 / 5". Note also that the plain `test` lifecycle task reaches none of this — it
+runs `:app` and `:desktopApp` only, and on JDK 26 it dies in `:app:compileDebugJavaWithJavac` before
+reaching even those; `testAndroidHostTest` is the task that runs the 850 KMP suites.
+
+**A note on the import sets, since the method generalises.** Neither ktlint nor the Kotlin compiler
+reports an unused import in this build, so a split file can silently carry imports it does not need
+and nothing complains. Hand-auditing them by grep does not work either: `height = dimensions.height`
+is a named argument, not the `Modifier.height` extension, and the two are indistinguishable by
+pattern. What does work is deleting every import and letting the compiler name what it cannot
+resolve, round by round until it converges — each round exposes the next layer, because an
+unresolved receiver hides its own extensions. Five rounds here, and the resulting set is minimal by
+construction: every import in these files was demanded by the compiler.
+
 ### 5a. The Component Gallery — decided: shipped easter egg
 
 Not debug-only. Consequences to build for, rather than discover late:
@@ -1559,8 +1654,8 @@ hardest family.
 
 ## 6. Gates
 
-Convention does not hold a boundary — `:core:designsystem` is the proof, and `build.gradle.kts:264`
-already says so in a comment. Every rule below is a build failure.
+Convention does not hold a boundary — `:core:designsystem` is the proof, and the root build's
+module-graph comment already said so before this migration started. Every rule below is a build failure.
 
 - [x] **G1 — `:core:component` ban list.** DONE in S1. `checkModuleGraph` now carries
       `componentLibraryAllowedProjects`, `componentLibraryBannedGroups`, and
@@ -1595,15 +1690,16 @@ already says so in a comment. Every rule below is a build failure.
             rule at least closes the case where a stray `import` survives a dependency removal
             (possible while another module on the compile classpath still `api`-exposes the type).
 - [x] **G3 — DONE in S4-4. The `:core:designsystem` -> `:core:book` api allowlist row is gone** from
-      `allowedApiDataEdges` (`build.gradle.kts:281` — note the row list has since grown two rows and
-      the set that drives it was renamed `apiSignOffModules`; see § 6a).
+      `allowedApiDataEdges` — note the row list has since grown two rows and the set that drives it
+      was renamed `apiSignOffModules`; see § 6a.
 - [ ] **G4 — Composable budget ratchet.** A `checkComponentBudget` task counting `@Composable`
       declarations outside `:core:component`, excluding only (a) functions whose name ends in
       `Preview` and (b) platform `expect`/`actual` composables (`BarcodeScanner`). Ceiling set to
       the post-migration measured value; a rise fails the build. Wire into `check`.
 - [ ] **G5 — Doc rule.** `docs/reference/design-system/` updated. Already enforced by
       `rhaydus-kotlin:code-reviewer`, which treats a design-system change without a doc update as a
-      blocker. `components.md` is 83KB today and will need splitting per family, mirroring the
+      blocker. `components.md` was 83KB when this was written and is **96KB** after S4 — it grows
+      with every family the library absorbs, so it will need splitting per family, mirroring the
       § 3 package layout.
 - [ ] **G6 — `./gradlew check` green**, including `styleCheck` (type-resolved detekt across every
       module) and `ktlintCheck`.
@@ -1625,7 +1721,7 @@ api(:core:component)` (§ 3a — seeing both sides of a mapping *is* the module)
 `:feature:book_detail -> api(:core:presentation)` (§ 5e). `:core:domain` and `:core:designsystem` are
 deliberately left out: domain is a dependency-free contract module (§ 3a settled that it may
 `api`-expose freely, and gating it would mean allowlisting ~15 legitimate edges), and designsystem is a
-leaf once G2 lands.
+leaf now that G2 has landed.
 
 **2. The direction rule (§ 5g) had no gate at all** — the rule that re-cut this entire stage. A
 reverse edge inside the UI stack is usually a Gradle *cycle*, so it did fail, but with a task-graph
@@ -1634,13 +1730,14 @@ It also catches the non-cyclic case: `:core:designsystem -> :core:presentation` 
 still forbidden, since establishing that those two sit side by side rather than stacking was the whole
 point of S3.
 
-**Pending, and already scheduled — not blind spots:** G2 (`:core:designsystem` zero project
-dependencies) lands in S4-6, because designsystem still `api`-depends on `:core:domain` for the
-`Deadline*` trio until S4-5. **G3 did not wait for S4-6 and could not have:** `onUnusedDependencies`
-is `severity("fail")`, so deleting `EditionImage.kt` made `api(project(":core:book"))` and
-`api(libs.coil3)` unused in the same commit — dropping them, and the allowlist row with them, was
-required for S4-4 to be green rather than optional cleanup. G4
-(`checkComponentBudget`) is S12's, since the count is still falling.
+**Pending, and already scheduled — not blind spots:** G4 (`checkComponentBudget`) is S12's, since
+the count is still falling. **Neither G2 nor G3 waited for S4-6, and neither could have:**
+`onUnusedDependencies` is `severity("fail")`, so the commit that empties a dependency block is
+forced to drop it. Deleting `EditionImage.kt` made `api(project(":core:book"))` and `api(libs.coil3)`
+unused in S4-4, taking the allowlist row with them (G3); deleting the `Deadline*` trio emptied the
+rest in S4-5b (G2). Both were required for their stage to be green rather than optional cleanup.
+This paragraph said the opposite until S4-6 corrected it — the audit predicted a schedule the build
+would not permit, which is § 5n's point.
 
 **New follow-up this audit surfaced**, and it is now tracked as work rather than prose: G2 is a
 **pair** of gates, not one — the dependency assertion plus a source-level `ForbiddenImport` scoped to
@@ -1694,31 +1791,29 @@ file suffix — `.jvm.kt` -> `jvmMain`, `.mobile.kt` -> `mobileMain`, `.android.
 
 ### 7.0 The `:core:designsystem` migration (S4)
 
-These two land in S4, before every family below. The share cards are the reference implementation (§ 4.3); rich text blocks `QuoteShareCardBody` and `VerdictSheet`.
+These two land in S4, before every family below. The share cards are the reference implementation (`component-contract.md` § 7.3); rich text blocks `QuoteShareCardBody` and `VerdictSheet`.
 
 #### Share cards — 1,161 lines -> `share/` in `:core:component`, one file per body
 
-> **The per-body file split is still open.** S4-2b moved `share/` and did the R8 rename and the R4
-> fix, but `ShareCard.kt` is still one file — splitting it was not needed to satisfy any gate, and
-> doing it in the same change as the module move would have made an already-large diff harder to read
-> against the original. The seven items below are the remaining work; they are pure file surgery with
-> no type changes, so they can land in any later sub-commit of S4.
+> **DONE in S4-6.** S4-2b moved `share/` and did the R8 rename and the R4 fix but left
+> `ShareCard.kt` one file, because splitting it satisfied no gate and would have made an already-large
+> diff harder to read against the original. S4-6 split it into eight files, with every declaration
+> carried across byte-for-byte. The one thing it could not keep was visibility — see § 5n.
+>
+> The heading's 1,161 is the § 2 baseline figure and stays that way, per this section's preamble.
+> The file was **1,061** lines when S4-6 opened it: S4-2b's `*ShareContent` -> `*ShareCardUiModel`
+> rename and R4 fix had already taken about a hundred lines out of it.
 
-**Recommendation: do this in S4, not S12, and split the bodies while renaming.** S4 already touches
-every `:core:designsystem` component; leaving this file whole means either it does not get UI models
-in S4 (and then fails G1, since it imports `:core:domain`) or it does and stays a 1,161-line
-monolith that S12 has to re-open. One pass, not two.
-
-The dispatch and the `*ShareContent` types are already correct (§ 4.3) — this is a rename plus a
+The dispatch and the `*ShareContent` types are already correct (`component-contract.md` § 7.3) — this is a rename plus a
 mechanical split plus one real piece of work (rich text, below).
 
 - [x] Keep `ShareCard(content:)` dispatch + `ShareCardSignOff` + `ShareCardDimensions` in `ShareCard.kt` (`share/ShareCard.kt:68,959`)
-- [ ] `BookShareCardBody` -> own file (`share/ShareCard.kt:132`, + `buildBookStatsLine:226`)
-- [ ] `ReadingUpdateShareCardBody`, `ReadingUpdateReaderIdentity` -> own file (`:243,377`)
-- [ ] `StatShareCardBody` -> own file (`:408`)
-- [ ] `QuoteShareCardBody` -> own file (`:433`) — carries the R4 rich-text gap
-- [ ] `YearRecapShareCardBody` -> own file (`:472`)
-- [ ] `ReadingLifeShareCardBody` + its parts (`MiniScallopPortrait:677`, `ReadingLifeRidgeline:721`, `ReadingLifeGenreRanking:824`, `ReadingLifeGenreRow:851`, `ReadingLifeFooterStat:887`, `ReadingLifeDivider:924`, `normalizedReadingLifeMonths:933`, `readingLifeInitials:943`) -> own file
+- [x] `BookShareCardBody` -> own file (`share/BookShareCardBody.kt`, + `buildBookStatsLine`)
+- [x] `ReadingUpdateShareCardBody`, `ReadingUpdateReaderIdentity` -> own file (`share/ReadingUpdateShareCardBody.kt`)
+- [x] `StatShareCardBody` -> own file (`share/StatShareCardBody.kt`)
+- [x] `QuoteShareCardBody` -> own file (`share/QuoteShareCardBody.kt`) — the R4 rich-text gap closed in S4-2b, so this was the mechanical half
+- [x] `YearRecapShareCardBody` -> own file (`share/YearRecapShareCardBody.kt`)
+- [x] `ReadingLifeShareCardBody` + its parts (`MiniScallopPortrait`, `ReadingLifeRidgeline`, `ReadingLifeGenreRanking`, `ReadingLifeGenreRow`, `ReadingLifeFooterStat`, `ReadingLifeDivider`, `normalizedReadingLifeMonths`, `readingLifeInitials`) -> `share/ReadingLifeShareCardBody.kt`
 - [x] Rename per R8: `ShareContent` -> `ShareCardUiModel`; `BookShareContent`, `QuoteShareContent`, `StatShareContent`, `YearRecapShareContent`, `ReadingLifeShareContent`, `ReadingUpdateShareContent` -> `*ShareCardUiModel`
 - [x] Update the two mappers that build them: `feature/book_detail/presentation/component/ReadingUpdateShareContentMapper.kt` (and its existing test) and the `ProfileShareBottomSheet` / `ReadingLifeSharePreview` construction sites in `feature/profile`
 
@@ -1740,22 +1835,23 @@ early in S4 — `QuoteShareCardBody` and `VerdictSheet` both block on it.
 - [x] `ReviewMark` / `ReviewMarkType` — `core/designsystem/presentation/component/ReviewMark.kt`, `ReviewMarkType.kt`
 - [x] `ReviewEditorBuffer` — `core/designsystem/presentation/component/ReviewEditorBuffer.kt`
 - [x] `VerdictBlock`, `VerdictScoreAndCaption` — `core/designsystem/presentation/component/VerdictBlock.kt`
-- [ ] `ReviewCard` — `feature/book_detail/presentation/screen/BookDetailShelf.kt`
+- [x] `ReviewCard` — `feature/book_detail/presentation/screen/BookDetailShelf.kt`. Done in S4-2b and the box was simply never ticked: it takes `BookReviewUiModel`, whose `body` is a `RichTextUiModel`, so no domain type reaches it. The *component* stays feature-local — it never lived in `:core:designsystem`, so only the R4 conversion was ever in this stage's scope; pulling the card itself into the library is S6's row work
 - [x] Existing `ReviewRichTextTest` re-pointed at the new model (it currently asserts on `ReviewDocument`)
 
 ### 7.1 Primitives (S5)
 
 #### Chips & pills — 29 -> `Chip` + `ChipUiModel`
 
-- [ ] `PillChip`, `PillChipLabel` — `core/designsystem/presentation/component/PillChip.kt:31,81`
+- [x] `PillChip`, `PillChipLabel` — **DONE in S4-5a.** `PillChip` became `Chip` (`core/component/chip/`, with `ChipUiModel` + `ChipEvent`); `PillChipLabel` survives as its private helper. Four features consume it.
 - [ ] `AddFilledPill`, `AddOutlinePill`, `MembershipPill`, `OnListChip` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; `MembershipPill` now takes a resolved label, so only the three pill chromes are left to consolidate)
-- [ ] `FormatChip` — `core/designsystem/presentation/component/ReviewFormattingToolbar.kt:65`
-- [ ] `SearchChromePill` — `core/designsystem/presentation/component/SoftcoverTopBar.kt:126`
+- [ ] `FormatChip` — `core/component/control/RichTextFormattingToolbar.kt` (moved + renamed in S4-2b; still a bespoke `Surface`, does not call `Chip`)
+- [ ] `SearchChromePill` — `core/component/topbar/SearchTopBar.kt` (moved in S4-5a; still bespoke)
 - [ ] `ActiveFilterChip`, `ClearAllChip`, `LibraryFilterChipRow` — `feature/library/presentation/component/LibraryFilterChipRow.kt:96,136,40`
 - [ ] `ArrangeChip`, `LayoutChipRow`, `SortChipRow` — `feature/library/presentation/component/LibraryArrangeSheet.kt:304,201,251`
 - [ ] `FilterPillControl`, `RearrangeHintChip` — `feature/library/presentation/component/LibraryControlLine.kt:209,154`
 - [ ] `SelectionActionPill` — `feature/library/presentation/screen/LibraryShelf.kt:1905`
-- [ ] `ConcealableTagChip`, `DashedTagOpenerChip`, `ExternalLinkPill` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:2099,1946,2209`
+- [x] `ConcealableTagChip` — `feature/book_detail/presentation/screen/BookDetailShelf.kt`. **Already routed through the library `Chip`** (it is a thin `Chip(model = …)` wrapper); consolidation effectively done in S4-5a
+- [ ] `DashedTagOpenerChip`, `ExternalLinkPill` — `feature/book_detail/presentation/screen/BookDetailShelf.kt`. Still bespoke `Surface`es (dashed border / bordered pill), untouched
 - [ ] `AddPill`, `TagChip`, `TagChipName` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:510,621,709`
 - [ ] `TrackingNowChip` — `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:437`
 - [ ] `RecentSearchChip`, `SortChip`, `FlowRowMoodChips` — `feature/explore/presentation/screen/ExploreShelf.kt:1260,1426,1405`
@@ -1808,7 +1904,7 @@ Kills all three cross-module name collisions.
 #### Dividers & rules — 5 -> `Divider` + `DividerUiModel`
 
 - [ ] `DebugRowDivider` — `app/src/debug/.../DebugRoutesSection.kt:106`
-- [ ] `ReadingLifeDivider` — `core/component/share/ShareCard.kt`
+- [ ] `ReadingLifeDivider` — `core/component/share/ReadingLifeShareCardBody.kt` (S4-6 split)
 - [ ] `HorizontalBreak` — `feature/settings/presentation/screen/RoadmapContent.kt:379`
 - [ ] `QuoteRule` — `feature/lists/presentation/screen/CreateListSheetContent.kt:176`
 - [ ] `OrTypeItDivider` — `feature/onboarding/presentation/screen/OnboardingShelf.kt:237`
@@ -1835,12 +1931,12 @@ Kills all three cross-module name collisions.
 
 #### Sheet chrome — extract from 18 sheets -> `SheetScaffold` + `SheetHeader` + `SheetRow` + `SheetFooter`
 
-Chrome only; each sheet's **body** stays a feature composable (§ 4.4).
+Chrome only; each sheet's **body** stays a feature composable (`component-contract.md` § 7.6).
 
 - [ ] `ChooseListsBottomSheet` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; already R1/R2-shaped, so S6 owes it chrome extraction only)
 - [ ] `UpdateProgressBottomSheet`, `ProgressBottomSheetContent`, `TabSwitcher` — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3; already R1/R2-shaped, so S6 owes it chrome extraction only)
 - [ ] `VerdictSheet` — `core/component/verdict/VerdictSheet.kt` — **also owes R1** (§ 5h, § 5j)
-- [ ] `SoftcoverLoadingDialog`, `SoftcoverLoadingSheet` — `core/designsystem/presentation/component/SoftcoverLoadingDialog.kt:25,35`
+- [x] `SoftcoverLoadingDialog`, `SoftcoverLoadingSheet` — **DONE in S4-5a.** The sheet became `LoadingSheet` (`core/component/sheet/`, + model + event, consumed by both onboarding layouts); the dialog was deleted as dead. Sheet *chrome* extraction is still owed on `LoadingSheet` — that is this section's S6 work, not this box
 - [ ] `LibraryFilterSheet`, `FilterSheetFooter`, `EmptyFacetMessage`, `TagSearchField` — `feature/library/presentation/component/LibraryFilterSheet.kt:76,394,442,309`
 - [ ] `LibraryArrangeSheet` — `feature/library/presentation/component/LibraryArrangeSheet.kt:81`
 - [ ] `LibraryShelvesSheet` — `feature/library/presentation/component/LibraryShelvesSheet.kt:50`
@@ -1888,12 +1984,16 @@ Variant mapping — record the assignment before writing code:
 | `PickUpNextTile` — `ReadingShelf.kt:1388` | `Tile` |
 | `LovedBookCard` — `feature/profile/presentation/screen/ProfileShelf.kt:1755` | `Rail` |
 | `EditionItem` — `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:275` | `Row(Large)` + selected state |
-| `StackedJackets` — `core/designsystem/presentation/component/ChooseListsBottomSheet.kt:264` | -> `Cover(stacked)` |
+| `StackedJackets` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3) | -> `Cover(stacked)` |
 
 Checklist:
 
 - [ ] `BookCardUiModel` / `BookCardVariant` / `BookCardContent` / `BookCardDecorations` / `BookCardEvent` / `BookCardKey`
-- [ ] `Cover` + `CoverUiModel` (incl. stacked, coverless-monogram, selection, deadline overlay)
+- [x] `Cover` + `CoverUiModel` + `CoverVariant` (21 entries) + `CoverDimensions` — **DONE in S4-4**, with `CoverMapper` / `CoverSourceResolver` in `:core:uibinding` and `CoverModelsCollector` in four features
+- [x] coverless-monogram — **DONE in S4-4** (`CoverlessTitleCover`, `MonogramCoverMetrics`)
+- [ ] stacked — **not on `Cover`**: still `StackedJackets` (`core/component/lists/ChooseListsBottomSheet.kt`) and `SeriesCoverStack` (`feature/explore/.../HiddenSuggestionsShelf.kt`)
+- [ ] selection — **not on `CoverUiModel`**: `SelectableCover` and `LibraryGridCover` still wrap `Cover` locally in `LibraryShelf.kt`
+- [ ] deadline overlay — shipped as a *separate* component, `CoverOverlay` in `badge/` (S4-5b). Decide in S7 whether it folds onto `CoverUiModel` or stays beside it
 - [ ] `BookCard` with per-variant private layouts
 - [ ] Preview fixtures covering every variant × decoration combination
 - [ ] Mappers: `feature:library`, `feature:explore`, `feature:reading`, `feature:profile`, `feature:book_detail` (promote to `:core:uibinding` per R6 where two features converge)
@@ -1905,8 +2005,8 @@ Checklist:
 
 #### Empty states — 8 -> `EmptyState` + `EmptyStateUiModel`
 
-- [ ] `ChooseListsEmptyState` — `core/designsystem/presentation/component/ChooseListsBottomSheet.kt:309`
-- [ ] `OfflineScreenContent` — `core/designsystem/presentation/component/OfflineGuard.kt:30`
+- [ ] `ChooseListsEmptyState` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; hand-rolled `Column` + two `Text`s, does not use `EmptyState`)
+- [x] `OfflineScreenContent` — **DONE in S4-5a.** `OfflineGuard.kt` was deleted whole; the content became `EmptyState` + `EmptyStateUiModel` (`core/component/state/`) behind an `offlineEmptyStateUiModel()` factory, called from four screen layouts. `rememberIsOnline` went to `core/presentation/connectivity/OnlineState.kt`
 - [ ] `EmptyListScreen` — `feature/library/presentation/screen/LibraryShelf.kt:1696`
 - [ ] `EmptyCurrentlyReadingScreen` — `feature/reading/presentation/screen/ReadingShelf.kt:1238`
 - [ ] `HiddenSuggestionsEmptyState` — `feature/explore/presentation/screen/HiddenSuggestionsShelf.kt:497`
@@ -1920,16 +2020,16 @@ The four `*Callout`s are one component with a tone variant.
 
 - [ ] `StatusCallout`, `ReadInfoCallout`, `WantToReadInfoCallout`, `DnfInfoCallout` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:1663,1599,1649,1627`
 - [ ] `ScanEditionUpdateBanner` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:1762`
-- [ ] `ConnectivityBanner` — `core/designsystem/presentation/component/ConnectivityBanner.kt:24`
+- [x] `ConnectivityBanner` — **DONE in S4-5a.** Became `Banner` + `BannerUiModel` + `BannerTone` (`core/component/callout/`), called once from `RootScreen.kt`. The `Callout` half of this family's target is still open
 - [ ] `RoadmapErrorBanner` — `feature/settings/presentation/screen/RoadmapContent.kt:123`
 - [ ] `PaceNudgeRibbon` — `feature/reading/presentation/screen/ReadingShelf.kt:1520`
 
 #### Top bars — 9 -> `TopBar` + `SearchTopBar` + `BackBar`
 
-`SoftcoverTopBar` and `SoftcoverSearchTopBar` stay separate (§ 4.4).
+`TopBar` and `SearchTopBar` stay separate (`component-contract.md` § 7.6).
 
-- [ ] `SoftcoverTopBar`, `SoftcoverSearchTopBar`, `SearchChromeBarcodeButton`, `SearchChromeInputArea` — `core/designsystem/presentation/component/SoftcoverTopBar.kt:349,82,319`
-- [ ] `SoftcoverTopBarAction` — `core/designsystem/presentation/component/SoftcoverTopBarAction.kt`
+- [x] `SoftcoverTopBar`, `SoftcoverSearchTopBar`, `SearchChromeBarcodeButton`, `SearchChromeInputArea` — **DONE in S4-5a.** `TopBar` and `SearchTopBar` in `core/component/topbar/` (with `TopBarUiModel`/`Event`/`Navigation`/`Surface` and `SearchTopBarUiModel`/`Event`); the two chrome helpers stayed private inside `SearchTopBar.kt`. ~12 screen layouts consume them. Only `BackBar` is left of this family
+- [x] `SoftcoverTopBarAction` — **GONE, deleted in S4-5a** rather than migrated. No successor type: `TopBarUiModel` carries `title` / `subtitle` / `navigation` / `surface`, and a screen's own actions go in the trailing slot
 - [ ] `TagEditorTopBar` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:248`
 - [ ] `DesktopBookDetailTopBar` — `feature/book_detail/presentation/screen/BookDetailScreenLayout.jvm.kt:135`
 - [ ] `OnboardingTopBar` — `feature/onboarding/presentation/screen/OnboardingScreenLayout.mobile.kt:158`
@@ -1938,8 +2038,8 @@ The four `*Callout`s are one component with a tone variant.
 
 #### Controls & fields — 14 -> `Toggle` + `SegmentedControl` + `TextField`
 
-- [ ] `TimeField` — `core/designsystem/presentation/component/UpdateProgressBottomSheet.kt:1105`
-- [ ] `ReviewFormattingToolbar` — `core/designsystem/presentation/component/ReviewFormattingToolbar.kt:27`
+- [ ] `TimeField` — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3)
+- [ ] `RichTextFormattingToolbar` — `core/component/control/RichTextFormattingToolbar.kt` (was `ReviewFormattingToolbar`; moved + renamed in S4-2b. In the library, but not yet the `Toggle`/`SegmentedControl`/`TextField` consolidation this group is about)
 - [ ] `LensToggle`, `LensSegment` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:632,686`
 - [ ] `ShareCardVariantToggle` — `feature/book_detail/presentation/component/ShareBookBottomSheet.kt:226`
 - [ ] `TagNamingField` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:424`
@@ -1956,15 +2056,15 @@ The `/dataviz` skill conventions apply to everything in the chart group.
 
 #### Stat tiles — 7 -> `StatTile` + `StatTileUiModel`
 
-- [ ] `AnimatedStatNumber` (×2 overloads), `StatPulseText` — `core/designsystem/presentation/component/AnimatedStatNumber.kt:41,81,115`
-- [ ] `ReadingLifeFooterStat` — `core/designsystem/presentation/share/ShareCard.kt:887`
+- [x] `AnimatedStatNumber` (×2 overloads), `StatPulseText` — **DONE in S4-5a.** Became `StatNumber` + `StatNumberUiModel` + `StatNumberFormat` (`core/component/statistic/`); `StatPulseText` stayed its private helper. Note this migrated the *number primitive* only — `StatTile` below is untouched
+- [ ] `ReadingLifeFooterStat` — `core/component/share/ReadingLifeShareCardBody.kt` (S4-6 split)
 - [ ] `HeroStatCard`, `StatTile`, `SmallStatTile` — `feature/profile/presentation/screen/ProfileShelf.kt:230,292,341`
 - [ ] `FeaturedProgressStat` — `feature/reading/presentation/screen/ReadingShelf.kt:765`
 
 #### Charts & legends — 11 -> `Chart` family + `Legend`
 
-- [ ] `MiniBar` — `core/designsystem/presentation/component/PreviewTile.kt:107`
-- [ ] `ReadingLifeRidgeline`, `ReadingLifeGenreRanking`, `ReadingLifeGenreRow` — `core/designsystem/presentation/share/ShareCard.kt:721,851`
+- [ ] `MiniBar` — `core/component/control/PreviewTile.kt` (moved in S4-5a)
+- [ ] `ReadingLifeRidgeline`, `ReadingLifeGenreRanking`, `ReadingLifeGenreRow` — `core/component/share/ReadingLifeShareCardBody.kt` (S4-6 split)
 - [ ] `GenreRankedBars`, `GenreRankedBar`, `GenreBarTrack` — `feature/profile/presentation/screen/ProfileShelf.kt:832,865,907`
 - [ ] `YearColumnChart` — `feature/profile/presentation/screen/ProfileShelf.kt:617`
 - [ ] `GenderProportionBar`, `GenderLegend` — `feature/profile/presentation/screen/ProfileShelf.kt:1115,1142`
@@ -1973,7 +2073,7 @@ The `/dataviz` skill conventions apply to everything in the chart group.
 
 #### Progress — 6 -> `ProgressIndicator` + `ProgressUiModel`
 
-- [ ] `EditorialProgressIndicator` — `core/designsystem/presentation/component/UpdateProgressBottomSheet.kt:310`
+- [ ] `EditorialProgressIndicator` — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3)
 - [ ] `LibraryWaveProgressRow` — `feature/library/presentation/screen/LibraryShelf.kt:1141`
 - [ ] `ProgressBlock` — `feature/reading/presentation/screen/ReadingShelf.kt:1100`
 - [ ] `FocusProgressBar` — `feature/session/presentation/screen/FocusModeShelf.kt:307`
@@ -1991,14 +2091,21 @@ gaps.
   `NavigationRailBar`, `EditorialSidebar`, `SidebarItem`, `BookDetailPaneHost`, `ReAuthDialog`.
 - **Platform `expect`/`actual`** — `BarcodeScanner` (common/android/ios/jvm),
   `isCameraAvailable`, `isCameraPermissionGranted`, `rememberCameraPermissionRequester`,
-  `EditionImage` platform bodies, `Theme.{android,ios,jvm}`, `TransientNavArg.{android,jvm}`.
+  `Theme.{android,ios,jvm}`, `TransientNavArg.{android,jvm}`. **`EditionImage`'s platform bodies were
+  on this list and should not have been** — S4-4 deleted `EditionImage` outright and the seam it owned
+  became `core/uibinding/cover/LocalImageSource.{android,ios,jvm}.kt` plus
+  `core/presentation/cover/CoverImagePersisterProvider.kt`, with the composable itself becoming `Cover`
+  in the library. That is the second time an "it stays put" exclusion here was wrong (see the debug
+  screens below): **an `expect`/`actual` is a reason a declaration needs platform bodies, not a reason
+  it stays out of the library** — the bodies can move too, and here they moved to a different module
+  than the composable did.
 - **Debug screens** — `MotionDebugScreen`, `ShareCardDebugScreen`, `DebugRoutesSection`. Not
   components, so they are not converted to UI models — but they did **not** stay where they were, as
   this bullet originally claimed. S4-2a relocated all three to `app/src/debug/` (§ 5g): they consume
   Voyager and the components that are moving out, and `:core:designsystem` cannot depend on
   `:core:component`. `DebugRoutesContent`, the seam that binds them per build type, moved to
   `:core:presentation`.
-- **Share cards are IN scope** — see § 7.0. (Earlier draft deferred them; § 4.3 explains why that
+- **Share cards are IN scope** — see § 7.0. (Earlier draft deferred them; `component-contract.md` § 7.3 explains why that
   was wrong.) They keep their own family — do not fold them into `BookCard` — but they migrate in S4
   with everything else in `:core:designsystem`.
 - **`@Preview` functions.** Excluded from the G4 budget count.
@@ -2014,7 +2121,7 @@ gaps.
 | **Shared-element transitions break** | S7 | R7: key resolved by the mapper, carried on `BookCardKey`. Manually verify library -> detail and explore -> detail. |
 | **Long-lived red branch.** All-at-once means the module split's compile breakage is resolved inside the branch. | S3, S4 | Stage boundaries must compile. Commit per stage so the PR is reviewable commit-by-commit even though it merges once. |
 | **Session loss mid-migration** | any | This file. Update checkboxes in the same commit as the work, and record the branch name in the header. |
-| **`docs/reference/design-system/components.md` is 83KB** and will be substantially rewritten | S12 | Split per family mirroring the § 3 package layout. G5 blocks merge without it. |
+| **`docs/reference/design-system/components.md` keeps growing** — 83KB when this table was written, **96KB after S4** | S12 | Split per family mirroring the § 3 package layout. G5 blocks merge without it. Re-measure at S12 rather than trusting either figure here. |
 | **Reviewer load.** A single PR of this size is not reviewable in the normal way. | merge | Commit-per-stage discipline; run `rhaydus-kotlin:code-reviewer` per stage, not once at the end. |
 
 ---
@@ -2041,7 +2148,7 @@ All three opening questions are resolved. Recorded here so they are not re-opene
 |---|---|---|
 | Gallery reachability | **Shipped easter egg**, not debug-only. N taps on `VersionFooter`. Registry in `:core:component`, screen in `feature:settings`, `commonMain` so it works on all three platforms. | § 5a, S2 |
 | `:core:uibinding` dependency visibility | **`api`.** Costs nothing at the gate — all 44 domain models live in `:core:domain`, which is not a data-area module, so no allowlist row is required. A `:core:uibinding -> :core:<data>` row is **pre-approved** if a mapper ever needs one; write it when the edge exists, not speculatively. | § 3a, S1 |
-| `ShareCard.kt` (1,161 lines) | **S4, split per body while renaming** — not deferred to S12. It is already the contract's reference implementation; one pass, not two. | § 4.3, § 7.0 |
+| `ShareCard.kt` (1,161 lines) | **S4, split per body while renaming** — not deferred to S12. It is already the contract's reference implementation; one pass, not two. | `component-contract.md` § 7.3, § 7.0 |
 
 ### Still open
 

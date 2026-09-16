@@ -25,7 +25,7 @@ private val HIDDEN_SUGGESTIONS_TOP_BAR = TopBarUiModel(
 )
 
 /**
- * Mobile Hidden-suggestions page — a pushed sub-screen of Settings. Uses the standard [SoftcoverTopBar]
+ * Mobile Hidden-suggestions page — a pushed sub-screen of Settings. Uses the standard [TopBar]
  * carrying the "Hidden suggestions" title + back control, exactly like the sibling Appearance /
  * Library-tabs settings pages; the [HiddenSuggestionsContent] body opens with an intro line rather than
  * repeating the title.

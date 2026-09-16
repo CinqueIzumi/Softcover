@@ -23,7 +23,8 @@ kotlin {
         commonMain.dependencies {
             // NO `project(...)` dependency belongs here, and `checkModuleGraph` fails the build if one
             // appears (migration tracker § 6, G2). This module is tokens — theme, editorial typography,
-            // the icon/illustration catalogs, modifiers, shared-element scopes — and a token has nothing
+            // the icon/illustration catalogs, modifiers, the bottom-chrome padding seam,
+            // shared-element scopes — and a token has nothing
             // to ask of the rest of the app. The source-level half of the same gate is a detekt
             // `ForbiddenImport` scoped to `**/core/designsystem/**` in `config/detekt/detekt.yml`.
             //

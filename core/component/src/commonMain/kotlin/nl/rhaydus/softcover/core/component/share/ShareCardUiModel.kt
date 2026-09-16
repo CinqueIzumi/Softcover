@@ -13,6 +13,10 @@ sealed interface ShareCardUiModel {
          * Per R5, one fixture per variant branch, plus two that change the card's anatomy rather
          * than just its strings: a book with almost every optional field null, and the in-progress
          * reading update, which swaps the rating + review pair for a progress label.
+         *
+         * Every `@Preview` in the family's body files renders off this list rather than
+         * re-declaring sample literals inline, so the preview set and the Component Gallery's set
+         * cannot drift apart.
          */
         override val previews: ImmutableList<ShareCardUiModel> = persistentListOf(
             BookShareCardUiModel(
