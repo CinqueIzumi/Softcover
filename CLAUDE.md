@@ -25,6 +25,15 @@ The project uses `kotlin.code.style=official`. Both the foundation ktlint rulese
 configured and gated (see Code Style below); `./gradlew styleCheck` runs detekt + the mechanical checks,
 and `./gradlew check` runs the full set.
 
+**Adding Compose Multiplatform resources to a module?** The `compose.resources { }` block is only half
+of it — the module's `androidLibrary` block also needs `androidResources.enable = true`, because CMP
+resources ship as Android *assets* and the KMP Android library plugin keeps those off by default.
+Without it the module still generates its `Res` accessor and still compiles; the resources simply never
+reach the APK and the first read throws `MissingResourceException` at runtime. Gated by
+`./gradlew checkResourcePackaging` (wired into `check`) — see
+[docs/reference/module-structure.md](docs/reference/module-structure.md) § Build wiring conventions for
+why it is a gate rather than a convention.
+
 ## Design System
 
 The brand-agnostic design skeleton (theme/typography plumbing, layout primitives, the shared component catalog, the editorial role contract) is governed by the foundation [`docs/rhaydus/0.3.1/design-system-foundations.md`](docs/rhaydus/0.3.1/design-system-foundations.md). [docs/reference/design-system.md](docs/reference/design-system.md) is the source of truth for Softcover's brand layered on top — color roles, editorial typography values, brand components, patterns, decision rules. It is split into section files under [`design-system/`](docs/reference/design-system/) behind a thin index; **read only the section you need** rather than the whole doc. Consult both before designing or modifying any UI surface.

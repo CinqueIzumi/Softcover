@@ -1,7 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import java.util.Properties
+import org.jetbrains.compose.resources.ResourcesExtension
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -234,6 +236,7 @@ subprojects {
     tasks.matching { it.name == "check" }.configureEach {
         dependsOn(rootProject.tasks.named("ktlintCheck"))
         dependsOn(":checkModuleGraph")
+        dependsOn(":checkResourcePackaging")
     }
 }
 
@@ -633,6 +636,70 @@ tasks.register("checkModuleGraph") {
         }
 
         logger.lifecycle("checkModuleGraph: $edges project dependencies validated, DAG intact.")
+    }
+}
+
+// Compose Multiplatform resources must actually reach the APK. A module that declares
+// `compose.resources` gets its generated `Res` accessor and compiles perfectly whether or not the
+// resources are ever packaged — **the failure is entirely at runtime**, as a `MissingResourceException`
+// on the first read. On Android the deciding switch is `androidResources.enable`, which the KMP Android
+// library plugin leaves OFF by default (CMP resources ship as Android *assets*, which that flag gates).
+//
+// This is a gate rather than a convention because the convention already failed twice, silently, and
+// was found by accident rather than by any check:
+//
+//  - `:core:component` (S4-5a) — the offline banner's copy. It crashed the app on launch the first time
+//    it was run on a device with no network, three commits after it landed.
+//  - `:feature:settings` — the bundled `ROADMAP.md` fallback, read only before the first live fetch, so
+//    a machine with a warm cache never touches it. It had never worked on Android.
+//
+// Both are the same one-line omission, and neither `compileDebugKotlin`, `ktlintCheck`, detekt,
+// `projectHealth` nor `checkModuleGraph` could see it — nothing in the source or the dependency graph
+// is wrong.
+tasks.register("checkResourcePackaging") {
+    group = "verification"
+    description = "Fails when a module declares Compose Multiplatform resources but does not enable " +
+        "Android resources, which silently omits them from the APK."
+
+    doLast {
+        val violations = mutableListOf<String>()
+        var checked = 0
+
+        subprojects.forEach { module ->
+            // `packageOfResClass` is the discriminator, not the presence of the Compose plugin (which
+            // every UI module applies) nor a `composeResources/` directory on disk (which the
+            // `customDirectory` case does not have). Declaring a resource package IS the act of saying
+            // "this module owns resources"; the plugin leaves it empty for everyone else.
+            val compose = module.extensions.findByName("compose") as? ExtensionAware ?: return@forEach
+            val resources = compose.extensions.findByType(ResourcesExtension::class.java) ?: return@forEach
+
+            if (resources.packageOfResClass.isEmpty()) return@forEach
+
+            val kotlin = module.extensions.findByName("kotlin") as? ExtensionAware ?: return@forEach
+            val androidLibrary = kotlin.extensions
+                .findByName("androidLibrary") as? KotlinMultiplatformAndroidLibraryExtension
+                ?: return@forEach
+
+            checked++
+
+            if (androidLibrary.androidResources.enable.not()) {
+                violations += "${module.path}  (declares Compose resources but leaves " +
+                    "`androidResources.enable` off, so nothing is packaged into the APK and the " +
+                    "first read throws MissingResourceException at runtime — add " +
+                    "`androidResources.enable = true` to its `androidLibrary` block)"
+            }
+        }
+
+        if (violations.isNotEmpty()) {
+            throw GradleException(
+                "Compose resources declared but not packaged:\n" +
+                    violations.sorted().joinToString("\n") { "  - $it" },
+            )
+        }
+
+        logger.lifecycle(
+            "checkResourcePackaging: $checked module(s) with Compose resources, all packaged.",
+        )
     }
 }
 

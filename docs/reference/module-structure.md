@@ -137,7 +137,12 @@ Room DB.
 - **Manifests merge upward.** Library modules contribute components via their own
   `src/main/AndroidManifest.xml` (`:orchestration` the launcher `MainActivity`, `:feature:session` the
   `ReadingSessionService`); `:app` owns the `<application>` element, permissions, FileProvider, and
-  launcher icons. Shared resources (strings, drawables, `Theme.Softcover`) live in `:core:designsystem`.
+  launcher icons. Shared resources (strings, drawables, `Theme.Softcover`) live in `:core:designsystem`;
+  two other modules own resources of their own, and both are deliberate rather than drift —
+  `:core:component` holds the copy that belongs to a *component* rather than to a feature (the offline
+  banner and offline screen say the same thing on every surface), and `:feature:settings` bundles the
+  build-time `ROADMAP.md` fallback. All three must carry `androidResources.enable = true` (see the gate
+  below).
 - **Koin:** each module owns one `module { }` that declares its own dependencies via `includes(...)`
   (the sibling modules whose bindings it `get()`s, plus its platform `expect`/`actual` module). The
   composition root `orchestrationModule` `includes(...)` the whole graph, so `softcoverModules` is just
@@ -159,6 +164,22 @@ Room DB.
   `core:{component, uibinding, presentation}`) and on any breach of the component library's own
   dependency ban. Every one of those rules has been verified by deliberately introducing a violation
   and watching it fail — an ungated task is indistinguishable from a passing one until you try it.
+- **A module that owns Compose Multiplatform resources must enable Android resources.** Setting
+  `packageOfResClass` in a `compose.resources { }` block gives the module a generated `Res` accessor and
+  compiles cleanly, but on Android CMP resources ship as **assets**, and the KMP Android library plugin
+  keeps those off by default. Without `androidResources.enable = true` in the module's `androidLibrary`
+  block, nothing is packaged into the APK and the first read throws `MissingResourceException` **at
+  runtime** — no compile, lint, detekt, `projectHealth` or `checkModuleGraph` failure, because nothing in
+  the source or the dependency graph is wrong.
+
+  Enforced by the `checkResourcePackaging` Gradle task (wired into `check`), which fails any module whose
+  resource package is declared while the flag is off. It is a gate rather than a convention because the
+  convention failed twice and both were found by accident: `:core:component`'s offline-banner copy
+  crashed the app on launch on a device with no network, and `:feature:settings`' bundled `ROADMAP.md`
+  fallback had never worked on Android at all — it is read only before the first live fetch lands, so a
+  warm cache never touches it. The discriminator is `packageOfResClass`, not a `composeResources/`
+  directory on disk, so it also covers the `customDirectory` case (`:feature:settings` has no such
+  directory). Verified the same way as the rules above.
 
 ### Kotlin Multiplatform
 

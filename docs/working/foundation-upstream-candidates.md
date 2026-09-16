@@ -136,6 +136,34 @@ Filed but not yet implemented in the foundation.
   practice on the same thing as the deprecation cleanup: there is no maintained Compose overflow API to
   build it on (`FlowRowOverflow` is deprecated, `ContextualFlowRow` likewise).
 
+### F28 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
+
+- **Type:** gate (custom Gradle task)
+- **Home:** `build-logic` convention plugins (alongside `rhaydus.module-graph`, F18)
+- **Status:** **Open.** Implemented inline in Softcover's root `build.gradle.kts` as
+  `checkResourcePackaging`, wired into every module's `check`. Generic — nothing in it is Softcover-specific.
+- **The trap.** A KMP module that declares `compose.resources { packageOfResClass = … }` gets its generated
+  `Res` accessor and compiles perfectly whether or not its resources are ever packaged. On Android, CMP
+  resources ship as **assets**, and `com.android.kotlin.multiplatform.library` keeps Android resources off by
+  default — so without `androidResources.enable = true` in the module's `androidLibrary` block the resources
+  silently never reach the APK, and the first `Res` read throws `MissingResourceException` **at runtime**.
+  Nothing in the source or the dependency graph is wrong, so no compile, lint, detekt, `projectHealth` or
+  `checkModuleGraph` failure is possible. The one-line omission is invisible until a device executes the read.
+- **Why it is worth upstreaming rather than remembering.** It bit Softcover **twice**, and neither was found
+  by a check. `:core:component` gained its own copy in S4-5a and crashed the app on launch three commits
+  later, the first time it ran on a device with no network (the offline banner is the only reader). The
+  second, `:feature:settings`' bundled `ROADMAP.md` fallback, had **never worked on Android** since it
+  landed — it is read only before the first live fetch, so any machine with a warm cache never touches it,
+  and it would have surfaced on a fresh install after release. Both are the same line. Any foundation app
+  that gives a module its own `composeResources` inherits the same trap, and the failure mode — latent,
+  runtime-only, device-dependent — is the worst kind to leave to review.
+- **What to build.** A task iterating subprojects: for each whose Compose `ResourcesExtension` has a
+  non-empty `packageOfResClass`, resolve its `KotlinMultiplatformAndroidLibraryExtension` and fail when
+  `androidResources.enable` is false. `packageOfResClass` is the right discriminator rather than a
+  `composeResources/` directory on disk — declaring a resource package *is* the claim to own resources, and
+  it is the only signal that covers a `customDirectory` module, which has no such directory (Softcover's
+  `:feature:settings` is exactly that case). Verified by flipping a real module's flag and watching it fail.
+
 ---
 
 # Implemented, not adopted
