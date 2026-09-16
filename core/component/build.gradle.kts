@@ -15,6 +15,15 @@ compose.resources {
 kotlin {
     androidLibrary {
         namespace = "nl.rhaydus.softcover.core.component"
+
+        // The KMP Android library plugin keeps Android resources off by default, and Compose
+        // Multiplatform resources ship as Android *assets* — so without this the `composeResources`
+        // block below compiles and generates its accessors, but nothing is packaged into the APK and
+        // the first read throws `MissingResourceException` at runtime. That is exactly what happened:
+        // S4-5a gave this module its own copy without the flag, and the offline banner crashed the app
+        // on launch the first time it was run on a device with no network. `:core:designsystem` carries
+        // the same line for the same reason.
+        androidResources.enable = true
     }
 
     sourceSets {
