@@ -31,9 +31,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.time.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.modifier.shimmer
@@ -41,7 +38,6 @@ import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.component.formatLongRelease
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
@@ -110,6 +106,7 @@ private fun RoadmapLoadedBody(
 
             RoadmapDocumentBody(
                 document = document,
+                lastUpdatedText = state.lastUpdatedText,
                 openUrl = openUrl,
             )
         } else if (state.roadmapError != null) {
@@ -137,6 +134,7 @@ private fun RoadmapErrorBanner(
 @Composable
 private fun RoadmapDocumentBody(
     document: RoadmapDocument,
+    lastUpdatedText: String?,
     openUrl: (String) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -164,23 +162,18 @@ private fun RoadmapDocumentBody(
             )
         }
 
-        if (document.fetchedAtEpochMillis != null) {
+        if (lastUpdatedText != null) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            RoadmapLastUpdatedFooter(epochMillis = document.fetchedAtEpochMillis)
+            RoadmapLastUpdatedFooter(text = lastUpdatedText)
         }
     }
 }
 
 @Composable
-private fun RoadmapLastUpdatedFooter(epochMillis: Long) {
-    val dateText = Instant.fromEpochMilliseconds(epochMillis)
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-        .date
-        .formatLongRelease()
-
+private fun RoadmapLastUpdatedFooter(text: String) {
     Text(
-        text = "Last updated $dateText.",
+        text = "Last updated $text.",
         style = MaterialTheme.editorialTypography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -7,6 +9,7 @@ import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -119,6 +122,21 @@ internal data class LibraryUiState(
 
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+
+    /**
+     * Each deadline-tracked book's [DeadlineProgress] keyed by [Book.id], computed by
+     * `DeadlineModelsCollector` (R9) off [booksByTab] and [deadlines]. Kept as the domain type
+     * rather than only its UI models below because `LibraryDeadlineCountdownBadge` and the
+     * expired-cover grayscale branch need `status`/`daysRemaining` directly, and neither is a
+     * `:core:component` component.
+     */
+    val deadlineProgressByBook: Map<Int, DeadlineProgress> = emptyMap(),
+
+    /** [deadlineProgressByBook] mapped to its status badge, keyed by [Book.id]. */
+    val deadlineBadges: Map<Int, BadgeUiModel> = emptyMap(),
+
+    /** [deadlineProgressByBook] mapped to its summary line, keyed by [Book.id]. */
+    val deadlineSummaries: Map<Int, DeadlineSummaryUiModel> = emptyMap(),
 
     val searchQuery: String = "",
 

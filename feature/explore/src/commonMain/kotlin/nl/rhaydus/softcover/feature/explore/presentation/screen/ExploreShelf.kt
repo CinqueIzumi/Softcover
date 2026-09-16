@@ -62,10 +62,10 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.formatCompactRelease
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverForeground
@@ -183,6 +183,7 @@ internal fun FeaturedCard(
     // Nullable for the one frame between `featuredUpcomingRelease` landing and `CoverModelsCollector`
     // deriving its cover: the hero must keep its footprint rather than vanish and pop back in.
     cover: CoverUiModel?,
+    releaseBadge: BadgeUiModel?,
     onClick: () -> Unit,
     onWantToReadClick: () -> Unit,
     onRemoveFromLibraryClick: () -> Unit,
@@ -199,8 +200,6 @@ internal fun FeaturedCard(
             .pressScaleClickable(onClick = onClick)
             .padding(18.dp),
     ) {
-        val releaseDate = book.effectiveReleaseDate
-
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
@@ -233,18 +232,8 @@ internal fun FeaturedCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            if (releaseDate != null) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = RoundedCornerShape(6.dp),
-                ) {
-                    Text(
-                        text = "Arriving ${releaseDate.formatCompactRelease()}",
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    )
-                }
+            if (releaseBadge != null) {
+                Badge(model = releaseBadge)
             }
 
             // Explore-3a deviation 3 kept this at a bare "readers" because usersCount is an
@@ -420,6 +409,7 @@ internal fun FeaturedCardSkeleton(modifier: Modifier = Modifier) {
 private fun DiscoveryRailCard(
     book: Book,
     cover: CoverUiModel?,
+    unreleasedBadge: BadgeUiModel?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     subline: @Composable () -> Unit,
@@ -437,15 +427,13 @@ private fun DiscoveryRailCard(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            if (book.isUnreleased) {
-                book.effectiveReleaseDate?.let { date ->
-                    UnreleasedBadge(
-                        releaseDate = date,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(all = 6.dp),
-                    )
-                }
+            if (unreleasedBadge != null) {
+                Badge(
+                    model = unreleasedBadge,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(all = 6.dp),
+                )
             }
         }
 
@@ -521,12 +509,14 @@ private fun RailCardSkeleton(modifier: Modifier = Modifier) {
 internal fun TrendingCard(
     book: Book,
     cover: CoverUiModel?,
+    unreleasedBadge: BadgeUiModel?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     DiscoveryRailCard(
         book = book,
         cover = cover,
+        unreleasedBadge = unreleasedBadge,
         onClick = onClick,
         modifier = modifier,
     ) {
@@ -565,12 +555,14 @@ internal fun TrendingCardSkeleton(modifier: Modifier = Modifier) = RailCardSkele
 internal fun BecauseYouReadCard(
     book: Book,
     cover: CoverUiModel?,
+    unreleasedBadge: BadgeUiModel?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     DiscoveryRailCard(
         book = book,
         cover = cover,
+        unreleasedBadge = unreleasedBadge,
         onClick = onClick,
         modifier = modifier,
     ) {
@@ -711,7 +703,7 @@ internal fun SeriesCardSkeleton(modifier: Modifier = Modifier) {
  * "Unreleased card"): the same [Cover] every other card uses — real art when the edition has
  * it, the shared monogram fallback when it doesn't (explore-3a feedback item 1: an unreleased book is
  * never keyed off release status for its cover, only off whether art actually resolves) — plus a dated
- * [UnreleasedBadge]. Otherwise it renders exactly like a released [SeriesCard] — same overflow
+ * [Badge]. Otherwise it renders exactly like a released [SeriesCard] — same overflow
  * affordance, series eyebrow, title, and "Book #N" position subline (explore-3a feedback: the
  * "Pre-order" prefix carried no information the series number didn't); only the dated badge differs.
  */
@@ -719,6 +711,7 @@ internal fun SeriesCardSkeleton(modifier: Modifier = Modifier) {
 internal fun UnreleasedSeriesCard(
     book: Book,
     cover: CoverUiModel?,
+    unreleasedBadge: BadgeUiModel?,
     onClick: () -> Unit,
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -737,11 +730,11 @@ internal fun UnreleasedSeriesCard(
             )
 
             // The dated badge (explore-3a feedback item 8: names the release date, e.g. "Out Sep 2" —
-            // never the generic "Coming soon" a discovery rail's ordinary UnreleasedBadge doesn't carry
-            // either), same top-start placement and Compact style every other unreleased cover uses.
-            book.effectiveReleaseDate?.let { date ->
-                UnreleasedBadge(
-                    releaseDate = date,
+            // never the generic "Coming soon" a discovery rail's ordinary badge doesn't carry either),
+            // same top-start placement and Standard variant every other unreleased cover uses.
+            if (unreleasedBadge != null) {
+                Badge(
+                    model = unreleasedBadge,
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(all = 6.dp),

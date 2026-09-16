@@ -1,9 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
+import org.jetbrains.compose.resources.ResourcesExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import java.util.Properties
-import org.jetbrains.compose.resources.ResourcesExtension
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -377,6 +377,28 @@ val bannedReverseEdges = setOf(
     ":core:designsystem" to ":core:presentation",
 )
 
+// Token-module isolation (docs/working/component-library-migration.md § 6 G2). `:core:designsystem` is
+// tokens — theme, editorial typography, the icon/illustration catalogs, modifiers, shared-element
+// scopes. A token is a value the whole app may read; it has nothing to ask of the app in return, so the
+// module needs no project dependency at all, and the modules listed here must declare none.
+//
+// This is asserted rather than left to hold by accident. It held by accident once before and stopped:
+// the module accumulated an `api` edge per component that wanted a domain type, which is how a token
+// module became the god-module S3 and S4 spent six sub-commits unwinding. The last two edges
+// (`:core:domain` and `kotlinx-datetime`, both for the `Deadline*` trio) went in S4-5b when those
+// components moved to `:core:component`.
+//
+// Pairs with the detekt `ForbiddenImport` rule scoped to `**/core/designsystem/**` in
+// `config/detekt/detekt.yml`. The two are NOT redundant, and § 6's G2 entry records how that was
+// learned: S4-1 left fully-qualified `nl.rhaydus.softcover.core.domain.model.*` references in `Color.kt`
+// and `LocalDarkTheme.kt`'s KDoc, and BOTH gates were blind to them — they are neither imports nor
+// declared dependencies. A reviewer caught them. What the import rule does close is the case where a
+// stray `import` outlives a dependency removal, which stays compilable for as long as some other module
+// on the compile classpath still `api`-exposes the type.
+val zeroProjectDependencyModules = setOf(
+    ":core:designsystem",
+)
+
 // Component-library isolation (docs/working/component-library-migration.md §6 G1). The tier rule
 // above lets any `:core:*` module depend on any other, which is too loose for the component library:
 // `:core:component` renders UI from UI models and must never reach a domain model, a use case, DI, or
@@ -585,6 +607,12 @@ tasks.register("checkModuleGraph") {
                                 "allowedApiDataEdges — MODULE_STRUCTURE_GUIDELINES §10)"
                         }
 
+                        if (module.path in zeroProjectDependencyModules) {
+                            violations += "${module.path} → ${dependency.path}  " +
+                                "(tokens only — this module must declare NO project dependency at " +
+                                "all. See docs/working/component-library-migration.md § 6 G2)"
+                        }
+
                         if ((module.path to dependency.path) in bannedReverseEdges) {
                             violations += "${module.path} → ${dependency.path}  " +
                                 "(wrong direction — the UI stack layers component → designsystem and " +
@@ -721,3 +749,4 @@ tasks.register("styleCheck") {
 
     dependsOn(subprojects.map { sp -> sp.tasks.matching { it.name in typeResolvedDetektTasks } })
 }
+

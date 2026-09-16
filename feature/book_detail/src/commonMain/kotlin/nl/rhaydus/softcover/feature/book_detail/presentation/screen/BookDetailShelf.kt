@@ -115,6 +115,8 @@ import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
+import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
@@ -132,9 +134,6 @@ import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -211,7 +210,7 @@ internal fun GeneralBookInfoSection(
     seriesText: String?,
     rating: Double?,
     releaseYear: Int?,
-    unreleasedDate: LocalDate?,
+    unreleasedBadge: BadgeUiModel?,
     isLoading: Boolean,
     isExpired: Boolean,
     isOwned: Boolean,
@@ -427,7 +426,7 @@ internal fun GeneralBookInfoSection(
                         Spacer(modifier = Modifier.height(4.dp))
 
                         val authorName = edition?.authorString.orEmpty()
-                        val showReleased = releaseYear != null && releaseYear > 0 && unreleasedDate == null
+                        val showReleased = releaseYear != null && releaseYear > 0 && unreleasedBadge == null
                         val bylineText = buildString {
                             append("By ")
                             append(authorName)
@@ -446,13 +445,10 @@ internal fun GeneralBookInfoSection(
                             ),
                         )
 
-                        if (unreleasedDate != null) {
+                        if (unreleasedBadge != null) {
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            UnreleasedBadge(
-                                releaseDate = unreleasedDate,
-                                style = UnreleasedBadgeStyle.Prominent,
-                            )
+                            Badge(model = unreleasedBadge)
                         }
 
                         val isAudiobook = edition?.isAudiobook == true
@@ -1506,10 +1502,19 @@ internal fun InProgressSection(
         }
 
         val deadlineProgress = state.deadlineProgress
-        var lastDeadlineProgress by remember { mutableStateOf(deadlineProgress) }
+        val deadlineBadge = state.deadlineBadge
+        val deadlineRow = if (deadlineProgress != null && deadlineBadge != null) {
+            DeadlineRowState(
+                progress = deadlineProgress,
+                badge = deadlineBadge,
+            )
+        } else {
+            null
+        }
+        var lastDeadlineRow by remember { mutableStateOf(deadlineRow) }
 
-        if (deadlineProgress != null) {
-            lastDeadlineProgress = deadlineProgress
+        if (deadlineRow != null) {
+            lastDeadlineRow = deadlineRow
         }
 
         AnimatedVisibility(
@@ -1517,12 +1522,13 @@ internal fun InProgressSection(
             enter = revealEnter,
             exit = revealExit,
         ) {
-            lastDeadlineProgress?.let { deadline ->
+            lastDeadlineRow?.let { row ->
                 Column {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     DeadlineRow(
-                        progress = deadline,
+                        progress = row.progress,
+                        badge = row.badge,
                         dateStyle = state.dateStyle,
                     )
                 }
@@ -1531,9 +1537,19 @@ internal fun InProgressSection(
     }
 }
 
+/**
+ * [DeadlineRow]'s progress and badge, remembered as one value so an `AnimatedVisibility` exit
+ * cannot animate one half a frame out of sync with the other (§5i).
+ */
+private data class DeadlineRowState(
+    val progress: DeadlineProgress,
+    val badge: BadgeUiModel,
+)
+
 @Composable
 private fun DeadlineRow(
     progress: DeadlineProgress,
+    badge: BadgeUiModel,
     dateStyle: DateStyle,
 ) {
     Surface(
@@ -1569,7 +1585,7 @@ private fun DeadlineRow(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                DeadlineBadge(status = progress.status)
+                Badge(model = badge)
             }
 
             Spacer(modifier = Modifier.height(6.dp))

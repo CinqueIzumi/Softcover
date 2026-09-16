@@ -48,6 +48,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagChipMo
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagSuggestionsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagVocabularySyncCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UnreleasedBadgeCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserBooksFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserListsFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
@@ -73,6 +74,7 @@ val bookDetailModule = module {
     factory { CoverModelsCollector() } bind BookDetailCollector::class
     factory { DateStyleCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class
+    factory { UnreleasedBadgeCollector() } bind BookDetailCollector::class
     factory { UserListsFlowCollector() } bind BookDetailCollector::class
     factory { CurrentUserCollector() } bind BookDetailCollector::class
     factory { UserTagsCollector() } bind BookDetailCollector::class

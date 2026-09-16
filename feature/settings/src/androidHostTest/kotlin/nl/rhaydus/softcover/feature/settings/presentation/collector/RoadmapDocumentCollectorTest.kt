@@ -10,9 +10,13 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.uibinding.date.formatLongDate
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSource
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ObserveRoadmapUseCase
@@ -97,6 +101,50 @@ class RoadmapDocumentCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.document shouldBe secondDocument
+            job.cancel()
+        }
+
+        @Test
+        fun `sets lastUpdatedText to the formatted long date when fetchedAtEpochMillis is present`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val expected = Instant.fromEpochMilliseconds(TEST_DOCUMENT.fetchedAtEpochMillis!!)
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+                    .formatLongDate()
+                val collector = RoadmapDocumentCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                documentFlow.emit(TEST_DOCUMENT)
+
+                // ----- Assert -----
+                stateFlow.value.lastUpdatedText shouldBe expected
+                job.cancel()
+            }
+
+        @Test
+        fun `lastUpdatedText is null when the document has no fetchedAtEpochMillis`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val documentWithoutFetchTime = TEST_DOCUMENT.copy(fetchedAtEpochMillis = null)
+            val collector = RoadmapDocumentCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            documentFlow.emit(documentWithoutFetchTime)
+
+            // ----- Assert -----
+            stateFlow.value.lastUpdatedText shouldBe null
             job.cancel()
         }
 

@@ -2,7 +2,11 @@ package nl.rhaydus.softcover.feature.settings.presentation.collector
 
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.uibinding.date.formatLongDate
 import nl.rhaydus.softcover.feature.settings.presentation.event.RoadmapEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapLocalVariables
@@ -43,10 +47,18 @@ internal class RoadmapDocumentCollector : RoadmapCollector {
                 }
             }
             .collectLatest { document ->
+                val lastUpdatedText = document.fetchedAtEpochMillis?.let { epochMillis ->
+                    Instant.fromEpochMilliseconds(epochMillis)
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .date
+                        .formatLongDate()
+                }
+
                 scope.setState {
                     it.copy(
                         document = document,
                         isLoading = false,
+                        lastUpdatedText = lastUpdatedText,
                     )
                 }
             }

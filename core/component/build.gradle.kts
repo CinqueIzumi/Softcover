@@ -45,6 +45,12 @@ kotlin {
             // `:core:designsystem`'s `api` edges; these it holds on `implementation`, so they are
             // declared here: the editorial section header (the verdict sheet's own chrome) and the
             // shimmer image the share cards load covers through.
+            //
+            // `core-common` supplies `currentLocalDateTime()` in the progress sheet's date picker. It
+            // is declared here as of S4-5b: it used to arrive through `:core:designsystem`'s
+            // `api(core-common)` edge, which that module dropped when the `Deadline*` trio took its
+            // last user away.
+            implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemEditorial)
             implementation(libs.rhaydus.designsystemImage)
 
@@ -52,6 +58,13 @@ kotlin {
             // public signature, so this is an `api` edge rather than `implementation` — a consumer
             // holding the request needs the type on its own compile classpath.
             api(libs.coil3)
+
+            // `UpdateProgressBottomSheet` (progress/) uses `LocalDateTime`/`TimeZone`. It used to get
+            // this transitively through `:core:designsystem`'s own `api(libs.kotlinx.datetime)`;
+            // S4-5b tightens that edge to `implementation` (the badge/ family it was covering for
+            // moved here without needing the type on its own public surface), so this module now
+            // declares its actual dependency directly instead of relying on someone else's `api`.
+            implementation(libs.kotlinx.datetime)
         }
     }
 }

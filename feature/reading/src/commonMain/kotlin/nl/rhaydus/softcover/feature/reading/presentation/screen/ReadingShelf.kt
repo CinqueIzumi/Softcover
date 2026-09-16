@@ -99,6 +99,10 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.badge.CoverOverlay
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryLine
+import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.rememberCoverImageRequest
@@ -107,8 +111,6 @@ import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineCoverOverlay
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -116,7 +118,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
@@ -185,7 +186,7 @@ internal fun ReadingBooksColumn(
                 header()
             }
 
-            val featuredDeadlineProgress = featured.deadlineProgressFrom(state)
+            val featuredDeadlineProgress = state.deadlineProgressByBook[featured.id]
             val planTodayMessage = planTodayNudgeFor(progress = featuredDeadlineProgress)
             val isPlanTodayDismissed = state.dismissedPlanTodayByBook[featured.id] == today
 
@@ -194,8 +195,8 @@ internal fun ReadingBooksColumn(
                     book = featured,
                     backdropCover = state.featuredBackdropCover,
                     heroCover = state.featuredCover,
-                    deadlineProgress = featuredDeadlineProgress,
-                    dateStyle = state.dateStyle,
+                    deadlineCoverOverlay = state.deadlineCoverOverlays[featured.id],
+                    deadlineSummary = state.featuredDeadlineSummary,
                     mutationFailed = featured.id in state.failedMutationBookIds,
                     paceForecast = state.featuredBookPace,
                     planTodayMessage = planTodayMessage.takeIf { isPlanTodayDismissed.not() },
@@ -233,8 +234,8 @@ internal fun ReadingBooksColumn(
                             .then(controller.slideModifier(book.id)),
                         book = book,
                         cover = state.bookCovers[book.id],
-                        deadlineProgress = book.deadlineProgressFrom(state),
-                        dateStyle = state.dateStyle,
+                        deadlineCoverOverlay = state.deadlineCoverOverlays[book.id],
+                        deadlineSummary = state.deadlineSummaries[book.id],
                         mutationFailed = book.id in state.failedMutationBookIds,
                         runAction = runAction,
                         onBookClick = onBookClick,
@@ -381,8 +382,8 @@ internal fun FeaturedBookCard(
     book: Book,
     backdropCover: CoverUiModel?,
     heroCover: CoverUiModel?,
-    deadlineProgress: DeadlineProgress?,
-    dateStyle: DateStyle,
+    deadlineCoverOverlay: CoverOverlayUiModel?,
+    deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
     paceForecast: ReadingPaceForecast?,
     planTodayMessage: String?,
@@ -425,8 +426,8 @@ internal fun FeaturedBookCard(
                 book = book,
                 backdropCover = backdropCover,
                 heroCover = heroCover,
-                deadlineProgress = deadlineProgress,
-                dateStyle = dateStyle,
+                deadlineCoverOverlay = deadlineCoverOverlay,
+                deadlineSummary = deadlineSummary,
                 mutationFailed = mutationFailed,
                 paceForecast = paceForecast,
                 cardColor = cardColor,
@@ -449,8 +450,8 @@ private fun FeaturedBackdropCard(
     book: Book,
     backdropCover: CoverUiModel?,
     heroCover: CoverUiModel?,
-    deadlineProgress: DeadlineProgress?,
-    dateStyle: DateStyle,
+    deadlineCoverOverlay: CoverOverlayUiModel?,
+    deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
     paceForecast: ReadingPaceForecast?,
     cardColor: Color,
@@ -535,7 +536,7 @@ private fun FeaturedBackdropCard(
             ) {
                 FeaturedCover(
                     cover = heroCover,
-                    deadlineProgress = deadlineProgress,
+                    deadlineCoverOverlay = deadlineCoverOverlay,
                 )
 
                 FeaturedBackdropMeta(
@@ -561,26 +562,22 @@ private fun FeaturedBackdropCard(
             val revealEnter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None
             val revealExit = if (playMotion) shrinkVertically() + fadeOut() else ExitTransition.None
 
-            var lastDeadlineProgress by remember { mutableStateOf(deadlineProgress) }
+            var lastDeadlineSummary by remember { mutableStateOf(deadlineSummary) }
 
-            if (deadlineProgress != null) {
-                lastDeadlineProgress = deadlineProgress
+            if (deadlineSummary != null) {
+                lastDeadlineSummary = deadlineSummary
             }
 
             AnimatedVisibility(
-                visible = deadlineProgress != null,
+                visible = deadlineSummary != null,
                 enter = revealEnter,
                 exit = revealExit,
             ) {
-                lastDeadlineProgress?.let { progress ->
+                lastDeadlineSummary?.let { summary ->
                     Column {
                         Spacer(modifier = Modifier.height(15.dp))
 
-                        DeadlineSummaryLine(
-                            progress = progress,
-                            dateStyle = dateStyle,
-                            foreground = foreground,
-                        )
+                        DeadlineSummaryLine(model = summary)
                     }
                 }
             }
@@ -621,9 +618,9 @@ private fun FeaturedBackdropCard(
 @Composable
 private fun FeaturedCover(
     cover: CoverUiModel?,
-    deadlineProgress: DeadlineProgress?,
+    deadlineCoverOverlay: CoverOverlayUiModel?,
 ) {
-    DeadlineCoverOverlay(progress = deadlineProgress) {
+    CoverOverlay(model = deadlineCoverOverlay) {
         Cover(
             model = cover,
             modifier = Modifier.width(108.dp),
@@ -955,8 +952,8 @@ private fun timeOfDayCaption(): String {
 internal fun CompactBookEntry(
     book: Book,
     cover: CoverUiModel?,
-    deadlineProgress: DeadlineProgress?,
-    dateStyle: DateStyle,
+    deadlineCoverOverlay: CoverOverlayUiModel?,
+    deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
     runAction: (ReadingAction) -> Unit,
     onBookClick: (Book) -> Unit,
@@ -1001,7 +998,7 @@ internal fun CompactBookEntry(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    DeadlineCoverOverlay(progress = deadlineProgress) {
+                    CoverOverlay(model = deadlineCoverOverlay) {
                         Cover(
                             model = cover,
                             modifier = Modifier.width(54.dp),
@@ -1071,13 +1068,10 @@ internal fun CompactBookEntry(
                     )
                 }
 
-                if (deadlineProgress != null) {
+                if (deadlineSummary != null) {
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    DeadlineSummaryLine(
-                        progress = deadlineProgress,
-                        dateStyle = dateStyle,
-                    )
+                    DeadlineSummaryLine(model = deadlineSummary)
                 }
             }
         }
@@ -1543,26 +1537,6 @@ internal fun PaceNudgeRibbon(
             )
         }
     }
-}
-
-internal fun Book.deadlineProgressFrom(state: ReadingScreenUiState): DeadlineProgress? {
-    val deadline = state.deadlines[id] ?: return null
-    val edition = currentEdition ?: return null
-
-    val current = when (deadline.unit) {
-        DeadlineUnit.PAGES -> userBookRead?.currentPage ?: 0
-        DeadlineUnit.SECONDS -> userBookRead?.currentSeconds ?: 0
-    }
-    val total = when (deadline.unit) {
-        DeadlineUnit.PAGES -> edition.pages ?: 0
-        DeadlineUnit.SECONDS -> edition.audioSeconds ?: 0
-    }
-
-    return DeadlineProgress.compute(
-        deadline = deadline,
-        current = current,
-        total = total,
-    )
 }
 
 internal fun List<Book>.averageProgress(): Float? {

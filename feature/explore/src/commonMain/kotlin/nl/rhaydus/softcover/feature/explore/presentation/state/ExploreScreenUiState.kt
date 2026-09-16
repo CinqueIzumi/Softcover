@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -21,6 +22,15 @@ internal data class ExploreScreenUiState(
     val becauseYouReadCovers: Map<Int, CoverUiModel> = emptyMap(),
     val continueSeriesCovers: Map<Int, CoverUiModel> = emptyMap(),
     val queriedBookCovers: Map<Int, CoverUiModel> = emptyMap(),
+    // Unreleased-badge UI models, mapped off composition by UnreleasedBadgeModelsCollector
+    // (`component-contract.md` § 7.2 R9). One map keyed by book id, unlike the five cover maps
+    // above: a badge carries no per-rail `sharedTransitionKey` surface, so the same book yields
+    // an identical badge everywhere it appears, and one id-keyed map is the single source of
+    // truth. `featuredReleaseBadge` does not gate on `isUnreleased` - the featured hero is by
+    // construction the upcoming-release card, so it badges on `effectiveReleaseDate` alone,
+    // reproducing today's ExploreShelf.kt:202,236 behaviour.
+    val unreleasedBadges: Map<Int, BadgeUiModel> = emptyMap(),
+    val featuredReleaseBadge: BadgeUiModel? = null,
     // Search paging (explore-3a feedback item 7). The Typesense `search` endpoint returns no
     // total hit count, so `queriedBooksHasMore` is a "maybe more" signal derived from whether the
     // last fetched page came back full, not an authoritative total. `loadingMoreQueriedBooks` is

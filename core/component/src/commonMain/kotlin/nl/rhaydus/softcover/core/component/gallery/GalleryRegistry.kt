@@ -7,10 +7,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.badge.BadgeTone
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.BadgeVariant
+import nl.rhaydus.softcover.core.component.badge.CoverOverlay
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryLine
+import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryTone
+import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.callout.Banner
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
@@ -24,6 +34,7 @@ import nl.rhaydus.softcover.core.component.control.ThemePreviewTileUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.cover.CoverlessTitleCover
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
@@ -83,6 +94,53 @@ object GalleryRegistry {
             label = ::chipFixtureLabel,
             content = { model, modifier ->
                 Chip(
+                    model = model,
+                    modifier = modifier,
+                )
+            },
+        ),
+        galleryEntry(
+            name = "Badge",
+            family = GalleryFamily.BADGE,
+            blurb = "A small pill reporting a status in one word or a short phrase — a reading " +
+                "deadline's pace, or an edition's release date.",
+            previews = BadgeUiModel,
+            label = ::badgeFixtureLabel,
+            content = { model, modifier ->
+                Badge(
+                    model = model,
+                    modifier = modifier,
+                )
+            },
+        ),
+        galleryEntry(
+            name = "CoverOverlay",
+            family = GalleryFamily.BADGE,
+            blurb = "A Badge pinned to a cover's top-end corner, with the cover itself optionally " +
+                "desaturated — a reading deadline's status laid over its book.",
+            previews = CoverOverlayUiModel,
+            label = ::coverOverlayFixtureLabel,
+            content = { model, modifier ->
+                CoverOverlay(
+                    model = model,
+                    modifier = modifier.width(BADGE_COVER_FIXTURE_WIDTH),
+                ) {
+                    CoverlessTitleCover(
+                        title = "Piranesi",
+                        modifier = Modifier.width(BADGE_COVER_FIXTURE_WIDTH),
+                    )
+                }
+            },
+        ),
+        galleryEntry(
+            name = "DeadlineSummaryLine",
+            family = GalleryFamily.BADGE,
+            blurb = "The deadline date paired with the pace needed to still make it, or the status " +
+                "label alone once the deadline has passed.",
+            previews = DeadlineSummaryUiModel,
+            label = ::deadlineSummaryLineFixtureLabel,
+            content = { model, modifier ->
+                DeadlineSummaryLine(
                     model = model,
                     modifier = modifier,
                 )
@@ -280,6 +338,9 @@ private val PREVIEW_TILE_FIXTURE_WIDTH = 120.dp
 /** The burst draws outward from the centre of whatever footprint it is given. */
 private val BURST_FIXTURE_SIZE = 160.dp
 
+/** `CoverOverlay`'s fixture cover — sized like the gallery's other thumbnail-ish jackets. */
+private val BADGE_COVER_FIXTURE_WIDTH = 96.dp
+
 /** Names what a [ChipUiModel] fixture demonstrates — its anatomy branch, not its words. */
 private fun chipFixtureLabel(model: ChipUiModel): String = when {
     model.concealed -> "Concealed (spoiler)"
@@ -290,6 +351,30 @@ private fun chipFixtureLabel(model: ChipUiModel): String = when {
 }
 
 private const val CHIP_LONG_LABEL_FLOOR = 30
+
+/** Names what a [BadgeUiModel] fixture demonstrates — its tone, or its variant when that differs. */
+private fun badgeFixtureLabel(model: BadgeUiModel): String = when {
+    model.variant == BadgeVariant.FeaturedRelease -> "Release, featured (larger pad)"
+    else -> when (model.tone) {
+        BadgeTone.OnTrack -> "On track"
+        BadgeTone.Behind -> "Behind"
+        BadgeTone.Expired -> "Expired"
+        BadgeTone.Release -> "Release"
+    }
+}
+
+/** Names what a [CoverOverlayUiModel] fixture demonstrates — whether the cover desaturates. */
+private fun coverOverlayFixtureLabel(model: CoverOverlayUiModel): String =
+    if (model.grayscale) "Expired (grayscale cover)" else "On track"
+
+/** Names what a [DeadlineSummaryUiModel] fixture demonstrates, derived from its anatomy branch. */
+private fun deadlineSummaryLineFixtureLabel(model: DeadlineSummaryUiModel): String = when {
+    model.tone == DeadlineSummaryTone.OnHeroBackdrop -> "On hero backdrop"
+    model.paceText == "Expired" -> "Expired"
+    model.paceText.contains("m/day") -> "Audio pace"
+    model.paceText.startsWith("1149") -> "Extreme pace, ellipsised"
+    else -> "Pages pace"
+}
 
 /** Names what a [TopBarUiModel] fixture demonstrates, derived from its anatomy branch. */
 private fun topBarFixtureLabel(model: TopBarUiModel): String = when {

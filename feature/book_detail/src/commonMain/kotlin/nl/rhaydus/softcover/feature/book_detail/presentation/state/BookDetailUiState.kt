@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
@@ -60,8 +61,14 @@ internal data class BookDetailUiState(
 
     val deadline: BookDeadline? = null,
     val deadlineProgress: DeadlineProgress? = null,
+
+    /** [deadlineProgress] mapped to a badge by `BookDeadlineCollector` (R9), so badge and progress share one writer and cannot disagree. */
+    val deadlineBadge: BadgeUiModel? = null,
     val readingPaceForecast: ReadingPaceForecast? = null,
     val showDeadlinePicker: Boolean = false,
+
+    /** [Book.effectiveReleaseDate] mapped to an unreleased-release badge by `UnreleasedBadgeCollector` (R9), off [book]. */
+    val unreleasedBadge: BadgeUiModel? = null,
 
     val reviews: ImmutableList<BookReviewUiModel> = persistentListOf(),
     val loadingReviews: Boolean = false,

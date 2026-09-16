@@ -8,13 +8,19 @@
 **Rollout model:** one branch, one PR, merged all at once. Stages below are *commit* boundaries on
 that branch, not separate pull requests. Every stage boundary must leave the branch compiling.
 
-**Status:** `S4 IN PROGRESS` — S4-1, S4-2a, S4-2b (incl. the **R9 correction**, § 5i), S4-3 and
-S4-4 done; **S4-5 is landing in two commits** (§ 5l) — the first, the domain-free primitives, is
-described below; the second takes the `Deadline*` / `Unreleased*` family and asserts G2. **§ 5g is the most important thing to read before
-continuing:** the direction rule re-cut S4's sub-commits, and the original ordering was impossible.
-**§ 5k** records S4-4's outcome — the `:core:book` edge is dead and **G3 is closed**, `CoverVariant`
-is the second and larger instance of R2's per-variant metrics table, and R9 finally reached the
-list-shaped surfaces.
+**Status:** `S4 IN PROGRESS` — S4-1, S4-2a, S4-2b (incl. the **R9 correction**, § 5i), S4-3, S4-4
+and **both halves of S4-5** done. **`:core:designsystem` is now tokens only, with zero project
+dependencies — G2 is closed** (§ 5m). Only **S4-6** remains in this stage: the `ShareCard.kt` split
+and the closing doc sweep. **§ 5g is the most important thing to read before continuing:** the
+direction rule re-cut S4's sub-commits, and the original ordering was impossible. **§ 5k** records
+S4-4's outcome — the `:core:book` edge is dead and **G3 is closed**, `CoverVariant` is the second and
+larger instance of R2's per-variant metrics table, and R9 finally reached the list-shaped surfaces.
+**§ 5m** records S4-5b's — G2, and the three dependencies that had to leave in one commit.
+> **S4-6 still has a hand-off doc:**
+> [`s4-5b-and-s4-6-handoff.md`](s4-5b-and-s4-6-handoff.md) — its S4-5b half is now spent, but the
+> `ShareCard.kt` split's file/line inventory is still current. It is a hand-off, not a second source
+> of truth; **this file wins** where they disagree, and S4-6 deletes it.
+
 **Branch:** `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models`
 **Issue:** [#275](https://github.com/CinqueIzumi/Softcover/issues/275) — tag `E.1`, labels
 `area:cross-cutting` / `kind:tech` / `scope:L`, no milestone. Keep its Stages and Acceptance
@@ -359,7 +365,7 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       `:core:designsystem` into `:core:presentation` — 27 files — and re-pointed 92 consumer files
       across 11 modules. No UI change, no behaviour change. **See § 5e for what this stage settled,
       including the one thing S3's own description here had wrong.**
-- [ ] **S4 — Tokens-only designsystem.** Move the existing `core:designsystem` components into
+- [ ] **S4 — Tokens-only designsystem.** *(S4-1 … S4-5b done; only S4-6 remains.)* Move the existing `core:designsystem` components into
       `:core:component`, converting each to a UI model as it moves (they cannot land domain-typed —
       the gate rejects it). Write their mappers per R6. Includes the `share/` package: split the six
       card bodies one-per-file, rename `*ShareContent` -> `*ShareCardUiModel` per R8, and close its
@@ -410,9 +416,11 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
                   `ThemeTilePainting`; `:core:component`'s own `compose.resources`; `rememberIsOnline`
                   hoisted to `:core:presentation`; `SoftcoverLoadingDialog` and `SoftcoverTopBarAction`
                   deleted as dead.
-            - [ ] **S4-5b — the domain-typed family**: the `Deadline*` trio and the `Unreleased*`
-                  pair, their `:core:uibinding` mappers and R9 collectors — which empties
-                  `:core:designsystem`'s dependency block and so lands **G2**.
+            - [x] **S4-5b — the domain-typed family.** DONE. The `Deadline*` trio and the
+                  `Unreleased*` pair became `Badge` / `CoverOverlay` / `DeadlineSummaryLine` in
+                  `:core:component`'s `badge/`, with their `:core:uibinding` mappers and six R9/R10
+                  collectors across five features. Emptied `:core:designsystem`'s dependency block
+                  and landed **G2**, both halves. **See § 5m.**
       - [ ] **S4-6 — Close the boundary**: zero project deps, G2, G3, the doc rewrite.
 - [ ] **S5 — Primitives** (§ 7.1): chips/pills, badges/overlays, headers/labels, dividers, skeletons.
 - [ ] **S6 — Rows & sheet chrome** (§ 7.2).
@@ -1392,6 +1400,135 @@ not created yet), 24 `) }` trailing-lambda glomming sites across the four new te
 production line this commit had touched, and a comment on `FilterChipModelsSnapshot`'s cross-tab merge
 recording that it is safe only because chip keys are facet-namespaced.
 
+### 5m. S4-5b outcome — G2, and the three dependencies that had to leave together
+
+The last components out of `:core:designsystem`. **The module is now tokens only — six directories
+(`icon`, `illustration`, `layout`, `modifier`, `theme`, `transition`) and zero project
+dependencies.** `presentation/component/` does not exist any more. What it settled:
+
+**G2 landed here rather than in S4-6, for the third time in this stage's history.** § 6 scheduled it
+for S4-6; § 5k had already recorded the same forcing function catching G3 out. `onUnusedDependencies`
+is `severity("fail")`, so the moment the five files were deleted the module's whole dependency block
+was unused and the build was red until it emptied. What the plan missed is that it was **three**
+dependencies, not two: `api(project(":core:domain"))` and `kotlinx-datetime` were expected, but
+`core-common` went too — `secondsToHm` (the pace line) and `currentLocalDate` (the release-date
+formatters) were its only users in the module, and both left with the components. That one was a
+transitive trap rather than a clean drop: `:core:component` and `:core:uibinding` both call into
+`nl.rhaydus.common` and neither declared the coordinate, inheriting it through the `api` edge being
+removed. Both declare it now. The same shape had already caught `kotlinx-datetime` one step earlier —
+`UpdateProgressBottomSheet` has used it since S4-3 without declaring it, invisibly, because
+`onUsedTransitiveDependencies` is `severity("ignore")`. **An `api` edge is load-bearing for consumers
+you never listed; deleting one means auditing its users, not just its owner.**
+
+**Both halves of G2 were verified by deliberately reintroducing a violation, and the first attempt at
+verifying the source half proved nothing.** Adding a `core.domain` import to `Color.kt` failed at
+*compile*, not at detekt — with the project dependency gone, the import cannot resolve at all. That
+is a stronger failure but it does not exercise the rule, and a rule that never fires reads exactly
+like one that passes (§ 6a). The honest test is the scenario the source gate actually exists for: a
+stray import that still resolves because something else on the compile classpath supplies the type.
+Restoring `implementation(project(":core:domain"))` alongside the import produced the real finding —
+`ForbiddenImport` on `Color.kt:3`. The dependency half was verified the same way and reports
+`:core:designsystem → :core:domain (tokens only — this module must declare NO project dependency at
+all)`.
+
+**detekt 1.23.8 has no multiple-rule-instance support, so the two scopes share one rule.**
+`ForbiddenImport`'s `includes` is now `['**/core/component/**', '**/core/designsystem/**']` against a
+single import list. That makes the ban a **superset** for the design system — Koin, Voyager and
+Apollo imports are forbidden there too, where G2 only asked for domain. That is correct rather than
+incidental, and is written into the config comment: a token module has no more business with DI,
+navigation or the network client than the component library does.
+
+**The hand-off's `DeadlineSummaryUiModel(dateText, paceText, foreground: Color?)` was wrong, and R10
+is why.** The default ink is `MaterialTheme.colorScheme.onSurfaceVariant` — a theme lookup that only
+resolves *in composition*. A model built in a collector therefore cannot hold it, so the nullable
+`Color` could never have been populated for the common case. It is a two-entry
+`DeadlineSummaryTone` (`OnSurface` / `OnHeroBackdrop`) resolved inside the component, which is also
+what R2 wants — a named variant rather than a flat nullable beside the model. **Worth generalising:
+when a loose render parameter resists becoming a model field, check whether the value is
+composition-scoped before reaching for a nullable. If it is, the field was never the answer; a
+variant is.**
+
+**The `Deadline*` compute was in composition in two features, and the hand-off's "R9 wiring" line
+undersold it.** Only book detail had a collector; `LibraryShelf.kt:870` and
+`ReadingShelf.kt:1548`'s `Book.deadlineProgressFrom(state)` both ran `DeadlineProgress.compute(...)`
+during layout, the second one from four call sites across two layout actuals. So this commit moved
+the *domain computation* off the composition as well as the mapping — six collectors in total
+(`DeadlineModelsCollector` in library and reading, `UnreleasedBadgeModelsCollector` in explore,
+`UnreleasedBadgeCollector` in book detail, plus writes folded into the existing `BookDeadlineCollector`
+and `RoadmapDocumentCollector`). `deadlineProgressByBook` stays a **domain-typed** field on library
+and reading state on purpose: Library's own countdown badge and the expired-cover grayscale branch
+read `status`/`daysRemaining`, and neither is a `:core:component` component until S5.
+
+**One map, not five — the cover precedent does not generalise.** `CoverModelsCollector` keeps five
+separate maps because a cover carries a per-rail `sharedTransitionKey` surface, so the same book
+yields a different model per rail. A badge carries no such thing, so explore's `unreleasedBadges` is
+one id-keyed map across all four source lists and five would have been five ways to disagree. **The
+question to ask of a new model map is whether the model varies by surface, not whether the previous
+one did.**
+
+**Two call sites the hand-off's "verified" table missed**, both consumers of the moving date
+formatters rather than of the components: `ExploreShelf.kt:243` and `RoadmapContent.kt:180`. The
+first was a **hand-rolled duplicate** of `UnreleasedBadge` — same `Surface` + `Text` anatomy, same
+colours, different copy ("Arriving …") and an `8dp`/`4dp` pad against everything else's `6dp`/`2dp`.
+It is now `Badge` with `BadgeVariant.FeaturedRelease`, reproducing the pad exactly, and the
+`UnreleasedBadgeStyle` enum gained a third entry to resolve its copy. Two entries in a metrics table
+from a sample of one deviation is thin, but it is the § 5k rule applied honestly: the drift is now
+readable in one file instead of invisible in two. The second was using `formatLongRelease()` to
+render **"Last updated …"**, which is not a release date at all — so the formatters moved as
+`formatCompactDate` / `formatLongDate`, named for the shape they render, with the release copy living
+in the mapper where it belongs.
+
+**Gates at this boundary:** `checkModuleGraph` (303 edges), `ktlintCheck`, repo-wide `compileKotlinJvm`
++ `:desktopApp:compileKotlin` + both `:app` variants, repo-wide `compileKotlinIosSimulatorArm64`,
+`projectHealth` on all eight touched modules, and type-resolved detekt under JDK 21 (`styleCheck`,
+whole repo) — all green. One deprecation warning was introduced and fixed rather than left: the
+roadmap collector reached for `kotlinx.datetime.Instant`, where the code it replaced used
+`kotlin.time.Instant`.
+
+**Tests: 3,519 completed, 5 failed** — the same five pre-existing
+`AndroidLegacySecureApiKeyStorageTest` cases in the untouched `:core:preferences` (no Android Keystore
+on the JVM host) this file's header already records. **56 are new**: `DateFormatsTest` (3),
+`UnreleasedMapperTest` (3) and `DeadlineMapperTest` (16) in `:core:uibinding`; `DeadlineModelsCollectorTest`
+in library (6) and reading (8); `UnreleasedBadgeModelsCollectorTest` (11); `UnreleasedBadgeCollectorTest`
+(4); plus extensions to `BookDeadlineCollectorTest` (3) and `RoadmapDocumentCollectorTest` (2).
+
+> **The recorded baseline of "3,346 tests" is wrong, and future stages should not compare against
+> it.** 3,519 − 56 is 3,463, not 3,346. Counts here are read off the results XML after
+> `./gradlew testAndroidHostTest`, and **without `--continue` that run halts at `:core:preferences`** —
+> the module whose five failures are permanent on this machine — so every module Gradle had not yet
+> reached contributes nothing to the total. The S4-5a figure was almost certainly taken from such a
+> halted run. Counts recorded from here on use `--continue`, and the number that actually matters is
+> the failure list, not the total: five, all pre-existing, unchanged.
+
+**The device run found a latent S4-5a crash, and it reads as a correction to § 5l.** That section
+records that `:core:component` "owns its own copy now" and that the library's `compose.resources` block
+"mirrors the design system's, `publicResClass` included". It mirrored everything except the line that
+makes the resources exist on Android: `:core:designsystem`'s `androidLibrary` block carries
+`androidResources.enable = true` and the library's did not. CMP resources ship as Android *assets* and the
+KMP Android library plugin keeps those off by default, so the module generated its `Res` accessor,
+compiled clean, and packaged **nothing** — `MissingResourceException` on the first read. The first reader
+is `offlineBannerUiModel()`, so the app crashed on launch on a device with no network, three commits after
+the omission landed. S4-5a's own "not verified: no visual pass" is exactly why it survived that long.
+
+Two consequences beyond the one-line fix. **A sweep of every resource-owning module found a second
+instance**: `:feature:settings`' bundled `ROADMAP.md` fallback had never worked on Android at all — it is
+read only before the first live fetch lands, so a warm cache never touches it, and it would have surfaced
+on a fresh install after a release. **And it is now a gate**, `checkResourcePackaging`, wired into `check`
+and verified by flipping a real module's flag: a module declaring `packageOfResClass` with
+`androidResources.enable` off fails the build. Documented in `module-structure.md` § Build wiring
+conventions and in `CLAUDE.md`, and filed for the foundation as F28, since the trap is generic to any
+nl.rhaydus app that gives a module its own `composeResources`. **The lesson for the stages still to come:
+a module gaining its own resources is a build-configuration change, not only a source change, and
+compilation cannot speak to whether it worked.**
+
+**Visual pass: partial.** Every change here is a re-point that should be pixel-identical, and the one
+place that claim is load-bearing is Explore's featured hero, where a hand-rolled badge became a shared
+component at a reproduced pad. **That one is confirmed on-device** — the hero renders "Arriving Dec 8"
+through `Badge` at the `FeaturedRelease` pad — along with the Reading screen, during the crash
+investigation above. The rest is still unseen: no deadline-carrying book was on screen, so the badge /
+cover-overlay / summary-line trio has not been watched rendering from its new models. The gallery now
+carries a `BADGE` family with three entries, which is the cheapest way to close that.
+
 ### 5a. The Component Gallery — decided: shipped easter egg
 
 Not debug-only. Consequences to build for, rather than discover late:
@@ -1440,13 +1577,15 @@ already says so in a comment. Every rule below is a build failure.
           "io.insert-koin", "cafe.adriel.voyager", "com.apollographql.apollo",
       )
       ```
-- [ ] **G2 — `:core:designsystem` has zero project dependencies.** Assert in the same task,
-      alongside `bannedReverseEdges` and the `apiSignOffModules` check (§ 6a). Lands in S4-6, once
-      `EditionImage` has moved and taken the `:core:domain` / `:core:book` edges with it. **Two
-      halves, and they land together:**
-      - [ ] the **dependency** gate — `checkModuleGraph` fails if `:core:designsystem` declares any
+- [x] **G2 — `:core:designsystem` has zero project dependencies.** DONE in **S4-5b**, not S4-6 —
+      the same forcing function as G3 (`onUnusedDependencies` is `severity("fail")`, so the edges had
+      to go in the commit that emptied them). Asserted in `checkModuleGraph` alongside
+      `bannedReverseEdges` and the `apiSignOffModules` check (§ 6a), via a
+      `zeroProjectDependencyModules` set. **Both halves landed together, and both were verified by
+      deliberately reintroducing a violation** (§ 6a's standing rule):
+      - [x] the **dependency** gate — `checkModuleGraph` fails if `:core:designsystem` declares any
             `project(...)` dependency at all
-      - [ ] the **source** gate — a detekt `ForbiddenImport` on
+      - [x] the **source** gate — a detekt `ForbiddenImport` on
             `nl.rhaydus.softcover.core.domain.**` scoped to `**/core/designsystem/**`, pairing with
             G2 exactly as § 5c pairs one with G1. **Not belt-and-braces: the two catch different
             things, verified the hard way.** S4-1 left fully-qualified
@@ -1649,9 +1788,10 @@ Kills all three cross-module name collisions.
 
 #### Badges & cover overlays — 12 -> `Badge` + `CoverOverlay`
 
-- [ ] `DeadlineBadge` — `core/designsystem/presentation/component/DeadlineBadge.kt:15` (drop the `DeadlineStatus` parameter per R4)
-- [ ] `DeadlineCoverOverlay` — `core/designsystem/presentation/component/DeadlineCoverOverlay.kt:15`
-- [ ] `UnreleasedBadge` (+ `UnreleasedBadgeStyle`) — `core/designsystem/presentation/component/UnreleasedBadge.kt:45`
+- [x] `DeadlineBadge` -> `Badge` + `BadgeUiModel` / `BadgeTone` / `BadgeVariant` — `core/component/badge/` (S4-5b)
+- [x] `DeadlineCoverOverlay` -> `CoverOverlay` + nullable `CoverOverlayUiModel` — `core/component/badge/` (S4-5b)
+- [x] `UnreleasedBadge` -> the same `Badge`, `BadgeTone.Release`; `UnreleasedBadgeStyle` moved to `:core:uibinding` as a mapper input and gained a third entry (S4-5b)
+- [x] `DeadlineSummaryLine` -> `DeadlineSummaryLine` + `DeadlineSummaryUiModel` / `DeadlineSummaryTone` — `core/component/badge/` (S4-5b; not originally listed here, it is the family's third member)
 - [ ] `BookmarkGlyph` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3)
 - [ ] `LibraryDeadlineCountdownBadge`, `CoverGridOverlay`, `SelectionCircleIndicator` — `feature/library/presentation/screen/LibraryShelf.kt:1083,1020,1658`
 - [ ] `OwnedCoverBadge` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:585`

@@ -166,7 +166,7 @@ private fun DesktopReadingContent(
     val isInspection = LocalInspectionMode.current
     val prefetcher = if (isInspection) null else rememberBookDetailPrefetcher()
 
-    val featuredDeadlineProgress = featured.deadlineProgressFrom(state)
+    val featuredDeadlineProgress = state.deadlineProgressByBook[featured.id]
     val planTodayMessage = planTodayNudgeFor(progress = featuredDeadlineProgress)
     val isPlanTodayDismissed = state.dismissedPlanTodayByBook[featured.id] == today
 
@@ -182,8 +182,8 @@ private fun DesktopReadingContent(
                     book = featured,
                     backdropCover = state.featuredBackdropCover,
                     heroCover = state.featuredCover,
-                    deadlineProgress = featuredDeadlineProgress,
-                    dateStyle = state.dateStyle,
+                    deadlineCoverOverlay = state.deadlineCoverOverlays[featured.id],
+                    deadlineSummary = state.featuredDeadlineSummary,
                     mutationFailed = featured.id in state.failedMutationBookIds,
                     paceForecast = state.featuredBookPace,
                     planTodayMessage = planTodayMessage.takeIf { isPlanTodayDismissed.not() },
@@ -209,8 +209,8 @@ private fun DesktopReadingContent(
                             modifier = controller.slideModifier(book.id),
                             book = book,
                             cover = state.bookCovers[book.id],
-                            deadlineProgress = book.deadlineProgressFrom(state),
-                            dateStyle = state.dateStyle,
+                            deadlineCoverOverlay = state.deadlineCoverOverlays[book.id],
+                            deadlineSummary = state.deadlineSummaries[book.id],
                             mutationFailed = book.id in state.failedMutationBookIds,
                             runAction = runAction,
                             onBookClick = onBookClick,

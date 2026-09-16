@@ -69,10 +69,12 @@ import nl.rhaydus.designsystem.modifier.grayscale
 import nl.rhaydus.designsystem.modifier.platformModifierClick
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
+import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryLine
+import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineBadge
-import nl.rhaydus.softcover.core.designsystem.presentation.component.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -80,13 +82,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookStatus
-import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
-import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -616,8 +615,9 @@ internal fun BookList(
                         onLongClick = onLongClick,
                         isSelectionMode = selectionMode,
                         isSelected = isSelected,
-                        deadline = state.deadlines[book.id],
-                        dateStyle = state.dateStyle,
+                        deadlineProgress = state.deadlineProgressByBook[book.id],
+                        deadlineBadge = state.deadlineBadges[book.id],
+                        deadlineSummary = state.deadlineSummaries[book.id],
                         dragHandle = if (isRearranging) {
                             { DragHandle(modifier = handleModifier) }
                         } else {
@@ -843,9 +843,10 @@ private fun LayoutBookEntry(
     onLongClick: (() -> Unit)?,
     isSelectionMode: Boolean,
     isSelected: Boolean,
-    dateStyle: DateStyle,
     modifier: Modifier = Modifier,
-    deadline: BookDeadline? = null,
+    deadlineProgress: DeadlineProgress? = null,
+    deadlineBadge: BadgeUiModel? = null,
+    deadlineSummary: DeadlineSummaryUiModel? = null,
     dragHandle: (@Composable () -> Unit)? = null,
 ) {
     // Prefetch only makes sense when the tap opens book detail. In selection mode the tap
@@ -856,23 +857,6 @@ private fun LayoutBookEntry(
     val authorName = book.authors.map { it.name }.firstOrNull().orEmpty()
 
     val currentEdition = book.currentEdition
-    val deadlineProgress = deadline?.let {
-        if (currentEdition == null) return@let null
-        val current = when (it.unit) {
-            DeadlineUnit.PAGES -> book.userBookRead?.currentPage ?: 0
-            DeadlineUnit.SECONDS -> book.userBookRead?.currentSeconds ?: 0
-        }
-        val total = when (it.unit) {
-            DeadlineUnit.PAGES -> currentEdition.pages ?: 0
-            DeadlineUnit.SECONDS -> currentEdition.audioSeconds ?: 0
-        }
-
-        DeadlineProgress.compute(
-            deadline = it,
-            current = current,
-            total = total,
-        )
-    }
 
     // The wavy shelf-progress signature (redesign brief): a thin sine wave under every in-progress
     // cover / beside every in-progress list row, independent of whether a deadline is tracked.
@@ -946,7 +930,7 @@ private fun LayoutBookEntry(
                 onLongClick = onLongClick,
                 isSelectionMode = isSelectionMode,
                 isSelected = isSelected,
-                deadlineProgress = deadlineProgress,
+                deadlineBadge = deadlineBadge,
                 trailing = dragHandle,
             )
         }
@@ -963,8 +947,7 @@ private fun LayoutBookEntry(
                 usersCount = book.usersCount,
                 rating = book.rating,
                 progressFraction = progressFraction,
-                deadlineProgress = deadlineProgress,
-                dateStyle = dateStyle,
+                deadlineSummary = deadlineSummary,
                 trailing = dragHandle,
             ) { coverModifier ->
                 SelectableCover(
@@ -1020,10 +1003,10 @@ private val LIBRARY_COVER_CORNER_RADIUS = 10.dp
  * Wraps a book cover with the redesign's deadline **countdown** badge (top-start, "N days" + clock,
  * primary — only while [deadlineProgress] is on track or behind; the countdown itself has no meaning
  * once a deadline has expired, so [DeadlineStatus.Expired] instead reads "Expired" and the cover
- * desaturates via `Modifier.grayscale()`). This supersedes the shared `DeadlineCoverOverlay`'s
+ * desaturates via `Modifier.grayscale()`). This supersedes the shared `CoverOverlay`'s
  * top-end status-label badge for Library's grid/cover-only cells specifically — that shared component
  * (and its status-label badge) is unchanged and still used as-is by Reading and Book detail; see
- * `docs/reference/design-system.md`'s Deadline badge entry for why the two coexist. Composed *inside*
+ * `docs/reference/design-system/components.md`'s Deadline badge entry for why the two coexist. Composed *inside*
  * `SelectableCover`'s content slot (not around it) so the badge dims with the rest of the cover while
  * unselected, matching the redesign spec's selection-mode behaviour.
  */
@@ -1305,7 +1288,7 @@ private fun CompactRow(
     onLongClick: (() -> Unit)? = null,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
-    deadlineProgress: DeadlineProgress? = null,
+    deadlineBadge: BadgeUiModel? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
     Column(
@@ -1351,10 +1334,10 @@ private fun CompactRow(
                 }
             }
 
-            if (deadlineProgress != null) {
+            if (deadlineBadge != null) {
                 Spacer(modifier = Modifier.width(8.dp))
 
-                DeadlineBadge(status = deadlineProgress.status)
+                Badge(model = deadlineBadge)
             }
 
             if (trailing != null) {
@@ -1374,9 +1357,8 @@ private fun CompactRow(
  * The redesign's List (large) row: de-carded (no `surfaceContainer` Surface — the old card look) in
  * favour of a hairline top divider, matching the spec's flattened list anatomy. Cover, series eyebrow,
  * title, byline, meta line, a [DeadlineSummaryLine] whenever the book carries a tracked deadline, and
- * — while [progressFraction] is non-null — the wavy shelf-progress line + percentage. [dateStyle] only
- * matters alongside a non-null [deadlineProgress]; edition rows (custom lists) have no deadlines and
- * pass neither.
+ * — while [progressFraction] is non-null — the wavy shelf-progress line + percentage. Edition rows
+ * (custom lists) have no deadlines and pass no [deadlineSummary].
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -1391,8 +1373,7 @@ private fun LargeRow(
     usersCount: Int? = null,
     rating: Double? = null,
     progressFraction: Float? = null,
-    deadlineProgress: DeadlineProgress? = null,
-    dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
+    deadlineSummary: DeadlineSummaryUiModel? = null,
     trailing: (@Composable () -> Unit)? = null,
     cover: @Composable (Modifier) -> Unit,
 ) {
@@ -1526,13 +1507,10 @@ private fun LargeRow(
                 }
             }
 
-            if (deadlineProgress != null) {
+            if (deadlineSummary != null) {
                 Spacer(modifier = Modifier.height(12.dp))
 
-                DeadlineSummaryLine(
-                    progress = deadlineProgress,
-                    dateStyle = dateStyle,
-                )
+                DeadlineSummaryLine(model = deadlineSummary)
             }
         }
     }

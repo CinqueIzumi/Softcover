@@ -9,12 +9,17 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import nl.rhaydus.softcover.core.uibinding.deadline.toBadgeUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
 
+/**
+ * Also writes [BookDetailUiState.deadlineBadge] in the same `setState` as [BookDetailUiState.deadlineProgress] —
+ * one writer for both, so a badge and its progress can never disagree.
+ */
 internal class BookDeadlineCollector : BookDetailCollector {
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun onLaunch(
@@ -74,6 +79,7 @@ internal class BookDeadlineCollector : BookDetailCollector {
                 state.copy(
                     deadline = deadline,
                     deadlineProgress = computed,
+                    deadlineBadge = computed?.toBadgeUiModel(),
                 )
             }
         }

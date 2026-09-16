@@ -47,6 +47,7 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
@@ -260,6 +261,7 @@ private fun DesktopDiscovery(
             DesktopFeaturedSection(
                 book = state.featuredUpcomingRelease,
                 cover = state.featuredCover,
+                releaseBadge = state.featuredReleaseBadge,
                 isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -268,6 +270,7 @@ private fun DesktopDiscovery(
             DesktopUpNextSection(
                 books = state.continueSeriesBooks,
                 covers = state.continueSeriesCovers,
+                unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -278,6 +281,7 @@ private fun DesktopDiscovery(
                 genreOptions = state.becauseYouReadGenreOptions,
                 books = state.becauseYouReadBooks,
                 covers = state.becauseYouReadCovers,
+                unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -286,6 +290,7 @@ private fun DesktopDiscovery(
             DesktopTrendingSection(
                 books = state.trendingBooks,
                 covers = state.trendingCovers,
+                unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
                 onBookClick = onBookClick,
             )
@@ -316,6 +321,7 @@ private fun DesktopDiscovery(
 private fun DesktopFeaturedSection(
     book: Book?,
     cover: CoverUiModel?,
+    releaseBadge: BadgeUiModel?,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -338,6 +344,7 @@ private fun DesktopFeaturedSection(
             FeaturedCard(
                 book = book,
                 cover = cover,
+                releaseBadge = releaseBadge,
                 onClick = {
                     onBookClick(
                         book,
@@ -356,6 +363,7 @@ private fun DesktopFeaturedSection(
 private fun DesktopTrendingSection(
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
+    unreleasedBadges: Map<Int, BadgeUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
 ) {
@@ -390,6 +398,7 @@ private fun DesktopTrendingSection(
                             modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
                             book = book,
                             cover = cover,
+                            unreleasedBadge = unreleasedBadges[book.id],
                             onClick = {
                                 onBookClick(
                                     book,
@@ -411,6 +420,7 @@ private fun DesktopBecauseYouReadSection(
     genreOptions: List<String>,
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
+    unreleasedBadges: Map<Int, BadgeUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -478,6 +488,7 @@ private fun DesktopBecauseYouReadSection(
                             modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
                             book = book,
                             cover = cover,
+                            unreleasedBadge = unreleasedBadges[book.id],
                             onClick = {
                                 onBookClick(
                                     book,
@@ -497,6 +508,7 @@ private fun DesktopBecauseYouReadSection(
 private fun DesktopUpNextSection(
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
+    unreleasedBadges: Map<Int, BadgeUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -536,6 +548,7 @@ private fun DesktopUpNextSection(
                                 modifier = cardModifier,
                                 book = book,
                                 cover = cover,
+                                unreleasedBadge = unreleasedBadges[book.id],
                                 onClick = {
                                     onBookClick(
                                         book,

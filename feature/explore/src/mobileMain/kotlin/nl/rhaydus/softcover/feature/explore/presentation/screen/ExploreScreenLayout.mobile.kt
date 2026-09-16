@@ -50,6 +50,7 @@ import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -263,6 +264,7 @@ private fun EditorialContent(
             FeaturedSection(
                 book = state.featuredUpcomingRelease,
                 cover = state.featuredCover,
+                releaseBadge = state.featuredReleaseBadge,
                 isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -271,6 +273,7 @@ private fun EditorialContent(
             ContinueSeriesSection(
                 books = state.continueSeriesBooks,
                 covers = state.continueSeriesCovers,
+                unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -281,6 +284,7 @@ private fun EditorialContent(
                 genreOptions = state.becauseYouReadGenreOptions,
                 books = state.becauseYouReadBooks,
                 covers = state.becauseYouReadCovers,
+                unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -289,6 +293,7 @@ private fun EditorialContent(
             TrendingSection(
                 books = state.trendingBooks,
                 covers = state.trendingCovers,
+                unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
                 onBookClick = onBookClick,
             )
@@ -313,6 +318,7 @@ private fun EditorialContent(
 private fun FeaturedSection(
     book: Book?,
     cover: CoverUiModel?,
+    releaseBadge: BadgeUiModel?,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -336,6 +342,7 @@ private fun FeaturedSection(
             FeaturedCard(
                 book = book,
                 cover = cover,
+                releaseBadge = releaseBadge,
                 onClick = {
                     onBookClick(
                         book,
@@ -353,6 +360,7 @@ private fun FeaturedSection(
 private fun TrendingSection(
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
+    unreleasedBadges: Map<Int, BadgeUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
 ) {
@@ -401,6 +409,7 @@ private fun TrendingSection(
                                 .staggeredEntry(coordinator = entry, index = index),
                             book = book,
                             cover = cover,
+                            unreleasedBadge = unreleasedBadges[book.id],
                             onClick = {
                                 onBookClick(
                                     book,
@@ -421,6 +430,7 @@ private fun BecauseYouReadSection(
     genreOptions: List<String>,
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
+    unreleasedBadges: Map<Int, BadgeUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -499,6 +509,7 @@ private fun BecauseYouReadSection(
                                 .staggeredEntry(coordinator = entry, index = index),
                             book = book,
                             cover = cover,
+                            unreleasedBadge = unreleasedBadges[book.id],
                             onClick = {
                                 onBookClick(
                                     book,
@@ -517,6 +528,7 @@ private fun BecauseYouReadSection(
 private fun ContinueSeriesSection(
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
+    unreleasedBadges: Map<Int, BadgeUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -565,6 +577,7 @@ private fun ContinueSeriesSection(
                                 modifier = cardModifier,
                                 book = book,
                                 cover = cover,
+                                unreleasedBadge = unreleasedBadges[book.id],
                                 onClick = {
                                     onBookClick(
                                         book,
