@@ -6,15 +6,19 @@
 
 ## Now
 
-- **State:** Steps 00 and 01 done and their step files deleted. Step 01 delivered `docs/working/ACTIVE.md`,
-  `.claude/hooks/context-budget.sh` (UserPromptSubmit), the `/handoff` skill and
-  `scripts/claude/token-usage.py`; the SessionStart resume hook was dropped (D13).
-- **Next:** Step 02, `steps/02-gradle-and-read-guards.md` from § 1.
+- **State:** Steps 00–02 done and their step files deleted. Step 02 delivered `scripts/gradle-quiet.sh`,
+  `.claude/hooks/quiet-gradle.sh` (PreToolUse Bash; rewrites `./gradlew` to the wrapper unless
+  `GRADLE_VERBOSE=1`), `.claude/hooks/large-read-guard.sh` (PreToolUse Read; main conversation, >600
+  lines without `limit`), the cases in `.claude/hooks/test/` and the style-check skill note. The
+  migration tracker's caveats note is deferred to Step 06 as planned.
+- **Next:** Step 03, `steps/03-agents.md` from § 1.
 - **Open questions:** none.
-- **Verification:** the budget notice fired live with `SOFTCOVER_CONTEXT_BUDGET=1000 claude` and stayed
-  silent at the 150K default; `/handoff` ran and asked before committing.
-- **Uncommitted:** Steps 00/01 close-out in the tracker docs: this block and the Steps table in
-  `README.md`, plus the deleted `steps/00-branch-setup.md` and `steps/01-session-loop.md`.
+- **Verification:** `.claude/hooks/test/run-quiet-gradle-cases.sh` passes all 9 cases; a deliberate
+  compile error printed its `e:` line and log path in 12 lines; live in-session, `./gradlew` was
+  rewritten and summarised, and an unlimited main-conversation Read of `BookDetailShelf.kt` was denied
+  while the same Read with `limit` and a subagent's Read went through.
+- **Uncommitted:** all of Step 02 plus this close-out (tracker `README.md`, `foundation-upstream.md`,
+  deleted `steps/02-gradle-and-read-guards.md`).
 
 ## How to run a step
 
@@ -32,7 +36,7 @@
 |---|---|---|---|
 | 00 | Branch setup | — | [x] |
 | 01 | Session loop + hook probe | tooling | [x] |
-| 02 | [Quiet Gradle + large-read guard](steps/02-gradle-and-read-guards.md) | tooling | [ ] |
+| 02 | Quiet Gradle + large-read guard | tooling | [x] |
 | 03 | [Local agents, deny rules, brief hook, memory triage](steps/03-agents.md) | tooling | [ ] |
 | 04 | [CLAUDE.md catalogue + path-scoped rules](steps/04-claude-md.md) | tooling | [ ] |
 | 04b | [Doc-growth guards](steps/04b-doc-growth-guards.md) | tooling | [ ] |
