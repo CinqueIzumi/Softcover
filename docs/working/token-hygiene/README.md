@@ -6,19 +6,15 @@
 
 ## Now
 
-- **State:** Step 01 built: probe done (P1–P5 under `## Decisions`), `docs/working/ACTIVE.md`,
-  `.claude/hooks/context-budget.sh` registered in `.claude/settings.json` (UserPromptSubmit), `/handoff`
-  skill, `scripts/claude/token-usage.py`. The SessionStart resume hook was removed (D13).
-  FU-3 / FU-11 → done locally. No `autoCompactWindow` (P4).
-- **Next:** close Step 01 (`steps/01-session-loop.md` § Acceptance): ask the user to confirm the budget
-  notice appears with `SOFTCOVER_CONTEXT_BUDGET=1000` exported before starting `claude`; then tick
-  Step 01, delete its step file, and start `steps/02-gradle-and-read-guards.md`.
+- **State:** Steps 00 and 01 done and their step files deleted. Step 01 delivered `docs/working/ACTIVE.md`,
+  `.claude/hooks/context-budget.sh` (UserPromptSubmit), the `/handoff` skill and
+  `scripts/claude/token-usage.py`; the SessionStart resume hook was dropped (D13).
+- **Next:** Step 02, `steps/02-gradle-and-read-guards.md` from § 1.
 - **Open questions:** none.
-- **Verification:** both hooks tested on sample input (silent paths, 60-line cap, missing file,
-  1000-token budget); `token-usage.py --since 2026-09-20` ran on real transcripts, agent types resolved;
-  `/handoff` ran and asked before committing.
-- **Uncommitted:** removal of `.claude/hooks/session-resume.sh` and its SessionStart registration in
-  `.claude/settings.json`; matching edits to the `/handoff` skill and the tracker docs.
+- **Verification:** the budget notice fired live with `SOFTCOVER_CONTEXT_BUDGET=1000 claude` and stayed
+  silent at the 150K default; `/handoff` ran and asked before committing.
+- **Uncommitted:** Steps 00/01 close-out in the tracker docs: this block and the Steps table in
+  `README.md`, plus the deleted `steps/00-branch-setup.md` and `steps/01-session-loop.md`.
 
 ## How to run a step
 
@@ -34,8 +30,8 @@
 
 | # | Step | Branch | Status |
 |---|---|---|---|
-| 00 | [Branch setup](steps/00-branch-setup.md) | — | [x] |
-| 01 | [Session loop + hook probe](steps/01-session-loop.md) | tooling | [ ] |
+| 00 | Branch setup | — | [x] |
+| 01 | Session loop + hook probe | tooling | [x] |
 | 02 | [Quiet Gradle + large-read guard](steps/02-gradle-and-read-guards.md) | tooling | [ ] |
 | 03 | [Local agents, deny rules, brief hook, memory triage](steps/03-agents.md) | tooling | [ ] |
 | 04 | [CLAUDE.md catalogue + path-scoped rules](steps/04-claude-md.md) | tooling | [ ] |
@@ -81,7 +77,7 @@
 - **P3** `.claude/rules/*.md` with `paths:` load inside subagents: the rule appeared in an Explore agent's
   context right after it read a matching file.
 - **P4** `/config` exposes auto-compact only as a boolean (`true`); `autoCompactWindow`'s unit could not be
-  confirmed, so Step 01 § 6 does **not** set it. The context-budget hook is the only budget backstop.
+  confirmed, so Step 01 did **not** set it. The context-budget hook is the only budget backstop.
 - **P5** Hook edits to `.claude/settings.json` take effect mid-session (no restart needed). In auto mode the
   classifier refuses the model's own edits to `.claude/settings.json` and its reads of hook logs and
   `~/.claude/projects/` transcripts; the user applies those via `!` commands.
