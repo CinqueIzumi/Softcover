@@ -6,21 +6,19 @@
 
 ## Now
 
-- **State:** Steps 00–03 done. Step 03 delivered `.claude/agents/softcover-{implementer,reviewer,test-writer}.md`,
-  `docs/reference/agent-briefs.md`, `.claude/hooks/agent-brief-check.sh` (+ `hooks/test/run-agent-brief-cases.sh`),
-  deny rules for the four plugin agents in `.claude/settings.json`, the memory triage into
-  `.claude/agent-memory/softcover-*/`, and `docs/reference/code-style.md` § Review-only rules. The reviewer smoke
-  run also found and we fixed two Step 02 bugs: `block-slow-gradle.sh` now guards direct `gradle-quiet.sh` calls,
-  and `gradle-quiet.sh` log names carry the PID.
-- **Next:** Step 04, `steps/04-claude-md.md` § 1. `CLAUDE.md` still routes to the denied plugin agents until then;
-  `agent-briefs.md` already exists (Step 04 § 5 only needs to check it).
-- **Open questions:** none.
-- **Verification:** `run-agent-brief-cases.sh` 11/11, `run-quiet-gradle-cases.sh` 9/9. Live: bare implementer
-  prompt denied with template; `rhaydus-kotlin:code-reviewer` refused by permissions. Smoke runs: implementer
-  5 tool calls, test-writer 5 (6/6 `MonogramCoverMetricsTest` passed), reviewer 14 — all reports in limits.
-- **Uncommitted:** all of Step 03 — new agents, brief hook + cases, settings deny/hook, agent-memory moves and
-  deletions, `agent-briefs.md`, code-style review-only section, the two Step 02 fixes, tracker close-out
-  (`README.md`, `foundation-upstream.md` FU-1/2/7/10, deleted `steps/03-agents.md`).
+- **State:** Steps 00–04 done. Step 04 rewrote `CLAUDE.md` as a catalogue (18.8KB → 6.0KB), moved the
+  area rules into six path-scoped files under `.claude/rules/` (`build-wiring`, `kotlin-style`, `compose-ui`,
+  `architecture`, `tests`, `roadmap`), replaced the Rhaydus block with the local override, and copied it into
+  `foundation-upstream.md` (FU-6 → done locally). The planned `checkResourcePackaging` gate does not exist, so
+  `build-wiring.md` states the `androidResources.enable = true` rule on its own (user-approved).
+- **Next:** Step 04b, `steps/04b-doc-growth-guards.md`.
+- **Open questions:** none. (The plugin docs-first hook still naming the denied agents is FU-13.)
+- **Verification:** Explore probe reading `core/designsystem/build.gradle.kts` quoted `build-wiring.md`
+  (plus `architecture.md` and `compose-ui.md`); a probe reading only `agent-briefs.md` loaded no rule file.
+  Still open: `/context` → Memory files → `CLAUDE.md` ≤3.2K tokens. Check it first in the next session; this
+  session loaded the old file (it showed 7k, the old baseline).
+- **Uncommitted:** all of Step 04 — `CLAUDE.md`, `.claude/rules/`, `agent-briefs.md` (no separate audit round),
+  `foundation-upstream.md` FU-6, tracker close-out (`README.md`, deleted `steps/04-claude-md.md`).
 
 ## How to run a step
 
@@ -40,7 +38,7 @@
 | 01 | Session loop + hook probe | tooling | [x] |
 | 02 | Quiet Gradle + large-read guard | tooling | [x] |
 | 03 | Local agents, deny rules, brief hook, memory triage | tooling | [x] |
-| 04 | [CLAUDE.md catalogue + path-scoped rules](steps/04-claude-md.md) | tooling | [ ] |
+| 04 | CLAUDE.md catalogue + path-scoped rules | tooling | [x] |
 | 04b | [Doc-growth guards](steps/04b-doc-growth-guards.md) | tooling | [ ] |
 | 05 | [Land the tooling branch](steps/05-land-tooling.md) | tooling → main → migration | [ ] |
 | 06 | [Migration tracker cleanup](steps/06-tracker.md) | migration | [ ] |

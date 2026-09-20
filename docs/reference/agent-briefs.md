@@ -56,7 +56,7 @@ Scoping for small mechanical changes (one field, a rename, compile breaks):
 - Give exactly one narrow `--tests` filter; say "do not run the broader suite, do not re-audit".
 
 When the target is a whole package or directory, add under `## Files`: "audit existing test files in the
-target for coverage gaps and close them in the same pass." For independent files, spawn test-writers in
+target for coverage gaps and close them in the same pass." Do not run a separate audit round. For independent files, spawn test-writers in
 parallel on disjoint file sets.
 
 ## `softcover-reviewer`
