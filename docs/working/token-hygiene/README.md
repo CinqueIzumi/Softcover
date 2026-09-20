@@ -6,19 +6,21 @@
 
 ## Now
 
-- **State:** Steps 00–02 done and their step files deleted. Step 02 delivered `scripts/gradle-quiet.sh`,
-  `.claude/hooks/quiet-gradle.sh` (PreToolUse Bash; rewrites `./gradlew` to the wrapper unless
-  `GRADLE_VERBOSE=1`), `.claude/hooks/large-read-guard.sh` (PreToolUse Read; main conversation, >600
-  lines without `limit`), the cases in `.claude/hooks/test/` and the style-check skill note. The
-  migration tracker's caveats note is deferred to Step 06 as planned.
-- **Next:** Step 03, `steps/03-agents.md` from § 1.
+- **State:** Steps 00–03 done. Step 03 delivered `.claude/agents/softcover-{implementer,reviewer,test-writer}.md`,
+  `docs/reference/agent-briefs.md`, `.claude/hooks/agent-brief-check.sh` (+ `hooks/test/run-agent-brief-cases.sh`),
+  deny rules for the four plugin agents in `.claude/settings.json`, the memory triage into
+  `.claude/agent-memory/softcover-*/`, and `docs/reference/code-style.md` § Review-only rules. The reviewer smoke
+  run also found and we fixed two Step 02 bugs: `block-slow-gradle.sh` now guards direct `gradle-quiet.sh` calls,
+  and `gradle-quiet.sh` log names carry the PID.
+- **Next:** Step 04, `steps/04-claude-md.md` § 1. `CLAUDE.md` still routes to the denied plugin agents until then;
+  `agent-briefs.md` already exists (Step 04 § 5 only needs to check it).
 - **Open questions:** none.
-- **Verification:** `.claude/hooks/test/run-quiet-gradle-cases.sh` passes all 9 cases; a deliberate
-  compile error printed its `e:` line and log path in 12 lines; live in-session, `./gradlew` was
-  rewritten and summarised, and an unlimited main-conversation Read of `BookDetailShelf.kt` was denied
-  while the same Read with `limit` and a subagent's Read went through.
-- **Uncommitted:** all of Step 02 plus this close-out (tracker `README.md`, `foundation-upstream.md`,
-  deleted `steps/02-gradle-and-read-guards.md`).
+- **Verification:** `run-agent-brief-cases.sh` 11/11, `run-quiet-gradle-cases.sh` 9/9. Live: bare implementer
+  prompt denied with template; `rhaydus-kotlin:code-reviewer` refused by permissions. Smoke runs: implementer
+  5 tool calls, test-writer 5 (6/6 `MonogramCoverMetricsTest` passed), reviewer 14 — all reports in limits.
+- **Uncommitted:** all of Step 03 — new agents, brief hook + cases, settings deny/hook, agent-memory moves and
+  deletions, `agent-briefs.md`, code-style review-only section, the two Step 02 fixes, tracker close-out
+  (`README.md`, `foundation-upstream.md` FU-1/2/7/10, deleted `steps/03-agents.md`).
 
 ## How to run a step
 
@@ -37,7 +39,7 @@
 | 00 | Branch setup | — | [x] |
 | 01 | Session loop + hook probe | tooling | [x] |
 | 02 | Quiet Gradle + large-read guard | tooling | [x] |
-| 03 | [Local agents, deny rules, brief hook, memory triage](steps/03-agents.md) | tooling | [ ] |
+| 03 | Local agents, deny rules, brief hook, memory triage | tooling | [x] |
 | 04 | [CLAUDE.md catalogue + path-scoped rules](steps/04-claude-md.md) | tooling | [ ] |
 | 04b | [Doc-growth guards](steps/04b-doc-growth-guards.md) | tooling | [ ] |
 | 05 | [Land the tooling branch](steps/05-land-tooling.md) | tooling → main → migration | [ ] |

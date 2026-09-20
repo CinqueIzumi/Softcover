@@ -55,6 +55,20 @@ today — it is enforced by the guide + review. The un-glommed form is stable un
 candidate — see [`../working/foundation-upstream-candidates.md`](../working/foundation-upstream-candidates.md);
 once that rule lands it will auto-fix and gate the whole codebase.
 
+## Review-only rules
+
+No tool gates these, so review checks them by hand in every touched file. The reviewer does not run
+`styleCheck`; the brief states the gate result.
+
+- **Blank line between sibling composables, `Spacer` included** ([foundation §Compose](../rhaydus/0.3.1/code-style.md#compose)) — tooling misses it inside nested `Column` / `Row` / `Box` / `LazyColumn` scopes.
+- **Every multi-line construct is its own paragraph** ([§Paragraph rule](../rhaydus/0.3.1/code-style.md#paragraph-rule-for-multi-line-constructs)) — ktlint only handles the blank lines next to braces.
+- **Guard-clause spacing** ([§Guard clauses](../rhaydus/0.3.1/code-style.md#guard-clauses)) — blank line after the extraction, between guards, and after the last guard, so each guard reads as one step.
+- **No `) }` on a multi-line trailing-lambda body** ([above](#trailing-lambda-over-a-multi-line-body--no-brace-glomming)) — grep touched files for `^\s*\)\s*\}`, since ktlint's wrapping produces the glommed form itself.
+- **A 2+-argument `Modifier` call wraps one-per-line too**, e.g. `.padding(horizontal = …, vertical = …)` ([§Argument and Property Layout](../rhaydus/0.3.1/code-style.md#argument-and-property-layout)) — the ktlint rule exempts `Modifier` chains, but the guide has no such carve-out.
+- **Import groups run Android/AndroidX → third-party → `nl.rhaydus.*`** ([§Import Ordering](../rhaydus/0.3.1/code-style.md#import-ordering)) — ktlint only sorts inside the `nl.rhaydus.*` group (`ktlint_standard` is disabled); fix a misplaced group wherever you find it, and re-sort after a bulk import rewrite.
+- **Every `@Test` sits in a `@Nested inner class`, one per function under test** ([§Test Class Organization](../rhaydus/0.3.1/code-style.md#test-class-organization)) — keeps a test file navigable by function.
+- **AAA markers are exactly `// ----- Arrange -----` / `Act` / `Assert`** ([§Unit Test Structure](../rhaydus/0.3.1/code-style.md#unit-test-structure)) — every test then splits into its three phases at the same markers.
+
 ## Error Handling & Logging (Softcover concretizations)
 
 The layered error model (data sources/repositories throw, use cases return `Result<T>` via a cancellation-aware `runCatching`, actions fold with `.onSuccess` / `.onFailure`) is the foundation's — including the `runCatchingCancellable` / `runCatchingLogged` helpers and the `AppLog` facade, which now live in `nl.rhaydus:core-common` (package `nl.rhaydus.common`). The project-specific bindings (the typed `ApiException` model, the presentation-authored copy, the `"Softcover"` tag passed to `AppLog.install`) are:

@@ -24,6 +24,15 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/large-read-guard.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-brief-check.sh\""
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -35,6 +44,14 @@
           }
         ]
       }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Agent(rhaydus-kotlin:rhaydus-logic)",
+      "Agent(rhaydus-kotlin:rhaydus-ui)",
+      "Agent(rhaydus-kotlin:code-reviewer)",
+      "Agent(rhaydus-kotlin:unit-test-writer)"
     ]
   }
 }

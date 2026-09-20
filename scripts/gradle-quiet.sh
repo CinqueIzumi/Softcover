@@ -4,7 +4,7 @@ set -u
 root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 log_dir="$root/build/claude-logs"
 mkdir -p "$log_dir"
-log="$log_dir/gradle-$(date -u +%Y%m%dT%H%M%SZ).log"
+log="$log_dir/gradle-$(date -u +%Y%m%dT%H%M%SZ)-$$.log"
 marker="$log_dir/.run-$$"
 touch "$marker"
 
