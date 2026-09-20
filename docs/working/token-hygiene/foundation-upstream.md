@@ -27,7 +27,7 @@ single-section docs and 2,000+-line screen files made every turn heavier. The fu
 | FU-9 | Presentation file-size gate (600 lines, no baseline) | root `build.gradle.kts` `checkPresentationFileSize` | a convention-plugin gate | planned |
 | FU-10 | Deny / retire the duplicate test-writer; drop "read CLAUDE.md every review" | `.claude/settings.json` deny rules | resolved by FU-1 | done locally |
 | FU-11 | Token-usage analysis script | `scripts/claude/token-usage.py` | plugin `scripts/` | done locally |
-| FU-12 | Doc-growth guards: doc-type contract + routing table, size budgets, write-time hook, `checkDocBudgets` gate, docs skill | see Step 04b | plugin hook + skill; the gate as a convention plugin; the contract in the foundation docs | proposed |
+| FU-12 | Doc-growth guards: doc-type contract + routing table, size budgets, write-time hook, `checkDocBudgets` gate, docs skill | `.claude/rules/docs.md`, `docs/doc-budgets.txt`, `.claude/hooks/doc-guard.sh`, `build-logic` `CheckDocBudgetsTask` (ratchet vs merge-base with `main`) | plugin hook + skill; the gate as a convention plugin; the contract in the foundation docs | done locally |
 | FU-13 | Docs-first reminder hook still routes feature work to `rhaydus-logic` / `rhaydus-ui` (denied here since Step 03) and points at the managed Rhaydus block; it should name the implementer / reviewer / test-writer agents | not overridable locally (plugin hook); `CLAUDE.md` routing overrides it in practice | plugin `hooks/scripts/docs-first-reminder.sh`, updated with FU-1 | proposed |
 
 Status values: `proposed` → `planned` → `done locally` → `upstreamed` (then delete the local copy).

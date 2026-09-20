@@ -16,6 +16,7 @@ plugins {
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kover)
+    id("softcover.doc-budgets")
 }
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML
@@ -208,6 +209,7 @@ subprojects {
     tasks.matching { it.name == "check" }.configureEach {
         dependsOn(rootProject.tasks.named("ktlintCheck"))
         dependsOn(":checkModuleGraph")
+        dependsOn(":checkDocBudgets")
     }
 }
 

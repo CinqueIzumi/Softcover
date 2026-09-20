@@ -12,3 +12,4 @@
 - [bottomChromePadding contract](project_bottom_chrome_padding.md) — trailing scroll padding under BottomBarScaffold; recurring miss is the offline/error early-return branch
 - [Design-system doc drift](project_design_system_doc_drift_pattern.md) — one UI fact is stated in several sections; grep the old value across every design-system section file
 - [Staged vs unstaged review scope](feedback_staged_vs_unstaged_review_scope.md) — "unstaged changes" may mean everything uncommitted; reconcile `git diff HEAD` against the brief's prose
+- [Hook script not registered](project_hook_script_not_registered.md) — a new `.claude/hooks/*.sh` does nothing until `.claude/settings.json` wires its matcher; always check both

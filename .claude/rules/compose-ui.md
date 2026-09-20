@@ -13,8 +13,8 @@ paths:
   (color roles, editorial typography, brand components, patterns, decision rules). Read only the section file
   under `docs/reference/design-system/` that you need.
 - **Maintenance rule (enforced by review).** Any change that introduces, retires, or alters a foundation,
-  component, or pattern in the design system MUST update the relevant section file under
-  `docs/reference/design-system/` in the same change. `softcover-reviewer` treats a missing update as a
+  component, or pattern in the design system MUST bring the relevant section file under
+  `docs/reference/design-system/` up to date in the same change, per `.claude/rules/docs.md`. `softcover-reviewer` treats a missing update as a
   blocker. This covers a new shared component, a new editorial typography role, a new color role usage, a
   new layout pattern other screens should adopt, and retiring or renaming any of these. A localized tweak to
   one screen that does not change the system needs no update.

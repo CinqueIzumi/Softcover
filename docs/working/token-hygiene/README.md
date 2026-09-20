@@ -6,19 +6,18 @@
 
 ## Now
 
-- **State:** Steps 00–04 done. Step 04 rewrote `CLAUDE.md` as a catalogue (18.8KB → 6.0KB), moved the
-  area rules into six path-scoped files under `.claude/rules/` (`build-wiring`, `kotlin-style`, `compose-ui`,
-  `architecture`, `tests`, `roadmap`), replaced the Rhaydus block with the local override, and copied it into
-  `foundation-upstream.md` (FU-6 → done locally). The planned `checkResourcePackaging` gate does not exist, so
-  `build-wiring.md` states the `androidResources.enable = true` rule on its own (user-approved).
-- **Next:** Step 04b, `steps/04b-doc-growth-guards.md`.
+- **State:** Steps 00–04b done. `CLAUDE.md` measured 2.3K tokens (Step 04 target ≤3.2K). Step 04b added the
+  contract `.claude/rules/docs.md`, budgets `docs/doc-budgets.txt`, write-time hook `.claude/hooks/doc-guard.sh`
+  (registered on `Edit|Write` and `Bash`), and the `checkDocBudgets` gate (`build-logic`, wired into `check`,
+  own CI step with `fetch-depth: 0`). The gate ratchets against `git merge-base HEAD origin/main` (user
+  decision, replaces the step's "budgets in Step 07" fallback). Bash denial covers actual `.md` writes only,
+  not reads. FU-12 → done locally.
+- **Next:** Step 05, `steps/05-land-tooling.md`.
 - **Open questions:** none. (The plugin docs-first hook still naming the denied agents is FU-13.)
-- **Verification:** Explore probe reading `core/designsystem/build.gradle.kts` quoted `build-wiring.md`
-  (plus `architecture.md` and `compose-ui.md`); a probe reading only `agent-briefs.md` loaded no rule file.
-  Still open: `/context` → Memory files → `CLAUDE.md` ≤3.2K tokens. Check it first in the next session; this
-  session loaded the old file (it showed 7k, the old baseline).
-- **Uncommitted:** all of Step 04 — `CLAUDE.md`, `.claude/rules/`, `agent-briefs.md` (no separate audit round),
-  `foundation-upstream.md` FU-6, tracker close-out (`README.md`, deleted `steps/04-claude-md.md`).
+- **Verification:** live hook denied growing `components.md`, a "This replaced the old X" line in
+  `docs/reference/`, and `echo x >> docs/reference/foo.md`. Hook cases (`.claude/hooks/test/run-doc-guard-cases.sh`)
+  and `CheckDocBudgetsTask` tests (`-p build-logic test`) pass; `checkDocBudgets` passes on this branch.
+- **Uncommitted:** all of Step 04b, plus the reviewer memory `project_hook_script_not_registered.md`.
 
 ## How to run a step
 
@@ -39,7 +38,7 @@
 | 02 | Quiet Gradle + large-read guard | tooling | [x] |
 | 03 | Local agents, deny rules, brief hook, memory triage | tooling | [x] |
 | 04 | CLAUDE.md catalogue + path-scoped rules | tooling | [x] |
-| 04b | [Doc-growth guards](steps/04b-doc-growth-guards.md) | tooling | [ ] |
+| 04b | Doc-growth guards | tooling | [x] |
 | 05 | [Land the tooling branch](steps/05-land-tooling.md) | tooling → main → migration | [ ] |
 | 06 | [Migration tracker cleanup](steps/06-tracker.md) | migration | [ ] |
 | 07 | [Design-system docs restructure](steps/07-design-docs.md) (07a–07d) | migration | [ ] |

@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -42,6 +44,9 @@ jobs:
 
       - name: detekt
         run: ./gradlew detekt --stacktrace
+
+      - name: Doc budgets
+        run: ./gradlew checkDocBudgets --stacktrace
 
       - name: Unit tests
         run: ./gradlew test --stacktrace

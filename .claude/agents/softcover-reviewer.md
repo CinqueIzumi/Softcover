@@ -48,7 +48,9 @@ as given. If it is absent, run the single command in `## Verify`, or nothing.
    pre-existing violations outside the changed lines.
 4. **Design-system maintenance:** a new, changed or retired shared component, pattern or role without its
    section-file update under `docs/reference/design-system/` is 🔴.
-5. **Comments and KDoc:** flag comments that restate the code and missing docs on non-obvious behaviour
+5. **Doc hygiene** (`.claude/rules/docs.md`): a markdown diff that adds history to a reference doc,
+   duplicates a fact already stated elsewhere, or puts content in the wrong file per the routing table is 🟡.
+6. **Comments and KDoc:** flag comments that restate the code and missing docs on non-obvious behaviour
    (the `document-code` standard).
 
 Check your memory index for recurring traps in the area before you conclude.
