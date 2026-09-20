@@ -6,9 +6,9 @@ disable-model-invocation: true
 
 # Handoff
 
-Close out this session so a fresh one can pick up from the tracker alone. The SessionStart hook
-(`.claude/hooks/session-resume.sh`) injects every `## Now` block listed in `docs/working/ACTIVE.md` into
-the next session, so that block is the only thing the next session is guaranteed to see.
+Close out this session so a fresh one can pick up from the tracker alone. The next session starts from
+the `## Now` block of the tracker listed in `docs/working/ACTIVE.md`, so that block must carry everything
+it needs.
 
 ## Procedure
 
@@ -42,4 +42,4 @@ the next session, so that block is the only thing the next session is guaranteed
    trailing period, no body, no trailers — see `CLAUDE.md` → Commit Messages). Commit only if the user
    says yes; never commit unasked.
 
-5. **End with exactly:** `Handoff written. Type /clear — the next session resumes from the Now block.`
+5. **End with exactly:** `Handoff written. Type /clear, then ask the next session to resume from the Now block.`

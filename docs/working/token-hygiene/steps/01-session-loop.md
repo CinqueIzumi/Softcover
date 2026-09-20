@@ -4,7 +4,7 @@
 
 Goal: keep sessions to one step each without relying on anyone remembering to. The model can't run
 `/clear`; only the user can. The loop is therefore: the context-budget warning → `/handoff` → the user
-types `/clear` → the SessionStart hook injects the next step.
+types `/clear` → the user asks the fresh session to resume from the Now block.
 
 ## 1. Hook probe (do first; the later steps depend on it)
 
@@ -30,14 +30,7 @@ probe rule. Steps 02–04 cite these answers.
   most 40 lines covering State, Next (with exact file references), Open questions, Verification (the last
   gate result), and Uncommitted changes.
 
-## 3. `.claude/hooks/session-resume.sh` (SessionStart, matcher `startup|clear|compact`)
-
-- Read `docs/working/ACTIVE.md`. For each listed file, pull out its `## Now` section (up to the next
-  `## ` heading), capped at 60 lines; past the cap, append a note that the block is too long.
-- Emit `{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"<header + blocks>"}}`
-  with the header `Active work (docs/working/ACTIVE.md). Read only the step file the Next line names.`
-- If `ACTIVE.md` is missing or empty, output nothing and exit 0. Needs only `bash`, `sed` and `jq` (the
-  existing hook already requires `jq`).
+## 3. ~~SessionStart resume hook~~ — dropped (README D13)
 
 ## 4. `.claude/hooks/context-budget.sh` (UserPromptSubmit)
 
@@ -57,12 +50,11 @@ probe rule. Steps 02–04 cite these answers.
   2. Rewrite its `## Now` block to the convention (≤40 lines).
   3. Summarise `git status --short` under Uncommitted changes.
   4. **Ask** whether to commit (subject-only message); never commit unasked.
-  5. End with: `Handoff written. Type /clear — the next session resumes from the Now block.`
+  5. End with: `Handoff written. Type /clear, then ask the next session to resume from the Now block.`
 
 ## 6. Settings (`.claude/settings.json`, checked in)
 
-- Register `session-resume.sh` (SessionStart) and `context-budget.sh` (UserPromptSubmit) next to the
-  existing `block-slow-gradle.sh`.
+- Register `context-budget.sh` (UserPromptSubmit) next to the existing `block-slow-gradle.sh`.
 - Set `autoCompactWindow` to the value from P4, as a backstop only.
 
 ## 7. `scripts/claude/token-usage.py`
@@ -75,8 +67,6 @@ dependencies beyond the Python 3 standard library. Step 09 uses it.
 ## Acceptance
 
 - P1–P4 are recorded in the README, and the probe hook and probe rule are removed.
-- In a fresh session, `/clear` makes the Now block appear with no prompt from the user (check on the next
-  step's start).
 - With `SOFTCOVER_CONTEXT_BUDGET=1000` exported, one prompt produces the budget notice.
 - `/handoff` rewrites the Now block and asks before committing.
 - `foundation-upstream.md` rows FU-3 and FU-11 → "done locally".

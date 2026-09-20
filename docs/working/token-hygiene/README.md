@@ -7,25 +7,22 @@
 ## Now
 
 - **State:** Step 01 built: probe done (P1–P5 under `## Decisions`), `docs/working/ACTIVE.md`,
-  `.claude/hooks/{session-resume,context-budget}.sh` registered in `.claude/settings.json` (SessionStart
-  `startup|clear|compact`, UserPromptSubmit), `/handoff` skill, `scripts/claude/token-usage.py`.
+  `.claude/hooks/context-budget.sh` registered in `.claude/settings.json` (UserPromptSubmit), `/handoff`
+  skill, `scripts/claude/token-usage.py`. The SessionStart resume hook was removed (D13).
   FU-3 / FU-11 → done locally. No `autoCompactWindow` (P4).
-- **Next:** close Step 01 (`steps/01-session-loop.md` § Acceptance): confirm this block was injected
-  after `/clear` unprompted and ask the user to confirm the budget notice appears with
-  `SOFTCOVER_CONTEXT_BUDGET=1000` exported before starting `claude`; then tick Step 01, delete its step
-  file, and start `steps/02-gradle-and-read-guards.md`.
+- **Next:** close Step 01 (`steps/01-session-loop.md` § Acceptance): ask the user to confirm the budget
+  notice appears with `SOFTCOVER_CONTEXT_BUDGET=1000` exported before starting `claude`; then tick
+  Step 01, delete its step file, and start `steps/02-gradle-and-read-guards.md`.
 - **Open questions:** none.
 - **Verification:** both hooks tested on sample input (silent paths, 60-line cap, missing file,
   1000-token budget); `token-usage.py --since 2026-09-20` ran on real transcripts, agent types resolved;
   `/handoff` ran and asked before committing.
-- **Uncommitted:** tracker docs under `docs/working/token-hygiene/` (staged) plus `docs/working/ACTIVE.md`;
-  `.claude/settings.json` (hook registration) and the new hooks `.claude/hooks/{session-resume,
-  context-budget}.sh`; the `.claude/skills/handoff/` skill; `scripts/claude/token-usage.py`.
+- **Uncommitted:** removal of `.claude/hooks/session-resume.sh` and its SessionStart registration in
+  `.claude/settings.json`; matching edits to the `/handoff` skill and the tracker docs.
 
 ## How to run a step
 
-1. Start a fresh session (`/clear`). Once Step 01 has landed, the SessionStart hook injects this `## Now`
-   block automatically.
+1. Start a fresh session (`/clear`) and ask it to resume from this `## Now` block.
 2. Read **this file's `## Now` block and the one step file it names**. Do not read the other step
    files, and do not read `docs/working/component-library-migration.md` unless the step says so.
 3. Every step ends the same way: the step's acceptance checks pass → update `## Now` → tick the step
@@ -67,7 +64,8 @@
   past stages.
 - **D6** `CLAUDE.md` becomes a catalogue; the managed Rhaydus block is overwritten locally with the
   proposed foundation version.
-- **D7** Session loop: a `/handoff` skill and a SessionStart resume hook, checked into the repo.
+- **D7** Session loop: a `/handoff` skill, checked into the repo. (The SessionStart resume hook was
+  dropped; see D13.)
 - **D8** Small changes (≤3 existing files, no new file, no public API change) are done in the main
   conversation; anything bigger goes to an agent with a structured brief.
 - **D9** Branches: tooling on a new branch off `main`; tracker, docs and splits on the migration branch.
@@ -87,6 +85,9 @@
 - **P5** Hook edits to `.claude/settings.json` take effect mid-session (no restart needed). In auto mode the
   classifier refuses the model's own edits to `.claude/settings.json` and its reads of hook logs and
   `~/.claude/projects/` transcripts; the user applies those via `!` commands.
+- **D13** (2026-09-20) SessionStart resume hook removed. It did inject the Now block after `/clear`, but a
+  hook can only add context, not start a turn, so the session still waited for a prompt. The user asks
+  the fresh session to resume instead.
 - **D10** Size gate: 600 lines for presentation and `:core:component` main sources, no baseline, added
   after the splits.
 
