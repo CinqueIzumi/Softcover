@@ -6,20 +6,18 @@
 
 ## Now
 
-- **State:** Steps 00–04b done. `CLAUDE.md` measured 2.3K tokens (Step 04 target ≤3.2K). Step 04b added the
-  contract `.claude/rules/docs.md`, budgets `docs/doc-budgets.txt`, write-time hook `.claude/hooks/doc-guard.sh`
-  (registered on `Edit|Write` and `Bash`), and the `checkDocBudgets` gate (`build-logic`, wired into `check`,
-  own CI step with `fetch-depth: 0`). The gate ratchets against `git merge-base HEAD origin/main` (user
-  decision, replaces the step's "budgets in Step 07" fallback). Bash denial covers actual `.md` writes only,
-  not reads. FU-12 → done. Steps 00–04b landed on `main` via PR #281, and `main` is merged into
-  `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models` (`7c1154c8`). That branch
-  grew three design-system docs past their budgets before the gate existed, so their `docs/doc-budgets.txt`
-  rows are pinned to its current sizes; restoring them is on the migration tracker's S12.
-- **Next:** Step 05, `steps/05-land-tooling.md`.
+- **State:** Steps 00–05 done. The tooling (session loop, quiet Gradle, local `softcover-*` agents, the
+  `CLAUDE.md` catalogue, the doc-growth guards and the `checkDocBudgets` gate) landed on `main` via PR #281,
+  and `main` is merged into the migration branch (`7c1154c8`). `docs/working/ACTIVE.md` lists this tracker
+  and `docs/working/component-library-migration.md`. Three design-system docs grew past their budgets on the
+  migration branch before the gate existed; their `docs/doc-budgets.txt` rows are pinned to current sizes,
+  and restoring them is on the migration tracker's S12.
+- **Next:** Step 06, `steps/06-tracker.md`. The migration tracker has no `## Now` block yet; Step 06
+  Phase 2 adds it.
 - **Open questions:** none. (The plugin docs-first hook still naming the denied agents is FU-13.)
 - **Verification:** on the merged branch: `checkDocBudgets`, `checkModuleGraph`, `checkResourcePackaging`,
   `ktlintCheck` pass; Android/JVM compile passes; host tests of the nine merge-touched modules pass.
-- **Uncommitted:** none, the working tree is clean.
+- **Uncommitted:** `docs/working/ACTIVE.md`, this file, and the deleted `steps/05-land-tooling.md`.
 
 ## How to run a step
 
@@ -41,7 +39,7 @@
 | 03 | Local agents, deny rules, brief hook, memory triage | tooling | [x] |
 | 04 | CLAUDE.md catalogue + path-scoped rules | tooling | [x] |
 | 04b | Doc-growth guards | tooling | [x] |
-| 05 | [Land the tooling branch](steps/05-land-tooling.md) | tooling → main → migration | [ ] |
+| 05 | Land the tooling branch | tooling → main → migration | [x] |
 | 06 | [Migration tracker cleanup](steps/06-tracker.md) | migration | [ ] |
 | 07 | [Design-system docs restructure](steps/07-design-docs.md) (07a–07d) | migration | [ ] |
 | 08 | [Large-file splits + size gate](steps/08-file-splits.md) (08a–08n) | migration | [ ] |
