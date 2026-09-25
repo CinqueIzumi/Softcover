@@ -46,8 +46,8 @@ Open items carried forward, re-check as the relevant stage lands:
 
 Verified clean at S1: `checkModuleGraph` (231 edges, correctly rejects a deliberately introduced
 `:core:domain` + `voyager-navigator` + `koin-compose` violation), `ktlintCheck`, and `projectHealth` on
-all three new empty modules (confirms §5b finding 2 — zero declared project deps is required because
-`onUnusedDependencies` is `severity("fail")`).
+all three new empty modules (zero declared project deps is required because `onUnusedDependencies` is
+`severity("fail")`).
 
 See also [[project_rhaydus_foundation_upstream_migration]] for the sibling-repo foundation pattern this
 migration is unrelated to (this is app-local, not a foundation upstream port).

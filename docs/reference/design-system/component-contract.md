@@ -66,8 +66,8 @@ Two things that conversion settled, worth knowing before the next one:
 - **Screen state the component renders belongs on the model.** The progress sheet's selected tab was
   a second parameter beside the model; § 7.1 admits no such thing, so it moved onto
   `ProgressSheetUiModel`. Its *stored* home stays in the feature's `UiState` and the model field is
-  derived from it in one collector — one writer, so the two cannot disagree (the § 5i hazard). The
-  cost is one extra state emission on a tab tap, which is the right trade for a single source.
+  derived from it in one collector — one writer, so the two cannot disagree. The cost is one extra
+  state emission on a tab tap, which is the right trade for a single source.
 - **An exhaustive `when` is a stronger guarantee than a required parameter.** The sheet's mark-as-read
   used to be documented as "a required parameter, not optional, every call site must wire it". With a
   sealed event, a call site that fails to handle the branch does not compile. But note the limit: the
@@ -114,6 +114,12 @@ This is deliberately a *compiler-checked* rule rather than a `stabilityConfigura
 config file drifts silently, an `ImmutableList` parameter does not. There is no stability config in
 this build and none is to be added.
 
+**A lambda field is worse than an unstable list, and R3 covers it too.** `formatter: (Int) -> String`
+allocates fresh on every recomposition and is never equal to itself, which defeats skipping just as an
+unstable collection does. Replace it with a sealed descriptor the component resolves internally
+(`StatNumberFormat`'s `Grouped` / `Plain` / `Decimal(digits)` is the pattern), sized to what call sites
+actually need rather than to the shape of a generic callback.
+
 **R4 — Presentation-ready values only.**
 
 A UI model holds formatted strings, resolved icon tokens, and computed fractions. It holds no domain
@@ -124,6 +130,11 @@ The library's job is to render; deciding *what* to render is the feature's. When
 to need a domain type, what it actually needs is a library-owned model of the same shape — see
 `RichTextUiModel`, which exists precisely because six components were taking `ReviewDocument` straight
 from `:core:domain`.
+
+**R4 governs `:core:component`, not a feature's own presentation models.** A feature-local model may
+hold a domain enum as an event payload — `PaletteChoice` carries both the `SpinePalette` a tile renders
+and the `ColorPalette` its tap dispatches — as long as R9 still holds: the render neither maps the enum
+nor labels it, only forwards it.
 
 **R5 — Every UI model ships preview fixtures.**
 
@@ -241,6 +252,15 @@ model itself decorative, which is the worst of both shapes.
 > which construct models by definition; and a model that genuinely depends on a value only
 > composition has (a scroll position, a window size class, a `CompositionLocal`).
 
+**A composition-scoped value is a variant, not a nullable model field.** When a loose parameter
+resolves from something only composition has (a theme lookup, a platform read), the fix is not a
+nullable property waiting to be populated — it is never populated in a collector, because it cannot be.
+Name the possibilities as a variant the component resolves internally (`DeadlineSummaryTone`'s
+`OnSurface` / `OnHeroBackdrop`, in place of a nullable `Color`). The same question applies to a
+collector building one model per item: keep a single map keyed by identity unless the model actually
+varies by surface — a cover carries a per-rail shared-element key and needs one map per rail, but a
+badge with no surface-scoped data needs exactly one.
+
 **R11 — The signature is the model, the event lambda and the modifier. Nothing else.**
 
 R10 says the model must arrive from the `UiState`. R11 says the model must be **all of it**: a
@@ -341,6 +361,13 @@ Consequences worth internalising before designing a component:
   a review matter only for components still living in a feature.
 - **detekt does not scan `iosMain`** (no type resolution for native targets). Components live in
   `commonMain`; do not put one in `iosMain` and assume the gate saw it.
+- **R9 has no mechanical gate.** A detekt rule on a mapper call inside a `@Composable` was considered
+  and declined — the pattern is awkward to express precisely and risks false positives — so R9 is
+  enforced by review only.
+- **A `UiState` field can be declared and never populated, and every gate here passes anyway.** Two
+  flows that must move in lockstep are one forgotten `update` away from disagreeing, and nothing
+  short of reading the code catches it. After a state change, grep that every new field is both
+  declared and assigned; prefer deriving a field with `map` over writing it from a second place.
 
 ### 7.4a Known exceptions to R1
 
@@ -378,6 +405,9 @@ alike from `commonMain`:
   entry in that list, in the same change as the component.
 - **The screen lives in `feature:settings`.** Screens belong to features, and `:core:component` is
   banned from Voyager.
+- **It has no nav destination and no sidebar row.** The push happens within `feature:settings` itself,
+  triggered only by the tap gesture below; a visible entry point would defeat the easter egg. An empty
+  family is filtered out of the registry rather than shown with nothing in it.
 - **It is a user-visible surface**, so it gets a design pass and an entry in this doc like any other
   screen.
 

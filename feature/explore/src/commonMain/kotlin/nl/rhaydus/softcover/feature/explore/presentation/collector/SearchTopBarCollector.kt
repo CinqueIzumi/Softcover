@@ -17,7 +17,7 @@ import nl.rhaydus.toad.ActionScope
  * Deciding that "active" means *any* phase other than the resting feed is a reading of the screen's
  * own state, not something the chrome should re-derive on every frame — and the four fields it reads
  * are written by a dozen different actions, so deriving off [ActionScope.state] rather than patching
- * each writer is what keeps the chrome from going stale (§ 5i).
+ * each writer is what keeps the chrome from going stale.
  */
 internal class SearchTopBarCollector : ExploreCollector {
     override suspend fun onLaunch(

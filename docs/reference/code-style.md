@@ -68,6 +68,8 @@ No tool gates these, so review checks them by hand in every touched file. The re
 - **Import groups run Android/AndroidX → third-party → `nl.rhaydus.*`** ([§Import Ordering](../rhaydus/0.3.1/code-style.md#import-ordering)) — ktlint only sorts inside the `nl.rhaydus.*` group (`ktlint_standard` is disabled); fix a misplaced group wherever you find it, and re-sort after a bulk import rewrite.
 - **Every `@Test` sits in a `@Nested inner class`, one per function under test** ([§Test Class Organization](../rhaydus/0.3.1/code-style.md#test-class-organization)) — keeps a test file navigable by function.
 - **AAA markers are exactly `// ----- Arrange -----` / `Act` / `Assert`** ([§Unit Test Structure](../rhaydus/0.3.1/code-style.md#unit-test-structure)) — every test then splits into its three phases at the same markers.
+- **`kotlin.time.Instant`, never `kotlinx.datetime.Instant`.** The latter is a deprecated typealias; no
+  gate catches the import, since both resolve and compile.
 
 ## Error Handling & Logging (Softcover concretizations)
 

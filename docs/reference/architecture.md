@@ -60,6 +60,13 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   further — a composable does not *construct* a UI model either, even from literals; it arrives on the
   `UiState`. That rule is normative for new work and has a scheduled retrofit for the call sites that
   predate it.
+- **Collectors deriving a model off `scope.state` dedupe with a `*Snapshot`.** Map the state into a
+  private `*Snapshot` data class first, then `distinctUntilChanged()` on that snapshot before mapping to
+  the UI model — the snapshot's structural equality decides whether the derived work re-runs, not the
+  raw state. A `coerceIn`/`clamp` inside that mapping is a decision about which states the domain can
+  represent, not defensive hygiene: clamping a count to a minimum of one to avoid a "zero" case can
+  erase the exact state a component needs to render its own empty variant. Narrow a range only when the
+  render genuinely cannot tell the narrowed states apart.
 - **Error-slot convention.** A screen that can fail a load/submit follows the foundation TOAD error-slot
   convention ([`../rhaydus/0.3.1/toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md) §Conventions):
   a nullable `String?` error slot on its `UiState` (e.g. `ExploreScreenUiState.searchError`,

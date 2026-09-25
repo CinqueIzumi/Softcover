@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.core.domain.model.ColorPalette
  * only forwards [tile] as-is. [colorPalette] is the tile's tap payload for
  * [nl.rhaydus.softcover.feature.settings.presentation.action.OnColorPaletteSelectedAction] — it stays
  * on this feature-local model rather than on [tile] itself, since `:core:component` may not hold a
- * domain enum (`component-contract.md` § 5i / § 7.4).
+ * domain enum (`component-contract.md` R4).
  */
 internal data class PaletteChoice(
     val tile: ColorPalettePreviewTileUiModel,

@@ -1532,7 +1532,7 @@ internal fun InProgressSection(
 
 /**
  * [DeadlineRow]'s progress and badge, remembered as one value so an `AnimatedVisibility` exit
- * cannot animate one half a frame out of sync with the other (§5i).
+ * cannot animate one half a frame out of sync with the other.
  */
 private data class DeadlineRowState(
     val progress: DeadlineProgress,
