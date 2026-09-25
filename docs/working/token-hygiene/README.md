@@ -11,13 +11,15 @@
   (registered on `Edit|Write` and `Bash`), and the `checkDocBudgets` gate (`build-logic`, wired into `check`,
   own CI step with `fetch-depth: 0`). The gate ratchets against `git merge-base HEAD origin/main` (user
   decision, replaces the step's "budgets in Step 07" fallback). Bash denial covers actual `.md` writes only,
-  not reads. FU-12 → done locally.
+  not reads. FU-12 → done. Steps 00–04b landed on `main` via PR #281, and `main` is merged into
+  `275-migrate-every-component-into-a-corecomponent-library-driven-by-ui-models` (`7c1154c8`). That branch
+  grew three design-system docs past their budgets before the gate existed, so their `docs/doc-budgets.txt`
+  rows are pinned to its current sizes; restoring them is on the migration tracker's S12.
 - **Next:** Step 05, `steps/05-land-tooling.md`.
 - **Open questions:** none. (The plugin docs-first hook still naming the denied agents is FU-13.)
-- **Verification:** live hook denied growing `components.md`, a "This replaced the old X" line in
-  `docs/reference/`, and `echo x >> docs/reference/foo.md`. Hook cases (`.claude/hooks/test/run-doc-guard-cases.sh`)
-  and `CheckDocBudgetsTask` tests (`-p build-logic test`) pass; `checkDocBudgets` passes on this branch.
-- **Uncommitted:** all of Step 04b, plus the reviewer memory `project_hook_script_not_registered.md`.
+- **Verification:** on the merged branch: `checkDocBudgets`, `checkModuleGraph`, `checkResourcePackaging`,
+  `ktlintCheck` pass; Android/JVM compile passes; host tests of the nine merge-touched modules pass.
+- **Uncommitted:** none, the working tree is clean.
 
 ## How to run a step
 
