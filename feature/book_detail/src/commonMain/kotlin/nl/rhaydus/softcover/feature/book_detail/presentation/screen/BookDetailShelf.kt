@@ -36,8 +36,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,7 +50,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -90,12 +87,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toLocalDateTime
-import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.common.secondsToHm
@@ -123,6 +115,7 @@ import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
@@ -2564,51 +2557,6 @@ private fun SectionLabel(
 }
 // endregion
 // region Helpers
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DeadlinePickerDialog(
-    initialDate: LocalDate?,
-    onDismiss: () -> Unit,
-    onConfirm: (LocalDate) -> Unit,
-) {
-    val initialMillis = remember(initialDate) {
-        (initialDate ?: currentLocalDate())
-            .atStartOfDayIn(TimeZone.currentSystemDefault())
-            .toEpochMilliseconds()
-    }
-
-    val pickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
-
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val millis = pickerState.selectedDateMillis
-                    if (millis != null) {
-                        val picked = Instant.fromEpochMilliseconds(millis)
-                            .toLocalDateTime(TimeZone.currentSystemDefault())
-                            .date
-
-                        onConfirm(picked)
-                    } else {
-                        onDismiss()
-                    }
-                },
-            ) {
-                Text(text = "Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
-            }
-        },
-    ) {
-        DatePicker(state = pickerState)
-    }
-}
-
 private fun buildGoalText(progress: DeadlineProgress): String {
     if (progress.isExpired) {
         val daysPast = -progress.daysRemaining
@@ -2784,7 +2732,7 @@ internal fun BookDetailOverlays(
     }
 
     if (state.showDeadlinePicker) {
-        DeadlinePickerDialog(
+        SoftcoverDatePickerDialog(
             initialDate = state.deadline?.deadlineDate,
             onDismiss = { runAction(OnDismissDeadlinePickerAction()) },
             onConfirm = { runAction(OnDeadlinePickedAction(date = it)) },

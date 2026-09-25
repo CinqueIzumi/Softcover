@@ -19,7 +19,9 @@ internal data object OnRefreshAction : ExploreAction {
 
         dependencies.continueSeriesRefreshTrigger.update { it + 1 }
 
-        dependencies.getTrendingBooksUseCase()
+        // forceRefresh: this is a pull-to-refresh, so it must bypass the session cache that the
+        // on-mount collector reads from - otherwise the gesture spins and changes nothing.
+        dependencies.getTrendingBooksUseCase(forceRefresh = true)
             .onSuccess { trending ->
                 // Nothing catches a throw between here and the screen model's scope, and a terminal read
                 // re-throws an upstream failure even as `firstOrNull()`. No overlay is the safe default.

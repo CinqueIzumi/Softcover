@@ -17,7 +17,9 @@ class GetMoodTagsUseCaseTest {
     @BeforeEach
     fun setUp() {
         exploreRepository = mockk()
-        useCase = GetMoodTagsUseCase(exploreRepository = exploreRepository)
+        useCase = GetMoodTagsUseCase(
+            exploreRepository = exploreRepository,
+        )
     }
 
     @Nested

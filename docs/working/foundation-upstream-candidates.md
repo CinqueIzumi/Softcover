@@ -42,6 +42,29 @@ resolving. `foundation.local=true` remains available as an inner-loop switch (`i
 
 Filed but not yet implemented in the foundation.
 
+### F28 — A `LocalDate`-in/`LocalDate`-out date picker dialog
+
+- **Type:** component
+- **Home:** `nl.rhaydus:designsystem-core` (`component/`)
+- **Status:** **Open.** `designsystem-core` ships no date picker, so every consumer wires Material 3's
+  `DatePickerDialog` itself — and Material 3's `DatePickerState` exposes the selection as **UTC** epoch
+  millis (`initialSelectedDateMillis` / `selectedDateMillis`, canonicalised to start-of-day UTC). Passing
+  those through the device timezone is the obvious-looking thing to write and is wrong: west of UTC the
+  confirmed date lands a **day early**, east of it the dialog opens on the day (and at a month boundary,
+  the month) *before* the one it was handed. Softcover shipped exactly that bug in its deadline picker —
+  a user west of UTC reported having to pick the following day to get the day they wanted, and it was
+  invisible to a developer at UTC+2, where only the initial highlight is wrong. The trap is generic to
+  Material 3, not to Softcover, and it is silent: it compiles, reads naturally, and only misbehaves at
+  certain offsets.
+- **What to build:** `RhaydusDatePickerDialog(initialDate: LocalDate?, onDismiss, onConfirm: (LocalDate) -> Unit)`,
+  hosting `rememberDatePickerState` + `DatePickerDialog` and keeping the UTC millis conversion `internal`
+  so no consumer can reach it. Confirm/dismiss labels as params (Softcover's are hardcoded "Confirm" /
+  "Cancel" today). Optionally a `selectableDates` pass-through for surfaces that must exclude past days.
+- **Scope note:** Softcover's implementation is `SoftcoverDatePickerDialog` +
+  `presentation/util/PickerDates.kt` in `:core:designsystem`, catalogued in
+  `docs/reference/design-system/components.md` §4. It is app-generic already — lifting it upstream is a
+  move, not a rewrite, and the app component would then become a thin alias or be dropped.
+
 ### F24 — `import-grouping` ktlint rule (Android → third-party → project)
 
 - **Type:** gate (lint rule)

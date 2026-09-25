@@ -91,8 +91,17 @@ interface BooksRepository {
      * Fetches the books trending on Hardcover this week - the app's single trending cadence, no
      * monthly/other fallback. A book-discovery query (consumed by the reading and explore
      * surfaces), so it lives with the other book queries.
+     *
+     * Served from a process-lifetime session cache: trending is editorial content that turns over at
+     * most daily, so its 2 requests (GetTrendingBookIds + GetBooksByIds) are spent once per session
+     * rather than once per mount. Both the Reading and Explore surfaces read through here, so they
+     * share the one cached result. Caching is success-only, so a failed fetch retries on the next call.
+     *
+     * [forceRefresh] bypasses that cache. Pass it only for explicit user intent (pull-to-refresh):
+     * answering one from the cache spins the indicator, changes nothing, and reports no error, which
+     * reads as a broken button. A fetch on screen mount is not user intent and must leave it `false`.
      */
-    suspend fun fetchTrendingBooks(): List<Book>
+    suspend fun fetchTrendingBooks(forceRefresh: Boolean = false): List<Book>
 
     suspend fun getEditionsByBookId(bookId: Int): List<BookEdition>
 

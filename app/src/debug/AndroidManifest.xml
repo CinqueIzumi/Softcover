@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug-only manifest overlay. It binds the application to the debug network-security config, which
+  adds the user CA store to the TLS trust anchors so a locally installed HTTPS-proxy certificate can
+  be validated. The main manifest deliberately leaves the attribute unset, so release builds fall back
+  to Android's system-only default with no merge conflict to resolve here.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application android:networkSecurityConfig="@xml/network_security_config" />
+</manifest>

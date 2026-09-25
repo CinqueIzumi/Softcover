@@ -733,4 +733,137 @@ class EnrichDismissedContinueSeriesMetadataUseCaseTest {
             useCase()
         }
     }
+
+    @Nested
+    inner class EnrichmentCap {
+        @Test
+        fun `caps enrichment at MAX_ENRICHMENT_ROWS_PER_OPEN combined rows, books before series`() = runTest {
+            // ----- Arrange -----
+            val books = (1..5).map { id ->
+                dismissedBook(
+                    bookId = id,
+                    title = null,
+                )
+            }
+            val series = (501..504).map { seriesId ->
+                dismissedSeries(
+                    seriesId = seriesId,
+                    seriesName = null,
+                )
+            }
+
+            every {
+                exploreRepository.dismissedContinueSeriesBooks
+            } returns flowOf(books)
+            every {
+                exploreRepository.dismissedContinueSeries
+            } returns flowOf(series)
+            every {
+                booksRepository.books
+            } returns flowOf(emptyList())
+
+            books.forEach { book ->
+                coEvery {
+                    booksRepository.fetchBookById(id = book.bookId)
+                } returns PreviewData.baseBook.copy(
+                    id = book.bookId,
+                    bookSeries = null,
+                )
+            }
+
+            (501..503).forEach { seriesId ->
+                coEvery {
+                    exploreRepository.fetchNextInSeries(
+                        seriesId = seriesId,
+                        afterPosition = 0.0,
+                    )
+                } returns bookInSeries(
+                    id = seriesId,
+                    seriesId = seriesId,
+                )
+            }
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerify(exactly = 5) {
+                booksRepository.fetchBookById(id = any())
+            }
+            coVerify(exactly = 3) {
+                exploreRepository.fetchNextInSeries(
+                    seriesId = any(),
+                    afterPosition = 0.0,
+                )
+            }
+            coVerify(exactly = 0) {
+                exploreRepository.fetchNextInSeries(
+                    seriesId = 504,
+                    afterPosition = 0.0,
+                )
+            }
+        }
+
+        @Test
+        fun `resolves all rows when exactly MAX_ENRICHMENT_ROWS_PER_OPEN rows need enrichment`() = runTest {
+            // ----- Arrange -----
+            val books = (1..5).map { id ->
+                dismissedBook(
+                    bookId = id,
+                    title = null,
+                )
+            }
+            val series = (501..503).map { seriesId ->
+                dismissedSeries(
+                    seriesId = seriesId,
+                    seriesName = null,
+                )
+            }
+
+            every {
+                exploreRepository.dismissedContinueSeriesBooks
+            } returns flowOf(books)
+            every {
+                exploreRepository.dismissedContinueSeries
+            } returns flowOf(series)
+            every {
+                booksRepository.books
+            } returns flowOf(emptyList())
+
+            books.forEach { book ->
+                coEvery {
+                    booksRepository.fetchBookById(id = book.bookId)
+                } returns PreviewData.baseBook.copy(
+                    id = book.bookId,
+                    bookSeries = null,
+                )
+            }
+
+            series.forEach { dismissedSeries ->
+                coEvery {
+                    exploreRepository.fetchNextInSeries(
+                        seriesId = dismissedSeries.seriesId,
+                        afterPosition = 0.0,
+                    )
+                } returns bookInSeries(
+                    id = dismissedSeries.seriesId,
+                    seriesId = dismissedSeries.seriesId,
+                )
+            }
+
+            // ----- Act -----
+            useCase()
+
+            // ----- Assert -----
+            coVerify(exactly = 5) {
+                booksRepository.fetchBookById(id = any())
+            }
+            coVerify(exactly = 3) {
+                exploreRepository.fetchNextInSeries(
+                    seriesId = any(),
+                    afterPosition = 0.0,
+                )
+            }
+        }
+    }
 }

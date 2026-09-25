@@ -78,7 +78,7 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 - **Start reading in one step** — go straight to Currently Reading from the book without picking a status first.
 - Update reading or listening progress.
 - Set a reading deadline with a required pages-per-day or minutes-per-day pace, and see a **reading-pace forecast** of when you'll finish.
-- Tag your books with a **tag editor** — category-clustered suggestions from your own tag vocabulary, every tag you've ever used behind a *see more*, and a spoiler toggle for revealing tags.
+- Tag your books with a **tag editor** — category-clustered suggestions from your own tag vocabulary, a *see more* that unfurls a few more rows at a time rather than the whole list at once, and a spoiler toggle for revealing tags.
 - Share a reading update as a generated card.
 - Switch between book and audiobook editions.
 
@@ -119,6 +119,10 @@ A Kotlin Multiplatform app: domain, data, and UI are shared across all three pla
 | [Android Gradle Plugin](https://developer.android.com/build) | 9.0.0 | Android build tooling |
 | [Gradle (KTS)](https://gradle.org/) | 9.1.0 | Build system with version catalog |
 | [KSP](https://github.com/google/ksp) | 2.3.9 | Kotlin Symbol Processing for Room (per-target) |
+| [ktlint](https://pinterest.github.io/ktlint/) | 1.7.1 | Formatting engine driving the foundation ruleset — `ktlintFormat` autofix, `ktlintCheck` gate |
+| [detekt](https://detekt.dev/) | 1.23.8 | Type-resolved static analysis, gated from zero (`styleCheck`) |
+| [Dependency Analysis](https://github.com/autonomousapps/dependency-analysis-gradle-plugin) | 3.14.1 | Flags unused and misdeclared module dependencies |
+| [Kover](https://github.com/Kotlin/kotlinx-kover) | 0.9.8 | Code-coverage reports, aggregated at the root for Codecov |
 
 #### Foundation ([`nl.rhaydus`](https://central.sonatype.com/search?q=nl.rhaydus), 0.3.1 — first-party shared libraries, resolved from Maven Central by default, or locally via `foundation.local=true`)
 | Library | Purpose |
@@ -261,7 +265,7 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 ## Roadmap
 
-Softcover is being actively redesigned. **What's coming, by version, lives in [ROADMAP.md](ROADMAP.md)** — the public, user-facing roadmap (also viewable inside the app). Behind it, the internal planning docs in [docs/working/](docs/working/) hold the idea catalogue, the sequenced step list (completed steps are deleted as they land), and the per-release bundling.
+Softcover is being actively redesigned. **What's coming, by version, lives in [ROADMAP.md](ROADMAP.md)** — the public, user-facing roadmap (also viewable inside the app). That file is generated from the open [GitHub milestones](https://github.com/CinqueIzumi/Softcover/milestones), which are the single source of truth for planned work: one issue per unit of work, one milestone per release.
 
 ---
 
@@ -274,8 +278,8 @@ Softcover is being actively redesigned. **What's coming, by version, lives in [R
 | [docs/reference/design-system.md](docs/reference/design-system.md) | Color roles, editorial typography, layout primitives, components, and patterns |
 | [docs/reference/code-style.md](docs/reference/code-style.md) | Naming, layout, and whitespace conventions |
 | [docs/rhaydus/0.3.1/](docs/rhaydus/0.3.1/CAPABILITIES.md) | The `nl.rhaydus` foundation conventions (architecture, TOAD, code style, design-system) + capabilities index — the source of truth the local docs defer to |
-| [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — what's coming, by version |
-| [docs/working/](docs/working/) | Internal planning — idea catalogue, sequenced steps, release plan, and the day-to-day `now.md` |
+| [ROADMAP.md](ROADMAP.md) | Public, user-facing roadmap — generated from the open GitHub milestones; never hand-edited |
+| [docs/working/](docs/working/) | Working notes — audits and reviews kept alongside the code (planned work lives in GitHub Issues) |
 | [CLAUDE.md](CLAUDE.md) | Guidance for Claude Code when working in this repo |
 
 ---

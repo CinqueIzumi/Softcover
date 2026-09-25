@@ -4209,5 +4209,147 @@ class BooksRepositoryImplTest {
             }
             result shouldBe trendingBooks
         }
+
+        @Test
+        fun `caches the result so a second plain call does not hit the remote data source again`() = runTest {
+            // ----- Arrange -----
+            val trendingBooks = listOf(stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns trendingBooks
+
+            // ----- Act -----
+            val firstResult = repository.fetchTrendingBooks()
+            val secondResult = repository.fetchTrendingBooks()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            firstResult shouldBe trendingBooks
+            secondResult shouldBe trendingBooks
+        }
+
+        @Test
+        fun `forceRefresh bypasses a populated cache and re-fetches from the remote data source`() = runTest {
+            // ----- Arrange -----
+            val cachedBooks = listOf(stubBook(userBookId = null))
+            val refreshedBooks = listOf(stubBook(userBookId = null), stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns cachedBooks
+
+            // ----- Act -----
+            repository.fetchTrendingBooks()
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns refreshedBooks
+
+            val refreshedResult = repository.fetchTrendingBooks(forceRefresh = true)
+
+            // ----- Assert -----
+            coVerify(exactly = 2) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            refreshedResult shouldBe refreshedBooks
+        }
+
+        @Test
+        fun `forceRefresh on a cold cache still fetches exactly once`() = runTest {
+            // ----- Arrange -----
+            val trendingBooks = listOf(stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns trendingBooks
+
+            // ----- Act -----
+            val result = repository.fetchTrendingBooks(forceRefresh = true)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            result shouldBe trendingBooks
+        }
+
+        @Test
+        fun `a failed fetch is not cached so the next plain call retries the remote data source`() = runTest {
+            // ----- Arrange -----
+            val remoteError = RuntimeException("network failure")
+            val trendingBooks = listOf(stubBook(userBookId = null))
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } throws remoteError
+
+            // ----- Act & Assert -----
+            shouldThrow<RuntimeException> {
+                repository.fetchTrendingBooks()
+            } shouldBe remoteError
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns trendingBooks
+
+            val result = repository.fetchTrendingBooks()
+
+            coVerify(exactly = 2) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            result shouldBe trendingBooks
+        }
+
+        @Test
+        fun `a failed forceRefresh leaves the previously cached value in place`() = runTest {
+            // ----- Arrange -----
+            val cachedBooks = listOf(stubBook(userBookId = null))
+            val remoteError = RuntimeException("network failure")
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns cachedBooks
+
+            // ----- Act -----
+            repository.fetchTrendingBooks()
+
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } throws remoteError
+
+            // ----- Assert -----
+            shouldThrow<RuntimeException> {
+                repository.fetchTrendingBooks(forceRefresh = true)
+            } shouldBe remoteError
+
+            val result = repository.fetchTrendingBooks()
+
+            coVerify(exactly = 2) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            result shouldBe cachedBooks
+        }
+
+        @Test
+        fun `an empty list is cached as a valid value rather than treated as a cache miss`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                booksRemoteDataSource.fetchTrendingBooks()
+            } returns emptyList()
+
+            // ----- Act -----
+            val firstResult = repository.fetchTrendingBooks()
+            val secondResult = repository.fetchTrendingBooks()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.fetchTrendingBooks()
+            }
+            firstResult shouldBe emptyList()
+            secondResult shouldBe emptyList()
+        }
     }
 }

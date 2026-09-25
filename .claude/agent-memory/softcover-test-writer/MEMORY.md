@@ -1,0 +1,18 @@
+- [Softcover test conventions](project_test_conventions.md) — stack, mockk domain models, TOAD action `launch` callOriginal workaround, @Nested name-clash FQN exception, UserBook.status is BookStatus
+- [Canonical test templates by layer](project_canonical_test_templates.md) — one template file per layer; clone the matching one, skip broad exploration
+- [Host-test task name](project_host_test_task_name.md) — KMP modules use testAndroidHostTest; jvmTest is a false-green NO-SOURCE, testDebugUnitTest is app-only
+- [MockK only — no mock servers](feedback_no_mock_servers.md) — never MockServer/WireMock; mock only the public surface actually consumed
+- [MockK / kotest gotchas](feedback_mockk_kotest_gotchas.md) — default-param stubs pin the default, erased generic matchers, relaxed lambdas never run, stateful keyed stores, capture import, `===` parens, test-name chars
+- [Coroutine test scheduling](feedback_coroutine_test_scheduling.md) — one shared TestDispatcher everywhere; runCurrent for backgroundScope + explicit StandardTestDispatcher; flowOf DAO stubs need none
+- [Flow emission assertions](feedback_flow_emission_assertions.md) — StateFlow conflation needs three distinct values; loop past loading placeholders before coVerify
+- [Paged-flow early cancellation](feedback_paged_flow_early_cancellation.md) — count pages requested upstream, not items collected, to prove transformWhile stopped early
+- [Virtual time source for refill logic](feedback_virtual_time_source_for_refill_logic.md) — scheduler-backed TimeSource fake, never TestTimeSource, for injected-TimeSource wait math
+- [SessionValueCache testing](project_sessionvaluecache_testing.md) — use a real cache; per-key caching test shape; virtual-time proof of per-key locking
+- [Apollo extensions mocking](project_apollo_extensions_mocking.md) — fetchPolicy/toFlow chain mocking and testing the private retry helper via safeQuery/safeMutation
+- [Apollo generated-type mocking](feedback_apollo_generated_type_mocking.md) — taggable_counts shape + raw-count hasMore, fragment accessor is identity, nested-interface aliases, Optional.Absent
+- [Apollo CompiledField mocking](feedback_apollo_compiled_field_mocking.md) — stub argumentValues + nameWithArguments for the FieldPolicyCacheResolver delegate path; ResolverContext construction
+- [Pagination adds required query params](feedback_apollo_pagination_required_params.md) — new required GraphQL vars break old test call sites; run the tests first and fix those minimally
+- [Room migration test pattern](project_migration_test_pattern.md) — BundledSQLiteDriver in-memory per test; needs sqlite-bundled-jvm runtimeOnly; PRAGMA + sqlite_master helpers
+- [Bash hook and Gradle task testing](project_bash_hook_and_gradle_task_testing.md) — base64 TSV harness for PreToolUse hooks; ProjectBuilder for DefaultTask actions; single-branch merge-base gotcha; concurrent-edit handling
+- [ktlintFormat nested-call trailing comma](feedback_ktlintformat_nested_call_trailing_comma.md) — grep for `),)` after ktlintFormat; wrap the outer call too
+- [designsystem palette contrast tests](project_designsystem_palette_contrast_tests.md) — WCAG helper pattern + @TestFactory/DynamicTest data-driving over ColorPalette.entries; confirms flat alphabetical import order

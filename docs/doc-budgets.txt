@@ -1,0 +1,12 @@
+# <glob> <limit> — first match wins. Units: B, KB (1024 B), L (lines). See .claude/rules/docs.md.
+CLAUDE.md                                      8500B
+.claude/rules/*.md                             40L
+.claude/agent-memory/*/MEMORY.md               40L
+docs/reference/design-system/components.md     98980B
+docs/reference/design-system/foundations.md    41663B
+docs/reference/design-system/patterns.md       88634B
+docs/reference/design-system/components/*.md   20KB
+docs/reference/design-system/patterns/*.md     20KB
+docs/reference/**/*.md                         30KB
+docs/working/**/*.md                           40KB
+## Now                                         40L

@@ -225,6 +225,7 @@ component/
 +              · Toggle  · SegmentedControl  · TextField                     S8
 + cover/       Cover  CoverUiModel  CoverVariant  CoverSource
 +              CoverDimensions  CoverlessTitleCover  MonogramCoverMetrics    S4-4
++ dialog/      SoftcoverDatePickerDialog  PickerDates (internal)   — owes R1   merge
 + gallery/     GalleryRegistry  GalleryEntry  GalleryFamily
 +              GalleryFixture  UiModelPreviews                               S2
 + lists/       ChooseListsBottomSheet  ChooseListsUiModel/RowUiModel
@@ -425,6 +426,12 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
 - [ ] **S12 — Close out.** Final gate values, `docs/reference/design-system/` rewrite, gallery
       completeness pass, trim the transitional component-path parenthetical in `CLAUDE.md`'s
       design-system maintenance rule down to `core/component/` (§ 5e), delete this file.
+
+      **Restore the doc budgets.** Merging main's `checkDocBudgets` pinned three limits in
+      `docs/doc-budgets.txt` to this branch's sizes: `components.md` 98980B, `foundations.md` 41663B,
+      `patterns.md` 88634B. S12 puts them back: `components.md` to `8KB` (reached through the
+      per-family split in § 8), and the `foundations.md` / `patterns.md` rows deleted so they fall back
+      under `docs/reference/**/*.md 30KB`, where the shrink-only ratchet takes over again.
 
 ### 5b. S1 findings — two things the plan had wrong
 
@@ -1944,7 +1951,7 @@ Chrome only; each sheet's **body** stays a feature composable (`component-contra
 - [ ] `TagEditorBottomSheet` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:149`
 - [ ] `EditionBottomSheetSelector`, `EditionBottomSheetContent` — `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:60,87`
 - [ ] `ShareBookBottomSheet` — `feature/book_detail/presentation/component/ShareBookBottomSheet.kt:57`
-- [ ] `DeadlinePickerDialog` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:2586`
+- [ ] `SoftcoverDatePickerDialog` — `core/component/dialog/SoftcoverDatePickerDialog.kt` (+ its `internal` `PickerDates.kt` helpers); arrived loose-parameter from main's 3.1.3 hotfix, so it **owes R1 + R11** (model + event), not just chrome
 - [ ] `BecauseYouReadGenreSheet`, `ContinueSeriesDismissSheet`, `ContinueSeriesMenuSheet` — `feature/explore/presentation/screen/ExploreShelf.kt:1756,911,861`
 - [ ] `StreakStripSheet`, `StreakStripSheetContent` — `feature/reading/presentation/component/StreakStrip.kt:161,171`
 - [ ] `ProfileShareBottomSheet`, `LogOutConfirmBottomSheet` — `feature/profile/presentation/screen/ProfileShelf.kt:1890,2074`
@@ -2149,6 +2156,7 @@ All three opening questions are resolved. Recorded here so they are not re-opene
 | Gallery reachability | **Shipped easter egg**, not debug-only. N taps on `VersionFooter`. Registry in `:core:component`, screen in `feature:settings`, `commonMain` so it works on all three platforms. | § 5a, S2 |
 | `:core:uibinding` dependency visibility | **`api`.** Costs nothing at the gate — all 44 domain models live in `:core:domain`, which is not a data-area module, so no allowlist row is required. A `:core:uibinding -> :core:<data>` row is **pre-approved** if a mapper ever needs one; write it when the edge exists, not speculatively. | § 3a, S1 |
 | `ShareCard.kt` (1,161 lines) | **S4, split per body while renaming** — not deferred to S12. It is already the contract's reference implementation; one pass, not two. | `component-contract.md` § 7.3, § 7.0 |
+| `SoftcoverDatePickerDialog` (main's 3.1.3 hotfix) | **`:core:component` `dialog/`, moved as-is at the merge** — `:core:designsystem` is tokens-only (G2), so it could not land where main put it. | § 7.2 Sheet chrome |
 
 ### Still open
 

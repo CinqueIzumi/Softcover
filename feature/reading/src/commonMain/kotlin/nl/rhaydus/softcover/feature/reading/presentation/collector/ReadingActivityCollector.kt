@@ -19,7 +19,7 @@ internal class ReadingActivityCollector : ReadingCollector {
 
             if (enabled) {
                 dependencies.launch {
-                    dependencies.refreshUserProfileDataUseCase()
+                    dependencies.refreshReadingActivityUseCase()
                         .onApiFailure()
                 }
 

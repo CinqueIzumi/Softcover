@@ -38,6 +38,9 @@ import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.model.isBlank
+import nl.rhaydus.softcover.core.domain.util.SessionValueCache
+import nl.rhaydus.softcover.core.domain.util.getOrPut
+import nl.rhaydus.softcover.core.domain.util.refresh
 
 internal class BooksRepositoryImpl(
     private val booksRemoteDataSource: BooksRemoteDataSource,
@@ -51,6 +54,12 @@ internal class BooksRepositoryImpl(
 
     private val inflightMutex = Mutex()
     private val inflightRefreshes = mutableMapOf<UserBookStatus?, Deferred<Unit>>()
+
+    // Owned here rather than injected, for the same reason as inflightRefreshes above: which source
+    // answers a read, and how fresh that answer has to be, is this class's decision. Constructed
+    // directly because the primitive has no dependencies of its own - a Koin binding plus a qualifier
+    // would only route a singleton into the singleton that already owns it.
+    private val trendingBooksCache = SessionValueCache<Unit, List<Book>>()
 
     override fun getBooksFlowByStatus(status: UserBookStatus): Flow<List<Book>> {
         return booksLocalDataSource.getBooksFlowByStatus(status = status)
@@ -299,7 +308,11 @@ internal class BooksRepositoryImpl(
         return booksRemoteDataSource.fetchBooksByIds(ids = ids)
     }
 
-    override suspend fun fetchTrendingBooks(): List<Book> = booksRemoteDataSource.fetchTrendingBooks()
+    override suspend fun fetchTrendingBooks(forceRefresh: Boolean): List<Book> = if (forceRefresh) {
+        trendingBooksCache.refresh { booksRemoteDataSource.fetchTrendingBooks() }
+    } else {
+        trendingBooksCache.getOrPut { booksRemoteDataSource.fetchTrendingBooks() }
+    }
 
     override suspend fun getEditionsByBookId(bookId: Int): List<BookEdition> {
         if (networkAvailability.isOnline.value.not()) {

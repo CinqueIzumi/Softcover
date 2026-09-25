@@ -1,0 +1,16 @@
+- [TOAD one-shot init convention](architecture_toad_init_side_effects.md) — ScreenModel `init` runs one-shot work via a Collector.onLaunch or dispatch(Action), never a raw `dependencies.launch{}`
+- [TOAD action race: untracked Job](project_toad_action_race_untracked_job.md) — same-action reentrancy guards are sound, but a "load more" fetch not stored in the shared cancellable Job races a fresh-search action
+- [onStart + StateFlow double-emit](feedback_onstart_stateflow_double_emit.md) — an `.onStart{ check-and-fire }` guard on a StateFlow collector double-fires on startup; confirm with an instrumented test run
+- [Because-you-read reselect stuck-loading](project_because_you_read_reselect_stuck_loading.md) — a picker re-dispatching the active value into a distinctUntilChanged flow strands the loading flag; need a sheet or action same-value guard
+- [Refresh-gate race (Reading + Profile)](project_profile_redesign_refresh_gate_race.md) — ProfileRefreshGate is shared by two ScreenModels; once-per-session gates need a Mutex around check-then-act
+- [UserTag.count overload + @Transaction](project_usertag_count_overload.md) — count is global popularity or personal usage depending on the query; clear-then-insert must be one @Transaction DAO method
+- [AdaptiveModalSheet scroll contract](project_adaptive_modal_sheet_scroll_contract.md) — the sheet does not scroll its content; a long content Column adds its own `.verticalScroll()`
+- [Full-height sheet pinning is safe](architecture_full_height_sheet_pinning.md) — pinned rows + `weight(1f)+verticalScroll` body in AdaptiveModalSheet fills height on both forms; don't re-litigate
+- [Foundation press/click modifiers](architecture_foundation_press_modifiers.md) — pressScaleClickable hides its InteractionSource; hand-rolling pressScale+clickable is correct when the source is shared
+- [SkeletonCrossfade / stagger contract](project_skeleton_crossfade_contract.md) — no shared sizing (caller sizes skeleton == content); stagger timestamp is a process-wide map, so hoist it above the loading branch
+- [Skeleton dimension math](project_skeleton_dimension_math.md) — check a skeleton bar against the real lineHeight; a Row next to a tall cover masks a gap, a Column sums it
+- [bottomChromePadding contract](project_bottom_chrome_padding.md) — trailing scroll padding under BottomBarScaffold; recurring miss is the offline/error early-return branch
+- [Design-system doc drift](project_design_system_doc_drift_pattern.md) — one UI fact is stated in several sections; grep the old value across every design-system section file
+- [Staged vs unstaged review scope](feedback_staged_vs_unstaged_review_scope.md) — "unstaged changes" may mean everything uncommitted; reconcile `git diff HEAD` against the brief's prose
+- [Hook script not registered](project_hook_script_not_registered.md) — a new `.claude/hooks/*.sh` does nothing until `.claude/settings.json` wires its matcher; always check both
+- [Component-library migration S1](project_component_library_migration_s1.md) — G1 gate's koin-core skip is a real service-locator hole (verified live), re-check once :core:component gets source; test-config asymmetry vs api-edge check; module-structure.md roster drift

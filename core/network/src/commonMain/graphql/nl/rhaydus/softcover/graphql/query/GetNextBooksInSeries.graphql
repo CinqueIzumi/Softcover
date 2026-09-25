@@ -1,0 +1,28 @@
+# Batched sibling of GetNextBookInSeries.graphql: resolves the "next unread book" cursor for many
+# series in a single request instead of one request per series. The caller builds $where as an
+# `_or` of one `{ series_id: { _eq: … }, position: { _gt: … } }` clause per series seed.
+#
+# Hasura cannot limit per group, so this returns every remaining book in every requested series,
+# not just the first one per series - that selection has to happen client-side by taking the first
+# row per series_id, relying on the ordering below. Keeping the selection to id-only columns is
+# what makes that full-series payload safe to fetch; do not add BookDetailFragment here.
+#
+# Ordering matches GetNextBookInSeries.graphql exactly - position ascending, then book popularity
+# descending as a tiebreak - because that tiebreak is part of the existing single-series contract
+# and must survive the batching.
+query GetNextBooksInSeries($where: book_series_bool_exp!) {
+    book_series(
+        where: $where
+        order_by: [
+            { position: asc },
+            { book: { users_count: desc } },
+        ]
+        # Runaway guard, not a result-shaping limit: bounds the payload for a pathological account
+        # with an unusually large number of in-progress series, each with many remaining books.
+        limit: 5000
+    ) {
+        series_id
+        position
+        book_id
+    }
+}

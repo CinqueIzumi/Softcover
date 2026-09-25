@@ -1,0 +1,9 @@
+./gradlew :app:testDebugUnitTest	@Q@ :app:testDebugUnitTest
+JAVA_HOME=/opt/jdk21 ./gradlew styleCheck	JAVA_HOME=/opt/jdk21 @Q@ styleCheck
+./gradlew a && ./gradlew b	@Q@ a && @Q@ b
+./gradlew x | tail -5	@Q@ x | tail -5
+GRADLE_VERBOSE=1 ./gradlew x	=
+echo "./gradlew"	=
+echo './gradlew x'; ./gradlew y	echo './gradlew x'; @Q@ y
+./gradlew --tests "nl.rhaydus.*"	@Q@ --tests "nl.rhaydus.*"
+ls ./gradlew.bat	=

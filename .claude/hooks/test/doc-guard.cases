@@ -1,0 +1,42 @@
+# name  tool  relpath  old_b64(- = absent)  arg1_b64  arg2_b64  replace_all  expected  reason_substring(- = skip)
+budget_grows_over_deny	Write	fixture/tiny.md	MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NQ==	MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkw	-	-	deny	exceeds its budget
+budget_shrinks_allow	Write	fixture/tiny.md	MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkw	MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NQ==	-	-	allow	-
+budget_equal_allow	Write	fixture/tiny.md	MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NQ==	MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NQ==	-	-	allow	-
+budget_under_pushed_over_deny	Write	fixture/tiny.md	MTIzNDU2Nzg5MDEyMzQ1	MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NQ==	-	-	deny	exceeds its budget
+history_line_in_reference_deny	Edit	docs/reference/foo.md	IyBGb28KClNvbWUgdGV4dC4K	U29tZSB0ZXh0Lgo=	U29tZSB0ZXh0LgpUaGlzIHJlcGxhY2VkIHRoZSBvbGQgYXBwcm9hY2guCg==	false	deny	adds a history line
+history_line_with_marker_allow	Edit	docs/reference/foo.md	IyBGb28KClNvbWUgdGV4dC4K	U29tZSB0ZXh0Lgo=	U29tZSB0ZXh0LgpUaGlzIHJlcGxhY2VkIHRoZSBvbGQgYXBwcm9hY2guIDwhLS0gaGlzdG9yeS1vayAtLT4K	false	allow	-
+history_line_outside_reference_allow	Edit	docs/working/other.md	IyBGb28KClNvbWUgdGV4dC4K	U29tZSB0ZXh0Lgo=	U29tZSB0ZXh0LgpUaGlzIHJlcGxhY2VkIHRoZSBvbGQgYXBwcm9hY2guCg==	false	allow	-
+rules_41_lines_write_deny	Write	.claude/rules/x.md	-	eAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4CngKeAp4Cg==	-	-	deny	exceeds its budget
+now_section_over_40_lines_deny	Edit	docs/working/now-test.md	IyBUZXN0CgojIyBOb3cKLSBhCi0gYgotIGMKLSBkCi0gZQoKIyMgTGF0ZXIKLSB6Cg==	IyMgTm93Ci0gYQotIGIKLSBjCi0gZAotIGUKCg==	IyMgTm93Ci0gaXRlbTEKLSBpdGVtMgotIGl0ZW0zCi0gaXRlbTQKLSBpdGVtNQotIGl0ZW02Ci0gaXRlbTcKLSBpdGVtOAotIGl0ZW05Ci0gaXRlbTEwCi0gaXRlbTExCi0gaXRlbTEyCi0gaXRlbTEzCi0gaXRlbTE0Ci0gaXRlbTE1Ci0gaXRlbTE2Ci0gaXRlbTE3Ci0gaXRlbTE4Ci0gaXRlbTE5Ci0gaXRlbTIwCi0gaXRlbTIxCi0gaXRlbTIyCi0gaXRlbTIzCi0gaXRlbTI0Ci0gaXRlbTI1Ci0gaXRlbTI2Ci0gaXRlbTI3Ci0gaXRlbTI4Ci0gaXRlbTI5Ci0gaXRlbTMwCi0gaXRlbTMxCi0gaXRlbTMyCi0gaXRlbTMzCi0gaXRlbTM0Ci0gaXRlbTM1Ci0gaXRlbTM2Ci0gaXRlbTM3Ci0gaXRlbTM4Ci0gaXRlbTM5Ci0gaXRlbTQwCi0gaXRlbTQxCgo=	false	deny	## Now section exceeds its budget
+bash_echo_single_redirect_deny	Bash	-	-	ZWNobyBoZWxsbyA+IGRvY3MvcmVmZXJlbmNlL2Zvby5tZA==	-	-	deny	edit markdown with Edit/Write
+bash_echo_append_redirect_deny	Bash	-	-	ZWNobyBoZWxsbyA+PiBkb2NzL3JlZmVyZW5jZS9mb28ubWQ=	-	-	deny	edit markdown with Edit/Write
+bash_heredoc_redirect_deny	Bash	-	-	Y2F0IDw8RU9GID4gZG9jcy9yZWZlcmVuY2Uvbm90ZXMubWQKaGVsbG8KRU9G	-	-	deny	edit markdown with Edit/Write
+bash_tee_md_deny	Bash	-	-	ZWNobyBoZWxsbyB8IHRlZSBkb2NzL3JlZmVyZW5jZS9mb28ubWQ=	-	-	deny	edit markdown with Edit/Write
+bash_tee_non_md_allow	Bash	-	-	ZWNobyBoZWxsbyB8IHRlZSAvdG1wL291dC50eHQ=	-	-	allow	-
+bash_sed_i_md_deny	Bash	-	-	c2VkIC1pIGRvY3MvcmVmZXJlbmNlL2Zvby5tZA==	-	-	deny	edit markdown with Edit/Write
+bash_perl_i_md_deny	Bash	-	-	cGVybCAtaSBkb2NzL3JlZmVyZW5jZS9mb28ubWQ=	-	-	deny	edit markdown with Edit/Write
+bash_python_c_md_deny	Bash	-	-	cHl0aG9uMyAtYyBkb2NzL3JlZmVyZW5jZS9mb28ubWQ=	-	-	deny	edit markdown with Edit/Write
+bash_node_e_md_deny	Bash	-	-	bm9kZSAtZSBkb2NzL3JlZmVyZW5jZS9mb28ubWQ=	-	-	deny	edit markdown with Edit/Write
+bash_python_heredoc_md_deny	Bash	-	-	cHl0aG9uMyA8PFBZCmRvY3MvcmVmZXJlbmNlL2Zvby5tZApQWQ==	-	-	deny	edit markdown with Edit/Write
+bash_cat_read_allow	Bash	-	-	Y2F0IGRvY3MvcmVmZXJlbmNlL2Zvby5tZA==	-	-	allow	-
+bash_wc_read_allow	Bash	-	-	d2MgLWwgZG9jcy9yZWZlcmVuY2UvZm9vLm1k	-	-	allow	-
+bash_grep_read_allow	Bash	-	-	Z3JlcCBmb28gZG9jcy9yZWZlcmVuY2UvZm9vLm1k	-	-	allow	-
+bash_sed_n_allow	Bash	-	-	c2VkIC1uIDEsNXAgZG9jcy9yZWZlcmVuY2UvZm9vLm1k	-	-	allow	-
+bash_head_allow	Bash	-	-	aGVhZCBkb2NzL3JlZmVyZW5jZS9mb28ubWQ=	-	-	allow	-
+bash_git_diff_allow	Bash	-	-	Z2l0IGRpZmYgZG9jcy9yZWZlcmVuY2UvZm9vLm1k	-	-	allow	-
+bash_git_mv_allow	Bash	-	-	Z2l0IG12IGRvY3MvcmVmZXJlbmNlL2Zvby5tZCBkb2NzL3JlZmVyZW5jZS9iYXIubWQ=	-	-	allow	-
+bash_stderr_redirect_allow	Bash	-	-	Y2F0IGRvY3MvcmVmZXJlbmNlL2Zvby5tZCAyPiYx	-	-	allow	-
+bash_dev_null_allow	Bash	-	-	Li9ncmFkbGV3IHNvbWVUYXNrID4gL2Rldi9udWxs	-	-	allow	-
+bash_ls_redirect_txt_allow	Bash	-	-	bHMgPiAvdG1wL3gudHh0	-	-	allow	-
+unicode_bytes_correct_deny	Write	fixture/unicode.md	-	YWIg4oCUIPCfmIA=	-	-	deny	exceeds its budget
+edit_old_string_not_found_allow	Edit	fixture/does-not-exist.md	-	c29tZXRoaW5nIHRvIHJlcGxhY2U=	cmVwbGFjZW1lbnQ=	false	allow	-
+edit_replace_all_multiplies_size_deny	Edit	fixture/tiny.md	QUFBQUFBQUFBQQ==	QQ==	QkJC	true	deny	exceeds its budget
+first_match_wins_deny	Write	fixture/special/exact.md	-	MTIzNDU2Nzg5MA==	-	-	deny	8B
+star_vs_doublestar_deny	Write	docs/reference/sub/deep.md	-	MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NQ==	-	-	deny	20B
+bash_cp_md_destination_deny	Bash	-	-	Y3AgL3RtcC94IGRvY3MvcmVmZXJlbmNlL2Zvby5tZA==	-	-	deny	edit markdown with Edit/Write
+bash_cp_md_source_only_allow	Bash	-	-	Y3AgZG9jcy9hLm1kIC90bXAveA==	-	-	allow	-
+bash_dd_of_md_deny	Bash	-	-	ZGQgaWY9L3RtcC94IG9mPWEubWQ=	-	-	deny	edit markdown with Edit/Write
+bash_rsync_md_deny	Bash	-	-	cnN5bmMgL3RtcC94IGRvY3MvYS5tZA==	-	-	deny	edit markdown with Edit/Write
+bash_awk_inplace_md_deny	Bash	-	-	YXdrIC1pIGlucGxhY2UgJ3twcmludH0nIGEubWQ=	-	-	deny	edit markdown with Edit/Write
+bash_mv_md_allow	Bash	-	-	bXYgYS5tZCBiLm1k	-	-	allow	-
+edit_number_old_string_forces_jq_error_deny	EditNumberOldString	fixture/badedit.md	aGVsbG8K	NQ==	cmVwbGFjZW1lbnQ=	-	deny	doc-guard could not evaluate the edit

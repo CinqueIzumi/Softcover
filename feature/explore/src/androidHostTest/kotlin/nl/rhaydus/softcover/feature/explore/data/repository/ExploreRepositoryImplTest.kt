@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.feature.explore.data.datasource.SearchRemoteDataSour
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
+import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 
 
 class ExploreRepositoryImplTest {
@@ -193,6 +194,335 @@ class ExploreRepositoryImplTest {
                     limit = limit,
                 )
             }
+        }
+
+        @Test
+        fun `caches by genre so a second call for the same genre does not hit remote again`() = runTest {
+            // ----- Arrange -----
+            val genre = "Fantasy"
+            val limit = 50
+            val expectedBooks = listOf(stubBook())
+
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = genre,
+                    limit = limit,
+                )
+            } returns expectedBooks
+
+            // ----- Act -----
+            val firstResult = repository.fetchBooksByGenre(
+                genre = genre,
+                limit = limit,
+            )
+            val secondResult = repository.fetchBooksByGenre(
+                genre = genre,
+                limit = limit,
+            )
+
+            // ----- Assert -----
+            firstResult shouldBe expectedBooks
+            secondResult shouldBe expectedBooks
+            coVerify(exactly = 1) {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = genre,
+                    limit = limit,
+                )
+            }
+        }
+
+        @Test
+        fun `caches independently for two different genres`() = runTest {
+            // ----- Arrange -----
+            val fantasyGenre = "Fantasy"
+            val horrorGenre = "Horror"
+            val limit = 50
+            val fantasyBooks = listOf(stubBook())
+            val horrorBooks = listOf(stubBook())
+
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = fantasyGenre,
+                    limit = limit,
+                )
+            } returns fantasyBooks
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = horrorGenre,
+                    limit = limit,
+                )
+            } returns horrorBooks
+
+            // ----- Act -----
+            val fantasyResult = repository.fetchBooksByGenre(
+                genre = fantasyGenre,
+                limit = limit,
+            )
+            val horrorResult = repository.fetchBooksByGenre(
+                genre = horrorGenre,
+                limit = limit,
+            )
+
+            // ----- Assert -----
+            fantasyResult shouldBe fantasyBooks
+            horrorResult shouldBe horrorBooks
+            coVerify(exactly = 1) {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = fantasyGenre,
+                    limit = limit,
+                )
+            }
+            coVerify(exactly = 1) {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = horrorGenre,
+                    limit = limit,
+                )
+            }
+        }
+
+        @Test
+        fun `re-requesting the first genre after fetching a second genre still hits cache`() = runTest {
+            // ----- Arrange -----
+            val fantasyGenre = "Fantasy"
+            val horrorGenre = "Horror"
+            val limit = 50
+            val fantasyBooks = listOf(stubBook())
+            val horrorBooks = listOf(stubBook())
+
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = fantasyGenre,
+                    limit = limit,
+                )
+            } returns fantasyBooks
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = horrorGenre,
+                    limit = limit,
+                )
+            } returns horrorBooks
+
+            // ----- Act -----
+            repository.fetchBooksByGenre(
+                genre = fantasyGenre,
+                limit = limit,
+            )
+            repository.fetchBooksByGenre(
+                genre = horrorGenre,
+                limit = limit,
+            )
+            val secondFantasyResult = repository.fetchBooksByGenre(
+                genre = fantasyGenre,
+                limit = limit,
+            )
+
+            // ----- Assert -----
+            secondFantasyResult shouldBe fantasyBooks
+            coVerify(exactly = 1) {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = fantasyGenre,
+                    limit = limit,
+                )
+            }
+        }
+
+        @Test
+        fun `a failed fetch for one genre does not affect an already-cached different genre`() = runTest {
+            // ----- Arrange -----
+            val fantasyGenre = "Fantasy"
+            val horrorGenre = "Horror"
+            val limit = 50
+            val fantasyBooks = listOf(stubBook())
+
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = fantasyGenre,
+                    limit = limit,
+                )
+            } returns fantasyBooks
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = horrorGenre,
+                    limit = limit,
+                )
+            } throws RuntimeException("boom")
+
+            // ----- Act -----
+            repository.fetchBooksByGenre(
+                genre = fantasyGenre,
+                limit = limit,
+            )
+            val horrorFailure = runCatching { repository.fetchBooksByGenre(
+                genre = horrorGenre,
+                limit = limit,
+            ) }
+            val fantasyResult = repository.fetchBooksByGenre(
+                genre = fantasyGenre,
+                limit = limit,
+            )
+
+            // ----- Assert -----
+            horrorFailure.isFailure shouldBe true
+            fantasyResult shouldBe fantasyBooks
+            coVerify(exactly = 1) {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = fantasyGenre,
+                    limit = limit,
+                )
+            }
+        }
+
+        @Test
+        fun `a cache hit is served regardless of the limit passed on a later call`() = runTest {
+            // ----- Arrange -----
+            val genre = "Fantasy"
+            val firstLimit = 50
+            val secondLimit = 10
+            val expectedBooks = listOf(stubBook())
+
+            coEvery {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = genre,
+                    limit = firstLimit,
+                )
+            } returns expectedBooks
+
+            // ----- Act -----
+            repository.fetchBooksByGenre(
+                genre = genre,
+                limit = firstLimit,
+            )
+            val secondResult = repository.fetchBooksByGenre(
+                genre = genre,
+                limit = secondLimit,
+            )
+
+            // ----- Assert -----
+            secondResult shouldBe expectedBooks
+            coVerify(exactly = 1) {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = genre,
+                    limit = firstLimit,
+                )
+            }
+            coVerify(exactly = 0) {
+                searchRemoteDataSource.fetchBooksByGenre(
+                    genre = genre,
+                    limit = secondLimit,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class FetchFeaturedUpcomingRelease {
+        @Test
+        fun `two calls hit remote exactly once and both return the same value`() = runTest {
+            // ----- Arrange -----
+            val expectedBook = stubBook()
+            coEvery {
+                searchRemoteDataSource.fetchFeaturedUpcomingRelease()
+            } returns expectedBook
+
+            // ----- Act -----
+            val firstResult = repository.fetchFeaturedUpcomingRelease()
+            val secondResult = repository.fetchFeaturedUpcomingRelease()
+
+            // ----- Assert -----
+            firstResult shouldBe expectedBook
+            secondResult shouldBe expectedBook
+            coVerify(exactly = 1) { searchRemoteDataSource.fetchFeaturedUpcomingRelease() }
+        }
+
+        @Test
+        fun `a null result is cached and not re-fetched`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                searchRemoteDataSource.fetchFeaturedUpcomingRelease()
+            } returns null
+
+            // ----- Act -----
+            val firstResult = repository.fetchFeaturedUpcomingRelease()
+            val secondResult = repository.fetchFeaturedUpcomingRelease()
+
+            // ----- Assert -----
+            firstResult shouldBe null
+            secondResult shouldBe null
+            coVerify(exactly = 1) { searchRemoteDataSource.fetchFeaturedUpcomingRelease() }
+        }
+
+        @Test
+        fun `a failed fetch is not cached and the next call retries`() = runTest {
+            // ----- Arrange -----
+            val expectedBook = stubBook()
+            coEvery {
+                searchRemoteDataSource.fetchFeaturedUpcomingRelease()
+            } throws RuntimeException("boom") andThen expectedBook
+
+            // ----- Act -----
+            val firstAttempt = runCatching { repository.fetchFeaturedUpcomingRelease() }
+            val secondResult = repository.fetchFeaturedUpcomingRelease()
+
+            // ----- Assert -----
+            firstAttempt.isFailure shouldBe true
+            secondResult shouldBe expectedBook
+            coVerify(exactly = 2) { searchRemoteDataSource.fetchFeaturedUpcomingRelease() }
+        }
+    }
+
+    @Nested
+    inner class FetchMoodTags {
+        @Test
+        fun `two calls return the same list and remote is hit exactly once`() = runTest {
+            // ----- Arrange -----
+            val expectedMoodTags = listOf<MoodTag>(mockk())
+            coEvery {
+                searchRemoteDataSource.fetchMoodTags(limit = any())
+            } returns expectedMoodTags
+
+            // ----- Act -----
+            val firstResult = repository.fetchMoodTags()
+            val secondResult = repository.fetchMoodTags()
+
+            // ----- Assert -----
+            firstResult shouldBe expectedMoodTags
+            secondResult shouldBe expectedMoodTags
+            coVerify(exactly = 1) { searchRemoteDataSource.fetchMoodTags(limit = any()) }
+        }
+
+        @Test
+        fun `a failed fetch is not cached and the next call retries`() = runTest {
+            // ----- Arrange -----
+            val expectedMoodTags = listOf<MoodTag>(mockk())
+            coEvery {
+                searchRemoteDataSource.fetchMoodTags(limit = any())
+            } throws RuntimeException("boom") andThen expectedMoodTags
+
+            // ----- Act -----
+            val firstAttempt = runCatching { repository.fetchMoodTags() }
+            val secondResult = repository.fetchMoodTags()
+
+            // ----- Assert -----
+            firstAttempt.isFailure shouldBe true
+            secondResult shouldBe expectedMoodTags
+            coVerify(exactly = 2) { searchRemoteDataSource.fetchMoodTags(limit = any()) }
+        }
+
+        @Test
+        fun `an empty list is cached and not re-fetched`() = runTest {
+            // ----- Arrange -----
+            coEvery {
+                searchRemoteDataSource.fetchMoodTags(limit = any())
+            } returns emptyList()
+
+            // ----- Act -----
+            val firstResult = repository.fetchMoodTags()
+            val secondResult = repository.fetchMoodTags()
+
+            // ----- Assert -----
+            firstResult shouldBe emptyList()
+            secondResult shouldBe emptyList()
+            coVerify(exactly = 1) { searchRemoteDataSource.fetchMoodTags(limit = any()) }
         }
     }
 

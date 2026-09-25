@@ -20,21 +20,20 @@ import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
 import nl.rhaydus.softcover.core.domain.model.RefreshScope
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.presentation.state.SplashState
-import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
+import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 
 internal class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
     private val refreshLibraryUseCase: RefreshLibraryUseCase,
     private val getThemeConfigurationUseCase: GetThemeConfigurationUseCase,
-    private val refreshUserProfileDataUseCase: RefreshUserProfileDataUseCase,
+    private val refreshReadingActivityUseCase: RefreshReadingActivityUseCase,
     private val reAuthenticateUseCase: ReAuthenticateUseCase,
     private val resetUserDataUseCase: ResetUserDataUseCase,
 ) : ViewModel(), SessionAuthenticator {
@@ -158,18 +157,19 @@ internal class MainActivityViewModel(
 
         val backgroundScope = MainScope()
 
-        backgroundScope.launch {
-            refreshLibraryUseCase(
-                scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING),
-            ).onApiFailure()
-        }
-
+        // No narrow ByStatus(CURRENTLY_READING) refresh here: the shelf renders from a Room flow
+        // (CurrentlyReadingBooksCollector), so it paints from cache immediately regardless, and the
+        // narrow query would race the full one below without deduplicating (runOrJoin keys in-flight
+        // requests on statusFilter, so CURRENTLY_READING and null never join) — wasted API burst budget.
         backgroundScope.launch {
             refreshLibraryUseCase(scope = RefreshScope.All).onApiFailure()
         }
 
+        // Activity-only: the stats half (fetchAllStatsBooks, ceil(booksRead/100) requests) is
+        // rendered only by the Profile tab, so it refreshes lazily on Profile-tab mount
+        // (UserInformationCollector) instead of paying for it on every cold start.
         backgroundScope.launch {
-            refreshUserProfileDataUseCase().onApiFailure()
+            refreshReadingActivityUseCase().onApiFailure()
         }
     }
 }
