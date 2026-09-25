@@ -14,3 +14,4 @@
 - [Pagination adds required query params](feedback_apollo_pagination_required_params.md) — new required GraphQL vars break old test call sites; run the tests first and fix those minimally
 - [Room migration test pattern](project_migration_test_pattern.md) — BundledSQLiteDriver in-memory per test; needs sqlite-bundled-jvm runtimeOnly; PRAGMA + sqlite_master helpers
 - [Bash hook and Gradle task testing](project_bash_hook_and_gradle_task_testing.md) — base64 TSV harness for PreToolUse hooks; ProjectBuilder for DefaultTask actions; single-branch merge-base gotcha; concurrent-edit handling
+- [ktlintFormat nested-call trailing comma](feedback_ktlintformat_nested_call_trailing_comma.md) — grep for `),)` after ktlintFormat; wrap the outer call too
