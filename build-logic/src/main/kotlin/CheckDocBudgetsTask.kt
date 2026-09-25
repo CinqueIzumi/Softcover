@@ -12,10 +12,6 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
-private enum class BudgetUnit(val suffix: String) { BYTES("B"), LINES("L") }
-
-private data class BudgetRule(val glob: String, val token: String, val limit: Long, val unit: BudgetUnit)
-
 private fun parseLimitToken(token: String): Pair<Long, BudgetUnit> = when {
     token.endsWith("KB") -> (token.removeSuffix("KB").toLong() * 1024) to BudgetUnit.BYTES
     token.endsWith("B") -> token.removeSuffix("B").toLong() to BudgetUnit.BYTES
@@ -28,7 +24,10 @@ private fun globToRegex(glob: String): Regex {
     var i = 0
     while (i < glob.length) {
         when {
-            glob.startsWith("**", i) -> {
+            glob.startsWith(
+                "**",
+                i,
+            ) -> {
                 pattern.append(".*")
                 i += 2
             }
@@ -71,7 +70,10 @@ private fun extractNowSection(text: String): String {
     return section.joinToString("\n")
 }
 
-private fun runGit(workingDir: File, vararg args: String): ByteArray? {
+private fun runGit(
+    workingDir: File,
+    vararg args: String,
+): ByteArray? {
     val process = ProcessBuilder(listOf("git") + args)
         .directory(workingDir)
         .start()
@@ -81,15 +83,33 @@ private fun runGit(workingDir: File, vararg args: String): ByteArray? {
 }
 
 private fun resolveMergeBase(root: File): String =
-    runGit(root, "merge-base", "HEAD", "origin/main")?.toString(Charsets.UTF_8)?.trim()
-        ?: runGit(root, "merge-base", "HEAD", "main")?.toString(Charsets.UTF_8)?.trim()
+    runGit(
+        root,
+        "merge-base",
+        "HEAD",
+        "origin/main",
+    )?.toString(Charsets.UTF_8)?.trim()
+        ?: runGit(
+            root,
+            "merge-base",
+            "HEAD",
+            "main",
+        )?.toString(Charsets.UTF_8)?.trim()
         ?: throw GradleException(
             "checkDocBudgets: cannot resolve a git merge-base against origin/main or main — " +
                 "the checkout needs full history (fetch-depth: 0).",
         )
 
-private fun contentAtRef(root: File, ref: String, relativePath: String): ByteArray? =
-    runGit(root, "show", "$ref:$relativePath")
+private fun contentAtRef(
+    root: File,
+    ref: String,
+    relativePath: String,
+): ByteArray? =
+    runGit(
+        root,
+        "show",
+        "$ref:$relativePath",
+    )
 
 /**
  * Gates `docs/doc-budgets.txt` in CI: a file already over its budget still passes as long as it has not
@@ -99,7 +119,6 @@ private fun contentAtRef(root: File, ref: String, relativePath: String): ByteArr
  * checkout) is a hard failure rather than a silent pass, since `check` must run with `fetch-depth: 0`.
  */
 abstract class CheckDocBudgetsTask : DefaultTask() {
-
     @get:InputFile
     abstract val budgetsFile: RegularFileProperty
 
@@ -125,17 +144,27 @@ abstract class CheckDocBudgetsTask : DefaultTask() {
             val relativePath = file.relativeTo(root).invariantSeparatorsPath
             val rule = rules.firstOrNull { globToRegex(it.glob).matches(relativePath) } ?: return@forEach
             val currentBytes = file.readBytes()
-            val currentSize = sizeOf(currentBytes, rule.unit)
+            val currentSize = sizeOf(
+                currentBytes,
+                rule.unit,
+            )
             if (currentSize <= rule.limit) return@forEach
 
-            val baseBytes = contentAtRef(root, mergeBase, relativePath)
+            val baseBytes = contentAtRef(
+                root,
+                mergeBase,
+                relativePath,
+            )
             if (baseBytes == null) {
                 violations += "$relativePath: new file over budget (${rule.glob} ${rule.token}) — " +
                     "$currentSize${rule.unit.suffix} (limit ${rule.limit}${rule.unit.suffix})"
                 return@forEach
             }
 
-            val baseSize = sizeOf(baseBytes, rule.unit)
+            val baseSize = sizeOf(
+                baseBytes,
+                rule.unit,
+            )
             if (currentSize > baseSize) {
                 violations += "$relativePath: over budget and grew since merge-base (${rule.glob} ${rule.token}) — " +
                     "$baseSize${rule.unit.suffix} → $currentSize${rule.unit.suffix} (limit ${rule.limit}${rule.unit.suffix})"
@@ -150,12 +179,16 @@ abstract class CheckDocBudgetsTask : DefaultTask() {
                 ?.filter { it.isNotEmpty() }
                 ?.forEach { relativePath ->
                     val file = root.resolve(relativePath)
-                    if (!file.exists()) return@forEach
+                    if (file.exists().not()) return@forEach
 
                     val currentNow = lineCountOf(extractNowSection(file.readText()))
                     if (currentNow <= nowLimit) return@forEach
 
-                    val baseBytes = contentAtRef(root, mergeBase, relativePath)
+                    val baseBytes = contentAtRef(
+                        root,
+                        mergeBase,
+                        relativePath,
+                    )
                     val baseNow = baseBytes?.let { lineCountOf(extractNowSection(it.toString(Charsets.UTF_8))) } ?: 0
                     if (baseBytes == null || currentNow > baseNow) {
                         violations += "$relativePath ## Now section: over budget (## Now ${nowLimit}L) — " +
@@ -174,7 +207,10 @@ abstract class CheckDocBudgetsTask : DefaultTask() {
         logger.lifecycle("checkDocBudgets: ${markdownFiles.files.size} markdown files within budget.")
     }
 
-    private fun sizeOf(bytes: ByteArray, unit: BudgetUnit): Long = when (unit) {
+    private fun sizeOf(
+        bytes: ByteArray,
+        unit: BudgetUnit,
+    ): Long = when (unit) {
         BudgetUnit.BYTES -> bytes.size.toLong()
         BudgetUnit.LINES -> lineCountOf(bytes.toString(Charsets.UTF_8))
     }
@@ -196,7 +232,12 @@ abstract class CheckDocBudgetsTask : DefaultTask() {
                 else -> {
                     val fields = line.trim().split(Regex("\\s+"))
                     val (limit, unit) = parseLimitToken(fields.last())
-                    rules += BudgetRule(fields.first(), fields.last(), limit, unit)
+                    rules += BudgetRule(
+                        fields.first(),
+                        fields.last(),
+                        limit,
+                        unit,
+                    )
                 }
             }
         }

@@ -19,7 +19,12 @@ class DocBudgetsConventionPlugin : Plugin<Project> {
             markdownFiles.from(
                 fileTree(layout.projectDirectory) {
                     include("**/*.md")
-                    exclude("**/build/**", "**/.gradle/**", "**/.git/**", "**/.idea/**")
+                    exclude(
+                        "**/build/**",
+                        "**/.gradle/**",
+                        "**/.git/**",
+                        "**/.idea/**",
+                    )
                 },
             )
         }
