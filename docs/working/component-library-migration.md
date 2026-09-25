@@ -15,8 +15,8 @@ that branch, not separate pull requests. Every stage boundary must leave the bra
   (`docs/working/token-hygiene/README.md`).
 - **Next:** S5 — Primitives (§ 7.1), starting with chips, **started fresh** once the hygiene steps
   land. There is no S5 plan file on this branch; an older chips attempt exists only in `refs/stash`
-  and is **not** the plan. Pinned budgets for `components.md` / `foundations.md` / `patterns.md`
-  (three design-system docs, pinned by the token-hygiene gate) get restored on S12.
+  and is **not** the plan. Pinned budgets for `foundations.md` / `patterns.md` (two design-system
+  docs, pinned by the token-hygiene gate) get restored on S12.
 - **Open questions:** none.
 - **Verification:** the reliable per-change gates below; run through `scripts/gradle-quiet.sh`.
 - **Uncommitted:** none.
@@ -643,7 +643,7 @@ gaps.
 | **Shared-element transitions break** | S7 | R7: key resolved by the mapper, carried on `BookCardKey`. Manually verify library -> detail and explore -> detail. |
 | **Long-lived red branch.** All-at-once means the module split's compile breakage is resolved inside the branch. | S3, S4 | Stage boundaries must compile. Commit per stage so the PR is reviewable commit-by-commit even though it merges once. |
 | **Session loss mid-migration** | any | This file. Update checkboxes in the same commit as the work, and record the branch name in the header. |
-| **`docs/reference/design-system/components.md` keeps growing** | S12 | Split per family mirroring the § 3 package layout. G5 blocks merge without it. Re-measure at S12. |
+| **New component docs regrow `components.md`** | any | Split done (token-hygiene 07a): the file is an index; new component docs go into KDoc on the UI model plus one index line. |
 | **Reviewer load.** A single PR of this size is not reviewable in the normal way. | merge | Commit-per-stage discipline; run `rhaydus-kotlin:code-reviewer` per stage, not once at the end. |
 
 ---

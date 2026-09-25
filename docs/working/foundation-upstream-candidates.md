@@ -62,7 +62,7 @@ Filed but not yet implemented in the foundation.
   "Cancel" today). Optionally a `selectableDates` pass-through for surfaces that must exclude past days.
 - **Scope note:** Softcover's implementation is `SoftcoverDatePickerDialog` +
   `presentation/util/PickerDates.kt` in `:core:designsystem`, catalogued in
-  `docs/reference/design-system/components.md` §4. It is app-generic already — lifting it upstream is a
+  `docs/reference/design-system/components/sheets.md`. It is app-generic already — lifting it upstream is a
   move, not a rewrite, and the app component would then become a thin alias or be dropped.
 
 ### F24 — `import-grouping` ktlint rule (Android → third-party → project)

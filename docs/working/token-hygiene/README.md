@@ -6,17 +6,19 @@
 
 ## Now
 
-- **State:** Steps 00–06 done. The tooling landed on `main` via PR #281 and is merged into the migration
-  branch. The migration tracker is rewritten to 666 lines with a `## Now` block (migration paused until
-  Steps 07–09 land; S5 then starts fresh). Its § 5b–5n write-ups are deleted after 16 approved promotions
-  into `docs/reference/*`, `CLAUDE.md` and the tracker's S11 / S12 / § 7 checklists. Three design-system
-  docs keep pinned budget rows until the migration tracker's S12.
-- **Next:** Step 07, `steps/07-design-docs.md`.
-- **Open questions:** none. (The plugin docs-first hook still naming the denied agents is FU-13.)
-- **Verification:** `checkDocBudgets` passes; no `§ 5b`–`§ 5n` / `§ 6a` references remain outside this
-  directory; `softcover-reviewer` found no issues.
-- **Uncommitted:** the Step 06 rewrite (tracker, `CLAUDE.md` plus five reference docs, one reviewer-memory file, four
-  KDoc citation fixes), this file, and the deleted `steps/06-tracker.md`.
+- **State:** Steps 00–06 and 07a done. `components.md` is an 8189B index (60 entries, 11 families) that
+  links to `design-system/components/<family>.md` (each ≤ 20KB). Entries for components already in
+  `:core:component` sit under `## Parked for KDoc (Step 07d)` in their family file. The pinned
+  `components.md` budget row is now `8KB`; `foundations.md` / `patterns.md` stay pinned until the
+  migration tracker's S12.
+- **Next:** Step 07b (`patterns.md` → per-surface files), `steps/07-design-docs.md` § 07b.
+- **Open questions:** none. Reviewer notes left as they are: Verdict sheet / block are indexed under
+  Editorial, not Sheets; `states-feedback.md`'s "Deadline family: usage and division of labour" section has
+  no index line of its own (the index is 3 bytes under budget). (FU-13 still stands.)
+- **Verification:** `checkDocBudgets` passes; no broken `components.md#` anchors; `softcover-reviewer`
+  found no issues.
+- **Uncommitted:** the 07a split (`components.md`, 11 family files, `design-system.md`, `doc-budgets.txt`,
+  the migration tracker, `foundation-upstream-candidates.md`) and this file.
 
 ## How to run a step
 
