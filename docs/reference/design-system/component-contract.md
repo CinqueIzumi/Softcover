@@ -437,7 +437,7 @@ sizes to a line, a card sizes to its own body, and neither is stretched or clipp
 neighbour.
 
 With the registry empty (its state as of the S2 contract/gallery scaffold), the frame shows the
-documented empty-state variant of the editorial quote pattern (§5) — the same low-alpha, swaying quote
+documented empty-state variant of the [editorial quote](patterns/editorial.md#editorial-quote) pattern — the same low-alpha, swaying quote
 glyph the empty Reading and Hidden-suggestions screens use — with copy that explains the library is
 filling one migration stage at a time, so the frame reads as a deliberate moment rather than an
 unfinished placeholder. Because the empty state renders inside the themed region too, it still shows the

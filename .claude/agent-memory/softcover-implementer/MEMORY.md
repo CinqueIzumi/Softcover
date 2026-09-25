@@ -1,1 +1,2 @@
 - [Check working tree before starting](feedback_check_working_tree_before_starting.md) — git status/diff first; uncommitted prior work may already violate the current brief's scope guard; stash it recoverably, don't build on it
+- [doc-guard history-regex false positives](feedback_doc_guard_history_regex_false_positives.md) — "used to surface" trips the same rule as "used to be"; pinned-budget files need byte-diff-ordered edits

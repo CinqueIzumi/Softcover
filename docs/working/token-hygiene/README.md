@@ -6,19 +6,23 @@
 
 ## Now
 
-- **State:** Steps 00–06 and 07a done. `components.md` is an 8189B index (60 entries, 11 families) that
-  links to `design-system/components/<family>.md` (each ≤ 20KB). Entries for components already in
-  `:core:component` sit under `## Parked for KDoc (Step 07d)` in their family file. The pinned
-  `components.md` budget row is now `8KB`; `foundations.md` / `patterns.md` stay pinned until the
-  migration tracker's S12.
-- **Next:** Step 07b (`patterns.md` → per-surface files), `steps/07-design-docs.md` § 07b.
-- **Open questions:** none. Reviewer notes left as they are: Verdict sheet / block are indexed under
-  Editorial, not Sheets; `states-feedback.md`'s "Deadline family: usage and division of labour" section has
-  no index line of its own (the index is 3 bytes under budget). (FU-13 still stands.)
-- **Verification:** `checkDocBudgets` passes; no broken `components.md#` anchors; `softcover-reviewer`
-  found no issues.
-- **Uncommitted:** the 07a split (`components.md`, 11 family files, `design-system.md`, `doc-budgets.txt`,
-  the migration tracker, `foundation-upstream-candidates.md`) and this file.
+- **State:** Steps 00–06, 07a and 07b done. `components.md` (8189B) and `patterns.md` (8186B) are
+  indexes; their entries live in `design-system/components/<family>.md` and
+  `design-system/patterns/<surface>.md` (8 surfaces, each ≤ 20KB, one `### Name` per pattern, 56 total).
+  Both index budget rows are `8KB`; only `foundations.md` stays pinned until the migration tracker's S12.
+  Every former "§5" pattern reference is a relative link to its `patterns/` anchor. Entries for components
+  already in `:core:component` sit under `## Parked for KDoc (Step 07d)` in their family file.
+- **Next:** Step 07c (`component-contract.md` compaction), `steps/07-design-docs.md` § 07c.
+- **Open questions:** none. Normative-looking history kept in 07b: the compact-list back-compat value
+  (Library layout model / Bulk-select), the peek bar's abandoned-MediaSession trap (`<!-- history-ok -->`),
+  the profile header's `SectionLabel` exception. 07a reviewer notes left as they are: Verdict sheet / block
+  are indexed under Editorial, not Sheets; `states-feedback.md`'s "Deadline family" section has no index line
+  of its own. (FU-13 still stands.)
+- **Verification:** `checkDocBudgets` passes; all 110 `components/` / `patterns/` links resolve to a
+  heading; `softcover-reviewer` found no lost rule.
+- **Uncommitted:** the 07b split (`patterns.md`, `patterns/`, cross-reference fixes across
+  `design-system/`, `.claude/rules/docs.md`, `doc-budgets.txt`, the migration tracker), an implementer
+  memory note, and this file.
 
 ## How to run a step
 

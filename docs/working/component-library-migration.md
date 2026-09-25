@@ -15,8 +15,8 @@ that branch, not separate pull requests. Every stage boundary must leave the bra
   (`docs/working/token-hygiene/README.md`).
 - **Next:** S5 — Primitives (§ 7.1), starting with chips, **started fresh** once the hygiene steps
   land. There is no S5 plan file on this branch; an older chips attempt exists only in `refs/stash`
-  and is **not** the plan. Pinned budgets for `foundations.md` / `patterns.md` (two design-system
-  docs, pinned by the token-hygiene gate) get restored on S12.
+  and is **not** the plan. Pinned budget for `foundations.md` (the one remaining design-system doc
+  pinned by the token-hygiene gate) gets restored on S12.
 - **Open questions:** none.
 - **Verification:** the reliable per-change gates below; run through `scripts/gradle-quiet.sh`.
 - **Uncommitted:** none.
@@ -229,9 +229,8 @@ One branch. One commit (or a small run of commits) per stage. **Each stage bound
       - [ ] Fold `ShareCardPalette`'s two parallel colour `when`s into a per-variant lookup.
 - [ ] **S12 — Close out.** Final gate values (G4, G5, G6), `docs/reference/design-system/` rewrite,
       gallery completeness pass, trim the component-path parenthetical in `CLAUDE.md`, delete this
-      file. **Restore the doc budgets** pinned by the token-hygiene gate: `components.md` to `8KB`
-      (per-family split, § 8), `foundations.md` / `patterns.md` back under the generic
-      `docs/reference/**/*.md 30KB`.
+      file. **Restore the doc budget** pinned by the token-hygiene gate: `foundations.md` back
+      under the generic `docs/reference/**/*.md 30KB`.
       - [ ] Decide the cover-radius drift (`HiddenSeriesStack`'s 3dp vs. every other flat cover's
             4dp; Reading's three thumbnails at 6/8/10dp).
       - [ ] Decide the `"tnum"` token (~17 call sites today; one `:core:designsystem` token instead).

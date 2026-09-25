@@ -15,7 +15,7 @@ paths:
   |---|---|
   | Component contract | KDoc on its UI model |
   | Component existence and role | one line in `docs/reference/design-system/components.md` |
-  | Screen or recipe behaviour | `docs/reference/design-system/patterns.md` |
+  | Screen or recipe behaviour | `docs/reference/design-system/patterns/<surface>.md` (one line in `patterns.md`) |
   | Build gotcha | `.claude/rules/build-wiring.md` |
   | Migration decision | one line in the migration tracker's Appendix A |
   | Why a change was made | the PR description (never a reference doc) |
