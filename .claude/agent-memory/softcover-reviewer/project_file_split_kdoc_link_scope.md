@@ -19,6 +19,19 @@ downgraded to backticks.
 See also [[project_design_system_doc_drift_pattern]] for the general "one fact stated in several places"
 doc-hygiene check this is a narrower cousin of.
 
+**Backtick downgrade isn't always the best fix.** Confirmed in the SettingsShelf.kt → `screen/section/*.kt`
+split: four links (`EditorialSectionHeader`/`RhaydusButton` in `AppUpdateSection.kt`, `EditorialSectionHeader`
+in `LibraryTabsGroupHeader.kt`, `pressScaleClickable` in `VersionFooter.kt`, `LibraryVisibilitySaveBar` in
+`LibraryVisibilityContent.kt`) resolved in the old file via an import that the split correctly dropped (the
+symbol is never called in that file, only named in prose), so the plain-backtick downgrade avoids a dangling
+link — legitimate. But the *same diff* also carries a fully-qualified link with no import,
+`` [Chip][nl.rhaydus.softcover.core.component.chip.Chip] ``, in `AppUpdateSection.kt` itself, plus FQN corrections
+in `PaletteChoice.kt`/`ThemeChoice.kt` (`[nl.rhaydus...screen.section.ThemeSection]`). A KDoc link resolves
+fully-qualified without an import, so a symbol mentioned only in prose (no import wanted) should get
+`` [Symbol][fully.qualified.Name] `` — preserving the link — rather than a backtick downgrade, whenever the
+split's own diff already demonstrates that convention elsewhere. Flag the inconsistency (🟡), not the downgrade
+itself.
+
 **A second, distinct trap in the same steps:** the split's own PR always leaves the *deleted* file's bare
 name behind in KDoc/comments of files it did not touch as part of the move — not a `[Symbol]` link, just a
 plain-text mention like `` `ExploreShelf.kt:243` `` or "the shared shelf pieces (`ExploreShelf.kt`)". Two

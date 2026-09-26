@@ -5,7 +5,8 @@ import nl.rhaydus.softcover.core.domain.model.ThemeMode
 
 /**
  * One tile in the Appearance screen's theme picker, mapped off the composition
- * (`component-contract.md` R9) so [nl.rhaydus.softcover.feature.settings.presentation.screen.ThemeSection]
+ * (`component-contract.md` R9) so
+ * [nl.rhaydus.softcover.feature.settings.presentation.screen.section.ThemeSection]
  * only forwards [tile] as-is. [mode] is the tile's tap payload for
  * [nl.rhaydus.softcover.feature.settings.presentation.action.OnThemeModeSelectedAction] — it stays on
  * this feature-local model rather than on [tile] itself, since `:core:component` may not hold a domain

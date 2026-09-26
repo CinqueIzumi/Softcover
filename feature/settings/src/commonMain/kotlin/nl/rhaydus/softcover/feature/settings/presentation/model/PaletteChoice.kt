@@ -5,7 +5,8 @@ import nl.rhaydus.softcover.core.domain.model.ColorPalette
 
 /**
  * One tile in the Appearance screen's spine-colour picker, mapped off the composition
- * (`component-contract.md` R9) so [nl.rhaydus.softcover.feature.settings.presentation.screen.SpineColourSection]
+ * (`component-contract.md` R9) so
+ * [nl.rhaydus.softcover.feature.settings.presentation.screen.section.SpineColourSection]
  * only forwards [tile] as-is. [colorPalette] is the tile's tap payload for
  * [nl.rhaydus.softcover.feature.settings.presentation.action.OnColorPaletteSelectedAction] — it stays
  * on this feature-local model rather than on [tile] itself, since `:core:component` may not hold a

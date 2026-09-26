@@ -31,7 +31,7 @@ class ComponentGalleryScreen : Screen {
 /**
  * The Component Gallery screen body (`component-contract.md` § 7.5) — the library's shipped visual
  * acceptance surface. It is reached only by the version footer's seven-tap easter egg
- * (`VersionFooter`, `SettingsShelf.kt`) from the About screen, and by the desktop Settings
+ * (`VersionFooter`) from the About screen, and by the desktop Settings
  * master–detail pane's `About` category through the same gesture; nothing links here directly. Desktop
  * (`jvmMain`) and mobile (`mobileMain`) each provide a bespoke `actual` around the shared
  * [ComponentGalleryContent]; only the chrome (top bar vs a static back bar) branches. `expect` cannot

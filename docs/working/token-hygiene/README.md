@@ -6,27 +6,30 @@
 
 ## Now
 
-- **State:** Steps 00–07 and 08a–08c committed; 08d done, not yet committed. `ExploreShelf.kt` is now 13
-  files under `feature/explore/…/presentation/screen/section/` (largest: `FeaturedCard.kt`, 272 lines) plus
-  `screen/ExploreScreenConstants.kt` (skeleton counts, load-more threshold, `SURFACE_*`). Keep the shell
-  cwd at the repo root before spawning agents: they write `.claude/agent-memory/` relative to it.
-- **Next:** Step 08e, split `feature/reading/…/presentation/screen/ReadingShelf.kt` (1571 lines;
-  `steps/08-file-splits.md`, 08e row). Build the declaration map and the intra-file call graph yourself
-  (a short Python regex pass over declaration ranges works), then paste a file → line-range table and the
-  call sites into the brief. Also grep the repo for plain-text `ReadingShelf.kt` mentions and hand them
-  over, since the reviewer flags them. The implementer finishes in one pass (08d: 59 tool calls).
-- **Open questions:** none. Still stands: `ReadingShelf.kt:461` cites a contract note on
-  `rememberCoverImageRequest` that never existed; FU-13.
-- **Verification:** the step's Verify command passed; `softcover-reviewer` diffed all 45 declarations and
-  confirmed a pure move. Its two findings, both stale `ExploreShelf.kt` mentions, were fixed through
-  `document-code`: `ExploreScreenLayout.mobile.kt`'s KDoc no longer names the file, and
-  `UnreleasedMapper.kt`'s KDoc lost its finished-migration history. `:core:uibinding` + `:feature:explore`
-  compile and ktlint passed afterwards.
-- **Uncommitted:** all of 08d: the `ExploreShelf.kt` deletion, `screen/section/` and
-  `ExploreScreenConstants.kt`, imports and KDoc in `ExploreScreenLayout.mobile.kt`, imports in
-  `ExploreScreenLayout.jvm.kt`, `UnreleasedMapper.kt`'s KDoc, this block, the 08d row in
-  `steps/08-file-splits.md`, and the reviewer memory update
-  (`.claude/agent-memory/softcover-reviewer/project_file_split_kdoc_link_scope.md`).
+- **State:** Steps 00–07 and 08a–08d committed; 08e and 08f done in parallel, not yet committed.
+  `ReadingShelf.kt` → 14 files under `feature/reading/…/screen/section/` (largest: `CompactBookEntry.kt`,
+  270 lines) plus `screen/ReadingHeaderCopy.kt`. `SettingsShelf.kt` → 14 files under
+  `feature/settings/…/screen/section/` (largest 284 lines) plus `screen/AppearanceSettingsContent.kt` and
+  `screen/LibraryVisibilityContent.kt`. Keep the shell cwd at the repo root before spawning agents.
+- **Next:** Step 08g, split `core/component/…/progress/UpdateProgressBottomSheet.kt` (1218 lines;
+  `steps/08-file-splits.md`, 08g row: split along the component's anatomy, public API unchanged). Build the
+  declaration map and call graph yourself, and paste the file → line-range table, call sites and plain-text
+  mentions into the brief. Two disjoint modules can run in parallel. Ktlint and `checkDocBudgets` are root-only;
+  scope ktlint with `-Pktlint.root=<module dir>`.
+- **Open questions:** none. Still stands: `section/FeaturedBackdropCard.kt:80` cites a contract note on
+  `rememberCoverImageRequest` that never existed; FU-13. Follow-up: the KDoc sentence "`expect` cannot carry
+  default argument values" in 10 `*Screen.kt` files is false (`BarcodeScanner.kt:18` has an `expect` default).
+- **Verification:** both Verify commands passed, and `softcover-reviewer` ran once per split. 08e: one dropped
+  `Spacer` in `CompactBookEntry` and three misplaced `kotlin.math` imports, both fixed. 08f: every body
+  identical; five KDoc links that had been downgraded to backticks were restored as fully qualified links,
+  plus two that were already dangling (`ThemeMode`, `ColorPalette`), through `document-code`. The
+  `ReadingScreenUiState` link and the `SettingsShelf.kt` mention in `ComponentGalleryScreen` were fixed too.
+  Both modules compile and pass ktlint afterwards. Left open: the 🔵 finding about wrapping multi-arg
+  `Modifier.padding` calls one argument per line in the new reading files; not done, since it would break
+  the pure-move rule.
+- **Uncommitted:** all of 08e and 08f (the two deletions, the new `section/` directories and screen files,
+  the import and KDoc edits in both modules), this block, the 08e/08f rows, and the reviewer memory
+  (`MEMORY.md`, `project_file_split_kdoc_link_scope.md`, new `project_file_split_body_and_import_drift.md`).
 
 ## How to run a step
 

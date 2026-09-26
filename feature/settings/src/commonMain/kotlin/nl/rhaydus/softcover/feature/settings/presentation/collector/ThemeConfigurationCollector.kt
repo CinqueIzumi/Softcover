@@ -13,8 +13,9 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Also maps the Appearance screen's theme and spine-colour pickers off the composition
- * (`component-contract.md` R9): [nl.rhaydus.softcover.feature.settings.presentation.screen.ThemeSection]
- * and [nl.rhaydus.softcover.feature.settings.presentation.screen.SpineColourSection] render
+ * (`component-contract.md` R9):
+ * [nl.rhaydus.softcover.feature.settings.presentation.screen.section.ThemeSection]
+ * and [nl.rhaydus.softcover.feature.settings.presentation.screen.section.SpineColourSection] render
  * [SettingsScreenUiState.themeChoices] / [SettingsScreenUiState.paletteChoices] /
  * [SettingsScreenUiState.spinePalette] / [SettingsScreenUiState.paletteGloss] as-is rather than
  * calling `toSpinePalette()` themselves.

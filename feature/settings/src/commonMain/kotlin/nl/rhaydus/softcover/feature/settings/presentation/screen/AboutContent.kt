@@ -29,6 +29,7 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.VersionFooter
 // region About content
 /**
  * The About screen body, shared by the mobile [AboutScreen] page, the desktop standalone fallback, and

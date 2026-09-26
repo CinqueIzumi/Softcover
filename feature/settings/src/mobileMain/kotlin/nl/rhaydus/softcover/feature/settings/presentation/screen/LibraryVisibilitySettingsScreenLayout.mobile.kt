@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
 /** The bar is fixed for this screen, so the model is a constant rather than rebuilt per frame. */
