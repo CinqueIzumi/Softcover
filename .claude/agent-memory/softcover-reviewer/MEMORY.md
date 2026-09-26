@@ -14,3 +14,4 @@
 - [Staged vs unstaged review scope](feedback_staged_vs_unstaged_review_scope.md) — "unstaged changes" may mean everything uncommitted; reconcile `git diff HEAD` against the brief's prose
 - [Hook script not registered](project_hook_script_not_registered.md) — a new `.claude/hooks/*.sh` does nothing until `.claude/settings.json` wires its matcher; always check both
 - [Component-library migration S1](project_component_library_migration_s1.md) — G1 gate's koin-core skip is a real service-locator hole (verified live), re-check once :core:component gets source; test-config asymmetry vs api-edge check; module-structure.md roster drift
+- [File-split KDoc link scope](project_file_split_kdoc_link_scope.md) — a token-hygiene split can legitimately downgrade a `[Symbol]` doc-link to backticks when the target left the file's import scope; a stale unresolvable link left behind is the real finding

@@ -17,7 +17,7 @@ costs one ~150-line file. A cross-cutting change costs about the same as today, 
 |---|---|---|
 | 08a | `feature/book_detail/…/presentation/screen/BookDetailShelf.kt` | done |
 | 08b | `feature/profile/…/presentation/screen/ProfileShelf.kt` | done |
-| 08c | `feature/library/…/presentation/screen/LibraryShelf.kt` | 1971 |
+| 08c | `feature/library/…/presentation/screen/LibraryShelf.kt` | done |
 | 08d | `feature/explore/…/presentation/screen/ExploreShelf.kt` | 1801 |
 | 08e | `feature/reading/…/presentation/screen/ReadingShelf.kt` | 1571 |
 | 08f | `feature/settings/…/presentation/screen/SettingsShelf.kt` | 1455 |

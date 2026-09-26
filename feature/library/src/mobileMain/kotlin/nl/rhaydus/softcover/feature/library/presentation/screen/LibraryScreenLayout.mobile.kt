@@ -97,6 +97,10 @@ import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilter
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryShelvesSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.ShelfNeighbourRail
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.BookList
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.BulkRemoveConfirmationDialog
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.EditionList
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.SelectionHeader
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @OptIn(

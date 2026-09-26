@@ -23,7 +23,7 @@ import nl.rhaydus.toad.ActionScope
  * Computes each book's [DeadlineProgress] off the composition (`component-contract.md` § 7.2 R9)
  * and maps it to the [BadgeUiModel] and [DeadlineSummaryUiModel] the shelf renders, keyed by
  * [Book.id] into [LibraryUiState.deadlineProgressByBook], [LibraryUiState.deadlineBadges], and
- * [LibraryUiState.deadlineSummaries]. `LibraryShelf`'s `LayoutBookEntry` used to run
+ * [LibraryUiState.deadlineSummaries]. `LayoutBookEntry` used to run
  * [DeadlineProgress.compute] inline during composition (R9's original violation).
  *
  * Deriving off [ActionScope.state] rather than patched into each writer: [LibraryUiState.booksByTab]

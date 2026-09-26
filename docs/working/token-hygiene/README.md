@@ -6,24 +6,24 @@
 
 ## Now
 
-- **State:** Steps 00–07 and 08a committed; 08b done, not yet committed. `ProfileShelf.kt` is now 13 files
-  under `feature/profile/…/presentation/screen/section/` (largest: `AuthorRepresentationSection.kt`, 570
-  lines). Keep the shell cwd at the repo root before spawning agents: they write `.claude/agent-memory/`
-  relative to it.
-- **Next:** Step 08c, split `feature/library/…/presentation/screen/LibraryShelf.kt` (1971 lines;
-  `steps/08-file-splits.md`, 08c row). Grep the region / declaration map and the cross-region uses of
-  private helpers yourself, then paste a file → line-range table into the brief. The implementer then
-  finishes in one pass (08b: 58 tool calls, no turn-limit hit).
+- **State:** Steps 00–07, 08a and 08b committed; 08c done, not yet committed. `LibraryShelf.kt` is now 11
+  files under `feature/library/…/presentation/screen/section/` (largest: `BookList.kt`, 427 lines) plus
+  `screen/LibraryTabSummary.kt` (`subtitleFor`, `resultCountFor`). Keep the shell cwd at the repo root
+  before spawning agents: they write `.claude/agent-memory/` relative to it.
+- **Next:** Step 08d, split `feature/explore/…/presentation/screen/ExploreShelf.kt` (1801 lines;
+  `steps/08-file-splits.md`, 08d row). Build the declaration map and the intra-file call graph yourself
+  (a short Python regex pass over declaration ranges works), then paste a file → line-range table and the
+  call sites into the brief. The implementer finishes in one pass (08c: 45 tool calls).
 - **Open questions:** none. Still stands: `ReadingShelf.kt:461` cites a contract note on
   `rememberCoverImageRequest` that never existed; FU-13.
 - **Verification:** the step's Verify command passed; `softcover-reviewer` diffed every declaration body,
-  confirmed a pure move and had no findings. Stale `ProfileShelf.kt` mentions were fixed in the KDoc of
-  `RatingBandCopy.kt` and `ProfileScreenLayout.jvm.kt` and in `components/statistics.md`. The migration
-  tracker's line references were left as they are, as in 08a.
-- **Uncommitted:** all of 08b: the `ProfileShelf.kt` deletion, the new `section/` directory, and the
-  import and KDoc fixes in five profile files. Also the path fix in `components/statistics.md`, this block,
-  the 08b row in `steps/08-file-splits.md`, and a new implementer memory entry (`.claude/agent-memory/
-  softcover-implementer/`: `MEMORY.md` and `feedback_file_split_import_verification.md`).
+  confirmed a pure move and had no findings. The stale `LibraryShelf` mention in
+  `DeadlineModelsCollector.kt`'s KDoc was fixed. The migration tracker's line references were left as they
+  are, as in 08a.
+- **Uncommitted:** all of 08c: the `LibraryShelf.kt` deletion, the new `section/` directory and
+  `LibraryTabSummary.kt`, the imports in both `LibraryScreenLayout` files, the `DeadlineModelsCollector.kt`
+  KDoc, this block, the 08c row in `steps/08-file-splits.md`, and a new reviewer memory entry
+  (`.claude/agent-memory/softcover-reviewer/`: `MEMORY.md` and `project_file_split_kdoc_link_scope.md`).
 
 ## How to run a step
 
