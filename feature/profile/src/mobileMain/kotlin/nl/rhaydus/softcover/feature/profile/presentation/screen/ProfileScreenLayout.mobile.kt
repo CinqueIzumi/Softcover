@@ -46,6 +46,19 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenreRankingSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.LogOutConfirmBottomSheet
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileAvatar
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileShareBottomSheet
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RatingsHistogramSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ReadingAtlasSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RecentlyLovedSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.SectionLabel
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ShareEntryRow
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColumnHistorySection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
 /**

@@ -46,6 +46,19 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenreRankingSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.LogOutConfirmBottomSheet
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileAvatar
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileShareBottomSheet
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RatingsHistogramSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ReadingAtlasSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RecentlyLovedSection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.SectionLabel
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ShareEntryRow
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColumnHistorySection
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
 private val IDENTITY_COLUMN_WIDTH = 320.dp
@@ -66,7 +79,7 @@ private val TWO_COLUMN_MIN_WIDTH = 720.dp
  * top bar. The whole surface paints an opaque [Surface] background so a pushed Profile never lets the
  * screen beneath it bleed through during the navigation transition. The avatar, section labels, and the
  * whole reading-life content block are shared shelf code ([ProfileAvatar], [SectionLabel],
- * [ReadingAtlasSection] and the new "reading life" sections in `ProfileShelf.kt`) — only the
+ * [ReadingAtlasSection] and the other "reading life" sections in `section/`) — only the
  * arrangement is desktop-specific.
  */
 @Composable

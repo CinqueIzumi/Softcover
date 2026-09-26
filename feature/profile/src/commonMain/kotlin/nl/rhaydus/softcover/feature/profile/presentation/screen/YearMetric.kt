@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen
 
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColumnHistorySection
+
 /**
  * The two series [YearColumnHistorySection]'s toggle switches the year-column chart between —
  * [nl.rhaydus.softcover.core.profile.domain.model.ReadingLife.booksByYear] or `.pagesByYear`.

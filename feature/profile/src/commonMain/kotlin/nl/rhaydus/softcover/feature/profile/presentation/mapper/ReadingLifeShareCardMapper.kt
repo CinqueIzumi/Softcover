@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.core.component.share.ReadingLifeGenre
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
-import nl.rhaydus.softcover.feature.profile.presentation.screen.PERCENTAGE_MULTIPLIER
+import nl.rhaydus.softcover.feature.profile.presentation.screen.section.PERCENTAGE_MULTIPLIER
 
 private const val SHARE_CARD_GENRE_LIMIT = 3
 private const val MONTHS_IN_YEAR = 12
