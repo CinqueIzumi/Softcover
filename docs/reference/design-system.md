@@ -20,4 +20,4 @@ The reader is the protagonist. Their books, progress, and stats are foregrounded
 - [Components](design-system/components.md) — an index of shared components, with the full catalogue split by family under `design-system/components/` (§4).
 - [Patterns](design-system/patterns.md) — an index of shared patterns, with the full catalogue split by surface under `design-system/patterns/` (§5).
 - [Decision rules](design-system/decision-rules.md) — the checklist to walk before reaching for novelty (§6).
-- [Component contract](design-system/component-contract.md) — the UI-model contract every `:core:component` component obeys: signature, model rules (R1–R9), mapper placement, the build gates, and the Component Gallery (§7).
+- [Component contract](design-system/component-contract.md) — the UI-model contract every `:core:component` component obeys: signature, model rules (R1–R11), mapper placement, the build gates, and the Component Gallery (§7).
