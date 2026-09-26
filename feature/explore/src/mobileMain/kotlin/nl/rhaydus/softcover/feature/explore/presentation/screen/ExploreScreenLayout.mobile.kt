@@ -76,6 +76,24 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFrom
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRetrySearchAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchActivatedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchDismissedAction
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.BecauseYouReadCard
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.BecauseYouReadCardSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.BecauseYouReadGenreControl
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ContinueSeriesMenuSheet
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.EditorialSectionHeaderSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.FeaturedCard
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.FeaturedCardSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.MoodGrid
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.RecentSearchesSection
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchFocusContent
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchResultRow
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchResultsHeader
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SeriesCard
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SeriesCardSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SortChip
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.TrendingCard
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.TrendingCardSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.UnreleasedSeriesCard
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreSearchPhase
 
@@ -95,7 +113,7 @@ private val UP_NEXT_CARD_WIDTH = 126.dp
  * Mobile Explore (explore-3a): a [SearchTopBar] search chrome over one of four bodies,
  * branched on [ExploreScreenUiState.searchPhase] — the editorial feed, the search-focus overlay
  * (recent + "try a mood"), the loading state, or the results list. The cards, the dismiss sheet, the
- * mood grid, and the recent-searches block are the shared shelf pieces (`ExploreShelf.kt`); only this
+ * mood grid, and the recent-searches block are the shared shelf pieces; only this
  * Scaffold-and-phase framing is mobile-specific.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)

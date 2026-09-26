@@ -61,6 +61,23 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnLoadMoreSearch
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.BecauseYouReadCard
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.BecauseYouReadCardSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.BecauseYouReadGenreControl
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ContinueSeriesMenuSheet
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.EditorialSectionHeaderSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.FeaturedCard
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.FeaturedCardSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.MoodGrid
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.RecentSearchesSection
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchResultRow
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchResultsHeader
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SeriesCard
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SeriesCardSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SortChip
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.TrendingCard
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.TrendingCardSkeleton
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.UnreleasedSeriesCard
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
 private val discoveryScrollState = ScrollState(initial = 0)
