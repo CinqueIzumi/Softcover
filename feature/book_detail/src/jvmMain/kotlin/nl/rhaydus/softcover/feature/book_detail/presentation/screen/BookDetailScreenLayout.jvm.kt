@@ -39,6 +39,13 @@ import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePa
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensContent
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensToggle
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ScanEditionUpdateBanner
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveControlCard
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 private val IDENTITY_SIDEBAR_WIDTH = 360.dp

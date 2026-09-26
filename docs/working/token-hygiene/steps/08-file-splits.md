@@ -15,7 +15,7 @@ costs one ~150-line file. A cross-cutting change costs about the same as today, 
 
 | Sub | File | Lines |
 |---|---|---|
-| 08a | `feature/book_detail/…/presentation/screen/BookDetailShelf.kt` | 2849 |
+| 08a | `feature/book_detail/…/presentation/screen/BookDetailShelf.kt` | done |
 | 08b | `feature/profile/…/presentation/screen/ProfileShelf.kt` | 2328 |
 | 08c | `feature/library/…/presentation/screen/LibraryShelf.kt` | 1971 |
 | 08d | `feature/explore/…/presentation/screen/ExploreShelf.kt` | 1801 |
@@ -51,7 +51,7 @@ Where a migration stage has already moved or shrunk a file below 600 lines, skip
 ## Goal       Split <file> per the split rules; pure move.
 ## Files      <file> (N lines) — sections at lines … (grep `^(private |internal )?fun [A-Z]` first)
 ## Constraints <split rules above>
-## Verify     scripts/gradle-quiet.sh :<module>:compileKotlinJvm :<module>:ktlintCheck :<module>:testDebugUnitTest
+## Verify     scripts/gradle-quiet.sh :<module>:compileKotlinJvm :<module>:testAndroidHostTest ktlintCheck checkDocBudgets
 ## Report     ≤150 words: new files with line counts, visibility changes, anything not a pure move
 ```
 

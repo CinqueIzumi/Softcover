@@ -6,22 +6,20 @@
 
 ## Now
 
-- **State:** Steps 00–07 done. 07d moved every parked entry into KDoc on its `:core:component` component /
-  UI model / event (plus caption and label rules on `:core:uibinding`'s `ChooseListsMapper`) and deleted the
-  parked sections; `components/share.md` and `components/rich-text.md` are gone. The choose-lists anatomy
-  stays as a ≤10-line entry in `sheets.md`, and the mark-as-read consumer routing moved to
-  `patterns/reading.md` and `patterns/book-detail.md`. The migration tracker's § 7 "move the family doc"
-  items now point at `components.md`'s `[detail]` links (Step 06 had named family files that never existed).
-  The build gotcha "`ktlintCheck` / `checkDocBudgets` are root-only" is recorded in `.claude/rules/build-wiring.md`.
-- **Next:** Step 08a (split `BookDetailShelf.kt`), `steps/08-file-splits.md`.
+- **State:** Steps 00–07 committed; 08a done, not yet committed. `BookDetailShelf.kt` is now 16 files under
+  `feature/book_detail/…/presentation/screen/section/` (largest: `GeneralBookInfoSection.kt`, 462 lines).
+  Keep the shell cwd at the repo root before spawning agents: they write `.claude/agent-memory/` relative
+  to it.
+- **Next:** Step 08b, split `feature/profile/…/presentation/screen/ProfileShelf.kt` (`steps/08-file-splits.md`,
+  08b row; re-measure first). Paste the region / declaration map into the brief and tell the implementer
+  not to re-read files it has already split; on 08a it hit its 80-turn limit.
 - **Open questions:** none. Still stands: `ReadingShelf.kt:461` cites a contract note on
   `rememberCoverImageRequest` that never existed; FU-13.
-- **Verification:** `:core:component:compileKotlinJvm ktlintCheck checkDocBudgets` passes (plus
-  `:core:uibinding:compileKotlinJvm`); the diff is KDoc/comments only; no links to deleted files or anchors
-  remain. `softcover-reviewer` confirmed nothing lost; its two findings (stale `design-system.md` refs in
-  `UpdateProgressBottomSheet.kt`, missing trailing newlines) are fixed.
-- **Uncommitted:** all of 07d (KDoc in `core/component` and `core/uibinding`, the family and pattern files,
-  `build-wiring.md`, the migration tracker's § 7 items, this file).
+- **Verification:** the step's Verify command passed; `softcover-reviewer` diffed every declaration body and
+  confirmed a pure move. Its one finding, dead `core.domain.model.isBlank` imports in `AboutSection.kt` and
+  `BookDetailOverlays.kt`, is fixed; compile + `ktlintCheck` were re-run green.
+- **Uncommitted:** all of 08a (the deletion, `section/`, the two layout files' imports), this block, and
+  `steps/08-file-splits.md` (08a row, Verify line).
 
 ## How to run a step
 
