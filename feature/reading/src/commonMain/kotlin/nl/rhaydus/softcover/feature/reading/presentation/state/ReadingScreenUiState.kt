@@ -54,7 +54,7 @@ internal data class ReadingScreenUiState(
     val bookCovers: Map<Int, CoverUiModel> = emptyMap(),
 
     /**
-     * Mirrors [nl.rhaydus.softcover.feature.reading.presentation.screen.EmptyCurrentlyReadingScreen]'s
+     * Mirrors [nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen]'s
      * own `wantToReadBooks.take(3)` — kept in step here because that render decision is duplicated,
      * not derived from this map, so a change to the empty screen's tile count must update both.
      */

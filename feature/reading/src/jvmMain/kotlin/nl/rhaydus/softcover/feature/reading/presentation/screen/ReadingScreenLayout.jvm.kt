@@ -40,6 +40,12 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTod
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.AlsoReadingSectionHeader
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.CompactBookEntry
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBookCard
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 /** The reading screen celebrates at full-screen scale, so its burst is bigger and slower. */

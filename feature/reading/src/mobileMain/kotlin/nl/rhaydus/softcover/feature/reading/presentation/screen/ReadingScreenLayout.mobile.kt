@@ -54,6 +54,10 @@ import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.PaceNudgeRibbon
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 /** The reading screen celebrates at full-screen scale, so its burst is bigger and slower. */
