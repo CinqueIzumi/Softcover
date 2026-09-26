@@ -11,7 +11,11 @@ import androidx.compose.runtime.Immutable
  *
  * [membership] stays on the model even though the labels are resolved, because it chooses *which*
  * trailing control renders: three genuinely different chromes (a removable filled chip, a filled
- * add pill, a quiet outline pill), not three labels on one.
+ * add pill, a quiet outline pill), not three labels on one. Tapping the row is instant and
+ * optimistic — there is no save button — and commits membership toward the larger end
+ * ([ListMembership.NONE] and [ListMembership.PARTIAL] both move to [ListMembership.ALL],
+ * [ListMembership.ALL] clears to [ListMembership.NONE]); the whole row is the tap target, and the
+ * trailing control is display-only.
  */
 @Immutable
 data class ChooseListsRowUiModel(
@@ -20,6 +24,6 @@ data class ChooseListsRowUiModel(
     val caption: String,
     val actionLabel: String,
     val membership: ListMembership,
-    /** A mutation is in flight: the row shows a spinner and ignores taps. */
+    /** A mutation is in flight: the row is tap-disabled and shows the house wavy indicator, never a circular spinner. */
     val isPending: Boolean,
 )

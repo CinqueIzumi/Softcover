@@ -14,7 +14,8 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  * `:core:component` cannot do — the detekt `ForbiddenImport` gate rejects the import outright. The
  * shape is deliberately the same, because the shape was never the problem: what a *library* must not
  * do is depend on the app's domain vocabulary. `:core:uibinding`'s `toRichTextUiModel()` /
- * `toReviewDocument()` bridge the two, in both directions, because the review editor writes back.
+ * `toReviewDocument()` are the only bridge between the two, in both directions, because the review
+ * editor writes back.
  *
  * It is named for what it holds, not for where it came from: nothing about formatted text is specific
  * to a review, and the quote share card renders one without a review anywhere in sight.

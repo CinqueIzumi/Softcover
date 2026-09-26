@@ -29,18 +29,27 @@ private const val TABULAR_NUMS = "tnum"
 private const val PULSE_DURATION_MS = 220
 
 /**
- * Renders a numeric stat that tweens between values when [StatNumberUiModel.value] changes.
+ * The canonical way to render a numeric stat that can change in place — profile stats, pages-read
+ * counters, deadline pacing. Raw `Text` for a number that can change should be treated as a bug.
+ * Tweens between values when [StatNumberUiModel.value] changes; pair it with the wavy progress
+ * indicator under the Hero stat pattern (`docs/reference/design-system/patterns/editorial.md`) so bar
+ * and number move as one motion.
  *
  * The display is locked to tabular figures so individual digits don't shift width mid-tween. When the
  * user has disabled system animations the number snaps — tweening here is decorative, the value
  * itself is the source of truth.
  *
  * Each integer crossing during the tween fires a brief 1dp hairline pulse under the number, tinted
- * with the number's own content colour so the tick reads against any surface — a quiet ledger tick
- * that makes a count feel earned rather than rolled. Suppressed under reduced motion.
+ * with the number's own content colour so the tick reads against any surface — including a
+ * `primary`-filled hero card, where that colour is `onPrimary` — a quiet ledger tick that makes a
+ * count feel earned rather than rolled. Suppressed under reduced motion.
  *
  * It takes the `Text`-shaped render parameters after the model, the same way `RichText` does: a
  * number is type, and which face it is set in belongs to the surface rather than to the datum.
+ * [style] / [color] / [autoSize] / [maxLines] as loose parameters is a known departure from R11 (a
+ * component takes only its model, its event lambda and a modifier) rather than a pattern to copy —
+ * scheduled to fold into model properties (a surface-named variant plus a metrics table, as
+ * `CoverDimensions.forVariant` does) in the contract retrofit.
  */
 @Composable
 fun StatNumber(

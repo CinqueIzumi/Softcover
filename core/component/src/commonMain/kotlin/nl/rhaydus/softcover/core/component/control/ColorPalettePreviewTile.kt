@@ -33,6 +33,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorS
  * palette, even while dynamic colour is overriding the scheme app-wide — five identical
  * wallpaper-coloured tiles would say nothing; the section's gloss line carries that state instead,
  * and picking a palette takes the page back.
+ *
+ * Never render a palette as a bare colour swatch, a paint chip, or a radio row.
  */
 @Composable
 fun ColorPalettePreviewTile(

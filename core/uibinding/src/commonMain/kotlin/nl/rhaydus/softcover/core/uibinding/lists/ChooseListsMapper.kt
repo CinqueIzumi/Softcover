@@ -99,7 +99,11 @@ private fun List<BookList>.rowsFor(
     )
 }.toImmutableList()
 
-/** "12 BOOKS" on its own for a single book; "12 BOOKS · 3 OF 5 HERE" once a selection is in play. */
+/**
+ * "12 BOOKS" on its own for a single book; in bulk it appends the membership phrase — `ALL` → "ALL
+ * {totalCount} HERE", `PARTIAL` → "{matchingCount} OF {totalCount} HERE", `NONE` → "NONE YET" — e.g.
+ * "12 BOOKS · 3 OF 5 HERE".
+ */
 private fun captionFor(
     bookCount: Int,
     membership: ListMembership,
@@ -121,8 +125,10 @@ private fun captionFor(
 }
 
 /**
- * The trailing control's label. `PARTIAL` only ever arises in bulk (a single book is either on a
- * list or not), so its label needs no single-book form.
+ * The trailing control's label: `ALL` → "On the list" (single) or "On all {totalCount}" (bulk);
+ * `PARTIAL` → "Add the other {totalCount - matchingCount}"; `NONE` → "Add" (single) or "Add all
+ * {totalCount}" (bulk). `PARTIAL` only ever arises in bulk (a single book is either on a list or
+ * not), so its label needs no single-book form.
  */
 private fun actionLabelFor(
     membership: ListMembership,

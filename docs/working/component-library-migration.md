@@ -356,7 +356,7 @@ immediately).
 - [ ] `UpdatePillButton` — `feature/settings/presentation/screen/SettingsShelf.kt:1273`
 - [ ] `SortLabelControl` — `feature/library/presentation/component/LibraryControlLine.kt:107`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/chip.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Headers & labels — 17 -> `SectionHeader` + `PageMasthead` + `SidebarLabel`
 
@@ -381,7 +381,7 @@ Kills all three cross-module name collisions.
 - [ ] `TagEditorHeader` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:281`
 - [ ] `SelectionHeader` — `feature/library/presentation/screen/LibraryShelf.kt:1793`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/header.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Badges & cover overlays — 12 -> `Badge` + `CoverOverlay`
 
@@ -399,14 +399,14 @@ Kills all three cross-module name collisions.
 - [ ] `deadlineProgressByBook` becomes UI-typed (still domain-typed, on `LibraryUiState` / `ReadingUiState`).
 - [ ] Visual pass on the deadline trio (`Badge`, `CoverOverlay`, `DeadlineSummaryLine`) — never watched rendering from its new models.
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/badge.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Skeletons — 9 -> `Skeleton` + `SkeletonUiModel`
 
 - [ ] `EditorialSectionHeaderSkeleton`, `FeaturedCardSkeleton`, `RailCardSkeleton`, `TrendingCardSkeleton`, `BecauseYouReadCardSkeleton`, `SeriesCardSkeleton`, `MoodTileSkeleton` — `feature/explore/presentation/screen/ExploreShelf.kt:132,326,499,579,605,689,1185`
 - [ ] `RoadmapSkeleton`, `RoadmapSkeletonLine` — `feature/settings/presentation/screen/RoadmapContent.kt:449,487`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/state.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Dividers & rules — 5 -> `Divider` + `DividerUiModel`
 
@@ -416,7 +416,7 @@ Kills all three cross-module name collisions.
 - [ ] `QuoteRule` — `feature/lists/presentation/screen/CreateListSheetContent.kt:176`
 - [ ] `OrTypeItDivider` — `feature/onboarding/presentation/screen/OnboardingShelf.kt:237`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/divider.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 ### 7.2 Rows & sheet chrome (S6)
 
@@ -438,7 +438,7 @@ Kills all three cross-module name collisions.
 - [ ] `ShareEntryRow` — `feature/profile/presentation/screen/ProfileShelf.kt:426`
 - [ ] `ExplainerStepRow`, `PasteFromClipboardRow` — `feature/onboarding/presentation/screen/OnboardingShelf.kt:404,178`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/row.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Sheet chrome — extract from 18 sheets -> `SheetScaffold` + `SheetHeader` + `SheetRow` + `SheetFooter`
 
@@ -462,7 +462,7 @@ Chrome only; each sheet's **body** stays a feature composable (`component-contra
 - [ ] `CreateListSheet`, `CreateListSheetContent` — `feature/lists/presentation/screen/CreateListSheet.kt:15`, `CreateListSheetContent.kt:83`
 - [ ] `UnknownIsbnSheet` — `feature/scan/presentation/component/UnknownIsbnSheet.kt:28`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/sheet.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 ### 7.3 `BookCard` (S7) — 21 -> 1
 
@@ -514,7 +514,7 @@ Checklist:
 - [ ] Shared-element transition keys verified on library -> book detail and explore -> book detail
 - [ ] Skippability verified: no per-item lambda allocation in the library grid
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/bookcard.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 ### 7.4 Screen states (S8)
 
@@ -529,7 +529,7 @@ Checklist:
 - [ ] `EmptyEntriesCard` — `feature/settings/presentation/screen/SettingsShelf.kt:1100`
 - [ ] `EmptyDetailPane` — `orchestration/presentation/BookDetailPaneHost.kt:65`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/state.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Callouts & banners — 8 -> `Callout` + `Banner`
 
@@ -541,7 +541,7 @@ The four `*Callout`s are one component with a tone variant.
 - [ ] `RoadmapErrorBanner` — `feature/settings/presentation/screen/RoadmapContent.kt:123`
 - [ ] `PaceNudgeRibbon` — `feature/reading/presentation/screen/ReadingShelf.kt:1520`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/callout.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Top bars — 9 -> `TopBar` + `SearchTopBar` + `BackBar`
 
@@ -555,7 +555,7 @@ The four `*Callout`s are one component with a tone variant.
 - [ ] `DesktopSettingsBackBar` — `feature/settings/presentation/screen/SettingsScreenLayout.jvm.kt:622`
 - [ ] `HiddenSuggestionsDesktopBackBar` — `feature/explore/presentation/screen/HiddenSuggestionsScreenLayout.jvm.kt:82`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/topbar.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Controls & fields — 14 -> `Toggle` + `SegmentedControl` + `TextField`
 
@@ -571,7 +571,7 @@ The four `*Callout`s are one component with a tone variant.
 - [ ] `KeyField` — `feature/onboarding/presentation/screen/OnboardingShelf.kt:266`
 - [ ] `NameHeroField`, `PrivacyProseToggle` — `feature/lists/presentation/screen/CreateListSheetContent.kt:214,335`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/control.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 ### 7.5 Statistics & progress (S9)
 
@@ -584,7 +584,7 @@ The `/dataviz` skill conventions apply to everything in the chart group.
 - [ ] `HeroStatCard`, `StatTile`, `SmallStatTile` — `feature/profile/presentation/screen/ProfileShelf.kt:230,292,341`
 - [ ] `FeaturedProgressStat` — `feature/reading/presentation/screen/ReadingShelf.kt:765`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/statistic.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Charts & legends — 11 -> `Chart` family + `Legend`
 
@@ -596,7 +596,7 @@ The `/dataviz` skill conventions apply to everything in the chart group.
 - [ ] `DemographicProportionBar`, `DemographicLegend`, `DemographicLegendRow` — `feature/profile/presentation/screen/ProfileShelf.kt:1307,1362,1401`
 - [ ] `RatingsHistogramChart`, `RatingsAverageRow` — `feature/profile/presentation/screen/ProfileShelf.kt:1646,1577`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/statistic.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 #### Progress — 6 -> `ProgressIndicator` + `ProgressUiModel`
 
@@ -606,7 +606,7 @@ The `/dataviz` skill conventions apply to everything in the chart group.
 - [ ] `FocusProgressBar` — `feature/session/presentation/screen/FocusModeShelf.kt:307`
 - [ ] `WavyConnector`, `WavySineLine` — `feature/onboarding/presentation/screen/OnboardingScreenLayout.mobile.kt:360,390`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
-- [ ] Move the family's doc (`docs/reference/design-system/components/progress.md`) into KDoc on the UI model and delete it (Step 07).
+- [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
 
 ### 7.6 Deliberately out of scope
 

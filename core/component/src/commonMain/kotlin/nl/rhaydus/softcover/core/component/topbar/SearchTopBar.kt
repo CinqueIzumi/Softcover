@@ -62,6 +62,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
  * keyboard, leaving it clears focus and hides the keyboard. The events are therefore intents rather
  * than focus notifications — see [SearchTopBarEvent], which records why the tap intent is what keeps
  * the chrome recoverable.
+ *
+ * The scan action sits in the outer `Row` *beside* the pill, not inside it — the pill's one trailing
+ * slot is already spoken for by the clear/loading affordance.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

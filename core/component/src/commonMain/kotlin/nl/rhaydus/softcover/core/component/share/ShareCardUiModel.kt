@@ -7,6 +7,14 @@ import nl.rhaydus.softcover.core.component.richtext.RichTextParagraph
 import nl.rhaydus.softcover.core.component.richtext.RichTextRun
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 
+/**
+ * The content behind [ShareCard]'s six variants: [BookShareCardUiModel] (the plain editorial book
+ * card — cover, title, byline, optional rating, optional pulled quote), [ReadingUpdateShareCardUiModel]
+ * (a personalised card attributing the book to the reader), [StatShareCardUiModel] (a `primary`-filled
+ * hero numeral), [QuoteShareCardUiModel] (an oversize pulled quote), [YearRecapShareCardUiModel] (a
+ * year-in-review recap), and [ReadingLifeShareCardUiModel] (a whole-history recap). [ShareCard]
+ * dispatches on the concrete subtype to a private per-variant body.
+ */
 sealed interface ShareCardUiModel {
     companion object : UiModelPreviews<ShareCardUiModel> {
         /**

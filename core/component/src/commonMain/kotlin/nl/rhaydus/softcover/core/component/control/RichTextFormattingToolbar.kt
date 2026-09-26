@@ -23,6 +23,9 @@ import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
  * whole selection already carries that mark, and the whole row dims to signal it is inert when there is
  * no selection to act on. Labels are words (the bold/italic ones carry their own weight/slant to preview
  * the effect) rather than icons, matching the editor's editorial voice and avoiding icon assets.
+ *
+ * It is only ever used inside `VerdictSheet`; reach for it there and nowhere else — it is not a
+ * generic rich-text bar.
  */
 @Composable
 internal fun RichTextFormattingToolbar(

@@ -17,7 +17,8 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  * @property concealed Renders the chip as a spoiler redaction: the label draws transparent so it
  * reserves its width but cannot be read, beneath a solid cover fill — the same treatment
  * `RichText` gives an inline spoiler run. Because the label still measures at its real
- * width, revealing it (re-render with `concealed = false`) does not reflow the row.
+ * width, revealing it (re-render with `concealed = false`) does not reflow the row. Used for the
+ * book-detail content-warning chips.
  * @property clickable Whether the chip is interactive. `false` renders the read-only chip (e.g. the
  * book-detail community/user tag chips, which carry no click role or ripple).
  */

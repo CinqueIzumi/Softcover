@@ -2,10 +2,10 @@ package nl.rhaydus.softcover.core.component.cover
 
 /**
  * What [Cover] loads, already resolved to a Coil-loadable model — a local file path or a remote
- * URL — with nothing left for the component to decide. The resolution ladder that picks between a
- * user's local copy, an edition's remote cover, and a fallback URL is the mapper's job
- * (`:core:uibinding`), not [Cover]'s; a `null` [CoverUiModel.source] means the ladder found nothing,
- * and [Cover] falls through to its coverless rung.
+ * URL — with nothing left for the component to decide. The fallback ladder — chosen edition →
+ * default edition → fallback URL → nothing — runs in `:core:uibinding`'s `resolveCoverSource`, off
+ * the composition (§7.2 R9), not in [Cover]; a `null` [CoverUiModel.source] means the ladder found
+ * nothing, and [Cover] falls through to its coverless rung.
  */
 sealed interface CoverSource {
     /**

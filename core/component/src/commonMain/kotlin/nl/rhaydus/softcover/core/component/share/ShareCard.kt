@@ -22,6 +22,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
+/**
+ * Renders any user-facing share artefact — book, personal reading update, hero stat, pulled quote,
+ * year recap, or whole-history reading-life recap — into a fixed-aspect editorial composition with a
+ * trailing `SOFTCOVER` folio sign-off. [content]'s concrete [ShareCardUiModel] subtype selects the
+ * variant body and, via [ShareCardDimensions.forContent], the card's fixed size; a variant never
+ * overrides those dimensions at the call site.
+ *
+ * [ShareCard] only draws pixels — it takes no position on exporting them. Pair it with the foundation
+ * `CapturableShareCard` + `rememberShareCardCapture(config)` seam (`nl.rhaydus.designsystem.share`) to
+ * turn a rendered card into a saved or shared image: wrap this composable in `CapturableShareCard`'s
+ * slot, passing [softcoverShareCardCaptureConfig] as the brand config, and drive the returned
+ * `ShareCardCapture`'s `saveToGallery(displayName)` / `saveToCache(displayName)` / `share(displayName)`
+ * — the last presents the **platform** share sheet (an Android `ACTION_SEND` chooser, an iOS
+ * `UIActivityViewController`, or a desktop clipboard copy) rather than the caller building one. A
+ * caller that just wants to share the card calls `capture.share(...)` and branches on the returned
+ * `ShareOutcome` (`Shared` / `Cancelled` / `Failure`, with a dismissed share sheet reported as
+ * `Cancelled` — a no-op, not a failure) instead of constructing an intent itself. Legacy gallery-write
+ * permission (API 26–28) goes through `rememberGalleryWritePermissionRequester`, a synchronous
+ * pass-through from API 29 on; the iOS gallery save is not yet wired.
+ */
 @Composable
 fun ShareCard(
     content: ShareCardUiModel,

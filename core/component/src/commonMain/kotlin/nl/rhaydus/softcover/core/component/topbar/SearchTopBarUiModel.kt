@@ -12,7 +12,9 @@ private const val DEFAULT_PLACEHOLDER = "Search books, authors…"
  * Everything [SearchTopBar] renders.
  *
  * @property active True whenever the chrome is not the plain resting feed — focused, loading, or
- * showing results. It grows the pill's primary border and reveals the clear (×).
+ * showing results. It grows the pill's primary border and reveals the clear (×). The caller derives
+ * it once off its own state (Explore's `SearchTopBarCollector`) rather than this model re-deriving
+ * "resting feed or not" every frame.
  * @property focused **The caller's** search state, which the platform field follows. It is never the
  * other way round: the field's platform focus dies with its composition while the caller's state
  * outlives it, so re-entering a screen with a search still active must not yank the keyboard open.

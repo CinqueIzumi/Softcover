@@ -92,6 +92,20 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
+/**
+ * The modal sheet for editing reading progress: a `pages | percentage | time` segmented switcher over
+ * a hero numeric input, an editorial suffix line and a wavy progress bar, plus the "when did you read
+ * this?" backdating row and a "Mark as read" action ([ProgressSheetEvent.MarkAsReadRequested]).
+ * Percentage is offered only when [ProgressSheetMedium.hasKnownTotal] is true — without a total a
+ * fraction can only ever resolve to 0, so the tab is hidden rather than shown broken.
+ *
+ * With no known total, the sheet drops to its primary unit alone — hiding the "of N …" suffix and the
+ * progress bar — and accepts free numeric/time entry with no clamp to a total. Reach for this sheet
+ * before inventing a new "edit a single number on a book" surface.
+ *
+ * "Mark as read" is a standard secondary action present on every progress sheet: an outlined button
+ * below the tab content's own filled "Update progress" action.
+ */
 @Composable
 fun UpdateProgressBottomSheet(
     model: ProgressSheetUiModel,
@@ -136,7 +150,7 @@ private fun ProgressBottomSheetContent(
 
     val focusManager = LocalFocusManager.current
 
-    // Shared across all three tabs (§ When did you read this?, design-system.md patterns) — whichever
+    // Shared across all three tabs (patterns/reading.md, "Backdate a logged action") — whichever
     // tab's "Update progress" button fires carries this value. Null means "just now": the server stamps
     // the mutation with its own current time, reproducing today's behaviour exactly. Once the reader
     // backdates it, the picked instant travels with every tab's submit until cleared.
@@ -302,8 +316,12 @@ private fun EditorialProgressIndicator(fraction: Float) {
 }
 
 /**
- * A −/+ stepper flanking a hero number field (design-system.md's Update-progress sheet steppers
- * pattern). 44dp circle, `surfaceContainerHigh` fill, primary glyph.
+ * A −/+ stepper flanking a hero number field: a 44dp circle, `surfaceContainerHigh` fill, primary
+ * glyph. On the Page and Percentage tabs it steps the value by 1, reusing the same clamp bounds
+ * (`[0, total]` / `[0, 100]`) the typed-entry path already enforces; on the Time tab it flanks only
+ * the minutes field, stepping by 1 minute (hours and seconds stay typed-entry only). A tap writes
+ * straight into the tab's existing `TextFieldValue` state, so it composes with typed entry rather
+ * than branching around it.
  */
 @Composable
 private fun StepperCircle(
@@ -341,7 +359,7 @@ private fun StepperCircle(
 }
 
 /**
- * "When did you read this?" (design-system.md's Backdate-a-logged-action pattern, §5). A pill
+ * "When did you read this?" (patterns/reading.md, "Backdate a logged action"). A pill
  * defaulting to "Just now" — no backdating, so the submitted `actionAt` is null and the server
  * stamps the mutation with its own current time. Tapping it seeds the picker with the current
  * moment and expands an inline day + time-of-day editor below; a trailing clear glyph resets to

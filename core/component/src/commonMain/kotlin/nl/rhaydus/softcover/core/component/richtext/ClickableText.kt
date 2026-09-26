@@ -24,7 +24,8 @@ import androidx.compose.ui.text.TextStyle
  * rather than a model field because its values are composable slots, not data.
  *
  * Like `RichText`, it takes the `Text`-shaped render parameters after the model: which face prose is
- * set in belongs to the surface rather than to the words.
+ * set in belongs to the surface rather than to the words. [style] is an R11 holdout on the contract
+ * retrofit — it belongs on [model], not on this signature.
  */
 @Composable
 fun ClickableText(

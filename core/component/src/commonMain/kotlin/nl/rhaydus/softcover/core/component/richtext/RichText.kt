@@ -32,6 +32,13 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
  * Tapping a hidden spoiler reveals it and consumes the tap; tapping anywhere else invokes [onClick]
  * (when provided) so the surrounding card — e.g. the personal review card — still opens on a tap that
  * does not land on a concealed spoiler.
+ *
+ * Named for what it renders, not for where the text came from — nothing about formatted prose is
+ * specific to a review. Reach for it for any displayed review body; never route review content through
+ * `htmlToAnnotatedString` (that path is for server HTML, e.g. a book description, not for reviews).
+ *
+ * [style], [color], [maxLines], [overflow], [onClick] and [onTextLayout] are R11 holdouts on the
+ * contract retrofit — they belong on [model], not on this signature.
  */
 @Composable
 fun RichText(

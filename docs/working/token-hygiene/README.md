@@ -6,27 +6,22 @@
 
 ## Now
 
-- **State:** Steps 00–06 and 07a–07c done. `component-contract.md` (19.4KB) has its rules block first
-  (§ 7.1–7.6 numbering unchanged, so code references still resolve) and rationale last in § 7.7; the user
-  approved the before/after rule list. `components.md` (8189B) and `patterns.md` (8186B) are
-  indexes; their entries live in `design-system/components/<family>.md` and
-  `design-system/patterns/<surface>.md` (8 surfaces, each ≤ 20KB, one `### Name` per pattern, 56 total).
-  Both index budget rows are `8KB`; only `foundations.md` stays pinned until the migration tracker's S12.
-  Every former "§5" pattern reference is a relative link to its `patterns/` anchor. Entries for components
-  already in `:core:component` sit under `## Parked for KDoc (Step 07d)` in their family file.
-- **Next:** Step 07d (KDoc for migrated components, batches of ~4 packages), `steps/07-design-docs.md`
-  § 07d.
-- **Open questions:** none. 07c kept R10/R11's "not yet satisfied" status notes (S11 retrofit, holdout
-  list) as normative. `ReadingShelf.kt:461` cites a contract note on `rememberCoverImageRequest` that never
-  existed. Normative-looking history kept in 07b: the compact-list back-compat value
-  (Library layout model / Bulk-select), the peek bar's abandoned-MediaSession trap (`<!-- history-ok -->`),
-  the profile header's `SectionLabel` exception. 07a reviewer notes left as they are: Verdict sheet / block
-  are indexed under Editorial, not Sheets; `states-feedback.md`'s "Deadline family" section has no index line
-  of its own. (FU-13 still stands.)
-- **Verification:** `checkDocBudgets` passes; all 110 `components/` / `patterns/` links resolve to a
-  heading; `softcover-reviewer` found no lost rule.
-- **Uncommitted:** the 07c rewrite of `component-contract.md`, the `design-system.md` index line
-  (R1–R11), and this file.
+- **State:** Steps 00–07 done. 07d moved every parked entry into KDoc on its `:core:component` component /
+  UI model / event (plus caption and label rules on `:core:uibinding`'s `ChooseListsMapper`) and deleted the
+  parked sections; `components/share.md` and `components/rich-text.md` are gone. The choose-lists anatomy
+  stays as a ≤10-line entry in `sheets.md`, and the mark-as-read consumer routing moved to
+  `patterns/reading.md` and `patterns/book-detail.md`. The migration tracker's § 7 "move the family doc"
+  items now point at `components.md`'s `[detail]` links (Step 06 had named family files that never existed).
+  The build gotcha "`ktlintCheck` / `checkDocBudgets` are root-only" is recorded in `.claude/rules/build-wiring.md`.
+- **Next:** Step 08a (split `BookDetailShelf.kt`), `steps/08-file-splits.md`.
+- **Open questions:** none. Still stands: `ReadingShelf.kt:461` cites a contract note on
+  `rememberCoverImageRequest` that never existed; FU-13.
+- **Verification:** `:core:component:compileKotlinJvm ktlintCheck checkDocBudgets` passes (plus
+  `:core:uibinding:compileKotlinJvm`); the diff is KDoc/comments only; no links to deleted files or anchors
+  remain. `softcover-reviewer` confirmed nothing lost; its two findings (stale `design-system.md` refs in
+  `UpdateProgressBottomSheet.kt`, missing trailing newlines) are fixed.
+- **Uncommitted:** all of 07d (KDoc in `core/component` and `core/uibinding`, the family and pattern files,
+  `build-wiring.md`, the migration tracker's § 7 items, this file).
 
 ## How to run a step
 
@@ -50,7 +45,7 @@
 | 04b | Doc-growth guards | tooling | [x] |
 | 05 | Land the tooling branch | tooling → main → migration | [x] |
 | 06 | Migration tracker cleanup | migration | [x] |
-| 07 | [Design-system docs restructure](steps/07-design-docs.md) (07a–07d) | migration | [ ] |
+| 07 | Design-system docs restructure (07a–07d) | migration | [x] |
 | 08 | [Large-file splits + size gate](steps/08-file-splits.md) (08a–08n) | migration | [ ] |
 | 09 | [Measure and close out](steps/09-measure.md) | migration | [ ] |
 

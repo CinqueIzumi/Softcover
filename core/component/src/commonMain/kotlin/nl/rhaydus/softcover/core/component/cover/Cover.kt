@@ -40,11 +40,15 @@ import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalShare
 private const val COVER_ASPECT_RATIO = 2f / 3f
 
 /**
- * A book/edition cover, rendered as: a shimmer while [CoverUiModel.isLoading] and nothing has
- * resolved yet, [CoverlessTitleCover] (or a blank box, for purely decorative surfaces) when
- * [CoverUiModel.source] is `null` or fails to decode, or the loaded image otherwise. Treatment —
+ * The canonical book cover and the only way the app draws one — never reach for a raw image loader
+ * for cover art; a surface that needs the raw request rather than this rendered component uses
+ * [rememberCoverImageRequest] instead. Rendered as: a shimmer while [CoverUiModel.isLoading] and
+ * nothing has resolved yet, [CoverlessTitleCover] (or a blank box, for purely decorative surfaces)
+ * when [CoverUiModel.source] is `null` or fails to decode, or the loaded image otherwise. Treatment —
  * elevation, corner radius, shadow tint, decode cap — comes from [CoverDimensions.forVariant], keyed
- * off [CoverUiModel.variant]; `Cover` itself never branches on the variant directly.
+ * off [CoverUiModel.variant]; `Cover` itself never branches on the variant directly, and no call site
+ * hand-tunes a cover: tuning one surface's treatment can never move another's, and widths stay in the
+ * caller's [modifier] rather than in [CoverVariant].
  *
  * [ReadingHeroBackdrop][CoverVariant.ReadingHeroBackdrop] and
  * [FullScreenViewer][CoverVariant.FullScreenViewer] do not render through `Cover` — a `Crop` + `blur`

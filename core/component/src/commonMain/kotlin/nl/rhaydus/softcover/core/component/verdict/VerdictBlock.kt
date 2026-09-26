@@ -43,6 +43,8 @@ private const val VERDICT_BLOCK_REVIEW_COLLAPSED_LINES = 8
  * Renders **empty** (outline stars + an invitation) when neither [rating] nor [review] carries content,
  * or **filled** — whichever of a gold star row / score line and a rendered [review] paragraph actually
  * has content, separated by a hairline when both are present — followed by a "Tap to edit" hint.
+ * [rating] and [review] are independent: a rating-only or review-only verdict still renders the filled
+ * anatomy, simply omitting the piece with no content.
  */
 @Composable
 fun VerdictBlock(

@@ -19,9 +19,10 @@ import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 
 /**
- * A blocking, undismissable sheet that reports the progress of a long-running setup step — today,
- * the initial library sync. [LoadingSheetUiModel.isLoading] governs whether it shows at all; while
- * showing it cannot be tapped or backed out of, since there is nothing sensible to return to mid-sync.
+ * A blocking, undismissable sheet that reports the progress of a long-running setup step — used by
+ * onboarding's initial library pull. [LoadingSheetUiModel.isLoading] governs whether it shows at all;
+ * while showing it cannot be tapped or backed out of, since there is nothing sensible to return to
+ * mid-sync. Prefer inline shimmer on cards when the wait is short or the surface can stay interactive.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

@@ -99,8 +99,15 @@ private val VERDICT_CAPTIONS = listOf(
 /**
  * The combined "Verdict" sheet fusing a half-star rating with an optional written review — the single
  * surface both `feature/book_detail` (reopened from the book page) and `feature/reading` (raised once
- * on a genuine mark-as-read transition) host, each driven by its own TOAD state. [context] swaps copy
- * only (see the private `verdictCopyFor` below); the anatomy is identical either way.
+ * on a genuine mark-as-read transition) host, each driven by its own TOAD state and saving through the
+ * shared `core:book` `SaveBookVerdictUseCase`, the same shared-stateless-component pattern
+ * `ChooseListsBottomSheet` / `UpdateProgressBottomSheet` follow. [context] swaps copy only (see the
+ * private `verdictCopyFor` below); the anatomy is identical either way.
+ *
+ * The sheet is a fixed dismiss header over a scrolling middle over a pinned action footer, so the
+ * primary action is never buried below the fold, regardless of how much review text or how tall the
+ * keyboard pushes the content — the same shape `feature/book_detail`'s `EditionBottomSheetSelector`
+ * uses for the same reason.
  *
  * Rating and review are held as a **local draft** — exactly like the review editor it replaces held its
  * text/marks/spoiler flag — seeded once from [initialRating] / [initialReview] / [initialHasSpoilers].

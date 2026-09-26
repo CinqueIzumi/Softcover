@@ -31,6 +31,9 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
  * [color] and [secondaryColor] stay parameters rather than model fields: they default to the theme
  * roles the burst is specified in, and the one caller that overrides them is overriding a *tint*,
  * not describing different data.
+ *
+ * Pair every trigger with a single `commit` haptic so the visual and haptic land together — read is
+ * deliberately the only shelf-status change with this celebration; no other transition should reuse it.
  */
 @Composable
 fun MarkAsReadBurst(

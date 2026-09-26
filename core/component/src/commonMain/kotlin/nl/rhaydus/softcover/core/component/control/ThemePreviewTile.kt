@@ -47,6 +47,11 @@ private val DIAGONAL_LOWER_HALF: Shape = GenericShape { size, _ ->
  * when [model]'s dynamic colour flag is on, so what the tile promises is what picking it delivers.
  * [ThemeTilePainting.SPLIT] is drawn as one tile split on the diagonal — light above the seam, dark
  * below — rather than as a third flat swatch, because "whichever your device is" has no single colour.
+ *
+ * It lives in the component library rather than in `feature/settings` because the onboarding theme
+ * step is a second consumer in waiting, and because the schemes it paints come from tokens the library
+ * already depends on. Reach for this anatomy for any "pick a whole-app look" choice; never render a
+ * theme as a bare colour swatch or a radio row.
  */
 @Composable
 fun ThemePreviewTile(

@@ -16,7 +16,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
 /**
  * The canonical pill-shaped chip (§3.4). Fully-rounded surface with a single label. Selected swaps
  * to [secondaryContainer][androidx.compose.material3.ColorScheme.secondaryContainer]; idle sits on
- * [surfaceContainerHigh][androidx.compose.material3.ColorScheme.surfaceContainerHigh].
+ * [surfaceContainerHigh][androidx.compose.material3.ColorScheme.surfaceContainerHigh]. It backs both
+ * the library filter facets and the book-detail tag chips, so the chip anatomy lives in one place —
+ * reach for it instead of hand-rolling a `Surface`-and-`Text` pill.
  *
  * [ChipUiModel.clickable] `= false` renders a read-only, inert chip (book-detail tags): the surface
  * then carries no ripple and no click role. A tap on an interactive chip (library facets, toggles)

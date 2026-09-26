@@ -6,13 +6,18 @@ import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 
 /**
  * A personalised "reading update" card — the user sharing *their* relationship with a book rather
- * than the book itself. Finished books show the reader's rating (as stars) and their review;
- * in-progress books show their reading progress instead.
+ * than the book itself. [kind] keys the two states, and neither carries any recency wording since a
+ * reader may share long after the fact: finished books show the reader's rating (as stars) and their
+ * review; in-progress books show [progressLabel] instead.
  *
  * The review travels as a structured [RichTextUiModel] (not a flattened string) so the card can mask
  * inline spoiler spans the same way the book-detail screen does — see the `RichText`
  * render in [ShareCard]. The remaining display values are pre-computed by the caller so [ShareCard]
  * stays a dumb renderer.
+ *
+ * @property tags The reader's own tags on this book. **The caller excludes any spoiler-flagged tag**
+ * before building this model — a share image is public, so a tag the reader hid from other readers
+ * must not leak onto it.
  */
 data class ReadingUpdateShareCardUiModel(
     val username: String,

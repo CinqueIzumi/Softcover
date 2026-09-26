@@ -69,6 +69,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * variant: resolving a cover needs the reader's chosen edition, the book's default, a fallback URL
  * and a locally persisted file, none of which a component may know (R4). The sheet still owns the
  * widths and the rotations.
+ *
+ * The sheet is a dumb renderer: the caller owns the `AddBookToListUseCase` / `RemoveBookFromListUseCase`
+ * writes behind [ChooseListsEvent.MembershipToggled] and decides whether to stay open for consecutive
+ * adds. Reach for it for any add-to-list affordance; do not build a per-screen list picker.
  */
 @Composable
 fun ChooseListsBottomSheet(

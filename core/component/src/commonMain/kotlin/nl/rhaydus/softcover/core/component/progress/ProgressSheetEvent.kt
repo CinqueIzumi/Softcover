@@ -33,7 +33,7 @@ sealed interface ProgressSheetEvent {
     /**
      * The sheet's own "Mark as read" action — the same transition the Shelve control's "Read" row
      * fires. The host is responsible for dismissing the sheet as well as recording the finish; the
-     * sheet does not assume either.
+     * sheet does not assume either — both dispatch from the same `when (event)` branch.
      */
     data class MarkAsReadRequested(val actionAt: String?) : ProgressSheetEvent
 
