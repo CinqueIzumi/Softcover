@@ -3,9 +3,9 @@ package nl.rhaydus.softcover.feature.explore.data.datasource
 import app.cash.turbine.test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
+import com.apollographql.cache.normalized.FetchPolicy
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import com.apollographql.cache.normalized.FetchPolicy
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -14,10 +14,6 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.GetBooksByGenreTagQuery
 import nl.rhaydus.softcover.GetBooksByIdsQuery
 import nl.rhaydus.softcover.GetBooksByMoodTagQuery
@@ -29,6 +25,10 @@ import nl.rhaydus.softcover.feature.explore.data.mapper.toTypesenseSort
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.fragment.BookDetailFragment
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 // Mirrors SearchRemoteDataSourceImpl's private MOOD_BOOKS_LIMIT / SEARCH_RESULTS_PAGE_SIZE
 // constants (both 25) - kept here as literals since those constants aren't exposed to callers.

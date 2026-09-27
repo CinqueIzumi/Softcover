@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.model
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 
 class BookReviewTest {
     private fun buildReview(reviewedAt: String?): BookReview = BookReview(

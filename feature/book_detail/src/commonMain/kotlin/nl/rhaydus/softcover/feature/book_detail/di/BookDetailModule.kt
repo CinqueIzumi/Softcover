@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.di
 
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
@@ -54,6 +52,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserLists
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictReviewCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 val bookDetailModule = module {
     includes(

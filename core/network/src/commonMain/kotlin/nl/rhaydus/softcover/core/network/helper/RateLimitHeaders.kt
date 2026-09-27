@@ -4,9 +4,9 @@ import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.http.HttpHeader
 import com.apollographql.apollo.exception.ApolloHttpException
 import com.apollographql.apollo.network.http.HttpInfo
+import nl.rhaydus.common.AppLog
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import nl.rhaydus.common.AppLog
 
 /** HTTP 429, the status the API returns once a rate limit is exhausted. */
 internal const val HTTP_TOO_MANY_REQUESTS = 429

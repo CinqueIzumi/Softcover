@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import org.jetbrains.compose.resources.stringResource
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.generated.resources.Res
 import nl.rhaydus.softcover.core.component.generated.resources.connectivity_offline_banner
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Everything [Banner] renders: the line of copy, the register it speaks in, and whether it is

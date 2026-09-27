@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.core.personal.data.mapper
 
 import io.kotest.matchers.shouldBe
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.database.model.ReadingSessionEntity
 import nl.rhaydus.softcover.core.domain.model.ReadingSession
 import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 class PersonalMappersTest {
     // region Fixtures

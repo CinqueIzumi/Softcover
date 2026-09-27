@@ -10,15 +10,15 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import kotlin.time.Clock
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapBundledDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapLocalDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapRemoteDataSource
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSource
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import kotlin.time.Clock
 
 private const val ONE_HOUR_MILLIS = 60 * 60 * 1000L
 

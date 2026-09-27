@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.personal.domain.model
 
-import kotlin.math.ceil
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import kotlin.math.ceil
 
 /**
  * A pace-based finish estimate for a book currently being read: the average units logged per

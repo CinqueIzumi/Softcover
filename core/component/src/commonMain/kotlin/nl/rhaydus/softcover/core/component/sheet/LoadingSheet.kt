@@ -14,9 +14,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.seconds
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * A blocking, undismissable sheet that reports the progress of a long-running setup step — used by

@@ -14,8 +14,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
@@ -23,6 +21,8 @@ import nl.rhaydus.softcover.core.domain.exception.RetryableSyncException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 // Bounded so a genuinely unavailable server still surfaces `ServerUnavailableException` instead of
 // retrying forever; small so a startup burst does not turn one 429 into a multi-second stall. Doubles

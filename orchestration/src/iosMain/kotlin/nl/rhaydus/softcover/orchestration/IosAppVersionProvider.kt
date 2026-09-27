@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.orchestration
 
-import platform.Foundation.NSBundle
 import nl.rhaydus.softcover.core.domain.app.AppVersionInfo
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
+import platform.Foundation.NSBundle
 
 /**
  * iOS [AppVersionProvider] — reads the app bundle's `CFBundleShortVersionString` (marketing version,

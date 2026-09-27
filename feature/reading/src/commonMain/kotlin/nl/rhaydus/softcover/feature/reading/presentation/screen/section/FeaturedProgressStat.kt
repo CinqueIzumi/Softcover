@@ -19,10 +19,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
+import kotlin.math.roundToInt
 
 /**
  * "Page {x} of {y}" (or the audiobook time equivalent) beside the "NN%" stat, then a wavy bar — set

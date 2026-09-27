@@ -8,12 +8,12 @@ import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
+import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.database.SoftcoverDatabase
-import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 
 class UserTagVocabularyDaoTest {
     private val testDispatcher = StandardTestDispatcher()

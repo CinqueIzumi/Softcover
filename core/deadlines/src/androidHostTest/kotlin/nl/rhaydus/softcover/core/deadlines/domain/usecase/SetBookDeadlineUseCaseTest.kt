@@ -6,11 +6,11 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
+import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
-import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 
 class SetBookDeadlineUseCaseTest {
     private lateinit var repository: BookDeadlineRepository

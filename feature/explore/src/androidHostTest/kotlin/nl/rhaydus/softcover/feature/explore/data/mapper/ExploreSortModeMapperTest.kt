@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.explore.data.mapper
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
+import org.junit.jupiter.api.Test
 
 class ExploreSortModeMapperTest {
     @Test

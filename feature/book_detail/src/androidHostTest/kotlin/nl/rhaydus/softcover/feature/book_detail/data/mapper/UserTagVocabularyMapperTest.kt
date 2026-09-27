@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class UserTagVocabularyMapperTest {
     @Nested

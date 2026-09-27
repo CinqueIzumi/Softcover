@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ActiveFilterChipsSnapshotTest {
     @Nested

@@ -6,12 +6,12 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.profile.data.datastore.ProfileCacheDataStore
 import nl.rhaydus.softcover.core.profile.data.model.ProfileCacheEntity
 import nl.rhaydus.softcover.core.profile.data.model.UserProfileDataEntity
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ProfileLocalDataSourceImplTest {
     private lateinit var store: DataStore<ProfileCacheEntity>

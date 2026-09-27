@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.book.data.sync
 
 import kotlinx.coroutines.flow.firstOrNull
-import kotlin.time.Clock
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.database.mapper.toJson
@@ -13,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import kotlin.time.Clock
 
 internal class OfflineUserBookSyncImpl(
     private val userBookWriteQueue: UserBookWriteQueue,

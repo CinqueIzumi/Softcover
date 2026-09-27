@@ -4,13 +4,13 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
+import nl.rhaydus.softcover.core.notification.NotificationAppearance
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import org.junit.jupiter.api.Test
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.module
 import org.koin.test.verify.verify
-import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
-import nl.rhaydus.softcover.core.notification.NotificationAppearance
-import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 
 @OptIn(KoinExperimentalAPI::class)
 class SoftcoverModulesVerificationTest {

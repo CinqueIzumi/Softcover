@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.core.deadlines.domain.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import kotlin.time.Clock
 
 interface BookDeadlineRepository {
     fun observe(bookId: Int): Flow<BookDeadline?>

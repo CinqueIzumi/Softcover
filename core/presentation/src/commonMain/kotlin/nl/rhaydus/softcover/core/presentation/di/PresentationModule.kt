@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.core.presentation.di
 
-import org.koin.dsl.module
 import nl.rhaydus.designsystem.nav.NavPulse
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
+import org.koin.dsl.module
 
 val presentationModule = module {
     // Shared composables resolve these at runtime via koinInject: [BookDetailPrefetcher] here pulls a

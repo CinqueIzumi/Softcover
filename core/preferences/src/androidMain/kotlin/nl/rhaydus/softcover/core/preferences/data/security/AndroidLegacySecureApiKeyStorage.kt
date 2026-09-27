@@ -1,16 +1,16 @@
 package nl.rhaydus.softcover.core.preferences.data.security
 
-import android.security.keystore.KeyProperties
 import android.content.Context
+import android.security.keystore.KeyProperties
 import kotlinx.coroutines.withContext
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.common.AppLog
+import nl.rhaydus.common.runCatchingCancellable
 import java.io.File
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
-import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.common.AppLog
-import nl.rhaydus.common.runCatchingCancellable
 
 /**
  * Reads the API key from Softcover's **pre-foundation** Android location: ciphertext at

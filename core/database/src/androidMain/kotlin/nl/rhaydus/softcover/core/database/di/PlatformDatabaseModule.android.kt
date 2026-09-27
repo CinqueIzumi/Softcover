@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.core.database.di
 
 import androidx.room.Room
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 
 actual val platformDatabaseModule: Module = module {
     single<SoftcoverDatabase> {

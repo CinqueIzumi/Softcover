@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -12,6 +10,8 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryArrangeDraft
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ArrangeDraftChipsSnapshotTest {
     private val readingTab = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING)

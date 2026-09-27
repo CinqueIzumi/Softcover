@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.collector
 
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.common.AppLog
@@ -12,6 +11,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapDep
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.toad.ActionScope
+import kotlin.time.Instant
 
 private const val LOAD_FAILURE_MESSAGE = "Couldn't load the roadmap. Pull to refresh to try again."
 

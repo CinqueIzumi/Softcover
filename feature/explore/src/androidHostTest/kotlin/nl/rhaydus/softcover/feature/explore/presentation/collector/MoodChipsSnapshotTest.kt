@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 
 class MoodChipsSnapshotTest {
     private val cozy = MoodTag(

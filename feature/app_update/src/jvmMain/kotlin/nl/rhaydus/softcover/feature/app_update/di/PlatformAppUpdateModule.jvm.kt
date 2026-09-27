@@ -1,8 +1,5 @@
 package nl.rhaydus.softcover.feature.app_update.di
 
-import org.koin.core.module.Module
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.domain.platform.desktopAppDataDirectory
 import nl.rhaydus.softcover.feature.app_update.data.datasource.AppUpdateDataSource
@@ -13,6 +10,9 @@ import nl.rhaydus.softcover.feature.app_update.data.release.ReleaseSource
 import nl.rhaydus.softcover.feature.app_update.data.simulator.NoOpAppUpdateSimulator
 import nl.rhaydus.softcover.feature.app_update.domain.launcher.AppUpdateFlowLauncher
 import nl.rhaydus.softcover.feature.app_update.domain.launcher.JvmAppUpdateFlowLauncher
+import org.koin.core.module.Module
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 // Desktop drives a GitHub-releases-backed self-updater. The provider (GitHubReleaseSource) sits
 // behind the provider-agnostic ReleaseSource, which the JvmAppUpdateDataSource state machine depends

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.network.helper
 
+import app.cash.turbine.test
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloResponse
@@ -10,7 +11,6 @@ import com.apollographql.apollo.exception.ApolloNetworkException
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.fetchPolicy
 import com.benasher44.uuid.uuid4
-import app.cash.turbine.test
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -23,10 +23,6 @@ import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import okio.Buffer
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.GetUserIdQuery
 import nl.rhaydus.softcover.RemoveUserBookMutation
@@ -35,6 +31,10 @@ import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
 import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
 import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
+import okio.Buffer
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class RetryTransientFailuresTest {
     private val query = GetUserIdQuery()

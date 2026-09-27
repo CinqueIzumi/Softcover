@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.explore.data.mapper
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.GetMoodTagsQuery
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class MoodTagMapperTest {
     private fun stubTag(

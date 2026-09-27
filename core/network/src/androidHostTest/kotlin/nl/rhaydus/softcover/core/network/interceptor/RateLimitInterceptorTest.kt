@@ -28,12 +28,12 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Duration.Companion.seconds
+import nl.rhaydus.softcover.GetUserBookListsQuery
+import nl.rhaydus.softcover.core.network.helper.HTTP_TOO_MANY_REQUESTS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.GetUserBookListsQuery
-import nl.rhaydus.softcover.core.network.helper.HTTP_TOO_MANY_REQUESTS
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * All tests below drive [RateLimitInterceptor] with `refillTokensPerSecond = 1.0` unless noted

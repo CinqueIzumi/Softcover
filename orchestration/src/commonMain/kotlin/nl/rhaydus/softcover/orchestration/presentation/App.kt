@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.Navigator
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.util.SnackBarManager
@@ -41,6 +40,7 @@ import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateSt
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
 import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel
+import org.koin.compose.koinInject
 
 /** Cap a snackbar's width on a wide window so it doesn't stretch across the whole desktop frame. */
 private val SNACKBAR_DESKTOP_MAX_WIDTH = 420.dp

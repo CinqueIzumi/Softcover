@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
@@ -25,6 +24,7 @@ import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequ
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import org.koin.compose.koinInject
 
 @Composable
 internal fun FeaturedSessionButton(

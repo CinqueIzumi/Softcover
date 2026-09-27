@@ -2,8 +2,6 @@ package nl.rhaydus.softcover.orchestration.navigation
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.BookDetailScreen
@@ -15,6 +13,8 @@ import nl.rhaydus.softcover.feature.scan.presentation.screen.BarcodeScannerScree
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
 import nl.rhaydus.softcover.feature.settings.presentation.screen.LibraryVisibilitySettingsScreen
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsTab
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class AppNavigatorImplTest {
     private val navigator = AppNavigatorImpl()

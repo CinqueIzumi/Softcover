@@ -15,29 +15,30 @@ checkboxes in step with `## Steps` and `## Gates` here.
 ## Now
 
 - **State:** S0–S4 and S5-1 through S5-3b done. S5-C-chips (the chip convergence pass; its step file is
-  already deleted) is mid-flight: one `ChipScaffold` + `ChipStyle`, shared `ChipDimensions` + `ChipSize`,
-  and the tone / slot model (`ChipTone` + `selected`, `ChipLeading` / `ChipTrailing`, `face`) are built;
-  every host test passes against them.
-- **Approved, not built:** features hold chips as a generic `ChipSet<P>(chips, payloadByKey)` from
-  `:core:component`, replacing every chip list + `…ByChipKey` map pair (explore, library, book_detail).
-- **Also built:** plan-reference gates (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`)
-  over markdown, `.kt`, and permanent config (`config/**`, `*.yml`/`*.yaml`, `*.kts`). The comment split
-  skips string literals, char literals, and quoted YAML scalars; config citations are removed.
-- **Next:** re-run the agent-memory audit read-only, then apply it (delete one-offs, promote durable
-  rules to docs).
-- **After that:** (1) memory gates: `/handoff` audits memory when a `steps/*.md` was deleted, memory
-  budgets in `checkDocBudgets`, `.claude/agent-memory/**` in the plan-reference scan; (2) `ChipSet<P>`,
+  already deleted) is mid-flight: `ChipScaffold` + `ChipStyle`, `ChipDimensions` + `ChipSize`, and the
+  tone / slot model (`ChipTone` + `selected`, `ChipLeading` / `ChipTrailing`, `face`) are built and
+  host-tested. Approved, not built: features hold chips as a generic `ChipSet<P>(chips, payloadByKey)`
+  from `:core:component`, replacing every chip list + `…ByChipKey` map pair (explore, library,
+  book_detail). Plan-reference gates (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`) now
+  cover markdown, `.kt` and permanent config (`config/**`, `*.yml`/`*.yaml`, `*.kts`), with a comment
+  split that skips string / char literals and quoted YAML scalars; committed as `8f05587c`. The
+  agent-memory audit is applied: 17 memories deleted, 12 trimmed, 7 rules promoted (architecture.md
+  § TOAD ×4 and § Local Storage, code-style.md, rules/tests.md) plus `UserTag.count` KDoc. Imports now
+  follow the IDE layout `*,java.**,javax.**,kotlin.**,^` (`.editorconfig`, code-style.md, 565 files
+  re-sorted); 14 files with Apollo alias imports wait on foundation F24. After Next: (2) `ChipSet<P>`,
   tests, reviewer over S5-C-chips; (3) [`steps/s5-headers.md`](steps/s5-headers.md) S5-4.
+- **Next:** (1) memory gates: `/handoff` audits memory when a `steps/*.md` was deleted, memory budgets
+  in `checkDocBudgets`, `.claude/agent-memory/**` in the plan-reference scan. Run Gradle with
+  `JAVA_HOME` set to JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
   stale for a frame on open; if visible, seed them in the open action.
-- **Verification:** on JBR 21, `run-doc-guard-cases.sh` 76/76; `CheckDocBudgetsTaskTest` 33/33;
-  `checkDocBudgets styleCheck` passes; `softcover-reviewer` re-check ✅, no findings.
-- **Uncommitted:** config gate + string/char/YAML-quote split (`doc-guard.sh`, `doc-guard.cases`,
-  `CheckDocBudgetsTask.kt`, `DocBudgetsConventionPlugin.kt`, `CheckDocBudgetsTaskTest.kt`); citations
-  removed from `config/detekt/detekt.yml` and four `build.gradle.kts`; `.claude/rules/docs.md` scope;
-  reviewer and implementer memory; this tracker.
+- **Verification:** on JBR 21, `ktlintCheck styleCheck checkDocBudgets` pass; the `.kt`/`.kts` diffs are
+  pure import reorders (script-checked); `softcover-reviewer` ⚠️ with two memory findings, both fixed.
+- **Uncommitted:** the memory audit (`.claude/agent-memory/**`, architecture.md, code-style.md,
+  rules/tests.md, `UserTag.kt`), the import re-sort (`.editorconfig`, 565 `.kt`/`.kts`), F24 in
+  `foundation-upstream-candidates.md`, `CheckDocBudgetsTask.kt:291` `.not()`, this block.
 
 ## Local verification
 

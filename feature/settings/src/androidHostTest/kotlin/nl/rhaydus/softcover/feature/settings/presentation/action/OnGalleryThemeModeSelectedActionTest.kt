@@ -8,9 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
@@ -19,6 +16,9 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentG
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class OnGalleryThemeModeSelectedActionTest {
     private lateinit var stateFlow: MutableStateFlow<ComponentGalleryUiState>

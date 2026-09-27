@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.uibinding.lists
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipLeading
 import nl.rhaydus.softcover.core.component.chip.ChipSize
@@ -15,6 +13,8 @@ import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ChooseListsMapperTest {
     private fun coverUiModel(): CoverUiModel = CoverUiModel(

@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
 import kotlinx.collections.immutable.toImmutableList
-import kotlin.math.roundToInt
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateKind
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
@@ -12,6 +11,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
+import kotlin.math.roundToInt
 
 /**
  * Builds the personalised "reading update" card, or null when there's nothing personal to share —

@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.feature.reading.presentation.component
 
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 
 class StreakStripTest {
     private fun date(day: Int): LocalDate = LocalDate(

@@ -65,25 +65,20 @@ Filed but not yet implemented in the foundation.
   `docs/reference/design-system/components/sheets.md`. It is app-generic already — lifting it upstream is a
   move, not a rewrite, and the app component would then become a thin alias or be dropped.
 
-### F24 — `import-grouping` ktlint rule (Android → third-party → project)
+### F24 — import ordering follows the IDE layout, enforced by ktlint
 
-- **Type:** gate (lint rule)
-- **Home:** `nl.rhaydus:ktlint-rules`
-- **Status:** **Open.** The foundation code-style doc (§Import Ordering) mandates three import groups in
-  order — 1) Android / AndroidX, 2) third-party, 3) project (`nl.rhaydus.*`) — but **nothing enforces
-  it.** `.editorconfig` sets `ktlint_standard = disabled` (deliberately, so the standard rules don't
-  fight the idiosyncratic guide), which turns off ktlint's own `import-ordering` rule; and the existing
-  custom `project-import-order` rule only sorts alphabetically *within* the `nl.rhaydus.*` group. So a
-  project import placed above the Android block passes `ktlintCheck` clean. Verified 2026-07-13: a stray
-  `nl.rhaydus.*` import at the top of `ExploreShelf.kt` / both `SettingsScreenLayout` actuals passed the
-  gate, and `ktlintFormat` did not move it.
-- **What to build:** an autocorrecting ktlint rule that partitions imports into the three groups in the
-  documented order (stable within each group; the existing alpha-sort within `nl.rhaydus.*` composes on
-  top). It should be a pure-AST rule (no type resolution needed). Once it lands, `ktlintFormat`
-  auto-fixes and `ktlintCheck` gates — replacing the guide-only + review enforcement that stands today.
-- **Scope note:** Softcover currently has this as a review-enforced convention. A one-off codebase
-  regroup was applied 2026-07-13 (312 files, Android→third-party→`nl.rhaydus.*`), so the app is clean;
-  this rule keeps it that way for every consumer with zero setup.
+- **Type:** gate (lint rule) + doc
+- **Home:** `nl.rhaydus:ktlint-rules`, foundation `code-style.md` §Import Ordering
+- **Status:** **Open.** Softcover uses the IntelliJ / Android Studio Kotlin default layout
+  `*,java.**,javax.**,kotlin.**,^` (pinned as `ij_kotlin_imports_layout` in `.editorconfig`), so
+  Optimize Imports and the rule agree. The foundation doc still prescribes Android → third-party →
+  `nl.rhaydus.*` groups. Nothing enforces either: `ktlint_standard = disabled`, the foundation runner
+  loads only its own rules, and `project-import-order` only sorts within `nl.rhaydus.*`.
+- **What to build:** replace `project-import-order` with an autocorrecting pure-AST rule that reads
+  `ij_kotlin_imports_layout` (default `*,java.**,javax.**,kotlin.**,^`) and sorts the whole block, and
+  rewrite §Import Ordering to match. `ktlintFormat` then fixes and `ktlintCheck` gates it. Aliases form
+  their own trailing bucket: today `project-import-order` checks every `nl.rhaydus.*` path in one run,
+  so 14 files with Apollo accessor aliases (`… .Companion.readingJournalFragment as …`) keep them in place.
 
 ### F25 — `trailing-lambda-brace` ktlint rule (no `) }` glomming over a multi-line body)
 

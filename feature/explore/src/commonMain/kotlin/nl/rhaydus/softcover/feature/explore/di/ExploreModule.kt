@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.explore.di
 
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
@@ -59,7 +57,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooks
 import nl.rhaydus.softcover.feature.explore.presentation.collector.UnreleasedBadgeModelsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsScreenModel
-
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 val exploreModule = module {
     includes(

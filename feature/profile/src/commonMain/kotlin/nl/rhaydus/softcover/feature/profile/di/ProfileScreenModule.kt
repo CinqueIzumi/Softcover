@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.profile.di
 
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
@@ -11,6 +9,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollec
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.UserInformationCollector
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 val profileScreenModule = module {
     includes(

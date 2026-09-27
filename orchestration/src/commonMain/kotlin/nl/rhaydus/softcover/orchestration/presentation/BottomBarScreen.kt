@@ -34,7 +34,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.layout.BottomBarPlacement
 import nl.rhaydus.designsystem.layout.BottomBarScaffold
 import nl.rhaydus.designsystem.layout.TwoPaneScaffold
@@ -49,6 +48,7 @@ import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
+import org.koin.compose.koinInject
 
 private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
 private val TAB_ROOT_DRIFT = 12.dp

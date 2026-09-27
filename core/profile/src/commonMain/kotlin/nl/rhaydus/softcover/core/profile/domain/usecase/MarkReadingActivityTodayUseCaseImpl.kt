@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.core.profile.domain.usecase
 
-import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.runCatchingLogged
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
+import kotlin.time.Clock
 
 /**
  * Marks today as an active reading day in the profile cache, using the device's local timezone so the

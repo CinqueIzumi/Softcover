@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 
 class LibraryGridLayoutMappingTest {
     @Nested

@@ -1,4 +1,3 @@
-import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
@@ -11,6 +10,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import java.io.File
 
 private val PLAN_DIRECTORY_PATTERN = Regex("""docs/working/[^/\s]+/""")
 private val DECISION_NUMBER_PATTERN = Regex("""\bD[0-9]{1,2}\b""")
@@ -288,7 +288,7 @@ abstract class CheckDocBudgetsTask : DefaultTask() {
 
         markdownFiles.files.forEach { file ->
             val relativePath = file.relativeTo(root).invariantSeparatorsPath
-            if (!isPermanentMarkdownDoc(relativePath)) return@forEach
+            if (isPermanentMarkdownDoc(relativePath).not()) return@forEach
 
             file.readText().lineSequence().forEachIndexed { index, line ->
                 if (PLAN_DIRECTORY_PATTERN.containsMatchIn(line)) {

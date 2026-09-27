@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.di
 
-import org.koin.dsl.bind
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
@@ -51,6 +49,8 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentG
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapScreenModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 val settingsModule = module {
     includes(

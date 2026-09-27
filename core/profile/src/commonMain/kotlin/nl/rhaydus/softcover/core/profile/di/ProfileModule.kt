@@ -1,9 +1,6 @@
 package nl.rhaydus.softcover.core.profile.di
 
-import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.domain.activity.MarkReadingActivityTodayUseCase
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
@@ -22,6 +19,9 @@ import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUs
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileStatsUseCase
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
+import kotlin.time.Clock
 
 // The activity half (streak + recent reading days) and the stats half (everything the Profile tab
 // renders) refresh independently, each skipped at most once per session - see

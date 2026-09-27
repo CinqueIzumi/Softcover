@@ -31,7 +31,6 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
@@ -52,6 +51,7 @@ import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import kotlin.math.roundToInt
 
 /**
  * The reading-life share sheet: the canonical mini header, a scaled preview of the exportable

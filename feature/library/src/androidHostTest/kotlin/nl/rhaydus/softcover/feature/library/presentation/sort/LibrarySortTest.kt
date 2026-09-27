@@ -2,12 +2,12 @@ package nl.rhaydus.softcover.feature.library.presentation.sort
 
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 /**
  * Book sort moved into SQL `ORDER BY` at the DAO layer (see `BooksLocalDataSource` +

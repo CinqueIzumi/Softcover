@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.di
 
-import org.koin.dsl.module
 import nl.rhaydus.softcover.AppVersionProviderImpl
 import nl.rhaydus.softcover.core.designsystem.R
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.notification.NotificationAccentColor
 import nl.rhaydus.softcover.core.notification.NotificationAppearance
 import nl.rhaydus.softcover.core.notification.NotificationIcon
+import org.koin.dsl.module
 
 internal val appModule = module {
     single<AppVersionProvider> { AppVersionProviderImpl() }

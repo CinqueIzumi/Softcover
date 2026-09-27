@@ -2,16 +2,16 @@ package nl.rhaydus.softcover.orchestration.di
 
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import org.koin.core.Koin
-import org.koin.core.KoinApplication
-import org.koin.core.context.startKoin
-import org.koin.dsl.KoinAppDeclaration
 import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.platform.NetworkAvailability
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdAsFlowUseCase
+import org.koin.core.Koin
+import org.koin.core.KoinApplication
+import org.koin.core.context.startKoin
+import org.koin.dsl.KoinAppDeclaration
 
 /**
  * Single shared Koin bootstrap. The cross-platform [App] composable assumes Koin is already started,

@@ -7,11 +7,11 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
+import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.database.dao.UserTagVocabularyDao
-import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 
 class UserTagVocabularyLocalDataSourceImplTest {
     private lateinit var dao: UserTagVocabularyDao

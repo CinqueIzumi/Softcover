@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.core.component.richtext
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlinx.collections.immutable.persistentListOf
 
 class RichTextEditingTest {
     private fun mark(

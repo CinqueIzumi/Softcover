@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LibraryFilterChipsBuilderTest {
     private val tagFiction = Tag(

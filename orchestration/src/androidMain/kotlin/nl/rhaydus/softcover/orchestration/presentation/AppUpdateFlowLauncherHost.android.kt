@@ -4,9 +4,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import nl.rhaydus.softcover.feature.app_update.domain.launcher.AppUpdateFlowLauncher
 import org.koin.compose.getKoin
 import org.koin.core.parameter.parametersOf
-import nl.rhaydus.softcover.feature.app_update.domain.launcher.AppUpdateFlowLauncher
 
 @Composable
 internal actual fun rememberAppUpdateFlowLauncher(): AppUpdateFlowLauncher {

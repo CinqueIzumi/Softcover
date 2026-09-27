@@ -1,16 +1,14 @@
 package nl.rhaydus.softcover.core.profile.data.datasource
 
 import com.apollographql.apollo.ApolloClient
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
-import kotlinx.datetime.todayIn
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.GetReadUserBooksForStatsQuery
 import nl.rhaydus.softcover.GetReadingActivityDaysQuery
 import nl.rhaydus.softcover.GetUserProfileDataQuery
@@ -32,6 +30,8 @@ import nl.rhaydus.softcover.core.profile.data.model.StatsBook
 import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileSnapshot
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 interface ProfileRemoteDataSource {
     suspend fun getUserProfileSnapshot(): UserProfileSnapshot

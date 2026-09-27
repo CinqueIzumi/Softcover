@@ -6,8 +6,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
-import kotlin.system.exitProcess
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingLogged
@@ -17,6 +15,8 @@ import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerLaun
 import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
 import nl.rhaydus.softcover.feature.app_update.data.release.ReleaseSource
 import nl.rhaydus.softcover.feature.app_update.data.version.VersionComparator
+import java.io.File
+import kotlin.system.exitProcess
 
 /**
  * Desktop self-updater — the `AppUpdateDataSource` seam Android backs with Play. The desktop

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.orchestration.di
 
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.connectivity.di.connectivityModule
 import nl.rhaydus.softcover.core.database.di.databaseModule
@@ -39,6 +38,7 @@ import nl.rhaydus.softcover.orchestration.usecase.InitializeUserIdAndBooksUseCas
 import nl.rhaydus.softcover.orchestration.usecase.ReAuthenticateUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ResetUserDataUseCaseImpl
+import org.koin.dsl.module
 
 internal val orchestrationModule = module {
     includes(

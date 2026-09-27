@@ -12,13 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.random.Random
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 /**
  * A radial particle burst played on a successful mark-as-read commit. The caller composes this as a

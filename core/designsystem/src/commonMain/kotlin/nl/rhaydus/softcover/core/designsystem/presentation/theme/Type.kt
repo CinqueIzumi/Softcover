@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import org.jetbrains.compose.resources.Font
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
 import nl.rhaydus.softcover.core.designsystem.generated.resources.fraunces_bold
 import nl.rhaydus.softcover.core.designsystem.generated.resources.fraunces_bold_italic
@@ -24,6 +23,7 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.inter_medium_i
 import nl.rhaydus.softcover.core.designsystem.generated.resources.inter_regular
 import nl.rhaydus.softcover.core.designsystem.generated.resources.inter_semibold
 import nl.rhaydus.softcover.core.designsystem.generated.resources.inter_semibold_italic
+import org.jetbrains.compose.resources.Font
 
 /**
  * The editorial display family (Fraunces) and the body family (Inter), bundled as Compose

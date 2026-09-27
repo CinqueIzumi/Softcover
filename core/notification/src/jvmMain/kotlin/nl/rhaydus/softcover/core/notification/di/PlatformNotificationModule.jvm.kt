@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.core.notification.di
 
-import org.koin.dsl.binds
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.notification.JvmSoftcoverNotifier
 import nl.rhaydus.softcover.core.notification.SoftcoverNotifier
+import org.koin.dsl.binds
+import org.koin.dsl.module
 
 actual val platformNotificationModule = module {
     // Also bound as AutoCloseable so the desktop shutdown teardown removes the tray icon (which pins

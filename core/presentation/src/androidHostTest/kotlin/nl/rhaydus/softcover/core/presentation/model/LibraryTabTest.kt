@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.core.presentation.model
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class LibraryTabTest {
     @Nested

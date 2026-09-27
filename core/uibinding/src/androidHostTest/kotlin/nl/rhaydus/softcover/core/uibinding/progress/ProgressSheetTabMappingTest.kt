@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.core.uibinding.progress
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.ProgressUnit
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ProgressSheetTabMappingTest {
     @Nested

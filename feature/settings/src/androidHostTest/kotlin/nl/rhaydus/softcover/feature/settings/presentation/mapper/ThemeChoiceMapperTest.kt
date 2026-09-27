@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.settings.presentation.mapper
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.control.ThemeTilePainting
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ThemeChoiceMapperTest {
     @Nested

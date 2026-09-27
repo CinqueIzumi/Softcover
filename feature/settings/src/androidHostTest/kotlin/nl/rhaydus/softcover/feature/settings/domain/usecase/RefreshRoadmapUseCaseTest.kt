@@ -5,10 +5,10 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.settings.domain.repository.RoadmapRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.feature.settings.domain.repository.RoadmapRepository
 
 class RefreshRoadmapUseCaseTest {
     private lateinit var roadmapRepository: RoadmapRepository

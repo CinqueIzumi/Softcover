@@ -4,9 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
-import org.koin.dsl.module
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
+import org.koin.dsl.module
 
 val dispatcherModule = module {
     single {

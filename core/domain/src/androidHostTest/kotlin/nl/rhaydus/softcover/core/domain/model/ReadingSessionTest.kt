@@ -2,13 +2,13 @@ package nl.rhaydus.softcover.core.domain.model
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
 class ReadingSessionTest {
     // region Fixtures

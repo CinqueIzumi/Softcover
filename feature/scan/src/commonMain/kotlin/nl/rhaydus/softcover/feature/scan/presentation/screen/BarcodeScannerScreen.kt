@@ -11,7 +11,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import org.koin.compose.koinInject
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -30,6 +29,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraPermiss
 import nl.rhaydus.softcover.feature.scan.presentation.permission.rememberCameraPermissionRequester
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanScreenModel
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
+import org.koin.compose.koinInject
 
 class BarcodeScannerScreen : Screen {
     @Composable

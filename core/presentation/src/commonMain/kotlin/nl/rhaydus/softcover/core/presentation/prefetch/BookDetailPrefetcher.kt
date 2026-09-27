@@ -12,10 +12,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.koin.compose.koinInject
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
+import org.koin.compose.koinInject
 
 class BookDetailPrefetcher internal constructor(
     private val fetchBookByIdUseCase: FetchBookByIdUseCase,

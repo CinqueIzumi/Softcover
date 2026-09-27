@@ -1,12 +1,12 @@
 package nl.rhaydus.softcover.core.component.dialog
 
 import io.kotest.matchers.shouldBe
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Instant
 
 class PickerDatesTest {
     @Nested

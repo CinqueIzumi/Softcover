@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import coil3.ImageLoader
-import org.koin.core.Koin
 import nl.rhaydus.softcover.orchestration.di.initKoinDesktop
+import org.koin.core.Koin
 
 /**
  * Opaque handle to the desktop app's process-lifetime resources, produced by [bootstrapDesktop] and

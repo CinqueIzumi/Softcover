@@ -4,11 +4,11 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
-import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 
 class GetMoodTagsUseCaseTest {
     private lateinit var exploreRepository: ExploreRepository

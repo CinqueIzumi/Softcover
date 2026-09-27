@@ -1,12 +1,10 @@
 package nl.rhaydus.softcover.core.lists.data.repository
 
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.time.Clock
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
@@ -23,6 +21,8 @@ import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.core.lists.domain.model.ListSignature
 import nl.rhaydus.softcover.core.lists.domain.model.ListsRefreshResult
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
 
 internal class ListsRepositoryImpl(
     private val listsRemoteDataSource: ListsRemoteDataSource,

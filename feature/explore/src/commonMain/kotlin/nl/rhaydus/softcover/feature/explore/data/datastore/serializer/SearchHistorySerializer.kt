@@ -3,9 +3,9 @@ package nl.rhaydus.softcover.feature.explore.data.datastore.serializer
 import androidx.datastore.core.okio.OkioSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import nl.rhaydus.common.AppLog
 import okio.BufferedSink
 import okio.BufferedSource
-import nl.rhaydus.common.AppLog
 
 internal object SearchHistorySerializer : OkioSerializer<SearchHistoryEntity> {
     override val defaultValue: SearchHistoryEntity

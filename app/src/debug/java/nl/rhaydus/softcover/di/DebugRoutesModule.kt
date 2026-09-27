@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.di
 
 import androidx.compose.runtime.Composable
-import org.koin.dsl.module
 import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.debug.DebugRoutesSection
+import org.koin.dsl.module
 
 /**
  * Debug-build binding for the Settings debug routes — wires in the real [DebugRoutesSection]. The

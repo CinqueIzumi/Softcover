@@ -3,12 +3,12 @@ package nl.rhaydus.softcover.core.lists.data.mapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.data.mapper.buildListSignature
 import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ListFragment
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class ListMapperTest {
     private fun stubAggregate(

@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipTone
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class RecentSearchChipsSnapshotTest {
     @Nested

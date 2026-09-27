@@ -6,18 +6,18 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlinx.datetime.TimeZone
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
-import nl.rhaydus.softcover.core.profile.domain.repository.ProfileRepository
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class ObserveRecentReadingActivityUseCaseTest {
     // Fixed today: 2026-05-04, so window is 2026-04-14 … 2026-05-04

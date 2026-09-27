@@ -4,11 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import org.jetbrains.compose.resources.stringResource
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.generated.resources.Res
 import nl.rhaydus.softcover.core.component.generated.resources.connectivity_offline_screen_body
 import nl.rhaydus.softcover.core.component.generated.resources.connectivity_offline_screen_title
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * The copy an [EmptyState] renders in place of content a screen could not show: a headline naming

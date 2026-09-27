@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
-import kotlin.time.Duration.Companion.seconds
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.toad.ActionScope
+import kotlin.time.Duration.Companion.seconds
 
 internal data class OnRecentSearchChipClickedAction(
     private val key: String,

@@ -26,8 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlin.math.min
-import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import nl.rhaydus.common.currentInstant
 import nl.rhaydus.designsystem.component.RhaydusButton
@@ -43,6 +41,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 /**
  * The distraction-free reading hero shared by both platforms: eyebrow → cover → title/author → the

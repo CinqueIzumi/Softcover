@@ -4,10 +4,10 @@ import io.kotest.matchers.shouldBe
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class PlanTodayNudgeTest {
     private fun buildProgress(

@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.feature.explore.data.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
+import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHistoryEntity
+import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHistorySerializer
 import okio.FileSystem
 import okio.Path
 import kotlin.jvm.JvmInline
-import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHistoryEntity
-import nl.rhaydus.softcover.feature.explore.data.datastore.serializer.SearchHistorySerializer
 
 @JvmInline
 internal value class SearchHistoryDataStore(val store: DataStore<SearchHistoryEntity>)

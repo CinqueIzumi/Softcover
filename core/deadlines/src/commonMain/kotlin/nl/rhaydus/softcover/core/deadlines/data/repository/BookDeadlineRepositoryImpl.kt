@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.deadlines.data.repository
 
-import kotlin.math.max
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
@@ -11,6 +10,7 @@ import nl.rhaydus.softcover.core.deadlines.data.mapper.toEntity
 import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import kotlin.math.max
 
 internal class BookDeadlineRepositoryImpl(
     private val localDataSource: BookDeadlineLocalDataSource,

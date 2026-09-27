@@ -2,9 +2,9 @@ package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import platform.UIKit.UIApplication
 import platform.UIKit.UIUserInterfaceStyle
-import nl.rhaydus.softcover.core.domain.model.ThemeMode
 
 @Composable
 internal actual fun ApplyPlatformThemeAppearance(themeMode: ThemeMode) {

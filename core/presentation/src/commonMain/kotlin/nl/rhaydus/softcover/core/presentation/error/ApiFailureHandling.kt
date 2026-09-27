@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.presentation.error
 
-import kotlin.coroutines.cancellation.CancellationException
 import nl.rhaydus.designsystem.util.SnackBarManager
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * The standard presentation handling for a failed use-case [Result]: surface a user-facing snackbar

@@ -36,15 +36,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.google.mlkit.vision.barcode.BarcodeScanner as MlKitBarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
+import com.google.mlkit.vision.barcode.BarcodeScanner as MlKitBarcodeScanner
 
 /**
  * Android implementation: a CameraX barcode-scanning surface backed by the bundled ML Kit model

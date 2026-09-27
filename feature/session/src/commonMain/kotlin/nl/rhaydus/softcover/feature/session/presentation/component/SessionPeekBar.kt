@@ -32,7 +32,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
-import org.koin.compose.koinInject
 import nl.rhaydus.common.currentInstant
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.haptics.rememberHaptics
@@ -44,6 +43,7 @@ import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
+import org.koin.compose.koinInject
 
 /**
  * Persistent live-timer bar shown above the bottom nav while a reading session is active. Tapping it

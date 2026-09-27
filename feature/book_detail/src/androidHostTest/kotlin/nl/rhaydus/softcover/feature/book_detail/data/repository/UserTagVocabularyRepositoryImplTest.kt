@@ -8,9 +8,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.database.model.UserTagVocabularyEntity
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -18,6 +15,9 @@ import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagVocabular
 import nl.rhaydus.softcover.feature.book_detail.data.datasource.UserTagsRemoteDataSource
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toUserTag
 import nl.rhaydus.softcover.feature.book_detail.data.mapper.toVocabularyEntity
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 class UserTagVocabularyRepositoryImplTest {
     private lateinit var remoteDataSource: UserTagsRemoteDataSource

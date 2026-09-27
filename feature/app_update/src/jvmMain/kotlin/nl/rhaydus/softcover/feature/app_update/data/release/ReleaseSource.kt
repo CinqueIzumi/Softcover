@@ -4,15 +4,15 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerTarget
+import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
 import java.io.File
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.feature.app_update.data.install.DesktopInstallerTarget
-import nl.rhaydus.softcover.feature.app_update.data.model.AppRelease
 
 /**
  * Provider-agnostic access to the desktop app's release feed. Named for its role, not its backing:

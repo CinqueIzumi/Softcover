@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.core.book.data.storage
 
 import io.kotest.matchers.shouldBe
-import java.io.File
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import java.io.File
 
 class EditionImageStorageImplTest {
     @TempDir

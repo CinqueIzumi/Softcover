@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 data class Book(
     val id: Int,

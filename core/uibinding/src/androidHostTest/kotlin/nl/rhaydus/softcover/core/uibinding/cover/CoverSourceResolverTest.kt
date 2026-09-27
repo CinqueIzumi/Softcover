@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.core.uibinding.cover
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.component.cover.CoverSource
+import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
-import nl.rhaydus.softcover.core.component.cover.CoverSource
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.preview.PreviewData
 
 class CoverSourceResolverTest {
     @TempDir

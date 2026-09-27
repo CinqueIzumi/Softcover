@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.core.presentation.cover
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import org.koin.compose.koinInject
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.component.cover.CoverImagePersister
 import nl.rhaydus.softcover.core.component.cover.LocalCoverImagePersister
+import org.koin.compose.koinInject
 
 /**
  * Resolves [PersistEditionImageUseCase] from Koin and provides it into [LocalCoverImagePersister]

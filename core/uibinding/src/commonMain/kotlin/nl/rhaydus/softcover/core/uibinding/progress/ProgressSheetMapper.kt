@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.core.uibinding.progress
 
-import kotlin.math.roundToInt
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import kotlin.math.roundToInt
 
 /**
  * Maps a [Book] onto what the progress sheet renders. Promoted straight to `:core:uibinding` rather
