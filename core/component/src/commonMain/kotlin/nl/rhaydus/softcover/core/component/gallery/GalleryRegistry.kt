@@ -91,7 +91,7 @@ object GalleryRegistry {
             name = "Chip",
             family = GalleryFamily.CHIP,
             blurb = "The pill-shaped chip family: tonal, spoiler, add, add-outlined, remove, " +
-                "and format variants.",
+                "quiet, format, and choice variants.",
             previews = ChipUiModel,
             label = ::chipFixtureLabel,
             content = { model, modifier ->
@@ -357,6 +357,8 @@ private fun chipFixtureLabel(model: ChipUiModel): String = when {
     model.variant is ChipVariant.Remove -> "Remove"
     model.variant is ChipVariant.Format -> "Format"
     model.variant is ChipVariant.Tonal && model.variant.selected -> "Selected"
+    model.variant is ChipVariant.Choice && model.variant.selected -> "Choice, selected"
+    model.variant is ChipVariant.Choice -> "Choice"
     model.label.length > CHIP_LONG_LABEL_FLOOR -> "Long label, ellipsised"
     else -> "Idle"
 }

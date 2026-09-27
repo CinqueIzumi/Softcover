@@ -14,22 +14,25 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, S5-1 and S5-2a done. S5-2a: `ChipVariant.Remove(removeLabel)` and `Quiet(selected)`;
-  the Library active-filter row and rearrange chip render through `Chip`, built by
-  `ActiveFilterChipsCollector` / `RearrangeChipCollector`, taps via `OnActiveFilterChipClickedAction`;
-  `LibraryFilterValue.chipKey()` is the shared key scheme. Reviewer findings applied.
-- **Next:** Step 09 (Measure and close out) in `docs/working/token-hygiene/README.md` →
-  `docs/working/token-hygiene/steps/09-measure.md` — the migration-session countdown reached 5 of 5. After
-  it, resume [`steps/s5-chips.md`](steps/s5-chips.md) § S5-2b, Phase 2 per
-  [`family-procedure.md`](family-procedure.md): Arrange / Filter sheet drafts onto `UiState`, `Choice`,
-  `ArrangeChip` onto `Chip`, delete `ChipUiModel.selectedFor`.
-- **Open questions:** none.
-- **Verification:** compile (core:component, core:uibinding, feature:library), `checkModuleGraph`,
-  `:feature:library:projectHealth`, `ktlintCheck`, `styleCheck`, and core:component + feature:library host
-  tests passed under JBR 21. `:core:component:projectHealth` fails on a pre-existing `kotlinx.datetime`
-  finding.
-- **Uncommitted:** tracker docs — this `## Now` block, D14, `family-procedure.md` § Phase 3, and a
-  convergence row in every S5–S11 step file (S5-2a committed as `ea7cc0b0`).
+- **State:** S0–S4, S5-1, S5-2a and S5-2b done. S5-2b: the Library Arrange / Filter sheet drafts live on
+  `LibraryUiState` (`arrangeDraft`, `filterDraft`, incl. tag search), edited by draft actions and
+  committed by the now no-arg `OnApplyArrangeAction` / `OnApplyFiltersAction`; `ChipVariant.Choice` added;
+  `ArrangeDraftChipsCollector` / `FilterDraftChipsCollector` build the sheet chips; `ArrangeChip` and
+  `ChipUiModel.selectedFor` deleted. Reviewer findings applied (ranked-failure draft rollback).
+- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) § S5-3, Phase 1 per
+  [`family-procedure.md`](family-procedure.md): design with the user, starting from that section's
+  Phase 1 questions (`DashedTagOpenerChip` / `ExternalLinkPill` chrome, `ConcealableTagChip` reveal).
+- **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
+  convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
+- **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
+  stale for a frame on open (chips now arrive via collectors); if visible, seed them in the open action.
+- **Verification:** compile (core:component, feature:library), `checkModuleGraph`,
+  `:feature:library:projectHealth`, `ktlintCheck`, `styleCheck`, and the full core:component +
+  feature:library host test suites passed under JBR 21.
+- **Uncommitted:** S5-2b — chip variant, dimensions, gallery and tests in `core/component`; draft state,
+  actions, collectors, sheets, DI and tests in `feature/library`; `components.md`. Step 09 retrigger —
+  `.claude/skills/handoff/SKILL.md` (`Due when` rule), token-hygiene `README.md` and `steps/09-measure.md`.
+  Tracker docs (this block, the S5-2b tick). Reviewer memory under `.claude/agent-memory/softcover-reviewer/`.
 
 ## Local verification
 

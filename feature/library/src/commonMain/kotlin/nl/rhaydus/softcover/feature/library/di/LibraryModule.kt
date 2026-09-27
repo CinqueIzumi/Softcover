@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.feature.library.presentation.collector.ActiveFilterChipsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.AllBooksCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.ArrangeDraftChipsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BooksByStatusCollector
@@ -19,6 +20,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.DateStyleColl
 import nl.rhaydus.softcover.feature.library.presentation.collector.DeadlineModelsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.DisplayListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterChipModelsCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.FilterDraftChipsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterOptionsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
@@ -63,6 +65,8 @@ val libraryModule = module {
     factory { FilterChipModelsCollector() } bind LibraryCollector::class
     factory { ActiveFilterChipsCollector() } bind LibraryCollector::class
     factory { RearrangeChipCollector() } bind LibraryCollector::class
+    factory { ArrangeDraftChipsCollector() } bind LibraryCollector::class
+    factory { FilterDraftChipsCollector() } bind LibraryCollector::class
 
     factory { DisplayListsCollector() } bind LibraryCollector::class
 

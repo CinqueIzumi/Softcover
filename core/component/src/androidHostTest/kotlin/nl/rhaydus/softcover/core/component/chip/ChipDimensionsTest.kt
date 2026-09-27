@@ -193,10 +193,47 @@ class ChipDimensionsTest {
         }
 
         @Test
+        fun `Choice uses 16 by 9 padding with a 15dp trailing icon`() {
+            // ----- Arrange & Act -----
+            val dimensions = ChipDimensions.forVariant(ChipVariant.Choice())
+
+            // ----- Assert -----
+            dimensions shouldBe ChipDimensions(
+                paddingStart = 16.dp,
+                paddingTop = 9.dp,
+                paddingEnd = 16.dp,
+                paddingBottom = 9.dp,
+                innerGap = 0.dp,
+                leadingIconSize = 18.dp,
+                leadingIconGap = 8.dp,
+                dismissIconSize = 16.dp,
+                dismissIconGap = 8.dp,
+                removeIconSize = 12.dp,
+                borderWidth = 0.dp,
+                disabledAlpha = 0.45f,
+                trailingIconSize = 15.dp,
+                trailingIconGap = 4.dp,
+            )
+        }
+
+        @Test
+        fun `Choice's selected flag never changes its dimensions`() {
+            // ----- Arrange -----
+            val unselected = ChipDimensions.forVariant(ChipVariant.Choice(selected = false))
+
+            // ----- Act -----
+            val selected = ChipDimensions.forVariant(ChipVariant.Choice(selected = true))
+
+            // ----- Assert -----
+            selected shouldBe unselected
+        }
+
+        @Test
         fun `every variant shares the same leading, dismiss and remove icon metrics`() {
             // ----- Arrange -----
             val variants = listOf(
                 ChipVariant.Tonal(),
+                ChipVariant.Choice(),
                 ChipVariant.Spoiler,
                 ChipVariant.Add,
                 ChipVariant.AddOutlined,

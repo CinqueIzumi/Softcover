@@ -83,6 +83,12 @@ fun Chip(
             onEvent = onEvent,
             modifier = modifier,
         )
+        is ChipVariant.Choice -> ChoiceChip(
+            model = model,
+            variant = variant,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
     }
 }
 
@@ -464,6 +470,72 @@ private fun FormatChip(
             ),
             color = content,
         )
+
+        model.dismissLabel?.let { label ->
+            ChipDismissIcon(dismissLabel = label, tint = content, dimensions = dimensions) {
+                onEvent(ChipEvent.Dismissed(key = model.key))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChoiceChip(
+    model: ChipUiModel,
+    variant: ChipVariant.Choice,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val container = if (variant.selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer
+    val content = if (variant.selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+    val dimensions = ChipDimensions.forVariant(variant)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .background(container)
+            .chipInteraction(interaction = model.interaction, dimensions = dimensions) {
+                onEvent(ChipEvent.Clicked(key = model.key))
+            }
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        model.leadingIcon?.let { icon ->
+            ChipLeadingIcon(
+                icon = icon,
+                tint = content,
+                dimensions = dimensions,
+            )
+        }
+
+        Text(
+            text = model.label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = content,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        variant.trailingIcon?.let { icon ->
+            Spacer(modifier = Modifier.width(dimensions.trailingIconGap))
+
+            val resource = drawableIconResource(
+                icon = icon,
+                contentDescription = "",
+            )
+
+            Icon(
+                painter = resource.getIconPainter(),
+                contentDescription = resource.contentDescription,
+                tint = content,
+                modifier = Modifier.size(dimensions.trailingIconSize),
+            )
+        }
 
         model.dismissLabel?.let { label ->
             ChipDismissIcon(dismissLabel = label, tint = content, dimensions = dimensions) {

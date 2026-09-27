@@ -18,10 +18,14 @@ import nl.rhaydus.toad.ActionScope
  * "Make this list ordered" in the sort dropdown.
  *
  * Both writes are optimistic: the repository flips the local cache, and we flip the local sort
- * setting via [LibraryDependencies.setLibrarySortUseCase]. On server failure we roll **both** back
- * and surface a snackbar; the repository already rolls back the `ranked` flag itself, but the sort
- * switch lives in DataStore and must be unwound here so the screen doesn't strand the user on an
- * ORDER tab that no longer has server backing.
+ * setting via [LibraryDependencies.setLibrarySortUseCase]. On server failure the action unwinds the
+ * sort switch and surfaces a snackbar; the repository already rolls back the `ranked` flag itself,
+ * but the sort switch lives in DataStore and must be unwound here so the screen doesn't strand the
+ * user on an ORDER tab that no longer has server backing.
+ *
+ * The Arrange sheet's "✶ Make this list ordered" link dispatches this action while its draft is
+ * open, so an open [LibraryUiState.arrangeDraft] for this tab follows both the switch to ORDER and
+ * its rollback.
  */
 internal class OnSetListRankedAction(
     private val listId: Int,
@@ -51,6 +55,14 @@ internal class OnSetListRankedAction(
                 mode = LibrarySortMode.ORDER,
                 direction = LibrarySortMode.ORDER.defaultDirection,
             )
+
+            scope.setState { current ->
+                current.withArrangeDraftSort(
+                    tabId = tabId,
+                    mode = LibrarySortMode.ORDER,
+                    direction = LibrarySortMode.ORDER.defaultDirection,
+                )
+            }
         }
 
         dependencies.setListRankedUseCase(
@@ -68,6 +80,14 @@ internal class OnSetListRankedAction(
                     mode = previousMode,
                     direction = previousDirection,
                 )
+
+                scope.setState { current ->
+                    current.withArrangeDraftSort(
+                        tabId = tabId,
+                        mode = previousMode,
+                        direction = previousDirection,
+                    )
+                }
             }
 
             val suffix = list?.name?.let { " for \"$it\"" }.orEmpty()
@@ -78,4 +98,21 @@ internal class OnSetListRankedAction(
             )
         }
     }
+}
+
+private fun LibraryUiState.withArrangeDraftSort(
+    tabId: String,
+    mode: LibrarySortMode,
+    direction: SortDirection,
+): LibraryUiState {
+    val draft = arrangeDraft
+
+    if (draft == null || draft.tabId != tabId) return this
+
+    return copy(
+        arrangeDraft = draft.copy(
+            sortMode = mode,
+            sortDirection = direction,
+        ),
+    )
 }

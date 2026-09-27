@@ -17,3 +17,4 @@
 - [File-split KDoc link scope](project_file_split_kdoc_link_scope.md) — a token-hygiene split can legitimately downgrade a `[Symbol]` doc-link to backticks when the target left the file's import scope; a stale unresolvable link left behind is the real finding
 - [File-split body/import drift](project_file_split_body_and_import_drift.md) — a "pure move" split can drop a statement inside a body (diff line-by-line) and can re-append a bare `kotlin.*` import after the `nl.rhaydus.*` group
 - [Gradle *Main suffix is case-sensitive](architecture_gradle_main_suffix_case_sensitive.md) — a source-dir scan gate silently skips classic lowercase `src/main` modules (`:app`, `:desktopApp`); confirm they have nothing to catch
+- [Arrange/Filter draft-commit pattern traps](project_arrange_filter_draft_commit_pattern.md) — a live nudge into an open draft needs its own failure rollback; async collector-derived chips can blank-flash on sheet open

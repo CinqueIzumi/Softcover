@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -38,18 +39,38 @@ class OnApplyFiltersActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets the tab's entry to the non-empty draft filters`() = runTest {
+        fun `no-op when filterDraft is null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(filtersByTab = emptyMap())
-
-            val draft = LibraryFilters(formats = setOf("ebook"))
-            val action = OnApplyFiltersAction(
-                tabId = tabId,
-                filters = draft,
+            val existing = LibraryFilters(formats = setOf("ebook"))
+            stateFlow.value = LibraryUiState(
+                filtersByTab = mapOf(tabId to existing),
+                filterDraft = null,
             )
 
             // ----- Act -----
-            action.execute(
+            OnApplyFiltersAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filtersByTab shouldBe mapOf(tabId to existing)
+        }
+
+        @Test
+        fun `sets the tab's entry to the non-empty draft filters`() = runTest {
+            // ----- Arrange -----
+            val draft = LibraryFilters(formats = setOf("ebook"))
+            stateFlow.value = LibraryUiState(
+                filtersByTab = emptyMap(),
+                filterDraft = LibraryFilterDraft(
+                    tabId = tabId,
+                    filters = draft,
+                ),
+            )
+
+            // ----- Act -----
+            OnApplyFiltersAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -62,19 +83,20 @@ class OnApplyFiltersActionTest {
         fun `replaces an existing non-empty entry for the tab`() = runTest {
             // ----- Arrange -----
             val previous = LibraryFilters(formats = setOf("paperback"))
-            stateFlow.value = LibraryUiState(filtersByTab = mapOf(tabId to previous))
-
             val draft = LibraryFilters(
                 formats = setOf("ebook"),
                 owned = true,
             )
-            val action = OnApplyFiltersAction(
-                tabId = tabId,
-                filters = draft,
+            stateFlow.value = LibraryUiState(
+                filtersByTab = mapOf(tabId to previous),
+                filterDraft = LibraryFilterDraft(
+                    tabId = tabId,
+                    filters = draft,
+                ),
             )
 
             // ----- Act -----
-            action.execute(
+            OnApplyFiltersAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -87,15 +109,16 @@ class OnApplyFiltersActionTest {
         fun `removes the tab entry when the applied filters are empty`() = runTest {
             // ----- Arrange -----
             val previous = LibraryFilters(formats = setOf("ebook"))
-            stateFlow.value = LibraryUiState(filtersByTab = mapOf(tabId to previous))
-
-            val action = OnApplyFiltersAction(
-                tabId = tabId,
-                filters = LibraryFilters(),
+            stateFlow.value = LibraryUiState(
+                filtersByTab = mapOf(tabId to previous),
+                filterDraft = LibraryFilterDraft(
+                    tabId = tabId,
+                    filters = LibraryFilters(),
+                ),
             )
 
             // ----- Act -----
-            action.execute(
+            OnApplyFiltersAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -107,15 +130,16 @@ class OnApplyFiltersActionTest {
         @Test
         fun `applying empty filters to a tab with no existing entry is a no-op`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(filtersByTab = emptyMap())
-
-            val action = OnApplyFiltersAction(
-                tabId = tabId,
-                filters = LibraryFilters(),
+            stateFlow.value = LibraryUiState(
+                filtersByTab = emptyMap(),
+                filterDraft = LibraryFilterDraft(
+                    tabId = tabId,
+                    filters = LibraryFilters(),
+                ),
             )
 
             // ----- Act -----
-            action.execute(
+            OnApplyFiltersAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -128,15 +152,16 @@ class OnApplyFiltersActionTest {
         fun `does not touch other tabs' filters when setting a non-empty entry`() = runTest {
             // ----- Arrange -----
             val otherFilters = LibraryFilters(releaseYears = setOf(2020))
-            stateFlow.value = LibraryUiState(filtersByTab = mapOf(otherTabId to otherFilters))
-
-            val action = OnApplyFiltersAction(
-                tabId = tabId,
-                filters = LibraryFilters(formats = setOf("ebook")),
+            stateFlow.value = LibraryUiState(
+                filtersByTab = mapOf(otherTabId to otherFilters),
+                filterDraft = LibraryFilterDraft(
+                    tabId = tabId,
+                    filters = LibraryFilters(formats = setOf("ebook")),
+                ),
             )
 
             // ----- Act -----
-            action.execute(
+            OnApplyFiltersAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -155,15 +180,14 @@ class OnApplyFiltersActionTest {
                     tabId to ownFilters,
                     otherTabId to otherFilters,
                 ),
-            )
-
-            val action = OnApplyFiltersAction(
-                tabId = tabId,
-                filters = LibraryFilters(),
+                filterDraft = LibraryFilterDraft(
+                    tabId = tabId,
+                    filters = LibraryFilters(),
+                ),
             )
 
             // ----- Act -----
-            action.execute(
+            OnApplyFiltersAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -178,15 +202,14 @@ class OnApplyFiltersActionTest {
             stateFlow.value = LibraryUiState(
                 searchQuery = "kotlin",
                 gridLayout = LibraryGridLayout.LIST_COMPACT,
-            )
-
-            val action = OnApplyFiltersAction(
-                tabId = tabId,
-                filters = LibraryFilters(formats = setOf("ebook")),
+                filterDraft = LibraryFilterDraft(
+                    tabId = tabId,
+                    filters = LibraryFilters(formats = setOf("ebook")),
+                ),
             )
 
             // ----- Act -----
-            action.execute(
+            OnApplyFiltersAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )

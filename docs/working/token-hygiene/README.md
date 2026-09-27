@@ -9,8 +9,8 @@
 - **State:** Steps 00–07 and 08a–08m committed. 08n is done and uncommitted: `checkPresentationFileSize` in
   the root `build.gradle.kts`, wired into `check`, 600 lines, no baseline. It passes on 759 files, and a
   temporary 601-line file made it fail with that file's path listed. FU-9 is "done locally".
-- **Next:** Step 09 in `steps/09-measure.md`. It waits until at least five migration sessions have run under
-  the new setup, so resume migration work first. Run Gradle with `JAVA_HOME` set to JBR 21
+- **Next:** Step 09 in `steps/09-measure.md`. It waits until migration stages S5 and S6 are fully implemented,
+  so resume migration work first. Run Gradle with `JAVA_HOME` set to JBR 21
   (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`). The default JDK 26 fails detekt, and JDK 17 (CI's) is
   not installed. Keep the shell cwd at the repo root before spawning agents.
 - **Open questions:** none. Follow-ups:

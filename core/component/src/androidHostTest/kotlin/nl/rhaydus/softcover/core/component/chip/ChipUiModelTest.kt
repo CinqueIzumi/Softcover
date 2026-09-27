@@ -24,6 +24,7 @@ class ChipUiModelTest {
             // ----- Arrange -----
             val expectedVariantTypes = setOf(
                 ChipVariant.Tonal::class,
+                ChipVariant.Choice::class,
                 ChipVariant.Spoiler::class,
                 ChipVariant.Add::class,
                 ChipVariant.AddOutlined::class,

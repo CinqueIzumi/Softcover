@@ -21,10 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -44,32 +40,29 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyFiltersAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftChipToggledAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftClearAllAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftTagSearchChangedAction
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetSelection
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.state.libraryPreviewCount
-import nl.rhaydus.softcover.feature.library.presentation.state.toggle
 import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 
 /**
  * The Filter sheet (redesign brief).
  *
- * **Draft/commit.** The sheet holds its own local [LibraryFilters] draft, seeded from the committed
- * `state.filtersFor(tabId)` when the sheet is (re-)composed — which happens fresh on every open,
- * since the call site only composes this sheet while its expanded flag is true (`remember` therefore
- * re-seeds on every open without needing an explicit re-seed key beyond [tabId], kept for the edge
- * case where the selected tab itself changes underneath an already-open sheet). Every chip tap and
- * the in-sheet "Clear all" mutate only that local draft — [OnApplyFiltersAction] is the only action
- * this sheet ever dispatches, firing once on "Show N titles" to commit the whole draft atomically.
- * Dismissing any other way (scrim, back) never dispatches anything, so the draft is simply discarded.
- * `resultCount` previews live against the draft via [libraryPreviewCount] so the button's count always
+ * **Draft/commit.** [LibraryUiState.filterDraft] holds the sheet's facet selections and tag search
+ * query, seeded from committed `state.filtersFor(tabId)` by `OnFilterSheetExpandedChangeAction` when
+ * the sheet opens, and cleared when it closes, so a reopen always starts fresh. Every chip tap and
+ * the in-sheet "Clear all" dispatch draft-edit actions only — [OnApplyFiltersAction] is the only
+ * action this sheet ever commits, firing once on "Show N titles" to apply the whole draft atomically.
+ * Dismissing any other way (scrim, back) never dispatches it, so the draft is simply discarded.
+ * [LibraryUiState.filterSheetSelection] previews live against the draft so the button's count always
  * matches what committing would actually show. This is deliberately separate from
  * `OnToggleFilterValueAction` / `OnClearFiltersAction`, which stay live/immediate — those back the
  * main-screen active-filter chip row, a different surface that has no "commit" step of its own.
@@ -84,14 +77,8 @@ internal fun LibraryFilterSheet(
     AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
         val dismiss = LocalModalSheetDismiss.current
 
-        var draft by remember(tabId) { mutableStateOf(state.filtersFor(tabId = tabId)) }
-
         val chips = state.filterChipsFor(tabId = tabId)
-        val resultCount = libraryPreviewCount(
-            state = state,
-            tabId = tabId,
-            draftFilters = draft,
-        )
+        val selection = state.filterSheetSelection
 
         Column(modifier = Modifier.fillMaxWidth()) {
             Column(
@@ -110,12 +97,18 @@ internal fun LibraryFilterSheet(
 
                 if (chips.isEmpty) {
                     EmptyFacetMessage()
-                } else {
+                } else if (selection != null) {
                     FacetSections(
                         chips = chips,
-                        filters = draft,
-                        valueByChipKey = state.filterValueByChipKey,
-                        onToggle = { value -> draft = draft.toggle(value = value) },
+                        selection = selection,
+                        tagSearch = state.filterDraft?.tagSearch.orEmpty(),
+                        onChipEvent = { event ->
+                            when (event) {
+                                is ChipEvent.Clicked -> runAction(OnFilterDraftChipToggledAction(key = event.key))
+                                is ChipEvent.Dismissed -> Unit
+                            }
+                        },
+                        onTagSearchChanged = { query -> runAction(OnFilterDraftTagSearchChangedAction(query = query)) },
                     )
                 }
 
@@ -123,16 +116,11 @@ internal fun LibraryFilterSheet(
             }
 
             FilterSheetFooter(
-                filtersActive = draft.isEmpty.not(),
-                resultCount = resultCount,
-                onClearAll = { draft = LibraryFilters() },
+                filtersActive = selection?.clearAllEnabled ?: state.filtersFor(tabId = tabId).isEmpty.not(),
+                resultCount = selection?.resultCount ?: state.tabStatsFor(tabId = tabId).itemCount,
+                onClearAll = { runAction(OnFilterDraftClearAllAction()) },
                 onShowResults = {
-                    runAction(
-                        OnApplyFiltersAction(
-                            tabId = tabId,
-                            filters = draft,
-                        ),
-                    )
+                    runAction(OnApplyFiltersAction())
 
                     dismiss()
                 },
@@ -144,25 +132,16 @@ internal fun LibraryFilterSheet(
 @Composable
 private fun FacetSections(
     chips: LibraryFilterChips,
-    filters: LibraryFilters,
-    valueByChipKey: Map<String, LibraryFilterValue>,
-    onToggle: (LibraryFilterValue) -> Unit,
+    selection: LibraryFilterSheetSelection,
+    tagSearch: String,
+    onChipEvent: (ChipEvent) -> Unit,
+    onTagSearchChanged: (String) -> Unit,
 ) {
-    val onChipEvent: (ChipEvent) -> Unit = { event ->
-        when (event) {
-            is ChipEvent.Clicked -> valueByChipKey[event.key]?.let(onToggle)
-            is ChipEvent.Dismissed -> Unit
-        }
-    }
-
     if (chips.ownershipChips.isNotEmpty() || chips.formatChips.isNotEmpty()) {
         FacetSection(title = "Ownership · Format") {
-            (chips.ownershipChips + chips.formatChips).forEach { chip ->
+            (selection.ownershipChips + selection.formatChips).forEach { chip ->
                 Chip(
-                    model = chip.selectedFor(
-                        filters = filters,
-                        valueByChipKey = valueByChipKey,
-                    ),
+                    model = chip,
                     onEvent = onChipEvent,
                 )
             }
@@ -173,12 +152,9 @@ private fun FacetSections(
 
     if (chips.releaseYearChips.isNotEmpty()) {
         FacetSection(title = "Release year") {
-            chips.releaseYearChips.forEach { chip ->
+            selection.releaseYearChips.forEach { chip ->
                 Chip(
-                    model = chip.selectedFor(
-                        filters = filters,
-                        valueByChipKey = valueByChipKey,
-                    ),
+                    model = chip,
                     onEvent = onChipEvent,
                 )
             }
@@ -189,12 +165,9 @@ private fun FacetSections(
 
     if (chips.readYearChips.isNotEmpty()) {
         FacetSection(title = "Year finished") {
-            chips.readYearChips.forEach { chip ->
+            selection.readYearChips.forEach { chip ->
                 Chip(
-                    model = chip.selectedFor(
-                        filters = filters,
-                        valueByChipKey = valueByChipKey,
-                    ),
+                    model = chip,
                     onEvent = onChipEvent,
                 )
             }
@@ -205,10 +178,11 @@ private fun FacetSections(
 
     if (chips.tagChips.isNotEmpty()) {
         TagsFacetSection(
-            chips = chips.tagChips,
-            filters = filters,
-            valueByChipKey = valueByChipKey,
+            availableCount = chips.tagChips.size,
+            tagSearch = tagSearch,
+            visibleChips = selection.tagChips,
             onChipEvent = onChipEvent,
+            onTagSearchChanged = onTagSearchChanged,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -216,12 +190,9 @@ private fun FacetSections(
 
     if (chips.ratingChips.isNotEmpty()) {
         FacetSection(title = "Rating") {
-            chips.ratingChips.forEach { chip ->
+            selection.ratingChips.forEach { chip ->
                 Chip(
-                    model = chip.selectedFor(
-                        filters = filters,
-                        valueByChipKey = valueByChipKey,
-                    ),
+                    model = chip,
                     onEvent = onChipEvent,
                 )
             }
@@ -230,47 +201,20 @@ private fun FacetSections(
 }
 
 /**
- * Combines a facet chip's ready [ChipUiModel] with the sheet's local draft [LibraryFilters] to
- * resolve [ChipVariant.Tonal.selected] — deliberately absent from the model itself
- * (`LibraryFilterChips`'s KDoc), since which chip reads selected depends on this composition-local
- * draft rather than on anything committed to [LibraryUiState]. Combining a ready model with draft
- * state like this is not mapping (`component-contract.md` § 7.2 R9's carve-out); building the model
- * from a domain type would be.
- */
-private fun ChipUiModel.selectedFor(
-    filters: LibraryFilters,
-    valueByChipKey: Map<String, LibraryFilterValue>,
-): ChipUiModel {
-    val value = valueByChipKey[key] ?: return this
-
-    return copy(variant = ChipVariant.Tonal(selected = filters.isSelected(value = value)))
-}
-
-private fun LibraryFilters.isSelected(value: LibraryFilterValue): Boolean = when (value) {
-    is LibraryFilterValue.Tag -> value.tag.id in tags.mapTo(mutableSetOf()) { it.id }
-    is LibraryFilterValue.Format -> value.value in formats
-    is LibraryFilterValue.ReleaseYear -> value.year in releaseYears
-    is LibraryFilterValue.ReadYear -> readYear == value.year
-    is LibraryFilterValue.Owned -> owned == value.owned
-    is LibraryFilterValue.RatingMin -> ratingMin == value.threshold
-}
-
-/**
  * The Tags facet: a "N available" count trailing the sub-label (the number of distinct tags the
  * shelf's books carry — not how many the user has selected, which would read wrong with e.g. one
- * tag active), a search-your-tags pill that narrows the chip cloud client-side (transient local
- * state — not part of the TOAD contract, since it only scopes what's rendered in this sheet), and
- * the checkable chip cloud itself.
+ * tag active), a search-your-tags pill that narrows the chip cloud ([LibraryFilterSheetSelection]
+ * already applies the query, since [nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft.tagSearch]
+ * lives on state), and the checkable chip cloud itself.
  */
 @Composable
 private fun TagsFacetSection(
-    chips: List<ChipUiModel>,
-    filters: LibraryFilters,
-    valueByChipKey: Map<String, LibraryFilterValue>,
+    availableCount: Int,
+    tagSearch: String,
+    visibleChips: List<ChipUiModel>,
     onChipEvent: (ChipEvent) -> Unit,
+    onTagSearchChanged: (String) -> Unit,
 ) {
-    var tagSearch by remember { mutableStateOf("") }
-
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -283,7 +227,7 @@ private fun TagsFacetSection(
             )
 
             Text(
-                text = "${chips.size} available",
+                text = "$availableCount available",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -293,26 +237,16 @@ private fun TagsFacetSection(
 
         TagSearchField(
             query = tagSearch,
-            onQueryChange = { tagSearch = it },
+            onQueryChange = onTagSearchChanged,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
-
-        val visibleChips = chips.filter { chip ->
-            chip.label.contains(
-                other = tagSearch,
-                ignoreCase = true,
-            )
-        }
 
         if (LocalModalSheetForm.current == ModalSheetForm.PANEL) {
             ExpandableFlowRow {
                 visibleChips.forEach { chip ->
                     Chip(
-                        model = chip.selectedFor(
-                            filters = filters,
-                            valueByChipKey = valueByChipKey,
-                        ),
+                        model = chip,
                         onEvent = onChipEvent,
                     )
                 }
@@ -325,10 +259,7 @@ private fun TagsFacetSection(
             ) {
                 visibleChips.forEach { chip ->
                     Chip(
-                        model = chip.selectedFor(
-                            filters = filters,
-                            valueByChipKey = valueByChipKey,
-                        ),
+                        model = chip,
                         onEvent = onChipEvent,
                     )
                 }
@@ -342,7 +273,9 @@ private fun TagsFacetSection(
  * padding and a taller (~56dp) field to sit directly on a page, which — nested inside this sheet's
  * already-24dp-padded facet column — would both double-inset the pill past the other facets' left
  * edge and blow past the spec's 42dp search-your-tags pill height. Composed from the same
- * leading-icon + `BasicTextField` + placeholder primitives instead, sized to fit this sheet.
+ * leading-icon + `BasicTextField` + placeholder primitives instead, sized to fit this sheet. Fully
+ * controlled by [query] — the field itself holds no state, since [query] backs
+ * `LibraryFilterDraft.tagSearch` on [LibraryUiState].
  */
 @Composable
 private fun TagSearchField(

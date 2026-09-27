@@ -1,8 +1,16 @@
 package nl.rhaydus.softcover.core.component.chip
 
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+
 /** `component-contract.md` § 7.2 R2 — the chip's anatomy and colours, resolved by [Chip]. */
 sealed interface ChipVariant {
     data class Tonal(val selected: Boolean = false) : ChipVariant
+
+    /** A primary-filled single-choice pill (a sheet's layout/sort picker), [trailingIcon] optional. */
+    data class Choice(
+        val selected: Boolean = false,
+        val trailingIcon: SoftcoverIcon? = null,
+    ) : ChipVariant
 
     /**
      * A spoiler redaction: the label draws transparent under a solid cover fill, reserving its

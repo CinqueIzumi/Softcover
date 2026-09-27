@@ -4,7 +4,8 @@
 
 ## Actions
 
-1. After at least **five** migration sessions have run under the new setup, run
+1. Once migration stages **S5 and S6** are fully implemented (every sub-step in
+   `component-library-migration/steps/s5-*.md` and `s6-*.md` ticked), run
    `python3 scripts/claude/token-usage.py --since <date Step 05 merged>`.
 2. Compare against the `README.md` baseline table and write the before/after table into
    `foundation-upstream.md` § Evidence. Expected, as estimates to check rather than guarantees:

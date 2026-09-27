@@ -85,6 +85,19 @@ data class ChipUiModel(
                 ),
             ),
             ChipUiModel(
+                key = "choice-idle",
+                label = "Grid · 2",
+                variant = ChipVariant.Choice(),
+            ),
+            ChipUiModel(
+                key = "choice-selected",
+                label = "Title",
+                variant = ChipVariant.Choice(
+                    selected = true,
+                    trailingIcon = SoftcoverIcon.ArrowDropDown,
+                ),
+            ),
+            ChipUiModel(
                 key = "leading-icon",
                 label = "Just now",
                 leadingIcon = SoftcoverIcon.DateRange,

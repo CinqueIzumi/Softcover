@@ -74,11 +74,37 @@ internal data class LibraryUiState(
     /** The Arrange sheet (layout + titles toggle + sort) shown on both mobile and desktop. */
     val isArrangeSheetExpanded: Boolean = false,
 
+    /**
+     * The Arrange sheet's uncommitted draft — seeded by `OnArrangeSheetExpandedChangeAction` on
+     * open, mutated by draft-edit actions, cleared on close, committed by `OnApplyArrangeAction`.
+     * Null whenever the sheet is closed.
+     */
+    val arrangeDraft: LibraryArrangeDraft? = null,
+
+    /** The Arrange sheet's layout row, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
+    val arrangeLayoutChips: List<ChipUiModel> = emptyList(),
+
+    /** The Arrange sheet's sort row, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
+    val arrangeSortChips: List<ChipUiModel> = emptyList(),
+
     /** The Shelves sheet — the tab switcher on mobile; desktop keeps its permanent sidebar. */
     val isShelvesSheetExpanded: Boolean = false,
 
     val filtersByTab: Map<String, LibraryFilters> = emptyMap(),
     val isFilterSheetExpanded: Boolean = false,
+
+    /**
+     * The Filter sheet's uncommitted draft — seeded by `OnFilterSheetExpandedChangeAction` on open,
+     * mutated by draft-edit actions, cleared on close, committed by `OnApplyFiltersAction`. Null
+     * whenever the sheet is closed.
+     */
+    val filterDraft: LibraryFilterDraft? = null,
+
+    /**
+     * The Filter sheet's resolved facet chips, mapped by `FilterDraftChipsCollector` off
+     * [filterDraft]. Null whenever the sheet is closed.
+     */
+    val filterSheetSelection: LibraryFilterSheetSelection? = null,
 
     /**
      * Filter picker options per tab, precomputed off the main thread by `FilterOptionsCollector`

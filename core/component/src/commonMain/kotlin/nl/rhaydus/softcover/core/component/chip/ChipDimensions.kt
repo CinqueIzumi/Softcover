@@ -24,6 +24,9 @@ internal data class ChipDimensions(
     val removeIconSize: Dp,
     val borderWidth: Dp,
     val disabledAlpha: Float,
+    /** Only [ChipVariant.Choice] renders a trailing icon; every other variant carries the default. */
+    val trailingIconSize: Dp = LeadingIconSize,
+    val trailingIconGap: Dp = LeadingIconGap,
 ) {
     companion object {
         private val LeadingIconSize = 18.dp
@@ -137,6 +140,23 @@ internal data class ChipDimensions(
                 removeIconSize = RemoveIconSize,
                 borderWidth = 0.dp,
                 disabledAlpha = DISABLED_ALPHA,
+            )
+
+            is ChipVariant.Choice -> ChipDimensions(
+                paddingStart = 16.dp,
+                paddingTop = 9.dp,
+                paddingEnd = 16.dp,
+                paddingBottom = 9.dp,
+                innerGap = 0.dp,
+                leadingIconSize = LeadingIconSize,
+                leadingIconGap = LeadingIconGap,
+                dismissIconSize = DismissIconSize,
+                dismissIconGap = DismissIconGap,
+                removeIconSize = RemoveIconSize,
+                borderWidth = 0.dp,
+                disabledAlpha = DISABLED_ALPHA,
+                trailingIconSize = 15.dp,
+                trailingIconGap = 4.dp,
             )
         }
     }

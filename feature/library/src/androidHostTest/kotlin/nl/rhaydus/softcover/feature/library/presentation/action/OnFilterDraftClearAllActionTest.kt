@@ -16,10 +16,12 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
-class OnFilterSheetExpandedChangeActionTest {
+class OnFilterDraftClearAllActionTest {
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
+
+    private val tabId = "list-10"
 
     @BeforeEach
     fun setUp() {
@@ -35,103 +37,99 @@ class OnFilterSheetExpandedChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isFilterSheetExpanded to true when expanded is true`() = runTest {
+        fun `no-op when filterDraft is null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isFilterSheetExpanded = false)
-            val action = OnFilterSheetExpandedChangeAction(expanded = true)
+            stateFlow.value = LibraryUiState(filterDraft = null)
 
             // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isFilterSheetExpanded shouldBe true
-        }
-
-        @Test
-        fun `sets isFilterSheetExpanded to false when expanded is false`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isFilterSheetExpanded = true)
-            val action = OnFilterSheetExpandedChangeAction(expanded = false)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isFilterSheetExpanded shouldBe false
-        }
-
-        @Test
-        fun `preserves other state fields when updating isFilterSheetExpanded`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isLoading = false,
-                isFilterSheetExpanded = false,
-            )
-            val action = OnFilterSheetExpandedChangeAction(expanded = true)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isFilterSheetExpanded shouldBe true
-        }
-
-        @Test
-        fun `opening seeds filterDraft from the selected tab's committed filters`() = runTest {
-            // ----- Arrange -----
-            val selectedTabId = "list-42"
-            val committedFilters = LibraryFilters(formats = setOf("ebook"))
-            stateFlow.value = LibraryUiState(
-                selectedTabId = selectedTabId,
-                filtersByTab = mapOf(selectedTabId to committedFilters),
-                filterDraft = null,
-            )
-            val action = OnFilterSheetExpandedChangeAction(expanded = true)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft shouldBe LibraryFilterDraft(
-                tabId = selectedTabId,
-                filters = committedFilters,
-            )
-        }
-
-        @Test
-        fun `closing clears filterDraft, discarding any in-sheet edits`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isFilterSheetExpanded = true,
-                filterDraft = LibraryFilterDraft(
-                    tabId = "list-42",
-                    filters = LibraryFilters(formats = setOf("ebook")),
-                    tagSearch = "kotlin",
-                ),
-            )
-            val action = OnFilterSheetExpandedChangeAction(expanded = false)
-
-            // ----- Act -----
-            action.execute(
+            OnFilterDraftClearAllAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
             stateFlow.value.filterDraft shouldBe null
+        }
+
+        @Test
+        fun `resets the draft's facet selections to empty`() = runTest {
+            // ----- Arrange -----
+            val draft = LibraryFilterDraft(
+                tabId = tabId,
+                filters = LibraryFilters(
+                    formats = setOf("Hardcover"),
+                    owned = true,
+                    ratingMin = 4.0,
+                ),
+            )
+            stateFlow.value = LibraryUiState(filterDraft = draft)
+
+            // ----- Act -----
+            OnFilterDraftClearAllAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterDraft?.filters shouldBe LibraryFilters()
+        }
+
+        @Test
+        fun `leaves the tag search query untouched`() = runTest {
+            // ----- Arrange -----
+            val draft = LibraryFilterDraft(
+                tabId = tabId,
+                filters = LibraryFilters(formats = setOf("Hardcover")),
+                tagSearch = "kotlin",
+            )
+            stateFlow.value = LibraryUiState(filterDraft = draft)
+
+            // ----- Act -----
+            OnFilterDraftClearAllAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterDraft?.tagSearch shouldBe "kotlin"
+        }
+
+        @Test
+        fun `leaves tabId untouched`() = runTest {
+            // ----- Arrange -----
+            val draft = LibraryFilterDraft(
+                tabId = tabId,
+                filters = LibraryFilters(formats = setOf("Hardcover")),
+            )
+            stateFlow.value = LibraryUiState(filterDraft = draft)
+
+            // ----- Act -----
+            OnFilterDraftClearAllAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterDraft?.tabId shouldBe tabId
+        }
+
+        @Test
+        fun `is idempotent when the draft's filters are already empty`() = runTest {
+            // ----- Arrange -----
+            val draft = LibraryFilterDraft(
+                tabId = tabId,
+                filters = LibraryFilters(),
+            )
+            stateFlow.value = LibraryUiState(filterDraft = draft)
+
+            // ----- Act -----
+            OnFilterDraftClearAllAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterDraft shouldBe draft
         }
     }
 }
