@@ -363,7 +363,7 @@ immediately).
 Kills all three cross-module name collisions.
 
 - [ ] `SectionLabel` × 4 — `app/src/debug/.../MotionDebugScreen.kt`, `feature/book_detail/presentation/screen/BookDetailShelf.kt:2535`, `feature/profile/presentation/screen/ProfileShelf.kt:136`, `feature/reading/presentation/screen/ReadingShelf.kt:1178`
-- [ ] `EditorialHeader` × 2 — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3; now takes a `title: String`), `feature/reading/presentation/screen/ReadingScreenLayout.mobile.kt:158`
+- [ ] `EditorialHeader` × 2 — `core/component/progress/EditorialHeader.kt` (moved in S4-3; now takes a `title: String`), `feature/reading/presentation/screen/ReadingScreenLayout.mobile.kt:158`
 - [ ] `SidebarSectionLabel` × 2 — `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:416`, `feature/settings/presentation/screen/SettingsScreenLayout.jvm.kt:260`
 - [ ] `SmallSectionLabel`, `InlineAccentLabel` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:1128,1100`
 - [ ] `SectionIntro` — `feature/profile/presentation/screen/ProfileShelf.kt:402`
@@ -423,7 +423,7 @@ Kills all three cross-module name collisions.
 #### List rows — 22 -> `ListRow` + `ListRowUiModel`
 
 - [ ] `ChooseListsRow`, `NewListRow` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; `ChooseListsRow` now takes one `ChooseListsRowUiModel`)
-- [ ] `WhenReadRow` — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3, unchanged)
+- [ ] `WhenReadRow` — `core/component/progress/WhenReadRow.kt` (moved in S4-3, unchanged)
 - [ ] `DebugNavigationRow` — `app/src/debug/.../DebugRoutesSection.kt:68`
 - [ ] `HapticRow` — `app/src/debug/.../MotionDebugScreen.kt:137`
 - [ ] `AboutLinkRow`, `AboutNavigationRow`, `AboutUsernameRow`, `AboutRow` — `feature/settings/presentation/screen/AboutContent.kt:192,232,275,307`
@@ -445,7 +445,7 @@ Kills all three cross-module name collisions.
 Chrome only; each sheet's **body** stays a feature composable (`component-contract.md` § 7.6).
 
 - [ ] `ChooseListsBottomSheet` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; already R1/R2-shaped, so S6 owes it chrome extraction only)
-- [ ] `UpdateProgressBottomSheet`, `ProgressBottomSheetContent`, `TabSwitcher` — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3; already R1/R2-shaped, so S6 owes it chrome extraction only)
+- [ ] `UpdateProgressBottomSheet`, `ProgressBottomSheetContent` — `core/component/progress/UpdateProgressBottomSheet.kt`; `TabSwitcher` — `core/component/progress/TabSwitcher.kt` (moved in S4-3; already R1/R2-shaped, so S6 owes it chrome extraction only)
 - [ ] `VerdictSheet` — `core/component/verdict/VerdictSheet.kt` — **also owes R1**
 - [x] `SoftcoverLoadingDialog`, `SoftcoverLoadingSheet` — **DONE in S4-5a.** The sheet became `LoadingSheet` (`core/component/sheet/`, + model + event, consumed by both onboarding layouts); the dialog was deleted as dead. Sheet *chrome* extraction is still owed on `LoadingSheet` — that is this section's S6 work, not this box
 - [ ] `LibraryFilterSheet`, `FilterSheetFooter`, `EmptyFacetMessage`, `TagSearchField` — `feature/library/presentation/component/LibraryFilterSheet.kt:76,394,442,309`
@@ -559,7 +559,7 @@ The four `*Callout`s are one component with a tone variant.
 
 #### Controls & fields — 14 -> `Toggle` + `SegmentedControl` + `TextField`
 
-- [ ] `TimeField` — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3)
+- [ ] `TimeField` — `core/component/progress/TimeField.kt` (moved in S4-3)
 - [ ] `RichTextFormattingToolbar` — `core/component/control/RichTextFormattingToolbar.kt` (was `ReviewFormattingToolbar`; moved + renamed in S4-2b. In the library, but not yet the `Toggle`/`SegmentedControl`/`TextField` consolidation this group is about)
 - [ ] `LensToggle`, `LensSegment` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:632,686`
 - [ ] `ShareCardVariantToggle` — `feature/book_detail/presentation/component/ShareBookBottomSheet.kt:226`
@@ -600,7 +600,7 @@ The `/dataviz` skill conventions apply to everything in the chart group.
 
 #### Progress — 6 -> `ProgressIndicator` + `ProgressUiModel`
 
-- [ ] `EditorialProgressIndicator` — `core/component/progress/UpdateProgressBottomSheet.kt` (moved in S4-3)
+- [ ] `EditorialProgressIndicator` — `core/component/progress/EditorialProgressIndicator.kt` (moved in S4-3)
 - [ ] `LibraryWaveProgressRow` — `feature/library/presentation/screen/LibraryShelf.kt:1141`
 - [ ] `ProgressBlock` — `feature/reading/presentation/screen/ReadingShelf.kt:1100`
 - [ ] `FocusProgressBar` — `feature/session/presentation/screen/FocusModeShelf.kt:307`
