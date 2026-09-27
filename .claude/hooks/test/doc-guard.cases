@@ -58,3 +58,9 @@ kotlin_comment_plain_allow	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsK
 kotlin_code_line_with_d1_allowed	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCBEMSA9IDUKfQ==	false	allow	-
 kotlin_kdoc_docs_working_deny	Edit	src/Foo.kt	LyoqCiAqIFNpbXBsZS4KICovCmNsYXNzIEZvbyB7Cn0K	ICogU2ltcGxlLg==	ICogU2ltcGxlLgogKiBTZWUgZG9jcy93b3JraW5nLzI3NS1mb28vc3RlcC0xLm1k	false	deny	adds a comment citing docs/working
 kotlin_comment_ratchet_allow	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKICAgIC8vIHNlZSBkb2NzL3dvcmtpbmcvMjc1LWZvby9zdGVwLTEubWQgYWxyZWFkeSBoZXJlCgogICAgZnVuIGJhcigpIHt9Cn0K	ZnVuIGJhcigpIHt9	ZnVuIGJhcigpIHt9CgogICAgZnVuIGJheigpIHt9	false	allow	-
+
+plan_ref_step_id_deny	Edit	docs/reference/foo.md	IyBGb28KClNvbWUgdGV4dC4K	U29tZSB0ZXh0Lg==	U29tZSB0ZXh0LgpTZWUgUzQtNWIgZm9yIGRldGFpbHMu	false	deny	cites a plan step
+plan_ref_step_id_ratchet_allow	Edit	docs/reference/foo.md	IyBGb28KClNlZSBTNC01YiBmb3IgZGV0YWlscy4KCk90aGVyIHRleHQuCg==	T3RoZXIgdGV4dC4=	T3RoZXIgdGV4dC4KTW9yZSB0ZXh0Lg==	false	allow	-
+kotlin_trailing_line_comment_step_ref_deny	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCB4ID0gMSAvLyBTNS0xYQp9	false	deny	citing a plan step
+kotlin_trailing_block_comment_docs_working_deny	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIGRvU29tZXRoaW5nKCkgLyogZG9jcy93b3JraW5nL3gvICovCn0=	false	deny	adds a comment citing docs/working
+kotlin_trailing_comment_plain_allow	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCB4ID0gMSAvLyBqdXN0IGEgbm90ZQp9	false	allow	-

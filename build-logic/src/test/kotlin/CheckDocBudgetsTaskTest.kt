@@ -367,6 +367,45 @@ class CheckDocBudgetsTaskTest {
         }
 
         @Test
+        fun `flags a permanent doc that cites a plan step`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "docs/reference/foo.md",
+                "# Foo\n\nThis implements S4-5b.\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    listOf("docs/reference/foo.md"),
+                )
+            }
+            exception.message shouldContain "cites a plan step"
+        }
+
+        @Test
+        fun `passes a permanent doc with a step-like token that is not a step id`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "docs/reference/foo.md",
+                "# Foo\n\nThis references S3 elsewhere.\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    listOf("docs/reference/foo.md"),
+                )
+            }
+        }
+
+        @Test
         fun `passes a doc under docs-working that cites a plan directory`() {
             // ----- Arrange -----
             initRepoOnMain()

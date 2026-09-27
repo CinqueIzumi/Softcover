@@ -20,10 +20,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
   every host test passes against them.
 - **Approved, not built:** features hold chips as a generic `ChipSet<P>(chips, payloadByKey)` from
   `:core:component`, replacing every chip list + `…ByChipKey` map pair (explore, library, book_detail).
-- **Also built:** plan-reference gates (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`).
-- **Next:** `softcover-test-writer` adds cases for the gate fix round: the step-id pattern in
-  `check_plan_refs` / `CheckDocBudgetsTask`, and trailing comments in `check_kotlin_comments`; then a
-  short `softcover-reviewer` re-check.
+- **Also built:** plan-reference gates (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`),
+  with markdown and Kotlin checks on all three patterns, tested and reviewed.
+- **Next:** close two gate holes (via `softcover-implementer`, then tests and reviewer): (a) the gates
+  never scan config files, and `config/detekt/detekt.yml:74,78` cite `S4-5b` / `S4-1` — remove the
+  citations and extend the plan-reference scan (hook + `checkDocBudgets`) to permanent config
+  (`config/**`, `*.yml`, `*.kts`); (b) `check_kotlin_comments` in `.claude/hooks/doc-guard.sh` splits a
+  code line at its first `//` / `/*`, so a string literal like `"https://…/D17"` false-denies — make
+  the split skip string literals, with cases in `.claude/hooks/test/doc-guard.cases`.
 - **After that:** (1) re-run the agent-memory audit read-only, then apply it (delete one-offs, promote
   durable rules to docs); (2) memory gates: `/handoff` audits memory when a `steps/*.md` was deleted,
   memory budgets in `checkDocBudgets`, `.claude/agent-memory/**` in the plan-reference scan; (3)
@@ -32,10 +36,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
   stale for a frame on open; if visible, seed them in the open action.
-- **Verification:** chip host tests pass; `checkDocBudgets styleCheck`, `-p build-logic test` and
-  `run-doc-guard-cases.sh` pass after the gate fix round.
-- **Uncommitted:** chip package, call sites and host tests; plan-citation KDoc cleanup; the gates and
-  their tests; `.claude/rules/docs.md`; reference docs; this tracker and step files; new agent memories.
+- **Verification:** `run-doc-guard-cases.sh` 61/61 pass; `-p build-logic test --tests
+  CheckDocBudgetsTaskTest` passes; `softcover-reviewer` re-check: looks good.
+- **Uncommitted:** new gate test cases (`.claude/hooks/test/doc-guard.cases`,
+  `CheckDocBudgetsTaskTest.kt`); reviewer memory swap (step-pattern-gap → blind-spots); this tracker.
 
 ## Local verification
 
