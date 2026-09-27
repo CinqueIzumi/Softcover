@@ -198,4 +198,25 @@ class LibraryFilterChipsBuilderTest {
             allChips.map { it.variant } shouldBe allChips.map { ChipVariant.Tonal(selected = false) }
         }
     }
+
+    @Nested
+    inner class RoundedRatingThreshold {
+        @Test
+        fun `integer threshold collapses to a whole number`() {
+            // ----- Act -----
+            val result = roundedRatingThreshold(threshold = 4.0)
+
+            // ----- Assert -----
+            result shouldBe "4"
+        }
+
+        @Test
+        fun `fractional threshold keeps the fractional digit`() {
+            // ----- Act -----
+            val result = roundedRatingThreshold(threshold = 3.5)
+
+            // ----- Assert -----
+            result shouldBe "3.5"
+        }
+    }
 }

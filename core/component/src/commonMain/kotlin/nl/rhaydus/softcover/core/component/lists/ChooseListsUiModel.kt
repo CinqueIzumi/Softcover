@@ -48,7 +48,7 @@ data class ChooseListsUiModel(
                         membershipChip = ChipUiModel(
                             key = "1",
                             label = "On the list",
-                            variant = ChipVariant.Remove,
+                            variant = ChipVariant.Remove(removeLabel = "Remove from list"),
                             interaction = ChipInteraction.Inert,
                         ),
                         membership = ListMembership.ALL,
@@ -101,7 +101,7 @@ data class ChooseListsUiModel(
                         membershipChip = ChipUiModel(
                             key = "1",
                             label = "On all 5",
-                            variant = ChipVariant.Remove,
+                            variant = ChipVariant.Remove(removeLabel = "Remove from list"),
                             interaction = ChipInteraction.Inert,
                         ),
                         membership = ListMembership.ALL,

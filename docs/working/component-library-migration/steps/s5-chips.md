@@ -9,7 +9,8 @@
 | Sub | Scope | Status |
 |---|---|---|
 | S5-1 | Pills already in `:core:component`, plus the `ChipUiModel` extension design | [x] |
-| S5-2 | `feature:library` chips | [ ] |
+| S5-2a | `feature:library` control-line and filter-row chips; `Remove(removeLabel)`, `Quiet` | [x] |
+| S5-2b | Arrange and Filter sheet drafts onto `UiState`; `Choice`; `ArrangeChip` | [ ] |
 | S5-3 | book_detail, explore, reading and settings chips | [ ] |
 
 ## S5-1 — core pills
@@ -40,9 +41,18 @@
 | `SortLabelControl` | `feature/library/presentation/component/LibraryControlLine.kt:107` | |
 | `SelectionActionPill` | `feature/library/presentation/screen/section/SelectionHeader.kt:153` | |
 
-**Phase 1 questions:** `ActiveFilterChip` / `ClearAllChip` carry a selected/dismiss affordance the core
-pills do not — does that need a new `ChipEvent` case, or does it fit the existing one? Decide whether
-`SelectionActionPill` belongs to this family at all (it reads as an action pill, not a filter chip).
+**Phase 1:** done — the shape is `README.md` D13. `SortLabelControl` leaves the family (stays
+feature-local); `FilterPillControl` and `SelectionActionPill` move in S8 controls.
+
+- **S5-2a:** `Remove` gains `removeLabel` (update `ChooseListsMapper`); add `Quiet(selected)`.
+  `ActiveFilterChip` → `Remove` + `Clicked`, `ClearAllChip` → `Quiet()`, `RearrangeHintChip` →
+  `Quiet(selected)` + `leadingIcon`. An active-filter collector replaces `FilterChipDescriptor` /
+  `toChipDescriptors()` with per-tab chip models and a key → `LibraryFilterValue` map on `LibraryUiState`;
+  the rearrange chip's model arrives on `UiState` too.
+- **S5-2b:** move `LibraryArrangeSheet`'s and `LibraryFilterSheet`'s `remember` drafts onto `UiState` —
+  seeded on open, edited through actions, committed by `OnApplyArrangeAction` / `OnApplyFiltersAction`.
+  Add `Choice(selected, trailingIcon)`; a collector derives the layout and sort chip models from the
+  draft; `ArrangeChip` goes and `ChipUiModel.selectedFor` is deleted.
 
 ## S5-3 — book_detail, explore, reading, settings
 

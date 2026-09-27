@@ -327,7 +327,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().membershipChip.variant shouldBe ChipVariant.Remove
+            result.rows.single().membershipChip.variant shouldBe ChipVariant.Remove(removeLabel = "Remove from list")
         }
 
         @Test

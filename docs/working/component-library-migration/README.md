@@ -14,21 +14,21 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4 done. S5-1 done: `Chip` is the D11 + D12 family (`ChipVariant`, `ChipInteraction`,
-  `ChipDimensions`), the ChooseLists pills and the `WhenReadRow` date pill render through it, and
-  `ChooseListsRowUiModel.membershipChip` carries the row's chip. Reviewer: no findings.
-- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) § S5-2, Phase 1 per
-  [`family-procedure.md`](family-procedure.md): the `feature:library` chips, including the
-  `ActiveFilterChip` dismiss question (D12's `ChipEvent.Dismissed` likely answers it).
-- **Countdown:** Step 09 in `docs/working/token-hygiene/README.md` — 3 of 5 sessions.
+- **State:** S0–S4, S5-1 and S5-2a done. S5-2a: `ChipVariant.Remove(removeLabel)` and `Quiet(selected)`;
+  the Library active-filter row and rearrange chip render through `Chip`, built by
+  `ActiveFilterChipsCollector` / `RearrangeChipCollector`, taps via `OnActiveFilterChipClickedAction`;
+  `LibraryFilterValue.chipKey()` is the shared key scheme. Reviewer findings applied.
+- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) § S5-2b, Phase 2 per
+  [`family-procedure.md`](family-procedure.md): Arrange / Filter sheet drafts onto `UiState`, `Choice`,
+  `ArrangeChip` onto `Chip`, delete `ChipUiModel.selectedFor`.
+- **Countdown:** Step 09 in `docs/working/token-hygiene/README.md` — 4 of 5 sessions.
 - **Open questions:** none.
-- **Verification:** compile for the five touched modules, `checkModuleGraph`, `ktlintCheck`,
-  `styleCheck` and `checkDocBudgets` passed under JBR 21, and so did the targeted tests.
-- **Uncommitted (all staged):** the S5-1 chip family under `core/component/.../chip/` (plus the new
-  `ChipDimensions`, `ChipVariant`, `ChipInteraction` and `ChipFace`); its call sites in core:component
-  lists/progress/share/gallery/topbar, `ChooseListsMapper`, and feature book_detail, library and
-  settings; tests in core:component, core:uibinding, book_detail and library; `components.md` and the
-  tracker docs; agent-memory notes under `.claude/agent-memory/`.
+- **Verification:** compile (core:component, core:uibinding, feature:library), `checkModuleGraph`,
+  `:feature:library:projectHealth`, `ktlintCheck`, `styleCheck`, and core:component + feature:library host
+  tests passed under JBR 21. `:core:component:projectHealth` fails on a pre-existing `kotlinx.datetime`
+  finding.
+- **Uncommitted:** S5-2a code, tests and docs (D13 tracker docs, `components.md`), plus the narrowed
+  test-failure rule in `CLAUDE.md`.
 
 ## Local verification
 
@@ -64,7 +64,7 @@ every sub-step's Verify.
 | Stage | Step file | Sub-steps | Status |
 |---|---|---|---|
 | S0–S4 | — | module scaffolding through tokens-only designsystem | [x] |
-| S5 | [steps/s5-chips.md](steps/s5-chips.md) | S5-1–S5-3 | [ ] |
+| S5 | [steps/s5-chips.md](steps/s5-chips.md) | S5-1, S5-2a, S5-2b, S5-3 | [ ] |
 | S5 | [steps/s5-headers.md](steps/s5-headers.md) | S5-4–S5-6 | [ ] |
 | S5 | [steps/s5-badges.md](steps/s5-badges.md) | S5-7 | [ ] |
 | S5 | [steps/s5-skeletons.md](steps/s5-skeletons.md) | S5-8 | [ ] |
@@ -118,6 +118,19 @@ every sub-step's Verify.
   `dismissLabel` renders a trailing ✕ as its own tap target, uses the label as the ✕'s content
   description, and reports `ChipEvent.Dismissed(key)`. S5-2's `ActiveFilterChip` reuses it. `Remove`'s
   ✕ stays display-only. The date pill takes Tonal's `onSurface` idle ink, an accepted visual change.
+- **D13** (2026-09-28) S5-2 shape. No new `ChipEvent`: `ActiveFilterChip` is whole-chip-tap removal, so it
+  renders as `Remove` reporting `Clicked` — D12's `Dismissed` would shrink the target to the 16dp ✕.
+  `Remove` becomes `Remove(removeLabel: String)`, the ✕'s content description (ChooseLists passes
+  "Remove from list"). New `Quiet(selected)` — `surfaceContainer`/`onSurfaceVariant` idle,
+  `secondaryContainer`/`onSecondaryContainer` selected — carries `ClearAllChip` and `RearrangeHintChip`
+  (`leadingIcon = DragHandle`). New `Choice(selected, trailingIcon: SoftcoverIcon?)` — `primary`/`onPrimary`
+  selected, `surfaceContainer`/`onSurface` idle — carries `ArrangeChip` and its sort-direction arrow.
+  Metrics converge: one tuple per variant, so each pair sharing a variant renders identically (accepted
+  1–2dp shifts). Chip models arrive on `LibraryUiState` from feature-local collectors (R6, one consumer);
+  both the Arrange and the Filter sheet drafts move from composition onto `UiState`, which retires the
+  Filter sheet's `ChipUiModel.selectedFor` R10 holdout. Out of the family: `SortLabelControl` (text, not a
+  chip; stays feature-local), `FilterPillControl` and `SelectionActionPill` (buttons; move in S8 controls).
+  The chip rows stay feature-local containers.
 
 ## Baseline
 

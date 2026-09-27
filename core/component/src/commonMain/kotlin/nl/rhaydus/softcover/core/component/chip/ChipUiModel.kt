@@ -62,7 +62,19 @@ data class ChipUiModel(
             ChipUiModel(
                 key = "remove",
                 label = "On the list",
-                variant = ChipVariant.Remove,
+                variant = ChipVariant.Remove(removeLabel = "Remove from list"),
+            ),
+            ChipUiModel(
+                key = "quiet-idle",
+                label = "Reorder",
+                variant = ChipVariant.Quiet(),
+                leadingIcon = SoftcoverIcon.DragHandle,
+            ),
+            ChipUiModel(
+                key = "quiet-selected",
+                label = "Done",
+                variant = ChipVariant.Quiet(selected = true),
+                leadingIcon = SoftcoverIcon.DragHandle,
             ),
             ChipUiModel(
                 key = "format",

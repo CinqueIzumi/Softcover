@@ -94,12 +94,27 @@ internal data class ChipDimensions(
                 disabledAlpha = DISABLED_ALPHA,
             )
 
-            ChipVariant.Remove -> ChipDimensions(
+            is ChipVariant.Remove -> ChipDimensions(
                 paddingStart = 13.dp,
                 paddingTop = 7.dp,
                 paddingEnd = 10.dp,
                 paddingBottom = 7.dp,
                 innerGap = 4.dp,
+                leadingIconSize = LeadingIconSize,
+                leadingIconGap = LeadingIconGap,
+                dismissIconSize = DismissIconSize,
+                dismissIconGap = DismissIconGap,
+                removeIconSize = RemoveIconSize,
+                borderWidth = 0.dp,
+                disabledAlpha = DISABLED_ALPHA,
+            )
+
+            is ChipVariant.Quiet -> ChipDimensions(
+                paddingStart = 14.dp,
+                paddingTop = 8.dp,
+                paddingEnd = 14.dp,
+                paddingBottom = 8.dp,
+                innerGap = 0.dp,
                 leadingIconSize = LeadingIconSize,
                 leadingIconGap = LeadingIconGap,
                 dismissIconSize = DismissIconSize,

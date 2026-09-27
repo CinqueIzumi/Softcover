@@ -42,68 +42,83 @@ private fun ownershipChipEntries(
     if (options.supportsOwnedFilter.not()) return emptyList()
 
     return listOf(
-        ChipUiModel(
-            key = "owned:true",
-            label = "Owned",
-        ) to LibraryFilterValue.Owned(owned = true),
-        ChipUiModel(
-            key = "owned:false",
-            label = "Unowned",
-        ) to LibraryFilterValue.Owned(owned = false),
+        LibraryFilterValue.Owned(owned = true).let { value ->
+            ChipUiModel(
+                key = value.chipKey(),
+                label = "Owned",
+            ) to value
+        },
+        LibraryFilterValue.Owned(owned = false).let { value ->
+            ChipUiModel(
+                key = value.chipKey(),
+                label = "Unowned",
+            ) to value
+        },
     )
 }
 
 private fun formatChipEntries(
     options: LibraryFilterOptions,
 ): List<Pair<ChipUiModel, LibraryFilterValue>> = options.formats.map { format ->
+    val value = LibraryFilterValue.Format(value = format)
+
     ChipUiModel(
-        key = "format:$format",
+        key = value.chipKey(),
         label = format,
-    ) to LibraryFilterValue.Format(value = format)
+    ) to value
 }
 
 private fun releaseYearChipEntries(
     options: LibraryFilterOptions,
 ): List<Pair<ChipUiModel, LibraryFilterValue>> = options.releaseYears.map { year ->
+    val value = LibraryFilterValue.ReleaseYear(year = year)
+
     ChipUiModel(
-        key = "releaseYear:$year",
+        key = value.chipKey(),
         label = year.toString(),
-    ) to LibraryFilterValue.ReleaseYear(year = year)
+    ) to value
 }
 
 private fun readYearChipEntries(
     options: LibraryFilterOptions,
 ): List<Pair<ChipUiModel, LibraryFilterValue>> = options.readYears.map { year ->
+    val value = LibraryFilterValue.ReadYear(year = year)
+
     ChipUiModel(
-        key = "readYear:$year",
+        key = value.chipKey(),
         label = year.toString(),
-    ) to LibraryFilterValue.ReadYear(year = year)
+    ) to value
 }
 
 private fun tagChipEntries(
     options: LibraryFilterOptions,
 ): List<Pair<ChipUiModel, LibraryFilterValue>> = options.tags.map { tag ->
+    val value = LibraryFilterValue.Tag(tag = tag)
+
     ChipUiModel(
-        key = "tag:${tag.id}",
+        key = value.chipKey(),
         label = tag.name,
-    ) to LibraryFilterValue.Tag(tag = tag)
+    ) to value
 }
 
 private fun ratingChipEntries(
     options: LibraryFilterOptions,
 ): List<Pair<ChipUiModel, LibraryFilterValue>> = options.ratingBuckets.map { threshold ->
+    val value = LibraryFilterValue.RatingMin(threshold = threshold)
+
     ChipUiModel(
-        key = "rating:$threshold",
+        key = value.chipKey(),
         label = formatRatingLabel(threshold = threshold),
-    ) to LibraryFilterValue.RatingMin(threshold = threshold)
+    ) to value
 }
 
 /**
  * The single source for a rating threshold's chip label — `LibraryFilterSheet` used to keep its own
  * copy, now dead since the render takes its labels straight off the built [ChipUiModel]s.
  */
-private fun formatRatingLabel(threshold: Double): String {
-    val rounded = if (threshold % 1.0 == 0.0) threshold.toInt().toString() else threshold.toString()
+private fun formatRatingLabel(threshold: Double): String =
+    "${roundedRatingThreshold(threshold = threshold)}★ and up"
 
-    return "$rounded★ and up"
-}
+/** Shared by [formatRatingLabel] and `LibraryActiveFilterChipsBuilder`'s active-chip label. */
+internal fun roundedRatingThreshold(threshold: Double): String =
+    if (threshold % 1.0 == 0.0) threshold.toInt().toString() else threshold.toString()

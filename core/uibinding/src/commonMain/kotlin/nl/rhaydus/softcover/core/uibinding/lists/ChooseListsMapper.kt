@@ -109,7 +109,7 @@ private fun List<BookList>.rowsFor(
 
 /** The trailing control's chrome per membership: a removable chip, a filled add pill, a quiet outline pill. */
 private fun ListMembership.toMembershipChipVariant(): ChipVariant = when (this) {
-    ListMembership.ALL -> ChipVariant.Remove
+    ListMembership.ALL -> ChipVariant.Remove(removeLabel = "Remove from list")
     ListMembership.PARTIAL -> ChipVariant.Add
     ListMembership.NONE -> ChipVariant.AddOutlined
 }

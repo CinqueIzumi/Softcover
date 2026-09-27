@@ -45,6 +45,7 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -55,6 +56,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnActiveFilterChipClickedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveMenuExpandedChangeAction
@@ -62,14 +64,12 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfA
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveDialogExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveFromLibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkToggleListMembershipAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnClearFiltersAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleFilterValueAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlLine
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
@@ -233,23 +233,23 @@ internal actual fun LibraryScreenLayout(
                     runAction = runAction,
                 )
 
-                val activeFilters = currentTab?.id?.let { state.filtersFor(tabId = it) }
+                val activeFilterChips = currentTab?.id?.let { state.activeFilterChipsFor(tabId = it) }
 
-                if (currentTab != null && activeFilters != null && activeFilters.isEmpty.not()) {
+                if (currentTab != null && activeFilterChips != null && activeFilterChips.chips.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     LibraryFilterChipRow(
-                        filters = activeFilters,
-                        onRemove = { value ->
-                            runAction(
-                                OnToggleFilterValueAction(
-                                    tabId = currentTab.id,
-                                    value = value,
-                                ),
-                            )
-                        },
-                        onClearAll = {
-                            runAction(OnClearFiltersAction(tabId = currentTab.id))
+                        chips = activeFilterChips,
+                        onChipEvent = { event ->
+                            when (event) {
+                                is ChipEvent.Clicked ->
+                                    runAction(OnActiveFilterChipClickedAction(
+                                        tabId = currentTab.id,
+                                        key = event.key,
+                                    ),)
+
+                                is ChipEvent.Dismissed -> Unit
+                            }
                         },
                     )
                 }

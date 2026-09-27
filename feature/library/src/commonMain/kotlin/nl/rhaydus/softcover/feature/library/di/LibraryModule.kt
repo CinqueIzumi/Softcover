@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
+import nl.rhaydus.softcover.feature.library.presentation.collector.ActiveFilterChipsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.AllBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookListsCollector
@@ -21,6 +22,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.FilterChipMod
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterOptionsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.RearrangeChipCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.SortModeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.VisibleTabsCollector
@@ -59,6 +61,8 @@ val libraryModule = module {
 
     factory { FilterOptionsCollector() } bind LibraryCollector::class
     factory { FilterChipModelsCollector() } bind LibraryCollector::class
+    factory { ActiveFilterChipsCollector() } bind LibraryCollector::class
+    factory { RearrangeChipCollector() } bind LibraryCollector::class
 
     factory { DisplayListsCollector() } bind LibraryCollector::class
 

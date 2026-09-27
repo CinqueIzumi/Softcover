@@ -17,7 +17,10 @@ sealed interface ChipVariant {
     data object AddOutlined : ChipVariant
 
     /** A primary-container pill whose trailing ✕ is display-only — it never reports [ChipEvent.Dismissed]. */
-    data object Remove : ChipVariant
+    data class Remove(val removeLabel: String) : ChipVariant
+
+    /** A low-emphasis surface-container pill; [selected] swaps it onto the secondary container. */
+    data class Quiet(val selected: Boolean = false) : ChipVariant
 
     /**
      * A rich-text formatting toggle previewing the mark [face] applies; [active] reflects whether

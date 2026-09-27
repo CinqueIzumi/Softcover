@@ -28,6 +28,7 @@ class ChipUiModelTest {
                 ChipVariant.Add::class,
                 ChipVariant.AddOutlined::class,
                 ChipVariant.Remove::class,
+                ChipVariant.Quiet::class,
                 ChipVariant.Format::class,
             )
 

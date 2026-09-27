@@ -21,12 +21,13 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetExpandedChangeAction
@@ -37,15 +38,11 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExp
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 /**
- * The masthead's second row (redesign brief "Control line"): replaces the old `LibraryControlStrip`
- * (sort/filter/layout dropdown pills). Left: the current sort label + direction chevron, opening the
- * Arrange sheet — the same sheet now owns layout too, so there is no separate layout affordance here.
- * Right: the Filter pill (with an active-dot) and the Select circle, which enters selection mode with
- * an **empty** selection — unlike a cover long-press, which seeds the pressed cover, the toolbar
- * entry point has no single book to anchor to, so it opens empty and the user picks their own start.
- * An inline "Reorder" hint chip surfaces beside the sort label whenever the shelf is on a reorderable
- * positional sort — the old control-strip's trailing drag-handle icon-button's replacement entry
- * point into Rearrange mode.
+ * The masthead's second row (redesign brief "Control line"). Left: the current sort label + direction
+ * chevron, opening the Arrange sheet — the same sheet owns layout too, so there is no separate layout
+ * affordance here. Right: the Filter pill (with an active-dot) and the Select circle, which enters
+ * selection mode with an **empty** selection — unlike a cover long-press, which seeds the pressed
+ * cover, the toolbar entry point has no single book to anchor to.
  */
 @Composable
 internal fun LibraryControlLine(
@@ -68,16 +65,22 @@ internal fun LibraryControlLine(
             runAction = runAction,
         )
 
-        if (canRearrange(
-            state = state,
-            tab = currentTab,
-        ) || state.isRearranging
-        ) {
+        state.rearrangeChipFor(tabId = currentTab.id)?.let { chip ->
             Spacer(modifier = Modifier.width(10.dp))
 
-            RearrangeHintChip(
-                isRearranging = state.isRearranging,
-                runAction = runAction,
+            Chip(
+                model = chip,
+                onEvent = { event ->
+                    if (event is ChipEvent.Clicked) {
+                        val action = if (state.isRearranging) {
+                            OnExitRearrangeModeAction()
+                        } else {
+                            OnEnterRearrangeModeAction()
+                        }
+
+                        runAction(action)
+                    }
+                },
             )
         }
 
@@ -145,61 +148,6 @@ private fun SortLabelControl(
                 contentDescription = arrowIcon.contentDescription,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(16.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun RearrangeHintChip(
-    isRearranging: Boolean,
-    runAction: (LibraryAction) -> Unit,
-) {
-    val container = if (isRearranging) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceContainer
-    }
-
-    val content = if (isRearranging) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
-    val label = if (isRearranging) "Done" else "Reorder"
-
-    Surface(
-        color = container,
-        contentColor = content,
-        shape = RoundedCornerShape(percent = 50),
-        onClick = {
-            val action = if (isRearranging) OnExitRearrangeModeAction() else OnEnterRearrangeModeAction()
-
-            runAction(action)
-        },
-        modifier = Modifier.pointerHandCursor(),
-    ) {
-        Row(
-            modifier = Modifier.padding(start = 10.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            val dragHandleIcon = drawableIconResource(
-                icon = SoftcoverIcon.DragHandle,
-                contentDescription = if (isRearranging) "Finish rearranging" else "Rearrange this shelf",
-            )
-
-            Icon(
-                painter = dragHandleIcon.getIconPainter(),
-                contentDescription = dragHandleIcon.contentDescription,
-                modifier = Modifier.size(14.dp),
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
-
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
             )
         }
     }
@@ -299,34 +247,4 @@ private fun canSelect(
     is LibraryTab.CustomList -> false
     is LibraryTab.All, is LibraryTab.Status ->
         (state.displayBooksFor(tabId = tab.id) ?: state.booksByTab[tab.id]).orEmpty().isNotEmpty()
-}
-
-/**
- * Whether [tab] is currently on a positional sort with enough items to be worth rearranging —
- * MANUAL on a built-in reading shelf (not Did Not Finish), or ORDER on a ranked custom list. Mirrors
- * the screen's reorder-grid gating so the hint only appears where a drag actually persists. The
- * `>= 2` guard hides the hint when the visible set (after search/filters) has nothing to reorder.
- */
-private fun canRearrange(
-    state: LibraryUiState,
-    tab: LibraryTab,
-): Boolean {
-    val mode = state.sortModeFor(tabId = tab.id)
-
-    return when (tab) {
-        is LibraryTab.Status ->
-            mode == LibrarySortMode.MANUAL &&
-                tab.status != UserBookStatus.DID_NOT_FINISH &&
-                (state.displayBooksFor(tabId = tab.id)?.size ?: 0) >= 2
-
-        is LibraryTab.CustomList -> {
-            val isRanked = state.customLists.firstOrNull { it.id == tab.listId }?.ranked == true
-
-            mode == LibrarySortMode.ORDER &&
-                isRanked &&
-                (state.displayEditionsFor(tabId = tab.id)?.size ?: 0) >= 2
-        }
-
-        LibraryTab.All -> false
-    }
 }

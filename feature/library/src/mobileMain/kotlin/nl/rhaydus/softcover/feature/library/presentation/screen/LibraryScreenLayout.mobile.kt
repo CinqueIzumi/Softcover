@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -58,6 +59,7 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnActiveFilterChipClickedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveMenuExpandedChangeAction
@@ -65,7 +67,6 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfA
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveDialogExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveFromLibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkToggleListMembershipAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnClearFiltersAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
@@ -73,7 +74,6 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnShelvesSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleFilterValueAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlLine
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
@@ -276,32 +276,32 @@ internal actual fun LibraryScreenLayout(
                     )
                 }
 
-                val activeFilters = currentTab?.id?.let { state.filtersFor(tabId = it) }
+                val activeFilterChips = currentTab?.id?.let { state.activeFilterChipsFor(tabId = it) }
 
                 AnimatedVisibility(
-                    visible = activeFilters != null && activeFilters.isEmpty.not(),
+                    visible = activeFilterChips != null && activeFilterChips.chips.isNotEmpty(),
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut(),
                 ) {
                     val tabId = currentTab?.id
-                    val filters = activeFilters
+                    val chips = activeFilterChips
 
-                    if (tabId != null && filters != null) {
+                    if (tabId != null && chips != null) {
                         Column {
                             Spacer(modifier = Modifier.height(8.dp))
 
                             LibraryFilterChipRow(
-                                filters = filters,
-                                onRemove = { value ->
-                                    runAction(
-                                        OnToggleFilterValueAction(
-                                            tabId = tabId,
-                                            value = value,
-                                        ),
-                                    )
-                                },
-                                onClearAll = {
-                                    runAction(OnClearFiltersAction(tabId = tabId))
+                                chips = chips,
+                                onChipEvent = { event ->
+                                    when (event) {
+                                        is ChipEvent.Clicked ->
+                                            runAction(OnActiveFilterChipClickedAction(
+                                                tabId = tabId,
+                                                key = event.key,
+                                            ),)
+
+                                        is ChipEvent.Dismissed -> Unit
+                                    }
                                 },
                             )
                         }

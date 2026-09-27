@@ -92,7 +92,7 @@ class ChipDimensionsTest {
         @Test
         fun `Remove uses 13, 7, 10, 7 padding with a 12dp dismiss icon`() {
             // ----- Arrange & Act -----
-            val dimensions = ChipDimensions.forVariant(ChipVariant.Remove)
+            val dimensions = ChipDimensions.forVariant(ChipVariant.Remove(removeLabel = "Remove from list"))
 
             // ----- Assert -----
             dimensions shouldBe ChipDimensions(
@@ -109,6 +109,40 @@ class ChipDimensionsTest {
                 borderWidth = 0.dp,
                 disabledAlpha = 0.45f,
             )
+        }
+
+        @Test
+        fun `Quiet uses 14 by 8 padding with no border`() {
+            // ----- Arrange & Act -----
+            val dimensions = ChipDimensions.forVariant(ChipVariant.Quiet())
+
+            // ----- Assert -----
+            dimensions shouldBe ChipDimensions(
+                paddingStart = 14.dp,
+                paddingTop = 8.dp,
+                paddingEnd = 14.dp,
+                paddingBottom = 8.dp,
+                innerGap = 0.dp,
+                leadingIconSize = 18.dp,
+                leadingIconGap = 8.dp,
+                dismissIconSize = 16.dp,
+                dismissIconGap = 8.dp,
+                removeIconSize = 12.dp,
+                borderWidth = 0.dp,
+                disabledAlpha = 0.45f,
+            )
+        }
+
+        @Test
+        fun `Quiet's selected flag never changes its dimensions`() {
+            // ----- Arrange -----
+            val unselected = ChipDimensions.forVariant(ChipVariant.Quiet(selected = false))
+
+            // ----- Act -----
+            val selected = ChipDimensions.forVariant(ChipVariant.Quiet(selected = true))
+
+            // ----- Assert -----
+            selected shouldBe unselected
         }
 
         @Test
@@ -166,7 +200,8 @@ class ChipDimensionsTest {
                 ChipVariant.Spoiler,
                 ChipVariant.Add,
                 ChipVariant.AddOutlined,
-                ChipVariant.Remove,
+                ChipVariant.Remove(removeLabel = "Remove from list"),
+                ChipVariant.Quiet(),
                 ChipVariant.Format(
                     active = false,
                     face = ChipFace.Plain,

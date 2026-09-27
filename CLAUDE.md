@@ -40,7 +40,9 @@ book tracking platform, on Android (SDK 26+), iOS and desktop (JVM). Shared UI a
 - **Always delegate test writing to `softcover-test-writer`**, however small the change — never write or modify
   unit tests in the main conversation. No exceptions. The agent runs the tests it writes.
 - Relaying its report: if all pass, say the suite was executed and passed. If any fail, give the failing test
-  names and the agent's diagnosis verbatim, then **stop** and wait for the user to approve a fix round.
+  names and the agent's diagnosis verbatim. When the diagnosis points at production behaviour, **stop** and
+  wait for the user to approve a fix round. When it is test-side fallout from an intended change (setup the
+  change now correctly rejects, a style gate on the test file), send the fix round straight away.
 
 ## Commit messages
 

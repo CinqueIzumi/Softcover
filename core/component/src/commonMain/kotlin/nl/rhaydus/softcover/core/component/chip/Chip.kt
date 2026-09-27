@@ -65,8 +65,15 @@ fun Chip(
             onEvent = onEvent,
             modifier = modifier,
         )
-        ChipVariant.Remove -> RemoveChip(
+        is ChipVariant.Remove -> RemoveChip(
             model = model,
+            variant = variant,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+        is ChipVariant.Quiet -> QuietChip(
+            model = model,
+            variant = variant,
             onEvent = onEvent,
             modifier = modifier,
         )
@@ -116,11 +123,13 @@ private fun TonalChip(
                 bottom = dimensions.paddingBottom,
             ),
     ) {
-        model.leadingIcon?.let { ChipLeadingIcon(
-            icon = it,
-            tint = content,
-            dimensions = dimensions,
-        ) }
+        model.leadingIcon?.let { icon ->
+            ChipLeadingIcon(
+                icon = icon,
+                tint = content,
+                dimensions = dimensions,
+            )
+        }
 
         Text(
             text = model.label,
@@ -161,11 +170,13 @@ private fun SpoilerChip(
                 bottom = dimensions.paddingBottom,
             ),
     ) {
-        model.leadingIcon?.let { ChipLeadingIcon(
-            icon = it,
-            tint = Color.Transparent,
-            dimensions = dimensions,
-        ) }
+        model.leadingIcon?.let { icon ->
+            ChipLeadingIcon(
+                icon = icon,
+                tint = Color.Transparent,
+                dimensions = dimensions,
+            )
+        }
 
         Text(
             text = model.label,
@@ -207,11 +218,13 @@ private fun AddChip(
                 bottom = dimensions.paddingBottom,
             ),
     ) {
-        model.leadingIcon?.let { ChipLeadingIcon(
-            icon = it,
-            tint = content,
-            dimensions = dimensions,
-        ) }
+        model.leadingIcon?.let { icon ->
+            ChipLeadingIcon(
+                icon = icon,
+                tint = content,
+                dimensions = dimensions,
+            )
+        }
 
         Text(
             text = "+ ${model.label}",
@@ -255,11 +268,13 @@ private fun AddOutlinedChip(
                 bottom = dimensions.paddingBottom,
             ),
     ) {
-        model.leadingIcon?.let { ChipLeadingIcon(
-            icon = it,
-            tint = MaterialTheme.colorScheme.primary,
-            dimensions = dimensions,
-        ) }
+        model.leadingIcon?.let { icon ->
+            ChipLeadingIcon(
+                icon = icon,
+                tint = MaterialTheme.colorScheme.primary,
+                dimensions = dimensions,
+            )
+        }
 
         Text(
             text = "+",
@@ -286,11 +301,12 @@ private fun AddOutlinedChip(
 @Composable
 private fun RemoveChip(
     model: ChipUiModel,
+    variant: ChipVariant.Remove,
     onEvent: (ChipEvent) -> Unit,
     modifier: Modifier,
 ) {
     val content = MaterialTheme.colorScheme.onPrimaryContainer
-    val dimensions = ChipDimensions.forVariant(ChipVariant.Remove)
+    val dimensions = ChipDimensions.forVariant(variant)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -307,11 +323,13 @@ private fun RemoveChip(
                 bottom = dimensions.paddingBottom,
             ),
     ) {
-        model.leadingIcon?.let { ChipLeadingIcon(
-            icon = it,
-            tint = content,
-            dimensions = dimensions,
-        ) }
+        model.leadingIcon?.let { icon ->
+            ChipLeadingIcon(
+                icon = icon,
+                tint = content,
+                dimensions = dimensions,
+            )
+        }
 
         Text(
             text = model.label,
@@ -323,7 +341,7 @@ private fun RemoveChip(
 
         val closeIcon = drawableIconResource(
             icon = SoftcoverIcon.Close,
-            contentDescription = "Remove from list",
+            contentDescription = variant.removeLabel,
         )
 
         Icon(
@@ -332,6 +350,66 @@ private fun RemoveChip(
             tint = content,
             modifier = Modifier.size(dimensions.removeIconSize),
         )
+    }
+}
+
+@Composable
+private fun QuietChip(
+    model: ChipUiModel,
+    variant: ChipVariant.Quiet,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val container = if (variant.selected) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainer
+    }
+
+    val content = if (variant.selected) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    val dimensions = ChipDimensions.forVariant(variant)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .background(container)
+            .chipInteraction(interaction = model.interaction, dimensions = dimensions) {
+                onEvent(ChipEvent.Clicked(key = model.key))
+            }
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        model.leadingIcon?.let { icon ->
+            ChipLeadingIcon(
+                icon = icon,
+                tint = content,
+                dimensions = dimensions,
+            )
+        }
+
+        Text(
+            text = model.label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+            color = content,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        model.dismissLabel?.let { label ->
+            ChipDismissIcon(dismissLabel = label, tint = content, dimensions = dimensions) {
+                onEvent(ChipEvent.Dismissed(key = model.key))
+            }
+        }
     }
 }
 
@@ -370,11 +448,13 @@ private fun FormatChip(
                 bottom = dimensions.paddingBottom,
             ),
     ) {
-        model.leadingIcon?.let { ChipLeadingIcon(
-            icon = it,
-            tint = content,
-            dimensions = dimensions,
-        ) }
+        model.leadingIcon?.let { icon ->
+            ChipLeadingIcon(
+                icon = icon,
+                tint = content,
+                dimensions = dimensions,
+            )
+        }
 
         Text(
             text = model.label,

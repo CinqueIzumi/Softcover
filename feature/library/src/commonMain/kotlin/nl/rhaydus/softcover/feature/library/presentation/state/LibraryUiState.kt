@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -100,6 +101,10 @@ internal data class LibraryUiState(
      * offering the same value share one entry.
      */
     val filterValueByChipKey: Map<String, LibraryFilterValue> = emptyMap(),
+
+    val activeFilterChipsByTab: Map<String, LibraryActiveFilterChips> = emptyMap(),
+    val activeFilterValueByChipKey: Map<String, LibraryFilterValue> = emptyMap(),
+    val rearrangeChipByTab: Map<String, ChipUiModel> = emptyMap(),
 
     /**
      * Search + filter-chip results per tab for book shelves (year-finished narrowing lives inside
@@ -203,6 +208,12 @@ internal data class LibraryUiState(
      */
     fun filterChipsFor(tabId: String): LibraryFilterChips =
         filterChipsByTab[tabId] ?: LibraryFilterChips()
+
+    fun activeFilterChipsFor(tabId: String): LibraryActiveFilterChips =
+        activeFilterChipsByTab[tabId] ?: LibraryActiveFilterChips()
+
+    fun rearrangeChipFor(tabId: String): ChipUiModel? =
+        rearrangeChipByTab[tabId]
 
     /**
      * Books to render for [tabId], precomputed by [DisplayListsCollector] and served as an O(1)
