@@ -17,6 +17,7 @@ that branch, not separate pull requests. Every stage boundary must leave the bra
   land. There is no S5 plan file on this branch; an older chips attempt exists only in `refs/stash`
   and is **not** the plan. Pinned budget for `foundations.md` (the one remaining design-system doc
   pinned by the token-hygiene gate) gets restored on S12.
+- **Countdown:** Step 09 in `docs/working/token-hygiene/README.md` — 0 of 5 sessions.
 - **Open questions:** none.
 - **Verification:** the reliable per-change gates below; run through `scripts/gradle-quiet.sh`.
 - **Uncommitted:** none.

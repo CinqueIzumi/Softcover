@@ -31,6 +31,10 @@ it needs.
    - **Uncommitted:** a summary of `git status --short` (step 3).
    ```
 
+   If the old block has a **Countdown** line (`- **Countdown:** <step> in <tracker> — N of M sessions`),
+   carry it into the new block with N raised by one. When N reaches M, drop the line, make that step the
+   **Next** item, and start the final message with `Countdown reached: <step> is due.`
+
    Replace the old block; do not append to it. Drop history the next session does not need — decisions
    belong under the tracker's `## Decisions`, not in `## Now`.
 
