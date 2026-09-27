@@ -6,27 +6,26 @@
 
 ## Now
 
-- **State:** Steps 00–07 and 08a–08h committed. 08i–08m are split, reviewed as pure moves and uncommitted. Every
-  presentation file they touched is ≤532 lines. `LibraryScreenLayout.mobile.kt` (527) is one 379-line
-  composable that a pure move cannot split.
-- **Next:** Step 08n in `steps/08-file-splits.md` § 08n: the `checkPresentationFileSize` gate in the root
-  `build.gradle.kts`, its docs, and FU-9 in `foundation-upstream.md`. Then tick Step 08 and delete the step
-  file. Run Gradle with `JAVA_HOME` set to JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`). The
-  default JDK 26 fails detekt, and JDK 17 (CI's) is not installed. Keep the shell cwd at the repo root before
-  spawning agents.
+- **State:** Steps 00–07 and 08a–08m committed. 08n is done and uncommitted: `checkPresentationFileSize` in
+  the root `build.gradle.kts`, wired into `check`, 600 lines, no baseline. It passes on 759 files, and a
+  temporary 601-line file made it fail with that file's path listed. FU-9 is "done locally".
+- **Next:** Step 09 in `steps/09-measure.md`. It waits until at least five migration sessions have run under
+  the new setup, so resume migration work first. Run Gradle with `JAVA_HOME` set to JBR 21
+  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`). The default JDK 26 fails detekt, and JDK 17 (CI's) is
+  not installed. Keep the shell cwd at the repo root before spawning agents.
 - **Open questions:** none. Follow-ups:
   - `section/FeaturedBackdropCard.kt:80` cites a contract note on `rememberCoverImageRequest` that never
     existed (FU-13).
   - The KDoc sentence "`expect` cannot carry default argument values" in 10 `*Screen.kt` files is false
     (`BarcodeScanner.kt:18` has an `expect` default).
   - The line pointers in `docs/working/compose-audit-report.md` are stale.
-- **Verification:** on JBR 21, the `ci.yml` steps (`ktlintCheck`, `detekt`, `checkDocBudgets`, `test`,
-  `koverXmlReport`), `styleCheck`, and `compileKotlinJvm` + `testAndroidHostTest` for the five modules all passed.
-  Only `styleCheck` catches detekt `MatchingDeclarationName`, so include it in every Verify.
-- **Uncommitted:** the 08i–08m splits. That covers the sources in `:feature:book_detail` (`component/`), explore
-  jvmMain, settings jvmMain (plus two comment repoints in mobileMain/commonMain), library mobileMain and reading
-  mobileMain/commonMain, with new files under each `section/`. Also the path repoints in
-  `component-library-migration.md`, this block, and the 08i–08m rows in `steps/08-file-splits.md`.
+- **Verification:** on JBR 21, `checkPresentationFileSize`, `checkDocBudgets` and `ktlintCheck` passed, and
+  `softcover-reviewer` returned ✅ with no bugs. Only `styleCheck` catches detekt `MatchingDeclarationName`,
+  so include it in every Verify.
+- **Uncommitted:** all staged. The Step 08n gate (`build.gradle.kts`) and its docs (`module-structure.md`,
+  `.claude/rules/build-wiring.md`). The token-hygiene tracker (this block, the Step 08 tick, FU-9, the
+  deleted `steps/08-file-splits.md`). Reviewer memory under `.claude/agent-memory/softcover-reviewer/`
+  (one path repoint, one new note on the `*Main` scan scope, its index line).
 
 ## How to run a step
 
@@ -51,7 +50,7 @@
 | 05 | Land the tooling branch | tooling → main → migration | [x] |
 | 06 | Migration tracker cleanup | migration | [x] |
 | 07 | Design-system docs restructure (07a–07d) | migration | [x] |
-| 08 | [Large-file splits + size gate](steps/08-file-splits.md) (08a–08n) | migration | [ ] |
+| 08 | Large-file splits + size gate (08a–08n) | migration | [x] |
 | 09 | [Measure and close out](steps/09-measure.md) | migration | [ ] |
 
 `tooling` = a new branch off `main` (name chosen in Step 00). `migration` =

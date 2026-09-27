@@ -1,6 +1,6 @@
 ---
 name: project_file_split_kdoc_link_scope
-description: When a token-hygiene "split one file into many" step (docs/working/token-hygiene/steps/08-file-splits.md) moves a composable to a new file, check that its KDoc [Symbol] links still resolve in the new file's import scope.
+description: When a "split one file into many" change (token-hygiene Step 08, or any split `checkPresentationFileSize` forces) moves a composable to a new file, check that its KDoc [Symbol] links still resolve in the new file's import scope.
 metadata:
   type: project
 ---
