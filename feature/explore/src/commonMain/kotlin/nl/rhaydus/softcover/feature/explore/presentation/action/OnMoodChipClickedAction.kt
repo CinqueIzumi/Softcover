@@ -13,7 +13,7 @@ internal data class OnMoodChipClickedAction(
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        val mood = scope.currentState.moodTagByChipKey[key] ?: return
+        val mood = scope.currentState.moodChips[key] ?: return
 
         OnMoodChipClickAction(mood = mood).execute(
             dependencies = dependencies,

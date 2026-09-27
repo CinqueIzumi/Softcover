@@ -27,7 +27,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryActiveFilt
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun LibraryFilterChipRow(
-    chips: LibraryActiveFilterChips,
+    activeFilters: LibraryActiveFilterChips,
     onChipEvent: (ChipEvent) -> Unit,
 ) {
     // A fixed-width desktop pane can't scroll a chip row sideways with a pointer, so the row wraps
@@ -35,7 +35,7 @@ internal fun LibraryFilterChipRow(
     val wrap = rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
 
     val chipContent: @Composable () -> Unit = {
-        chips.chips.forEach { chip ->
+        activeFilters.chips.chips.forEach { chip ->
             key(chip.key) {
                 AnimatedVisibility(
                     visible = true,
@@ -50,7 +50,7 @@ internal fun LibraryFilterChipRow(
             }
         }
 
-        chips.clearAll?.let { clearAll ->
+        activeFilters.clearAll?.let { clearAll ->
             Chip(
                 model = clearAll,
                 onEvent = onChipEvent,

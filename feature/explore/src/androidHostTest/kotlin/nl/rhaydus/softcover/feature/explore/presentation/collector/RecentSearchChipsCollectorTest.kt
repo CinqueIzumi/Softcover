@@ -36,7 +36,7 @@ class RecentSearchChipsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets recentSearchChips and recentSearchQueryByChipKey from previousSearchQueries`() =
+        fun `sets recentSearchChips with chips and payloads from previousSearchQueries`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val collector = RecentSearchChipsCollector()
@@ -49,8 +49,9 @@ class RecentSearchChipsCollectorTest {
                 stateFlow.value = ExploreScreenUiState(previousSearchQueries = listOf("kotlin", "android"))
 
                 // ----- Assert -----
-                stateFlow.value.recentSearchChips.map { it.key } shouldBe listOf("recent:kotlin", "recent:android")
-                stateFlow.value.recentSearchQueryByChipKey shouldBe mapOf(
+                stateFlow.value.recentSearchChips.chips.map { it.key } shouldBe
+                    listOf("recent:kotlin", "recent:android")
+                stateFlow.value.recentSearchChips.payloadByKey shouldBe mapOf(
                     "recent:kotlin" to "kotlin",
                     "recent:android" to "android",
                 )
@@ -58,7 +59,7 @@ class RecentSearchChipsCollectorTest {
             }
 
         @Test
-        fun `updates to empty chips and map when previousSearchQueries becomes empty`() =
+        fun `updates to an empty chip set when previousSearchQueries becomes empty`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = ExploreScreenUiState(previousSearchQueries = listOf("kotlin"))
@@ -72,8 +73,8 @@ class RecentSearchChipsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(previousSearchQueries = emptyList())
 
                 // ----- Assert -----
-                stateFlow.value.recentSearchChips shouldBe persistentListOf()
-                stateFlow.value.recentSearchQueryByChipKey shouldBe emptyMap()
+                stateFlow.value.recentSearchChips.chips shouldBe persistentListOf()
+                stateFlow.value.recentSearchChips.payloadByKey shouldBe emptyMap()
                 job.cancel()
             }
 
@@ -109,15 +110,13 @@ class RecentSearchChipsCollectorTest {
                     scope = scope,
                     dependencies = dependencies,
                 ) }
-                val chipsAfterFirstEmit = stateFlow.value.recentSearchChips
-                val mapAfterFirstEmit = stateFlow.value.recentSearchQueryByChipKey
+                val chipSetAfterFirstEmit = stateFlow.value.recentSearchChips
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(isLoading = true)
 
                 // ----- Assert -----
-                (stateFlow.value.recentSearchChips === chipsAfterFirstEmit) shouldBe true
-                (stateFlow.value.recentSearchQueryByChipKey === mapAfterFirstEmit) shouldBe true
+                (stateFlow.value.recentSearchChips === chipSetAfterFirstEmit) shouldBe true
                 job.cancel()
             }
     }

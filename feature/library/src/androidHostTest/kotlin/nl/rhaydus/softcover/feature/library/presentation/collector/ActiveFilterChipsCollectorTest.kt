@@ -44,7 +44,7 @@ class ActiveFilterChipsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `activeFilterChipsByTab and activeFilterValueByChipKey are populated per tab`() = runTest(testDispatcher) {
+        fun `activeFilterChipsByTab is populated per tab with chips and payloads`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val collector = ActiveFilterChipsCollector()
             val job = launch {
@@ -63,9 +63,11 @@ class ActiveFilterChipsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.activeFilterChipsFor("all").chips.map { it.key } shouldBe listOf("format:ebook")
-            stateFlow.value.activeFilterChipsFor("read").chips.map { it.key } shouldBe listOf("readYear:2021")
-            stateFlow.value.activeFilterValueByChipKey["format:ebook"] shouldBe
+            stateFlow.value.activeFilterChipsFor("all").chips.chips.map { it.key } shouldBe
+                listOf("format:ebook")
+            stateFlow.value.activeFilterChipsFor("read").chips.chips.map { it.key } shouldBe
+                listOf("readYear:2021")
+            stateFlow.value.activeFilterChipsFor("all").chips["format:ebook"] shouldBe
                 LibraryFilterValue.Format(value = "ebook")
             job.cancel()
         }
@@ -85,7 +87,7 @@ class ActiveFilterChipsCollectorTest {
             stateFlow.value = LibraryUiState(filtersByTab = mapOf("all" to LibraryFilters(formats = setOf("ebook"))))
 
             // ----- Assert -----
-            stateFlow.value.activeFilterChipsFor("missing").chips shouldBe emptyList()
+            stateFlow.value.activeFilterChipsFor("missing").chips.chips shouldBe emptyList()
             stateFlow.value.activeFilterChipsFor("missing").clearAll shouldBe null
             job.cancel()
         }
@@ -104,14 +106,12 @@ class ActiveFilterChipsCollectorTest {
 
                 stateFlow.value = LibraryUiState(filtersByTab = mapOf("all" to LibraryFilters(formats = setOf("ebook"))))
                 val chipsByTabAfterFirstEmit = stateFlow.value.activeFilterChipsByTab
-                val valueByKeyAfterFirstEmit = stateFlow.value.activeFilterValueByChipKey
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
 
                 // ----- Assert -----
                 (stateFlow.value.activeFilterChipsByTab === chipsByTabAfterFirstEmit) shouldBe true
-                (stateFlow.value.activeFilterValueByChipKey === valueByKeyAfterFirstEmit) shouldBe true
                 job.cancel()
             }
     }

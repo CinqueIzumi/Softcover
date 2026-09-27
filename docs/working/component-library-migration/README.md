@@ -15,27 +15,22 @@ checkboxes in step with `## Steps` and `## Gates` here.
 ## Now
 
 - **State:** S0–S4 and S5-1 through S5-3b done. S5-C-chips (the chip convergence pass; its step file is
-  already deleted) is mid-flight: `ChipScaffold` + `ChipStyle`, `ChipDimensions` + `ChipSize`, and the
-  tone / slot model (`ChipTone` + `selected`, `ChipLeading` / `ChipTrailing`, `face`) are built and
-  host-tested. Approved, not built: features hold chips as a generic `ChipSet<P>(chips, payloadByKey)`
-  from `:core:component`, replacing every chip list + `…ByChipKey` map pair (explore, library,
-  book_detail). Plan-reference gates (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`) now
-  cover markdown, `.kt` and permanent config (`config/**`, `*.yml`/`*.yaml`, `*.kts`), with a comment
-  split that skips string / char literals and quoted YAML scalars. The agent-memory audit is applied
-  (`a2c3db44`), and imports follow the IDE layout `*,java.**,javax.**,kotlin.**,^` (`d293ff14`); 14
-  files with Apollo alias imports wait on foundation F24. After Next: `ChipSet<P>`, tests, reviewer
-  over S5-C-chips; then [`steps/s5-headers.md`](steps/s5-headers.md) S5-4.
-- **Next:** memory gates — `.claude/skills/handoff/SKILL.md` audits agent memory when a `steps/*.md`
-  was deleted; memory-file budgets in `checkDocBudgets` (`docs/doc-budgets.txt`); `.claude/agent-memory/**`
-  in the plan-reference scan (`doc-guard.sh`, `CheckDocBudgetsTask.kt`). Run Gradle with `JAVA_HOME`
-  set to JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+  already deleted) is built, host-tested and reviewed: `ChipScaffold` + `ChipStyle`, `ChipDimensions` +
+  `ChipSize`, the tone / slot model, and `ChipSet<P>(chips, payloadByKey)` in `:core:component`, which
+  replaces every chip list + `…ByChipKey` map pair (explore, library, book_detail). Library chip actions
+  resolve a key within their own tab (`filterChipsFor` / `activeFilterChipsFor`). Plan-reference gates
+  (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`) cover markdown, `.kt`, permanent config
+  and agent memory (`3c8e6add`). Imports follow the IDE layout (`d293ff14`); 14 files with Apollo alias
+  imports wait on foundation F24.
+- **Next:** [`steps/s5-headers.md`](steps/s5-headers.md) S5-4. Run Gradle with `JAVA_HOME` set to JBR 21
+  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
   stale for a frame on open; if visible, seed them in the open action.
-- **Verification:** on JBR 21, `ktlintCheck styleCheck checkDocBudgets` pass; the `.kt`/`.kts` diffs are
-  pure import reorders (script-checked); `softcover-reviewer` ⚠️ with two memory findings, both fixed.
-- **Uncommitted:** this tracker's `## Now` block only.
+- **Verification:** on JBR 21, `ktlintCheck styleCheck checkDocBudgets` pass; `testAndroidHostTest` passes for
+  `:core:component`, explore, library and book_detail; `softcover-reviewer` ✅ (two style nits fixed).
+- **Uncommitted:** the `ChipSet<P>` migration (main + tests) and this tracker's `## Now` block.
 
 ## Local verification
 

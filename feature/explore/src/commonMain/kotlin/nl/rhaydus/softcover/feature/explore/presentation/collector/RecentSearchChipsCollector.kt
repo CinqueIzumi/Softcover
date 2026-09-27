@@ -18,14 +18,9 @@ internal class RecentSearchChipsCollector : ExploreCollector {
             .map { state -> RecentSearchChipsSnapshot(previousSearchQueries = state.previousSearchQueries) }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
-                val (chips, queryByKey) = snapshot.compute()
+                val chips = snapshot.compute()
 
-                scope.setState {
-                    it.copy(
-                        recentSearchChips = chips,
-                        recentSearchQueryByChipKey = queryByKey,
-                    )
-                }
+                scope.setState { it.copy(recentSearchChips = chips) }
             }
     }
 }

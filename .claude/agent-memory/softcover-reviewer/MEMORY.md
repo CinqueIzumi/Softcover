@@ -10,3 +10,4 @@
 - [Gradle *Main suffix is case-sensitive](architecture_gradle_main_suffix_case_sensitive.md) — a source-dir scan gate silently skips classic lowercase `src/main` modules (`:app`, `:desktopApp`); confirm they have nothing to catch
 - [Arrange/Filter draft-commit pattern traps](project_arrange_filter_draft_commit_pattern.md) — a live nudge into an open draft needs its own failure rollback; async collector-derived chips can blank-flash on sheet open
 - [Dual gate predicate parity](architecture_dual_gate_predicate_parity.md) — doc-guard.sh vs CheckDocBudgetsTask.kt predicates must match; an unconditional (non-ratcheted) scan can retroactively fail untouched files when widened
+- [ChipSet double `.chips` field](project_chipset_double_chips_field.md) — a wrapper's own `chips`/`fooChips` field holding a `ChipSet<P>` forces `.chips.chips` at render sites; flag readability, suggest Iterable/isEmpty on ChipSet

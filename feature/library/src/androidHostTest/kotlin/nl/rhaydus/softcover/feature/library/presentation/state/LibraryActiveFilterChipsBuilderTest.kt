@@ -22,17 +22,17 @@ class LibraryActiveFilterChipsBuilderTest {
     @Nested
     inner class BuildLibraryActiveFilterChips {
         @Test
-        fun `no active filters produce no chips, no clearAll and an empty value map`() {
+        fun `no active filters produce no chips, no clearAll and an empty payload map`() {
             // ----- Arrange -----
             val filters = LibraryFilters()
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips shouldBe emptyList()
-            chips.clearAll shouldBe null
-            valueByKey shouldBe emptyMap()
+            result.chips.chips shouldBe emptyList()
+            result.clearAll shouldBe null
+            result.chips.payloadByKey shouldBe emptyMap()
         }
 
         @Test
@@ -41,11 +41,11 @@ class LibraryActiveFilterChipsBuilderTest {
             val filters = LibraryFilters(formats = setOf("ebook"))
 
             // ----- Act -----
-            val (chips, _) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.map { it.key } shouldBe listOf("format:ebook")
-            chips.clearAll shouldBe null
+            result.chips.chips.map { it.key } shouldBe listOf("format:ebook")
+            result.clearAll shouldBe null
         }
 
         @Test
@@ -57,10 +57,10 @@ class LibraryActiveFilterChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (chips, _) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.clearAll shouldBe ChipUiModel(
+            result.clearAll shouldBe ChipUiModel(
                 key = LIBRARY_CLEAR_ALL_CHIP_KEY,
                 label = "Clear all",
                 tone = ChipTone.Tonal,
@@ -80,10 +80,10 @@ class LibraryActiveFilterChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (chips, _) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.map { it.key } shouldBe listOf(
+            result.chips.chips.map { it.key } shouldBe listOf(
                 "tag:1",
                 "format:ebook",
                 "releaseYear:2021",
@@ -99,12 +99,12 @@ class LibraryActiveFilterChipsBuilderTest {
             val filters = LibraryFilters(tags = setOf(tagFiction, tagScifi))
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.map { it.key }.toSet() shouldBe setOf("tag:1", "tag:2")
-            valueByKey["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
-            valueByKey["tag:2"] shouldBe LibraryFilterValue.Tag(tag = tagScifi)
+            result.chips.chips.map { it.key }.toSet() shouldBe setOf("tag:1", "tag:2")
+            result.chips["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
+            result.chips["tag:2"] shouldBe LibraryFilterValue.Tag(tag = tagScifi)
         }
 
         @Test
@@ -113,11 +113,11 @@ class LibraryActiveFilterChipsBuilderTest {
             val filters = LibraryFilters(readYear = 2022)
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.single().label shouldBe "Finished 2022"
-            valueByKey["readYear:2022"] shouldBe LibraryFilterValue.ReadYear(year = 2022)
+            result.chips.chips.single().label shouldBe "Finished 2022"
+            result.chips["readYear:2022"] shouldBe LibraryFilterValue.ReadYear(year = 2022)
         }
 
         @Test
@@ -126,10 +126,10 @@ class LibraryActiveFilterChipsBuilderTest {
             val filters = LibraryFilters(owned = true)
 
             // ----- Act -----
-            val (chips, _) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.single().label shouldBe "Owned"
+            result.chips.chips.single().label shouldBe "Owned"
         }
 
         @Test
@@ -138,10 +138,10 @@ class LibraryActiveFilterChipsBuilderTest {
             val filters = LibraryFilters(owned = false)
 
             // ----- Act -----
-            val (chips, _) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.single().label shouldBe "Unowned"
+            result.chips.chips.single().label shouldBe "Unowned"
         }
 
         @Test
@@ -150,10 +150,10 @@ class LibraryActiveFilterChipsBuilderTest {
             val filters = LibraryFilters(ratingMin = 4.0)
 
             // ----- Act -----
-            val (chips, _) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.single().label shouldBe "4★+"
+            result.chips.chips.single().label shouldBe "4★+"
         }
 
         @Test
@@ -162,10 +162,10 @@ class LibraryActiveFilterChipsBuilderTest {
             val filters = LibraryFilters(ratingMin = 3.5)
 
             // ----- Act -----
-            val (chips, _) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.single().label shouldBe "3.5★+"
+            result.chips.chips.single().label shouldBe "3.5★+"
         }
 
         @Test
@@ -177,10 +177,10 @@ class LibraryActiveFilterChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (chips, _) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.forEach { chip ->
+            result.chips.chips.forEach { chip ->
                 chip.tone shouldBe ChipTone.Container
                 chip.trailing shouldBe ChipTrailing.Icon(
                     icon = SoftcoverIcon.Close,
@@ -190,7 +190,7 @@ class LibraryActiveFilterChipsBuilderTest {
         }
 
         @Test
-        fun `valueByKey resolves every chip key back to the LibraryFilterValue that built it`() {
+        fun `the ChipSet resolves every chip key back to the LibraryFilterValue that built it`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
                 tags = setOf(tagFiction),
@@ -202,16 +202,16 @@ class LibraryActiveFilterChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryActiveFilterChips(filters = filters)
+            val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            chips.chips.forEach { chip -> (chip.key in valueByKey) shouldBe true }
-            valueByKey["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
-            valueByKey["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
-            valueByKey["releaseYear:2021"] shouldBe LibraryFilterValue.ReleaseYear(year = 2021)
-            valueByKey["readYear:2020"] shouldBe LibraryFilterValue.ReadYear(year = 2020)
-            valueByKey["owned:true"] shouldBe LibraryFilterValue.Owned(owned = true)
-            valueByKey["rating:4.0"] shouldBe LibraryFilterValue.RatingMin(threshold = 4.0)
+            result.chips.chips.forEach { chip -> (result.chips[chip.key] != null) shouldBe true }
+            result.chips["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
+            result.chips["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
+            result.chips["releaseYear:2021"] shouldBe LibraryFilterValue.ReleaseYear(year = 2021)
+            result.chips["readYear:2020"] shouldBe LibraryFilterValue.ReadYear(year = 2020)
+            result.chips["owned:true"] shouldBe LibraryFilterValue.Owned(owned = true)
+            result.chips["rating:4.0"] shouldBe LibraryFilterValue.RatingMin(threshold = 4.0)
         }
     }
 }

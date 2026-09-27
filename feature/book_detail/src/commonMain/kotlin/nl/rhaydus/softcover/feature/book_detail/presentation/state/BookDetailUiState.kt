@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
@@ -162,14 +163,7 @@ internal data class BookDetailUiState(
     val tagEditorCategoryChips: List<ChipUiModel> = emptyList(),
 
     /** [tagSuggestions] mapped to chips by `TagEditorChipModelsCollector` (R9). */
-    val tagSuggestionChips: List<ChipUiModel> = emptyList(),
-
-    /**
-     * Every [tagSuggestionChips] key resolved back to the [UserTag] `OnAddUserTagAction`'s call site
-     * needs — kept beside the models rather than rebuilt in composition, mapped by
-     * `TagEditorChipModelsCollector` (R9).
-     */
-    val tagSuggestionByChipKey: Map<String, UserTag> = emptyMap(),
+    val tagSuggestionChips: ChipSet<UserTag> = ChipSet(),
 ) : UiState {
     /**
      * The edition pinned by an external entry point (a barcode scan), if any. It wins over every

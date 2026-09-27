@@ -120,16 +120,7 @@ internal data class LibraryUiState(
      */
     val filterChipsByTab: Map<String, LibraryFilterChips> = emptyMap(),
 
-    /**
-     * Every chip key in [filterChipsByTab] resolved back to the [LibraryFilterValue] dispatching it
-     * would toggle — kept beside the models rather than rebuilt in composition. Flat across every
-     * tab: a chip key already encodes its facet (`"tag:42"`, `"format:Hardcover"`, …), so two tabs
-     * offering the same value share one entry.
-     */
-    val filterValueByChipKey: Map<String, LibraryFilterValue> = emptyMap(),
-
     val activeFilterChipsByTab: Map<String, LibraryActiveFilterChips> = emptyMap(),
-    val activeFilterValueByChipKey: Map<String, LibraryFilterValue> = emptyMap(),
     val rearrangeChipByTab: Map<String, ChipUiModel> = emptyMap(),
 
     /**

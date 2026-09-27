@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.domain.model.TagCategory
@@ -45,8 +46,7 @@ internal fun TagEditorBottomSheet(
     userTagEditorGroups: List<UserTagEditorChipGroup>,
     newlyAddedTagKey: String?,
     categoryChips: List<ChipUiModel>,
-    suggestionChips: List<ChipUiModel>,
-    suggestionByChipKey: Map<String, UserTag>,
+    suggestions: ChipSet<UserTag>,
     selectedCategory: TagCategory,
     draft: String,
     onCategorySelected: (TagCategory) -> Unit,
@@ -71,7 +71,7 @@ internal fun TagEditorBottomSheet(
 
         val onSuggestionChipEvent: (ChipEvent) -> Unit = { event ->
             if (event is ChipEvent.Clicked) {
-                suggestionByChipKey[event.key]?.let(onSuggestionSelected)
+                suggestions[event.key]?.let(onSuggestionSelected)
             }
         }
 
@@ -102,7 +102,7 @@ internal fun TagEditorBottomSheet(
                     selectedCategory = selectedCategory,
                     categoryChips = categoryChips,
                     draft = draft,
-                    suggestionChips = suggestionChips,
+                    suggestionChips = suggestions.chips,
                     onCategoryChipEvent = onCategoryChipEvent,
                     onDraftChange = onDraftChange,
                     onCommit = commitDraft,

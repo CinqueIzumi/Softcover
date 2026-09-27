@@ -10,16 +10,15 @@ class ActiveFilterChipsSnapshotTest {
     @Nested
     inner class Compute {
         @Test
-        fun `empty filtersByTab produces an empty per-tab map and an empty value map`() {
+        fun `empty filtersByTab produces an empty per-tab map`() {
             // ----- Arrange -----
             val snapshot = ActiveFilterChipsSnapshot(filtersByTab = emptyMap())
 
             // ----- Act -----
-            val (chipsByTab, valueByKey) = snapshot.compute()
+            val chipsByTab = snapshot.compute()
 
             // ----- Assert -----
             chipsByTab shouldBe emptyMap()
-            valueByKey shouldBe emptyMap()
         }
 
         @Test
@@ -33,12 +32,12 @@ class ActiveFilterChipsSnapshotTest {
             )
 
             // ----- Act -----
-            val (chipsByTab, _) = snapshot.compute()
+            val chipsByTab = snapshot.compute()
 
             // ----- Assert -----
             chipsByTab.keys shouldBe setOf("all", "read")
-            chipsByTab.getValue("all").chips.map { it.key } shouldBe listOf("format:ebook")
-            chipsByTab.getValue("read").chips.map { it.key } shouldBe listOf("readYear:2021")
+            chipsByTab.getValue("all").chips.chips.map { it.key } shouldBe listOf("format:ebook")
+            chipsByTab.getValue("read").chips.chips.map { it.key } shouldBe listOf("readYear:2021")
         }
 
         @Test
@@ -47,15 +46,15 @@ class ActiveFilterChipsSnapshotTest {
             val snapshot = ActiveFilterChipsSnapshot(filtersByTab = mapOf("all" to LibraryFilters()))
 
             // ----- Act -----
-            val (chipsByTab, _) = snapshot.compute()
+            val chipsByTab = snapshot.compute()
 
             // ----- Assert -----
-            chipsByTab.getValue("all").chips shouldBe emptyList()
+            chipsByTab.getValue("all").chips.chips shouldBe emptyList()
             chipsByTab.getValue("all").clearAll shouldBe null
         }
 
         @Test
-        fun `flattens every tab's value map into one lookup across tabs`() {
+        fun `each tab's ChipSet resolves its own chip keys back to the value that built them`() {
             // ----- Arrange -----
             val snapshot = ActiveFilterChipsSnapshot(
                 filtersByTab = mapOf(
@@ -65,15 +64,15 @@ class ActiveFilterChipsSnapshotTest {
             )
 
             // ----- Act -----
-            val (_, valueByKey) = snapshot.compute()
+            val chipsByTab = snapshot.compute()
 
             // ----- Assert -----
-            valueByKey["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
-            valueByKey["readYear:2021"] shouldBe LibraryFilterValue.ReadYear(year = 2021)
+            chipsByTab.getValue("all").chips["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
+            chipsByTab.getValue("read").chips["readYear:2021"] shouldBe LibraryFilterValue.ReadYear(year = 2021)
         }
 
         @Test
-        fun `two tabs sharing the same active value collapse to one entry in the flattened map`() {
+        fun `two tabs sharing the same active value each keep their own independent ChipSet entry`() {
             // ----- Arrange -----
             val snapshot = ActiveFilterChipsSnapshot(
                 filtersByTab = mapOf(
@@ -83,11 +82,11 @@ class ActiveFilterChipsSnapshotTest {
             )
 
             // ----- Act -----
-            val (_, valueByKey) = snapshot.compute()
+            val chipsByTab = snapshot.compute()
 
             // ----- Assert -----
-            valueByKey.size shouldBe 1
-            valueByKey["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
+            chipsByTab.getValue("all").chips["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
+            chipsByTab.getValue("read").chips["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
         }
     }
 }

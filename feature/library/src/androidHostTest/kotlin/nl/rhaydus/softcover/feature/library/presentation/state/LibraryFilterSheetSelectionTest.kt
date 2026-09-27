@@ -1,7 +1,10 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import org.junit.jupiter.api.Nested
@@ -29,16 +32,12 @@ class LibraryFilterSheetSelectionTest {
                     ChipUiModel(
                         key = "owned:true",
                         label = "Owned",
-                    ),
+                    ) to LibraryFilterValue.Owned(owned = true),
                     ChipUiModel(
                         key = "owned:false",
                         label = "Unowned",
-                    ),
-                ),
-            )
-            val valueByChipKey = mapOf(
-                "owned:true" to LibraryFilterValue.Owned(owned = true),
-                "owned:false" to LibraryFilterValue.Owned(owned = false),
+                    ) to LibraryFilterValue.Owned(owned = false),
+                ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
                 tabId = "all",
@@ -49,7 +48,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
                 draft = draft,
-                valueByChipKey = valueByChipKey,
                 resultCount = 0,
             )
 
@@ -65,16 +63,12 @@ class LibraryFilterSheetSelectionTest {
                     ChipUiModel(
                         key = "format:ebook",
                         label = "ebook",
-                    ),
+                    ) to LibraryFilterValue.Format(value = "ebook"),
                     ChipUiModel(
                         key = "format:hardcover",
                         label = "hardcover",
-                    ),
-                ),
-            )
-            val valueByChipKey = mapOf(
-                "format:ebook" to LibraryFilterValue.Format(value = "ebook"),
-                "format:hardcover" to LibraryFilterValue.Format(value = "hardcover"),
+                    ) to LibraryFilterValue.Format(value = "hardcover"),
+                ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
                 tabId = "all",
@@ -85,7 +79,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
                 draft = draft,
-                valueByChipKey = valueByChipKey,
                 resultCount = 0,
             )
 
@@ -101,16 +94,12 @@ class LibraryFilterSheetSelectionTest {
                     ChipUiModel(
                         key = "releaseYear:2020",
                         label = "2020",
-                    ),
+                    ) to LibraryFilterValue.ReleaseYear(year = 2020),
                     ChipUiModel(
                         key = "releaseYear:2019",
                         label = "2019",
-                    ),
-                ),
-            )
-            val valueByChipKey = mapOf(
-                "releaseYear:2020" to LibraryFilterValue.ReleaseYear(year = 2020),
-                "releaseYear:2019" to LibraryFilterValue.ReleaseYear(year = 2019),
+                    ) to LibraryFilterValue.ReleaseYear(year = 2019),
+                ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
                 tabId = "all",
@@ -121,7 +110,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
                 draft = draft,
-                valueByChipKey = valueByChipKey,
                 resultCount = 0,
             )
 
@@ -137,16 +125,12 @@ class LibraryFilterSheetSelectionTest {
                     ChipUiModel(
                         key = "readYear:2021",
                         label = "2021",
-                    ),
+                    ) to LibraryFilterValue.ReadYear(year = 2021),
                     ChipUiModel(
                         key = "readYear:2020",
                         label = "2020",
-                    ),
-                ),
-            )
-            val valueByChipKey = mapOf(
-                "readYear:2021" to LibraryFilterValue.ReadYear(year = 2021),
-                "readYear:2020" to LibraryFilterValue.ReadYear(year = 2020),
+                    ) to LibraryFilterValue.ReadYear(year = 2020),
+                ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
                 tabId = "read",
@@ -157,7 +141,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
                 draft = draft,
-                valueByChipKey = valueByChipKey,
                 resultCount = 0,
             )
 
@@ -173,16 +156,12 @@ class LibraryFilterSheetSelectionTest {
                     ChipUiModel(
                         key = "tag:1",
                         label = "Fiction",
-                    ),
+                    ) to LibraryFilterValue.Tag(tag = tagFiction),
                     ChipUiModel(
                         key = "tag:2",
                         label = "Sci-Fi",
-                    ),
-                ),
-            )
-            val valueByChipKey = mapOf(
-                "tag:1" to LibraryFilterValue.Tag(tag = tagFiction),
-                "tag:2" to LibraryFilterValue.Tag(tag = tagScifi),
+                    ) to LibraryFilterValue.Tag(tag = tagScifi),
+                ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
                 tabId = "all",
@@ -193,7 +172,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
                 draft = draft,
-                valueByChipKey = valueByChipKey,
                 resultCount = 0,
             )
 
@@ -209,16 +187,12 @@ class LibraryFilterSheetSelectionTest {
                     ChipUiModel(
                         key = "rating:4.0",
                         label = "4★ and up",
-                    ),
+                    ) to LibraryFilterValue.RatingMin(threshold = 4.0),
                     ChipUiModel(
                         key = "rating:3.5",
                         label = "3.5★ and up",
-                    ),
-                ),
-            )
-            val valueByChipKey = mapOf(
-                "rating:4.0" to LibraryFilterValue.RatingMin(threshold = 4.0),
-                "rating:3.5" to LibraryFilterValue.RatingMin(threshold = 3.5),
+                    ) to LibraryFilterValue.RatingMin(threshold = 3.5),
+                ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
                 tabId = "all",
@@ -229,7 +203,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
                 draft = draft,
-                valueByChipKey = valueByChipKey,
                 resultCount = 0,
             )
 
@@ -238,13 +211,15 @@ class LibraryFilterSheetSelectionTest {
         }
 
         @Test
-        fun `a chip whose key is absent from valueByChipKey keeps its original selection unresolved`() {
+        fun `a chip whose key is absent from the facet's payloadByKey keeps its original selection unresolved`() {
             // ----- Arrange -----
             val untouchedChip = ChipUiModel(
                 key = "format:unknown",
                 label = "unknown",
             )
-            val chips = LibraryFilterChips(formatChips = listOf(untouchedChip))
+            val chips = LibraryFilterChips(
+                formatChips = ChipSet(chips = persistentListOf(untouchedChip)),
+            )
             val draft = LibraryFilterDraft(
                 tabId = "all",
                 filters = LibraryFilters(formats = setOf("unknown")),
@@ -254,7 +229,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
                 draft = draft,
-                valueByChipKey = emptyMap(),
                 resultCount = 0,
             )
 
@@ -270,12 +244,12 @@ class LibraryFilterSheetSelectionTest {
                     ChipUiModel(
                         key = "tag:1",
                         label = "Fiction",
-                    ),
+                    ) to LibraryFilterValue.Tag(tag = tagFiction),
                     ChipUiModel(
                         key = "tag:2",
                         label = "Sci-Fi",
-                    ),
-                ),
+                    ) to LibraryFilterValue.Tag(tag = tagScifi),
+                ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
                 tabId = "all",
@@ -286,7 +260,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
                 draft = draft,
-                valueByChipKey = emptyMap(),
                 resultCount = 0,
             )
 
@@ -302,12 +275,12 @@ class LibraryFilterSheetSelectionTest {
                     ChipUiModel(
                         key = "tag:1",
                         label = "Fiction",
-                    ),
+                    ) to LibraryFilterValue.Tag(tag = tagFiction),
                     ChipUiModel(
                         key = "tag:2",
                         label = "Sci-Fi",
-                    ),
-                ),
+                    ) to LibraryFilterValue.Tag(tag = tagScifi),
+                ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
                 tabId = "all",
@@ -318,7 +291,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = chips,
                 draft = draft,
-                valueByChipKey = emptyMap(),
                 resultCount = 0,
             )
 
@@ -335,7 +307,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = LibraryFilterChips(),
                 draft = draft,
-                valueByChipKey = emptyMap(),
                 resultCount = 42,
             )
 
@@ -355,7 +326,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = LibraryFilterChips(),
                 draft = draft,
-                valueByChipKey = emptyMap(),
                 resultCount = 0,
             )
 
@@ -372,7 +342,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = LibraryFilterChips(),
                 draft = draft,
-                valueByChipKey = emptyMap(),
                 resultCount = 0,
             )
 
@@ -389,7 +358,6 @@ class LibraryFilterSheetSelectionTest {
             val selection = buildLibraryFilterSheetSelection(
                 chips = LibraryFilterChips(),
                 draft = draft,
-                valueByChipKey = emptyMap(),
                 resultCount = 0,
             )
 

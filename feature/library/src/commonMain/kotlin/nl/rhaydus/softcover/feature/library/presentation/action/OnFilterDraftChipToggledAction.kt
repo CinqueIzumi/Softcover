@@ -17,7 +17,7 @@ internal class OnFilterDraftChipToggledAction(
     ) {
         scope.setState { state ->
             val draft = state.filterDraft ?: return@setState state
-            val value = state.filterValueByChipKey[key] ?: return@setState state
+            val value = state.filterChipsFor(draft.tabId)[key] ?: return@setState state
 
             state.copy(filterDraft = draft.copy(filters = draft.filters.toggle(value = value)))
         }

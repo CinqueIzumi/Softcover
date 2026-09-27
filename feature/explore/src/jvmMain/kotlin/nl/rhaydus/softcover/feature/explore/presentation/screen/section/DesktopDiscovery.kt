@@ -78,7 +78,7 @@ internal fun DesktopDiscovery(
             )
 
             RecentSearchesSection(
-                chips = state.recentSearchChips,
+                chips = state.recentSearchChips.chips,
                 runAction = runAction,
             )
         }

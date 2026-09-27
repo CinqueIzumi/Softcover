@@ -22,16 +22,16 @@ class LibraryFilterChipsBuilderTest {
     @Nested
     inner class BuildLibraryFilterChips {
         @Test
-        fun `empty options produce empty chips per facet and an empty value map`() {
+        fun `empty options produce empty chips per facet and an empty payload map`() {
             // ----- Arrange -----
             val options = LibraryFilterOptions()
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
             chips.isEmpty shouldBe true
-            valueByKey shouldBe emptyMap()
+            chips.ownershipChips.payloadByKey shouldBe emptyMap()
         }
 
         @Test
@@ -40,13 +40,13 @@ class LibraryFilterChipsBuilderTest {
             val options = LibraryFilterOptions(supportsOwnedFilter = true)
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            chips.ownershipChips.map { it.key } shouldBe listOf("owned:true", "owned:false")
-            chips.ownershipChips.map { it.label } shouldBe listOf("Owned", "Unowned")
-            valueByKey["owned:true"] shouldBe LibraryFilterValue.Owned(owned = true)
-            valueByKey["owned:false"] shouldBe LibraryFilterValue.Owned(owned = false)
+            chips.ownershipChips.chips.map { it.key } shouldBe listOf("owned:true", "owned:false")
+            chips.ownershipChips.chips.map { it.label } shouldBe listOf("Owned", "Unowned")
+            chips.ownershipChips["owned:true"] shouldBe LibraryFilterValue.Owned(owned = true)
+            chips.ownershipChips["owned:false"] shouldBe LibraryFilterValue.Owned(owned = false)
         }
 
         @Test
@@ -55,10 +55,10 @@ class LibraryFilterChipsBuilderTest {
             val options = LibraryFilterOptions(supportsOwnedFilter = false)
 
             // ----- Act -----
-            val (chips, _) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            chips.ownershipChips shouldBe emptyList()
+            chips.ownershipChips.chips shouldBe emptyList()
         }
 
         @Test
@@ -67,12 +67,13 @@ class LibraryFilterChipsBuilderTest {
             val options = LibraryFilterOptions(formats = listOf("hardcover", "ebook", "audiobook"))
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            chips.formatChips.map { it.key } shouldBe listOf("format:hardcover", "format:ebook", "format:audiobook")
-            chips.formatChips.map { it.label } shouldBe listOf("hardcover", "ebook", "audiobook")
-            valueByKey["format:hardcover"] shouldBe LibraryFilterValue.Format(value = "hardcover")
+            chips.formatChips.chips.map { it.key } shouldBe
+                listOf("format:hardcover", "format:ebook", "format:audiobook")
+            chips.formatChips.chips.map { it.label } shouldBe listOf("hardcover", "ebook", "audiobook")
+            chips.formatChips["format:hardcover"] shouldBe LibraryFilterValue.Format(value = "hardcover")
         }
 
         @Test
@@ -81,12 +82,12 @@ class LibraryFilterChipsBuilderTest {
             val options = LibraryFilterOptions(releaseYears = listOf(2021, 2019))
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            chips.releaseYearChips.map { it.key } shouldBe listOf("releaseYear:2021", "releaseYear:2019")
-            chips.releaseYearChips.map { it.label } shouldBe listOf("2021", "2019")
-            valueByKey["releaseYear:2021"] shouldBe LibraryFilterValue.ReleaseYear(year = 2021)
+            chips.releaseYearChips.chips.map { it.key } shouldBe listOf("releaseYear:2021", "releaseYear:2019")
+            chips.releaseYearChips.chips.map { it.label } shouldBe listOf("2021", "2019")
+            chips.releaseYearChips["releaseYear:2021"] shouldBe LibraryFilterValue.ReleaseYear(year = 2021)
         }
 
         @Test
@@ -95,12 +96,12 @@ class LibraryFilterChipsBuilderTest {
             val options = LibraryFilterOptions(readYears = listOf(2022, 2020))
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            chips.readYearChips.map { it.key } shouldBe listOf("readYear:2022", "readYear:2020")
-            chips.readYearChips.map { it.label } shouldBe listOf("2022", "2020")
-            valueByKey["readYear:2022"] shouldBe LibraryFilterValue.ReadYear(year = 2022)
+            chips.readYearChips.chips.map { it.key } shouldBe listOf("readYear:2022", "readYear:2020")
+            chips.readYearChips.chips.map { it.label } shouldBe listOf("2022", "2020")
+            chips.readYearChips["readYear:2022"] shouldBe LibraryFilterValue.ReadYear(year = 2022)
         }
 
         @Test
@@ -109,12 +110,12 @@ class LibraryFilterChipsBuilderTest {
             val options = LibraryFilterOptions(tags = listOf(tagScifi, tagFiction))
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            chips.tagChips.map { it.key } shouldBe listOf("tag:2", "tag:1")
-            chips.tagChips.map { it.label } shouldBe listOf("Sci-Fi", "Fiction")
-            valueByKey["tag:2"] shouldBe LibraryFilterValue.Tag(tag = tagScifi)
+            chips.tagChips.chips.map { it.key } shouldBe listOf("tag:2", "tag:1")
+            chips.tagChips.chips.map { it.label } shouldBe listOf("Sci-Fi", "Fiction")
+            chips.tagChips["tag:2"] shouldBe LibraryFilterValue.Tag(tag = tagScifi)
         }
 
         @Test
@@ -123,11 +124,11 @@ class LibraryFilterChipsBuilderTest {
             val options = LibraryFilterOptions(ratingBuckets = listOf(4.0, 3.5, 3.0))
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            chips.ratingChips.map { it.key } shouldBe listOf("rating:4.0", "rating:3.5", "rating:3.0")
-            valueByKey["rating:4.0"] shouldBe LibraryFilterValue.RatingMin(threshold = 4.0)
+            chips.ratingChips.chips.map { it.key } shouldBe listOf("rating:4.0", "rating:3.5", "rating:3.0")
+            chips.ratingChips["rating:4.0"] shouldBe LibraryFilterValue.RatingMin(threshold = 4.0)
         }
 
         @Test
@@ -136,10 +137,10 @@ class LibraryFilterChipsBuilderTest {
             val options = LibraryFilterOptions(ratingBuckets = listOf(4.0))
 
             // ----- Act -----
-            val (chips, _) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            chips.ratingChips.single().label shouldBe "4★ and up"
+            chips.ratingChips.chips.single().label shouldBe "4★ and up"
         }
 
         @Test
@@ -148,33 +149,33 @@ class LibraryFilterChipsBuilderTest {
             val options = LibraryFilterOptions(ratingBuckets = listOf(3.5))
 
             // ----- Act -----
-            val (chips, _) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            chips.ratingChips.single().label shouldBe "3.5★ and up"
+            chips.ratingChips.chips.single().label shouldBe "3.5★ and up"
         }
 
         @Test
         fun `two facets sharing a display label still get distinct facet-prefixed keys`() {
             // ----- Arrange -----
-            // "2020" is both a format's own name and a release year's label — the flat lookup map
-            // can only disambiguate them because each key carries its facet prefix.
+            // "2020" is both a format's own name and a release year's label — each facet's own
+            // ChipSet can only disambiguate them because each key carries its facet prefix.
             val options = LibraryFilterOptions(
                 formats = listOf("2020"),
                 releaseYears = listOf(2020),
             )
 
             // ----- Act -----
-            val (chips, valueByKey) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            val formatKey = chips.formatChips.single().key
-            val releaseYearKey = chips.releaseYearChips.single().key
+            val formatKey = chips.formatChips.chips.single().key
+            val releaseYearKey = chips.releaseYearChips.chips.single().key
             formatKey shouldBe "format:2020"
             releaseYearKey shouldBe "releaseYear:2020"
             (formatKey == releaseYearKey) shouldBe false
-            valueByKey[formatKey] shouldBe LibraryFilterValue.Format(value = "2020")
-            valueByKey[releaseYearKey] shouldBe LibraryFilterValue.ReleaseYear(year = 2020)
+            chips.formatChips[formatKey] shouldBe LibraryFilterValue.Format(value = "2020")
+            chips.releaseYearChips[releaseYearKey] shouldBe LibraryFilterValue.ReleaseYear(year = 2020)
         }
 
         @Test
@@ -190,11 +191,11 @@ class LibraryFilterChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (chips, _) = buildLibraryFilterChips(options = options)
+            val chips = buildLibraryFilterChips(options = options)
 
             // ----- Assert -----
-            val allChips = chips.ownershipChips + chips.formatChips + chips.releaseYearChips +
-                chips.readYearChips + chips.tagChips + chips.ratingChips
+            val allChips = chips.ownershipChips.chips + chips.formatChips.chips + chips.releaseYearChips.chips +
+                chips.readYearChips.chips + chips.tagChips.chips + chips.ratingChips.chips
             allChips.map { it.tone } shouldBe allChips.map { ChipTone.Tonal }
             allChips.map { it.selected } shouldBe allChips.map { false }
         }

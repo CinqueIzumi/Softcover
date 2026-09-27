@@ -1,14 +1,14 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
-import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 internal fun buildLibraryActiveFilterChips(
     filters: LibraryFilters,
-): Pair<LibraryActiveFilterChips, Map<String, LibraryFilterValue>> {
+): LibraryActiveFilterChips {
     val entries = buildList {
         filters.tags.forEach { tag ->
             add(
@@ -65,8 +65,6 @@ internal fun buildLibraryActiveFilterChips(
         }
     }
 
-    val valueByKey = entries.associate { (chip, value) -> chip.key to value }
-
     val clearAll = if (entries.size > 1) {
         ChipUiModel(
             key = LIBRARY_CLEAR_ALL_CHIP_KEY,
@@ -77,12 +75,10 @@ internal fun buildLibraryActiveFilterChips(
         null
     }
 
-    val model = LibraryActiveFilterChips(
-        chips = entries.map { it.first }.toImmutableList(),
+    return LibraryActiveFilterChips(
+        chips = entries.toChipSet(),
         clearAll = clearAll,
     )
-
-    return model to valueByKey
 }
 
 private fun activeFilterChipEntry(

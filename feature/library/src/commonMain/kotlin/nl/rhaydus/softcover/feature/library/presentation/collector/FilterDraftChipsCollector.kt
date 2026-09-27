@@ -25,7 +25,6 @@ internal class FilterDraftChipsCollector : LibraryCollector {
                 FilterDraftChipsSnapshot(
                     draft = state.filterDraft,
                     filterChipsByTab = state.filterChipsByTab,
-                    filterValueByChipKey = state.filterValueByChipKey,
                     booksByTab = state.booksByTab,
                     editionsByTab = state.editionsByTab,
                     addedAtByTab = state.addedAtByTab,

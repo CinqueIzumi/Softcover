@@ -23,7 +23,7 @@ internal class OnActiveFilterChipClickedAction(
             return
         }
 
-        val value = scope.currentState.activeFilterValueByChipKey[key] ?: return
+        val value = scope.currentState.activeFilterChipsFor(tabId).chips[key] ?: return
 
         OnToggleFilterValueAction(
             tabId = tabId,

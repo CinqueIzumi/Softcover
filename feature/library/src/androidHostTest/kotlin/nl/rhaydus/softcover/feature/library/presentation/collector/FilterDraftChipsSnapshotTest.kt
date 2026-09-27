@@ -4,9 +4,11 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -20,7 +22,6 @@ class FilterDraftChipsSnapshotTest {
             val snapshot = FilterDraftChipsSnapshot(
                 draft = null,
                 filterChipsByTab = emptyMap(),
-                filterValueByChipKey = emptyMap(),
                 booksByTab = emptyMap(),
                 editionsByTab = emptyMap(),
                 addedAtByTab = emptyMap(),
@@ -43,7 +44,6 @@ class FilterDraftChipsSnapshotTest {
             val snapshot = FilterDraftChipsSnapshot(
                 draft = LibraryFilterDraft(tabId = "all"),
                 filterChipsByTab = emptyMap(),
-                filterValueByChipKey = emptyMap(),
                 booksByTab = emptyMap(),
                 editionsByTab = emptyMap(),
                 addedAtByTab = emptyMap(),
@@ -64,11 +64,14 @@ class FilterDraftChipsSnapshotTest {
         @Test
         fun `compute resolves chips for the draft's own tab out of filterChipsByTab`() {
             // ----- Arrange -----
+            val ebookValue = LibraryFilterValue.Format(value = "ebook")
             val chips = LibraryFilterChips(
-                formatChips = listOf(ChipUiModel(
-                    key = "format:ebook",
-                    label = "ebook",
-                ),),
+                formatChips = listOf(
+                    ChipUiModel(
+                        key = "format:ebook",
+                        label = "ebook",
+                    ) to ebookValue,
+                ).toChipSet(),
             )
             val snapshot = FilterDraftChipsSnapshot(
                 draft = LibraryFilterDraft(tabId = "read"),
@@ -76,7 +79,6 @@ class FilterDraftChipsSnapshotTest {
                     "all" to LibraryFilterChips(),
                     "read" to chips,
                 ),
-                filterValueByChipKey = emptyMap(),
                 booksByTab = emptyMap(),
                 editionsByTab = emptyMap(),
                 addedAtByTab = emptyMap(),
@@ -99,7 +101,6 @@ class FilterDraftChipsSnapshotTest {
             val snapshot = FilterDraftChipsSnapshot(
                 draft = LibraryFilterDraft(tabId = "all"),
                 filterChipsByTab = emptyMap(),
-                filterValueByChipKey = emptyMap(),
                 booksByTab = mapOf("all" to List(3) { mockk() }),
                 editionsByTab = emptyMap(),
                 addedAtByTab = emptyMap(),
@@ -135,7 +136,6 @@ class FilterDraftChipsSnapshotTest {
                     filters = LibraryFilters(releaseYears = setOf(2020)),
                 ),
                 filterChipsByTab = emptyMap(),
-                filterValueByChipKey = emptyMap(),
                 booksByTab = mapOf("all" to listOf(matchingBook, nonMatchingBook)),
                 editionsByTab = emptyMap(),
                 addedAtByTab = emptyMap(),

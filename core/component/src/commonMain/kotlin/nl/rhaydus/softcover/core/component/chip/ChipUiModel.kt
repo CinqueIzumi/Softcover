@@ -11,8 +11,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * gated by [interaction], with a [leading] / [trailing] slot and a [face] mark
  * (`component-contract.md` § 7.2 R2).
  *
- * @property key Identity — the event carries it back (R1), and the mapper's lookup map (kept beside
- * the models in `UiState`, not rebuilt in composition) resolves it back to whatever payload
+ * @property key Identity — the event carries it back (R1); [ChipSet] resolves it to whatever payload
  * dispatching the original action needs (a filter value, a tag, a category).
  */
 @Immutable

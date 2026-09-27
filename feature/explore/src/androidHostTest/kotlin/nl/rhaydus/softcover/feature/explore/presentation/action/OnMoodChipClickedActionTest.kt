@@ -4,11 +4,13 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchByMoodUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
@@ -70,10 +72,10 @@ class OnMoodChipClickedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `a key missing from moodTagByChipKey is a no-op`() = runTest {
+        fun `a key missing from moodChips is a no-op`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            val initialState = ExploreScreenUiState(moodTagByChipKey = emptyMap())
+            val initialState = ExploreScreenUiState(moodChips = ChipSet())
             stateFlow.value = initialState
             val action = OnMoodChipClickedAction(key = "mood:missing")
 
@@ -109,7 +111,9 @@ class OnMoodChipClickedActionTest {
                 scope = directScope,
             )
 
-            stateFlow.value = ExploreScreenUiState(moodTagByChipKey = mapOf("mood:1" to cozy))
+            stateFlow.value = ExploreScreenUiState(
+                moodChips = ChipSet(payloadByKey = persistentMapOf("mood:1" to cozy)),
+            )
             val action = OnMoodChipClickedAction(key = "mood:1")
 
             // ----- Act -----

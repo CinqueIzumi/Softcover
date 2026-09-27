@@ -4,11 +4,13 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -63,10 +65,10 @@ class OnRecentSearchChipClickedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `a key missing from recentSearchQueryByChipKey is a no-op`() = runTest {
+        fun `a key missing from recentSearchChips is a no-op`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            val initialState = ExploreScreenUiState(recentSearchQueryByChipKey = emptyMap())
+            val initialState = ExploreScreenUiState(recentSearchChips = ChipSet())
             stateFlow.value = initialState
             val action = OnRecentSearchChipClickedAction(key = "recent:missing")
 
@@ -108,7 +110,9 @@ class OnRecentSearchChipClickedActionTest {
                 scope = directScope,
             )
 
-            stateFlow.value = ExploreScreenUiState(recentSearchQueryByChipKey = mapOf("recent:kotlin" to "kotlin"))
+            stateFlow.value = ExploreScreenUiState(
+                recentSearchChips = ChipSet(payloadByKey = persistentMapOf("recent:kotlin" to "kotlin")),
+            )
             val action = OnRecentSearchChipClickedAction(key = "recent:kotlin")
 
             // ----- Act -----

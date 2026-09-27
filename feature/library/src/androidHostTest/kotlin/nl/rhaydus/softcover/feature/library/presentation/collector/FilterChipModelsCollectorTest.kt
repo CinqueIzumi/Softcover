@@ -71,14 +71,16 @@ class FilterChipModelsCollectorTest {
             ),)
 
             // ----- Assert -----
-            stateFlow.value.filterChipsFor("all").formatChips.map { it.key } shouldBe listOf("format:ebook")
-            stateFlow.value.filterChipsFor("read").readYearChips.map { it.key } shouldBe listOf("readYear:2021")
+            stateFlow.value.filterChipsFor("all").formatChips.chips.map { it.key } shouldBe
+                listOf("format:ebook")
+            stateFlow.value.filterChipsFor("read").readYearChips.chips.map { it.key } shouldBe
+                listOf("readYear:2021")
             stateFlow.value.filterChipsFor("missing").isEmpty shouldBe true
             job.cancel()
         }
 
         @Test
-        fun `filterValueByChipKey round-trips every chip key across every facet to the value that built it`() =
+        fun `each facet's ChipSet round-trips every chip key to the value that built it`() =
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 val options = LibraryFilterOptions(
@@ -102,17 +104,17 @@ class FilterChipModelsCollectorTest {
 
                 // ----- Assert -----
                 val chips = stateFlow.value.filterChipsFor("all")
-                val valueByKey = stateFlow.value.filterValueByChipKey
-                val allChips = chips.ownershipChips + chips.formatChips + chips.releaseYearChips +
-                    chips.readYearChips + chips.tagChips + chips.ratingChips
+                val allChips = chips.ownershipChips.chips + chips.formatChips.chips +
+                    chips.releaseYearChips.chips + chips.readYearChips.chips + chips.tagChips.chips +
+                    chips.ratingChips.chips
 
-                allChips.forEach { chip -> (chip.key in valueByKey) shouldBe true }
-                valueByKey["owned:true"] shouldBe LibraryFilterValue.Owned(owned = true)
-                valueByKey["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
-                valueByKey["releaseYear:2020"] shouldBe LibraryFilterValue.ReleaseYear(year = 2020)
-                valueByKey["readYear:2019"] shouldBe LibraryFilterValue.ReadYear(year = 2019)
-                valueByKey["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
-                valueByKey["rating:4.0"] shouldBe LibraryFilterValue.RatingMin(threshold = 4.0)
+                allChips.forEach { chip -> (chips[chip.key] != null) shouldBe true }
+                chips["owned:true"] shouldBe LibraryFilterValue.Owned(owned = true)
+                chips["format:ebook"] shouldBe LibraryFilterValue.Format(value = "ebook")
+                chips["releaseYear:2020"] shouldBe LibraryFilterValue.ReleaseYear(year = 2020)
+                chips["readYear:2019"] shouldBe LibraryFilterValue.ReadYear(year = 2019)
+                chips["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
+                chips["rating:4.0"] shouldBe LibraryFilterValue.RatingMin(threshold = 4.0)
                 job.cancel()
             }
 
@@ -131,16 +133,14 @@ class FilterChipModelsCollectorTest {
 
                 stateFlow.value = LibraryUiState(filterOptionsByTab = mapOf("all" to options))
                 val chipsByTabAfterFirstEmit = stateFlow.value.filterChipsByTab
-                val valueByKeyAfterFirstEmit = stateFlow.value.filterValueByChipKey
 
                 // ----- Act -----
                 // isArrangeSheetExpanded is not part of FilterChipModelsSnapshot, so this must not
-                // retrigger the collector's compute — the maps must stay the same instances.
+                // retrigger the collector's compute — the map must stay the same instance.
                 stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
 
                 // ----- Assert -----
                 (stateFlow.value.filterChipsByTab === chipsByTabAfterFirstEmit) shouldBe true
-                (stateFlow.value.filterValueByChipKey === valueByKeyAfterFirstEmit) shouldBe true
                 job.cancel()
             }
     }

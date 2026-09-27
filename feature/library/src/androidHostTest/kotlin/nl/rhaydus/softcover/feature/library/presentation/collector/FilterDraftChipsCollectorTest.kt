@@ -9,10 +9,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.toChipSet
+import nl.rhaydus.softcover.core.domain.model.Tag
+import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
@@ -68,10 +72,12 @@ class FilterDraftChipsCollectorTest {
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 val chips = LibraryFilterChips(
-                    formatChips = listOf(ChipUiModel(
-                        key = "format:ebook",
-                        label = "ebook",
-                    ),),
+                    formatChips = listOf(
+                        ChipUiModel(
+                            key = "format:ebook",
+                            label = "ebook",
+                        ) to LibraryFilterValue.Format(value = "ebook"),
+                    ).toChipSet(),
                 )
                 val collector = FilterDraftChipsCollector()
                 val job = launch {
@@ -97,17 +103,27 @@ class FilterDraftChipsCollectorTest {
         @Test
         fun `editing the draft's tagSearch recomputes which tag chips remain`() = runTest(testDispatcher) {
             // ----- Arrange -----
+            val tagFiction = Tag(
+                id = 1,
+                name = "Fiction",
+                category = TagCategory.GENRE,
+            )
+            val tagScifi = Tag(
+                id = 2,
+                name = "Sci-Fi",
+                category = TagCategory.GENRE,
+            )
             val chips = LibraryFilterChips(
                 tagChips = listOf(
                     ChipUiModel(
                         key = "tag:1",
                         label = "Fiction",
-                    ),
+                    ) to LibraryFilterValue.Tag(tag = tagFiction),
                     ChipUiModel(
                         key = "tag:2",
                         label = "Sci-Fi",
-                    ),
-                ),
+                    ) to LibraryFilterValue.Tag(tag = tagScifi),
+                ).toChipSet(),
             )
             val collector = FilterDraftChipsCollector()
             val job = launch {

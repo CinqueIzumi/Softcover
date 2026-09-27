@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetSelection
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.buildLibraryFilterSheetSelection
 import nl.rhaydus.softcover.feature.library.presentation.state.libraryPreviewCount
@@ -22,7 +21,6 @@ import nl.rhaydus.softcover.feature.library.presentation.state.libraryPreviewCou
 internal data class FilterDraftChipsSnapshot(
     val draft: LibraryFilterDraft?,
     val filterChipsByTab: Map<String, LibraryFilterChips>,
-    val filterValueByChipKey: Map<String, LibraryFilterValue>,
     val booksByTab: Map<String, List<Book>>,
     val editionsByTab: Map<String, List<BookEdition>>,
     val addedAtByTab: Map<String, Map<Int, String?>>,
@@ -54,7 +52,6 @@ internal data class FilterDraftChipsSnapshot(
         return buildLibraryFilterSheetSelection(
             chips = chips,
             draft = draft,
-            valueByChipKey = filterValueByChipKey,
             resultCount = resultCount,
         )
     }

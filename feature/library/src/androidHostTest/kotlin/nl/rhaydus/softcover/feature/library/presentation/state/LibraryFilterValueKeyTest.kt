@@ -106,8 +106,14 @@ class LibraryFilterValueKeyTest {
             )
 
             // ----- Act -----
-            val (_, optionsValueByKey) = buildLibraryFilterChips(options = options)
-            val (_, activeValueByKey) = buildLibraryActiveFilterChips(filters = filters)
+            val optionsChips = buildLibraryFilterChips(options = options)
+            val optionsValueByKey = optionsChips.ownershipChips.payloadByKey +
+                optionsChips.formatChips.payloadByKey +
+                optionsChips.releaseYearChips.payloadByKey +
+                optionsChips.readYearChips.payloadByKey +
+                optionsChips.tagChips.payloadByKey +
+                optionsChips.ratingChips.payloadByKey
+            val activeValueByKey = buildLibraryActiveFilterChips(filters = filters).chips.payloadByKey
 
             // ----- Assert -----
             // buildLibraryFilterChips offers both Owned(true) and Owned(false) as picker options,

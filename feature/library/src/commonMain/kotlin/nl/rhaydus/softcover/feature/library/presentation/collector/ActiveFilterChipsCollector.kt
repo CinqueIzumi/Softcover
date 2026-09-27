@@ -19,16 +19,9 @@ internal class ActiveFilterChipsCollector : LibraryCollector {
             .map { state -> ActiveFilterChipsSnapshot(filtersByTab = state.filtersByTab) }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
-                val (chipsByTab, valueByKey) = withContext(dependencies.defaultDispatcher) {
-                    snapshot.compute()
-                }
+                val chipsByTab = withContext(dependencies.defaultDispatcher) { snapshot.compute() }
 
-                scope.setState {
-                    it.copy(
-                        activeFilterChipsByTab = chipsByTab,
-                        activeFilterValueByChipKey = valueByKey,
-                    )
-                }
+                scope.setState { it.copy(activeFilterChipsByTab = chipsByTab) }
             }
     }
 }

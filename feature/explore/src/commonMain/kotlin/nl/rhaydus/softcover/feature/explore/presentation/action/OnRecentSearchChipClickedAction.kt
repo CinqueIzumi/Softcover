@@ -14,7 +14,7 @@ internal data class OnRecentSearchChipClickedAction(
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        val query = scope.currentState.recentSearchQueryByChipKey[key] ?: return
+        val query = scope.currentState.recentSearchChips[key] ?: return
 
         OnQueryChangeAction(
             newQuery = query,

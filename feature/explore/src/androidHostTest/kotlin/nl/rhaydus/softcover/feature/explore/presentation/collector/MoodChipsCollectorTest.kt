@@ -44,7 +44,7 @@ class MoodChipsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets moodChips and moodTagByChipKey from moodTags`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sets moodChips with chips and payloads from moodTags`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = MoodChipsCollector()
             val job = launch { collector.onLaunch(
@@ -56,14 +56,14 @@ class MoodChipsCollectorTest {
             stateFlow.value = ExploreScreenUiState(moodTags = listOf(cozy))
 
             // ----- Assert -----
-            stateFlow.value.moodChips.map { it.key } shouldBe listOf("mood:1")
-            stateFlow.value.moodChips.map { it.label } shouldBe listOf("Cosy")
-            stateFlow.value.moodTagByChipKey shouldBe mapOf("mood:1" to cozy)
+            stateFlow.value.moodChips.chips.map { it.key } shouldBe listOf("mood:1")
+            stateFlow.value.moodChips.chips.map { it.label } shouldBe listOf("Cosy")
+            stateFlow.value.moodChips.payloadByKey shouldBe mapOf("mood:1" to cozy)
             job.cancel()
         }
 
         @Test
-        fun `updates to empty chips and map when moodTags becomes empty`() = runTest(UnconfinedTestDispatcher()) {
+        fun `updates to an empty chip set when moodTags becomes empty`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(moodTags = listOf(cozy))
             val collector = MoodChipsCollector()
@@ -76,8 +76,8 @@ class MoodChipsCollectorTest {
             stateFlow.value = stateFlow.value.copy(moodTags = emptyList())
 
             // ----- Assert -----
-            stateFlow.value.moodChips shouldBe persistentListOf()
-            stateFlow.value.moodTagByChipKey shouldBe emptyMap()
+            stateFlow.value.moodChips.chips shouldBe persistentListOf()
+            stateFlow.value.moodChips.payloadByKey shouldBe emptyMap()
             job.cancel()
         }
 
@@ -113,15 +113,13 @@ class MoodChipsCollectorTest {
                     scope = scope,
                     dependencies = dependencies,
                 ) }
-                val chipsAfterFirstEmit = stateFlow.value.moodChips
-                val mapAfterFirstEmit = stateFlow.value.moodTagByChipKey
+                val chipSetAfterFirstEmit = stateFlow.value.moodChips
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(isLoading = true)
 
                 // ----- Assert -----
-                (stateFlow.value.moodChips === chipsAfterFirstEmit) shouldBe true
-                (stateFlow.value.moodTagByChipKey === mapAfterFirstEmit) shouldBe true
+                (stateFlow.value.moodChips === chipSetAfterFirstEmit) shouldBe true
                 job.cancel()
             }
     }

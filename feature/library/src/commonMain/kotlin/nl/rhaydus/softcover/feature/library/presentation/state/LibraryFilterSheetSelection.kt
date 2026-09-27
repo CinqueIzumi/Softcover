@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 
 /**
@@ -29,11 +30,10 @@ internal data class LibraryFilterSheetSelection(
 internal fun buildLibraryFilterSheetSelection(
     chips: LibraryFilterChips,
     draft: LibraryFilterDraft,
-    valueByChipKey: Map<String, LibraryFilterValue>,
     resultCount: Int,
 ): LibraryFilterSheetSelection {
-    fun List<ChipUiModel>.resolveSelection(): List<ChipUiModel> = map { chip ->
-        val value = valueByChipKey[chip.key] ?: return@map chip
+    fun ChipSet<LibraryFilterValue>.resolveSelection(): List<ChipUiModel> = this.chips.map { chip ->
+        val value = this[chip.key] ?: return@map chip
 
         chip.copy(selected = draft.filters.isSelected(value = value))
     }

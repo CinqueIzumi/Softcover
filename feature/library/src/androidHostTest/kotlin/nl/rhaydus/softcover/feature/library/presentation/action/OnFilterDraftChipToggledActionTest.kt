@@ -5,8 +5,11 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
@@ -23,10 +26,19 @@ class OnFilterDraftChipToggledActionTest {
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     private val tabId = "list-10"
+    private val otherTabId = "list-99"
     private val formatKey = "format:Hardcover"
     private val formatValue = LibraryFilterValue.Format(value = "Hardcover")
+    private val formatChip = ChipUiModel(
+        key = formatKey,
+        label = "Hardcover",
+    )
     private val ownedKey = "owned:true"
     private val ownedValue = LibraryFilterValue.Owned(owned = true)
+    private val ownedChip = ChipUiModel(
+        key = ownedKey,
+        label = "Owned",
+    )
 
     @BeforeEach
     fun setUp() {
@@ -50,7 +62,9 @@ class OnFilterDraftChipToggledActionTest {
             )
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
-                filterValueByChipKey = mapOf(formatKey to formatValue),
+                filterChipsByTab = mapOf(
+                    tabId to LibraryFilterChips(formatChips = listOf(formatChip to formatValue).toChipSet()),
+                ),
             )
 
             // ----- Act -----
@@ -68,7 +82,9 @@ class OnFilterDraftChipToggledActionTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 filterDraft = null,
-                filterValueByChipKey = mapOf(formatKey to formatValue),
+                filterChipsByTab = mapOf(
+                    tabId to LibraryFilterChips(formatChips = listOf(formatChip to formatValue).toChipSet()),
+                ),
             )
 
             // ----- Act -----
@@ -90,7 +106,9 @@ class OnFilterDraftChipToggledActionTest {
             )
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
-                filterValueByChipKey = mapOf(formatKey to formatValue),
+                filterChipsByTab = mapOf(
+                    tabId to LibraryFilterChips(formatChips = listOf(formatChip to formatValue).toChipSet()),
+                ),
             )
 
             // ----- Act -----
@@ -112,7 +130,9 @@ class OnFilterDraftChipToggledActionTest {
             )
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
-                filterValueByChipKey = mapOf(formatKey to formatValue),
+                filterChipsByTab = mapOf(
+                    tabId to LibraryFilterChips(formatChips = listOf(formatChip to formatValue).toChipSet()),
+                ),
             )
 
             // ----- Act -----
@@ -134,7 +154,9 @@ class OnFilterDraftChipToggledActionTest {
             )
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
-                filterValueByChipKey = mapOf(ownedKey to ownedValue),
+                filterChipsByTab = mapOf(
+                    tabId to LibraryFilterChips(ownershipChips = listOf(ownedChip to ownedValue).toChipSet()),
+                ),
             )
 
             // ----- Act -----
@@ -166,7 +188,9 @@ class OnFilterDraftChipToggledActionTest {
             )
             stateFlow.value = LibraryUiState(
                 filterDraft = draft,
-                filterValueByChipKey = mapOf(formatKey to formatValue),
+                filterChipsByTab = mapOf(
+                    tabId to LibraryFilterChips(formatChips = listOf(formatChip to formatValue).toChipSet()),
+                ),
             )
 
             // ----- Act -----
@@ -178,6 +202,30 @@ class OnFilterDraftChipToggledActionTest {
             // ----- Assert -----
             stateFlow.value.filterDraft?.tabId shouldBe tabId
             stateFlow.value.filterDraft?.tagSearch shouldBe "kotlin"
+        }
+
+        @Test
+        fun `a key present in another tab's chips but not the draft's tab is a no-op`() = runTest {
+            // ----- Arrange -----
+            val draft = LibraryFilterDraft(
+                tabId = tabId,
+                filters = LibraryFilters(),
+            )
+            stateFlow.value = LibraryUiState(
+                filterDraft = draft,
+                filterChipsByTab = mapOf(
+                    otherTabId to LibraryFilterChips(formatChips = listOf(formatChip to formatValue).toChipSet()),
+                ),
+            )
+
+            // ----- Act -----
+            OnFilterDraftChipToggledAction(key = formatKey).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.filterDraft shouldBe draft
         }
     }
 }

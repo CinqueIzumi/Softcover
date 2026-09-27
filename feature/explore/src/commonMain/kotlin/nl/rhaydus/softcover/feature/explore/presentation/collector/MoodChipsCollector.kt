@@ -18,14 +18,9 @@ internal class MoodChipsCollector : ExploreCollector {
             .map { state -> MoodChipsSnapshot(moodTags = state.moodTags) }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
-                val (chips, moodByKey) = snapshot.compute()
+                val chips = snapshot.compute()
 
-                scope.setState {
-                    it.copy(
-                        moodChips = chips,
-                        moodTagByChipKey = moodByKey,
-                    )
-                }
+                scope.setState { it.copy(moodChips = chips) }
             }
     }
 }

@@ -235,11 +235,11 @@ internal actual fun LibraryScreenLayout(
 
                 val activeFilterChips = currentTab?.id?.let { state.activeFilterChipsFor(tabId = it) }
 
-                if (currentTab != null && activeFilterChips != null && activeFilterChips.chips.isNotEmpty()) {
+                if (currentTab != null && activeFilterChips != null && activeFilterChips.chips.isEmpty.not()) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     LibraryFilterChipRow(
-                        chips = activeFilterChips,
+                        activeFilters = activeFilterChips,
                         onChipEvent = { event ->
                             when (event) {
                                 is ChipEvent.Clicked ->

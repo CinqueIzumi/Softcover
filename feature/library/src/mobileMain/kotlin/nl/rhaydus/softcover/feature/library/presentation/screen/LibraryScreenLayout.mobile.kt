@@ -279,7 +279,7 @@ internal actual fun LibraryScreenLayout(
                 val activeFilterChips = currentTab?.id?.let { state.activeFilterChipsFor(tabId = it) }
 
                 AnimatedVisibility(
-                    visible = activeFilterChips != null && activeFilterChips.chips.isNotEmpty(),
+                    visible = activeFilterChips != null && activeFilterChips.chips.isEmpty.not(),
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut(),
                 ) {
@@ -291,7 +291,7 @@ internal actual fun LibraryScreenLayout(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             LibraryFilterChipRow(
-                                chips = chips,
+                                activeFilters = chips,
                                 onChipEvent = { event ->
                                     when (event) {
                                         is ChipEvent.Clicked ->

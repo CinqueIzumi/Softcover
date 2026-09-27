@@ -181,7 +181,7 @@ private val previewRecentSearchQueries = listOf(
 
 private val previewMockState = ExploreScreenUiState(
     previousSearchQueries = previewRecentSearchQueries,
-    recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = previewRecentSearchQueries).compute().first,
+    recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = previewRecentSearchQueries).compute(),
     trendingBooks = ExploreMockData.trending,
     trendingCovers = ExploreMockData.trending.toPreviewCoverModels(
         CoverVariant.ExploreRail,
@@ -259,7 +259,7 @@ private fun LoadingTrendingExploreScreenPreview() {
                 ),
                 loadingContinueSeriesBooks = false,
                 previousSearchQueries = listOf("Bubblegum", "Earthlings"),
-                recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = listOf("Bubblegum", "Earthlings")).compute().first,
+                recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = listOf("Bubblegum", "Earthlings")).compute(),
                 loadingFeaturedUpcomingRelease = false,
                 loadingBecauseYouReadBooks = false,
                 loadingMoodTags = false,
@@ -307,7 +307,7 @@ private fun SearchFocusExploreScreenPreview() {
             state = previewMockState.copy(
                 searchFocused = true,
                 moodTags = previewSearchFocusMoodTags,
-                moodChips = MoodChipsSnapshot(moodTags = previewSearchFocusMoodTags).compute().first,
+                moodChips = MoodChipsSnapshot(moodTags = previewSearchFocusMoodTags).compute(),
             ),
         )
     }

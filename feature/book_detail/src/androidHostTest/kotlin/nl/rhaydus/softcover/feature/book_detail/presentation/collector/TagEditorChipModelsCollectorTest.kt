@@ -112,14 +112,14 @@ class TagEditorChipModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(tagSuggestions = suggestions)
 
             // ----- Assert -----
-            val chips = stateFlow.value.tagSuggestionChips
+            val chips = stateFlow.value.tagSuggestionChips.chips
             chips.map { it.label } shouldBe listOf("Fantasy", "Cozy")
             chips.map { it.key } shouldBe listOf("GENRE:Fantasy", "MOOD:Cozy")
             job.cancel()
         }
 
         @Test
-        fun `tagSuggestionByChipKey round-trips every suggestion chip back to its UserTag`() =
+        fun `tagSuggestionChips round-trips every suggestion chip back to its UserTag`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val fantasy = UserTag(
@@ -143,8 +143,8 @@ class TagEditorChipModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(tagSuggestions = suggestions)
 
                 // ----- Assert -----
-                val chips = stateFlow.value.tagSuggestionChips
-                val byKey = stateFlow.value.tagSuggestionByChipKey
+                val chips = stateFlow.value.tagSuggestionChips.chips
+                val byKey = stateFlow.value.tagSuggestionChips.payloadByKey
                 chips.forEach { chip ->
                     byKey[chip.key] shouldBe suggestions.single { "${it.category.name}:${it.name}" == chip.key }
                 }
@@ -177,11 +177,11 @@ class TagEditorChipModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(tagSuggestions = listOf(genreFantasy, moodFantasy))
 
                 // ----- Assert -----
-                val chips = stateFlow.value.tagSuggestionChips
+                val chips = stateFlow.value.tagSuggestionChips.chips
                 val keys = chips.map { it.key }
                 keys.toSet().size shouldBe 2
 
-                val byKey = stateFlow.value.tagSuggestionByChipKey
+                val byKey = stateFlow.value.tagSuggestionChips.payloadByKey
                 byKey["GENRE:Fantasy"] shouldBe genreFantasy
                 byKey["MOOD:Fantasy"] shouldBe moodFantasy
                 job.cancel()

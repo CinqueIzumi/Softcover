@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.toChipSet
 
 /**
  * Pure, dispatcher-friendly builder mapping a tab's [LibraryFilterOptions] to [ChipUiModel]s
@@ -8,33 +9,19 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
  * `FilterChipModelsCollector` can call it on `Dispatchers.Default` without keeping the whole UI state
  * on the worker thread.
  *
- * Every chip's key encodes the facet it belongs to (`"format:Hardcover"`, `"tag:42"`, …) so the
- * returned lookup map stays collision-free across facets while sharing one flat namespace per tab.
+ * Every chip's key encodes the facet it belongs to (`"format:Hardcover"`, `"tag:42"`, …) so each
+ * facet's [nl.rhaydus.softcover.core.component.chip.ChipSet] stays collision-free.
  */
 internal fun buildLibraryFilterChips(
     options: LibraryFilterOptions,
-): Pair<LibraryFilterChips, Map<String, LibraryFilterValue>> {
-    val ownership = ownershipChipEntries(options = options)
-    val formats = formatChipEntries(options = options)
-    val releaseYears = releaseYearChipEntries(options = options)
-    val readYears = readYearChipEntries(options = options)
-    val tags = tagChipEntries(options = options)
-    val ratings = ratingChipEntries(options = options)
-
-    val valueByKey = (ownership + formats + releaseYears + readYears + tags + ratings)
-        .associate { (chip, value) -> chip.key to value }
-
-    val chips = LibraryFilterChips(
-        ownershipChips = ownership.map { it.first },
-        formatChips = formats.map { it.first },
-        releaseYearChips = releaseYears.map { it.first },
-        readYearChips = readYears.map { it.first },
-        tagChips = tags.map { it.first },
-        ratingChips = ratings.map { it.first },
-    )
-
-    return chips to valueByKey
-}
+): LibraryFilterChips = LibraryFilterChips(
+    ownershipChips = ownershipChipEntries(options = options).toChipSet(),
+    formatChips = formatChipEntries(options = options).toChipSet(),
+    releaseYearChips = releaseYearChipEntries(options = options).toChipSet(),
+    readYearChips = readYearChipEntries(options = options).toChipSet(),
+    tagChips = tagChipEntries(options = options).toChipSet(),
+    ratingChips = ratingChipEntries(options = options).toChipSet(),
+)
 
 private fun ownershipChipEntries(
     options: LibraryFilterOptions,

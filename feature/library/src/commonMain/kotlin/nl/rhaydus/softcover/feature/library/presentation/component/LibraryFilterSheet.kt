@@ -138,7 +138,7 @@ private fun FacetSections(
     onChipEvent: (ChipEvent) -> Unit,
     onTagSearchChanged: (String) -> Unit,
 ) {
-    if (chips.ownershipChips.isNotEmpty() || chips.formatChips.isNotEmpty()) {
+    if (chips.ownershipChips.isEmpty.not() || chips.formatChips.isEmpty.not()) {
         FacetSection(title = "Ownership · Format") {
             (selection.ownershipChips + selection.formatChips).forEach { chip ->
                 Chip(
@@ -151,7 +151,7 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    if (chips.releaseYearChips.isNotEmpty()) {
+    if (chips.releaseYearChips.isEmpty.not()) {
         FacetSection(title = "Release year") {
             selection.releaseYearChips.forEach { chip ->
                 Chip(
@@ -164,7 +164,7 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    if (chips.readYearChips.isNotEmpty()) {
+    if (chips.readYearChips.isEmpty.not()) {
         FacetSection(title = "Year finished") {
             selection.readYearChips.forEach { chip ->
                 Chip(
@@ -177,9 +177,9 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    if (chips.tagChips.isNotEmpty()) {
+    if (chips.tagChips.isEmpty.not()) {
         TagsFacetSection(
-            availableCount = chips.tagChips.size,
+            availableCount = chips.tagChips.chips.size,
             tagSearch = tagSearch,
             visibleChips = selection.tagChips,
             onChipEvent = onChipEvent,
@@ -189,7 +189,7 @@ private fun FacetSections(
         Spacer(modifier = Modifier.height(20.dp))
     }
 
-    if (chips.ratingChips.isNotEmpty()) {
+    if (chips.ratingChips.isEmpty.not()) {
         FacetSection(title = "Rating") {
             selection.ratingChips.forEach { chip ->
                 Chip(
