@@ -1,34 +1,41 @@
 package nl.rhaydus.softcover.core.component.chip
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
 
+private val ChipShape = RoundedCornerShape(percent = 50)
+
 /**
- * The canonical pill-shaped chip (§3.4). Fully-rounded surface with a single label. Selected swaps
- * to [secondaryContainer][androidx.compose.material3.ColorScheme.secondaryContainer]; idle sits on
- * [surfaceContainerHigh][androidx.compose.material3.ColorScheme.surfaceContainerHigh]. It backs both
- * the library filter facets and the book-detail tag chips, so the chip anatomy lives in one place —
- * reach for it instead of hand-rolling a `Surface`-and-`Text` pill.
- *
- * [ChipUiModel.clickable] `= false` renders a read-only, inert chip (book-detail tags): the surface
- * then carries no ripple and no click role. A tap on an interactive chip (library facets, toggles)
- * reports [ChipEvent.Clicked] with [ChipUiModel.key].
- *
- * [ChipUiModel.concealed] renders the chip as a spoiler redaction (§2.1 spoiler register): the label
- * is drawn transparent so it reserves its width but cannot be read, beneath a solid
- * [spoilerCover][nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover] fill — the same
- * treatment `RichText` gives an inline spoiler run. Because the label still measures at
- * its real width, revealing it (re-render with `concealed = false`) does not reflow the row.
+ * The pill-shaped chip family (`component-contract.md` § 7.2 R2, `component-library-migration`
+ * README D11/D12): one label on a fully-rounded surface, its anatomy and colours resolved from
+ * [ChipUiModel.variant]. [ChipUiModel.interaction] gates the tap affordance independently of the
+ * variant, so the same [ChipVariant.Tonal] pill backs both the library's interactive filter facets
+ * and book-detail's [ChipInteraction.Inert] read-only tags. Every clickable pill reports through this
+ * one [ChipEvent] lambda (R1) using the same press-scale + hand-cursor affordance as `WhenReadRow`
+ * and `ChooseListsRow`, never a `Surface(onClick)` ripple.
  */
 @Composable
 fun Chip(
@@ -36,60 +43,409 @@ fun Chip(
     onEvent: (ChipEvent) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val container = when {
-        model.concealed -> MaterialTheme.colorScheme.spoilerCover
-        model.selected -> MaterialTheme.colorScheme.secondaryContainer
-        else -> MaterialTheme.colorScheme.surfaceContainerHigh
-    }
-
-    val content = when {
-        model.concealed -> Color.Transparent
-        model.selected -> MaterialTheme.colorScheme.onSecondaryContainer
-        else -> MaterialTheme.colorScheme.onSurface
-    }
-
-    val shape = RoundedCornerShape(percent = 50)
-
-    if (model.clickable) {
-        Surface(
+    when (val variant = model.variant) {
+        is ChipVariant.Tonal -> TonalChip(
+            model = model,
+            variant = variant,
+            onEvent = onEvent,
             modifier = modifier,
-            color = container,
-            contentColor = content,
-            shape = shape,
-            onClick = { onEvent(ChipEvent.Clicked(key = model.key)) },
-        ) {
-            PillChipLabel(
-                label = model.label,
-                selected = model.selected,
-            )
-        }
+        )
+        ChipVariant.Spoiler -> SpoilerChip(
+            model = model,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+        ChipVariant.Add -> AddChip(
+            model = model,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+        ChipVariant.AddOutlined -> AddOutlinedChip(
+            model = model,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+        ChipVariant.Remove -> RemoveChip(
+            model = model,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+        is ChipVariant.Format -> FormatChip(
+            model = model,
+            variant = variant,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun TonalChip(
+    model: ChipUiModel,
+    variant: ChipVariant.Tonal,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val container = if (variant.selected) {
+        MaterialTheme.colorScheme.secondaryContainer
     } else {
-        Surface(
-            modifier = modifier,
-            color = container,
-            contentColor = content,
-            shape = shape,
-        ) {
-            PillChipLabel(
-                label = model.label,
-                selected = model.selected,
-            )
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+
+    val content = if (variant.selected) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    val fontWeight = if (variant.selected) FontWeight.SemiBold else FontWeight.Medium
+    val dimensions = ChipDimensions.forVariant(variant)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .background(container)
+            .chipInteraction(interaction = model.interaction, dimensions = dimensions) {
+                onEvent(ChipEvent.Clicked(key = model.key))
+            }
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        model.leadingIcon?.let { ChipLeadingIcon(
+            icon = it,
+            tint = content,
+            dimensions = dimensions,
+        ) }
+
+        Text(
+            text = model.label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = fontWeight),
+            color = content,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        model.dismissLabel?.let { label ->
+            ChipDismissIcon(dismissLabel = label, tint = content, dimensions = dimensions) {
+                onEvent(ChipEvent.Dismissed(key = model.key))
+            }
         }
     }
 }
 
 @Composable
-private fun PillChipLabel(
-    label: String,
-    selected: Boolean,
+private fun SpoilerChip(
+    model: ChipUiModel,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
 ) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium.copy(
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-        ),
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+    val dimensions = ChipDimensions.forVariant(ChipVariant.Spoiler)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .background(MaterialTheme.colorScheme.spoilerCover)
+            .chipInteraction(interaction = model.interaction, dimensions = dimensions) {
+                onEvent(ChipEvent.Clicked(key = model.key))
+            }
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        model.leadingIcon?.let { ChipLeadingIcon(
+            icon = it,
+            tint = Color.Transparent,
+            dimensions = dimensions,
+        ) }
+
+        Text(
+            text = model.label,
+            style = MaterialTheme.typography.labelMedium,
+            color = Color.Transparent,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        model.dismissLabel?.let { label ->
+            ChipDismissIcon(dismissLabel = label, tint = Color.Transparent, dimensions = dimensions) {
+                onEvent(ChipEvent.Dismissed(key = model.key))
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddChip(
+    model: ChipUiModel,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val content = MaterialTheme.colorScheme.onPrimary
+    val dimensions = ChipDimensions.forVariant(ChipVariant.Add)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .background(MaterialTheme.colorScheme.primary)
+            .chipInteraction(interaction = model.interaction, dimensions = dimensions) {
+                onEvent(ChipEvent.Clicked(key = model.key))
+            }
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        model.leadingIcon?.let { ChipLeadingIcon(
+            icon = it,
+            tint = content,
+            dimensions = dimensions,
+        ) }
+
+        Text(
+            text = "+ ${model.label}",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = content,
+        )
+
+        model.dismissLabel?.let { label ->
+            ChipDismissIcon(dismissLabel = label, tint = content, dimensions = dimensions) {
+                onEvent(ChipEvent.Dismissed(key = model.key))
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddOutlinedChip(
+    model: ChipUiModel,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val dimensions = ChipDimensions.forVariant(ChipVariant.AddOutlined)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .border(
+                width = dimensions.borderWidth,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = ChipShape,
+            )
+            .chipInteraction(interaction = model.interaction, dimensions = dimensions) {
+                onEvent(ChipEvent.Clicked(key = model.key))
+            }
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        model.leadingIcon?.let { ChipLeadingIcon(
+            icon = it,
+            tint = MaterialTheme.colorScheme.primary,
+            dimensions = dimensions,
+        ) }
+
+        Text(
+            text = "+",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.primary,
+        )
+
+        Spacer(modifier = Modifier.width(dimensions.innerGap))
+
+        Text(
+            text = model.label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+            color = labelColor,
+        )
+
+        model.dismissLabel?.let { label ->
+            ChipDismissIcon(dismissLabel = label, tint = labelColor, dimensions = dimensions) {
+                onEvent(ChipEvent.Dismissed(key = model.key))
+            }
+        }
+    }
+}
+
+@Composable
+private fun RemoveChip(
+    model: ChipUiModel,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val content = MaterialTheme.colorScheme.onPrimaryContainer
+    val dimensions = ChipDimensions.forVariant(ChipVariant.Remove)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .chipInteraction(interaction = model.interaction, dimensions = dimensions) {
+                onEvent(ChipEvent.Clicked(key = model.key))
+            }
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        model.leadingIcon?.let { ChipLeadingIcon(
+            icon = it,
+            tint = content,
+            dimensions = dimensions,
+        ) }
+
+        Text(
+            text = model.label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = content,
+        )
+
+        Spacer(modifier = Modifier.width(dimensions.innerGap))
+
+        val closeIcon = drawableIconResource(
+            icon = SoftcoverIcon.Close,
+            contentDescription = "Remove from list",
+        )
+
+        Icon(
+            painter = closeIcon.getIconPainter(),
+            contentDescription = closeIcon.contentDescription,
+            tint = content,
+            modifier = Modifier.size(dimensions.removeIconSize),
+        )
+    }
+}
+
+@Composable
+private fun FormatChip(
+    model: ChipUiModel,
+    variant: ChipVariant.Format,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val container = if (variant.active) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainer
+    }
+
+    val content = if (variant.active) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    val dimensions = ChipDimensions.forVariant(variant)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .background(container)
+            .chipInteraction(interaction = model.interaction, dimensions = dimensions) {
+                onEvent(ChipEvent.Clicked(key = model.key))
+            }
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        model.leadingIcon?.let { ChipLeadingIcon(
+            icon = it,
+            tint = content,
+            dimensions = dimensions,
+        ) }
+
+        Text(
+            text = model.label,
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = if (variant.face == ChipFace.Bold) FontWeight.Bold else null,
+                fontStyle = if (variant.face == ChipFace.Italic) FontStyle.Italic else FontStyle.Normal,
+            ),
+            color = content,
+        )
+
+        model.dismissLabel?.let { label ->
+            ChipDismissIcon(dismissLabel = label, tint = content, dimensions = dimensions) {
+                onEvent(ChipEvent.Dismissed(key = model.key))
+            }
+        }
+    }
+}
+
+@Composable
+private fun Modifier.chipInteraction(
+    interaction: ChipInteraction,
+    dimensions: ChipDimensions,
+    onClick: () -> Unit,
+): Modifier = when (interaction) {
+    ChipInteraction.Clickable -> pointerHandCursor().pressScaleClickable(onClick = onClick)
+    ChipInteraction.Disabled -> alpha(dimensions.disabledAlpha)
+    ChipInteraction.Inert -> this
+}
+
+@Composable
+private fun ChipLeadingIcon(
+    icon: SoftcoverIcon,
+    tint: Color,
+    dimensions: ChipDimensions,
+) {
+    val resource = drawableIconResource(
+        icon = icon,
+        contentDescription = "",
+    )
+
+    Icon(
+        painter = resource.getIconPainter(),
+        contentDescription = resource.contentDescription,
+        tint = tint,
+        modifier = Modifier.size(dimensions.leadingIconSize),
+    )
+
+    Spacer(modifier = Modifier.width(dimensions.leadingIconGap))
+}
+
+@Composable
+private fun ChipDismissIcon(
+    dismissLabel: String,
+    tint: Color,
+    dimensions: ChipDimensions,
+    onDismiss: () -> Unit,
+) {
+    Spacer(modifier = Modifier.width(dimensions.dismissIconGap))
+
+    val resource = drawableIconResource(
+        icon = SoftcoverIcon.Close,
+        contentDescription = dismissLabel,
+    )
+
+    Icon(
+        painter = resource.getIconPainter(),
+        contentDescription = resource.contentDescription,
+        tint = tint,
+        modifier = Modifier
+            .size(dimensions.dismissIconSize)
+            .pointerHandCursor()
+            .pressScaleClickable(onClick = onDismiss),
     )
 }

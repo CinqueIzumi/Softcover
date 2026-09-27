@@ -27,7 +27,7 @@ An index of shared components. Each line links to its family file under `compone
 
 ## Chips
 
-- **Pill chip** — `core:component/chip` — canonical fully-rounded chip, interactive or read-only.
+- **Pill chip** — `core:component/chip` — one family; tonal/spoiler/add/outline/remove/format.
 - **Expandable flow row** — [detail](components/chips.md#expandable-flow-row) — wrapping chip/tag container that collapses past N lines.
 
 ## Covers

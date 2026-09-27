@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -88,7 +89,7 @@ internal fun TagsSection(state: BookDetailUiState) {
                 ) {
                     group.chips.forEach { chip ->
                         key(chip.key) {
-                            if (chip.concealed) {
+                            if (chip.variant == ChipVariant.Spoiler) {
                                 ConcealableTagChip(model = chip)
                             } else {
                                 Chip(model = chip)
@@ -141,7 +142,7 @@ private fun ConcealableTagChip(model: ChipUiModel) {
     var revealed by rememberSaveable { mutableStateOf(false) }
 
     if (revealed) {
-        Chip(model = model.copy(concealed = false))
+        Chip(model = model.copy(variant = ChipVariant.Tonal()))
     } else {
         Chip(
             model = model,

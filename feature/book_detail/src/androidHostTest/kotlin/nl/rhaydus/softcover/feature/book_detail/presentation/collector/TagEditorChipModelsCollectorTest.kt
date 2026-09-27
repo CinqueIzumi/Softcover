@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -57,8 +58,8 @@ class TagEditorChipModelsCollectorTest {
                 val chips = stateFlow.value.tagEditorCategoryChips
                 chips.map { it.key } shouldBe EDITABLE_CATEGORIES.map { it.name }
                 chips.map { it.label } shouldBe EDITABLE_CATEGORIES.map { it.label }
-                chips.count { it.selected } shouldBe 1
-                chips.single { it.selected }.key shouldBe TagCategory.MOOD.name
+                chips.count { it.variant == ChipVariant.Tonal(selected = true) } shouldBe 1
+                chips.single { it.variant == ChipVariant.Tonal(selected = true) }.key shouldBe TagCategory.MOOD.name
                 job.cancel()
             }
 
@@ -73,15 +74,17 @@ class TagEditorChipModelsCollectorTest {
                 )
             }
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
-            stateFlow.value.tagEditorCategoryChips.single { it.selected }.key shouldBe TagCategory.GENRE.name
+            stateFlow.value.tagEditorCategoryChips.single { it.variant == ChipVariant.Tonal(selected = true) }
+                .key shouldBe TagCategory.GENRE.name
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.CONTENT_WARNING)
 
             // ----- Assert -----
             val chips = stateFlow.value.tagEditorCategoryChips
-            chips.count { it.selected } shouldBe 1
-            chips.single { it.selected }.key shouldBe TagCategory.CONTENT_WARNING.name
+            chips.count { it.variant == ChipVariant.Tonal(selected = true) } shouldBe 1
+            chips.single { it.variant == ChipVariant.Tonal(selected = true) }.key shouldBe
+                TagCategory.CONTENT_WARNING.name
             job.cancel()
         }
 

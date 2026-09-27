@@ -4,6 +4,9 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
@@ -42,7 +45,12 @@ data class ChooseListsUiModel(
                         listId = 1,
                         name = "Winter reading",
                         caption = "12 BOOKS",
-                        actionLabel = "On the list",
+                        membershipChip = ChipUiModel(
+                            key = "1",
+                            label = "On the list",
+                            variant = ChipVariant.Remove,
+                            interaction = ChipInteraction.Inert,
+                        ),
                         membership = ListMembership.ALL,
                         isPending = false,
                     ),
@@ -50,7 +58,12 @@ data class ChooseListsUiModel(
                         listId = 2,
                         name = "Second helpings",
                         caption = "4 BOOKS",
-                        actionLabel = "Add",
+                        membershipChip = ChipUiModel(
+                            key = "2",
+                            label = "Add",
+                            variant = ChipVariant.AddOutlined,
+                            interaction = ChipInteraction.Inert,
+                        ),
                         membership = ListMembership.NONE,
                         isPending = false,
                     ),
@@ -58,7 +71,12 @@ data class ChooseListsUiModel(
                         listId = 3,
                         name = "Bought in a hurry",
                         caption = "31 BOOKS",
-                        actionLabel = "Add",
+                        membershipChip = ChipUiModel(
+                            key = "3",
+                            label = "Add",
+                            variant = ChipVariant.AddOutlined,
+                            interaction = ChipInteraction.Inert,
+                        ),
                         membership = ListMembership.NONE,
                         isPending = true,
                     ),
@@ -80,7 +98,12 @@ data class ChooseListsUiModel(
                         listId = 1,
                         name = "Winter reading",
                         caption = "12 BOOKS · ALL 5 HERE",
-                        actionLabel = "On all 5",
+                        membershipChip = ChipUiModel(
+                            key = "1",
+                            label = "On all 5",
+                            variant = ChipVariant.Remove,
+                            interaction = ChipInteraction.Inert,
+                        ),
                         membership = ListMembership.ALL,
                         isPending = false,
                     ),
@@ -88,7 +111,12 @@ data class ChooseListsUiModel(
                         listId = 2,
                         name = "Second helpings",
                         caption = "4 BOOKS · 3 OF 5 HERE",
-                        actionLabel = "Add the other 2",
+                        membershipChip = ChipUiModel(
+                            key = "2",
+                            label = "Add the other 2",
+                            variant = ChipVariant.Add,
+                            interaction = ChipInteraction.Inert,
+                        ),
                         membership = ListMembership.PARTIAL,
                         isPending = false,
                     ),
@@ -96,7 +124,12 @@ data class ChooseListsUiModel(
                         listId = 3,
                         name = "Bought in a hurry",
                         caption = "31 BOOKS · NONE YET",
-                        actionLabel = "Add all 5",
+                        membershipChip = ChipUiModel(
+                            key = "3",
+                            label = "Add all 5",
+                            variant = ChipVariant.AddOutlined,
+                            interaction = ChipInteraction.Inert,
+                        ),
                         membership = ListMembership.NONE,
                         isPending = false,
                     ),

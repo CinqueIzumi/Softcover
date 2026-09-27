@@ -31,6 +31,7 @@ import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -122,7 +123,7 @@ internal fun ReadingUpdateShareCardBody(content: ReadingUpdateShareCardUiModel) 
                         model = ChipUiModel(
                             key = tag,
                             label = tag,
-                            clickable = false,
+                            interaction = ChipInteraction.Inert,
                         ),
                     )
                 }

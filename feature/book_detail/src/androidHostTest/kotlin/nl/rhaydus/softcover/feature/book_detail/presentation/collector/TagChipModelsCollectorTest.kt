@@ -11,6 +11,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
@@ -73,7 +75,7 @@ class TagChipModelsCollectorTest {
             // ----- Assert -----
             stateFlow.value.userTagChips.map { it.key } shouldBe listOf("GENRE:Fantasy", "MOOD:Cozy")
             stateFlow.value.userTagChips.map { it.label } shouldBe listOf("Fantasy", "Cozy")
-            stateFlow.value.userTagChips.all { it.clickable.not() } shouldBe true
+            stateFlow.value.userTagChips.all { it.interaction == ChipInteraction.Inert } shouldBe true
             job.cancel()
         }
 
@@ -185,7 +187,7 @@ class TagChipModelsCollectorTest {
         }
 
         @Test
-        fun `content warning chips are concealed while other categories are not`() =
+        fun `content warning chips use the Spoiler variant while other categories use Tonal`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val tags = listOf(
@@ -220,16 +222,16 @@ class TagChipModelsCollectorTest {
                 // ----- Assert -----
                 val groups = stateFlow.value.communityTagGroups
                 groups.single { it.category == TagCategory.CONTENT_WARNING }
-                    .chips.all { it.concealed } shouldBe true
+                    .chips.all { it.variant == ChipVariant.Spoiler } shouldBe true
                 groups.single { it.category == TagCategory.GENRE }
-                    .chips.none { it.concealed } shouldBe true
+                    .chips.none { it.variant == ChipVariant.Spoiler } shouldBe true
                 groups.single { it.category == TagCategory.MOOD }
-                    .chips.none { it.concealed } shouldBe true
+                    .chips.none { it.variant == ChipVariant.Spoiler } shouldBe true
                 job.cancel()
             }
 
         @Test
-        fun `community chips are not clickable`() = runTest(UnconfinedTestDispatcher()) {
+        fun `community chips are inert`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val tags = listOf(
                 Tag(
@@ -256,7 +258,8 @@ class TagChipModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            stateFlow.value.communityTagGroups.flatMap { it.chips }.all { it.clickable.not() } shouldBe true
+            stateFlow.value.communityTagGroups.flatMap { it.chips }
+                .all { it.interaction == ChipInteraction.Inert } shouldBe true
             job.cancel()
         }
 
@@ -314,5 +317,44 @@ class TagChipModelsCollectorTest {
             stateFlow.value.communityTagGroups shouldBe emptyList()
             job.cancel()
         }
+
+        @Test
+        fun `userTag and community tag chips are both Inert, never Clickable or Disabled`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val userTags = listOf(
+                    UserTag(
+                        name = "Fantasy",
+                        category = TagCategory.GENRE,
+                    ),
+                )
+                val tags = listOf(
+                    Tag(
+                        id = 1,
+                        name = "Adventure",
+                        category = TagCategory.GENRE,
+                    ),
+                )
+                val book = stubBook(tags)
+                val collector = TagChipModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    userTags = userTags,
+                    book = book,
+                )
+
+                // ----- Assert -----
+                stateFlow.value.userTagChips.map { it.interaction } shouldBe listOf(ChipInteraction.Inert)
+                stateFlow.value.communityTagGroups.flatMap { it.chips }
+                    .map { it.interaction } shouldBe listOf(ChipInteraction.Inert)
+                job.cancel()
+            }
     }
 }

@@ -16,3 +16,5 @@
 - [Bash hook and Gradle task testing](project_bash_hook_and_gradle_task_testing.md) — base64 TSV harness for PreToolUse hooks; ProjectBuilder for DefaultTask actions; single-branch merge-base gotcha; concurrent-edit handling
 - [ktlintFormat nested-call trailing comma](feedback_ktlintformat_nested_call_trailing_comma.md) — grep for `),)` after ktlintFormat; wrap the outer call too
 - [designsystem palette contrast tests](project_designsystem_palette_contrast_tests.md) — WCAG helper pattern + @TestFactory/DynamicTest data-driving over ColorPalette.entries; confirms flat alphabetical import order
+- [Brief says internal, code says private](feedback_private_function_named_internal_in_brief.md) — grep the modifier before writing; a stale/wrong brief premise is a blocker to report, not a workaround
+- [ktlint tasks are root-only](feedback_ktlint_tasks_are_root_only.md) — `:<module>:ktlintFormat`/`ktlintCheck` don't exist; always run `:ktlintFormat`/`:ktlintCheck` unscoped

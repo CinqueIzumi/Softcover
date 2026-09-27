@@ -14,14 +14,21 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4 done — G1, G2 and G3 are closed, `:core:designsystem` is tokens only with zero
-  project dependencies. The tracker is restructured into this directory.
-- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) S5-1, Phase 1.
-- **Countdown:** Step 09 in `docs/working/token-hygiene/README.md` — 0 of 5 sessions.
+- **State:** S0–S4 done. S5-1 done: `Chip` is the D11 + D12 family (`ChipVariant`, `ChipInteraction`,
+  `ChipDimensions`), the ChooseLists pills and the `WhenReadRow` date pill render through it, and
+  `ChooseListsRowUiModel.membershipChip` carries the row's chip. Reviewer: no findings.
+- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) § S5-2, Phase 1 per
+  [`family-procedure.md`](family-procedure.md): the `feature:library` chips, including the
+  `ActiveFilterChip` dismiss question (D12's `ChipEvent.Dismissed` likely answers it).
+- **Countdown:** Step 09 in `docs/working/token-hygiene/README.md` — 3 of 5 sessions.
 - **Open questions:** none.
-- **Verification:** the reliable per-change gates below; run through `scripts/gradle-quiet.sh`.
-- **Uncommitted:** the tracker restructure (this directory, the deleted single-file tracker, the
-  repointed references).
+- **Verification:** compile for the five touched modules, `checkModuleGraph`, `ktlintCheck`,
+  `styleCheck` and `checkDocBudgets` passed under JBR 21, and so did the targeted tests.
+- **Uncommitted (all staged):** the S5-1 chip family under `core/component/.../chip/` (plus the new
+  `ChipDimensions`, `ChipVariant`, `ChipInteraction` and `ChipFace`); its call sites in core:component
+  lists/progress/share/gallery/topbar, `ChooseListsMapper`, and feature book_detail, library and
+  settings; tests in core:component, core:uibinding, book_detail and library; `components.md` and the
+  tracker docs; agent-memory notes under `.claude/agent-memory/`.
 
 ## Local verification
 
@@ -99,6 +106,18 @@ every sub-step's Verify.
   user; the approved shape is recorded here as a new D-number before Phase 2 starts.
 - **D10** (2026-09-28) A step large enough to span several sessions splits into sub-steps, one session
   each, tracked in the step file's `## Sub-steps` table.
+- **D11** (2026-09-28) Chips and pills are one family on `Chip` + `ChipUiModel(key, label, variant,
+  interaction)`. `ChipVariant` is sealed: `Tonal(selected)`, `Spoiler` (replaces `concealed`), `Add`,
+  `AddOutlined`, `Remove`, `Format(active, face: ChipFace)`. `ChipInteraction` is `Clickable` /
+  `Disabled` / `Inert` (replaces `clickable`). Metrics come from a per-variant table, so the migration is
+  visually neutral. `ChipEvent` stays `Clicked(key)`. `MembershipPill` goes: `ChooseListsMapper` builds
+  the pill as `ChooseListsRowUiModel.membershipChip`. `FormatChip` moves in S8-4 with the toolbar's own model.
+  `SearchChromePill` was a search field, not a chip, and is renamed `SearchChromeField`.
+- **D12** (2026-09-28) The `WhenReadRow` date pill is `Tonal(selected)`. To carry it, `ChipUiModel` gains
+  two variant-independent fields: `leadingIcon: SoftcoverIcon?` and `dismissLabel: String?`. A non-null
+  `dismissLabel` renders a trailing ✕ as its own tap target, uses the label as the ✕'s content
+  description, and reports `ChipEvent.Dismissed(key)`. S5-2's `ActiveFilterChip` reuses it. `Remove`'s
+  ✕ stays display-only. The date pill takes Tonal's `onSurface` idle ink, an accepted visual change.
 
 ## Baseline
 

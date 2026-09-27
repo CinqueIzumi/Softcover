@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 
@@ -194,7 +195,7 @@ class LibraryFilterChipsBuilderTest {
             // ----- Assert -----
             val allChips = chips.ownershipChips + chips.formatChips + chips.releaseYearChips +
                 chips.readYearChips + chips.tagChips + chips.ratingChips
-            allChips.map { it.selected } shouldBe allChips.map { false }
+            allChips.map { it.variant } shouldBe allChips.map { ChipVariant.Tonal(selected = false) }
         }
     }
 }

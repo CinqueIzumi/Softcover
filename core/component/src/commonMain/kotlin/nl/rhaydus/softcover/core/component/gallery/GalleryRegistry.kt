@@ -26,7 +26,9 @@ import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTile
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileUiModel
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTile
@@ -88,8 +90,8 @@ object GalleryRegistry {
         galleryEntry(
             name = "Chip",
             family = GalleryFamily.CHIP,
-            blurb = "The pill-shaped chip: one label on a fully-rounded surface, optionally " +
-                "selected, redacted as a spoiler, or read-only.",
+            blurb = "The pill-shaped chip family: tonal, spoiler, add, add-outlined, remove, " +
+                "and format variants.",
             previews = ChipUiModel,
             label = ::chipFixtureLabel,
             content = { model, modifier ->
@@ -343,9 +345,16 @@ private val BADGE_COVER_FIXTURE_WIDTH = 96.dp
 
 /** Names what a [ChipUiModel] fixture demonstrates — its anatomy branch, not its words. */
 private fun chipFixtureLabel(model: ChipUiModel): String = when {
-    model.concealed -> "Concealed (spoiler)"
-    model.selected -> "Selected"
-    model.clickable.not() -> "Read-only"
+    model.interaction == ChipInteraction.Disabled -> "Disabled"
+    model.interaction == ChipInteraction.Inert -> "Read-only"
+    model.dismissLabel != null -> "Dismissible"
+    model.leadingIcon != null -> "Leading icon"
+    model.variant == ChipVariant.Spoiler -> "Spoiler"
+    model.variant == ChipVariant.Add -> "Add"
+    model.variant == ChipVariant.AddOutlined -> "Add, outlined"
+    model.variant == ChipVariant.Remove -> "Remove"
+    model.variant is ChipVariant.Format -> "Format"
+    model.variant is ChipVariant.Tonal && model.variant.selected -> "Selected"
     model.label.length > CHIP_LONG_LABEL_FLOOR -> "Long label, ellipsised"
     else -> "Idle"
 }

@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.core.uibinding.lists
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.lists.ChooseListsVariant
@@ -87,7 +89,7 @@ class ChooseListsMapperTest {
         }
 
         @Test
-        fun `actionLabel is On the list when the book is a member`() {
+        fun `membership chip label is On the list when the book is a member`() {
             // ----- Arrange -----
             val lists = listOf(bookList(
                 id = 1,
@@ -103,11 +105,11 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().actionLabel shouldBe "On the list"
+            result.rows.single().membershipChip.label shouldBe "On the list"
         }
 
         @Test
-        fun `actionLabel is Add when the book is not a member`() {
+        fun `membership chip label is Add when the book is not a member`() {
             // ----- Arrange -----
             val lists = listOf(bookList(
                 id = 1,
@@ -123,7 +125,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().actionLabel shouldBe "Add"
+            result.rows.single().membershipChip.label shouldBe "Add"
         }
     }
 
@@ -248,9 +250,9 @@ class ChooseListsMapperTest {
     }
 
     @Nested
-    inner class BulkActionLabels {
+    inner class BulkMembershipChipLabels {
         @Test
-        fun `actionLabel is On all n when every selected book is on the list`() {
+        fun `membership chip label is On all n when every selected book is on the list`() {
             // ----- Arrange -----
             val lists = listOf(bookList(
                 id = 1,
@@ -265,11 +267,11 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().actionLabel shouldBe "On all 5"
+            result.rows.single().membershipChip.label shouldBe "On all 5"
         }
 
         @Test
-        fun `actionLabel is Add the other n when some selected books are on the list`() {
+        fun `membership chip label is Add the other n when some selected books are on the list`() {
             // ----- Arrange -----
             val lists = listOf(bookList(
                 id = 1,
@@ -284,11 +286,11 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().actionLabel shouldBe "Add the other 2"
+            result.rows.single().membershipChip.label shouldBe "Add the other 2"
         }
 
         @Test
-        fun `actionLabel is Add all n when no selected books are on the list`() {
+        fun `membership chip label is Add all n when no selected books are on the list`() {
             // ----- Arrange -----
             val lists = listOf(bookList(
                 id = 1,
@@ -303,7 +305,87 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().actionLabel shouldBe "Add all 5"
+            result.rows.single().membershipChip.label shouldBe "Add all 5"
+        }
+    }
+
+    @Nested
+    inner class MembershipChipMapping {
+        @Test
+        fun `membership chip variant is Remove when membership is ALL`() {
+            // ----- Arrange -----
+            val lists = listOf(bookList(
+                id = 1,
+                bookIds = listOf(0, 1),
+            ),)
+
+            // ----- Act -----
+            val result = lists.toBulkChooseListsUiModel(
+                bookIds = setOf(0, 1),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.rows.single().membershipChip.variant shouldBe ChipVariant.Remove
+        }
+
+        @Test
+        fun `membership chip variant is Add when membership is PARTIAL`() {
+            // ----- Arrange -----
+            val lists = listOf(bookList(
+                id = 1,
+                bookIds = listOf(0),
+            ),)
+
+            // ----- Act -----
+            val result = lists.toBulkChooseListsUiModel(
+                bookIds = setOf(0, 1),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.rows.single().membershipChip.variant shouldBe ChipVariant.Add
+        }
+
+        @Test
+        fun `membership chip variant is AddOutlined when membership is NONE`() {
+            // ----- Arrange -----
+            val lists = listOf(bookList(
+                id = 1,
+                bookIds = listOf(100),
+            ),)
+
+            // ----- Act -----
+            val result = lists.toBulkChooseListsUiModel(
+                bookIds = setOf(0, 1),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.rows.single().membershipChip.variant shouldBe ChipVariant.AddOutlined
+        }
+
+        @Test
+        fun `membership chip interaction is always Inert`() {
+            // ----- Arrange -----
+            val lists = listOf(bookList(
+                id = 1,
+                bookIds = listOf(0),
+            ),)
+
+            // ----- Act -----
+            val result = lists.toChooseListsUiModel(
+                bookId = 0,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.rows.single().membershipChip.interaction shouldBe ChipInteraction.Inert
         }
     }
 

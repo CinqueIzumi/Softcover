@@ -50,8 +50,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 /**
- * The Explore search chrome (explore-3a §4 "Search chrome"): a rounded pill (search glyph, inline
- * text field, and a trailing clear/loading affordance) beside a square barcode-scan button.
+ * The Explore search chrome (explore-3a §4 "Search chrome"): a rounded search field (search glyph,
+ * inline text field, and a trailing clear/loading affordance) beside a square barcode-scan button.
  *
  * It stays a component of its own rather than a variant of [TopBar] (§ 7.6): the focus contract
  * below has no counterpart on the plain bar, so merged they would be one component with two disjoint
@@ -63,8 +63,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
  * than focus notifications — see [SearchTopBarEvent], which records why the tap intent is what keeps
  * the chrome recoverable.
  *
- * The scan action sits in the outer `Row` *beside* the pill, not inside it — the pill's one trailing
- * slot is already spoken for by the clear/loading affordance.
+ * The scan action sits in the outer `Row` *beside* the search field, not inside it — the field's one
+ * trailing slot is already spoken for by the clear/loading affordance.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -85,7 +85,7 @@ fun SearchTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            SearchChromePill(
+            SearchChromeField(
                 query = model.query,
                 onQueryChange = { query -> onEvent(SearchTopBarEvent.QueryChanged(query = query)) },
                 focused = model.focused,
@@ -105,7 +105,7 @@ fun SearchTopBar(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SearchChromePill(
+private fun SearchChromeField(
     query: String,
     onQueryChange: (String) -> Unit,
     focused: Boolean,
@@ -197,8 +197,8 @@ private fun SearchChromePill(
 }
 
 /**
- * The pill's tap-to-search region: the leading glyph and the text field. The whole region — not
- * just the field's own hit box — handles the tap, observed on the initial pass and consuming
+ * `SearchChromeField`'s tap-to-search region: the leading glyph and the text field. The whole
+ * region — not just the field's own hit box — handles the tap, observed on the initial pass and consuming
  * nothing, so it never interferes with the field's own tap handling. Two things ride on that: the
  * glyph and the padding around the field stop being dead zones, and a tap on an *already-focused*
  * field is still an activation, which the edge-triggered [Modifier.onFocusChanged] cannot see. The

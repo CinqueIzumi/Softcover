@@ -121,7 +121,7 @@ internal data class BookDetailUiState(
     /**
      * The community tag block (`TagsSection`, The Book lens), mapped by `TagChipModelsCollector`
      * (R9) off [book]'s tags — grouped by category, top-5 per category, content-warning tags
-     * flagged [ChipUiModel.concealed]. Read-only.
+     * flagged with [nl.rhaydus.softcover.core.component.chip.ChipVariant.Spoiler]. Read-only.
      */
     val communityTagGroups: List<TagCategoryChipGroup> = emptyList(),
 

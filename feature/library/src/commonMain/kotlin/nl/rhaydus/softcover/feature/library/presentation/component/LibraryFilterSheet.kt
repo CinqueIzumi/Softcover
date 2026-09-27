@@ -44,6 +44,7 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -150,6 +151,7 @@ private fun FacetSections(
     val onChipEvent: (ChipEvent) -> Unit = { event ->
         when (event) {
             is ChipEvent.Clicked -> valueByChipKey[event.key]?.let(onToggle)
+            is ChipEvent.Dismissed -> Unit
         }
     }
 
@@ -229,10 +231,11 @@ private fun FacetSections(
 
 /**
  * Combines a facet chip's ready [ChipUiModel] with the sheet's local draft [LibraryFilters] to
- * resolve `selected` — deliberately absent from the model itself (`LibraryFilterChips`'s KDoc),
- * since which chip reads selected depends on this composition-local draft rather than on anything
- * committed to [LibraryUiState]. Combining a ready model with draft state like this is not mapping
- * (`component-contract.md` § 7.2 R9's carve-out); building the model from a domain type would be.
+ * resolve [ChipVariant.Tonal.selected] — deliberately absent from the model itself
+ * (`LibraryFilterChips`'s KDoc), since which chip reads selected depends on this composition-local
+ * draft rather than on anything committed to [LibraryUiState]. Combining a ready model with draft
+ * state like this is not mapping (`component-contract.md` § 7.2 R9's carve-out); building the model
+ * from a domain type would be.
  */
 private fun ChipUiModel.selectedFor(
     filters: LibraryFilters,
@@ -240,7 +243,7 @@ private fun ChipUiModel.selectedFor(
 ): ChipUiModel {
     val value = valueByChipKey[key] ?: return this
 
-    return copy(selected = filters.isSelected(value = value))
+    return copy(variant = ChipVariant.Tonal(selected = filters.isSelected(value = value)))
 }
 
 private fun LibraryFilters.isSelected(value: LibraryFilterValue): Boolean = when (value) {

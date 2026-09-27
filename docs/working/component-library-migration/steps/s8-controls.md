@@ -31,7 +31,8 @@ moved and renamed from `ReviewFormattingToolbar` in S4-2b) is listed both under 
 remaining row and under this family. Settle here whether it belongs in `control/` as a consolidation
 target for this sub-step, or in `richtext/` bearing its own `Toggle`/`SegmentedControl` internals — and
 close its outstanding R1 debt (model + event) as part of whichever answer wins. Record the placement in
-`README.md` § Decisions.
+`README.md` § Decisions. Its private `FormatChip` moves onto `Chip` with `ChipVariant.Format` here
+(D11), once the toolbar's model can carry the chip models.
 
 ## S8-5 — `TextField` and the rest
 

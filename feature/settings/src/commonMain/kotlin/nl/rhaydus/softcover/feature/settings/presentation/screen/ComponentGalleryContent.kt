@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.component.gallery.GalleryEntry
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.component.gallery.GalleryFixture
@@ -185,7 +186,7 @@ private fun <T> GalleryChipRow(
                 model = ChipUiModel(
                     key = index.toString(),
                     label = label(option),
-                    selected = isSelected(option),
+                    variant = ChipVariant.Tonal(selected = isSelected(option)),
                 ),
                 onEvent = { onSelect(option) },
             )

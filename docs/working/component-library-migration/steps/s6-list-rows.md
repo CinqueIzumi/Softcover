@@ -17,7 +17,7 @@
 |---|---|---|
 | `ChooseListsRow` | `core/component/lists/ChooseListsBottomSheet.kt:290` | takes one `ChooseListsRowUiModel` |
 | `NewListRow` | `core/component/lists/ChooseListsBottomSheet.kt:511` | takes one `ChooseListsRowUiModel` |
-| `WhenReadRow` | `core/component/progress/WhenReadRow.kt:46` | |
+| `WhenReadRow` | `core/component/progress/WhenReadRow.kt:46` | its date pill moves to `Chip` in S5-1; lift `whenReadChipModel` onto `UiState` here (R10) |
 | `DebugNavigationRow` | `app/src/debug/.../DebugRoutesSection.kt:68` | |
 | `HapticRow` | `app/src/debug/.../MotionDebugScreen.kt:152` | |
 | `AboutLinkRow` | `feature/settings/presentation/screen/AboutContent.kt:197` | |

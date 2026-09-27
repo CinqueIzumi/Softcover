@@ -2,6 +2,9 @@ package nl.rhaydus.softcover.core.uibinding.lists
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsRowUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
@@ -88,16 +91,28 @@ private fun List<BookList>.rowsFor(
             totalCount = bookIds.size,
             isBulk = isBulk,
         ),
-        actionLabel = actionLabelFor(
-            membership = membership,
-            matchingCount = matchingCount,
-            totalCount = bookIds.size,
-            isBulk = isBulk,
+        membershipChip = ChipUiModel(
+            key = list.id.toString(),
+            label = membershipChipLabelFor(
+                membership = membership,
+                matchingCount = matchingCount,
+                totalCount = bookIds.size,
+                isBulk = isBulk,
+            ),
+            variant = membership.toMembershipChipVariant(),
+            interaction = ChipInteraction.Inert,
         ),
         membership = membership,
         isPending = list.id in listsBeingMutated,
     )
 }.toImmutableList()
+
+/** The trailing control's chrome per membership: a removable chip, a filled add pill, a quiet outline pill. */
+private fun ListMembership.toMembershipChipVariant(): ChipVariant = when (this) {
+    ListMembership.ALL -> ChipVariant.Remove
+    ListMembership.PARTIAL -> ChipVariant.Add
+    ListMembership.NONE -> ChipVariant.AddOutlined
+}
 
 /**
  * "12 BOOKS" on its own for a single book; in bulk it appends the membership phrase — `ALL` → "ALL
@@ -130,7 +145,7 @@ private fun captionFor(
  * {totalCount}" (bulk). `PARTIAL` only ever arises in bulk (a single book is either on a list or
  * not), so its label needs no single-book form.
  */
-private fun actionLabelFor(
+private fun membershipChipLabelFor(
     membership: ListMembership,
     matchingCount: Int,
     totalCount: Int,

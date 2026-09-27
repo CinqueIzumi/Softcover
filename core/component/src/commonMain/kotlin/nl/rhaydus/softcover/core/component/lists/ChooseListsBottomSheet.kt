@@ -42,6 +42,7 @@ import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
@@ -332,10 +333,7 @@ private fun ChooseListsRow(
             if (row.isPending) {
                 CircularWavyProgressIndicator(modifier = Modifier.size(20.dp))
             } else {
-                MembershipPill(
-                    membership = row.membership,
-                    label = row.actionLabel,
-                )
+                Chip(model = row.membershipChip)
             }
         }
     }
@@ -399,110 +397,6 @@ private fun PartialBookmarkMark() {
                 .width(10.dp)
                 .height(2.4.dp)
                 .background(primary),
-        )
-    }
-}
-
-@Composable
-private fun MembershipPill(
-    membership: ListMembership,
-    label: String,
-) {
-    when (membership) {
-        ListMembership.ALL -> OnListChip(label = label)
-        ListMembership.PARTIAL -> AddFilledPill(label = label)
-        ListMembership.NONE -> AddOutlinePill(label = label)
-    }
-}
-
-@Composable
-private fun OnListChip(
-    label: String,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(percent = 50))
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(
-                start = 13.dp,
-                top = 7.dp,
-                end = 10.dp,
-                bottom = 7.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
-
-        val closeIcon = drawableIconResource(
-            icon = SoftcoverIcon.Close,
-            contentDescription = "Remove from list",
-        )
-
-        Icon(
-            painter = closeIcon.getIconPainter(),
-            contentDescription = closeIcon.contentDescription,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size(12.dp),
-        )
-    }
-}
-
-@Composable
-private fun AddFilledPill(
-    label: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = "+ $label",
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.onPrimary,
-        modifier = modifier
-            .clip(RoundedCornerShape(percent = 50))
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(
-                horizontal = 13.dp,
-                vertical = 7.dp,
-            ),
-    )
-}
-
-@Composable
-private fun AddOutlinePill(
-    label: String,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(percent = 50))
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(percent = 50),
-            )
-            .padding(
-                horizontal = 14.dp,
-                vertical = 7.dp,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = "+",
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.primary,
-        )
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
