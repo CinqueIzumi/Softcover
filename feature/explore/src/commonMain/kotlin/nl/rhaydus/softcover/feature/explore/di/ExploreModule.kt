@@ -48,10 +48,12 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichMetadat
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ExploreCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.FeaturedUpcomingReleaseCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.HiddenSuggestionsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodChipsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTagsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueriesCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchTopBarCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.UnreleasedBadgeModelsCollector
@@ -120,6 +122,10 @@ val exploreModule = module {
     factory { BecauseYouReadCollector() } bind ExploreCollector::class
 
     factory { MoodTagsCollector() } bind ExploreCollector::class
+
+    factory { RecentSearchChipsCollector() } bind ExploreCollector::class
+
+    factory { MoodChipsCollector() } bind ExploreCollector::class
 
     factory { CoverModelsCollector() } bind ExploreCollector::class
 

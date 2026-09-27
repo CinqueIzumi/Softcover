@@ -37,7 +37,7 @@ grids where a stability regression is a dropped frame, not a compile error.
 | `BecauseYouReadCard` — `feature/explore/presentation/screen/section/DiscoveryRailCard.kt:216` | `Rail` |
 | `SeriesCard`, `UnreleasedSeriesCard` — `feature/explore/presentation/screen/section/SeriesCard.kt:45,168` | `Rail` + series badge |
 | `SearchResultRow` — `feature/explore/presentation/screen/section/SearchResultRow.kt:46` | `Row(Compact)` |
-| `MoodTile` — `feature/explore/presentation/screen/section/MoodGrid.kt:127` | `Tile` |
+| `MoodTile` — `feature/explore/presentation/screen/section/MoodGrid.kt:127` | `Tile`; its model takes the label title-cased by `toTitleCaseWords`, as `MoodChipsSnapshot` does since S5-3a |
 | `HiddenBookRow`, `HiddenSeriesRow` — `feature/explore/presentation/screen/HiddenSuggestionsShelf.kt:238,324` | `Row(Compact)` + restore trailing |
 | `SeriesCoverStack` — `feature/explore/presentation/screen/HiddenSuggestionsShelf.kt:418` | → `Cover(stacked)` |
 | `FeaturedBookCard` — `feature/reading/presentation/screen/section/FeaturedBookCard.kt:36` | `Featured` |

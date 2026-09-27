@@ -2,7 +2,7 @@
 
 **Stage:** S5 — Primitives. **Delegation:** user (Phase 1), `softcover-implementer` (Phase 2).
 
-30 declarations collapse onto `Chip` + `ChipUiModel` (`core/component/chip/`).
+23 declarations collapse onto `Chip` + `ChipUiModel` (`core/component/chip/`).
 
 ## Sub-steps
 
@@ -11,7 +11,8 @@
 | S5-1 | Pills already in `:core:component`, plus the `ChipUiModel` extension design | [x] |
 | S5-2a | `feature:library` control-line and filter-row chips; `Remove(removeLabel)`, `Quiet` | [x] |
 | S5-2b | Arrange and Filter sheet drafts onto `UiState`; `Choice`; `ArrangeChip` | [x] |
-| S5-3 | book_detail, explore, reading and settings chips | [ ] |
+| S5-3a | explore: `RecentSearchChip`, `FlowRowMoodChips` onto `Tonal()` via collectors | [x] |
+| S5-3b | book_detail tags: `Spoiler` reveal on `UiState`, `Dashed`, `Editable` + `SpoilerToggled` | [ ] |
 | S5-C-chips | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S5-1 — core pills
@@ -73,8 +74,15 @@ feature-local); `FilterPillControl` and `SelectionActionPill` move in S8 control
 | `SetProgressChip` | `feature/reading/presentation/screen/section/CompactBookEntry.kt:231` | |
 | `UpdatePillButton` | `feature/settings/presentation/screen/section/AppUpdateSection.kt:145` | |
 
-**Phase 1 questions:** `DashedTagOpenerChip` and `ExternalLinkPill` use a dashed-border / bordered-pill
-chrome neither existing variant covers — decide whether that is a new `ChipVariant` or stays
-feature-local as a deliberate exception (record either way). `ConcealableTagChip` moves its reveal onto
-`UiState` (R1, R10): a `ChipEvent.Clicked` swaps that chip out of its concealed treatment in the
-ScreenModel.
+**Phase 1:** done — the shape is `README.md` D15. `AddPill`, `ExternalLinkPill`, the update-progress
+pill, `SortChip`, `SetProgressChip` and `UpdatePillButton` move in S8-6 (`s8-controls.md`);
+`TrackingNowChip` moves in S5-7 (`s5-badges.md`).
+
+- **S5-3a:** feature-local collectors build `recentSearchChips` and `moodChips` (`Tonal()` + `Clickable`)
+  on `ExploreUiState`, with a key → query / mood map that `Clicked(key)` resolves through.
+  `RecentSearchChip` goes; the rows stay feature-local.
+- **S5-3b:** add `Dashed`, `Editable(spoiler, spoilerToggleLabel)` and `ChipEvent.SpoilerToggled(key)`.
+  `ConcealableTagChip` goes: `Spoiler` + `Clickable`, a reveal action, `revealedTagKeys` on
+  `BookDetailUiState`, `Tonal()` + `Inert` once revealed. Collectors put the tag-editor opener model and
+  the `UserTag` → `ChipUiModel` editor chips on `BookDetailUiState`; `TagChip`, `TagChipName`,
+  `SpoilerToggleIcon` and `DashedTagOpenerChip` go; the insert fade reads `newlyAddedTagKey`.

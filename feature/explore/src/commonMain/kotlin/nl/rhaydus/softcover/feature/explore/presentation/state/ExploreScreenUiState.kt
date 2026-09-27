@@ -1,6 +1,9 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -10,6 +13,11 @@ import nl.rhaydus.toad.UiState
 
 internal data class ExploreScreenUiState(
     val previousSearchQueries: List<String> = emptyList(),
+    // Built off `previousSearchQueries` by `RecentSearchChipsCollector` (`component-contract.md`
+    // § 7.2 R9); `recentSearchQueryByChipKey` is the click-time lookup back to the query a chip's
+    // key stands for.
+    val recentSearchChips: ImmutableList<ChipUiModel> = persistentListOf(),
+    val recentSearchQueryByChipKey: Map<String, String> = emptyMap(),
     val queriedBooks: List<Book> = emptyList(),
     // Cover UI models, keyed by book id, mapped off composition by CoverModelsCollector
     // (`component-contract.md` § 7.2 R9). Five separate maps rather than one keyed by book id:
@@ -71,6 +79,10 @@ internal data class ExploreScreenUiState(
     // Browse-by-mood grid + the active mood filter, when a mood tile/chip drove the current
     // results (see the "Modelling choice" note on [ExploreSearchPhase]).
     val moodTags: List<MoodTag> = emptyList(),
+    // Built off `moodTags` by `MoodChipsCollector` (`component-contract.md` § 7.2 R9);
+    // `moodTagByChipKey` is the click-time lookup back to the `MoodTag` a chip's key stands for.
+    val moodChips: ImmutableList<ChipUiModel> = persistentListOf(),
+    val moodTagByChipKey: Map<String, MoodTag> = emptyMap(),
     val loadingMoodTags: Boolean = true,
     val activeMoodFilter: MoodTag? = null,
 ) : UiState {

@@ -47,7 +47,7 @@ internal fun SearchFocusScreen(
         ) {
             SearchFocusContent(
                 queries = state.previousSearchQueries,
-                moods = state.moodTags,
+                moodChips = state.moodChips,
                 runAction = runAction,
             )
 

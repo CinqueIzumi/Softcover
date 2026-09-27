@@ -110,7 +110,7 @@ internal fun EditorialContent(
             )
 
             RecentSearchesSection(
-                queries = state.previousSearchQueries,
+                chips = state.recentSearchChips,
                 runAction = runAction,
             )
 

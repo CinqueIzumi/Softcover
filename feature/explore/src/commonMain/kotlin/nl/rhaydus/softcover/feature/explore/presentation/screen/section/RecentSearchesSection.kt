@@ -13,12 +13,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlin.time.Duration.Companion.seconds
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRecentSearchChipClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveAllSearchQueriesClickedAction
 
 /**
@@ -29,10 +32,10 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveAllSearc
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun RecentSearchesSection(
-    queries: List<String>,
+    chips: ImmutableList<ChipUiModel>,
     runAction: (ExploreAction) -> Unit,
 ) {
-    if (queries.isEmpty()) return
+    if (chips.isEmpty()) return
 
     Column(
         modifier = Modifier.padding(horizontal = 24.dp),
@@ -60,16 +63,13 @@ internal fun RecentSearchesSection(
             horizontalArrangement = Arrangement.spacedBy(9.dp),
             verticalArrangement = Arrangement.spacedBy(9.dp),
         ) {
-            queries.forEach { query ->
-                RecentSearchChip(
-                    query = query,
-                    onClick = {
-                        runAction(
-                            OnQueryChangeAction(
-                                newQuery = query,
-                                searchDelay = 0.seconds,
-                            ),
-                        )
+            chips.forEach { chip ->
+                Chip(
+                    model = chip,
+                    onEvent = { event ->
+                        if (event is ChipEvent.Clicked) {
+                            runAction(OnRecentSearchChipClickedAction(key = event.key))
+                        }
                     },
                 )
             }

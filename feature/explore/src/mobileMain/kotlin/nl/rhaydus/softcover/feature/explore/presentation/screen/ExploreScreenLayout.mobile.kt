@@ -31,6 +31,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnClearSearchAct
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchActivatedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchDismissedAction
+import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodChipsSnapshot
+import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsSnapshot
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ActiveSearchContent
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.EditorialContent
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchFocusScreen
@@ -154,14 +156,32 @@ private fun List<Book>.toPreviewCoverModels(
     )
 }
 
-private val previewMockState = ExploreScreenUiState(
-    previousSearchQueries = listOf(
-        "Bubblegum",
-        "Earthlings",
-        "Convenience Store",
-        "Babel",
-        "Piranesi",
+private val previewSearchFocusMoodTags = listOf(
+    MoodTag(
+        id = 1,
+        label = "Cosy & comforting",
+        slug = "cosy",
+        bookCount = 820,
     ),
+    MoodTag(
+        id = 2,
+        label = "Dread & unease",
+        slug = "dread",
+        bookCount = 1540,
+    ),
+)
+
+private val previewRecentSearchQueries = listOf(
+    "Bubblegum",
+    "Earthlings",
+    "Convenience Store",
+    "Babel",
+    "Piranesi",
+)
+
+private val previewMockState = ExploreScreenUiState(
+    previousSearchQueries = previewRecentSearchQueries,
+    recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = previewRecentSearchQueries).compute().first,
     trendingBooks = ExploreMockData.trending,
     trendingCovers = ExploreMockData.trending.toPreviewCoverModels(
         CoverVariant.ExploreRail,
@@ -239,6 +259,7 @@ private fun LoadingTrendingExploreScreenPreview() {
                 ),
                 loadingContinueSeriesBooks = false,
                 previousSearchQueries = listOf("Bubblegum", "Earthlings"),
+                recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = listOf("Bubblegum", "Earthlings")).compute().first,
                 loadingFeaturedUpcomingRelease = false,
                 loadingBecauseYouReadBooks = false,
                 loadingMoodTags = false,
@@ -285,20 +306,8 @@ private fun SearchFocusExploreScreenPreview() {
             isOnline = true,
             state = previewMockState.copy(
                 searchFocused = true,
-                moodTags = listOf(
-                    MoodTag(
-                        id = 1,
-                        label = "Cosy & comforting",
-                        slug = "cosy",
-                        bookCount = 820,
-                    ),
-                    MoodTag(
-                        id = 2,
-                        label = "Dread & unease",
-                        slug = "dread",
-                        bookCount = 1540,
-                    ),
-                ),
+                moodTags = previewSearchFocusMoodTags,
+                moodChips = MoodChipsSnapshot(moodTags = previewSearchFocusMoodTags).compute().first,
             ),
         )
     }

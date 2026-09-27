@@ -2,7 +2,7 @@
 
 **Stage:** S8 — Screen states. **Delegation:** user (Phase 1), `softcover-implementer` (Phase 2).
 
-14 declarations collapse onto `Toggle` + `SegmentedControl` + `TextField`.
+22 declarations collapse onto `Toggle` + `SegmentedControl` + `TextField` + `PillButton`.
 
 ## Sub-steps
 
@@ -10,6 +10,7 @@
 |---|---|---|
 | S8-4 | `Toggle` + `SegmentedControl` design and the toggle/segment call sites | [ ] |
 | S8-5 | `TextField` and the rest | [ ] |
+| S8-6 | `PillButton` design and the pill-button call sites | [ ] |
 | S8-C-controls | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S8-4 — `Toggle` + `SegmentedControl`
@@ -43,3 +44,16 @@ close its outstanding R1 debt (model + event) as part of whichever answer wins. 
 | `TagNamingField` | `feature/book_detail/presentation/component/TagNamingField.kt:49` | |
 | `KeyField` | `feature/onboarding/presentation/screen/OnboardingShelf.kt:268` | |
 | `NameHeroField` | `feature/lists/presentation/screen/CreateListSheetContent.kt:214` | |
+
+## S8-6 — `PillButton`
+
+| Symbol(s) | Current path:line | Note |
+|---|---|---|
+| `FilterPillControl` | `feature/library/presentation/component/LibraryControlLine.kt:209` | D13 |
+| `SelectionActionPill` | `feature/library/presentation/screen/section/SelectionHeader.kt:153` | D13 |
+| `AddPill` | `feature/book_detail/presentation/component/TagNamingField.kt:135` | D15 |
+| `ExternalLinkPill` | `feature/book_detail/presentation/screen/section/ExternalLinksSection.kt:126` | D15; outlined, leading icon |
+| update-progress pill in `InProgressSection` | `feature/book_detail/presentation/screen/section/InProgressSection.kt:77` | D15; inline `Surface` |
+| `SortChip` | `feature/explore/presentation/screen/section/SortChip.kt:25` | D15; menu anchor, `remember` menu state |
+| `SetProgressChip` | `feature/reading/presentation/screen/section/CompactBookEntry.kt:231` | D15; icon-only |
+| `UpdatePillButton` | `feature/settings/presentation/screen/section/AppUpdateSection.kt:145` | D15; label chosen in composition |

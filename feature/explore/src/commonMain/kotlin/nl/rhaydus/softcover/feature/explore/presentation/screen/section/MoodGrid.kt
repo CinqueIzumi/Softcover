@@ -46,6 +46,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodChipClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.util.toTitleCaseWords
 
 internal const val MOOD_SKELETON_COUNT = 4
 

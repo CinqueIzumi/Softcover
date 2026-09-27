@@ -14,25 +14,21 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, S5-1, S5-2a and S5-2b done. S5-2b: the Library Arrange / Filter sheet drafts live on
-  `LibraryUiState` (`arrangeDraft`, `filterDraft`, incl. tag search), edited by draft actions and
-  committed by the now no-arg `OnApplyArrangeAction` / `OnApplyFiltersAction`; `ChipVariant.Choice` added;
-  `ArrangeDraftChipsCollector` / `FilterDraftChipsCollector` build the sheet chips; `ArrangeChip` and
-  `ChipUiModel.selectedFor` deleted. Reviewer findings applied (ranked-failure draft rollback).
-- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) § S5-3, Phase 1 per
-  [`family-procedure.md`](family-procedure.md): design with the user, starting from that section's
-  Phase 1 questions (`DashedTagOpenerChip` / `ExternalLinkPill` chrome, `ConcealableTagChip` reveal).
+- **State:** S0–S4, S5-1, S5-2a, S5-2b and S5-3a done. S5-3a: explore's recent-search and mood chips
+  render `Chip` (`Tonal()`) from `RecentSearchChipsCollector` / `MoodChipsCollector` models on
+  `ExploreScreenUiState`, resolved by `OnRecentSearchChipClickedAction` / `OnMoodChipClickedAction`;
+  `RecentSearchChip` is gone. Reviewer: no blockers; `MoodTile`'s inline title-casing is noted on its S7 row.
+- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) § S5-3, the S5-3b bullet: Phase 2 per
+  [`family-procedure.md`](family-procedure.md), delegated to `softcover-implementer`.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
   stale for a frame on open (chips now arrive via collectors); if visible, seed them in the open action.
-- **Verification:** compile (core:component, feature:library), `checkModuleGraph`,
-  `:feature:library:projectHealth`, `ktlintCheck`, `styleCheck`, and the full core:component +
-  feature:library host test suites passed under JBR 21.
-- **Uncommitted:** S5-2b — chip variant, dimensions, gallery and tests in `core/component`; draft state,
-  actions, collectors, sheets, DI and tests in `feature/library`; `components.md`. Step 09 retrigger —
-  `.claude/skills/handoff/SKILL.md` (`Due when` rule), token-hygiene `README.md` and `steps/09-measure.md`.
-  Tracker docs (this block, the S5-2b tick). Reviewer memory under `.claude/agent-memory/softcover-reviewer/`.
+- **Verification:** `:feature:explore` `compileKotlinJvm` / `compileAndroidMain` / `projectHealth` /
+  `testAndroidHostTest` (26 new tests), `checkModuleGraph`, `ktlintCheck`, `styleCheck` passed under JBR 21.
+- **Uncommitted:** S5-3a in `feature/explore` (main and host-test sources). Tracker docs: this block and
+  D15 in `README.md`; the S5-3 split and S5-3a tick in `steps/s5-chips.md`; S8-6 in `steps/s8-controls.md`;
+  the `TrackingNowChip` row in `steps/s5-badges.md`; the `MoodTile` note in `steps/s7-bookcard.md`.
 
 ## Local verification
 
@@ -137,6 +133,22 @@ every sub-step's Verify.
   The chip rows stay feature-local containers.
 - **D14** (2026-09-28) Every S5–S11 step file closes with a convergence sub-step (`family-procedure.md`
   § Phase 3): audit the family's variants and merge near-duplicates for app-wide consistency.
+- **D15** (2026-09-28) S5-3 shape. `ConcealableTagChip` goes: the mapper emits `Spoiler` + `Clickable`,
+  `Clicked(key)` dispatches a reveal action, `BookDetailUiState` gains `revealedTagKeys: ImmutableSet`,
+  and `TagChipModelsCollector` emits `Tonal()` + `Inert` for revealed keys — the `rememberSaveable`, the
+  stacked `clickable` and the in-composition `copy` go (reveal takes the press-scale affordance).
+  `RecentSearchChip` and `FlowRowMoodChips`' chips are `Tonal()` + `Clickable` (accepted shift: `onSurface`
+  ink, Medium weight, 14/10 padding), built as `recentSearchChips` / `moodChips` on `ExploreUiState` by
+  feature-local collectors with a key → query / mood map. New `Dashed` — 1dp dashed `primary` stroke,
+  `primary` ink — carries `DashedTagOpenerChip`; its "+ Add tags" / "Edit tags" model arrives on
+  `BookDetailUiState`. New `Editable(spoiler, spoilerToggleLabel)` carries `TagChip` / `TagChipName`:
+  the variant draws the leading spoiler eye (absorbing `SpoilerToggleIcon`) and the name highlight,
+  `dismissLabel` carries the ✕, and new `ChipEvent.SpoilerToggled(key)` reports the eye; a collector maps
+  `UserTag` → `ChipUiModel`, and the insert fade stays in the feature-local row, driven by
+  `newlyAddedTagKey` on `UiState`. Out of the family: `AddPill`, `ExternalLinkPill`, the
+  `InProgressSection` update pill, `SetProgressChip`, `UpdatePillButton` and `SortChip` (menu anchor) are
+  buttons and move in S8-6 `PillButton`, with D13's `FilterPillControl` and `SelectionActionPill`;
+  `TrackingNowChip` is a status badge and moves to S5-7. All mappers stay feature-local (R6).
 
 ## Baseline
 

@@ -21,16 +21,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodChipClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodChipClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveAllSearchQueriesClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQueryClickedAction
@@ -43,7 +46,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveSearchQu
 @Composable
 internal fun SearchFocusContent(
     queries: List<String>,
-    moods: List<MoodTag>,
+    moodChips: ImmutableList<ChipUiModel>,
     runAction: (ExploreAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -87,7 +90,7 @@ internal fun SearchFocusContent(
             Spacer(modifier = Modifier.height(28.dp))
         }
 
-        if (moods.isNotEmpty()) {
+        if (moodChips.isNotEmpty()) {
             Text(
                 text = "TRY A MOOD",
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
@@ -95,8 +98,8 @@ internal fun SearchFocusContent(
             )
 
             FlowRowMoodChips(
-                moods = moods,
-                onMoodClick = { mood -> runAction(OnMoodChipClickAction(mood = mood)) },
+                chips = moodChips,
+                runAction = runAction,
             )
         }
     }
@@ -161,18 +164,22 @@ private fun SearchFocusRecentRow(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FlowRowMoodChips(
-    moods: List<MoodTag>,
-    onMoodClick: (MoodTag) -> Unit,
+    chips: ImmutableList<ChipUiModel>,
+    runAction: (ExploreAction) -> Unit,
 ) {
     FlowRow(
         modifier = Modifier.padding(top = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(9.dp),
         verticalArrangement = Arrangement.spacedBy(9.dp),
     ) {
-        moods.forEach { mood ->
-            RecentSearchChip(
-                query = mood.label.toTitleCaseWords(),
-                onClick = { onMoodClick(mood) },
+        chips.forEach { chip ->
+            Chip(
+                model = chip,
+                onEvent = { event ->
+                    if (event is ChipEvent.Clicked) {
+                        runAction(OnMoodChipClickedAction(key = event.key))
+                    }
+                },
             )
         }
     }
