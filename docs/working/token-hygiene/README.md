@@ -6,30 +6,26 @@
 
 ## Now
 
-- **State:** Steps 00–07 and 08a–08d committed; 08e and 08f done in parallel, not yet committed.
-  `ReadingShelf.kt` → 14 files under `feature/reading/…/screen/section/` (largest: `CompactBookEntry.kt`,
-  270 lines) plus `screen/ReadingHeaderCopy.kt`. `SettingsShelf.kt` → 14 files under
-  `feature/settings/…/screen/section/` (largest 284 lines) plus `screen/AppearanceSettingsContent.kt` and
-  `screen/LibraryVisibilityContent.kt`. Keep the shell cwd at the repo root before spawning agents.
-- **Next:** Step 08g, split `core/component/…/progress/UpdateProgressBottomSheet.kt` (1218 lines;
-  `steps/08-file-splits.md`, 08g row: split along the component's anatomy, public API unchanged). Build the
-  declaration map and call graph yourself, and paste the file → line-range table, call sites and plain-text
-  mentions into the brief. Two disjoint modules can run in parallel. Ktlint and `checkDocBudgets` are root-only;
-  scope ktlint with `-Pktlint.root=<module dir>`.
+- **State:** Steps 00–07 and 08a–08f committed. 08g and 08h done in parallel, not yet committed:
+  `UpdateProgressBottomSheet.kt` → 239 lines plus 10 files in `progress/` (largest 202);
+  `ExploreScreenLayout.mobile.kt` → 411 lines (entry + previews) plus 7 files in mobileMain `screen/section/`
+  (largest 133). Keep the shell cwd at the repo root before spawning agents.
+- **Next:** Steps 08i (`TagEditorBottomSheet.kt`, `:feature:book_detail`) and 08j
+  (`ExploreScreenLayout.jvm.kt`, `:feature:explore`), in parallel (disjoint modules). Build the declaration map
+  and call graph yourself, and paste the file → line-range table, call sites and plain-text mentions into the
+  brief. `testAndroidHostTest` is what compiles mobileMain; `compileKotlinJvm` does not. Ktlint and
+  `checkDocBudgets` are root-only; scope ktlint with `-Pktlint.root=<module dir>`.
 - **Open questions:** none. Still stands: `section/FeaturedBackdropCard.kt:80` cites a contract note on
   `rememberCoverImageRequest` that never existed; FU-13. Follow-up: the KDoc sentence "`expect` cannot carry
   default argument values" in 10 `*Screen.kt` files is false (`BarcodeScanner.kt:18` has an `expect` default).
-- **Verification:** both Verify commands passed, and `softcover-reviewer` ran once per split. 08e: one dropped
-  `Spacer` in `CompactBookEntry` and three misplaced `kotlin.math` imports, both fixed. 08f: every body
-  identical; five KDoc links that had been downgraded to backticks were restored as fully qualified links,
-  plus two that were already dangling (`ThemeMode`, `ColorPalette`), through `document-code`. The
-  `ReadingScreenUiState` link and the `SettingsShelf.kt` mention in `ComponentGalleryScreen` were fixed too.
-  Both modules compile and pass ktlint afterwards. Left open: the 🔵 finding about wrapping multi-arg
-  `Modifier.padding` calls one argument per line in the new reading files; not done, since it would break
-  the pure-move rule.
-- **Uncommitted:** all of 08e and 08f (the two deletions, the new `section/` directories and screen files,
-  the import and KDoc edits in both modules), this block, the 08e/08f rows, and the reviewer memory
-  (`MEMORY.md`, `project_file_split_kdoc_link_scope.md`, new `project_file_split_body_and_import_drift.md`).
+- **Verification:** both Verify commands passed; both reviewers diffed per declaration and found bodies
+  byte-identical. 08h's reviewer found a stale `ExploreShelf.kt` pointer in `foundations.md:113`; repointed,
+  and that line's history phrasing was rewritten to present tense (doc-guard required it). The scroll-state
+  comment copied onto five section files was cut to one (`EditorialContent.kt`) through `document-code`.
+  Ktlint and `checkDocBudgets` green afterwards. Carried-over unwrapped `Modifier.padding` calls left as-is
+  (pure move).
+- **Uncommitted:** all of 08g and 08h (sources, `component-library-migration.md` path repoints,
+  `foundations.md:112-113`), this block and the step-file rows.
 
 ## How to run a step
 

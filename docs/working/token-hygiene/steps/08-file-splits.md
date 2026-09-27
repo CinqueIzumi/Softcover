@@ -21,8 +21,8 @@ costs one ~150-line file. A cross-cutting change costs about the same as today, 
 | 08d | `feature/explore/…/presentation/screen/ExploreShelf.kt` | done |
 | 08e | `feature/reading/…/presentation/screen/ReadingShelf.kt` | done |
 | 08f | `feature/settings/…/presentation/screen/SettingsShelf.kt` | done |
-| 08g | `core/component/…/progress/UpdateProgressBottomSheet.kt` | 1200 |
-| 08h | `feature/explore/…/screen/ExploreScreenLayout.mobile.kt` | 994 |
+| 08g | `core/component/…/progress/UpdateProgressBottomSheet.kt` | done |
+| 08h | `feature/explore/…/screen/ExploreScreenLayout.mobile.kt` | done |
 | 08i | `feature/book_detail/…/component/TagEditorBottomSheet.kt` | 795 |
 | 08j | `feature/explore/…/screen/ExploreScreenLayout.jvm.kt` | 698 |
 | 08k | `feature/settings/…/screen/SettingsScreenLayout.jvm.kt` | 671 |

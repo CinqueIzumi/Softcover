@@ -44,3 +44,11 @@ as "where the shared pieces live" (confirmed in `ExploreScreenLayout.mobile.kt`,
 filename, so the two platform actuals can drift out of sync with each other on this exact sentence). Both
 are real 🟡 findings even though neither is inside the moved declaration bodies the "pure move" brief
 otherwise gates on.
+
+**Confirmed again in 08h** (`ExploreScreenLayout.mobile.kt` → `screen/section/*.kt`, 2026-09-27): this trap
+isn't limited to KDoc/comments in Kotlin files. `docs/reference/design-system/foundations.md`'s "Staggered
+entry" bullet was correctly updated to point at `section/TrendingSection.kt` by this very diff, but the very
+next bullet ("Skeleton↔content crossfade") still cited `ExploreShelf.kt` for `FeaturedCardSkeleton`/
+`RailCardSkeleton`/`SeriesCardSkeleton` — a file deleted two steps earlier (08d) that this 08h diff's own
+scope didn't touch. Whenever a doc-touching step fixes one stale path pointer, grep the *whole* touched
+doc file (not just the edited line) for the same deleted filename — sibling bullets drift independently.
