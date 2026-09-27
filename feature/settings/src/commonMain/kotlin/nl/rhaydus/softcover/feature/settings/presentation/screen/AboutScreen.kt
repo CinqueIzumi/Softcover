@@ -43,7 +43,7 @@ class AboutScreen : Screen {
  * `SettingsScreenLayout`'s `AboutPane`). [onComponentGalleryUnlocked] fires from the version footer's
  * seven-tap easter egg (`component-contract.md` § 7.5) and, on this standalone page, pushes
  * [ComponentGalleryScreen] onto this screen's own navigator — the master–detail pane's `About`
- * category wires the same gesture to its own local navigator instead (see `SettingsScreenLayout.jvm.kt`'s
+ * category wires the same gesture to its own local navigator instead (see `section/AboutPane.kt`'s
  * `AboutPane`).
  */
 @Composable

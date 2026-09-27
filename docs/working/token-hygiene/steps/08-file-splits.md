@@ -23,11 +23,11 @@ costs one ~150-line file. A cross-cutting change costs about the same as today, 
 | 08f | `feature/settings/…/presentation/screen/SettingsShelf.kt` | done |
 | 08g | `core/component/…/progress/UpdateProgressBottomSheet.kt` | done |
 | 08h | `feature/explore/…/screen/ExploreScreenLayout.mobile.kt` | done |
-| 08i | `feature/book_detail/…/component/TagEditorBottomSheet.kt` | 795 |
-| 08j | `feature/explore/…/screen/ExploreScreenLayout.jvm.kt` | 698 |
-| 08k | `feature/settings/…/screen/SettingsScreenLayout.jvm.kt` | 671 |
-| 08l | `feature/library/…/screen/LibraryScreenLayout.mobile.kt` | 660 |
-| 08m | `feature/reading/…/screen/ReadingScreenLayout.mobile.kt` | 612 |
+| 08i | `feature/book_detail/…/component/TagEditorBottomSheet.kt` | done |
+| 08j | `feature/explore/…/screen/ExploreScreenLayout.jvm.kt` | done |
+| 08k | `feature/settings/…/screen/SettingsScreenLayout.jvm.kt` | done |
+| 08l | `feature/library/…/screen/LibraryScreenLayout.mobile.kt` | done |
+| 08m | `feature/reading/…/screen/ReadingScreenLayout.mobile.kt` | done |
 
 Where a migration stage has already moved or shrunk a file below 600 lines, skip it and mark it `n/a`.
 

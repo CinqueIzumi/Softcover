@@ -349,7 +349,7 @@ immediately).
 - [ ] `SelectionActionPill` — `feature/library/presentation/screen/LibraryShelf.kt:1905`
 - [x] `ConcealableTagChip` — `feature/book_detail/presentation/screen/BookDetailShelf.kt`. **Already routed through the library `Chip`** (it is a thin `Chip(model = …)` wrapper); consolidation effectively done in S4-5a
 - [ ] `DashedTagOpenerChip`, `ExternalLinkPill` — `feature/book_detail/presentation/screen/BookDetailShelf.kt`. Still bespoke `Surface`es (dashed border / bordered pill), untouched
-- [ ] `AddPill`, `TagChip`, `TagChipName` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:510,621,709`
+- [ ] `AddPill` — `feature/book_detail/presentation/component/TagNamingField.kt:135`; `TagChip`, `TagChipName` — `feature/book_detail/presentation/component/TagChip.kt:46,134`
 - [ ] `TrackingNowChip` — `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:437`
 - [ ] `RecentSearchChip`, `SortChip`, `FlowRowMoodChips` — `feature/explore/presentation/screen/ExploreShelf.kt:1260,1426,1405`
 - [ ] `SetProgressChip` — `feature/reading/presentation/screen/ReadingShelf.kt:1136`
@@ -363,22 +363,22 @@ immediately).
 Kills all three cross-module name collisions.
 
 - [ ] `SectionLabel` × 4 — `app/src/debug/.../MotionDebugScreen.kt`, `feature/book_detail/presentation/screen/BookDetailShelf.kt:2535`, `feature/profile/presentation/screen/ProfileShelf.kt:136`, `feature/reading/presentation/screen/ReadingShelf.kt:1178`
-- [ ] `EditorialHeader` × 2 — `core/component/progress/EditorialHeader.kt` (moved in S4-3; now takes a `title: String`), `feature/reading/presentation/screen/ReadingScreenLayout.mobile.kt:158`
-- [ ] `SidebarSectionLabel` × 2 — `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:416`, `feature/settings/presentation/screen/SettingsScreenLayout.jvm.kt:260`
+- [ ] `EditorialHeader` × 2 — `core/component/progress/EditorialHeader.kt` (moved in S4-3; now takes a `title: String`), `feature/reading/presentation/screen/section/EditorialHeader.kt:27`
+- [ ] `SidebarSectionLabel` × 2 — `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:416`, `feature/settings/presentation/screen/section/SettingsCategorySidebar.kt:129`
 - [ ] `SmallSectionLabel`, `InlineAccentLabel` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:1128,1100`
 - [ ] `SectionIntro` — `feature/profile/presentation/screen/ProfileShelf.kt:402`
-- [ ] `SectionHeaderBar` — `feature/explore/presentation/screen/ExploreScreenLayout.jvm.kt:557`
+- [ ] `SectionHeaderBar` — `feature/explore/presentation/screen/section/DesktopExploreSectionShared.kt:15`
 - [ ] `AlsoReadingSectionHeader` — `feature/reading/presentation/screen/ReadingShelf.kt:1205`
 - [ ] `SearchResultsHeader`, `HiddenSuggestionsGroupHeader` — `feature/explore/presentation/screen/ExploreShelf.kt:1472`, `feature/explore/presentation/screen/HiddenSuggestionsShelf.kt:177`
-- [ ] `LibraryTabsGroupHeader`, `RowLabel`, `SettingsPageHeader`, `SidebarHeader`, `DesktopPaneHeader` — `feature/settings/presentation/screen/SettingsShelf.kt:625,968`, `SettingsScreenLayout.mobile.kt:222`, `SettingsScreenLayout.jvm.kt:241,583`
-- [ ] `MastheadHeader` — `feature/library/presentation/screen/LibraryScreenLayout.mobile.kt:485`
+- [ ] `LibraryTabsGroupHeader`, `RowLabel`, `SettingsPageHeader`, `SidebarHeader`, `DesktopPaneHeader` — `feature/settings/presentation/screen/SettingsShelf.kt:625,968`, `SettingsScreenLayout.mobile.kt:222`, `section/SettingsCategorySidebar.kt:110`, `section/DesktopPaneHeader.kt:15`
+- [ ] `MastheadHeader` — `feature/library/presentation/screen/section/MastheadHeader.kt:37`
 - [ ] `ProfileHeader` — `feature/profile/presentation/screen/ProfileScreenLayout.mobile.kt:196`
-- [ ] `DesktopExploreHeader`, `DesktopLibraryHeader`, `DesktopReadingHeader` — `feature/explore/presentation/screen/ExploreScreenLayout.jvm.kt:172`, `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:481`, `feature/reading/presentation/screen/ReadingScreenLayout.jvm.kt:220`
+- [ ] `DesktopExploreHeader`, `DesktopLibraryHeader`, `DesktopReadingHeader` — `feature/explore/presentation/screen/section/DesktopExploreHeader.kt:27`, `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:481`, `feature/reading/presentation/screen/ReadingScreenLayout.jvm.kt:220`
 - [ ] `ArrangeSubLabel` — `feature/library/presentation/component/LibraryArrangeSheet.kt:191`
 - [ ] `ChangeEditionHeader` — `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:208`
 - [ ] `ChooseListsHeader` — `core/component/lists/ChooseListsBottomSheet.kt` (moved in S4-3; now takes a `ChooseListsVariant` + the jacket slot)
 - [ ] `ShelvesSheetHeader` — `feature/library/presentation/component/LibraryShelvesSheet.kt:90`
-- [ ] `TagEditorHeader` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:281`
+- [ ] `TagEditorHeader` — `feature/book_detail/presentation/component/TagEditorHeader.kt:37`
 - [ ] `SelectionHeader` — `feature/library/presentation/screen/LibraryShelf.kt:1793`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
 - [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
@@ -395,7 +395,7 @@ Kills all three cross-module name collisions.
 - [ ] `SelectedCheckBadge` — `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:414`
 - [ ] `FolioIndicator` — `feature/onboarding/presentation/screen/OnboardingScreenLayout.mobile.kt:204`
 - [ ] `GripOrPinGlyph` — `feature/settings/presentation/screen/SettingsShelf.kt:922`
-- [ ] `SpoilerToggleIcon` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:677`
+- [ ] `SpoilerToggleIcon` — `feature/book_detail/presentation/component/TagChip.kt:102`
 - [ ] `deadlineProgressByBook` becomes UI-typed (still domain-typed, on `LibraryUiState` / `ReadingUiState`).
 - [ ] Visual pass on the deadline trio (`Badge`, `CoverOverlay`, `DeadlineSummaryLine`) — never watched rendering from its new models.
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
@@ -429,7 +429,7 @@ Kills all three cross-module name collisions.
 - [ ] `AboutLinkRow`, `AboutNavigationRow`, `AboutUsernameRow`, `AboutRow` — `feature/settings/presentation/screen/AboutContent.kt:192,232,275,307`
 - [ ] `SettingsToggleRow`, `SettingsSelectableRow`, `ReorderableRow` — `feature/settings/presentation/screen/SettingsShelf.kt:445,517,853`
 - [ ] `SettingsMenuRow` — `feature/settings/presentation/screen/SettingsScreenLayout.mobile.kt:248`
-- [ ] `SettingsSidebarRow` — `feature/settings/presentation/screen/SettingsScreenLayout.jvm.kt:274`
+- [ ] `SettingsSidebarRow` — `feature/settings/presentation/screen/section/SettingsSidebarRow.kt:30`
 - [ ] `ShelfSidebarRow` — `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:427`
 - [ ] `ShelvesSheetRow`, `ShowTitlesToggleRow` — `feature/library/presentation/component/LibraryShelvesSheet.kt:128`, `LibraryArrangeSheet.kt:227`
 - [ ] `ShelveRow`, `DeadlineRow` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:959,1547`
@@ -452,7 +452,7 @@ Chrome only; each sheet's **body** stays a feature composable (`component-contra
 - [ ] `LibraryArrangeSheet` — `feature/library/presentation/component/LibraryArrangeSheet.kt:81`
 - [ ] `LibraryShelvesSheet` — `feature/library/presentation/component/LibraryShelvesSheet.kt:50`
 - [ ] `BulkRemoveConfirmationDialog` — `feature/library/presentation/screen/LibraryShelf.kt:1981`
-- [ ] `TagEditorBottomSheet` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:149`
+- [ ] `TagEditorBottomSheet` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:81`
 - [ ] `EditionBottomSheetSelector`, `EditionBottomSheetContent` — `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:60,87`
 - [ ] `ShareBookBottomSheet` — `feature/book_detail/presentation/component/ShareBookBottomSheet.kt:57`
 - [ ] `SoftcoverDatePickerDialog` — `core/component/dialog/SoftcoverDatePickerDialog.kt` (+ its `internal` `PickerDates.kt` helpers); arrived loose-parameter from main's 3.1.3 hotfix, so it **owes R1 + R11** (model + event), not just chrome
@@ -525,7 +525,7 @@ Checklist:
 - [ ] `EmptyListScreen` — `feature/library/presentation/screen/LibraryShelf.kt:1696`
 - [ ] `EmptyCurrentlyReadingScreen` — `feature/reading/presentation/screen/ReadingShelf.kt:1238`
 - [ ] `HiddenSuggestionsEmptyState` — `feature/explore/presentation/screen/HiddenSuggestionsShelf.kt:497`
-- [ ] `TagEditorEmptyState` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:761`
+- [ ] `TagEditorEmptyState` — `feature/book_detail/presentation/component/TagEditorCollection.kt:109`
 - [ ] `EmptyEntriesCard` — `feature/settings/presentation/screen/SettingsShelf.kt:1100`
 - [ ] `EmptyDetailPane` — `orchestration/presentation/BookDetailPaneHost.kt:65`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
@@ -549,10 +549,10 @@ The four `*Callout`s are one component with a tone variant.
 
 - [x] `SoftcoverTopBar`, `SoftcoverSearchTopBar`, `SearchChromeBarcodeButton`, `SearchChromeInputArea` — **DONE in S4-5a.** `TopBar` and `SearchTopBar` in `core/component/topbar/` (with `TopBarUiModel`/`Event`/`Navigation`/`Surface` and `SearchTopBarUiModel`/`Event`); the two chrome helpers stayed private inside `SearchTopBar.kt`. ~12 screen layouts consume them. Only `BackBar` is left of this family
 - [x] `SoftcoverTopBarAction` — **GONE, deleted in S4-5a** rather than migrated. No successor type: `TopBarUiModel` carries `title` / `subtitle` / `navigation` / `surface`, and a screen's own actions go in the trailing slot
-- [ ] `TagEditorTopBar` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:248`
+- [ ] `TagEditorTopBar` — `feature/book_detail/presentation/component/TagEditorTopBar.kt:17`
 - [ ] `DesktopBookDetailTopBar` — `feature/book_detail/presentation/screen/BookDetailScreenLayout.jvm.kt:135`
 - [ ] `OnboardingTopBar` — `feature/onboarding/presentation/screen/OnboardingScreenLayout.mobile.kt:158`
-- [ ] `DesktopSettingsBackBar` — `feature/settings/presentation/screen/SettingsScreenLayout.jvm.kt:622`
+- [ ] `DesktopSettingsBackBar` — `feature/settings/presentation/screen/DesktopSettingsBackBar.kt:28`
 - [ ] `HiddenSuggestionsDesktopBackBar` — `feature/explore/presentation/screen/HiddenSuggestionsScreenLayout.jvm.kt:82`
 - [ ] Move the family's section files into `:core:component` (Step 08 split them in place).
 - [ ] Move the family's `[detail]` entries (see `components.md`) into KDoc on the UI model and delete them (Step 07).
@@ -563,7 +563,7 @@ The four `*Callout`s are one component with a tone variant.
 - [ ] `RichTextFormattingToolbar` — `core/component/control/RichTextFormattingToolbar.kt` (was `ReviewFormattingToolbar`; moved + renamed in S4-2b. In the library, but not yet the `Toggle`/`SegmentedControl`/`TextField` consolidation this group is about)
 - [ ] `LensToggle`, `LensSegment` — `feature/book_detail/presentation/screen/BookDetailShelf.kt:632,686`
 - [ ] `ShareCardVariantToggle` — `feature/book_detail/presentation/component/ShareBookBottomSheet.kt:226`
-- [ ] `TagNamingField` — `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:424`
+- [ ] `TagNamingField` — `feature/book_detail/presentation/component/TagNamingField.kt:49`
 - [ ] `SelectCircleControl` — `feature/library/presentation/component/LibraryControlLine.kt:264`
 - [ ] `BookmarkToggle`, `BecauseYouReadGenreControl` — `feature/explore/presentation/screen/ExploreShelf.kt:1642,1694`
 - [ ] `YearMetricToggle`, `HideUntaggedAuthorsToggle` — `feature/profile/presentation/screen/ProfileShelf.kt:579,1069`

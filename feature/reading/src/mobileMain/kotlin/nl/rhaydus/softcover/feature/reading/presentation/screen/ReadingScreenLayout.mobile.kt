@@ -3,11 +3,9 @@ package nl.rhaydus.softcover.feature.reading.presentation.screen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
@@ -15,12 +13,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,21 +24,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
-import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -53,9 +44,8 @@ import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
-import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EditorialHeader
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
-import nl.rhaydus.softcover.feature.reading.presentation.screen.section.PaceNudgeRibbon
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
@@ -167,69 +157,6 @@ internal actual fun ReadingScreenLayout(
             },
             modifier = Modifier.fillMaxSize(),
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun EditorialHeader(
-    bookCount: Int,
-    averageProgress: Float?,
-    recentReadingActivity: List<ReadingDayActivity>,
-    streakEnabled: Boolean,
-    onExpandStreak: () -> Unit,
-    pullToRefreshState: PullToRefreshState,
-    isRefreshing: Boolean,
-) {
-    val greeting = remember { greetingForNow() }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 24.dp, end = 24.dp, top = 24.dp),
-    ) {
-        PullToRefreshEyebrow(
-            pullToRefreshState = pullToRefreshState,
-            isRefreshing = isRefreshing,
-            baseText = "Now reading",
-            refreshingText = "Catching up on your reading…",
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = greeting,
-            style = MaterialTheme.editorialTypography.headlineMedium.copy(
-                lineHeight = 32.sp,
-            ),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-
-        val subtitle = buildSubtitle(
-            bookCount = bookCount,
-            averageProgress = averageProgress,
-        )
-
-        Text(
-            text = subtitle,
-            style = MaterialTheme.editorialTypography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-
-        if (streakEnabled && recentReadingActivity.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(14.dp))
-
-            StreakStrip(
-                activity = recentReadingActivity,
-                onClick = onExpandStreak,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
@@ -600,17 +527,6 @@ private fun ReadingScreenAudiobookPreview() {
             runAction = {},
             onBookClick = {},
             onNavigateToSearch = {},
-        )
-    }
-}
-
-@StandardPreview
-@Composable
-private fun PaceNudgeRibbonPreview() {
-    SoftcoverTheme {
-        PaceNudgeRibbon(
-            text = "Read 24 pages today to stay on pace.",
-            onDismiss = {},
         )
     }
 }

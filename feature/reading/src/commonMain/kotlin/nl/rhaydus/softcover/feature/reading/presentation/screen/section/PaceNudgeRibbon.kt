@@ -15,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -73,5 +75,16 @@ internal fun PaceNudgeRibbon(
                 modifier = Modifier.size(16.dp),
             )
         }
+    }
+}
+
+@StandardPreview
+@Composable
+private fun PaceNudgeRibbonPreview() {
+    SoftcoverTheme {
+        PaceNudgeRibbon(
+            text = "Read 24 pages today to stay on pace.",
+            onDismiss = {},
+        )
     }
 }

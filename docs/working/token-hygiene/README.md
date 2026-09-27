@@ -6,26 +6,27 @@
 
 ## Now
 
-- **State:** Steps 00–07 and 08a–08f committed. 08g and 08h done in parallel, not yet committed:
-  `UpdateProgressBottomSheet.kt` → 239 lines plus 10 files in `progress/` (largest 202);
-  `ExploreScreenLayout.mobile.kt` → 411 lines (entry + previews) plus 7 files in mobileMain `screen/section/`
-  (largest 133). Keep the shell cwd at the repo root before spawning agents.
-- **Next:** Steps 08i (`TagEditorBottomSheet.kt`, `:feature:book_detail`) and 08j
-  (`ExploreScreenLayout.jvm.kt`, `:feature:explore`), in parallel (disjoint modules). Build the declaration map
-  and call graph yourself, and paste the file → line-range table, call sites and plain-text mentions into the
-  brief. `testAndroidHostTest` is what compiles mobileMain; `compileKotlinJvm` does not. Ktlint and
-  `checkDocBudgets` are root-only; scope ktlint with `-Pktlint.root=<module dir>`.
-- **Open questions:** none. Still stands: `section/FeaturedBackdropCard.kt:80` cites a contract note on
-  `rememberCoverImageRequest` that never existed; FU-13. Follow-up: the KDoc sentence "`expect` cannot carry
-  default argument values" in 10 `*Screen.kt` files is false (`BarcodeScanner.kt:18` has an `expect` default).
-- **Verification:** both Verify commands passed; both reviewers diffed per declaration and found bodies
-  byte-identical. 08h's reviewer found a stale `ExploreShelf.kt` pointer in `foundations.md:113`; repointed,
-  and that line's history phrasing was rewritten to present tense (doc-guard required it). The scroll-state
-  comment copied onto five section files was cut to one (`EditorialContent.kt`) through `document-code`.
-  Ktlint and `checkDocBudgets` green afterwards. Carried-over unwrapped `Modifier.padding` calls left as-is
-  (pure move).
-- **Uncommitted:** all of 08g and 08h (sources, `component-library-migration.md` path repoints,
-  `foundations.md:112-113`), this block and the step-file rows.
+- **State:** Steps 00–07 and 08a–08h committed. 08i–08m are split, reviewed as pure moves and uncommitted. Every
+  presentation file they touched is ≤532 lines. `LibraryScreenLayout.mobile.kt` (527) is one 379-line
+  composable that a pure move cannot split.
+- **Next:** Step 08n in `steps/08-file-splits.md` § 08n: the `checkPresentationFileSize` gate in the root
+  `build.gradle.kts`, its docs, and FU-9 in `foundation-upstream.md`. Then tick Step 08 and delete the step
+  file. Run Gradle with `JAVA_HOME` set to JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`). The
+  default JDK 26 fails detekt, and JDK 17 (CI's) is not installed. Keep the shell cwd at the repo root before
+  spawning agents.
+- **Open questions:** none. Follow-ups:
+  - `section/FeaturedBackdropCard.kt:80` cites a contract note on `rememberCoverImageRequest` that never
+    existed (FU-13).
+  - The KDoc sentence "`expect` cannot carry default argument values" in 10 `*Screen.kt` files is false
+    (`BarcodeScanner.kt:18` has an `expect` default).
+  - The line pointers in `docs/working/compose-audit-report.md` are stale.
+- **Verification:** on JBR 21, the `ci.yml` steps (`ktlintCheck`, `detekt`, `checkDocBudgets`, `test`,
+  `koverXmlReport`), `styleCheck`, and `compileKotlinJvm` + `testAndroidHostTest` for the five modules all passed.
+  Only `styleCheck` catches detekt `MatchingDeclarationName`, so include it in every Verify.
+- **Uncommitted:** the 08i–08m splits. That covers the sources in `:feature:book_detail` (`component/`), explore
+  jvmMain, settings jvmMain (plus two comment repoints in mobileMain/commonMain), library mobileMain and reading
+  mobileMain/commonMain, with new files under each `section/`. Also the path repoints in
+  `component-library-migration.md`, this block, and the 08i–08m rows in `steps/08-file-splits.md`.
 
 ## How to run a step
 

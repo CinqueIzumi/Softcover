@@ -72,7 +72,7 @@ internal actual val settingsUsesMasterDetail: Boolean = false
  * unused: it carried nothing this menu itself renders once the app version moved off this list and onto
  * [AboutScreen] — its sole home now — to avoid showing the version in two places. [navigateToRoadmap]
  * *is* used — this menu's own direct "Roadmap" shortcut, alongside the desktop sidebar's equivalent row
- * (`SettingsScreenLayout.jvm.kt`'s `SettingsCategorySidebar`) — even though the same screen is also
+ * (`section/SettingsCategorySidebar.kt`'s `SettingsCategorySidebar`) — even though the same screen is also
  * reachable a second way, via the row [AboutContent] renders once you're already on About.
  * [navigateToComponentGallery] is unused here, the mirror image of [navigateToRoadmap]'s desktop
  * story: mobile reaches the Component Gallery only through the version footer's easter egg on the
