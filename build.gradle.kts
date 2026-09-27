@@ -780,8 +780,8 @@ tasks.register("checkPresentationFileSize") {
     }
 }
 
-// The per-change style gate: type-resolved detekt across every module — the shared nl.rhaydus baseline
-// plus the custom `rhaydus` ruleset, gating from zero with no baseline file.
+// The per-change style gate: `ktlintCheck` plus type-resolved detekt across every module — the shared
+// nl.rhaydus baseline plus the custom `rhaydus` ruleset, gating from zero with no baseline file.
 //
 // detekt's own tasks are wired into the heavy `check` lifecycle, but the gate developers actually run
 // per change is `styleCheck` — so without this, findings would only surface in a rarely-run full build
@@ -790,8 +790,9 @@ tasks.register("checkPresentationFileSize") {
 // than merely parsing source. That cost is the point: an inert gate is not a gate.
 tasks.register("styleCheck") {
     group = "verification"
-    description = "Runs type-resolved detekt (shared baseline + rhaydus crash-safety ruleset) across all modules."
+    description = "Runs ktlintCheck and type-resolved detekt (shared baseline + rhaydus crash-safety ruleset) across all modules."
 
+    dependsOn(tasks.named("ktlintCheck"))
     dependsOn(subprojects.map { sp -> sp.tasks.matching { it.name in typeResolvedDetektTasks } })
 }
 
