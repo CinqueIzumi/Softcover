@@ -28,7 +28,7 @@ kotlin {
             // to ask of the rest of the app. The source-level half of the same gate is a detekt
             // `ForbiddenImport` scoped to `**/core/designsystem/**` in `config/detekt/detekt.yml`.
             //
-            // Three dependencies left with the `Deadline*` trio in S4-5b, and all three had to go in the
+            // Three dependencies left when the `Deadline*` trio did, and all three had to go in the
             // same commit that emptied them because `onUnusedDependencies` is `severity("fail")`:
             // `:core:domain` (the trio's domain types), `kotlinx-datetime` and `core-common`
             // (`secondsToHm` for the pace line, `currentLocalDate` for the release-date formatters).

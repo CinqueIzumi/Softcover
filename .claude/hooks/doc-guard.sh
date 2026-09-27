@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Denies markdown edits that break a doc budget, its ratchet, the reference no-history rule, or a permanent
-# doc's/plan's citation rules, and denies a Kotlin comment or KDoc line that cites docs/working.
+# doc's/plan's citation rules, and denies a Kotlin (`.kt`/`.kts`) comment, KDoc line, or YAML comment that
+# cites docs/working, a decision number or a plan step.
 set -u
 
 input=$(cat)
@@ -286,6 +287,71 @@ handle_markdown_write() {
   check_decisions "$relpath" "$tmp_new" "$old_file"
 }
 
+extract_code_comment() {
+  awk '
+  BEGIN { sq = sprintf("%c", 39) }
+  {
+    n = length($0)
+    in_str = 0
+    in_chr = 0
+    for (i = 1; i <= n; i++) {
+      c = substr($0, i, 1)
+      if (in_str) {
+        if (c == "\\") { i++; continue }
+        if (c == "\"") in_str = 0
+        continue
+      }
+      if (in_chr) {
+        if (c == "\\") { i++; continue }
+        if (c == sq) in_chr = 0
+        continue
+      }
+      if (c == "\"") { in_str = 1; continue }
+      if (c == sq) { in_chr = 1; continue }
+      if (c == "/") {
+        nc = substr($0, i + 1, 1)
+        if (nc == "/" || nc == "*") {
+          print substr($0, i + 2)
+          exit
+        }
+      }
+    }
+  }' <<< "$1"
+}
+
+extract_yaml_comment() {
+  awk '
+  BEGIN { sq = sprintf("%c", 39) }
+  {
+    n = length($0)
+    quote = ""
+    for (i = 1; i <= n; i++) {
+      c = substr($0, i, 1)
+      if (quote == sq) {
+        if (c == sq) {
+          if (substr($0, i + 1, 1) == sq) { i++; continue }
+          quote = ""
+        }
+        continue
+      }
+      if (quote == "\"") {
+        if (c == "\\") { i++; continue }
+        if (c == "\"") quote = ""
+        continue
+      }
+      if (c == sq) { quote = sq; continue }
+      if (c == "\"") { quote = "\""; continue }
+      if (c == "#") {
+        prevc = (i == 1) ? "" : substr($0, i - 1, 1)
+        if (i == 1 || prevc == " " || prevc == "\t") {
+          print substr($0, i + 1)
+          exit
+        }
+      }
+    }
+  }' <<< "$1"
+}
+
 check_kotlin_comments() {
   local relpath="$1" new_file="$2" old_file="$3" line trimmed comment
   while IFS= read -r line || [ -n "$line" ]; do
@@ -294,11 +360,8 @@ check_kotlin_comments() {
     case "$trimmed" in
       '//'* | '*'* | '/**'*) comment="$trimmed" ;;
       *)
-        case "$line" in
-          *'//'*) comment="${line#*//}" ;;
-          *'/*'*) comment="${line#*/\*}" ;;
-          *) continue ;;
-        esac
+        comment=$(extract_code_comment "$line")
+        [ -n "$comment" ] || continue
         ;;
     esac
     grep -qxF -- "$line" "$old_file" 2>/dev/null && continue
@@ -322,7 +385,7 @@ handle_kotlin_write() {
     *) return 0 ;;
   esac
   case "$path" in
-    *.kt) ;;
+    *.kt | *.kts) ;;
     *) return 0 ;;
   esac
 
@@ -340,6 +403,53 @@ handle_kotlin_write() {
 
   relpath="${path#"$root"/}"
   check_kotlin_comments "$relpath" "$tmp_new" "$old_file"
+}
+
+check_yaml_comments() {
+  local relpath="$1" new_file="$2" old_file="$3" line comment
+  while IFS= read -r line || [ -n "$line" ]; do
+    [ -n "$line" ] || continue
+    comment=$(extract_yaml_comment "$line")
+    [ -n "$comment" ] || continue
+    grep -qxF -- "$line" "$old_file" 2>/dev/null && continue
+    if printf '%s' "$comment" | grep -Eq 'docs/working/'; then
+      deny "$relpath adds a comment citing docs/working: \"$comment\" — plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description."
+    fi
+    if printf '%s' "$comment" | grep -Eq '\bD[0-9]{1,2}\b'; then
+      deny "$relpath adds a comment citing a decision number: \"$comment\" — plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description."
+    fi
+    if printf '%s' "$comment" | grep -Eq '\bS[0-9]{1,2}-[0-9A-Z]'; then
+      deny "$relpath adds a comment citing a plan step: \"$comment\" — plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description."
+    fi
+  done < "$new_file"
+}
+
+handle_yaml_write() {
+  local path old_file rc relpath
+  path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // ""')
+  case "$path" in
+    "$root"/*) ;;
+    *) return 0 ;;
+  esac
+  case "$path" in
+    *.yml | *.yaml) ;;
+    *) return 0 ;;
+  esac
+
+  if [ -f "$path" ]; then old_file="$path"; else old_file="/dev/null"; fi
+
+  tmp_new=$(mktemp)
+  tmp_err=$(mktemp)
+  trap 'rm -f "$tmp_new" "$tmp_err"' EXIT
+  compute_new_content "$old_file" "$tmp_new" "$tmp_err"
+  rc=$?
+  if [ "$rc" -ne 0 ]; then
+    grep -q DOC_GUARD_NOT_FOUND "$tmp_err" && return 0
+    deny "doc-guard could not evaluate the edit: $(tr '\n' ' ' < "$tmp_err")"
+  fi
+
+  relpath="${path#"$root"/}"
+  check_yaml_comments "$relpath" "$tmp_new" "$old_file"
 }
 
 handle_bash() {
@@ -398,6 +508,7 @@ case "$tool_name" in
   Edit | Write)
     handle_markdown_write
     handle_kotlin_write
+    handle_yaml_write
     ;;
   Bash) handle_bash ;;
 esac

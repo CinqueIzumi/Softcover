@@ -15,7 +15,7 @@ kotlin {
             // without re-declaring either. No `allowedApiDataEdges` row is needed — `:core:domain` is
             // a contract module, not a data-area one.
             // `secondsToHm` (the deadline pace line) and `currentLocalDate` (the release-date
-            // formatters), both inherited from `:core:designsystem` until S4-5b moved their callers here
+            // formatters), both inherited from `:core:designsystem` until its callers moved here
             // and that module dropped its own `core-common` edge.
             implementation(libs.rhaydus.coreCommon)
 

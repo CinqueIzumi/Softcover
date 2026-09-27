@@ -64,3 +64,18 @@ plan_ref_step_id_ratchet_allow	Edit	docs/reference/foo.md	IyBGb28KClNlZSBTNC01Yi
 kotlin_trailing_line_comment_step_ref_deny	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCB4ID0gMSAvLyBTNS0xYQp9	false	deny	citing a plan step
 kotlin_trailing_block_comment_docs_working_deny	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIGRvU29tZXRoaW5nKCkgLyogZG9jcy93b3JraW5nL3gvICovCn0=	false	deny	adds a comment citing docs/working
 kotlin_trailing_comment_plain_allow	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCB4ID0gMSAvLyBqdXN0IGEgbm90ZQp9	false	allow	-
+
+yaml_comment_step_ref_deny	Edit	fixture/config.yml	a2V5OiB2YWx1ZQo=	a2V5OiB2YWx1ZQ==	a2V5OiB2YWx1ZQphbm90aGVyOiAxICAjIHBlciBTNC0x	false	deny	citing a plan step
+kts_comment_decision_number_deny	Edit	fixture/build.gradle.kts	dmFsIHggPSAxCg==	dmFsIHggPSAx	dmFsIHggPSAxCnZhbCB5ID0gMiAvLyBzZWUgRDE3	false	deny	citing a decision number
+yaml_comment_plain_allow	Edit	fixture/config.yml	a2V5OiB2YWx1ZQo=	a2V5OiB2YWx1ZQ==	a2V5OiB2YWx1ZQphbm90aGVyOiAxICAjIGp1c3QgYSBub3Rl	false	allow	-
+kts_comment_plain_allow	Edit	fixture/build.gradle.kts	dmFsIHggPSAxCg==	dmFsIHggPSAx	dmFsIHggPSAxCnZhbCB5ID0gMiAvLyBqdXN0IGEgbm90ZQ==	false	allow	-
+kt_string_literal_with_step_shape_allow	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCB1ID0gImh0dHBzOi8vZXhhbXBsZS5jb20vRDE3Igp9	false	allow	-
+kt_string_then_real_trailing_comment_step_ref_deny	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCB1ID0gImh0dHBzOi8vZXhhbXBsZS5jb20veCIgLy8gUzQtMQp9	false	deny	citing a plan step
+kt_escaped_quote_in_string_decision_number_deny	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCB1ID0gImEgXCIgYiIgLy8gRDkKfQ==	false	deny	citing a decision number
+
+yaml_hash_inside_double_quote_allow	Edit	fixture/config.yml	a2V5OiB2YWx1ZQo=	a2V5OiB2YWx1ZQ==	a2V5OiB2YWx1ZQprZXkyOiAiYSAjIEQxNyI=	false	allow	-
+yaml_hash_inside_single_quote_allow	Edit	fixture/config.yml	a2V5OiB2YWx1ZQo=	a2V5OiB2YWx1ZQ==	a2V5OiB2YWx1ZQprZXkyOiAnaXQnJ3MgIyBEMTcn	false	allow	-
+yaml_hash_no_whitespace_before_allow	Edit	fixture/config.yml	a2V5OiB2YWx1ZQo=	a2V5OiB2YWx1ZQ==	a2V5OiB2YWx1ZQp4OiBhI0QxNw==	false	allow	-
+yaml_hash_after_quote_and_space_deny	Edit	fixture/config.yml	a2V5OiB2YWx1ZQo=	a2V5OiB2YWx1ZQ==	a2V5OiB2YWx1ZQp4OiAiYSIgIyBEMTc=	false	deny	citing a decision number
+kt_char_literal_double_quote_step_ref_deny	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCBjID0gJyInIC8vIFM0LTEKfQ==	false	deny	citing a plan step
+kt_char_literal_escaped_quote_decision_number_deny	Edit	src/Foo.kt	Y2xhc3MgRm9vIHsKfQo=	Y2xhc3MgRm9vIHsKfQ==	Y2xhc3MgRm9vIHsKICAgIHZhbCBjID0gJ1wnJyAvLyBEMTcKfQ==	false	deny	citing a decision number

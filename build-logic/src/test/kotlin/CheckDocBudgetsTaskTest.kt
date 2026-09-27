@@ -74,6 +74,7 @@ class CheckDocBudgetsTaskTest {
         budgets: String,
         markdownRelativePaths: List<String>,
         activeContent: String? = null,
+        configRelativePaths: List<String> = emptyList(),
     ) {
         val budgetsFile = write(
             "docs/doc-budgets.txt",
@@ -88,6 +89,7 @@ class CheckDocBudgetsTaskTest {
         task.budgetsFile.set(budgetsFile)
         task.repoRoot.set(repoRoot)
         task.markdownFiles.setFrom(markdownRelativePaths.map { repoRoot.resolve(it) })
+        task.configFiles.setFrom(configRelativePaths.map { repoRoot.resolve(it) })
         if (activeContent != null) {
             task.activeFile.set(
                 write(
@@ -458,6 +460,391 @@ class CheckDocBudgetsTaskTest {
                 runCheck(
                     "",
                     listOf("docs/reference/foo.md"),
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class ConfigFiles {
+        @Test
+        fun `flags a yml comment citing a plan directory`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "config/detekt/detekt.yml",
+                "rule:\n  active: true  # see docs/working/275-foo/notes.md\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("config/detekt/detekt.yml"),
+                )
+            }
+            exception.message shouldContain "comment cites docs/working"
+        }
+
+        @Test
+        fun `flags a yml comment citing a decision number`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "config/detekt/detekt.yml",
+                "rule:\n  active: true  # per D17\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("config/detekt/detekt.yml"),
+                )
+            }
+            exception.message shouldContain "comment cites a decision number"
+        }
+
+        @Test
+        fun `flags a yml comment citing a step id`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "config/detekt/detekt.yml",
+                "rule:\n  active: true  # implements S4-1\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("config/detekt/detekt.yml"),
+                )
+            }
+            exception.message shouldContain "comment cites a plan step"
+        }
+
+        @Test
+        fun `flags a kts line comment citing a step id`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "build.gradle.kts",
+                "val x = 1 // implements S4-1\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("build.gradle.kts"),
+                )
+            }
+            exception.message shouldContain "comment cites a plan step"
+        }
+
+        @Test
+        fun `flags a kts block comment citing a decision number`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "build.gradle.kts",
+                "val x = 1 /* per D17 */\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("build.gradle.kts"),
+                )
+            }
+            exception.message shouldContain "comment cites a decision number"
+        }
+
+        @Test
+        fun `passes a kts string literal containing a decision-number-like token in a url`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "build.gradle.kts",
+                "val doc = \"https://example.com/D17\"\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            // The token sits inside a string literal with no trailing comment on the line, so
+            // nothing on it is a plan citation to flag.
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("build.gradle.kts"),
+                )
+            }
+        }
+
+        @Test
+        fun `passes a kts string literal containing a step-id-like token`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "build.gradle.kts",
+                "val note = \"see S4-1 for context\"\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("build.gradle.kts"),
+                )
+            }
+        }
+
+        @Test
+        fun `flags a kts line with a string literal followed by a real trailing comment`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "build.gradle.kts",
+                "val label = \"https://example.com/x\" // implements S4-1\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            // The string literal itself is inert; the real "//" after it is what should trip the check.
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("build.gradle.kts"),
+                )
+            }
+            exception.message shouldContain "comment cites a plan step"
+        }
+
+        @Test
+        fun `passes a kts string with an escaped quote that does not close the literal early`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "build.gradle.kts",
+                "val s = \"a \\\" // D17\"\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            // The escaped quote must not end the string literal early, or the text after it would
+            // be misread as a real trailing comment.
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("build.gradle.kts"),
+                )
+            }
+        }
+
+        @Test
+        fun `flags a kts string that closes before a real trailing comment despite an escaped quote`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "build.gradle.kts",
+                "val s = \"a \\\"\" // D17\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            // The escaped quote keeps the string open, but the very next unescaped quote closes it,
+            // leaving the trailing comment for real this time.
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("build.gradle.kts"),
+                )
+            }
+            exception.message shouldContain "comment cites a decision number"
+        }
+
+        @Test
+        fun `passes a yml hash inside a double-quoted value`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "config/detekt/detekt.yml",
+                "key: \"a # D17\"\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("config/detekt/detekt.yml"),
+                )
+            }
+        }
+
+        @Test
+        fun `passes a yml hash inside a single-quoted value with a doubled escaped quote`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "config/detekt/detekt.yml",
+                "key: 'it''s # D17'\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("config/detekt/detekt.yml"),
+                )
+            }
+        }
+
+        @Test
+        fun `passes a yml hash with no whitespace before it`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "config/detekt/detekt.yml",
+                "x: a#D17\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            // A "#" only opens a YAML comment at line start or after a space or tab.
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("config/detekt/detekt.yml"),
+                )
+            }
+        }
+
+        @Test
+        fun `flags a yml hash after a closed double-quoted value`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "config/detekt/detekt.yml",
+                "x: \"a\" # D17\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("config/detekt/detekt.yml"),
+                )
+            }
+            exception.message shouldContain "comment cites a decision number"
+        }
+
+        @Test
+        fun `flags a kts trailing comment after a char literal holding a double quote`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "build.gradle.kts",
+                "val c = '\"' // S4-1\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            // Without char-literal tracking, the quote inside '"' would be misread as a string
+            // opener that swallows the rest of the line, including the real "//" comment.
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("build.gradle.kts"),
+                )
+            }
+            exception.message shouldContain "comment cites a plan step"
+        }
+
+        @Test
+        fun `flags a kts trailing comment after a char literal holding an escaped quote`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "build.gradle.kts",
+                "val c = '\\'' // D17\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("build.gradle.kts"),
+                )
+            }
+            exception.message shouldContain "comment cites a decision number"
+        }
+
+        @Test
+        fun `passes a config file with an extension the scan does not recognise`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "config/notes.txt",
+                "Plan D17 lives here\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("config/notes.txt"),
+                )
+            }
+        }
+
+        @Test
+        fun `passes a config kt file even with a real trailing comment, since kt is not scanned`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "config/tool/Extra.kt",
+                "val x = 1 // implements S4-1\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            // Only .yml, .yaml and .kts are dispatched to a comment extractor; a .kt file under
+            // config/ is part of the configFiles input set but falls through unscanned.
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    emptyList(),
+                    configRelativePaths = listOf("config/tool/Extra.kt"),
                 )
             }
         }

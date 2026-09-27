@@ -4,3 +4,4 @@
 - [styleCheck pulls unrelated module failures](feedback_styleCheck_pulls_unrelated_module_failures.md) — a pre-existing break elsewhere in the tree can fail your Verify command; isolate before treating it as your bug
 - [Path-subdir regex needs whitespace exclusion](feedback_path_subdir_regex_needs_whitespace_exclusion.md) — `dir/[^/]+/` false-positives across a whole prose line; use `[^/\s]+`
 - [Verify a "clean" claim by running the gate](feedback_verify_clean_claim_by_running_the_gate.md) — a brief's "already clean" claim for a new gate still needs the gate run over the tree, not a looser grep
+- [Kotlin block comments nest](feedback_kotlin_block_comments_nest.md) — a literal `/*` inside KDoc opens a nested comment; "Unclosed comment" errors often point far from the real cause

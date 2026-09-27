@@ -20,7 +20,7 @@ kotlin {
         // Multiplatform resources ship as Android *assets* — so without this the `composeResources`
         // block below compiles and generates its accessors, but nothing is packaged into the APK and
         // the first read throws `MissingResourceException` at runtime. That is exactly what happened:
-        // S4-5a gave this module its own copy without the flag, and the offline banner crashed the app
+        // This module once had its own copy without the flag, and the offline banner crashed the app
         // on launch the first time it was run on a device with no network. `:core:designsystem` carries
         // the same line for the same reason.
         androidResources.enable = true
@@ -47,7 +47,7 @@ kotlin {
             // shimmer image the share cards load covers through.
             //
             // `core-common` supplies `currentLocalDateTime()` in the progress sheet's date picker. It
-            // is declared here as of S4-5b: it used to arrive through `:core:designsystem`'s
+            // is declared here directly now: it used to arrive through `:core:designsystem`'s
             // `api(core-common)` edge, which that module dropped when the `Deadline*` trio took its
             // last user away.
             implementation(libs.rhaydus.coreCommon)
@@ -61,7 +61,7 @@ kotlin {
 
             // `UpdateProgressBottomSheet` (progress/) uses `LocalDateTime`/`TimeZone`. It used to get
             // this transitively through `:core:designsystem`'s own `api(libs.kotlinx.datetime)`;
-            // S4-5b tightens that edge to `implementation` (the badge/ family it was covering for
+            // that edge was tightened to `implementation` (the badge/ family it was covering for
             // moved here without needing the type on its own public surface), so this module now
             // declares its actual dependency directly instead of relying on someone else's `api`.
             implementation(libs.kotlinx.datetime)

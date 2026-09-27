@@ -1,36 +1,47 @@
 ---
 name: project_plan_citation_gate_blind_spots
-description: the plan-citation gate's markdown/Kotlin parity gap is fixed; two other blind spots remain worth re-checking
+description: history of blind spots found in the plan-citation gate (doc-guard.sh + CheckDocBudgetsTask); all closed as of the char-literal/YAML-quote fix
 metadata:
   type: project
 ---
 
-As of commit `adfe1816`, `check_plan_refs` (doc-guard.sh) and `CheckDocBudgetsTask.kt`'s markdown scan both
-check all three patterns — plan directory, `\bD[0-9]{1,2}\b`, and `\bS[0-9]{1,2}-[0-9A-Z]` — at parity with
-the Kotlin-side checks (detekt's `ForbiddenComment` and doc-guard's `check_kotlin_comments`). The prior gap
-recorded here (markdown checks missing the step-id pattern) is closed; `docs/reference/module-structure.md`'s
-stray "S4-5b" was fixed in the same commit. Do not re-flag that gap — verify current state before citing it.
+All blind spots previously recorded against this gate are closed as of the round reviewed 2026-09-28
+(char-literal tracking + YAML quote-aware `#` detection). Do not re-flag any of the items below without
+re-verifying fresh — this file exists to save re-deriving the reasoning if a *new* gap surfaces in a future
+change to the same extractors, not as a standing list of open issues.
 
-Two things the gate still does not (and structurally cannot, as scoped) catch:
+**Closed, in order:**
+1. `config/detekt/detekt.yml`'s own stray "S4-5b"/"S4-1" citations, and the gate not scanning `.yml`/`.kts`
+   at all — closed when the gate was first extended to `config/**`, `*.yml`/`*.yaml`, `*.kts`.
+2. No single-quote/char-literal awareness in `kotlinStyleComment`/`extract_code_comment` — a `"` inside a
+   char literal like `'"'` used to flip `inString` with nothing to flip it back, silently swallowing a real
+   trailing comment. Closed by adding parallel `inChar`/`in_chr` tracking (mirrors the string-tracking
+   branches exactly, including the `\'`-escape and 2-char skip) in both the Kotlin (`kotlinStyleComment`,
+   `CheckDocBudgetsTask.kt`) and bash (`extract_code_comment`, `doc-guard.sh`) versions. Verified: both
+   `val c = '"' // S4-1` and `val c = '\'' // D17` now correctly deny, in the awk trace and in
+   `CheckDocBudgetsTaskTest.kt`'s "char literal holding a double quote" / "...holding an escaped quote" tests.
+3. `yamlStyleComment`/`check_yaml_comments` (`${line#*#}`) had zero string-literal awareness — any `#`
+   anywhere on a YAML line was treated as a comment start, demonstrably wrong on
+   `.github/workflows/issue-status.yml:101`/`:181` (`echo "#$number is not an issue…"`). Closed by adding
+   single-quote (`''`-doubling escape) and double-quote (`\"`-escape) tracking, AND requiring `#` to be at
+   line-start or preceded by whitespace (the actual YAML comment rule) in both `yamlStyleComment`
+   (`CheckDocBudgetsTask.kt`) and `extract_yaml_comment` (`doc-guard.sh`). Verified against the exact
+   `issue-status.yml` lines by hand-tracing the quote state machine (the `"` before `#$number` opens a
+   string that isn't closed until the line's trailing `"`, so `#` is correctly seen as inside the string),
+   and against `doc-guard.cases`' `yaml_hash_inside_double_quote_allow` / `yaml_hash_inside_single_quote_allow`
+   / `yaml_hash_no_whitespace_before_allow` / `yaml_hash_after_quote_and_space_deny`.
 
-1. **`config/detekt/detekt.yml` itself** still literally contains "S4-5b" and "S4-1" in its own `ForbiddenImport`
-   rationale comments (around line 74/78, pre-existing since `adfe1816`, untouched since). Neither gate scans
-   `.yml` — doc-guard's `is_permanent_doc` and `CheckDocBudgetsTask`'s `isPermanentMarkdownDoc` both only match
-   markdown/specific paths, and `checkDocBudgets`'s `markdownFiles` input is `.md`-only. This is a real,
-   live citation of a plan step in a permanent file, just outside the two gates' file-type scope — not a bug
-   in this round's fix, but don't assume "permanent config" is covered.
+**Parity check performed:** bash (`extract_code_comment`/`extract_yaml_comment`, awk) and Kotlin
+(`kotlinStyleComment`/`yamlStyleComment`) were compared branch-by-branch; both pairs are structurally
+identical (same state-machine branches in the same order, same escape/doubling semantics). Both extractors
+now carry KDoc (Kotlin side) describing the quote/char-literal handling and its single-line-only scope.
 
-2. **`check_kotlin_comments`' trailing-comment extraction is a naive substring split**: for a line not starting
-   with `//`/`*`, it takes everything after the line's *first* `//` (or `/*`) as "the comment", with no string-
-   literal awareness. A code line with a URL in a string (`"https://…/D17"` or similar) would have its `//`
-   consumed as the split point and the remainder checked against the citation patterns — a false "adds a
-   comment citing…" deny on code that has no comment at all. No live instance found in this codebase as of
-   this check (`grep` for `https?://` near a `D[0-9]` / `S[0-9]-` token turned up nothing), so this is a latent
-   trap, not a current failure — re-grep before flagging it as live.
+**Why:** a citation gate's whole job is correct detection; a quote-unaware split is a silent bypass
+(false negative) or a silent false-deny (false positive) depending on which side is wrong. Worth re-tracing
+by hand whenever this state machine changes, since the failure mode is invisible until an adversarial or
+just-unlucky line shows up. [[normative-rules-are-not-negotiable]]
 
-**Why:** re-verify gate state fresh each time rather than trusting a saved "gap" memory — the gap itself gets
-fixed between reviews, and citing a fixed gap as current would be an outdated-memory mistake. [[normative-rules-are-not-negotiable]]
-
-**How to apply:** when reviewing a change to this gate, re-run both parity checks (patterns, and permanent-path
-lists) fresh; don't assume last review's list of gaps still holds. Grep for `https?://` + citation-pattern
-collisions before calling the trailing-comment risk live.
+**How to apply:** if this gate's extractors change again, re-run the branch-by-branch bash/Kotlin comparison
+above before trusting a "gates passed" claim — a passing test suite only covers the cases someone thought to
+write. Re-derive at least one live-file trace (a real line in the actual tree, not just a fixture) the way
+`issue-status.yml:101` was traced here.

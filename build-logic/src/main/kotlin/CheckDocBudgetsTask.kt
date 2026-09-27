@@ -16,6 +16,106 @@ private val PLAN_DIRECTORY_PATTERN = Regex("""docs/working/[^/\s]+/""")
 private val DECISION_NUMBER_PATTERN = Regex("""\bD[0-9]{1,2}\b""")
 private val STEP_ID_PATTERN = Regex("""\bS[0-9]{1,2}-[0-9A-Z]""")
 
+// Config comments forbid the plan-tracker prefix outright — stricter than PLAN_DIRECTORY_PATTERN
+// above, which allows a bare top-level file such as ACTIVE.md.
+private val COMMENT_PLAN_DIRECTORY_PATTERN = Regex("""docs/working/""")
+
+/**
+ * Finds the first line-comment or block-comment opener in [line] that sits outside a double-quoted
+ * string literal or a char literal (honouring `\"`/`\'` escapes, single-line only), and returns the text
+ * after it, or null if the line has none. A char literal is tracked separately from a string literal so
+ * that a literal quote character, e.g. `'"'`, cannot be mistaken for a string opener that then swallows
+ * the rest of the line. A line whose trimmed start is already a comment marker or `*` is a whole-line or
+ * KDoc-continuation comment.
+ */
+private fun kotlinStyleComment(line: String): String? {
+    val trimmed = line.trimStart()
+    if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/**")) return trimmed
+
+    var inString = false
+    var inChar = false
+    var index = 0
+    while (index < line.length) {
+        val char = line[index]
+        when {
+            inString && char == '\\' -> index += 2
+            inString && char == '"' -> {
+                inString = false
+                index += 1
+            }
+            inString -> index += 1
+            inChar && char == '\\' -> index += 2
+            inChar && char == '\'' -> {
+                inChar = false
+                index += 1
+            }
+            inChar -> index += 1
+            char == '"' -> {
+                inString = true
+                index += 1
+            }
+            char == '\'' -> {
+                inChar = true
+                index += 1
+            }
+            char == '/' && index + 1 < line.length && (line[index + 1] == '/' || line[index + 1] == '*') ->
+                return line.substring(index + 2)
+            else -> index += 1
+        }
+    }
+    return null
+}
+
+/**
+ * Finds a YAML comment marker in [line]: a `#` at the start of the line or preceded by a space or tab,
+ * outside a single- or double-quoted scalar (single-line only). A single-quoted scalar escapes a quote
+ * by doubling it (`''`); a double-quoted one escapes with `\"`.
+ */
+private fun yamlStyleComment(line: String): String? {
+    var quote: Char? = null
+    var index = 0
+    while (index < line.length) {
+        val char = line[index]
+        when (quote) {
+            '\'' ->
+                when {
+                    char != '\'' -> index += 1
+                    index + 1 < line.length && line[index + 1] == '\'' -> index += 2
+                    else -> {
+                        quote = null
+                        index += 1
+                    }
+                }
+
+            '"' ->
+                when {
+                    char == '\\' -> index += 2
+                    char == '"' -> {
+                        quote = null
+                        index += 1
+                    }
+                    else -> index += 1
+                }
+
+            else ->
+                when {
+                    char == '\'' -> {
+                        quote = '\''
+                        index += 1
+                    }
+                    char == '"' -> {
+                        quote = '"'
+                        index += 1
+                    }
+                    char == '#' && (index == 0 || line[index - 1] == ' ' || line[index - 1] == '\t') ->
+                        return line.substring(index + 1)
+                    else -> index += 1
+                }
+        }
+    }
+    return null
+}
+
 private fun isPermanentMarkdownDoc(relativePath: String): Boolean =
     relativePath == "CLAUDE.md" ||
         relativePath.startsWith("docs/reference/") ||
@@ -137,6 +237,10 @@ abstract class CheckDocBudgetsTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val markdownFiles: ConfigurableFileCollection
 
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val configFiles: ConfigurableFileCollection
+
     @get:InputFile
     @get:Optional
     abstract val activeFile: RegularFileProperty
@@ -197,6 +301,31 @@ abstract class CheckDocBudgetsTask : DefaultTask() {
                 }
                 if (STEP_ID_PATTERN.containsMatchIn(line)) {
                     violations += "$relativePath:${index + 1}: cites a plan step — plans are deleted " +
+                        "when they finish; cite nothing from docs/working. The reason goes in the PR description."
+                }
+            }
+        }
+
+        configFiles.files.forEach { file ->
+            val relativePath = file.relativeTo(root).invariantSeparatorsPath
+            val extractComment: (String) -> String? = when {
+                relativePath.endsWith(".yml") || relativePath.endsWith(".yaml") -> ::yamlStyleComment
+                relativePath.endsWith(".kts") -> ::kotlinStyleComment
+                else -> return@forEach
+            }
+
+            file.readText().lineSequence().forEachIndexed { index, line ->
+                val comment = extractComment(line) ?: return@forEachIndexed
+                if (COMMENT_PLAN_DIRECTORY_PATTERN.containsMatchIn(comment)) {
+                    violations += "$relativePath:${index + 1}: comment cites docs/working — plans are deleted " +
+                        "when they finish; cite nothing from docs/working. The reason goes in the PR description."
+                }
+                if (DECISION_NUMBER_PATTERN.containsMatchIn(comment)) {
+                    violations += "$relativePath:${index + 1}: comment cites a decision number — plans are " +
+                        "deleted when they finish; cite nothing from docs/working. The reason goes in the PR description."
+                }
+                if (STEP_ID_PATTERN.containsMatchIn(comment)) {
+                    violations += "$relativePath:${index + 1}: comment cites a plan step — plans are deleted " +
                         "when they finish; cite nothing from docs/working. The reason goes in the PR description."
                 }
             }

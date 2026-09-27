@@ -20,26 +20,24 @@ checkboxes in step with `## Steps` and `## Gates` here.
   every host test passes against them.
 - **Approved, not built:** features hold chips as a generic `ChipSet<P>(chips, payloadByKey)` from
   `:core:component`, replacing every chip list + `…ByChipKey` map pair (explore, library, book_detail).
-- **Also built:** plan-reference gates (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`),
-  with markdown and Kotlin checks on all three patterns, tested and reviewed.
-- **Next:** close two gate holes (via `softcover-implementer`, then tests and reviewer): (a) the gates
-  never scan config files, and `config/detekt/detekt.yml:74,78` cite `S4-5b` / `S4-1` — remove the
-  citations and extend the plan-reference scan (hook + `checkDocBudgets`) to permanent config
-  (`config/**`, `*.yml`, `*.kts`); (b) `check_kotlin_comments` in `.claude/hooks/doc-guard.sh` splits a
-  code line at its first `//` / `/*`, so a string literal like `"https://…/D17"` false-denies — make
-  the split skip string literals, with cases in `.claude/hooks/test/doc-guard.cases`.
-- **After that:** (1) re-run the agent-memory audit read-only, then apply it (delete one-offs, promote
-  durable rules to docs); (2) memory gates: `/handoff` audits memory when a `steps/*.md` was deleted,
-  memory budgets in `checkDocBudgets`, `.claude/agent-memory/**` in the plan-reference scan; (3)
-  `ChipSet<P>`, tests, reviewer over S5-C-chips; (4) [`steps/s5-headers.md`](steps/s5-headers.md) S5-4.
+- **Also built:** plan-reference gates (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`)
+  over markdown, `.kt`, and permanent config (`config/**`, `*.yml`/`*.yaml`, `*.kts`). The comment split
+  skips string literals, char literals, and quoted YAML scalars; config citations are removed.
+- **Next:** re-run the agent-memory audit read-only, then apply it (delete one-offs, promote durable
+  rules to docs).
+- **After that:** (1) memory gates: `/handoff` audits memory when a `steps/*.md` was deleted, memory
+  budgets in `checkDocBudgets`, `.claude/agent-memory/**` in the plan-reference scan; (2) `ChipSet<P>`,
+  tests, reviewer over S5-C-chips; (3) [`steps/s5-headers.md`](steps/s5-headers.md) S5-4.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
   stale for a frame on open; if visible, seed them in the open action.
-- **Verification:** `run-doc-guard-cases.sh` 61/61 pass; `-p build-logic test --tests
-  CheckDocBudgetsTaskTest` passes; `softcover-reviewer` re-check: looks good.
-- **Uncommitted:** new gate test cases (`.claude/hooks/test/doc-guard.cases`,
-  `CheckDocBudgetsTaskTest.kt`); reviewer memory swap (step-pattern-gap → blind-spots); this tracker.
+- **Verification:** on JBR 21, `run-doc-guard-cases.sh` 76/76; `CheckDocBudgetsTaskTest` 33/33;
+  `checkDocBudgets styleCheck` passes; `softcover-reviewer` re-check ✅, no findings.
+- **Uncommitted:** config gate + string/char/YAML-quote split (`doc-guard.sh`, `doc-guard.cases`,
+  `CheckDocBudgetsTask.kt`, `DocBudgetsConventionPlugin.kt`, `CheckDocBudgetsTaskTest.kt`); citations
+  removed from `config/detekt/detekt.yml` and four `build.gradle.kts`; `.claude/rules/docs.md` scope;
+  reviewer and implementer memory; this tracker.
 
 ## Local verification
 

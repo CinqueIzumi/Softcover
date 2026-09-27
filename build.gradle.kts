@@ -312,7 +312,7 @@ fun tierOf(path: String): String? = when {
 //  - `:core:domain` — a pure contract module with no dependencies of its own. Re-exporting it leaks
 //    nothing a consumer could not already reach, and the migration tracker's § 3a settled that it may
 //    be `api`-exposed freely. Putting it in the set would mean allowlisting ~15 legitimate edges.
-//  - `:core:designsystem` — tokens. It has zero project dependencies (G2, closed in S4-5b), so an
+//  - `:core:designsystem` — tokens. It has zero project dependencies, so an
 //    `api` edge to it republishes a leaf. Revisit only if it ever grows a dependency again.
 //  - `:core:network`, `:core:database` — infra, and their `api` edges are load-bearing for the
 //    Apollo/Room types that cross module boundaries by design.
@@ -350,7 +350,7 @@ val allowedApiDataEdges = setOf(
     ":core:uibinding" to ":core:component",
 
     // `ActiveSession` — `:core:presentation`'s cross-tier session model, consumed by `:feature:session`
-    // through `ActiveSessionController` — carries a `CoverUiModel` per surface (S4-4). A consumer that
+    // through `ActiveSessionController` — carries a `CoverUiModel` per surface. A consumer that
     // sees `ActiveSession` must see the type of its own properties, so this is the same "both sides of
     // a public type" shape as the `:core:uibinding` row above, not a leak of the whole library.
     ":core:presentation" to ":core:component",
@@ -389,7 +389,7 @@ val bannedReverseEdges = setOf(
 // module became the god-module S3 and S4 spent six sub-commits unwinding.
 //
 // Pairs with the detekt `ForbiddenImport` rule scoped to `**/core/designsystem/**` in
-// `config/detekt/detekt.yml`. The two are NOT redundant: S4-1 left fully-qualified `nl.rhaydus.softcover.core.domain.model.*` references in `Color.kt`
+// `config/detekt/detekt.yml`. The two are NOT redundant: fully-qualified `nl.rhaydus.softcover.core.domain.model.*` references were once left in `Color.kt`
 // and `LocalDarkTheme.kt`'s KDoc, and BOTH gates were blind to them — they are neither imports nor
 // declared dependencies. A reviewer caught them. What the import rule does close is the case where a
 // stray `import` outlives a dependency removal, which stays compilable for as long as some other module
@@ -675,7 +675,7 @@ tasks.register("checkModuleGraph") {
 // This is a gate rather than a convention because the convention already failed twice, silently, and
 // was found by accident rather than by any check:
 //
-//  - `:core:component` (S4-5a) — the offline banner's copy. It crashed the app on launch the first time
+//  - `:core:component` — the offline banner's copy. It crashed the app on launch the first time
 //    it was run on a device with no network, three commits after it landed.
 //  - `:feature:settings` — the bundled `ROADMAP.md` fallback, read only before the first live fetch, so
 //    a machine with a warm cache never touches it. It had never worked on Android.
@@ -788,10 +788,6 @@ tasks.register("checkPresentationFileSize") {
 // and silently accumulate. It runs the TYPE-RESOLVED tasks, which is what makes the crash-safety rule
 // (`rhaydus:UnguardedFlowTerminalRead`) fire at all; the cost is that it compiles Android + JVM rather
 // than merely parsing source. That cost is the point: an inert gate is not a gate.
-//
-// (This task used to also shell out to `scripts/style-check.sh`. All six of that script's recipes are now
-// blocking rules — five in nl.rhaydus:ktlint-rules via `ktlintCheck`, the sixth the detekt rule above — so
-// the script was retired. See docs/working/foundation-upstream-candidates.md F1/F7/F22.)
 tasks.register("styleCheck") {
     group = "verification"
     description = "Runs type-resolved detekt (shared baseline + rhaydus crash-safety ruleset) across all modules."

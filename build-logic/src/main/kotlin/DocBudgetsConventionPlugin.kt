@@ -27,6 +27,22 @@ class DocBudgetsConventionPlugin : Plugin<Project> {
                     )
                 },
             )
+            configFiles.from(
+                fileTree(layout.projectDirectory) {
+                    include(
+                        "config/**",
+                        "**/*.yml",
+                        "**/*.yaml",
+                        "**/*.kts",
+                    )
+                    exclude(
+                        "**/build/**",
+                        "**/.gradle/**",
+                        "**/.git/**",
+                        "**/.idea/**",
+                    )
+                },
+            )
         }
     }
 }
