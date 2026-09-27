@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
@@ -69,7 +70,8 @@ internal fun BookDetailOverlays(
         TagEditorBottomSheet(
             bookTitle = state.book.title,
             cover = state.tagEditorCover,
-            userTags = state.userTags,
+            userTagEditorGroups = state.userTagEditorGroups,
+            newlyAddedTagKey = state.newlyAddedTagKey,
             categoryChips = state.tagEditorCategoryChips,
             suggestionChips = state.tagSuggestionChips,
             suggestionByChipKey = state.tagSuggestionByChipKey,
@@ -93,8 +95,23 @@ internal fun BookDetailOverlays(
                     ),
                 )
             },
-            onRemoveTag = { runAction(OnRemoveUserTagAction(tag = it)) },
-            onToggleSpoiler = { runAction(OnToggleUserTagSpoilerAction(tag = it)) },
+            onTagChipEvent = { event ->
+                when (event) {
+                    is ChipEvent.Dismissed -> {
+                        state.userTagByEditorChipKey[event.key]?.let { tag ->
+                            runAction(OnRemoveUserTagAction(tag = tag))
+                        }
+                    }
+
+                    is ChipEvent.SpoilerToggled -> {
+                        state.userTagByEditorChipKey[event.key]?.let { tag ->
+                            runAction(OnToggleUserTagSpoilerAction(tag = tag))
+                        }
+                    }
+
+                    is ChipEvent.Clicked -> Unit
+                }
+            },
             onDismissRequest = { runAction(OnDismissTagEditorAction()) },
         )
     }

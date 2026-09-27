@@ -31,6 +31,8 @@ class ChipUiModelTest {
                 ChipVariant.Remove::class,
                 ChipVariant.Quiet::class,
                 ChipVariant.Format::class,
+                ChipVariant.Dashed::class,
+                ChipVariant.Editable::class,
             )
 
             // ----- Act -----

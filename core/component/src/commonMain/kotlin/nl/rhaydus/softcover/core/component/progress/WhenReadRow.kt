@@ -69,6 +69,8 @@ internal fun WhenReadRow(
                         onPickedDateTimeChange(null)
                         expanded = false
                     }
+
+                    is ChipEvent.SpoilerToggled -> Unit
                 }
             },
         )

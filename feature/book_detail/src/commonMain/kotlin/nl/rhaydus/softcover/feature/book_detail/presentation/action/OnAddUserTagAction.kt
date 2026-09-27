@@ -39,7 +39,12 @@ internal class OnAddUserTagAction(
             category = category,
         )
 
-        scope.setState { it.copy(tagEditorInput = "") }
+        scope.setState {
+            it.copy(
+                tagEditorInput = "",
+                newlyAddedTagKey = "${category.name}:$trimmed",
+            )
+        }
 
         scope.commitUserTags(
             newSet = newSet,

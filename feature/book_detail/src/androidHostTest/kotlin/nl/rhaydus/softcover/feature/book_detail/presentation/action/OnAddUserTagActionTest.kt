@@ -268,6 +268,61 @@ class OnAddUserTagActionTest {
         }
 
         @Test
+        fun `sets newlyAddedTagKey to the trimmed category-name pair`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(book = stubBook(id = 1))
+
+            coEvery {
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = any(),
+                )
+            } returns Result.success(emptyList())
+
+            val action = OnAddUserTagAction(
+                name = "  epic  ",
+                category = TagCategory.TAG,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.newlyAddedTagKey shouldBe "TAG:epic"
+        }
+
+        @Test
+        fun `does not set newlyAddedTagKey when the tag is a no-op duplicate`() = runTest {
+            // ----- Arrange -----
+            val dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(),
+                userTags = listOf(UserTag(
+                    name = "Horror",
+                    category = TagCategory.GENRE,
+                ),),
+                newlyAddedTagKey = null,
+            )
+            val action = OnAddUserTagAction(
+                name = "Horror",
+                category = TagCategory.GENRE,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.newlyAddedTagKey shouldBe null
+        }
+
+        @Test
         fun `overwrites userTags with the server canonical response on success`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)

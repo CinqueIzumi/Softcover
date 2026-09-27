@@ -5,7 +5,6 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -13,37 +12,35 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
-import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealTagSpoilerAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 /**
  * The "Tags" section (The Book lens): the community tag block (grouped by category, top-5,
- * content-warning tags concealed via [ConcealableTagChip]'s spoiler reveal-in-place), followed by the
- * edition colophon line (publisher · format, year · ISBN-13) — folded into one section per the spec,
- * rather than two separate strips.
+ * content-warning tags concealed under [nl.rhaydus.softcover.core.component.chip.ChipVariant.Spoiler]
+ * until [OnRevealTagSpoilerAction] reveals them in place), followed by the edition colophon line
+ * (publisher · format, year · ISBN-13) — folded into one section per the spec, rather than two
+ * separate strips.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun TagsSection(state: BookDetailUiState) {
+internal fun TagsSection(
+    state: BookDetailUiState,
+    runAction: (BookDetailAction) -> Unit,
+) {
     val groups = state.communityTagGroups
 
     val edition = state.displayedEdition
@@ -89,11 +86,14 @@ internal fun TagsSection(state: BookDetailUiState) {
                 ) {
                     group.chips.forEach { chip ->
                         key(chip.key) {
-                            if (chip.variant == ChipVariant.Spoiler) {
-                                ConcealableTagChip(model = chip)
-                            } else {
-                                Chip(model = chip)
-                            }
+                            Chip(
+                                model = chip,
+                                onEvent = { event ->
+                                    if (event is ChipEvent.Clicked) {
+                                        runAction(OnRevealTagSpoilerAction(key = event.key))
+                                    }
+                                },
+                            )
                         }
                     }
                 }
@@ -135,25 +135,4 @@ private fun editionColophonLine(edition: BookEdition?): String? {
     val parts = listOfNotNull(publisher, formatAndYear, isbn13)
 
     return parts.takeIf { it.isNotEmpty() }?.joinToString(separator = " · ")
-}
-
-@Composable
-private fun ConcealableTagChip(model: ChipUiModel) {
-    var revealed by rememberSaveable { mutableStateOf(false) }
-
-    if (revealed) {
-        Chip(model = model.copy(variant = ChipVariant.Tonal()))
-    } else {
-        Chip(
-            model = model,
-            modifier = Modifier
-                .clip(RoundedCornerShape(percent = 50))
-                .clickable(
-                    onClickLabel = "Reveal content warning",
-                    role = Role.Button,
-                ) {
-                    revealed = true
-                },
-        )
-    }
 }

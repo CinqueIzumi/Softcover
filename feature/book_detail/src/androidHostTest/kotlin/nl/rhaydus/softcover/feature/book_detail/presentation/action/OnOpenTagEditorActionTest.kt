@@ -65,6 +65,22 @@ class OnOpenTagEditorActionTest {
         }
 
         @Test
+        fun `resets newlyAddedTagKey to null when a previous sheet visit had set it`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(newlyAddedTagKey = "GENRE:Fantasy")
+            val action = OnOpenTagEditorAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.newlyAddedTagKey shouldBe null
+        }
+
+        @Test
         fun `does not mutate any other state field`() = runTest {
             // ----- Arrange -----
             val initialState = stateFlow.value
@@ -80,6 +96,7 @@ class OnOpenTagEditorActionTest {
             stateFlow.value shouldBe initialState.copy(
                 showTagEditorSheet = true,
                 tagEditorInput = "",
+                newlyAddedTagKey = null,
             )
         }
     }

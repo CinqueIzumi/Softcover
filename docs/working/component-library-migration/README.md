@@ -14,21 +14,26 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, S5-1, S5-2a, S5-2b and S5-3a done. S5-3a: explore's recent-search and mood chips
-  render `Chip` (`Tonal()`) from `RecentSearchChipsCollector` / `MoodChipsCollector` models on
-  `ExploreScreenUiState`, resolved by `OnRecentSearchChipClickedAction` / `OnMoodChipClickedAction`;
-  `RecentSearchChip` is gone. Reviewer: no blockers; `MoodTile`'s inline title-casing is noted on its S7 row.
-- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) § S5-3, the S5-3b bullet: Phase 2 per
-  [`family-procedure.md`](family-procedure.md), delegated to `softcover-implementer`.
+- **State:** S0–S4 and S5-1 through S5-3b done. S5-3b: book_detail's tag chips render `Chip` — new
+  `Dashed` (tag-editor opener) and `Editable(spoiler, spoilerToggleLabel)` (editor chips) variants, new
+  `ChipEvent.SpoilerToggled`; spoiler reveal via `OnRevealTagSpoilerAction` into `revealedTagKeys`; opener,
+  editor groups, `userTagByEditorChipKey` and `newlyAddedTagKey` on `BookDetailUiState` from
+  `TagChipModelsCollector`. `TagChip.kt` and `TagGroup.kt` are gone. Reviewer: no blockers; its one
+  finding (`ChipUiModel` KDoc claimed `interaction` / `leadingIcon` / `dismissLabel` apply to `Editable` /
+  `Dashed`) is fixed.
+- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) S5-C-chips: the convergence pass per
+  [`family-procedure.md`](family-procedure.md) § Phase 3 — audit with the user, then build.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
   stale for a frame on open (chips now arrive via collectors); if visible, seed them in the open action.
-- **Verification:** `:feature:explore` `compileKotlinJvm` / `compileAndroidMain` / `projectHealth` /
-  `testAndroidHostTest` (26 new tests), `checkModuleGraph`, `ktlintCheck`, `styleCheck` passed under JBR 21.
-- **Uncommitted:** S5-3a in `feature/explore` (main and host-test sources). Tracker docs: this block and
-  D15 in `README.md`; the S5-3 split and S5-3a tick in `steps/s5-chips.md`; S8-6 in `steps/s8-controls.md`;
-  the `TrackingNowChip` row in `steps/s5-badges.md`; the `MoodTile` note in `steps/s7-bookcard.md`.
+- **Verification:** `:core:component` / `:feature:book_detail` `compileKotlinJvm`, `compileAndroidMain`,
+  `:feature:book_detail:projectHealth`, `checkModuleGraph`, `ktlintCheck`, `styleCheck`, and
+  `testAndroidHostTest` for both modules (508 + 79 tests) passed under JBR 21. `:core:component:projectHealth`
+  fails pre-existingly (kotlinx.datetime implementation → api), unrelated.
+- **Uncommitted:** S5-3b in `core/component` (`chip/`, `gallery/`, `WhenReadRow.kt`), `feature/book_detail`,
+  the forced `SpoilerToggled` branches in `feature/library`, their host tests, `components.md`,
+  `components/sheets.md`, `patterns/book-detail.md`; this block and the S5-3b tick in `steps/s5-chips.md`.
 
 ## Local verification
 

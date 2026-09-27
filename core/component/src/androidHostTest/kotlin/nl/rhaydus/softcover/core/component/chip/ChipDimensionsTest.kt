@@ -229,6 +229,78 @@ class ChipDimensionsTest {
         }
 
         @Test
+        fun `Dashed uses 14 by 10 padding with a 1dp border`() {
+            // ----- Arrange & Act -----
+            val dimensions = ChipDimensions.forVariant(ChipVariant.Dashed)
+
+            // ----- Assert -----
+            dimensions shouldBe ChipDimensions(
+                paddingStart = 14.dp,
+                paddingTop = 10.dp,
+                paddingEnd = 14.dp,
+                paddingBottom = 10.dp,
+                innerGap = 0.dp,
+                leadingIconSize = 18.dp,
+                leadingIconGap = 8.dp,
+                dismissIconSize = 16.dp,
+                dismissIconGap = 8.dp,
+                removeIconSize = 12.dp,
+                borderWidth = 1.dp,
+                disabledAlpha = 0.45f,
+            )
+        }
+
+        @Test
+        fun `Editable uses 9, 6, 8, 6 padding with its own smaller leading and dismiss icons`() {
+            // ----- Arrange -----
+            val variant = ChipVariant.Editable(
+                spoiler = false,
+                spoilerToggleLabel = "Mark as spoiler",
+            )
+
+            // ----- Act -----
+            val dimensions = ChipDimensions.forVariant(variant)
+
+            // ----- Assert -----
+            dimensions shouldBe ChipDimensions(
+                paddingStart = 9.dp,
+                paddingTop = 6.dp,
+                paddingEnd = 8.dp,
+                paddingBottom = 6.dp,
+                innerGap = 0.dp,
+                leadingIconSize = 17.dp,
+                leadingIconGap = 7.dp,
+                dismissIconSize = 13.dp,
+                dismissIconGap = 7.dp,
+                removeIconSize = 12.dp,
+                borderWidth = 0.dp,
+                disabledAlpha = 0.45f,
+            )
+        }
+
+        @Test
+        fun `Editable's spoiler flag never changes its dimensions`() {
+            // ----- Arrange -----
+            val idle = ChipDimensions.forVariant(
+                ChipVariant.Editable(
+                    spoiler = false,
+                    spoilerToggleLabel = "Mark as spoiler",
+                ),
+            )
+
+            // ----- Act -----
+            val spoiler = ChipDimensions.forVariant(
+                ChipVariant.Editable(
+                    spoiler = true,
+                    spoilerToggleLabel = "Marked as spoiler — tap to unmark",
+                ),
+            )
+
+            // ----- Assert -----
+            spoiler shouldBe idle
+        }
+
+        @Test
         fun `every variant shares the same leading, dismiss and remove icon metrics`() {
             // ----- Arrange -----
             val variants = listOf(
@@ -243,6 +315,7 @@ class ChipDimensionsTest {
                     active = false,
                     face = ChipFace.Plain,
                 ),
+                ChipVariant.Dashed,
             )
 
             // ----- Act -----
@@ -257,6 +330,23 @@ class ChipDimensionsTest {
                 dimensions.removeIconSize shouldBe 12.dp
                 dimensions.disabledAlpha shouldBe 0.45f
             }
+        }
+
+        @Test
+        fun `Editable shares removeIconSize and disabledAlpha despite its own leading and dismiss icon sizes`() {
+            // ----- Arrange & Act -----
+            val dimensions = ChipDimensions.forVariant(
+                ChipVariant.Editable(
+                    spoiler = false,
+                    spoilerToggleLabel = "Mark as spoiler",
+                ),
+            )
+
+            // ----- Assert -----
+            dimensions.removeIconSize shouldBe 12.dp
+            dimensions.disabledAlpha shouldBe 0.45f
+            dimensions.leadingIconSize shouldBe 17.dp
+            dimensions.dismissIconSize shouldBe 13.dp
         }
     }
 }

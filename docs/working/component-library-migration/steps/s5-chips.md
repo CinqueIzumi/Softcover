@@ -12,7 +12,7 @@
 | S5-2a | `feature:library` control-line and filter-row chips; `Remove(removeLabel)`, `Quiet` | [x] |
 | S5-2b | Arrange and Filter sheet drafts onto `UiState`; `Choice`; `ArrangeChip` | [x] |
 | S5-3a | explore: `RecentSearchChip`, `FlowRowMoodChips` onto `Tonal()` via collectors | [x] |
-| S5-3b | book_detail tags: `Spoiler` reveal on `UiState`, `Dashed`, `Editable` + `SpoilerToggled` | [ ] |
+| S5-3b | book_detail tags: `Spoiler` reveal on `UiState`, `Dashed`, `Editable` + `SpoilerToggled` | [x] |
 | S5-C-chips | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S5-1 — core pills

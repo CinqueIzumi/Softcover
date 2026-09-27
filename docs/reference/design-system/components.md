@@ -5,7 +5,7 @@ An index of shared components. Each line links to its family file under `compone
 ## Navigation & chrome
 
 - **Top app bar** — `core:component/topbar` — page title, optional back/trailing actions, opaque or over-media.
-- **Search top app bar** — `core:component/topbar` — mobile search chrome with a scan button.
+- **Search top app bar** — `core:component/topbar` — mobile search chrome.
 - **Editorial search field** — [detail](components/navigation.md#editorial-search-field) — persistent inline search pill for editorial headers.
 - **Bottom navigation** — [detail](components/navigation.md#bottom-navigation) — compact-width tab chrome, docked or floating.
 - **Navigation rail** — [detail](components/navigation.md#navigation-rail) — medium-width tab chrome.
@@ -27,7 +27,7 @@ An index of shared components. Each line links to its family file under `compone
 
 ## Chips
 
-- **Pill chip** — `core:component/chip` — tonal/spoiler/add/outline/remove/quiet/format/choice.
+- **Pill chip** — `core:component/chip` — tonal/spoiler/add/outline/remove/quiet/format/choice/dashed/editable.
 - **Expandable flow row** — [detail](components/chips.md#expandable-flow-row) — wrapping chip/tag container that collapses past N lines.
 
 ## Covers

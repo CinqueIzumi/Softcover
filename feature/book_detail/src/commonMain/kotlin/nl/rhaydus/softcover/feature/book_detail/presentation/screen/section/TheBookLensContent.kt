@@ -23,7 +23,10 @@ internal fun TheBookLensContent(
     Column(modifier = Modifier.fillMaxWidth()) {
         AboutSection(state = state)
 
-        TagsSection(state = state)
+        TagsSection(
+            state = state,
+            runAction = runAction,
+        )
 
         ExternalLinksSection(
             state = state,

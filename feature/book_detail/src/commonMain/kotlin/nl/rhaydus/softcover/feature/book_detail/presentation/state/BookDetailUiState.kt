@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -120,10 +122,38 @@ internal data class BookDetailUiState(
 
     /**
      * The community tag block (`TagsSection`, The Book lens), mapped by `TagChipModelsCollector`
-     * (R9) off [book]'s tags — grouped by category, top-5 per category, content-warning tags
-     * flagged with [nl.rhaydus.softcover.core.component.chip.ChipVariant.Spoiler]. Read-only.
+     * (R9) off [book]'s tags and [revealedTagKeys] — grouped by category, top-5 per category,
+     * content-warning tags flagged with [nl.rhaydus.softcover.core.component.chip.ChipVariant.Spoiler]
+     * until their key is in [revealedTagKeys], then [nl.rhaydus.softcover.core.component.chip.ChipVariant.Tonal].
      */
     val communityTagGroups: List<TagCategoryChipGroup> = emptyList(),
+
+    /** Community content-warning tag keys `OnRevealTagSpoilerAction` has revealed, for the rest of this screen instance. */
+    val revealedTagKeys: ImmutableSet<String> = persistentSetOf(),
+
+    /** The "+ Add tags" / "Edit tags" opener (`UserTagsSection`), mapped by `TagChipModelsCollector` (R9) off [userTags]. */
+    val tagEditorOpenerChip: ChipUiModel? = null,
+
+    /**
+     * The tag editor's own collection (`TagEditorBottomSheet` → `TagEditorCollection`), grouped in
+     * [EDITABLE_CATEGORIES] order plus a trailing "Other" group, mapped by `TagChipModelsCollector`
+     * (R9) off [userTags].
+     */
+    val userTagEditorGroups: List<UserTagEditorChipGroup> = emptyList(),
+
+    /**
+     * Every [userTagEditorGroups] chip key resolved back to the [UserTag] the remove / spoiler-toggle
+     * actions need — kept beside the models rather than rebuilt in composition, mapped by
+     * `TagChipModelsCollector` (R9).
+     */
+    val userTagByEditorChipKey: Map<String, UserTag> = emptyMap(),
+
+    /**
+     * The chip key of the [UserTag] `OnAddUserTagAction` most recently inserted, so `TagEditorCollection`
+     * plays its entry animation on that one chip only. `OnOpenTagEditorAction` clears it, so a tag added
+     * in an earlier sheet visit never replays the animation.
+     */
+    val newlyAddedTagKey: String? = null,
 
     /**
      * The tag editor's category picker chips, mapped by `TagEditorChipModelsCollector` (R9) — one

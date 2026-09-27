@@ -13,11 +13,13 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * @property key Identity — the event carries it back (R1), and the mapper's lookup map (kept beside
  * the models in `UiState`, not rebuilt in composition) resolves it back to whatever payload
  * dispatching the original action needs (a filter value, a tag, a category).
+ * @property interaction Ignored by [ChipVariant.Editable], whose body is not a tap target — only its
+ * spoiler eye and ✕ are.
  * @property leadingIcon Rendered at 18dp with an 8dp gap before the label, on every variant except
- * [ChipVariant.Remove].
+ * [ChipVariant.Remove] and [ChipVariant.Editable], whose leading slot is the spoiler eye.
  * @property dismissLabel Non-null renders a trailing ✕ as its own tap target reporting
  * [ChipEvent.Dismissed], using this string as its content description. [ChipVariant.Remove] ignores
- * it — its own ✕ is display-only.
+ * it — its own ✕ is display-only — and so does [ChipVariant.Dashed].
  */
 @Immutable
 data class ChipUiModel(
@@ -122,6 +124,29 @@ data class ChipUiModel(
             ChipUiModel(
                 key = "long-label",
                 label = "A Chip Label Long Enough That It Must Ellipsise Somewhere",
+            ),
+            ChipUiModel(
+                key = "dashed",
+                label = "+ Add tags",
+                variant = ChipVariant.Dashed,
+            ),
+            ChipUiModel(
+                key = "editable-idle",
+                label = "Cozy mystery",
+                variant = ChipVariant.Editable(
+                    spoiler = false,
+                    spoilerToggleLabel = "Mark as spoiler",
+                ),
+                dismissLabel = "Remove Cozy mystery",
+            ),
+            ChipUiModel(
+                key = "editable-spoiler",
+                label = "Contains a major death",
+                variant = ChipVariant.Editable(
+                    spoiler = true,
+                    spoilerToggleLabel = "Marked as spoiler — tap to unmark",
+                ),
+                dismissLabel = "Remove Contains a major death",
             ),
         )
     }

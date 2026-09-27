@@ -36,6 +36,22 @@ internal data class ChipDimensions(
         private val RemoveIconSize = 12.dp
         private const val DISABLED_ALPHA = 0.45f
 
+        /** [ChipVariant.Dashed] carries no fields, so its dimensions are fixed rather than computed per call. */
+        private val DashedDimensions = ChipDimensions(
+            paddingStart = 14.dp,
+            paddingTop = 10.dp,
+            paddingEnd = 14.dp,
+            paddingBottom = 10.dp,
+            innerGap = 0.dp,
+            leadingIconSize = LeadingIconSize,
+            leadingIconGap = LeadingIconGap,
+            dismissIconSize = DismissIconSize,
+            dismissIconGap = DismissIconGap,
+            removeIconSize = RemoveIconSize,
+            borderWidth = 1.dp,
+            disabledAlpha = DISABLED_ALPHA,
+        )
+
         fun forVariant(variant: ChipVariant): ChipDimensions = when (variant) {
             is ChipVariant.Tonal -> ChipDimensions(
                 paddingStart = 14.dp,
@@ -157,6 +173,23 @@ internal data class ChipDimensions(
                 disabledAlpha = DISABLED_ALPHA,
                 trailingIconSize = 15.dp,
                 trailingIconGap = 4.dp,
+            )
+
+            ChipVariant.Dashed -> DashedDimensions
+
+            is ChipVariant.Editable -> ChipDimensions(
+                paddingStart = 9.dp,
+                paddingTop = 6.dp,
+                paddingEnd = 8.dp,
+                paddingBottom = 6.dp,
+                innerGap = 0.dp,
+                leadingIconSize = 17.dp,
+                leadingIconGap = 7.dp,
+                dismissIconSize = 13.dp,
+                dismissIconGap = 7.dp,
+                removeIconSize = RemoveIconSize,
+                borderWidth = 0.dp,
+                disabledAlpha = DISABLED_ALPHA,
             )
         }
     }

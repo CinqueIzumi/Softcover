@@ -13,20 +13,25 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEve
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.EDITABLE_CATEGORIES
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.TagCategoryChipGroup
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditorChipGroup
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps the book page's two read-only tag surfaces to [ChipUiModel]s off the composition
- * (`component-contract.md` § 7.2 R9): [BookDetailUiState.userTagChips] ("Your tags", `UserTagsSection`)
- * and [BookDetailUiState.communityTagGroups] (the community tag block, `TagsSection`, grouped by
- * category, top-5 per category, content-warning tags flagged [ChipVariant.Spoiler]). Both are
- * [ChipInteraction.Inert] — neither `PillChip` call site they replace takes an `onClick`; the
- * section's "+ Add tags" / "Edit tags" affordance is a separate, non-chip component.
+ * Maps every tag surface on the book page to [ChipUiModel]s off the composition
+ * (`component-contract.md` § 7.2 R9): [BookDetailUiState.userTagChips] ("Your tags", read-only,
+ * `UserTagsSection`), [BookDetailUiState.communityTagGroups] (the community tag block, `TagsSection`,
+ * grouped by category, top-5 per category, content-warning tags [ChipVariant.Spoiler] until their key
+ * reaches [BookDetailUiState.revealedTagKeys]), [BookDetailUiState.tagEditorOpenerChip] (the
+ * "+ Add tags" / "Edit tags" opener) and [BookDetailUiState.userTagEditorGroups] (the tag editor's own
+ * collection, `TagEditorCollection`).
  *
  * The top-5-per-category cap and category order mirror `TagsSection`'s own `remember(tags)` block
  * exactly, moved here so the grouping/sorting work runs once per [BookDetailUiState.book] change
- * rather than being recomputed (memoized, but still composition-bound) on every recomposition.
+ * rather than being recomputed (memoized, but still composition-bound) on every recomposition. The
+ * editor grouping mirrors the same [EDITABLE_CATEGORIES] order `TagEditorBottomSheet` used to compute
+ * in composition, plus a trailing "Other" group for any tag outside that set.
  */
 internal class TagChipModelsCollector : BookDetailCollector {
     override suspend fun onLaunch(
@@ -38,17 +43,23 @@ internal class TagChipModelsCollector : BookDetailCollector {
                 TagChipModelsSnapshot(
                     userTags = state.userTags,
                     communityTags = state.book?.tags.orEmpty(),
+                    revealedTagKeys = state.revealedTagKeys,
                 )
             }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 val userTagChips = snapshot.userTags.map { it.toChipUiModel() }
-                val communityTagGroups = snapshot.communityTags.toTagCategoryChipGroups()
+                val communityTagGroups = snapshot.communityTags.toTagCategoryChipGroups(
+                    revealedTagKeys = snapshot.revealedTagKeys,
+                )
 
                 scope.setState {
                     it.copy(
                         userTagChips = userTagChips,
                         communityTagGroups = communityTagGroups,
+                        tagEditorOpenerChip = tagEditorOpenerChip(hasTags = snapshot.userTags.isNotEmpty()),
+                        userTagEditorGroups = snapshot.userTags.toUserTagEditorChipGroups(),
+                        userTagByEditorChipKey = snapshot.userTags.associateBy { it.chipKey },
                     )
                 }
             }
@@ -63,13 +74,32 @@ private val COMMUNITY_TAG_CATEGORIES: List<TagCategory> = listOf(
 
 private const val COMMUNITY_TAGS_PER_CATEGORY = 5
 
+private val UserTag.chipKey: String
+    get() = "${category.name}:$name"
+
 private fun UserTag.toChipUiModel(): ChipUiModel = ChipUiModel(
-    key = "${category.name}:$name",
+    key = chipKey,
     label = name,
     interaction = ChipInteraction.Inert,
 )
 
-private fun List<Tag>.toTagCategoryChipGroups(): List<TagCategoryChipGroup> =
+private fun UserTag.toEditorChipUiModel(): ChipUiModel = ChipUiModel(
+    key = chipKey,
+    label = name,
+    variant = ChipVariant.Editable(
+        spoiler = spoiler,
+        spoilerToggleLabel = if (spoiler) "Marked as spoiler — tap to unmark" else "Mark as spoiler",
+    ),
+    dismissLabel = "Remove $name",
+)
+
+private fun tagEditorOpenerChip(hasTags: Boolean): ChipUiModel = ChipUiModel(
+    key = "tag-editor-opener",
+    label = if (hasTags) "Edit tags" else "+ Add tags",
+    variant = ChipVariant.Dashed,
+)
+
+private fun List<Tag>.toTagCategoryChipGroups(revealedTagKeys: Set<String>): List<TagCategoryChipGroup> =
     COMMUNITY_TAG_CATEGORIES.mapNotNull { category ->
         val topTags = filter { it.category == category }
             .sortedByDescending { it.count }
@@ -80,16 +110,40 @@ private fun List<Tag>.toTagCategoryChipGroups(): List<TagCategoryChipGroup> =
         TagCategoryChipGroup(
             category = category,
             chips = topTags.map { tag ->
+                val key = tag.id.toString()
+                val concealed = category == TagCategory.CONTENT_WARNING && key !in revealedTagKeys
+
                 ChipUiModel(
-                    key = tag.id.toString(),
+                    key = key,
                     label = tag.name,
-                    variant = if (category == TagCategory.CONTENT_WARNING) {
-                        ChipVariant.Spoiler
-                    } else {
-                        ChipVariant.Tonal()
-                    },
-                    interaction = ChipInteraction.Inert,
+                    variant = if (concealed) ChipVariant.Spoiler else ChipVariant.Tonal(),
+                    interaction = if (concealed) ChipInteraction.Clickable else ChipInteraction.Inert,
                 )
             },
         )
     }
+
+/** Mirrors `TagEditorBottomSheet`'s old `groupedForCollection()`, now emitting chips instead of [UserTag]s. */
+private fun List<UserTag>.toUserTagEditorChipGroups(): List<UserTagEditorChipGroup> {
+    val editableGroups = EDITABLE_CATEGORIES.mapNotNull { category ->
+        val tagsInCategory = filter { it.category == category }
+
+        tagsInCategory.takeIf { it.isNotEmpty() }?.let {
+            UserTagEditorChipGroup(
+                category = category,
+                chips = it.map { tag -> tag.toEditorChipUiModel() },
+            )
+        }
+    }
+
+    val otherTags = filter { it.category !in EDITABLE_CATEGORIES }
+
+    return if (otherTags.isEmpty()) {
+        editableGroups
+    } else {
+        editableGroups + UserTagEditorChipGroup(
+            category = TagCategory.OTHER,
+            chips = otherTags.map { it.toEditorChipUiModel() },
+        )
+    }
+}

@@ -249,6 +249,7 @@ internal actual fun LibraryScreenLayout(
                                     ),)
 
                                 is ChipEvent.Dismissed -> Unit
+                                is ChipEvent.SpoilerToggled -> Unit
                             }
                         },
                     )

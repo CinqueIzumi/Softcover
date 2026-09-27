@@ -91,7 +91,7 @@ object GalleryRegistry {
             name = "Chip",
             family = GalleryFamily.CHIP,
             blurb = "The pill-shaped chip family: tonal, spoiler, add, add-outlined, remove, " +
-                "quiet, format, and choice variants.",
+                "quiet, format, choice, dashed, and editable variants.",
             previews = ChipUiModel,
             label = ::chipFixtureLabel,
             content = { model, modifier ->
@@ -347,6 +347,9 @@ private val BADGE_COVER_FIXTURE_WIDTH = 96.dp
 private fun chipFixtureLabel(model: ChipUiModel): String = when {
     model.interaction == ChipInteraction.Disabled -> "Disabled"
     model.interaction == ChipInteraction.Inert -> "Read-only"
+    model.variant is ChipVariant.Editable && model.variant.spoiler -> "Editable, spoiler"
+    model.variant is ChipVariant.Editable -> "Editable"
+    model.variant == ChipVariant.Dashed -> "Dashed"
     model.dismissLabel != null -> "Dismissible"
     model.variant is ChipVariant.Quiet && model.variant.selected -> "Quiet, selected"
     model.variant is ChipVariant.Quiet -> "Quiet"

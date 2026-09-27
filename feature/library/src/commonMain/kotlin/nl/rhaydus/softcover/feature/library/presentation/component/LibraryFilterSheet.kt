@@ -106,6 +106,7 @@ internal fun LibraryFilterSheet(
                             when (event) {
                                 is ChipEvent.Clicked -> runAction(OnFilterDraftChipToggledAction(key = event.key))
                                 is ChipEvent.Dismissed -> Unit
+                                is ChipEvent.SpoilerToggled -> Unit
                             }
                         },
                         onTagSearchChanged = { query -> runAction(OnFilterDraftTagSearchChangedAction(query = query)) },

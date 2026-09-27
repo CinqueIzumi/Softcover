@@ -39,4 +39,20 @@ sealed interface ChipVariant {
         val active: Boolean,
         val face: ChipFace,
     ) : ChipVariant
+
+    /** An outlined "open an editor" pill — a 1dp dashed `primary` stroke, transparent fill, `primary` ink. */
+    data object Dashed : ChipVariant
+
+    /**
+     * A self-owned pill for an item under edit: a leading spoiler-toggle eye ([spoiler] swaps it
+     * between "mark" and "unmark", tinted [spoilerToggleLabel] describes) beside the label, which
+     * itself takes a spoiler highlight wash when [spoiler] is set. The trailing ✕ is
+     * [ChipUiModel.dismissLabel]'s own affordance (unrelated to this variant); the eye reports
+     * [ChipEvent.SpoilerToggled] instead of [ChipEvent.Clicked], since the chip has no single primary
+     * action.
+     */
+    data class Editable(
+        val spoiler: Boolean,
+        val spoilerToggleLabel: String,
+    ) : ChipVariant
 }

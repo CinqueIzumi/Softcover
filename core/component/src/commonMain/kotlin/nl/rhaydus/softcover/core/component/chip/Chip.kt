@@ -16,15 +16,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 
 private val ChipShape = RoundedCornerShape(percent = 50)
 
@@ -84,6 +90,17 @@ fun Chip(
             modifier = modifier,
         )
         is ChipVariant.Choice -> ChoiceChip(
+            model = model,
+            variant = variant,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+        ChipVariant.Dashed -> DashedChip(
+            model = model,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+        is ChipVariant.Editable -> EditableChip(
             model = model,
             variant = variant,
             onEvent = onEvent,
@@ -542,6 +559,157 @@ private fun ChoiceChip(
                 onEvent(ChipEvent.Dismissed(key = model.key))
             }
         }
+    }
+}
+
+@Composable
+private fun DashedChip(
+    model: ChipUiModel,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val color = MaterialTheme.colorScheme.primary
+    val dimensions = ChipDimensions.forVariant(ChipVariant.Dashed)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .drawBehind {
+                drawRoundRect(
+                    color = color,
+                    style = Stroke(
+                        width = dimensions.borderWidth.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(intervals = floatArrayOf(6f, 4f)),
+                    ),
+                    cornerRadius = CornerRadius(size.height / 2f),
+                )
+            }
+            .chipInteraction(interaction = model.interaction, dimensions = dimensions) {
+                onEvent(ChipEvent.Clicked(key = model.key))
+            }
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        model.leadingIcon?.let { icon ->
+            ChipLeadingIcon(
+                icon = icon,
+                tint = color,
+                dimensions = dimensions,
+            )
+        }
+
+        Text(
+            text = model.label,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = color,
+        )
+    }
+}
+
+@Composable
+private fun EditableChip(
+    model: ChipUiModel,
+    variant: ChipVariant.Editable,
+    onEvent: (ChipEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val dimensions = ChipDimensions.forVariant(variant)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(ChipShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .padding(
+                start = dimensions.paddingStart,
+                top = dimensions.paddingTop,
+                end = dimensions.paddingEnd,
+                bottom = dimensions.paddingBottom,
+            ),
+    ) {
+        ChipSpoilerToggleIcon(
+            spoiler = variant.spoiler,
+            spoilerToggleLabel = variant.spoilerToggleLabel,
+            dimensions = dimensions,
+            onClick = { onEvent(ChipEvent.SpoilerToggled(key = model.key)) },
+        )
+
+        ChipEditableLabel(
+            label = model.label,
+            spoiler = variant.spoiler,
+        )
+
+        model.dismissLabel?.let { label ->
+            ChipDismissIcon(
+                dismissLabel = label,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                dimensions = dimensions,
+            ) {
+                onEvent(ChipEvent.Dismissed(key = model.key))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChipSpoilerToggleIcon(
+    spoiler: Boolean,
+    spoilerToggleLabel: String,
+    dimensions: ChipDimensions,
+    onClick: () -> Unit,
+) {
+    val icon = if (spoiler) SoftcoverIcon.VisibilityOff else SoftcoverIcon.Visibility
+    val tint = if (spoiler) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+    }
+    val resource = drawableIconResource(
+        icon = icon,
+        contentDescription = spoilerToggleLabel,
+    )
+
+    Icon(
+        painter = resource.getIconPainter(),
+        contentDescription = resource.contentDescription,
+        tint = tint,
+        modifier = Modifier
+            .size(dimensions.leadingIconSize)
+            .pointerHandCursor()
+            .pressScaleClickable(onClick = onClick),
+    )
+
+    Spacer(modifier = Modifier.width(dimensions.leadingIconGap))
+}
+
+@Composable
+private fun ChipEditableLabel(
+    label: String,
+    spoiler: Boolean,
+) {
+    val style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
+
+    if (spoiler) {
+        Text(
+            text = label,
+            style = style,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .clip(RoundedCornerShape(2.dp))
+                .background(MaterialTheme.colorScheme.spoilerEditorHighlight)
+                .padding(horizontal = 3.dp, vertical = 1.dp),
+        )
+    } else {
+        Text(
+            text = label,
+            style = style,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
