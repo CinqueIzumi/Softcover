@@ -27,7 +27,7 @@ An index of shared components. Each line links to its family file under `compone
 
 ## Chips
 
-- **Pill chip** — `core:component/chip` — tonal/spoiler/add/outline/remove/quiet/format/choice/dashed/editable.
+- **Pill chip** — `core:component/chip` — tonal/choice/filled/container/outlined/dashed/spoiler tone + slots.
 - **Expandable flow row** — [detail](components/chips.md#expandable-flow-row) — wrapping chip/tag container that collapses past N lines.
 
 ## Covers

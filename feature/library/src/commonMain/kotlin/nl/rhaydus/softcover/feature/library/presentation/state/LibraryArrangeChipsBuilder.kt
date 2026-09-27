@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -31,7 +32,8 @@ internal fun buildLibraryArrangeChips(
         ChipUiModel(
             key = chip.arrangeChipKey,
             label = chip.arrangeLabel,
-            variant = ChipVariant.Choice(selected = chip == draft.gridLayout.chip),
+            tone = ChipTone.Choice,
+            selected = chip == draft.gridLayout.chip,
         )
     }
 
@@ -53,18 +55,31 @@ internal fun buildLibraryArrangeChips(
         ChipUiModel(
             key = mode.arrangeChipKey,
             label = mode.label,
-            variant = ChipVariant.Choice(
-                selected = isActive,
-                trailingIcon = if (isActive && isPositional.not()) mode.directionIcon(direction = draft.sortDirection) else null,
-            ),
+            tone = ChipTone.Choice,
+            selected = isActive,
+            trailing = if (isActive && isPositional.not()) {
+                mode.directionTrailing(direction = draft.sortDirection)
+            } else {
+                null
+            },
         )
     }
 
     return layoutChips to sortChips
 }
 
-private fun LibrarySortMode.directionIcon(direction: SortDirection): SoftcoverIcon =
-    if (direction == SortDirection.ASCENDING) SoftcoverIcon.ArrowDropUp else SoftcoverIcon.ArrowDropDown
+private fun LibrarySortMode.directionTrailing(direction: SortDirection): ChipTrailing.Icon =
+    if (direction == SortDirection.ASCENDING) {
+        ChipTrailing.Icon(
+            icon = SoftcoverIcon.ArrowDropUp,
+            description = "Ascending",
+        )
+    } else {
+        ChipTrailing.Icon(
+            icon = SoftcoverIcon.ArrowDropDown,
+            description = "Descending",
+        )
+    }
 
 internal val LibraryLayoutChip.arrangeChipKey: String
     get() = "layout:$name"

@@ -3,7 +3,9 @@ package nl.rhaydus.softcover.core.component.progress
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -20,7 +22,7 @@ class WhenReadRowTest {
     @Nested
     inner class WhenReadChipModel {
         @Test
-        fun `picked null defaults to Just now, unselected, with no dismiss label`() {
+        fun `picked null defaults to Just now, unselected, with no dismiss trailing`() {
             // ----- Arrange -----
             // ----- Act -----
             val result = whenReadChipModel(
@@ -30,9 +32,10 @@ class WhenReadRowTest {
 
             // ----- Assert -----
             result.label shouldBe "Just now"
-            result.variant shouldBe ChipVariant.Tonal(selected = false)
-            result.dismissLabel shouldBe null
-            result.leadingIcon shouldBe SoftcoverIcon.DateRange
+            result.tone shouldBe ChipTone.Tonal
+            result.selected shouldBe false
+            result.trailing shouldBe null
+            result.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.DateRange)
             result.interaction shouldBe ChipInteraction.Clickable
         }
 
@@ -55,9 +58,10 @@ class WhenReadRowTest {
 
             // ----- Assert -----
             result.label shouldBe "Today, 14:30"
-            result.variant shouldBe ChipVariant.Tonal(selected = true)
-            result.dismissLabel shouldBe "Reset to just now"
-            result.leadingIcon shouldBe SoftcoverIcon.DateRange
+            result.tone shouldBe ChipTone.Tonal
+            result.selected shouldBe true
+            result.trailing shouldBe ChipTrailing.Dismiss(label = "Reset to just now")
+            result.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.DateRange)
         }
     }
 }

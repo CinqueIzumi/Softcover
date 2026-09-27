@@ -14,9 +14,8 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
  * [ListMembership.PARTIAL] both move to [ListMembership.ALL], [ListMembership.ALL] clears to
  * [ListMembership.NONE]).
  *
- * [membership] stays on the model even though [membershipChip] already carries the matching
- * [nl.rhaydus.softcover.core.component.chip.ChipVariant] — the row's leading bookmark glyph and the
- * caption's ink both key off it too.
+ * [membership] stays on the model even though [membershipChip] already carries the matching tone —
+ * the row's leading bookmark glyph and the caption's ink both key off it too.
  */
 @Immutable
 data class ChooseListsRowUiModel(

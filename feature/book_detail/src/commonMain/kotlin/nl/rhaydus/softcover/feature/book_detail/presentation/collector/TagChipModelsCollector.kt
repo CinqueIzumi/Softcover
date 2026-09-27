@@ -4,8 +4,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipSize
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
@@ -22,9 +26,9 @@ import nl.rhaydus.toad.ActionScope
  * Maps every tag surface on the book page to [ChipUiModel]s off the composition
  * (`component-contract.md` § 7.2 R9): [BookDetailUiState.userTagChips] ("Your tags", read-only,
  * `UserTagsSection`), [BookDetailUiState.communityTagGroups] (the community tag block, `TagsSection`,
- * grouped by category, top-5 per category, content-warning tags [ChipVariant.Spoiler] until their key
+ * grouped by category, top-5 per category, content-warning tags [ChipTone.Spoiler] until their key
  * reaches [BookDetailUiState.revealedTagKeys]), [BookDetailUiState.tagEditorOpenerChip] (the
- * "+ Add tags" / "Edit tags" opener) and [BookDetailUiState.userTagEditorGroups] (the tag editor's own
+ * "Add tags" / "Edit tags" opener) and [BookDetailUiState.userTagEditorGroups] (the tag editor's own
  * collection, `TagEditorCollection`).
  *
  * The top-5-per-category cap and category order mirror `TagsSection`'s own `remember(tags)` block
@@ -86,17 +90,20 @@ private fun UserTag.toChipUiModel(): ChipUiModel = ChipUiModel(
 private fun UserTag.toEditorChipUiModel(): ChipUiModel = ChipUiModel(
     key = chipKey,
     label = name,
-    variant = ChipVariant.Editable(
-        spoiler = spoiler,
-        spoilerToggleLabel = if (spoiler) "Marked as spoiler — tap to unmark" else "Mark as spoiler",
+    interaction = ChipInteraction.Inert,
+    size = ChipSize.Compact,
+    leading = ChipLeading.SpoilerToggle(
+        marked = spoiler,
+        label = if (spoiler) "Marked as spoiler — tap to unmark" else "Mark as spoiler",
     ),
-    dismissLabel = "Remove $name",
+    trailing = ChipTrailing.Dismiss(label = "Remove $name"),
 )
 
 private fun tagEditorOpenerChip(hasTags: Boolean): ChipUiModel = ChipUiModel(
     key = "tag-editor-opener",
-    label = if (hasTags) "Edit tags" else "+ Add tags",
-    variant = ChipVariant.Dashed,
+    label = if (hasTags) "Edit tags" else "Add tags",
+    tone = ChipTone.Dashed,
+    leading = if (hasTags) null else ChipLeading.Icon(icon = SoftcoverIcon.Add),
 )
 
 private fun List<Tag>.toTagCategoryChipGroups(revealedTagKeys: Set<String>): List<TagCategoryChipGroup> =
@@ -116,7 +123,7 @@ private fun List<Tag>.toTagCategoryChipGroups(revealedTagKeys: Set<String>): Lis
                 ChipUiModel(
                     key = key,
                     label = tag.name,
-                    variant = if (concealed) ChipVariant.Spoiler else ChipVariant.Tonal(),
+                    tone = if (concealed) ChipTone.Spoiler else ChipTone.Tonal,
                     interaction = if (concealed) ChipInteraction.Clickable else ChipInteraction.Inert,
                 )
             },

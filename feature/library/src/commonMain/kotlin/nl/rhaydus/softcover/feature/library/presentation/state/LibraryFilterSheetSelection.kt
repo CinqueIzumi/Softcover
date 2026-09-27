@@ -1,12 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 
 /**
  * The Filter sheet's facet chip rows for the open draft, mapped by `FilterDraftChipsCollector`
  * (`component-contract.md` § 7.2 R9) off [LibraryFilterChips] and [LibraryFilterDraft] — each chip's
- * [ChipVariant.Tonal.selected] resolved against the draft, and [tagChips] narrowed to the draft's
+ * [ChipUiModel.selected] resolved against the draft, and [tagChips] narrowed to the draft's
  * [LibraryFilterDraft.tagSearch]. [resultCount] and [clearAllEnabled] ride along so the footer never
  * derives them from the draft in composition either.
  */
@@ -36,7 +35,7 @@ internal fun buildLibraryFilterSheetSelection(
     fun List<ChipUiModel>.resolveSelection(): List<ChipUiModel> = map { chip ->
         val value = valueByChipKey[chip.key] ?: return@map chip
 
-        chip.copy(variant = ChipVariant.Tonal(selected = draft.filters.isSelected(value = value)))
+        chip.copy(selected = draft.filters.isSelected(value = value))
     }
 
     fun List<ChipUiModel>.matchingTagSearch(): List<ChipUiModel> = filter { chip ->

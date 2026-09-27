@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -48,7 +48,7 @@ internal data class RearrangeChipSnapshot(
     private fun rearrangeChip(): ChipUiModel = ChipUiModel(
         key = "rearrange",
         label = if (isRearranging) "Done" else "Reorder",
-        variant = ChipVariant.Quiet(selected = isRearranging),
-        leadingIcon = SoftcoverIcon.DragHandle,
+        selected = isRearranging,
+        leading = ChipLeading.Icon(icon = SoftcoverIcon.DragHandle),
     )
 }

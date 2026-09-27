@@ -24,7 +24,7 @@
 | `SelectedCheckBadge` | `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:410` | |
 | `FolioIndicator` | `feature/onboarding/presentation/screen/OnboardingScreenLayout.mobile.kt:219` | |
 | `GripOrPinGlyph` | `feature/settings/presentation/screen/section/ReorderableRow.kt:117` | |
-| `TrackingNowChip` | `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:433` | a status badge (D15) |
+| `TrackingNowChip` | `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:433` | a status badge |
 
 ## S5-7 — non-symbol tasks
 

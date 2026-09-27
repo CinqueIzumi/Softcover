@@ -11,7 +11,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
@@ -95,10 +96,12 @@ class ArrangeDraftChipsCollectorTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.arrangeLayoutChips.first { it.key == "layout:GRID_TWO" }.variant shouldBe
-                    ChipVariant.Choice(selected = true)
-                stateFlow.value.arrangeSortChips.first { it.key == "sort:MANUAL" }.variant shouldBe
-                    ChipVariant.Choice(selected = true)
+                val layoutChip = stateFlow.value.arrangeLayoutChips.first { it.key == "layout:GRID_TWO" }
+                layoutChip.tone shouldBe ChipTone.Choice
+                layoutChip.selected shouldBe true
+                val sortChip = stateFlow.value.arrangeSortChips.first { it.key == "sort:MANUAL" }
+                sortChip.tone shouldBe ChipTone.Choice
+                sortChip.selected shouldBe true
                 job.cancel()
             }
 
@@ -128,13 +131,16 @@ class ArrangeDraftChipsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.arrangeSortChips.first { it.key == "sort:MANUAL" }.variant shouldBe
-                ChipVariant.Choice(selected = false)
-            stateFlow.value.arrangeSortChips.first { it.key == "sort:TITLE" }.variant shouldBe
-                ChipVariant.Choice(
-                    selected = true,
-                    trailingIcon = SoftcoverIcon.ArrowDropUp,
-                )
+            val manualChip = stateFlow.value.arrangeSortChips.first { it.key == "sort:MANUAL" }
+            manualChip.tone shouldBe ChipTone.Choice
+            manualChip.selected shouldBe false
+            val titleChip = stateFlow.value.arrangeSortChips.first { it.key == "sort:TITLE" }
+            titleChip.tone shouldBe ChipTone.Choice
+            titleChip.selected shouldBe true
+            titleChip.trailing shouldBe ChipTrailing.Icon(
+                icon = SoftcoverIcon.ArrowDropUp,
+                description = "Ascending",
+            )
             job.cancel()
         }
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Denies markdown edits that break a doc budget, its ratchet, or the reference no-history rule.
+# Denies markdown edits that break a doc budget, its ratchet, the reference no-history rule, or a permanent
+# doc's/plan's citation rules, and denies a Kotlin comment or KDoc line that cites docs/working.
 set -u
 
 input=$(cat)
@@ -83,6 +84,15 @@ extract_now_section() {
   ' "$1"
 }
 
+extract_section_body() {
+  [ -f "$1" ] || return 0
+  awk -v header="$2" '
+    $0 ~ ("^" header "[[:space:]]*$") { capture=1; next }
+    capture && /^## / { exit }
+    capture { print }
+  ' "$1"
+}
+
 routing_hint() {
   case "$1" in
     docs/reference/design-system/components.md)
@@ -159,6 +169,91 @@ check_history() {
   done < "$new_file"
 }
 
+is_permanent_doc() {
+  case "$1" in
+    docs/reference/*) return 0 ;;
+    .claude/rules/*) return 0 ;;
+    .claude/agents/*) return 0 ;;
+    .claude/skills/*) return 0 ;;
+    CLAUDE.md) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+check_plan_refs() {
+  local relpath="$1" new_file="$2" old_file="$3" line
+  is_permanent_doc "$relpath" || return 0
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    [ -n "$line" ] || continue
+    grep -qxF -- "$line" "$old_file" 2>/dev/null && continue
+    if printf '%s' "$line" | grep -Eq 'docs/working/[^/[:space:]]+/'; then
+      deny "$relpath cites a plan directory: \"$line\" — plans are deleted when they finish; link only docs/working/ACTIVE.md or another top-level docs/working file."
+    fi
+    if printf '%s' "$line" | grep -Eq '\bD[0-9]{1,2}\b'; then
+      deny "$relpath cites a decision number: \"$line\" — plans are deleted when they finish; the reason goes in the PR description."
+    fi
+    if printf '%s' "$line" | grep -Eq '\bS[0-9]{1,2}-[0-9A-Z]'; then
+      deny "$relpath cites a plan step: \"$line\" — plans are deleted when they finish; the reason goes in the PR description."
+    fi
+  done < "$new_file"
+}
+
+check_decisions() {
+  local relpath="$1" new_file="$2" old_file="$3" line in_bullet=false section_tmp
+  case "$relpath" in
+    docs/working/*) ;;
+    *) return 0 ;;
+  esac
+
+  section_tmp=$(mktemp)
+  extract_section_body "$new_file" "## Decisions" > "$section_tmp"
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      "#"* | "") in_bullet=false; continue ;;
+    esac
+    if [[ "$line" == "- "* ]]; then
+      if [ "${#line}" -gt 200 ] && ! grep -qxF -- "$line" "$old_file" 2>/dev/null; then
+        rm -f "$section_tmp"
+        deny "$relpath: a decision is one line; a step's approved shape goes in its step file's ## Approved shape"
+      fi
+      in_bullet=true
+      continue
+    fi
+    if [ "$in_bullet" = true ] && [[ "$line" =~ ^[[:space:]]+[^[:space:]] ]]; then
+      if ! grep -qxF -- "$line" "$old_file" 2>/dev/null; then
+        rm -f "$section_tmp"
+        deny "$relpath: a decision is one line; a step's approved shape goes in its step file's ## Approved shape"
+      fi
+      continue
+    fi
+    in_bullet=false
+  done < "$section_tmp"
+
+  rm -f "$section_tmp"
+}
+
+compute_new_content() {
+  local old_file="$1" out_file="$2" err_file="$3"
+  printf '%s' "$input" | jq -j --rawfile old "$old_file" '
+    .tool_input as $ti
+    | ($old) as $o
+    | if .tool_name == "Write" then
+        ($ti.content // "")
+      else
+        ($ti.old_string // "") as $olds
+        | ($ti.new_string // "") as $news
+        | ($ti.replace_all // false) as $all
+        | ($o | split($olds)) as $parts
+        | if ($parts|length) < 2 then error("DOC_GUARD_NOT_FOUND")
+          elif $all then ($parts | join($news))
+          else ($parts[0] + $news + ($parts[1:] | join($olds)))
+          end
+      end
+  ' > "$out_file" 2> "$err_file"
+}
+
 handle_markdown_write() {
   local path old_file rc relpath
   path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // ""')
@@ -176,22 +271,7 @@ handle_markdown_write() {
   tmp_new=$(mktemp)
   tmp_err=$(mktemp)
   trap 'rm -f "$tmp_new" "$tmp_err"' EXIT
-  printf '%s' "$input" | jq -j --rawfile old "$old_file" '
-    .tool_input as $ti
-    | ($old) as $o
-    | if .tool_name == "Write" then
-        ($ti.content // "")
-      else
-        ($ti.old_string // "") as $olds
-        | ($ti.new_string // "") as $news
-        | ($ti.replace_all // false) as $all
-        | ($o | split($olds)) as $parts
-        | if ($parts|length) < 2 then error("DOC_GUARD_NOT_FOUND")
-          elif $all then ($parts | join($news))
-          else ($parts[0] + $news + ($parts[1:] | join($olds)))
-          end
-      end
-  ' > "$tmp_new" 2> "$tmp_err"
+  compute_new_content "$old_file" "$tmp_new" "$tmp_err"
   rc=$?
   if [ "$rc" -ne 0 ]; then
     grep -q DOC_GUARD_NOT_FOUND "$tmp_err" && return 0
@@ -202,6 +282,64 @@ handle_markdown_write() {
   check_budget "$relpath" "$tmp_new" "$old_file"
   check_now_section "$relpath" "$tmp_new" "$old_file"
   check_history "$relpath" "$tmp_new" "$old_file"
+  check_plan_refs "$relpath" "$tmp_new" "$old_file"
+  check_decisions "$relpath" "$tmp_new" "$old_file"
+}
+
+check_kotlin_comments() {
+  local relpath="$1" new_file="$2" old_file="$3" line trimmed comment
+  while IFS= read -r line || [ -n "$line" ]; do
+    [ -n "$line" ] || continue
+    trimmed="${line#"${line%%[![:space:]]*}"}"
+    case "$trimmed" in
+      '//'* | '*'* | '/**'*) comment="$trimmed" ;;
+      *)
+        case "$line" in
+          *'//'*) comment="${line#*//}" ;;
+          *'/*'*) comment="${line#*/\*}" ;;
+          *) continue ;;
+        esac
+        ;;
+    esac
+    grep -qxF -- "$line" "$old_file" 2>/dev/null && continue
+    if printf '%s' "$comment" | grep -Eq 'docs/working/'; then
+      deny "$relpath adds a comment citing docs/working: \"$comment\" — plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description."
+    fi
+    if printf '%s' "$comment" | grep -Eq '\bD[0-9]{1,2}\b'; then
+      deny "$relpath adds a comment citing a decision number: \"$comment\" — plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description."
+    fi
+    if printf '%s' "$comment" | grep -Eq '\bS[0-9]{1,2}-[0-9A-Z]'; then
+      deny "$relpath adds a comment citing a plan step: \"$comment\" — plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description."
+    fi
+  done < "$new_file"
+}
+
+handle_kotlin_write() {
+  local path old_file rc relpath
+  path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // ""')
+  case "$path" in
+    "$root"/*) ;;
+    *) return 0 ;;
+  esac
+  case "$path" in
+    *.kt) ;;
+    *) return 0 ;;
+  esac
+
+  if [ -f "$path" ]; then old_file="$path"; else old_file="/dev/null"; fi
+
+  tmp_new=$(mktemp)
+  tmp_err=$(mktemp)
+  trap 'rm -f "$tmp_new" "$tmp_err"' EXIT
+  compute_new_content "$old_file" "$tmp_new" "$tmp_err"
+  rc=$?
+  if [ "$rc" -ne 0 ]; then
+    grep -q DOC_GUARD_NOT_FOUND "$tmp_err" && return 0
+    deny "doc-guard could not evaluate the edit: $(tr '\n' ' ' < "$tmp_err")"
+  fi
+
+  relpath="${path#"$root"/}"
+  check_kotlin_comments "$relpath" "$tmp_new" "$old_file"
 }
 
 handle_bash() {
@@ -257,7 +395,10 @@ handle_bash() {
 
 tool_name=$(printf '%s' "$input" | jq -r '.tool_name // ""')
 case "$tool_name" in
-  Edit | Write) handle_markdown_write ;;
+  Edit | Write)
+    handle_markdown_write
+    handle_kotlin_write
+    ;;
   Bash) handle_bash ;;
 esac
 exit 0

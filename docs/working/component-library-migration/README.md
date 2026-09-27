@@ -14,26 +14,28 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4 and S5-1 through S5-3b done. S5-3b: book_detail's tag chips render `Chip` — new
-  `Dashed` (tag-editor opener) and `Editable(spoiler, spoilerToggleLabel)` (editor chips) variants, new
-  `ChipEvent.SpoilerToggled`; spoiler reveal via `OnRevealTagSpoilerAction` into `revealedTagKeys`; opener,
-  editor groups, `userTagByEditorChipKey` and `newlyAddedTagKey` on `BookDetailUiState` from
-  `TagChipModelsCollector`. `TagChip.kt` and `TagGroup.kt` are gone. Reviewer: no blockers; its one
-  finding (`ChipUiModel` KDoc claimed `interaction` / `leadingIcon` / `dismissLabel` apply to `Editable` /
-  `Dashed`) is fixed.
-- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) S5-C-chips: the convergence pass per
-  [`family-procedure.md`](family-procedure.md) § Phase 3 — audit with the user, then build.
+- **State:** S0–S4 and S5-1 through S5-3b done. S5-C-chips (the chip convergence pass; its step file is
+  already deleted) is mid-flight: one `ChipScaffold` + `ChipStyle`, shared `ChipDimensions` + `ChipSize`,
+  and the tone / slot model (`ChipTone` + `selected`, `ChipLeading` / `ChipTrailing`, `face`) are built;
+  every host test passes against them.
+- **Approved, not built:** features hold chips as a generic `ChipSet<P>(chips, payloadByKey)` from
+  `:core:component`, replacing every chip list + `…ByChipKey` map pair (explore, library, book_detail).
+- **Also built:** plan-reference gates (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`).
+- **Next:** `softcover-test-writer` adds cases for the gate fix round: the step-id pattern in
+  `check_plan_refs` / `CheckDocBudgetsTask`, and trailing comments in `check_kotlin_comments`; then a
+  short `softcover-reviewer` re-check.
+- **After that:** (1) re-run the agent-memory audit read-only, then apply it (delete one-offs, promote
+  durable rules to docs); (2) memory gates: `/handoff` audits memory when a `steps/*.md` was deleted,
+  memory budgets in `checkDocBudgets`, `.claude/agent-memory/**` in the plan-reference scan; (3)
+  `ChipSet<P>`, tests, reviewer over S5-C-chips; (4) [`steps/s5-headers.md`](steps/s5-headers.md) S5-4.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
-  stale for a frame on open (chips now arrive via collectors); if visible, seed them in the open action.
-- **Verification:** `:core:component` / `:feature:book_detail` `compileKotlinJvm`, `compileAndroidMain`,
-  `:feature:book_detail:projectHealth`, `checkModuleGraph`, `ktlintCheck`, `styleCheck`, and
-  `testAndroidHostTest` for both modules (508 + 79 tests) passed under JBR 21. `:core:component:projectHealth`
-  fails pre-existingly (kotlinx.datetime implementation → api), unrelated.
-- **Uncommitted:** S5-3b in `core/component` (`chip/`, `gallery/`, `WhenReadRow.kt`), `feature/book_detail`,
-  the forced `SpoilerToggled` branches in `feature/library`, their host tests, `components.md`,
-  `components/sheets.md`, `patterns/book-detail.md`; this block and the S5-3b tick in `steps/s5-chips.md`.
+  stale for a frame on open; if visible, seed them in the open action.
+- **Verification:** chip host tests pass; `checkDocBudgets styleCheck`, `-p build-logic test` and
+  `run-doc-guard-cases.sh` pass after the gate fix round.
+- **Uncommitted:** chip package, call sites and host tests; plan-citation KDoc cleanup; the gates and
+  their tests; `.claude/rules/docs.md`; reference docs; this tracker and step files; new agent memories.
 
 ## Local verification
 
@@ -69,7 +71,7 @@ every sub-step's Verify.
 | Stage | Step file | Sub-steps | Status |
 |---|---|---|---|
 | S0–S4 | — | module scaffolding through tokens-only designsystem | [x] |
-| S5 | [steps/s5-chips.md](steps/s5-chips.md) | S5-1, S5-2a, S5-2b, S5-3 | [ ] |
+| S5 | — (chips) | S5-1–S5-3b, S5-C-chips | [x] |
 | S5 | [steps/s5-headers.md](steps/s5-headers.md) | S5-4–S5-6 | [ ] |
 | S5 | [steps/s5-badges.md](steps/s5-badges.md) | S5-7 | [ ] |
 | S5 | [steps/s5-skeletons.md](steps/s5-skeletons.md) | S5-8 | [ ] |
@@ -86,74 +88,9 @@ every sub-step's Verify.
 
 ## Decisions
 
-- **D1** Gallery reachability: shipped easter egg, not debug-only. Seven taps on `VersionFooter`, each
-  within two seconds of the last, `milestone` haptic on the seventh, `noRippleClickable` so the footer
-  looks untouched. Counting logic in `SecretTapCounter`, unit-tested. Registry (`GalleryRegistry` /
-  `GalleryEntry` / `GalleryFamily`) lives in `:core:component/gallery/`; the screen
-  (`ComponentGalleryScreen`) lives in `feature:settings`, since G1 bans `:core:component` from Voyager.
-  Anatomy: `component-contract.md` § 7.5.
-- **D2** `:core:uibinding` dependency visibility: `api`. Every domain model lives in `:core:domain`, a
-  dependency-free contract module, so no allowlist row is required today. A
-  `:core:uibinding` → `:core:<data>` row is pre-approved when a mapper needs one — write it when the
-  edge exists, not speculatively. Policy detail: `module-structure.md`.
-- **D3** `ShareCard.kt` (1,161 lines) split per body while renaming, in S4 — not deferred to S12
-  (`component-contract.md` § 7.3, § 7.0).
-- **D4** `SoftcoverDatePickerDialog` lands in `:core:component/dialog/`, moved as-is at the merge —
-  `:core:designsystem` is tokens-only (G2), so it cannot land where it started.
-- **D5** Easter-egg gesture spec: seven taps, a two-second window between consecutive taps, `milestone`
-  haptic on unlock, `noRippleClickable` so the footer looks untouched.
-- **D6** Fixture size in the release binary: not measured; measure at S12.
-- **D7** Test posture: no Compose UI tests in this repo, none planned — coverage is unit tests on
-  every UI model and mapper, plus the Component Gallery as the visual-acceptance surface.
-- **D8** (2026-09-28) The target module shape and the `:core:component` package layout live in
-  `module-structure.md`, not here.
-- **D9** (2026-09-28) Each family step's Phase 1 proposes the UI model / variant / event shape to the
-  user; the approved shape is recorded here as a new D-number before Phase 2 starts.
-- **D10** (2026-09-28) A step large enough to span several sessions splits into sub-steps, one session
-  each, tracked in the step file's `## Sub-steps` table.
-- **D11** (2026-09-28) Chips and pills are one family on `Chip` + `ChipUiModel(key, label, variant,
-  interaction)`. `ChipVariant` is sealed: `Tonal(selected)`, `Spoiler` (replaces `concealed`), `Add`,
-  `AddOutlined`, `Remove`, `Format(active, face: ChipFace)`. `ChipInteraction` is `Clickable` /
-  `Disabled` / `Inert` (replaces `clickable`). Metrics come from a per-variant table, so the migration is
-  visually neutral. `ChipEvent` stays `Clicked(key)`. `MembershipPill` goes: `ChooseListsMapper` builds
-  the pill as `ChooseListsRowUiModel.membershipChip`. `FormatChip` moves in S8-4 with the toolbar's own model.
-  `SearchChromePill` was a search field, not a chip, and is renamed `SearchChromeField`.
-- **D12** (2026-09-28) The `WhenReadRow` date pill is `Tonal(selected)`. To carry it, `ChipUiModel` gains
-  two variant-independent fields: `leadingIcon: SoftcoverIcon?` and `dismissLabel: String?`. A non-null
-  `dismissLabel` renders a trailing ✕ as its own tap target, uses the label as the ✕'s content
-  description, and reports `ChipEvent.Dismissed(key)`. S5-2's `ActiveFilterChip` reuses it. `Remove`'s
-  ✕ stays display-only. The date pill takes Tonal's `onSurface` idle ink, an accepted visual change.
-- **D13** (2026-09-28) S5-2 shape. No new `ChipEvent`: `ActiveFilterChip` is whole-chip-tap removal, so it
-  renders as `Remove` reporting `Clicked` — D12's `Dismissed` would shrink the target to the 16dp ✕.
-  `Remove` becomes `Remove(removeLabel: String)`, the ✕'s content description (ChooseLists passes
-  "Remove from list"). New `Quiet(selected)` — `surfaceContainer`/`onSurfaceVariant` idle,
-  `secondaryContainer`/`onSecondaryContainer` selected — carries `ClearAllChip` and `RearrangeHintChip`
-  (`leadingIcon = DragHandle`). New `Choice(selected, trailingIcon: SoftcoverIcon?)` — `primary`/`onPrimary`
-  selected, `surfaceContainer`/`onSurface` idle — carries `ArrangeChip` and its sort-direction arrow.
-  Metrics converge: one tuple per variant, so each pair sharing a variant renders identically (accepted
-  1–2dp shifts). Chip models arrive on `LibraryUiState` from feature-local collectors (R6, one consumer);
-  both the Arrange and the Filter sheet drafts move from composition onto `UiState`, which retires the
-  Filter sheet's `ChipUiModel.selectedFor` R10 holdout. Out of the family: `SortLabelControl` (text, not a
-  chip; stays feature-local), `FilterPillControl` and `SelectionActionPill` (buttons; move in S8 controls).
-  The chip rows stay feature-local containers.
-- **D14** (2026-09-28) Every S5–S11 step file closes with a convergence sub-step (`family-procedure.md`
-  § Phase 3): audit the family's variants and merge near-duplicates for app-wide consistency.
-- **D15** (2026-09-28) S5-3 shape. `ConcealableTagChip` goes: the mapper emits `Spoiler` + `Clickable`,
-  `Clicked(key)` dispatches a reveal action, `BookDetailUiState` gains `revealedTagKeys: ImmutableSet`,
-  and `TagChipModelsCollector` emits `Tonal()` + `Inert` for revealed keys — the `rememberSaveable`, the
-  stacked `clickable` and the in-composition `copy` go (reveal takes the press-scale affordance).
-  `RecentSearchChip` and `FlowRowMoodChips`' chips are `Tonal()` + `Clickable` (accepted shift: `onSurface`
-  ink, Medium weight, 14/10 padding), built as `recentSearchChips` / `moodChips` on `ExploreUiState` by
-  feature-local collectors with a key → query / mood map. New `Dashed` — 1dp dashed `primary` stroke,
-  `primary` ink — carries `DashedTagOpenerChip`; its "+ Add tags" / "Edit tags" model arrives on
-  `BookDetailUiState`. New `Editable(spoiler, spoilerToggleLabel)` carries `TagChip` / `TagChipName`:
-  the variant draws the leading spoiler eye (absorbing `SpoilerToggleIcon`) and the name highlight,
-  `dismissLabel` carries the ✕, and new `ChipEvent.SpoilerToggled(key)` reports the eye; a collector maps
-  `UserTag` → `ChipUiModel`, and the insert fade stays in the feature-local row, driven by
-  `newlyAddedTagKey` on `UiState`. Out of the family: `AddPill`, `ExternalLinkPill`, the
-  `InProgressSection` update pill, `SetProgressChip`, `UpdatePillButton` and `SortChip` (menu anchor) are
-  buttons and move in S8-6 `PillButton`, with D13's `FilterPillControl` and `SelectionActionPill`;
-  `TrackingNowChip` is a status badge and moves to S5-7. All mappers stay feature-local (R6).
+- Test posture: no Compose UI tests; unit tests cover every UI model and mapper, and the Component Gallery is the visual-acceptance surface.
+- A `:core:uibinding` → `:core:<data>` edge is pre-approved when a mapper needs one; write it when the edge exists.
+- A step spanning several sessions splits into sub-steps, one session each, in the step file's `## Sub-steps`.
 
 ## Baseline
 

@@ -153,12 +153,11 @@ TopBar(model = state.topBar)
 - **One model per identity unless it varies by surface.** A collector building per-item models keeps one map
   keyed by identity; a cover carries a per-rail shared-element key and needs one map per rail, a badge with
   no surface-scoped data needs exactly one.
-- **Not yet satisfied by the whole library.** The retrofit is a dedicated stage in
-  `docs/working/component-library-migration/steps/s11-contract-retrofit.md`. Write new components to R10 and do not take an
-  existing call site as precedent. That stage, not this rule, settles three edges: copy the library owns and
-  resolves from its own `composeResources` (`offlineBannerUiModel()`); preview fixtures and the gallery, which
-  construct models by definition; and a model that depends on a value only composition has (scroll
-  position, window size class, a `CompositionLocal`).
+- **Not yet satisfied by the whole library.** Write new components to R10 and do not take an existing call
+  site as precedent. Three edges are unsettled: copy the library owns and resolves from its own
+  `composeResources` (`offlineBannerUiModel()`); preview fixtures and the gallery, which construct models by
+  definition; and a model that depends on a value only composition has (scroll position, window size class,
+  a `CompositionLocal`).
 
 **R11 — The signature is the model, the event lambda and the modifier. Nothing else.** Anything a call site
 would otherwise pass — a `TextStyle`, a `Color`, `maxLines`, an autosize spec, a particle count, a

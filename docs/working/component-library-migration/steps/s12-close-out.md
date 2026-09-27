@@ -33,7 +33,7 @@ the measured post-migration value; a rise fails the build. Wire into `check`.
 - Decide the cover-radius drift: `HiddenSeriesStack`'s 3dp vs. every other flat cover's 4dp; Reading's
   three thumbnails at 6/8/10dp.
 - Decide the `"tnum"` token (~17 call sites today; one `:core:designsystem` token instead).
-- Measure the fixture size in the release binary (`README.md` D6).
+- Measure the fixture size in the release binary.
 - Run the gallery completeness pass: every `:core:component` family has a `GalleryEntry`.
 - The § 7.0 rich-text remaining row (`RichTextFormattingToolbar` owing R1) is closed by
   `steps/s8-controls.md` S8-4, not repeated here — confirm it landed before ticking this sub-step.

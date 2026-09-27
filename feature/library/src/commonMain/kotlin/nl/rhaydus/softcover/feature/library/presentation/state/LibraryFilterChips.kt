@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 
 /**
  * The Filter sheet's facet chip rows for one tab, mapped by `FilterChipModelsCollector`
@@ -9,7 +8,7 @@ import nl.rhaydus.softcover.core.component.chip.ChipVariant
  * [LibraryFilterOptions]'s facet shape one-for-one, so a facet with no available values is simply an
  * empty list here too.
  *
- * None of these chips carry a selected [ChipVariant.Tonal] — the Filter sheet holds its own local
+ * None of these chips carry [ChipUiModel.selected] — the Filter sheet holds its own local
  * draft ([LibraryFilters]) rather than committing a `LibraryAction` per tap, so which chip reads
  * selected depends on that ephemeral, composition-local draft rather than on anything in
  * [LibraryUiState]. The render resolves the current selection against

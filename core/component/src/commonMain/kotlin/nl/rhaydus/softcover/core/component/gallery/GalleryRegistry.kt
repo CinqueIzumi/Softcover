@@ -26,9 +26,12 @@ import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipFace
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTile
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileUiModel
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTile
@@ -343,25 +346,23 @@ private val BURST_FIXTURE_SIZE = 160.dp
 /** `CoverOverlay`'s fixture cover — sized like the gallery's other thumbnail-ish jackets. */
 private val BADGE_COVER_FIXTURE_WIDTH = 96.dp
 
-/** Names what a [ChipUiModel] fixture demonstrates — its anatomy branch, not its words. */
+/** Names what a [ChipUiModel] fixture demonstrates — its tone or slot, not its words. */
 private fun chipFixtureLabel(model: ChipUiModel): String = when {
+    model.leading is ChipLeading.SpoilerToggle && model.leading.marked -> "Spoiler toggle, marked"
+    model.leading is ChipLeading.SpoilerToggle -> "Spoiler toggle"
+    model.tone == ChipTone.Spoiler -> "Spoiler"
+    model.tone == ChipTone.Dashed -> "Dashed"
+    model.tone == ChipTone.Choice && model.selected -> "Choice, selected"
+    model.tone == ChipTone.Choice -> "Choice"
+    model.tone == ChipTone.Filled -> "Filled"
+    model.tone == ChipTone.Container -> "Container"
+    model.tone == ChipTone.Outlined -> "Outlined"
+    model.trailing is ChipTrailing.Dismiss -> "Dismissible"
+    model.tone == ChipTone.Tonal && model.selected -> "Selected"
     model.interaction == ChipInteraction.Disabled -> "Disabled"
     model.interaction == ChipInteraction.Inert -> "Read-only"
-    model.variant is ChipVariant.Editable && model.variant.spoiler -> "Editable, spoiler"
-    model.variant is ChipVariant.Editable -> "Editable"
-    model.variant == ChipVariant.Dashed -> "Dashed"
-    model.dismissLabel != null -> "Dismissible"
-    model.variant is ChipVariant.Quiet && model.variant.selected -> "Quiet, selected"
-    model.variant is ChipVariant.Quiet -> "Quiet"
-    model.leadingIcon != null -> "Leading icon"
-    model.variant == ChipVariant.Spoiler -> "Spoiler"
-    model.variant == ChipVariant.Add -> "Add"
-    model.variant == ChipVariant.AddOutlined -> "Add, outlined"
-    model.variant is ChipVariant.Remove -> "Remove"
-    model.variant is ChipVariant.Format -> "Format"
-    model.variant is ChipVariant.Tonal && model.variant.selected -> "Selected"
-    model.variant is ChipVariant.Choice && model.variant.selected -> "Choice, selected"
-    model.variant is ChipVariant.Choice -> "Choice"
+    model.face != ChipFace.Plain -> "Format"
+    model.leading != null -> "Leading icon"
     model.label.length > CHIP_LONG_LABEL_FLOOR -> "Long label, ellipsised"
     else -> "Idle"
 }

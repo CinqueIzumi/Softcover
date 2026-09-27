@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.component.chip.ChipTone
 
 class RecentSearchChipsSnapshotTest {
     @Nested
@@ -33,7 +33,8 @@ class RecentSearchChipsSnapshotTest {
             // ----- Assert -----
             chips.map { it.label } shouldBe listOf("kotlin", "android")
             chips.forEach {
-                it.variant shouldBe ChipVariant.Tonal()
+                it.tone shouldBe ChipTone.Tonal
+                it.selected shouldBe false
                 it.interaction shouldBe ChipInteraction.Clickable
             }
         }

@@ -8,5 +8,6 @@ docs/reference/design-system/patterns.md       8KB
 docs/reference/design-system/components/*.md   20KB
 docs/reference/design-system/patterns/*.md     20KB
 docs/reference/**/*.md                         30KB
+docs/working/*/README.md                       11KB
 docs/working/**/*.md                           40KB
 ## Now                                         40L

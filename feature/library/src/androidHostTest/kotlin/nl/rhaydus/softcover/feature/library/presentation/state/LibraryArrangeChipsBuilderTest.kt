@@ -3,7 +3,8 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -39,7 +40,8 @@ class LibraryArrangeChipsBuilderTest {
             // ----- Assert -----
             layoutChips.map { it.key } shouldBe listOf("layout:GRID_TWO", "layout:GRID_THREE", "layout:LIST")
             layoutChips.map { it.label } shouldBe listOf("Grid · 2", "Grid · 3", "List")
-            layoutChips.map { (it.variant as ChipVariant.Choice).selected } shouldBe listOf(false, true, false)
+            layoutChips.map { it.tone } shouldBe listOf(ChipTone.Choice, ChipTone.Choice, ChipTone.Choice)
+            layoutChips.map { it.selected } shouldBe listOf(false, true, false)
         }
 
         @Test
@@ -62,11 +64,13 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            sortChips.single { it.key == "sort:TITLE" }.variant shouldBe
-                ChipVariant.Choice(
-                    selected = true,
-                    trailingIcon = SoftcoverIcon.ArrowDropUp,
-                )
+            val titleChip = sortChips.single { it.key == "sort:TITLE" }
+            titleChip.tone shouldBe ChipTone.Choice
+            titleChip.selected shouldBe true
+            titleChip.trailing shouldBe ChipTrailing.Icon(
+                icon = SoftcoverIcon.ArrowDropUp,
+                description = "Ascending",
+            )
         }
 
         @Test
@@ -89,11 +93,13 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            sortChips.single { it.key == "sort:TITLE" }.variant shouldBe
-                ChipVariant.Choice(
-                    selected = true,
-                    trailingIcon = SoftcoverIcon.ArrowDropDown,
-                )
+            val titleChip = sortChips.single { it.key == "sort:TITLE" }
+            titleChip.tone shouldBe ChipTone.Choice
+            titleChip.selected shouldBe true
+            titleChip.trailing shouldBe ChipTrailing.Icon(
+                icon = SoftcoverIcon.ArrowDropDown,
+                description = "Descending",
+            )
         }
 
         @Test
@@ -116,7 +122,10 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            sortChips.single { it.key == "sort:MANUAL" }.variant shouldBe ChipVariant.Choice(selected = true)
+            val manualChip = sortChips.single { it.key == "sort:MANUAL" }
+            manualChip.tone shouldBe ChipTone.Choice
+            manualChip.selected shouldBe true
+            manualChip.trailing shouldBe null
         }
 
         @Test
@@ -139,7 +148,10 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            sortChips.single { it.key == "sort:AUTHOR" }.variant shouldBe ChipVariant.Choice(selected = false)
+            val authorChip = sortChips.single { it.key == "sort:AUTHOR" }
+            authorChip.tone shouldBe ChipTone.Choice
+            authorChip.selected shouldBe false
+            authorChip.trailing shouldBe null
         }
 
         @Test
@@ -174,7 +186,8 @@ class LibraryArrangeChipsBuilderTest {
 
             // ----- Assert -----
             sortChips.first().key shouldBe "sort:ORDER"
-            sortChips.first().variant shouldBe ChipVariant.Choice(selected = true)
+            sortChips.first().tone shouldBe ChipTone.Choice
+            sortChips.first().selected shouldBe true
         }
 
         @Test

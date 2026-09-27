@@ -13,7 +13,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipSize
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
@@ -223,11 +227,11 @@ class TagChipModelsCollectorTest {
                 // ----- Assert -----
                 val groups = stateFlow.value.communityTagGroups
                 groups.single { it.category == TagCategory.CONTENT_WARNING }
-                    .chips.all { it.variant == ChipVariant.Spoiler } shouldBe true
+                    .chips.all { it.tone == ChipTone.Spoiler } shouldBe true
                 groups.single { it.category == TagCategory.GENRE }
-                    .chips.none { it.variant == ChipVariant.Spoiler } shouldBe true
+                    .chips.none { it.tone == ChipTone.Spoiler } shouldBe true
                 groups.single { it.category == TagCategory.MOOD }
-                    .chips.none { it.variant == ChipVariant.Spoiler } shouldBe true
+                    .chips.none { it.tone == ChipTone.Spoiler } shouldBe true
                 job.cancel()
             }
 
@@ -291,7 +295,7 @@ class TagChipModelsCollectorTest {
 
             // ----- Assert -----
             val chip = stateFlow.value.communityTagGroups.single().chips.single()
-            chip.variant shouldBe ChipVariant.Spoiler
+            chip.tone shouldBe ChipTone.Spoiler
             chip.interaction shouldBe ChipInteraction.Clickable
             job.cancel()
         }
@@ -323,7 +327,7 @@ class TagChipModelsCollectorTest {
 
             // ----- Assert -----
             val chip = stateFlow.value.communityTagGroups.single().chips.single()
-            chip.variant shouldBe ChipVariant.Tonal()
+            chip.tone shouldBe ChipTone.Tonal
             chip.interaction shouldBe ChipInteraction.Inert
             job.cancel()
         }
@@ -360,8 +364,8 @@ class TagChipModelsCollectorTest {
 
             // ----- Assert -----
             val chips = stateFlow.value.communityTagGroups.single().chips.associateBy { it.key }
-            chips.getValue("1").variant shouldBe ChipVariant.Tonal()
-            chips.getValue("2").variant shouldBe ChipVariant.Spoiler
+            chips.getValue("1").tone shouldBe ChipTone.Tonal
+            chips.getValue("2").tone shouldBe ChipTone.Spoiler
             job.cancel()
         }
 
@@ -475,8 +479,9 @@ class TagChipModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(userTags = emptyList())
 
                 // ----- Assert -----
-                stateFlow.value.tagEditorOpenerChip?.label shouldBe "+ Add tags"
-                stateFlow.value.tagEditorOpenerChip?.variant shouldBe ChipVariant.Dashed
+                stateFlow.value.tagEditorOpenerChip?.label shouldBe "Add tags"
+                stateFlow.value.tagEditorOpenerChip?.tone shouldBe ChipTone.Dashed
+                stateFlow.value.tagEditorOpenerChip?.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.Add)
                 job.cancel()
             }
 
@@ -503,7 +508,8 @@ class TagChipModelsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.tagEditorOpenerChip?.label shouldBe "Edit tags"
-                stateFlow.value.tagEditorOpenerChip?.variant shouldBe ChipVariant.Dashed
+                stateFlow.value.tagEditorOpenerChip?.tone shouldBe ChipTone.Dashed
+                stateFlow.value.tagEditorOpenerChip?.leading shouldBe null
                 job.cancel()
             }
 
@@ -577,7 +583,7 @@ class TagChipModelsCollectorTest {
             }
 
         @Test
-        fun `userTagEditorGroups chips are Editable and carry a Remove dismissLabel`() =
+        fun `userTagEditorGroups chips carry a SpoilerToggle leading and a Remove Dismiss trailing`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val userTags = listOf(
@@ -605,18 +611,44 @@ class TagChipModelsCollectorTest {
 
                 // ----- Assert -----
                 val chips = stateFlow.value.userTagEditorGroups.flatMap { it.chips }.associateBy { it.label }
-                chips.getValue("Fantasy").variant shouldBe ChipVariant.Editable(
-                    spoiler = false,
-                    spoilerToggleLabel = "Mark as spoiler",
+                chips.getValue("Fantasy").leading shouldBe ChipLeading.SpoilerToggle(
+                    marked = false,
+                    label = "Mark as spoiler",
                 )
-                chips.getValue("Fantasy").dismissLabel shouldBe "Remove Fantasy"
-                chips.getValue("Death").variant shouldBe ChipVariant.Editable(
-                    spoiler = true,
-                    spoilerToggleLabel = "Marked as spoiler — tap to unmark",
+                chips.getValue("Fantasy").trailing shouldBe ChipTrailing.Dismiss(label = "Remove Fantasy")
+                chips.getValue("Death").leading shouldBe ChipLeading.SpoilerToggle(
+                    marked = true,
+                    label = "Marked as spoiler — tap to unmark",
                 )
-                chips.getValue("Death").dismissLabel shouldBe "Remove Death"
+                chips.getValue("Death").trailing shouldBe ChipTrailing.Dismiss(label = "Remove Death")
                 job.cancel()
             }
+
+        @Test
+        fun `userTagEditorGroups chips are Compact`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val userTags = listOf(
+                UserTag(
+                    name = "Fantasy",
+                    category = TagCategory.GENRE,
+                ),
+            )
+            val collector = TagChipModelsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(userTags = userTags)
+
+            // ----- Assert -----
+            val chip = stateFlow.value.userTagEditorGroups.flatMap { it.chips }.single()
+            chip.size shouldBe ChipSize.Compact
+            job.cancel()
+        }
 
         @Test
         fun `userTagByEditorChipKey resolves every editor chip key back to its UserTag`() =

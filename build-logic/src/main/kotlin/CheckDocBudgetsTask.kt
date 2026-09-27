@@ -12,6 +12,17 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
+private val PLAN_DIRECTORY_PATTERN = Regex("""docs/working/[^/\s]+/""")
+private val DECISION_NUMBER_PATTERN = Regex("""\bD[0-9]{1,2}\b""")
+private val STEP_ID_PATTERN = Regex("""\bS[0-9]{1,2}-[0-9A-Z]""")
+
+private fun isPermanentMarkdownDoc(relativePath: String): Boolean =
+    relativePath == "CLAUDE.md" ||
+        relativePath.startsWith("docs/reference/") ||
+        relativePath.startsWith(".claude/rules/") ||
+        relativePath.startsWith(".claude/agents/") ||
+        relativePath.startsWith(".claude/skills/")
+
 private fun parseLimitToken(token: String): Pair<Long, BudgetUnit> = when {
     token.endsWith("KB") -> (token.removeSuffix("KB").toLong() * 1024) to BudgetUnit.BYTES
     token.endsWith("B") -> token.removeSuffix("B").toLong() to BudgetUnit.BYTES
@@ -168,6 +179,26 @@ abstract class CheckDocBudgetsTask : DefaultTask() {
             if (currentSize > baseSize) {
                 violations += "$relativePath: over budget and grew since merge-base (${rule.glob} ${rule.token}) — " +
                     "$baseSize${rule.unit.suffix} → $currentSize${rule.unit.suffix} (limit ${rule.limit}${rule.unit.suffix})"
+            }
+        }
+
+        markdownFiles.files.forEach { file ->
+            val relativePath = file.relativeTo(root).invariantSeparatorsPath
+            if (!isPermanentMarkdownDoc(relativePath)) return@forEach
+
+            file.readText().lineSequence().forEachIndexed { index, line ->
+                if (PLAN_DIRECTORY_PATTERN.containsMatchIn(line)) {
+                    violations += "$relativePath:${index + 1}: cites a plan directory — plans are deleted " +
+                        "when they finish; cite nothing from docs/working. The reason goes in the PR description."
+                }
+                if (DECISION_NUMBER_PATTERN.containsMatchIn(line)) {
+                    violations += "$relativePath:${index + 1}: cites a decision number — plans are deleted " +
+                        "when they finish; cite nothing from docs/working. The reason goes in the PR description."
+                }
+                if (STEP_ID_PATTERN.containsMatchIn(line)) {
+                    violations += "$relativePath:${index + 1}: cites a plan step — plans are deleted " +
+                        "when they finish; cite nothing from docs/working. The reason goes in the PR description."
+                }
             }
         }
 

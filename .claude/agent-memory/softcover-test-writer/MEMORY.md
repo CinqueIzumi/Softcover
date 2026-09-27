@@ -18,3 +18,4 @@
 - [designsystem palette contrast tests](project_designsystem_palette_contrast_tests.md) — WCAG helper pattern + @TestFactory/DynamicTest data-driving over ColorPalette.entries; confirms flat alphabetical import order
 - [Brief says internal, code says private](feedback_private_function_named_internal_in_brief.md) — grep the modifier before writing; a stale/wrong brief premise is a blocker to report, not a workaround
 - [ktlint tasks are root-only](feedback_ktlint_tasks_are_root_only.md) — `:<module>:ktlintFormat`/`ktlintCheck` don't exist; always run `:ktlintFormat`/`:ktlintCheck` unscoped
+- [Composable style resolution is untestable at unit level](feedback_composable_style_resolution_untestable.md) — no compose-ui-test dep in core:component; proxy "style resolution" coverage via enum/sealed-slot fixture coverage instead

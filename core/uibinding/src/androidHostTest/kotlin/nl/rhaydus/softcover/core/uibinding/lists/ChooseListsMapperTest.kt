@@ -4,11 +4,15 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipSize
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.lists.ChooseListsVariant
 import nl.rhaydus.softcover.core.component.lists.ListMembership
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 
@@ -312,7 +316,7 @@ class ChooseListsMapperTest {
     @Nested
     inner class MembershipChipMapping {
         @Test
-        fun `membership chip variant is Remove when membership is ALL`() {
+        fun `membership chip is Container-toned with a Close trailing icon when membership is ALL`() {
             // ----- Arrange -----
             val lists = listOf(bookList(
                 id = 1,
@@ -327,11 +331,16 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().membershipChip.variant shouldBe ChipVariant.Remove(removeLabel = "Remove from list")
+            val chip = result.rows.single().membershipChip
+            chip.tone shouldBe ChipTone.Container
+            chip.trailing shouldBe ChipTrailing.Icon(
+                icon = SoftcoverIcon.Close,
+                description = "Remove from list",
+            )
         }
 
         @Test
-        fun `membership chip variant is Add when membership is PARTIAL`() {
+        fun `membership chip is Filled-toned with an Add leading icon when membership is PARTIAL`() {
             // ----- Arrange -----
             val lists = listOf(bookList(
                 id = 1,
@@ -346,11 +355,13 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().membershipChip.variant shouldBe ChipVariant.Add
+            val chip = result.rows.single().membershipChip
+            chip.tone shouldBe ChipTone.Filled
+            chip.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.Add)
         }
 
         @Test
-        fun `membership chip variant is AddOutlined when membership is NONE`() {
+        fun `membership chip is Outlined-toned with an Add leading icon when membership is NONE`() {
             // ----- Arrange -----
             val lists = listOf(bookList(
                 id = 1,
@@ -365,7 +376,9 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().membershipChip.variant shouldBe ChipVariant.AddOutlined
+            val chip = result.rows.single().membershipChip
+            chip.tone shouldBe ChipTone.Outlined
+            chip.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.Add)
         }
 
         @Test
@@ -386,6 +399,83 @@ class ChooseListsMapperTest {
 
             // ----- Assert -----
             result.rows.single().membershipChip.interaction shouldBe ChipInteraction.Inert
+        }
+
+        @Test
+        fun `membership chip size is always Compact`() {
+            // ----- Arrange -----
+            val lists = listOf(bookList(
+                id = 1,
+                bookIds = listOf(0),
+            ),)
+
+            // ----- Act -----
+            val result = lists.toChooseListsUiModel(
+                bookId = 0,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.rows.single().membershipChip.size shouldBe ChipSize.Compact
+        }
+
+        @Test
+        fun `membership chip trailing is null when membership is PARTIAL`() {
+            // ----- Arrange -----
+            val lists = listOf(bookList(
+                id = 1,
+                bookIds = listOf(0),
+            ),)
+
+            // ----- Act -----
+            val result = lists.toBulkChooseListsUiModel(
+                bookIds = setOf(0, 1),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.rows.single().membershipChip.trailing shouldBe null
+        }
+
+        @Test
+        fun `membership chip trailing is null when membership is NONE`() {
+            // ----- Arrange -----
+            val lists = listOf(bookList(
+                id = 1,
+                bookIds = listOf(100),
+            ),)
+
+            // ----- Act -----
+            val result = lists.toBulkChooseListsUiModel(
+                bookIds = setOf(0, 1),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.rows.single().membershipChip.trailing shouldBe null
+        }
+
+        @Test
+        fun `membership chip leading is null when membership is ALL`() {
+            // ----- Arrange -----
+            val lists = listOf(bookList(
+                id = 1,
+                bookIds = listOf(0, 1),
+            ),)
+
+            // ----- Act -----
+            val result = lists.toBulkChooseListsUiModel(
+                bookIds = setOf(0, 1),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.rows.single().membershipChip.leading shouldBe null
         }
     }
 

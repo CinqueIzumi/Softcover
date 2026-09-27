@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 
@@ -55,7 +54,7 @@ class LibraryFilterSheetSelectionTest {
             )
 
             // ----- Assert -----
-            selection.ownershipChips.map { (it.variant as ChipVariant.Tonal).selected } shouldBe listOf(true, false)
+            selection.ownershipChips.map { it.selected } shouldBe listOf(true, false)
         }
 
         @Test
@@ -91,7 +90,7 @@ class LibraryFilterSheetSelectionTest {
             )
 
             // ----- Assert -----
-            selection.formatChips.map { (it.variant as ChipVariant.Tonal).selected } shouldBe listOf(true, false)
+            selection.formatChips.map { it.selected } shouldBe listOf(true, false)
         }
 
         @Test
@@ -127,7 +126,7 @@ class LibraryFilterSheetSelectionTest {
             )
 
             // ----- Assert -----
-            selection.releaseYearChips.map { (it.variant as ChipVariant.Tonal).selected } shouldBe listOf(true, false)
+            selection.releaseYearChips.map { it.selected } shouldBe listOf(true, false)
         }
 
         @Test
@@ -163,7 +162,7 @@ class LibraryFilterSheetSelectionTest {
             )
 
             // ----- Assert -----
-            selection.readYearChips.map { (it.variant as ChipVariant.Tonal).selected } shouldBe listOf(true, false)
+            selection.readYearChips.map { it.selected } shouldBe listOf(true, false)
         }
 
         @Test
@@ -199,7 +198,7 @@ class LibraryFilterSheetSelectionTest {
             )
 
             // ----- Assert -----
-            selection.tagChips.map { (it.variant as ChipVariant.Tonal).selected } shouldBe listOf(true, false)
+            selection.tagChips.map { it.selected } shouldBe listOf(true, false)
         }
 
         @Test
@@ -235,11 +234,11 @@ class LibraryFilterSheetSelectionTest {
             )
 
             // ----- Assert -----
-            selection.ratingChips.map { (it.variant as ChipVariant.Tonal).selected } shouldBe listOf(true, false)
+            selection.ratingChips.map { it.selected } shouldBe listOf(true, false)
         }
 
         @Test
-        fun `a chip whose key is absent from valueByChipKey keeps its original variant unresolved`() {
+        fun `a chip whose key is absent from valueByChipKey keeps its original selection unresolved`() {
             // ----- Arrange -----
             val untouchedChip = ChipUiModel(
                 key = "format:unknown",

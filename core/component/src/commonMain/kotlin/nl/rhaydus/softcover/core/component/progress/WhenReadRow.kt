@@ -19,8 +19,9 @@ import nl.rhaydus.common.currentLocalDateTime
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 private const val WHEN_READ_CHIP_KEY = "when-read"
@@ -48,7 +49,7 @@ internal fun WhenReadRow(
     val isCustomized = pickedDateTime != null
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        // S6-1 lifts this model onto `UpdateProgressBottomSheet`'s `UiState` (R10); until then it is
+        // This model is later lifted onto `UpdateProgressBottomSheet`'s `UiState` (R10); until then it is
         // the one `WhenReadRow`-local exception to "a UI model is never built in composition".
         Chip(
             model = whenReadChipModel(
@@ -90,7 +91,7 @@ internal fun WhenReadRow(
     }
 }
 
-/** Pure so S6-1 can lift it onto `UiState` unchanged once [pickedDateTime] moves there too. */
+/** Pure so it can later lift onto `UiState` unchanged once [pickedDateTime] moves there too. */
 internal fun whenReadChipModel(
     picked: LocalDateTime?,
     now: LocalDateTime,
@@ -100,10 +101,10 @@ internal fun whenReadChipModel(
         picked = it,
         now = now,
     ) } ?: "Just now",
-    variant = ChipVariant.Tonal(selected = picked != null),
+    selected = picked != null,
     interaction = ChipInteraction.Clickable,
-    leadingIcon = SoftcoverIcon.DateRange,
-    dismissLabel = if (picked != null) "Reset to just now" else null,
+    leading = ChipLeading.Icon(icon = SoftcoverIcon.DateRange),
+    trailing = if (picked != null) ChipTrailing.Dismiss(label = "Reset to just now") else null,
 )
 
 /** [dayLabelFor], paired with the picked time-of-day. */

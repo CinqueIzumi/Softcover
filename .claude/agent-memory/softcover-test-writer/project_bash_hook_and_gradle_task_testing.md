@@ -40,3 +40,11 @@ which is a KMP unit under test but both came through the same `softcover-test-wr
   heredoc gets denied by the very hook you're testing, because the check greps the whole raw command text, not
   just file writes. Put those literal strings inside a script file created via `Write` (untouched by the
   Bash-command checks) and only `bash`-invoke that file from the terminal.
+
+- **The doc-guard.cases harness diffs by substring, not by line — pick an `old_string` that isn't a prefix of
+  another line.** `compute_new_content` reimplements Edit with jq's `split($olds)`, a literal substring split
+  over the whole file. An `old_string` like `"- x"` also matches the first three characters of an unrelated
+  `"- xxxxxxx…"` bullet earlier in the fixture, so the hook splits at that first occurrence instead of the
+  intended line and the resulting fixture is nonsense (a ratchet case that should `allow` came back `deny`).
+  Anchor `old_string` on a longer, unique run of text (e.g. the preceding heading plus the line: `"## Now\n- x"`)
+  whenever the fixture file contains any line that shares a short prefix or suffix with it.

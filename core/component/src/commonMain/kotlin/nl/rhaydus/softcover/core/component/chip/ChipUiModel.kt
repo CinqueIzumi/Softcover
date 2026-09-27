@@ -7,34 +7,30 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
- * Everything [Chip] renders: a label on a fully-rounded surface, shaped by [variant] and gated by
- * [interaction] (`component-contract.md` § 7.2 R2).
+ * Everything [Chip] renders: a label on a fully-rounded surface, coloured by [tone] and [selected],
+ * gated by [interaction], with a [leading] / [trailing] slot and a [face] mark
+ * (`component-contract.md` § 7.2 R2).
  *
  * @property key Identity — the event carries it back (R1), and the mapper's lookup map (kept beside
  * the models in `UiState`, not rebuilt in composition) resolves it back to whatever payload
  * dispatching the original action needs (a filter value, a tag, a category).
- * @property interaction Ignored by [ChipVariant.Editable], whose body is not a tap target — only its
- * spoiler eye and ✕ are.
- * @property leadingIcon Rendered at 18dp with an 8dp gap before the label, on every variant except
- * [ChipVariant.Remove] and [ChipVariant.Editable], whose leading slot is the spoiler eye.
- * @property dismissLabel Non-null renders a trailing ✕ as its own tap target reporting
- * [ChipEvent.Dismissed], using this string as its content description. [ChipVariant.Remove] ignores
- * it — its own ✕ is display-only — and so does [ChipVariant.Dashed].
  */
 @Immutable
 data class ChipUiModel(
     val key: String,
     val label: String,
-    val variant: ChipVariant = ChipVariant.Tonal(),
+    val tone: ChipTone = ChipTone.Tonal,
+    val selected: Boolean = false,
     val interaction: ChipInteraction = ChipInteraction.Clickable,
-    val leadingIcon: SoftcoverIcon? = null,
-    val dismissLabel: String? = null,
+    val size: ChipSize = ChipSize.Regular,
+    val leading: ChipLeading? = null,
+    val trailing: ChipTrailing? = null,
+    val face: ChipFace = ChipFace.Plain,
 ) {
     companion object : UiModelPreviews<ChipUiModel> {
         /**
-         * Per R5, one fixture per [ChipVariant] branch, plus the anatomy-changing cases a leading
-         * icon, a dismissible chip, [ChipInteraction.Disabled] and [ChipInteraction.Inert] add, and
-         * a label long enough to exercise ellipsis.
+         * Per R5: one fixture per [ChipTone], one per [ChipLeading] / [ChipTrailing] kind, plus
+         * [ChipInteraction.Disabled], [ChipInteraction.Inert] and a label long enough to ellipsise.
          */
         override val previews: ImmutableList<ChipUiModel> = persistentListOf(
             ChipUiModel(
@@ -44,72 +40,93 @@ data class ChipUiModel(
             ChipUiModel(
                 key = "tonal-selected",
                 label = "Currently reading",
-                variant = ChipVariant.Tonal(selected = true),
-            ),
-            ChipUiModel(
-                key = "spoiler",
-                label = "Contains a major death",
-                variant = ChipVariant.Spoiler,
-            ),
-            ChipUiModel(
-                key = "add",
-                label = "Winter reading",
-                variant = ChipVariant.Add,
-            ),
-            ChipUiModel(
-                key = "add-outlined",
-                label = "Second helpings",
-                variant = ChipVariant.AddOutlined,
-            ),
-            ChipUiModel(
-                key = "remove",
-                label = "On the list",
-                variant = ChipVariant.Remove(removeLabel = "Remove from list"),
-            ),
-            ChipUiModel(
-                key = "quiet-idle",
-                label = "Reorder",
-                variant = ChipVariant.Quiet(),
-                leadingIcon = SoftcoverIcon.DragHandle,
-            ),
-            ChipUiModel(
-                key = "quiet-selected",
-                label = "Done",
-                variant = ChipVariant.Quiet(selected = true),
-                leadingIcon = SoftcoverIcon.DragHandle,
-            ),
-            ChipUiModel(
-                key = "format",
-                label = "Bold",
-                variant = ChipVariant.Format(
-                    active = true,
-                    face = ChipFace.Bold,
-                ),
+                selected = true,
             ),
             ChipUiModel(
                 key = "choice-idle",
                 label = "Grid · 2",
-                variant = ChipVariant.Choice(),
+                tone = ChipTone.Choice,
             ),
             ChipUiModel(
                 key = "choice-selected",
-                label = "Title",
-                variant = ChipVariant.Choice(
-                    selected = true,
-                    trailingIcon = SoftcoverIcon.ArrowDropDown,
+                label = "Ascending",
+                tone = ChipTone.Choice,
+                selected = true,
+                trailing = ChipTrailing.Icon(
+                    icon = SoftcoverIcon.ArrowDropDown,
+                    description = "Ascending",
                 ),
+            ),
+            ChipUiModel(
+                key = "filled",
+                label = "Winter reading",
+                tone = ChipTone.Filled,
+                leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
+            ),
+            ChipUiModel(
+                key = "container",
+                label = "On the list",
+                tone = ChipTone.Container,
+                trailing = ChipTrailing.Icon(
+                    icon = SoftcoverIcon.Close,
+                    description = "Remove from list",
+                ),
+            ),
+            ChipUiModel(
+                key = "outlined",
+                label = "Second helpings",
+                tone = ChipTone.Outlined,
+                leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
+            ),
+            ChipUiModel(
+                key = "dashed",
+                label = "Add tags",
+                tone = ChipTone.Dashed,
+                leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
+            ),
+            ChipUiModel(
+                key = "spoiler",
+                label = "Contains a major death",
+                tone = ChipTone.Spoiler,
+            ),
+            ChipUiModel(
+                key = "spoiler-toggle-marked",
+                label = "Contains a major death",
+                size = ChipSize.Compact,
+                leading = ChipLeading.SpoilerToggle(
+                    marked = true,
+                    label = "Marked as spoiler — tap to unmark",
+                ),
+                trailing = ChipTrailing.Dismiss(label = "Remove Contains a major death"),
+                interaction = ChipInteraction.Inert,
+            ),
+            ChipUiModel(
+                key = "spoiler-toggle-unmarked",
+                label = "Cozy mystery",
+                size = ChipSize.Compact,
+                leading = ChipLeading.SpoilerToggle(
+                    marked = false,
+                    label = "Mark as spoiler",
+                ),
+                trailing = ChipTrailing.Dismiss(label = "Remove Cozy mystery"),
+                interaction = ChipInteraction.Inert,
             ),
             ChipUiModel(
                 key = "leading-icon",
                 label = "Just now",
-                leadingIcon = SoftcoverIcon.DateRange,
+                leading = ChipLeading.Icon(icon = SoftcoverIcon.DateRange),
             ),
             ChipUiModel(
                 key = "dismissible",
                 label = "Yesterday, 14:30",
-                variant = ChipVariant.Tonal(selected = true),
-                leadingIcon = SoftcoverIcon.DateRange,
-                dismissLabel = "Reset to just now",
+                selected = true,
+                leading = ChipLeading.Icon(icon = SoftcoverIcon.DateRange),
+                trailing = ChipTrailing.Dismiss(label = "Reset to just now"),
+            ),
+            ChipUiModel(
+                key = "format-bold",
+                label = "Bold",
+                face = ChipFace.Bold,
             ),
             ChipUiModel(
                 key = "disabled",
@@ -124,29 +141,6 @@ data class ChipUiModel(
             ChipUiModel(
                 key = "long-label",
                 label = "A Chip Label Long Enough That It Must Ellipsise Somewhere",
-            ),
-            ChipUiModel(
-                key = "dashed",
-                label = "+ Add tags",
-                variant = ChipVariant.Dashed,
-            ),
-            ChipUiModel(
-                key = "editable-idle",
-                label = "Cozy mystery",
-                variant = ChipVariant.Editable(
-                    spoiler = false,
-                    spoilerToggleLabel = "Mark as spoiler",
-                ),
-                dismissLabel = "Remove Cozy mystery",
-            ),
-            ChipUiModel(
-                key = "editable-spoiler",
-                label = "Contains a major death",
-                variant = ChipVariant.Editable(
-                    spoiler = true,
-                    spoilerToggleLabel = "Marked as spoiler — tap to unmark",
-                ),
-                dismissLabel = "Remove Contains a major death",
             ),
         )
     }

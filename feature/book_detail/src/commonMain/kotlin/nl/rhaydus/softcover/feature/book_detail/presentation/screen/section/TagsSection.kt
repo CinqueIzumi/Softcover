@@ -30,7 +30,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 
 /**
  * The "Tags" section (The Book lens): the community tag block (grouped by category, top-5,
- * content-warning tags concealed under [nl.rhaydus.softcover.core.component.chip.ChipVariant.Spoiler]
+ * content-warning tags concealed under [nl.rhaydus.softcover.core.component.chip.ChipTone.Spoiler]
  * until [OnRevealTagSpoilerAction] reveals them in place), followed by the edition colophon line
  * (publisher · format, year · ISBN-13) — folded into one section per the spec, rather than two
  * separate strips.

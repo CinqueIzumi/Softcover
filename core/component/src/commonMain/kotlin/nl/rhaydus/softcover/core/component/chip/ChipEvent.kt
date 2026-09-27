@@ -5,6 +5,6 @@ sealed interface ChipEvent {
     data class Clicked(val key: String) : ChipEvent
     data class Dismissed(val key: String) : ChipEvent
 
-    /** [ChipVariant.Editable]'s leading eye, tapped independently of the chip's ✕ or any [Clicked]. */
+    /** [ChipLeading.SpoilerToggle]'s eye, tapped independently of the chip's own [Clicked] or [Dismissed]. */
     data class SpoilerToggled(val key: String) : ChipEvent
 }

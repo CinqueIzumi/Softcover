@@ -3,13 +3,17 @@ package nl.rhaydus.softcover.core.uibinding.lists
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipSize
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsRowUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsVariant
 import nl.rhaydus.softcover.core.component.lists.ListMembership
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 
 /** How many covers the bulk header's rotated stack can show. */
@@ -99,19 +103,34 @@ private fun List<BookList>.rowsFor(
                 totalCount = bookIds.size,
                 isBulk = isBulk,
             ),
-            variant = membership.toMembershipChipVariant(),
+            tone = membership.toMembershipChipTone(),
+            leading = membership.toMembershipChipLeading(),
+            trailing = membership.toMembershipChipTrailing(),
             interaction = ChipInteraction.Inert,
+            size = ChipSize.Compact,
         ),
         membership = membership,
         isPending = list.id in listsBeingMutated,
     )
 }.toImmutableList()
 
-/** The trailing control's chrome per membership: a removable chip, a filled add pill, a quiet outline pill. */
-private fun ListMembership.toMembershipChipVariant(): ChipVariant = when (this) {
-    ListMembership.ALL -> ChipVariant.Remove(removeLabel = "Remove from list")
-    ListMembership.PARTIAL -> ChipVariant.Add
-    ListMembership.NONE -> ChipVariant.AddOutlined
+private fun ListMembership.toMembershipChipTone(): ChipTone = when (this) {
+    ListMembership.ALL -> ChipTone.Container
+    ListMembership.PARTIAL -> ChipTone.Filled
+    ListMembership.NONE -> ChipTone.Outlined
+}
+
+private fun ListMembership.toMembershipChipLeading(): ChipLeading? = when (this) {
+    ListMembership.ALL -> null
+    ListMembership.PARTIAL, ListMembership.NONE -> ChipLeading.Icon(icon = SoftcoverIcon.Add)
+}
+
+private fun ListMembership.toMembershipChipTrailing(): ChipTrailing? = when (this) {
+    ListMembership.ALL -> ChipTrailing.Icon(
+        icon = SoftcoverIcon.Close,
+        description = "Remove from list",
+    )
+    ListMembership.PARTIAL, ListMembership.NONE -> null
 }
 
 /**

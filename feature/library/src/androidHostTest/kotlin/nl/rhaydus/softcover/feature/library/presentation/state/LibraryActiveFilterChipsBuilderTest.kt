@@ -3,8 +3,10 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Tag
 
 class LibraryActiveFilterChipsBuilderTest {
@@ -47,7 +49,7 @@ class LibraryActiveFilterChipsBuilderTest {
         }
 
         @Test
-        fun `more than one active filter adds a Quiet clearAll chip with the reserved key`() {
+        fun `more than one active filter adds a Tonal clearAll chip with the reserved key`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
                 formats = setOf("ebook"),
@@ -61,7 +63,7 @@ class LibraryActiveFilterChipsBuilderTest {
             chips.clearAll shouldBe ChipUiModel(
                 key = LIBRARY_CLEAR_ALL_CHIP_KEY,
                 label = "Clear all",
-                variant = ChipVariant.Quiet(),
+                tone = ChipTone.Tonal,
             )
         }
 
@@ -167,7 +169,7 @@ class LibraryActiveFilterChipsBuilderTest {
         }
 
         @Test
-        fun `every chip uses a Remove variant with a label naming the filter it removes`() {
+        fun `every chip uses a Container tone with a trailing close icon naming the filter it removes`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
                 tags = setOf(tagFiction),
@@ -179,7 +181,11 @@ class LibraryActiveFilterChipsBuilderTest {
 
             // ----- Assert -----
             chips.chips.forEach { chip ->
-                chip.variant shouldBe ChipVariant.Remove(removeLabel = "Remove filter ${chip.label}")
+                chip.tone shouldBe ChipTone.Container
+                chip.trailing shouldBe ChipTrailing.Icon(
+                    icon = SoftcoverIcon.Close,
+                    description = "Remove filter ${chip.label}",
+                )
             }
         }
 

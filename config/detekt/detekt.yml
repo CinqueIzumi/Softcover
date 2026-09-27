@@ -99,8 +99,19 @@ style:
     # @Composable is dead UI code and should be caught. Only previews are exempt (they are entry points).
     ignoreAnnotated: ['Preview', 'StandardPreview']
   ForbiddenComment:
-    # TODO / FIXME / etc. are legitimate, tracked markers in this codebase — not a code smell to gate on.
-    active: false
+    # TODO / FIXME / STOPSHIP are legitimate, tracked markers in this codebase — not a code smell to gate
+    # on, so `comments` below replaces the rule's own TODO/FIXME/STOPSHIP defaults rather than adding to
+    # them. What IS gated: a plan is deleted once it finishes (docs/working/<plan>/), so a comment or KDoc
+    # that cites its directory, a decision number (`D17`), or a step id (`S5-1a`) outlives the thing it
+    # points at. This rule also scans KDoc, not just `//`/`/* */` comments.
+    active: true
+    comments:
+      - value: 'docs/working/'
+        reason: 'Plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description.'
+      - value: '\bD[0-9]{1,2}\b'
+        reason: 'Plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description.'
+      - value: '\bS[0-9]{1,2}-[0-9A-Z]'
+        reason: 'Plans are deleted when they finish; cite nothing from docs/working. The reason goes in the PR description.'
   LoopWithTooManyJumpStatements:
     # Two jumps in a filtering/iteration loop is readable; the default of one is too strict. The one
     # outlier (the HTML parser's single-pass loop) carries a justified per-site @Suppress instead.

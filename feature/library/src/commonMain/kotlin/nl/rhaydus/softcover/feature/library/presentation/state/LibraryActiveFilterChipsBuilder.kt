@@ -1,8 +1,10 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 internal fun buildLibraryActiveFilterChips(
     filters: LibraryFilters,
@@ -69,7 +71,7 @@ internal fun buildLibraryActiveFilterChips(
         ChipUiModel(
             key = LIBRARY_CLEAR_ALL_CHIP_KEY,
             label = "Clear all",
-            variant = ChipVariant.Quiet(),
+            tone = ChipTone.Tonal,
         )
     } else {
         null
@@ -90,7 +92,11 @@ private fun activeFilterChipEntry(
     val chip = ChipUiModel(
         key = value.chipKey(),
         label = label,
-        variant = ChipVariant.Remove(removeLabel = "Remove filter $label"),
+        tone = ChipTone.Container,
+        trailing = ChipTrailing.Icon(
+            icon = SoftcoverIcon.Close,
+            description = "Remove filter $label",
+        ),
     )
 
     return chip to value

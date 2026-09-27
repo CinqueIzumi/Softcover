@@ -345,5 +345,82 @@ class CheckDocBudgetsTaskTest {
                 )
             }
         }
+
+        @Test
+        fun `flags a permanent doc that cites a plan directory`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "docs/reference/foo.md",
+                "# Foo\n\nSee docs/working/275-foo/step-1.md for details.\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    listOf("docs/reference/foo.md"),
+                )
+            }
+            exception.message shouldContain "cites a plan directory"
+        }
+
+        @Test
+        fun `passes a doc under docs-working that cites a plan directory`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "docs/working/notes.md",
+                "See docs/working/275-foo/step-1.md for details.\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    listOf("docs/working/notes.md"),
+                )
+            }
+        }
+
+        @Test
+        fun `excludes vendored rhaydus docs from citation checks`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "docs/rhaydus/0.3.1/architecture.md",
+                "This follows D3 in docs/working/275-foo/step-1.md.\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    listOf("docs/rhaydus/0.3.1/architecture.md"),
+                )
+            }
+        }
+
+        @Test
+        fun `passes a permanent doc that references the top-level ACTIVE tracker`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                "docs/reference/foo.md",
+                "# Foo\n\nSee docs/working/ACTIVE.md for state.\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            assertDoesNotThrow {
+                runCheck(
+                    "",
+                    listOf("docs/reference/foo.md"),
+                )
+            }
+        }
     }
 }

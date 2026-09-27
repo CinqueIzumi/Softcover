@@ -39,8 +39,7 @@ import nl.rhaydus.softcover.core.domain.model.ListBook
 
 // Room aggregates every book/edition/list/journal query onto one DAO, so the function count is
 // inherently high and keeps growing. Suppressed rather than gated — but this is a signal the DAO
-// should eventually be split into smaller, area-scoped DAOs (see docs/working/architecture-review.md,
-// DB2).
+// should eventually be split into smaller, area-scoped DAOs.
 @Suppress("TooManyFunctions")
 @Dao
 interface BookDao {

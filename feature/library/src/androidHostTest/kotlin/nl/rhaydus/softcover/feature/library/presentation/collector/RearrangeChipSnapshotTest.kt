@@ -3,7 +3,8 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -188,8 +189,9 @@ class RearrangeChipSnapshotTest {
 
             // ----- Assert -----
             chip.label shouldBe "Done"
-            chip.variant shouldBe ChipVariant.Quiet(selected = true)
-            chip.leadingIcon shouldBe SoftcoverIcon.DragHandle
+            chip.tone shouldBe ChipTone.Tonal
+            chip.selected shouldBe true
+            chip.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.DragHandle)
         }
 
         @Test
@@ -209,7 +211,8 @@ class RearrangeChipSnapshotTest {
 
             // ----- Assert -----
             chip.label shouldBe "Reorder"
-            chip.variant shouldBe ChipVariant.Quiet(selected = false)
+            chip.tone shouldBe ChipTone.Tonal
+            chip.selected shouldBe false
         }
 
         @Test

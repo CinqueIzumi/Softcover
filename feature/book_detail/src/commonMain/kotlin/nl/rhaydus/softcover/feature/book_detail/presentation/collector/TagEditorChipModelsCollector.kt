@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -41,7 +40,7 @@ internal class TagEditorChipModelsCollector : BookDetailCollector {
                     ChipUiModel(
                         key = category.name,
                         label = category.label,
-                        variant = ChipVariant.Tonal(selected = category == snapshot.selectedCategory),
+                        selected = category == snapshot.selectedCategory,
                     )
                 }
 

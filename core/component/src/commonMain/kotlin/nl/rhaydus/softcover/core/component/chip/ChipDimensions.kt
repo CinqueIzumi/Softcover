@@ -1,196 +1,28 @@
 package nl.rhaydus.softcover.core.component.chip
 
-import androidx.compose.ui.unit.Dp
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 
 /**
- * Per-[ChipVariant] metrics read by [Chip]'s variant bodies (`component-contract.md` § 7.2 R2).
- * This is a straight port of today's inlined literals — **the table changes no pixel**, it only
- * gives each variant's existing choice a name so a new variant has one place to add its own.
- *
- * [innerGap] is the extra gap [ChipVariant.AddOutlined] and [ChipVariant.Remove] insert between
- * their leading glyph and the label (or the label and [removeIconSize]'s icon); unused elsewhere.
+ * Chip metrics shared by every [ChipTone] (`component-contract.md` § 7.2 R2). Only the padding
+ * varies, by [ChipUiModel.size].
  */
-internal data class ChipDimensions(
-    val paddingStart: Dp,
-    val paddingTop: Dp,
-    val paddingEnd: Dp,
-    val paddingBottom: Dp,
-    val innerGap: Dp,
-    val leadingIconSize: Dp,
-    val leadingIconGap: Dp,
-    val dismissIconSize: Dp,
-    val dismissIconGap: Dp,
-    val removeIconSize: Dp,
-    val borderWidth: Dp,
-    val disabledAlpha: Float,
-    /** Only [ChipVariant.Choice] renders a trailing icon; every other variant carries the default. */
-    val trailingIconSize: Dp = LeadingIconSize,
-    val trailingIconGap: Dp = LeadingIconGap,
-) {
-    companion object {
-        private val LeadingIconSize = 18.dp
-        private val LeadingIconGap = 8.dp
-        private val DismissIconSize = 16.dp
-        private val DismissIconGap = 8.dp
-        private val RemoveIconSize = 12.dp
-        private const val DISABLED_ALPHA = 0.45f
+internal object ChipDimensions {
+    val iconSize = 18.dp
+    val iconGap = 8.dp
+    val dismissIconSize = 16.dp
+    val dismissIconGap = 8.dp
+    val borderWidth = 1.dp
+    const val disabledAlpha = 0.45f
 
-        /** [ChipVariant.Dashed] carries no fields, so its dimensions are fixed rather than computed per call. */
-        private val DashedDimensions = ChipDimensions(
-            paddingStart = 14.dp,
-            paddingTop = 10.dp,
-            paddingEnd = 14.dp,
-            paddingBottom = 10.dp,
-            innerGap = 0.dp,
-            leadingIconSize = LeadingIconSize,
-            leadingIconGap = LeadingIconGap,
-            dismissIconSize = DismissIconSize,
-            dismissIconGap = DismissIconGap,
-            removeIconSize = RemoveIconSize,
-            borderWidth = 1.dp,
-            disabledAlpha = DISABLED_ALPHA,
+    fun paddingFor(size: ChipSize): PaddingValues = when (size) {
+        ChipSize.Regular -> PaddingValues(
+            horizontal = 14.dp,
+            vertical = 8.dp,
         )
-
-        fun forVariant(variant: ChipVariant): ChipDimensions = when (variant) {
-            is ChipVariant.Tonal -> ChipDimensions(
-                paddingStart = 14.dp,
-                paddingTop = 10.dp,
-                paddingEnd = 14.dp,
-                paddingBottom = 10.dp,
-                innerGap = 0.dp,
-                leadingIconSize = LeadingIconSize,
-                leadingIconGap = LeadingIconGap,
-                dismissIconSize = DismissIconSize,
-                dismissIconGap = DismissIconGap,
-                removeIconSize = RemoveIconSize,
-                borderWidth = 0.dp,
-                disabledAlpha = DISABLED_ALPHA,
-            )
-
-            ChipVariant.Spoiler -> ChipDimensions(
-                paddingStart = 14.dp,
-                paddingTop = 10.dp,
-                paddingEnd = 14.dp,
-                paddingBottom = 10.dp,
-                innerGap = 0.dp,
-                leadingIconSize = LeadingIconSize,
-                leadingIconGap = LeadingIconGap,
-                dismissIconSize = DismissIconSize,
-                dismissIconGap = DismissIconGap,
-                removeIconSize = RemoveIconSize,
-                borderWidth = 0.dp,
-                disabledAlpha = DISABLED_ALPHA,
-            )
-
-            ChipVariant.Add -> ChipDimensions(
-                paddingStart = 13.dp,
-                paddingTop = 7.dp,
-                paddingEnd = 13.dp,
-                paddingBottom = 7.dp,
-                innerGap = 0.dp,
-                leadingIconSize = LeadingIconSize,
-                leadingIconGap = LeadingIconGap,
-                dismissIconSize = DismissIconSize,
-                dismissIconGap = DismissIconGap,
-                removeIconSize = RemoveIconSize,
-                borderWidth = 0.dp,
-                disabledAlpha = DISABLED_ALPHA,
-            )
-
-            ChipVariant.AddOutlined -> ChipDimensions(
-                paddingStart = 14.dp,
-                paddingTop = 7.dp,
-                paddingEnd = 14.dp,
-                paddingBottom = 7.dp,
-                innerGap = 4.dp,
-                leadingIconSize = LeadingIconSize,
-                leadingIconGap = LeadingIconGap,
-                dismissIconSize = DismissIconSize,
-                dismissIconGap = DismissIconGap,
-                removeIconSize = RemoveIconSize,
-                borderWidth = 1.dp,
-                disabledAlpha = DISABLED_ALPHA,
-            )
-
-            is ChipVariant.Remove -> ChipDimensions(
-                paddingStart = 13.dp,
-                paddingTop = 7.dp,
-                paddingEnd = 10.dp,
-                paddingBottom = 7.dp,
-                innerGap = 4.dp,
-                leadingIconSize = LeadingIconSize,
-                leadingIconGap = LeadingIconGap,
-                dismissIconSize = DismissIconSize,
-                dismissIconGap = DismissIconGap,
-                removeIconSize = RemoveIconSize,
-                borderWidth = 0.dp,
-                disabledAlpha = DISABLED_ALPHA,
-            )
-
-            is ChipVariant.Quiet -> ChipDimensions(
-                paddingStart = 14.dp,
-                paddingTop = 8.dp,
-                paddingEnd = 14.dp,
-                paddingBottom = 8.dp,
-                innerGap = 0.dp,
-                leadingIconSize = LeadingIconSize,
-                leadingIconGap = LeadingIconGap,
-                dismissIconSize = DismissIconSize,
-                dismissIconGap = DismissIconGap,
-                removeIconSize = RemoveIconSize,
-                borderWidth = 0.dp,
-                disabledAlpha = DISABLED_ALPHA,
-            )
-
-            is ChipVariant.Format -> ChipDimensions(
-                paddingStart = 16.dp,
-                paddingTop = 8.dp,
-                paddingEnd = 16.dp,
-                paddingBottom = 8.dp,
-                innerGap = 0.dp,
-                leadingIconSize = LeadingIconSize,
-                leadingIconGap = LeadingIconGap,
-                dismissIconSize = DismissIconSize,
-                dismissIconGap = DismissIconGap,
-                removeIconSize = RemoveIconSize,
-                borderWidth = 0.dp,
-                disabledAlpha = DISABLED_ALPHA,
-            )
-
-            is ChipVariant.Choice -> ChipDimensions(
-                paddingStart = 16.dp,
-                paddingTop = 9.dp,
-                paddingEnd = 16.dp,
-                paddingBottom = 9.dp,
-                innerGap = 0.dp,
-                leadingIconSize = LeadingIconSize,
-                leadingIconGap = LeadingIconGap,
-                dismissIconSize = DismissIconSize,
-                dismissIconGap = DismissIconGap,
-                removeIconSize = RemoveIconSize,
-                borderWidth = 0.dp,
-                disabledAlpha = DISABLED_ALPHA,
-                trailingIconSize = 15.dp,
-                trailingIconGap = 4.dp,
-            )
-
-            ChipVariant.Dashed -> DashedDimensions
-
-            is ChipVariant.Editable -> ChipDimensions(
-                paddingStart = 9.dp,
-                paddingTop = 6.dp,
-                paddingEnd = 8.dp,
-                paddingBottom = 6.dp,
-                innerGap = 0.dp,
-                leadingIconSize = 17.dp,
-                leadingIconGap = 7.dp,
-                dismissIconSize = 13.dp,
-                dismissIconGap = 7.dp,
-                removeIconSize = RemoveIconSize,
-                borderWidth = 0.dp,
-                disabledAlpha = DISABLED_ALPHA,
-            )
-        }
+        ChipSize.Compact -> PaddingValues(
+            horizontal = 10.dp,
+            vertical = 6.dp,
+        )
     }
 }

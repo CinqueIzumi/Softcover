@@ -123,15 +123,15 @@ internal data class BookDetailUiState(
     /**
      * The community tag block (`TagsSection`, The Book lens), mapped by `TagChipModelsCollector`
      * (R9) off [book]'s tags and [revealedTagKeys] — grouped by category, top-5 per category,
-     * content-warning tags flagged with [nl.rhaydus.softcover.core.component.chip.ChipVariant.Spoiler]
-     * until their key is in [revealedTagKeys], then [nl.rhaydus.softcover.core.component.chip.ChipVariant.Tonal].
+     * content-warning tags flagged with [nl.rhaydus.softcover.core.component.chip.ChipTone.Spoiler]
+     * until their key is in [revealedTagKeys], then [nl.rhaydus.softcover.core.component.chip.ChipTone.Tonal].
      */
     val communityTagGroups: List<TagCategoryChipGroup> = emptyList(),
 
     /** Community content-warning tag keys `OnRevealTagSpoilerAction` has revealed, for the rest of this screen instance. */
     val revealedTagKeys: ImmutableSet<String> = persistentSetOf(),
 
-    /** The "+ Add tags" / "Edit tags" opener (`UserTagsSection`), mapped by `TagChipModelsCollector` (R9) off [userTags]. */
+    /** The "Add tags" / "Edit tags" opener (`UserTagsSection`), mapped by `TagChipModelsCollector` (R9) off [userTags]. */
     val tagEditorOpenerChip: ChipUiModel? = null,
 
     /**

@@ -4,7 +4,7 @@ import org.gradle.kotlin.dsl.register
 
 /**
  * Registers `checkDocBudgets` on the applying project, wiring it to the repo's own
- * `docs/doc-budgets.txt` and `docs/working/ACTIVE.md` rather than requiring per-module configuration —
+ * `docs/doc-budgets.txt` and its `ACTIVE.md` tracker rather than requiring per-module configuration —
  * applied once, at the root, alongside `checkModuleGraph`.
  */
 class DocBudgetsConventionPlugin : Plugin<Project> {

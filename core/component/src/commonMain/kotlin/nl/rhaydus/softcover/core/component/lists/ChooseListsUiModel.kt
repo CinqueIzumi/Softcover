@@ -5,11 +5,15 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipSize
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.chip.ChipVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
  * Everything `ChooseListsBottomSheet` renders: who is being shelved, and the reader's custom lists
@@ -48,8 +52,13 @@ data class ChooseListsUiModel(
                         membershipChip = ChipUiModel(
                             key = "1",
                             label = "On the list",
-                            variant = ChipVariant.Remove(removeLabel = "Remove from list"),
+                            tone = ChipTone.Container,
+                            trailing = ChipTrailing.Icon(
+                                icon = SoftcoverIcon.Close,
+                                description = "Remove from list",
+                            ),
                             interaction = ChipInteraction.Inert,
+                            size = ChipSize.Compact,
                         ),
                         membership = ListMembership.ALL,
                         isPending = false,
@@ -61,8 +70,10 @@ data class ChooseListsUiModel(
                         membershipChip = ChipUiModel(
                             key = "2",
                             label = "Add",
-                            variant = ChipVariant.AddOutlined,
+                            tone = ChipTone.Outlined,
+                            leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
                             interaction = ChipInteraction.Inert,
+                            size = ChipSize.Compact,
                         ),
                         membership = ListMembership.NONE,
                         isPending = false,
@@ -74,8 +85,10 @@ data class ChooseListsUiModel(
                         membershipChip = ChipUiModel(
                             key = "3",
                             label = "Add",
-                            variant = ChipVariant.AddOutlined,
+                            tone = ChipTone.Outlined,
+                            leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
                             interaction = ChipInteraction.Inert,
+                            size = ChipSize.Compact,
                         ),
                         membership = ListMembership.NONE,
                         isPending = true,
@@ -101,8 +114,13 @@ data class ChooseListsUiModel(
                         membershipChip = ChipUiModel(
                             key = "1",
                             label = "On all 5",
-                            variant = ChipVariant.Remove(removeLabel = "Remove from list"),
+                            tone = ChipTone.Container,
+                            trailing = ChipTrailing.Icon(
+                                icon = SoftcoverIcon.Close,
+                                description = "Remove from list",
+                            ),
                             interaction = ChipInteraction.Inert,
+                            size = ChipSize.Compact,
                         ),
                         membership = ListMembership.ALL,
                         isPending = false,
@@ -114,8 +132,10 @@ data class ChooseListsUiModel(
                         membershipChip = ChipUiModel(
                             key = "2",
                             label = "Add the other 2",
-                            variant = ChipVariant.Add,
+                            tone = ChipTone.Filled,
+                            leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
                             interaction = ChipInteraction.Inert,
+                            size = ChipSize.Compact,
                         ),
                         membership = ListMembership.PARTIAL,
                         isPending = false,
@@ -127,8 +147,10 @@ data class ChooseListsUiModel(
                         membershipChip = ChipUiModel(
                             key = "3",
                             label = "Add all 5",
-                            variant = ChipVariant.AddOutlined,
+                            tone = ChipTone.Outlined,
+                            leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
                             interaction = ChipInteraction.Inert,
+                            size = ChipSize.Compact,
                         ),
                         membership = ListMembership.NONE,
                         isPending = false,

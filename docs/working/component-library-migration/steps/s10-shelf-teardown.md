@@ -29,6 +29,6 @@ weight the S5–S9 families haven't already pulled out, not about repeating the 
   scope` in `README.md`) or a component the relevant S5–S9 family step has not reached yet; if the
   latter, that symbol belongs to that family step instead, not to this one.
 - `HiddenSuggestionsShelf.kt` and `OnboardingShelf.kt` still hold several "current" family members
-  each (see `steps/s5-chips.md`, `steps/s6-list-rows.md`, `steps/s7-bookcard.md`,
+  each (see `steps/s6-list-rows.md`, `steps/s7-bookcard.md`,
   `steps/s8-controls.md`, `steps/s9-statistics.md`) — do not move those symbols here; this step only
   starts once its family step has already extracted them.

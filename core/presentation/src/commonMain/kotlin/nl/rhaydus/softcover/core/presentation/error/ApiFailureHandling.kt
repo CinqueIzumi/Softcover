@@ -5,9 +5,7 @@ import nl.rhaydus.designsystem.util.SnackBarManager
 
 /**
  * The standard presentation handling for a failed use-case [Result]: surface a user-facing snackbar
- * for it (mapped via [toUserMessage]), or nothing when the kind maps to `null`. Re-homes the generic
- * error toast the network seam used to emit from the data layer (D1) — presentation now owns the copy
- * and whether to show it.
+ * for it (mapped via [toUserMessage]), or nothing when the kind maps to `null`.
  *
  * Surface-only by design: the failure was already **logged** at the use-case boundary by
  * `runCatchingLogged`, so this does not log again. That split is what makes a forgotten fold safe — a
