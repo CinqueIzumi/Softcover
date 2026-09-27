@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -174,6 +175,24 @@ class LibraryUiStateTest {
 
             // ----- Assert -----
             state.tabsLoaded shouldBe false
+        }
+
+        @Test
+        fun `shelvesSidebarLabel defaults to a Label eyebrowed Shelves`() {
+            // ----- Arrange & Act -----
+            val state = LibraryUiState()
+
+            // ----- Assert -----
+            state.shelvesSidebarLabel shouldBe SectionHeaderUiModel.Label(eyebrow = "Shelves")
+        }
+
+        @Test
+        fun `listsSidebarLabel defaults to a Label eyebrowed Lists`() {
+            // ----- Arrange & Act -----
+            val state = LibraryUiState()
+
+            // ----- Assert -----
+            state.listsSidebarLabel shouldBe SectionHeaderUiModel.Label(eyebrow = "Lists")
         }
     }
 

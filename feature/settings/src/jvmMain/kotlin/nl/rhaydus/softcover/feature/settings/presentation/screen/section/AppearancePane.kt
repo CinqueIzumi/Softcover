@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.AppearanceSettingsContent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -43,11 +44,7 @@ internal fun AppearancePane(
                     .cappedContentWidth()
                     .padding(horizontal = 32.dp),
             ) {
-                DesktopPaneHeader(
-                    eyebrow = "Personalise",
-                    title = "Appearance",
-                    subtitle = "Make Softcover yours.",
-                )
+                PageMasthead(model = state.appearancePaneMasthead)
 
                 Spacer(modifier = Modifier.height(28.dp))
 

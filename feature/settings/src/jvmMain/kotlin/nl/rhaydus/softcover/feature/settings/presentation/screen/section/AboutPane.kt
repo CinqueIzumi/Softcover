@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.component.header.PageMasthead
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.screen.AboutContent
 
@@ -30,6 +32,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.AboutContent
  */
 @Composable
 internal fun AboutPane(
+    masthead: PageMastheadUiModel,
     versionName: String,
     versionCode: Int,
     appUpdateState: AppUpdateState,
@@ -56,11 +59,7 @@ internal fun AboutPane(
                     .cappedContentWidth()
                     .padding(horizontal = 32.dp),
             ) {
-                DesktopPaneHeader(
-                    eyebrow = "About",
-                    title = "About Softcover",
-                    subtitle = null,
-                )
+                PageMasthead(model = masthead)
 
                 Spacer(modifier = Modifier.height(28.dp))
 

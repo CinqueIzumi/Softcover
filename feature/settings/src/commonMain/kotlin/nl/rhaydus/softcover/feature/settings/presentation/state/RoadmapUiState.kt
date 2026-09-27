@@ -1,10 +1,18 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
 import nl.rhaydus.toad.UiState
 
 internal data class RoadmapUiState(
     val document: RoadmapDocument? = null,
+
+    /** Desktop only — mobile's pushed Roadmap screen renders its own top bar instead. */
+    val masthead: PageMastheadUiModel = PageMastheadUiModel(
+        eyebrow = "Roadmap",
+        title = "Roadmap",
+        subtitle = "What we're building next, and roughly when.",
+    ),
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val roadmapError: String? = null,

@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -45,6 +44,7 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -68,9 +68,9 @@ internal actual val settingsUsesMasterDetail: Boolean = false
  * ([settingsRunAction], [libraryVisibilityState], [libraryVisibilityRunAction], [roadmapState],
  * [roadmapRunAction], [onCreateListClick], [openUrl]) are unused here — the toggles live on the pushed
  * [AppearanceSettingsScreen] / [LibraryVisibilitySettingsScreen] / [AboutScreen] / [RoadmapScreen], each
- * with its own model (and, for About and Roadmap, their own `LocalUriHandler`). [state] is likewise
- * unused: it carried nothing this menu itself renders once the app version moved off this list and onto
- * [AboutScreen] — its sole home now — to avoid showing the version in two places. [navigateToRoadmap]
+ * with its own model (and, for About and Roadmap, their own `LocalUriHandler`). [state] now carries only
+ * this menu's own page masthead — the app version moved off this list and onto [AboutScreen], its sole
+ * home now, to avoid showing the version in two places. [navigateToRoadmap]
  * *is* used — this menu's own direct "Roadmap" shortcut, alongside the desktop sidebar's equivalent row
  * (`section/SettingsCategorySidebar.kt`'s `SettingsCategorySidebar`) — even though the same screen is also
  * reachable a second way, via the row [AboutContent] renders once you're already on About.
@@ -117,7 +117,7 @@ internal actual fun SettingsScreenLayout(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            SettingsPageHeader()
+            PageMasthead(model = state.settingsPageMasthead)
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -221,26 +221,6 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(24.dp + bottomBarPadding))
         }
-    }
-}
-
-@Composable
-private fun SettingsPageHeader() {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Settings",
-            style = MaterialTheme.editorialTypography.pageTitle,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Text(
-            text = "Tune Softcover to match how you read.",
-            style = MaterialTheme.editorialTypography.body,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.widthIn(max = 300.dp),
-        )
     }
 }
 

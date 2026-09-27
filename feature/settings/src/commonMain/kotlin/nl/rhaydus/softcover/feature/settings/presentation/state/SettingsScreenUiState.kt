@@ -1,6 +1,9 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import nl.rhaydus.softcover.core.component.header.PageMastheadSize
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -14,6 +17,35 @@ import nl.rhaydus.toad.UiState
 
 internal data class SettingsScreenUiState(
     val useFloatingBarChecked: Boolean = true,
+
+    /** Mobile only; desktop uses [settingsSidebarMasthead] instead. */
+    val settingsPageMasthead: PageMastheadUiModel = PageMastheadUiModel(
+        title = "Settings",
+        subtitle = "Tune Softcover to match how you read.",
+    ),
+
+    /** Desktop only; mobile uses [settingsPageMasthead] instead. */
+    val settingsSidebarMasthead: PageMastheadUiModel = PageMastheadUiModel(
+        title = "Settings",
+        subtitle = "Tune Softcover to match how you read.",
+        size = PageMastheadSize.Compact,
+    ),
+
+    val accountSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Account"),
+    val personaliseSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Personalise"),
+    val privacySidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Privacy"),
+    val aboutSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "About"),
+
+    val aboutPaneMasthead: PageMastheadUiModel = PageMastheadUiModel(
+        eyebrow = "About",
+        title = "About Softcover",
+    ),
+
+    val appearancePaneMasthead: PageMastheadUiModel = PageMastheadUiModel(
+        eyebrow = "Personalise",
+        title = "Appearance",
+        subtitle = "Make Softcover yours.",
+    ),
     val themeMode: ThemeMode = ThemeMode.DEFAULT,
     val colorPalette: ColorPalette = ColorPalette.DEFAULT,
     val useDynamicColorChecked: Boolean = false,

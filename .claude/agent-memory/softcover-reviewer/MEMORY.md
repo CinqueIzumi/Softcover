@@ -11,3 +11,5 @@
 - [Arrange/Filter draft-commit pattern traps](project_arrange_filter_draft_commit_pattern.md) — a live nudge into an open draft needs its own failure rollback; async collector-derived chips can blank-flash on sheet open
 - [Dual gate predicate parity](architecture_dual_gate_predicate_parity.md) — doc-guard.sh vs CheckDocBudgetsTask.kt predicates must match; an unconditional (non-ratcheted) scan can retroactively fail untouched files when widened
 - [ChipSet double `.chips` field](project_chipset_double_chips_field.md) — a wrapper's own `chips`/`fooChips` field holding a `ChipSet<P>` forces `.chips.chips` at render sites; flag readability, suggest Iterable/isEmpty on ChipSet
+- [New component shadows foundation](architecture_new_component_shadows_foundation.md) — grep CAPABILITIES.md for a matching foundation anatomy before accepting a new :core:component that just bolts on one extra behavior
+- [R2 lookup table applies to small enums](architecture_r2_lookup_table_applies_to_small_enums.md) — a size/scale enum branched on more than once inline (not just a big sealed variant) needs one table, per R2

@@ -25,11 +25,15 @@ Chrome only, extracted from 18 sheets into `SheetScaffold` + `SheetHeader` + `Sh
 | `ProgressBottomSheetContent` | `core/component/progress/UpdateProgressBottomSheet.kt:67` | already R1/R2-shaped; owes chrome only |
 | `TabSwitcher` | `core/component/progress/TabSwitcher.kt:15` | owes chrome only |
 | `LoadingSheet` | `core/component/sheet/LoadingSheet.kt:29` | model + event already landed (S4-5a); chrome extraction is this sub-step's work |
+| `EditorialHeader` | `core/component/progress/EditorialHeader.kt:19` | `UpdateProgressBottomSheet`'s header; bar stacked above the eyebrow |
+| `ChooseListsHeader` | `core/component/lists/ChooseListsBottomSheet.kt:141` | takes `ChooseListsVariant` + jacket slot |
+| `ChangeEditionHeader` | `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:213` | |
+| `ShelvesSheetHeader` | `feature/library/presentation/component/LibraryShelvesSheet.kt:90` | |
+| `TagEditorHeader` | `feature/book_detail/presentation/component/TagEditorHeader.kt:37` | |
 
 **Phase 1 questions:** design `SheetScaffold`/`SheetHeader`/`SheetRow`/`SheetFooter` against these four
-sheets first, since they are already contract-shaped and expose the chrome boundary cleanly. Cross-check
-against `steps/s5-headers.md` S5-6, which asks whether sheet-context headers fold into `SheetHeader`
-instead of `SectionHeader`.
+sheets first, since they are already contract-shaped and expose the chrome boundary cleanly.
+`SheetHeader` is a `SectionHeader.Section` (built in S5-4) plus a trailing jacket slot.
 
 ## S6-4 — `VerdictSheet` and `SoftcoverDatePickerDialog`
 

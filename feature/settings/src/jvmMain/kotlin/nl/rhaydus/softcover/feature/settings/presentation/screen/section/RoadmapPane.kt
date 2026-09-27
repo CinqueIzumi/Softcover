@@ -17,14 +17,15 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.RoadmapContent
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 
 /**
- * The master–detail `Roadmap` category: a [DesktopPaneHeader] over the shared [RoadmapContent],
- * following [AboutPane]'s shape. No pull-to-refresh here (a touch-only gesture, not a desktop one) — the
- * retry inside a [RoadmapUiState.roadmapError] banner is the desktop refresh path.
+ * The master–detail `Roadmap` category: a [PageMasthead] over the shared [RoadmapContent], following
+ * [AboutPane]'s shape. No pull-to-refresh here (a touch-only gesture, not a desktop one) — the retry
+ * inside a [RoadmapUiState.roadmapError] banner is the desktop refresh path.
  */
 @Composable
 internal fun RoadmapPane(
@@ -49,11 +50,7 @@ internal fun RoadmapPane(
                     .cappedContentWidth()
                     .padding(horizontal = 32.dp),
             ) {
-                DesktopPaneHeader(
-                    eyebrow = "Roadmap",
-                    title = "Roadmap",
-                    subtitle = "What we're building next, and roughly when.",
-                )
+                PageMasthead(model = state.masthead)
 
                 Spacer(modifier = Modifier.height(28.dp))
 

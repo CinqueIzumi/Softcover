@@ -14,23 +14,22 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4 and S5-1 through S5-3b done. S5-C-chips (the chip convergence pass; its step file is
-  already deleted) is built, host-tested and reviewed: `ChipScaffold` + `ChipStyle`, `ChipDimensions` +
-  `ChipSize`, the tone / slot model, and `ChipSet<P>(chips, payloadByKey)` in `:core:component`, which
-  replaces every chip list + `…ByChipKey` map pair (explore, library, book_detail). Library chip actions
-  resolve a key within their own tab (`filterChipsFor` / `activeFilterChipsFor`). Plan-reference gates
-  (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`) cover markdown, `.kt`, permanent config
-  and agent memory (`3c8e6add`). Imports follow the IDE layout (`d293ff14`); 14 files with Apollo alias
-  imports wait on foundation F24.
-- **Next:** [`steps/s5-headers.md`](steps/s5-headers.md) S5-4. Run Gradle with `JAVA_HOME` set to JBR 21
-  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S0–S4, S5-1–S5-3b, S5-C-chips (`c09e3750`) and S5-4 done. S5-4 added `SectionHeader`
+  (Section / Inline / Label registers) and `PageMasthead` (+ `PageMastheadDimensions`) in
+  `:core:component/header/`; the sidebar labels and settings page / pane headers use them, with every
+  header model a `UiState` default field. `:core:component` now holds kotlinx-datetime on `api`. S11-1 is
+  now a gate-driven R10 sweep. 14 files with Apollo alias imports wait on foundation F24.
+- **Next:** [`steps/s5-headers.md`](steps/s5-headers.md) S5-5 (its `## Approved shape` binds it). Run
+  Gradle with `JAVA_HOME` set to JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
   stale for a frame on open; if visible, seed them in the open action.
-- **Verification:** on JBR 21, `ktlintCheck styleCheck checkDocBudgets` pass; `testAndroidHostTest` passes for
-  `:core:component`, explore, library and book_detail; `softcover-reviewer` ✅ (two style nits fixed).
-- **Uncommitted:** the `ChipSet<P>` migration (main + tests) and this tracker's `## Now` block.
+- **Verification:** on JBR 21, compile, `projectHealth` (core:component, settings, library),
+  `checkModuleGraph`, `ktlintCheck`, `styleCheck`, `checkDocBudgets` and `testAndroidHostTest` for
+  `:core:component`, settings and library pass; `softcover-reviewer` findings fixed (its "use the
+  foundation `EditorialSectionHeader`" note rejected, it contradicts the approved shape).
+- **Uncommitted:** nothing.
 
 ## Local verification
 

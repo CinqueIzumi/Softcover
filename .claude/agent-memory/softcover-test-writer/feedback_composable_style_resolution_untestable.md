@@ -1,6 +1,6 @@
 ---
 name: feedback_composable_style_resolution_untestable
-description: core:component has no compose-ui-test dependency — private @Composable style-resolution functions (e.g. chipStyleFor) can't be unit-tested directly; test the enum coverage that drives them instead
+description: core:component has no compose-ui-test dependency — @Composable style-resolution functions (e.g. chipStyleFor, PageMastheadDimensions.forSize) can't be unit-tested directly; proxy via enum coverage, or flag that dropping @Composable in favor of a plain parameter is the real fix
 metadata:
   type: feedback
 ---
@@ -22,3 +22,13 @@ feeding the resolver (here, every `ChipTone`) appears in the model's `previews` 
 sealed-slot subtype (`ChipLeading`, `ChipTrailing`). That mirrors what the old variant-coverage test did and
 is a legitimate, deterministic proxy — flag the resolver itself as untested-at-unit-level rather than
 fabricating a way to exercise it.
+
+**Resolved case (`PageMastheadDimensions.forSize`):** flagged this same blocker for a `@Composable`
+`forSize(size)` reading `MaterialTheme.editorialTypography`. The production fix (not mine to make): drop
+`@Composable` and take the resolved typography value as a plain parameter — `forSize(size, typography)`.
+That turns it into a pure function, directly testable. Its type-building factory
+(`buildEditorialTypography`) was `internal` to a different Gradle module (`:core:designsystem`), invisible
+from `:core:component`'s test source set — Kotlin `internal` is per-module, not per source tree — so the
+test built the typography fixture directly via its public data-class constructor, giving each `TextStyle`
+field a distinct value so role-mapping assertions can't pass by accident. When flagging a resolver as
+untestable, name this de-composable-ify move as the structural fix, not just "add compose-ui-test."

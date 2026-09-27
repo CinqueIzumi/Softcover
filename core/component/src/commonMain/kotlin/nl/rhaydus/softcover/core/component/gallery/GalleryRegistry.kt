@@ -40,6 +40,11 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.cover.CoverlessTitleCover
+import nl.rhaydus.softcover.core.component.header.PageMasthead
+import nl.rhaydus.softcover.core.component.header.PageMastheadSize
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
@@ -146,6 +151,34 @@ object GalleryRegistry {
             label = ::deadlineSummaryLineFixtureLabel,
             content = { model, modifier ->
                 DeadlineSummaryLine(
+                    model = model,
+                    modifier = modifier,
+                )
+            },
+        ),
+        galleryEntry(
+            name = "SectionHeader",
+            family = GalleryFamily.HEADER,
+            blurb = "Opens a region within a page or sheet: an accent bar in one of three weights, " +
+                "an uppercased eyebrow, and — at its heaviest — an optional headline and description.",
+            previews = SectionHeaderUiModel,
+            label = ::sectionHeaderFixtureLabel,
+            content = { model, modifier ->
+                SectionHeader(
+                    model = model,
+                    modifier = modifier,
+                )
+            },
+        ),
+        galleryEntry(
+            name = "PageMasthead",
+            family = GalleryFamily.HEADER,
+            blurb = "Names the page, once per page: an optional eyebrow, the title, and an optional " +
+                "subtitle, sized for the surface that hosts it.",
+            previews = PageMastheadUiModel,
+            label = ::pageMastheadFixtureLabel,
+            content = { model, modifier ->
+                PageMasthead(
                     model = model,
                     modifier = modifier,
                 )
@@ -378,6 +411,20 @@ private fun badgeFixtureLabel(model: BadgeUiModel): String = when {
         BadgeTone.Expired -> "Expired"
         BadgeTone.Release -> "Release"
     }
+}
+
+/** Names what a [SectionHeaderUiModel] fixture demonstrates, derived from its register. */
+private fun sectionHeaderFixtureLabel(model: SectionHeaderUiModel): String = when (model) {
+    is SectionHeaderUiModel.Section -> if (model.headline != null) "Section, with headline" else "Section, eyebrow only"
+    is SectionHeaderUiModel.Inline -> "Inline"
+    is SectionHeaderUiModel.Label -> "Label"
+}
+
+/** Names what a [PageMastheadUiModel] fixture demonstrates — its size, or its eyebrow when present. */
+private fun pageMastheadFixtureLabel(model: PageMastheadUiModel): String = when {
+    model.size == PageMastheadSize.Compact -> "Compact"
+    model.eyebrow != null -> "Regular, with eyebrow"
+    else -> "Regular"
 }
 
 /** Names what a [CoverOverlayUiModel] fixture demonstrates — whether the cover desaturates. */

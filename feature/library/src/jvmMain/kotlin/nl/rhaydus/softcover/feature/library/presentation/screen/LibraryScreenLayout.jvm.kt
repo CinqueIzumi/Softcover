@@ -46,6 +46,8 @@ import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -158,6 +160,8 @@ internal actual fun LibraryScreenLayout(
         ShelfSidebar(
             tabs = tabs,
             selectedTabId = currentTab?.id,
+            shelvesSidebarLabel = state.shelvesSidebarLabel,
+            listsSidebarLabel = state.listsSidebarLabel,
             onTabClick = { id -> runAction(OnTabSelectedAction(tabId = id)) },
             onTabLongPress = onTabLongPress,
             modifier = Modifier
@@ -378,6 +382,8 @@ internal actual fun LibraryScreenLayout(
 private fun ShelfSidebar(
     tabs: List<LibraryContentTab>,
     selectedTabId: String?,
+    shelvesSidebarLabel: SectionHeaderUiModel,
+    listsSidebarLabel: SectionHeaderUiModel,
     onTabClick: (String) -> Unit,
     onTabLongPress: () -> Unit,
     modifier: Modifier = Modifier,
@@ -393,7 +399,10 @@ private fun ShelfSidebar(
                 bottom = 16.dp + rememberBottomBarPadding(),
             ),
     ) {
-        SidebarSectionLabel(text = "Shelves")
+        SectionHeader(
+            model = shelvesSidebarLabel,
+            modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
+        )
 
         shelves.forEach { tab ->
             ShelfSidebarRow(
@@ -407,7 +416,10 @@ private fun ShelfSidebar(
         if (lists.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            SidebarSectionLabel(text = "Lists")
+            SectionHeader(
+                model = listsSidebarLabel,
+                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
+            )
 
             lists.forEach { tab ->
                 ShelfSidebarRow(
@@ -419,16 +431,6 @@ private fun ShelfSidebar(
             }
         }
     }
-}
-
-@Composable
-private fun SidebarSectionLabel(text: String) {
-    Text(
-        text = text.uppercase(),
-        style = MaterialTheme.editorialTypography.eyebrowSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
-    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

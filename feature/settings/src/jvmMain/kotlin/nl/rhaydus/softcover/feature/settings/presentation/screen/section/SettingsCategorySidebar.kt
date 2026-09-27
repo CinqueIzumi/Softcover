@@ -7,14 +7,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.header.PageMasthead
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategory
+import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
 /**
  * The category source list. Carries no version text of its own — the app version shows exactly once,
@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategor
  */
 @Composable
 internal fun SettingsCategorySidebar(
+    state: SettingsScreenUiState,
     selected: SettingsCategory,
     onSelect: (SettingsCategory) -> Unit,
     onProfileClick: () -> Unit,
@@ -37,11 +38,17 @@ internal fun SettingsCategorySidebar(
                 .verticalScroll(rememberScrollState())
                 .padding(vertical = 16.dp),
         ) {
-            SidebarHeader()
+            PageMasthead(
+                model = state.settingsSidebarMasthead,
+                modifier = Modifier.padding(start = 26.dp, end = 16.dp),
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            SidebarSectionLabel(text = "Account")
+            SectionHeader(
+                model = state.accountSidebarLabel,
+                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
+            )
 
             SettingsSidebarRow(
                 label = "Your profile",
@@ -53,7 +60,10 @@ internal fun SettingsCategorySidebar(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SidebarSectionLabel(text = "Personalise")
+            SectionHeader(
+                model = state.personaliseSidebarLabel,
+                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
+            )
 
             SettingsSidebarRow(
                 label = "Appearance",
@@ -73,7 +83,10 @@ internal fun SettingsCategorySidebar(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SidebarSectionLabel(text = "Privacy")
+            SectionHeader(
+                model = state.privacySidebarLabel,
+                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
+            )
 
             SettingsSidebarRow(
                 label = "Hidden suggestions",
@@ -85,7 +98,10 @@ internal fun SettingsCategorySidebar(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SidebarSectionLabel(text = "About")
+            SectionHeader(
+                model = state.aboutSidebarLabel,
+                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
+            )
 
             SettingsSidebarRow(
                 label = "About",
@@ -104,37 +120,4 @@ internal fun SettingsCategorySidebar(
             )
         }
     }
-}
-
-@Composable
-private fun SidebarHeader() {
-    Column(modifier = Modifier.padding(start = 26.dp, end = 16.dp)) {
-        Text(
-            text = "Settings",
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = "Tune Softcover to match how you read.",
-            style = MaterialTheme.editorialTypography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun SidebarSectionLabel(text: String) {
-    Text(
-        text = text.uppercase(),
-        style = MaterialTheme.editorialTypography.eyebrowSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(
-            start = 26.dp,
-            top = 8.dp,
-            bottom = 6.dp,
-        ),
-    )
 }

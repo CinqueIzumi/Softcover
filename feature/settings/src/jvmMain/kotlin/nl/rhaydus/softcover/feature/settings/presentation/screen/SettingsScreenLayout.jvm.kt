@@ -72,6 +72,7 @@ internal actual fun SettingsScreenLayout(
 
     Row(modifier = Modifier.fillMaxSize()) {
         SettingsCategorySidebar(
+            state = state,
             selected = selected,
             onSelect = { selected = it },
             onProfileClick = navigateToProfile,
@@ -101,6 +102,7 @@ internal actual fun SettingsScreenLayout(
                 )
 
                 SettingsCategory.ABOUT -> AboutPane(
+                    masthead = state.aboutPaneMasthead,
                     versionName = state.appVersionName,
                     versionCode = state.appVersionCode,
                     appUpdateState = appUpdateState,

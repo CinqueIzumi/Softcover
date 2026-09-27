@@ -10,22 +10,25 @@ render parameter, before the migration's final verification. **Delegation:** use
 
 | Sub | Scope | Status |
 |---|---|---|
-| S11-1 | R10 holdouts | [ ] |
+| S11-1 | R10 sweep: every UI model built outside a collector, behind a build gate | [ ] |
 | S11-2 | R11 holdouts | [ ] |
 | S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | [ ] |
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
-## S11-1 — R10 holdouts
+## S11-1 — R10 sweep
 
-Call sites that build a UI model inside composition instead of receiving it from the collector:
+A full sweep, not a list: every UI model constructed, copied or mapped outside the state layer moves onto
+the `UiState`, assembled by the collector.
 
-- `StatNumberUiModel` — profile's four stat sites.
-- `MarkAsReadBurstUiModel` — book detail, reading, motion debug.
-- File-constant `TopBarUiModel`s on nine static bars.
-- `ClickableTextUiModel` — onboarding, roadmap.
-- `ChipUiModel.copy(selected = …)` — the library filter draft.
-- `LoadingSheetUiModel` — onboarding.
-- Inline `ChipUiModel`s — share cards, Component Gallery.
+1. **Gate first.** Add a detekt rule that fails when render code (composables, `presentation/screen/**`,
+   `presentation/component/**`, `:core:component` render files, `app/src/debug`) calls a `*UiModel`
+   constructor, a `*UiModel.copy(…)`, or a `to*UiModel(…)` mapper — in composition, in `remember`, or as
+   a file-level constant. Allowed: collectors, ScreenModels, actions, state builders, mappers, fixtures
+   (`UiModelPreviews`), the gallery, and each recorded § 7.4a exception (named by symbol in the rule's
+   config).
+2. **Sweep.** Run the gate; its findings are the work list. Fix every one, split into feature-sized
+   briefs.
+3. **Done** when the gate is green on the whole repo with no suppressions and no baseline entries.
 
 S11 settles the three R10 edges `component-contract.md` names. Two stay open on purpose, as recorded
 exceptions rather than holdouts: a component resolving its own copy from `composeResources`

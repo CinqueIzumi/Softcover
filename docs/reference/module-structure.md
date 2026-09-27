@@ -116,6 +116,7 @@ component/
 + dialog/      SoftcoverDatePickerDialog  PickerDates (internal)   — owes R1
 + gallery/     GalleryRegistry  GalleryEntry  GalleryFamily
 +              GalleryFixture  UiModelPreviews
++ header/      SectionHeader  PageMasthead
 + lists/       ChooseListsBottomSheet  ChooseListsUiModel/RowUiModel
 +              ChooseListsVariant  ChooseListsEvent  ListMembership
 + progress/    UpdateProgressBottomSheet  ProgressSheetUiModel
@@ -136,7 +137,6 @@ component/
 · bookcard/    BookCard  BookCardUiModel/Variant/Content/Decorations
 ·              BookCardEvent  BookCardKey                                    S7
 · row/         ListRow  ListRowUiModel                                       S6
-· header/      SectionHeader  PageMasthead  SidebarLabel                     S5/S6
 ```
 
 **No `*Previews.kt` third file.** Fixtures live on the model's companion via `UiModelPreviews<T>`

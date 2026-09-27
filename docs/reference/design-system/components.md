@@ -1,11 +1,13 @@
 # Design System — Components
 
-An index of shared components. Each line links to its family file under `components/` for the full contract — grep the name, then open that one file.
+Shared components; a `detail` link opens the family file holding the full contract.
 
 ## Navigation & chrome
 
 - **Top app bar** — `core:component/topbar` — page title, optional back/trailing actions, opaque or over-media.
 - **Search top app bar** — `core:component/topbar` — mobile search chrome.
+- **Section header** — `core:component/header` — region opener in three accent-bar registers.
+- **Page masthead** — `core:component/header` — a page's own title block.
 - **Editorial search field** — [detail](components/navigation.md#editorial-search-field) — persistent inline search pill for editorial headers.
 - **Bottom navigation** — [detail](components/navigation.md#bottom-navigation) — compact-width tab chrome, docked or floating.
 - **Navigation rail** — [detail](components/navigation.md#navigation-rail) — medium-width tab chrome.
@@ -17,10 +19,10 @@ An index of shared components. Each line links to its family file under `compone
 ## Buttons & controls
 
 - **Button** — [detail](components/buttons-controls.md#button) — five styles/sizes; filled is the one primary per region.
-- **Toggle button / icon toggle button** — [detail](components/buttons-controls.md#toggle-buttons) — active state via shape morph and fill.
+- **Toggle button / icon toggle button** — [detail](components/buttons-controls.md#toggle-buttons) — shape-morph active state.
 - **Split button** — [detail](components/buttons-controls.md#split-button) — primary action with an attached chevron menu of variants.
 - **Theme preview tile** — `core:component/control` — miniature-page choice control for the theme picker.
-- **Preview tile frame** — `core:component/control` — internal frame/mini-bar primitives the tiles build from.
+- **Preview tile frame** — `core:component/control` — the tiles' internal frame primitives.
 - **Colour palette preview tile** — `core:component/control` — miniature-page choice control for the spine-colour picker.
 - **Bookmark toggle** — [detail](components/buttons-controls.md#bookmark-toggle) — inline add/remove-from-library row control.
 - **Swipe row actions** — [detail](components/buttons-controls.md#swipe-row-actions) — swipe-to-mark-as-read / swipe-to-remove.
@@ -43,10 +45,10 @@ An index of shared components. Each line links to its family file under `compone
 - **Empty state** — `core:component/state` — centred headline-and-body placeholder for missing content.
 - **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — the one exception to the wavy-progress rule.
 - **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — contextual eyebrow copy synced to pull progress.
-- **Deadline badge / cover overlay / summary line** — `core:component/badge` — status badge, cover overlay, and date+pace line.
+- **Deadline badge / cover overlay / summary line** — `core:component/badge` — deadline status marks.
 - **Unreleased badge** — [detail](components/states-feedback.md#unreleased-badge) — the `Badge`/`Release` mark for a book not yet out.
 - **Mark-as-read celebration** — `core:component/celebration` — particle-burst hero moment for a mark-as-read commit.
-- **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging, no total count.
+- **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.
 - **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner` + `EmptyState` + `rememberIsOnline()`, offline surfaces.
 - **Update highlight card** — [detail](components/states-feedback.md#update-highlight-card) — Settings app-update `primaryContainer` callout.
 
@@ -55,7 +57,7 @@ An index of shared components. Each line links to its family file under `compone
 - **Loading sheet** — `core:component/sheet` — full-screen blocking wavy-progress surface for an unavoidable wait.
 - **Date picker dialog** — `core:component/dialog` — single-day calendar dialog; owns the UTC-millis conversion.
 - **Update progress sheet** — `core:component/progress` — the pages/percentage/time reading-progress editor sheet.
-- **Because-you-read genre picker** (feature-owned) — [detail](components/sheets.md#because-you-read-genre-picker) — genre-override sheet, Shelves-sheet anatomy.
+- **Because-you-read genre picker** (feature-owned) — [detail](components/sheets.md#because-you-read-genre-picker) — genre-override sheet.
 - **Tag editor sheet** (feature-local) — [detail](components/sheets.md#tag-editor-sheet) — manages the user's own tags on a book.
 - **Choose-lists sheet** — `core:component/lists` — add/remove one or many books to the user's custom lists.
 - **Change edition sheet** (feature-local) — [detail](components/sheets.md#change-edition-sheet) — picks which edition of a book the reader tracks.
@@ -92,5 +94,5 @@ An index of shared components. Each line links to its family file under `compone
 - **Haptics helper** — [detail](components/platform-helpers.md#haptics-helper) — the eight-case single entry point for haptic feedback.
 - **Lazy-item mutation animator** — [detail](components/platform-helpers.md#lazy-item-mutation-animator) — animates user-triggered list add/move/remove.
 - **Staggered entry coordinator** — [detail](components/platform-helpers.md#staggered-entry-coordinator) — welcome-moment stagger for carousels/lists.
-- **Barcode scanner** (feature-owned, not a DS component) — [detail](components/platform-helpers.md#barcode-scanner) — CameraX/ML Kit ISBN-scan surface.
+- **Barcode scanner** (feature-owned) — [detail](components/platform-helpers.md#barcode-scanner) — CameraX/ML Kit ISBN-scan surface.
 - **Active reading session** — [detail](components/platform-helpers.md#active-reading-session) — controller behind the peek bar and Focus Mode.

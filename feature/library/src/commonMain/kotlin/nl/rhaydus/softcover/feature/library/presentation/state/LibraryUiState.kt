@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -25,6 +26,10 @@ internal data class LibraryUiState(
     ),
     val tabsLoaded: Boolean = false,
     val selectedTabId: String = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id,
+
+    /** Static text, so the default below is its own source of truth — no collector sets it. */
+    val shelvesSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Shelves"),
+    val listsSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Lists"),
     val booksByTab: Map<String, List<Book>> = emptyMap(),
     val editionsByTab: Map<String, List<BookEdition>> = emptyMap(),
 
