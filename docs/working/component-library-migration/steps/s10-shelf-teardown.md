@@ -19,6 +19,7 @@ weight the S5–S9 families haven't already pulled out, not about repeating the 
 | S10-3 | `feature/onboarding/.../presentation/screen/OnboardingShelf.kt` | 526 | [ ] |
 | S10-4 | `feature/scan/.../presentation/screen/BarcodeScannerShelf.kt` | 121 | [ ] |
 | S10-5 | `feature/session/.../presentation/screen/FocusModeShelf.kt` | 309 | [ ] |
+| S10-C | Convergence pass over the family (family-procedure.md § Phase 3) | — | [ ] |
 
 ## Per sub-step
 

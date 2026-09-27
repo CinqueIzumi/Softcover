@@ -10,6 +10,7 @@
 | Sub | Scope | Status |
 |---|---|---|
 | S5-7 | The remaining badge/overlay call sites, `deadlineProgressByBook`, the deadline-trio visual pass | [ ] |
+| S5-C-badges | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S5-7 — inventory
 

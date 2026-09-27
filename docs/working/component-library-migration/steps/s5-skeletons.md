@@ -9,6 +9,7 @@
 | Sub | Scope | Status |
 |---|---|---|
 | S5-8 | All nine skeleton declarations | [ ] |
+| S5-C-skeletons | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S5-8 — inventory
 

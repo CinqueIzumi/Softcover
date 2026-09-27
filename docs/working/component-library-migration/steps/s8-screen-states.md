@@ -9,6 +9,7 @@
 | S8-1 | Empty states | [ ] |
 | S8-2 | Callouts & banners | [ ] |
 | S8-3 | Top bars | [ ] |
+| S8-C-states | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S8-1 — Empty states (8 → `EmptyState` + `EmptyStateUiModel`)
 

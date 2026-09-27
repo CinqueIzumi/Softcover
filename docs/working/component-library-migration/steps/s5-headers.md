@@ -12,6 +12,7 @@ cross-module name collisions (`SectionLabel` × 4, `EditorialHeader` × 2, `Side
 | S5-4 | `SectionHeader` / `SidebarLabel` design, plus core and the sidebar labels | [ ] |
 | S5-5 | Section labels and headers across the features | [ ] |
 | S5-6 | Mastheads, the desktop headers, the sheet headers | [ ] |
+| S5-C-headers | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S5-4 — design + core + sidebar labels
 

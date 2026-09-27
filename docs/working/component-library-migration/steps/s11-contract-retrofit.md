@@ -13,6 +13,7 @@ render parameter, before the migration's final verification. **Delegation:** use
 | S11-1 | R10 holdouts | [ ] |
 | S11-2 | R11 holdouts | [ ] |
 | S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | [ ] |
+| S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S11-1 — R10 holdouts
 

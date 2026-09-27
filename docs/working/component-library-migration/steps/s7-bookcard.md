@@ -18,6 +18,7 @@ grids where a stability regression is a dropped frame, not a compile error.
 | S7-5 | Explore search and hidden suggestions | [ ] |
 | S7-6 | Reading | [ ] |
 | S7-7 | Profile, book_detail's `EditionItem` and `StackedJackets`, plus the final shared-element and skippability verification | [ ] |
+| S7-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## Variant mapping (current paths)
 

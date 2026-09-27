@@ -10,6 +10,7 @@
 |---|---|---|
 | S8-4 | `Toggle` + `SegmentedControl` design and the toggle/segment call sites | [ ] |
 | S8-5 | `TextField` and the rest | [ ] |
+| S8-C-controls | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S8-4 — `Toggle` + `SegmentedControl`
 

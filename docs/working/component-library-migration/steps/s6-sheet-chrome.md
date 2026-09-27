@@ -14,6 +14,7 @@ Chrome only, extracted from 18 sheets into `SheetScaffold` + `SheetHeader` + `Sh
 | S6-5 | The library sheets and the bulk-remove dialog | [ ] |
 | S6-6 | The book_detail, lists and scan sheets | [ ] |
 | S6-7 | The explore, reading and profile sheets | [ ] |
+| S6-C-sheets | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S6-3 — chrome design + first movers
 

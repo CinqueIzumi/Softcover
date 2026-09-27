@@ -12,6 +12,7 @@ The `/dataviz` skill conventions apply to everything in the chart group.
 | S9-2 | Chart models and the first charts | [ ] |
 | S9-3 | The remaining charts and legends | [ ] |
 | S9-4 | Progress | [ ] |
+| S9-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S9-1 — Stat tiles (7 → `StatTile` + `StatTileUiModel`)
 

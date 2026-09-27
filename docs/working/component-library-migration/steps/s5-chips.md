@@ -12,6 +12,7 @@
 | S5-2a | `feature:library` control-line and filter-row chips; `Remove(removeLabel)`, `Quiet` | [x] |
 | S5-2b | Arrange and Filter sheet drafts onto `UiState`; `Choice`; `ArrangeChip` | [ ] |
 | S5-3 | book_detail, explore, reading and settings chips | [ ] |
+| S5-C-chips | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S5-1 — core pills
 

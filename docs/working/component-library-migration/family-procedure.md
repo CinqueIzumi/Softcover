@@ -36,6 +36,17 @@ every new UI model and mapper. Then `softcover-reviewer`, with `## Scope` = the 
 
 Phase 1 and Phase 2 may share a session; hand off between them if the context-budget notice fires.
 
+## Phase 3 — convergence pass, closing every step file
+
+The last sub-step of every step file is a critical pass over the family as it now stands:
+
+1. List every call site of the family's components and every variant in use (`git grep`).
+2. Table the variants and their exact differences: colours, padding, type, shape, icon size, interaction.
+3. For each pair that differs only in ways a user would not notice or no design reason justifies,
+   propose merging them, accepting the small visual shift (as D13 did for chip metrics).
+4. Stop for approval. Record the outcome as a D-number, including "nothing to converge" and why.
+5. Build the approved merges per Phase 2.
+
 ## Standard acceptance, every sub-step
 
 - Verify is green.

@@ -10,6 +10,7 @@
 |---|---|---|
 | S6-1 | `ListRow` design, plus the core, debug, settings and about rows | [ ] |
 | S6-2 | The remaining features | [ ] |
+| S6-C-rows | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S6-1 — design + core, debug, settings, about
 

@@ -18,17 +18,18 @@ checkboxes in step with `## Steps` and `## Gates` here.
   the Library active-filter row and rearrange chip render through `Chip`, built by
   `ActiveFilterChipsCollector` / `RearrangeChipCollector`, taps via `OnActiveFilterChipClickedAction`;
   `LibraryFilterValue.chipKey()` is the shared key scheme. Reviewer findings applied.
-- **Next:** [`steps/s5-chips.md`](steps/s5-chips.md) § S5-2b, Phase 2 per
+- **Next:** Step 09 (Measure and close out) in `docs/working/token-hygiene/README.md` →
+  `docs/working/token-hygiene/steps/09-measure.md` — the migration-session countdown reached 5 of 5. After
+  it, resume [`steps/s5-chips.md`](steps/s5-chips.md) § S5-2b, Phase 2 per
   [`family-procedure.md`](family-procedure.md): Arrange / Filter sheet drafts onto `UiState`, `Choice`,
   `ArrangeChip` onto `Chip`, delete `ChipUiModel.selectedFor`.
-- **Countdown:** Step 09 in `docs/working/token-hygiene/README.md` — 4 of 5 sessions.
 - **Open questions:** none.
 - **Verification:** compile (core:component, core:uibinding, feature:library), `checkModuleGraph`,
   `:feature:library:projectHealth`, `ktlintCheck`, `styleCheck`, and core:component + feature:library host
   tests passed under JBR 21. `:core:component:projectHealth` fails on a pre-existing `kotlinx.datetime`
   finding.
-- **Uncommitted:** S5-2a code, tests and docs (D13 tracker docs, `components.md`), plus the narrowed
-  test-failure rule in `CLAUDE.md`.
+- **Uncommitted:** tracker docs — this `## Now` block, D14, `family-procedure.md` § Phase 3, and a
+  convergence row in every S5–S11 step file (S5-2a committed as `ea7cc0b0`).
 
 ## Local verification
 
@@ -131,6 +132,8 @@ every sub-step's Verify.
   Filter sheet's `ChipUiModel.selectedFor` R10 holdout. Out of the family: `SortLabelControl` (text, not a
   chip; stays feature-local), `FilterPillControl` and `SelectionActionPill` (buttons; move in S8 controls).
   The chip rows stay feature-local containers.
+- **D14** (2026-09-28) Every S5–S11 step file closes with a convergence sub-step (`family-procedure.md`
+  § Phase 3): audit the family's variants and merge near-duplicates for app-wide consistency.
 
 ## Baseline
 
