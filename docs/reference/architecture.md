@@ -77,6 +77,17 @@ by [`toad-architecture.md`](../rhaydus/0.3.1/toad-architecture.md). Softcover de
   presentation via `Throwable.toUserMessage()` plus a screen-specific fallback, and the renderer is the
   foundation `nl.rhaydus.designsystem.component.InlineErrorState` (call sites pass the editorial `bodySmall`
   as `textStyle`).
+- **`init` calls only `startInitializers()`.** One-shot startup work runs in a `Collector.onLaunch` or a
+  dispatched Action, never a raw `dependencies.launch {}`.
+- **A load-more / pagination Action shares the fresh-query cancellation Job.** It launches its fetch
+  through `dependencies.launch` and stores the Job in the same `LocalVariables` field the fresh-query
+  Actions cancel.
+- **A loading flag driven by a `distinctUntilChanged` flow needs a same-value guard.** An Action that
+  sets the flag and relies on that flow to clear it returns early when the chosen value equals the
+  current one — an unchanged value never re-emits, so the flag would stick.
+- **A once-per-session gate holds a `Mutex` across its check-then-act.** A shared singleton gate (e.g.
+  `ProfileRefreshGate`) runs its check, the guarded work and the mark inside `mutex.withLock`; a bare
+  boolean lets two screens that mount together both pass the check.
 
 ## Network Layer
 
@@ -231,3 +242,5 @@ Three non-visual seams are **not** app-local — they come from `nl.rhaydus:core
   migrations, and **all** persisted entities + DAOs live in `:core:database` (not in the feature whose
   data source uses them — see the vertical-slice rule in module-structure.md).
 - **DataStore**: simple key-value preferences (app settings, search history).
+- Replacing all rows for a key (clear then insert) is one `@Transaction` DAO method, never two
+  data-source calls.

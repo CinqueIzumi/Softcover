@@ -6,6 +6,9 @@ package nl.rhaydus.softcover.core.domain.model
  * its [category] + [name] pair: the upsert API works purely on those strings (and creates the tag
  * server-side when the name is new), and the save response carries no tag id, so there is nothing
  * stable to key on but the pair. [spoiler] marks the tag as hidden from other readers.
+ *
+ * [count] depends on the source: the tag's global site-wide count from the find and save queries,
+ * the user's own usage count from the tag vocabulary.
  */
 data class UserTag(
     val name: String,

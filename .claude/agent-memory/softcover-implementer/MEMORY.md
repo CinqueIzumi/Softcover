@@ -1,7 +1,6 @@
-- [Check working tree before starting](feedback_check_working_tree_before_starting.md) — git status/diff first; uncommitted prior work may already violate the current brief's scope guard; stash it recoverably, don't build on it
+- [Check working tree before starting](feedback_check_working_tree_before_starting.md) — git status/diff first; uncommitted prior work may already violate the current brief's scope guard; inspect and report, don't build on it or discard it
 - [doc-guard history-regex false positives](feedback_doc_guard_history_regex_false_positives.md) — "used to surface" trips the same rule as "used to be"; pinned-budget files need byte-diff-ordered edits
 - [File-split import verification](feedback_file_split_import_verification.md) — re-scan each new section file's body for every modifier/layout call before trusting its import list
 - [styleCheck pulls unrelated module failures](feedback_styleCheck_pulls_unrelated_module_failures.md) — a pre-existing break elsewhere in the tree can fail your Verify command; isolate before treating it as your bug
-- [Path-subdir regex needs whitespace exclusion](feedback_path_subdir_regex_needs_whitespace_exclusion.md) — `dir/[^/]+/` false-positives across a whole prose line; use `[^/\s]+`
 - [Verify a "clean" claim by running the gate](feedback_verify_clean_claim_by_running_the_gate.md) — a brief's "already clean" claim for a new gate still needs the gate run over the tree, not a looser grep
 - [Kotlin block comments nest](feedback_kotlin_block_comments_nest.md) — a literal `/*` inside KDoc opens a nested comment; "Unclosed comment" errors often point far from the real cause

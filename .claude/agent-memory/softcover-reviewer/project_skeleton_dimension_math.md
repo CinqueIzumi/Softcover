@@ -5,10 +5,9 @@ metadata:
   type: project
 ---
 
-`SkeletonCrossfade` does no shared sizing (see [[project_skeleton_crossfade_contract]]), so a
-skeleton bar's claimed height must be checked against the real text style's `lineHeight`, not
-against a flat "12dp = small text, 16dp = title text" gut feel — that convention systematically
-undershoots larger roles.
+`SkeletonCrossfade` does no shared sizing (caller sizes skeleton == content), so a skeleton bar's
+claimed height must be checked against the real text style's `lineHeight`, not against a flat "12dp =
+small text, 16dp = title text" gut feel — that convention systematically undershoots larger roles.
 
 Softcover's `MaterialTheme.editorialTypography` (`core/designsystem/.../theme/EditorialTypography.kt`)
 inherits Material3's stock type-scale sizes for every role it doesn't explicitly `.copy()` a
@@ -18,7 +17,7 @@ for eyebrowSmall), `headlineSmall` = 24sp/32sp. A 2-line `Text(minLines=2, maxLi
 roughly `2 × lineHeight` regardless of glyph size.
 
 Found in the 2026-07-21 Explore skeleton-crossfade review: `RailCardSkeleton` and
-`SeriesCardSkeleton` (both in `feature/explore/.../screen/ExploreShelf.kt`) use flat 14–16dp bars for
+`SeriesCardSkeleton` (both in `feature/explore`) use flat 14–16dp bars for
 a 2-line `titleMedium`/`titleSmall` title (real: ~48dp/~40dp for 2 lines) and a flat 12dp bar for a
 `bodySmall` subline row (real: 16dp explicit row height) — each card undershoots its loaded
 counterpart's total height by ~12dp. This DOES matter for a `Column`-stacked card (cover, title,

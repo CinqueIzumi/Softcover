@@ -9,9 +9,9 @@ When a brief says a codebase is already clean of the thing a new gate will forbi
 not a fact — write the gate, then run it (or an equivalent grep with the exact final regex) over the whole
 tree before Verify, and fix what it finds.
 
-**Why:** building the plan-citation gates for [[softcover-implementer]], the brief said the repo had already
-been hand-cleaned of `docs/working/` / decision-number / plan-step citations in comments, "confirm with a
-grep". A grep with a hand-written pattern missed real violations that the actual detekt/hook regex caught:
+**Why:** building the plan-citation gates, the brief said the repo had already been hand-cleaned of
+`docs/working/` / decision-number / plan-step citations in comments, "confirm with a grep". A grep with a
+hand-written pattern missed real violations that the actual detekt/hook regex caught:
 a committed `BookDao.kt` comment citing `docs/working/architecture-review.md`, an uncommitted `WhenReadRow.kt`
 KDoc citing plan step `S6-1`, and `DocBudgetsConventionPlugin.kt` KDoc citing `docs/working/ACTIVE.md` (forbidden
 for Kotlin even though the hook's markdown-specific rule allows top-level `docs/working/*.md` files — the two

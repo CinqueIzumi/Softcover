@@ -9,9 +9,7 @@ Room migration tests live in `core/database/src/androidHostTest/kotlin/.../migra
 
 ## Runtime dependency wiring
 
-`BundledSQLiteDriver` ships Android native libs in the KMP artifact but **JVM native libs** in `androidx.sqlite:sqlite-bundled-jvm`. The `androidHostTest` JVM runner needs the latter:
-- Added alias `androidx-sqlite-bundled-jvm` to `gradle/libs.versions.toml`.
-- Added `runtimeOnly(libs.androidx.sqlite.bundled.jvm)` to `androidHostTest.dependencies` in `core/database/build.gradle.kts`.
+`BundledSQLiteDriver` ships Android native libs in the KMP artifact but **JVM native libs** in `androidx.sqlite:sqlite-bundled-jvm`. The `androidHostTest` JVM runner needs the latter: the `androidx-sqlite-bundled-jvm` alias in `gradle/libs.versions.toml`, added as `runtimeOnly(libs.androidx.sqlite.bundled.jvm)` to `androidHostTest.dependencies` in `core/database/build.gradle.kts`.
 
 Without this, every test fails with `NoClassDefFoundError: BundledSQLiteDriver` / `ExceptionInInitializerError`.
 

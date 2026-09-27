@@ -12,11 +12,9 @@ uncommitted, broken work in the working tree (see [[feedback_check_working_tree_
 that module's compile/detekt failure surfaces under the same Verify run even though the brief's
 diff never touches it.
 
-**Why:** on this branch, `feature/library`'s `LibraryFilterChipsBuilderTest.kt` referenced
-`ChipUiModel.selected`, a property removed by an already-staged, uncommitted change to
-`LibraryFilterChips.kt`/`ChipUiModel.kt` from earlier session work. `:core:component:compileKotlinJvm
-ktlintCheck styleCheck` therefore failed on `:feature:library:compileAndroidHostTest`, nothing in
-the chip-dimensions brief itself.
+**Why:** an already-staged, uncommitted change from earlier session work in an unrelated module had
+broken a test's compile in that module. `:core:component:compileKotlinJvm ktlintCheck styleCheck`
+therefore failed there, nothing in the current brief's own diff.
 
 **How to apply:** when Verify fails on a module the brief's `## Files` never lists, isolate before
 treating it as your own bug — rerun just the failing task in isolation

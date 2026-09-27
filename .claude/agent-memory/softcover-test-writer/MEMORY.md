@@ -1,7 +1,6 @@
 - [Softcover test conventions](project_test_conventions.md) — stack, mockk domain models, TOAD action `launch` callOriginal workaround, @Nested name-clash FQN exception, UserBook.status is BookStatus
 - [Canonical test templates by layer](project_canonical_test_templates.md) — one template file per layer; clone the matching one, skip broad exploration
-- [Host-test task name](project_host_test_task_name.md) — KMP modules use testAndroidHostTest; jvmTest is a false-green NO-SOURCE, testDebugUnitTest is app-only
-- [MockK only — no mock servers](feedback_no_mock_servers.md) — never MockServer/WireMock; mock only the public surface actually consumed
+- [Host-test task name](project_host_test_task_name.md) — KMP modules use testAndroidHostTest; jvmTest is a false-green NO-SOURCE
 - [MockK / kotest gotchas](feedback_mockk_kotest_gotchas.md) — default-param stubs pin the default, erased generic matchers, relaxed lambdas never run, stateful keyed stores, capture import, `===` parens, test-name chars
 - [Coroutine test scheduling](feedback_coroutine_test_scheduling.md) — one shared TestDispatcher everywhere; runCurrent for backgroundScope + explicit StandardTestDispatcher; flowOf DAO stubs need none
 - [Flow emission assertions](feedback_flow_emission_assertions.md) — StateFlow conflation needs three distinct values; loop past loading placeholders before coVerify
@@ -15,7 +14,4 @@
 - [Room migration test pattern](project_migration_test_pattern.md) — BundledSQLiteDriver in-memory per test; needs sqlite-bundled-jvm runtimeOnly; PRAGMA + sqlite_master helpers
 - [Bash hook and Gradle task testing](project_bash_hook_and_gradle_task_testing.md) — base64 TSV harness for PreToolUse hooks; ProjectBuilder for DefaultTask actions; single-branch merge-base gotcha; concurrent-edit handling
 - [ktlintFormat nested-call trailing comma](feedback_ktlintformat_nested_call_trailing_comma.md) — grep for `),)` after ktlintFormat; wrap the outer call too
-- [designsystem palette contrast tests](project_designsystem_palette_contrast_tests.md) — WCAG helper pattern + @TestFactory/DynamicTest data-driving over ColorPalette.entries; confirms flat alphabetical import order
-- [Brief says internal, code says private](feedback_private_function_named_internal_in_brief.md) — grep the modifier before writing; a stale/wrong brief premise is a blocker to report, not a workaround
-- [ktlint tasks are root-only](feedback_ktlint_tasks_are_root_only.md) — `:<module>:ktlintFormat`/`ktlintCheck` don't exist; always run `:ktlintFormat`/`:ktlintCheck` unscoped
 - [Composable style resolution is untestable at unit level](feedback_composable_style_resolution_untestable.md) — no compose-ui-test dep in core:component; proxy "style resolution" coverage via enum/sealed-slot fixture coverage instead

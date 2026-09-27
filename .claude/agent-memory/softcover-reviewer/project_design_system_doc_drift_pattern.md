@@ -12,14 +12,6 @@ fact is also asserted in one or two OTHER bullets elsewhere in the doc (a `§4` 
 entry and a `§5` "Profile screen" recipe bullet that names the same section by its old headline/
 detail) — and those don't get touched.
 
-Concretely found 2026-07-20: `ProfileShelf.kt`'s genre stack was reworked (remainder "Everything
-else" slice removed, `GENRE_STACK_ALPHAS` trimmed 6→5, headline reworded "The shelves of your
-taste" → "The genres you read most"). The reading-life share-card paragraph (§4, ~line 256) was
-correctly updated. But:
-- §4 "Genre proportion stack" bullet (~line 251) still said "six stepping alphas
-  (100/82/64/48/34/24%)".
-- §5 "Profile screen" bullet (~line 325) still named the section "'The shelves of your taste'".
-
 **Why:** the doc describes the same UI fact from 3 angles (component catalogue entry, recipe/screen
 bullet, and — for share cards — the share-card variant paragraph), and CLAUDE.md's maintenance rule
 technically only gets enforced against whichever paragraph the author remembered to open.

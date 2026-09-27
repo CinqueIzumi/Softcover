@@ -1,7 +1,8 @@
 ---
 name: project_canonical_test_templates
 description: One canonical test file per layer (action, use case, repository, local/remote data source, mapper) — clone these instead of exploring broadly
-type: project
+metadata:
+  type: project
 ---
 
 When writing a new test, first identify which layer the target belongs to, then read **only** the matching canonical test file below and clone its structure. Do not search across unrelated layers — the setup, mocking, and assertion style differs enough between layers that cross-referencing wastes tokens and often leads astray.

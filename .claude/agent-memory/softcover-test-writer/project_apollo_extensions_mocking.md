@@ -6,7 +6,7 @@ metadata:
 ---
 
 Applies to tests of `core/network/.../helper/ApolloExtensions.kt` itself (`SafeQueryFlowTest.kt` is the
-reference). Tests of data sources mock `safeQuery`/`safeMutation` instead — see [[feedback_no_mock_servers]].
+reference). Tests of data sources mock `safeQuery`/`safeMutation` instead — see `.claude/rules/tests.md`.
 
 ## Mocking the call chain
 

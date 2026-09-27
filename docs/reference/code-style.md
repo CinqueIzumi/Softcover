@@ -70,6 +70,9 @@ No tool gates these, so review checks them by hand in every touched file. The re
 - **AAA markers are exactly `// ----- Arrange -----` / `Act` / `Assert`** ([§Unit Test Structure](../rhaydus/0.3.1/code-style.md#unit-test-structure)) — every test then splits into its three phases at the same markers.
 - **`kotlin.time.Instant`, never `kotlinx.datetime.Instant`.** The latter is a deprecated typealias; no
   gate catches the import, since both resolve and compile.
+- **A KDoc link to a symbol the file does not import is `[Symbol][fully.qualified.Name]`, never
+  downgraded to backticks.** After a file split or rename, grep the repo for the old filename — no gate
+  catches a stale link.
 
 ## Error Handling & Logging (Softcover concretizations)
 
