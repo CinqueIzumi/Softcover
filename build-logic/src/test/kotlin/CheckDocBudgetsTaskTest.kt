@@ -463,6 +463,101 @@ class CheckDocBudgetsTaskTest {
                 )
             }
         }
+
+        @Test
+        fun `flags an agent-memory note that cites a plan step`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                ".claude/agent-memory/softcover-reviewer/new_note.md",
+                "# Notes\n\nSee S5-4 for details.\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    listOf(".claude/agent-memory/softcover-reviewer/new_note.md"),
+                )
+            }
+            exception.message shouldContain "cites a plan step"
+        }
+
+        @Test
+        fun `flags an agent-memory note that cites a plan directory`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            write(
+                ".claude/agent-memory/softcover-reviewer/new_note.md",
+                "# Notes\n\nSee docs/working/275-foo/step-1.md for details.\n",
+            )
+            commitAll("baseline")
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    "",
+                    listOf(".claude/agent-memory/softcover-reviewer/new_note.md"),
+                )
+            }
+            exception.message shouldContain "cites a plan directory"
+        }
+
+        @Test
+        fun `flags a new agent-memory note over the wildcard line budget`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            val budgets = ".claude/agent-memory/*/*.md     40L"
+            write(
+                ".gitkeep",
+                "",
+            )
+            commitAll("baseline")
+            write(
+                ".claude/agent-memory/softcover-reviewer/new_note.md",
+                (1..41).joinToString("\n") { "line$it" } + "\n",
+            )
+
+            // ----- Act & Assert -----
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    budgets,
+                    listOf(".claude/agent-memory/softcover-reviewer/new_note.md"),
+                )
+            }
+            exception.message shouldContain "new file over budget"
+        }
+
+        @Test
+        fun `applies the MEMORY md specific rule over the wildcard rule for an agent-memory index`() {
+            // ----- Arrange -----
+            initRepoOnMain()
+            val budgets = """
+                .claude/agent-memory/*/MEMORY.md   8B
+                .claude/agent-memory/*/*.md         1000B
+            """.trimIndent()
+            write(
+                ".gitkeep",
+                "",
+            )
+            commitAll("baseline")
+            write(
+                ".claude/agent-memory/softcover-reviewer/MEMORY.md",
+                "1234567890",
+            )
+
+            // ----- Act & Assert -----
+            // 10 bytes exceeds the MEMORY.md-specific rule's 8B limit but is well within the
+            // wildcard rule's 1000B limit; a violation proves the specific rule won.
+            val exception = shouldThrow<GradleException> {
+                runCheck(
+                    budgets,
+                    listOf(".claude/agent-memory/softcover-reviewer/MEMORY.md"),
+                )
+            }
+            exception.message shouldContain ".claude/agent-memory/softcover-reviewer/MEMORY.md"
+        }
     }
 
     @Nested

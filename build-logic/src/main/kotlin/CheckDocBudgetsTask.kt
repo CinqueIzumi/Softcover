@@ -121,7 +121,8 @@ private fun isPermanentMarkdownDoc(relativePath: String): Boolean =
         relativePath.startsWith("docs/reference/") ||
         relativePath.startsWith(".claude/rules/") ||
         relativePath.startsWith(".claude/agents/") ||
-        relativePath.startsWith(".claude/skills/")
+        relativePath.startsWith(".claude/skills/") ||
+        relativePath.startsWith(".claude/agent-memory/")
 
 private fun parseLimitToken(token: String): Pair<Long, BudgetUnit> = when {
     token.endsWith("KB") -> (token.removeSuffix("KB").toLong() * 1024) to BudgetUnit.BYTES

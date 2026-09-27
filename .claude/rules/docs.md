@@ -26,10 +26,10 @@ paths:
 - **Rewrite, never append.** Rewrite the entry to the current truth and delete the sentence it replaces. Never
   add a change note ("that replaced…", "previously…"). One fact lives in one place; link to it elsewhere.
 - **Plans are temporary.** A plan directory under `docs/working/` is deleted when the plan finishes, so code,
-  KDoc, permanent config (`config/**`, `*.yml`/`*.yaml`, `*.kts`) and permanent docs never cite one, its steps
-  or its decision numbers. A decision is deleted once built; the code is then the record and the reason goes in
-  the PR description. Enforced by detekt's `ForbiddenComment` and `doc-guard.sh` at write time, and by
-  `checkDocBudgets` in CI.
+  KDoc, permanent config (`config/**`, `*.yml`/`*.yaml`, `*.kts`), permanent docs and agent memory
+  (`.claude/agent-memory/**`) never cite one, its steps or its decision numbers. A decision is deleted once
+  built; the code is then the record and the reason goes in the PR description. Enforced by detekt's
+  `ForbiddenComment` and `doc-guard.sh` at write time, and by `checkDocBudgets` in CI.
 - **Entry lengths:** a decision is one line; an index line is one sentence; a pattern or component entry is ≤12 lines; a `## Now`
   block is ≤40 lines.
 - **Budgets.** Every file has a size budget in `docs/doc-budgets.txt`. A file over budget may shrink but never

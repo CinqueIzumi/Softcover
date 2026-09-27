@@ -12,10 +12,10 @@ tree before Verify, and fix what it finds.
 **Why:** building the plan-citation gates, the brief said the repo had already been hand-cleaned of
 `docs/working/` / decision-number / plan-step citations in comments, "confirm with a grep". A grep with a
 hand-written pattern missed real violations that the actual detekt/hook regex caught:
-a committed `BookDao.kt` comment citing `docs/working/architecture-review.md`, an uncommitted `WhenReadRow.kt`
-KDoc citing plan step `S6-1`, and `DocBudgetsConventionPlugin.kt` KDoc citing `docs/working/ACTIVE.md` (forbidden
-for Kotlin even though the hook's markdown-specific rule allows top-level `docs/working/*.md` files — the two
-mechanisms are intentionally not symmetric).
+a committed `BookDao.kt` comment citing a plan directory, an uncommitted `WhenReadRow.kt` KDoc citing a plan
+step id, and `DocBudgetsConventionPlugin.kt` KDoc citing `docs/working/ACTIVE.md` (forbidden for Kotlin even
+though the hook's markdown-specific rule allows top-level `docs/working/*.md` files — the two mechanisms are
+intentionally not symmetric).
 
 **How to apply:** after wiring a new comment/doc-content gate, grep the whole tree (`find … -name "*.kt"`,
 excluding `build/` and vendored dirs) with the *actual* patterns going into the gate before running

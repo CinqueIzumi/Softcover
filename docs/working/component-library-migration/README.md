@@ -21,24 +21,21 @@ checkboxes in step with `## Steps` and `## Gates` here.
   from `:core:component`, replacing every chip list + `…ByChipKey` map pair (explore, library,
   book_detail). Plan-reference gates (detekt `ForbiddenComment`, `doc-guard.sh`, `checkDocBudgets`) now
   cover markdown, `.kt` and permanent config (`config/**`, `*.yml`/`*.yaml`, `*.kts`), with a comment
-  split that skips string / char literals and quoted YAML scalars; committed as `8f05587c`. The
-  agent-memory audit is applied: 17 memories deleted, 12 trimmed, 7 rules promoted (architecture.md
-  § TOAD ×4 and § Local Storage, code-style.md, rules/tests.md) plus `UserTag.count` KDoc. Imports now
-  follow the IDE layout `*,java.**,javax.**,kotlin.**,^` (`.editorconfig`, code-style.md, 565 files
-  re-sorted); 14 files with Apollo alias imports wait on foundation F24. After Next: (2) `ChipSet<P>`,
-  tests, reviewer over S5-C-chips; (3) [`steps/s5-headers.md`](steps/s5-headers.md) S5-4.
-- **Next:** (1) memory gates: `/handoff` audits memory when a `steps/*.md` was deleted, memory budgets
-  in `checkDocBudgets`, `.claude/agent-memory/**` in the plan-reference scan. Run Gradle with
-  `JAVA_HOME` set to JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+  split that skips string / char literals and quoted YAML scalars. The agent-memory audit is applied
+  (`a2c3db44`), and imports follow the IDE layout `*,java.**,javax.**,kotlin.**,^` (`d293ff14`); 14
+  files with Apollo alias imports wait on foundation F24. After Next: `ChipSet<P>`, tests, reviewer
+  over S5-C-chips; then [`steps/s5-headers.md`](steps/s5-headers.md) S5-4.
+- **Next:** memory gates — `.claude/skills/handoff/SKILL.md` audits agent memory when a `steps/*.md`
+  was deleted; memory-file budgets in `checkDocBudgets` (`docs/doc-budgets.txt`); `.claude/agent-memory/**`
+  in the plan-reference scan (`doc-guard.sh`, `CheckDocBudgetsTask.kt`). Run Gradle with `JAVA_HOME`
+  set to JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
   stale for a frame on open; if visible, seed them in the open action.
 - **Verification:** on JBR 21, `ktlintCheck styleCheck checkDocBudgets` pass; the `.kt`/`.kts` diffs are
   pure import reorders (script-checked); `softcover-reviewer` ⚠️ with two memory findings, both fixed.
-- **Uncommitted:** the memory audit (`.claude/agent-memory/**`, architecture.md, code-style.md,
-  rules/tests.md, `UserTag.kt`), the import re-sort (`.editorconfig`, 565 `.kt`/`.kts`), F24 in
-  `foundation-upstream-candidates.md`, `CheckDocBudgetsTask.kt:291` `.not()`, this block.
+- **Uncommitted:** this tracker's `## Now` block only.
 
 ## Local verification
 

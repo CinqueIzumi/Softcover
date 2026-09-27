@@ -38,12 +38,19 @@ it needs.
    Replace the old block; do not append to it. Drop history the next session does not need — decisions
    belong under the tracker's `## Decisions`, not in `## Now`.
 
-3. **Summarise uncommitted changes.** Run `git status --short` and group the paths by purpose (e.g.
+3. **Audit agent memory if a plan step finished.** If `git status --short` shows a deleted step file under a
+   plan's `steps/` directory, or this session deleted one itself, read each `.claude/agent-memory/*/MEMORY.md`
+   index. Delete the memories that only served that step, and promote the durable ones as the owning agent's
+   `## Memory` section directs (`.claude/agents/softcover-{implementer,reviewer,test-writer}.md`); an agent
+   with no local definition, such as a plugin agent, keeps only durable, non-obvious lessons. Keep each
+   index line in sync with the file it points to. Report what was pruned in the final message.
+
+4. **Summarise uncommitted changes.** Run `git status --short` and group the paths by purpose (e.g.
    "hook scripts under `.claude/hooks/`", "tracker docs") rather than listing every file. Write that under
    **Uncommitted**.
 
-4. **Ask whether to commit.** Propose a single subject-line message (imperative, sentence case, no
+5. **Ask whether to commit.** Propose a single subject-line message (imperative, sentence case, no
    trailing period, no body, no trailers — see `CLAUDE.md` → Commit Messages). Commit only if the user
    says yes; never commit unasked.
 
-5. **End with exactly:** `Handoff written. Type /clear, then ask the next session to resume from the Now block.`
+6. **End with exactly:** `Handoff written. Type /clear, then ask the next session to resume from the Now block.`

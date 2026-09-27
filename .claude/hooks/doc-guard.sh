@@ -176,6 +176,7 @@ is_permanent_doc() {
     .claude/rules/*) return 0 ;;
     .claude/agents/*) return 0 ;;
     .claude/skills/*) return 0 ;;
+    .claude/agent-memory/*) return 0 ;;
     CLAUDE.md) return 0 ;;
     *) return 1 ;;
   esac
