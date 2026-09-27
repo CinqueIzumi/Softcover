@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
@@ -56,6 +58,7 @@ private const val COMPACT_COUNT_MILLION = 1_000_000
 internal fun YearColumnHistorySection(
     readingLife: ReadingLife?,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
     modifier: Modifier = Modifier,
 ) {
     var selectedMetric by remember { mutableStateOf(YearMetric.BOOKS) }
@@ -66,10 +69,7 @@ internal fun YearColumnHistorySection(
     }
 
     Column(modifier = modifier) {
-        SectionIntro(
-            eyebrow = "The shape of the years",
-            headline = "Reading, year by year",
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(16.dp))
 

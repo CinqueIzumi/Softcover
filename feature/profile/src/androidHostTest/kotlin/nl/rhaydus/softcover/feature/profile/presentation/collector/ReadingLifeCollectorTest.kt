@@ -11,11 +11,14 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
+import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -77,12 +80,15 @@ class ReadingLifeCollectorTest {
         readingStreak = 7,
     )
 
-    private fun buildReadingLife(trackedYears: Int = 3): ReadingLife = ReadingLife(
+    private fun buildReadingLife(
+        trackedYears: Int = 3,
+        ratingBand: RatingBand = RatingBand.NEW_READER,
+    ): ReadingLife = ReadingLife(
         booksByYear = emptyList(),
         pagesByYear = emptyList(),
         pagesByMonth = emptyList(),
         genres = GenreBreakdown(),
-        ratings = RatingsDistribution(),
+        ratings = RatingsDistribution(band = ratingBand),
         recentlyLoved = emptyList(),
         trackedYears = trackedYears,
     )
@@ -198,6 +204,54 @@ class ReadingLifeCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.readingLifeShareCard shouldBe secondReadingLife.toReadingLifeShareCardUiModel(profileData)
+                job.cancel()
+            }
+
+        @Test
+        fun `sets ratingsHistogramHeader and ratingsHistogramCaption from the emitted ratings band`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val readingLife = buildReadingLife(ratingBand = RatingBand.SUPERFAN)
+                val dependencies = stubDependencies(this)
+                val collector = ReadingLifeCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                readingLifeFlow.emit(readingLife)
+
+                // ----- Assert -----
+                stateFlow.value.ratingsHistogramHeader shouldBe RatingBand.SUPERFAN.toRatingsHistogramHeader()
+                stateFlow.value.ratingsHistogramCaption shouldBe RatingBand.SUPERFAN.toRatingsHistogramCaption()
+                job.cancel()
+            }
+
+        @Test
+        fun `recomputes ratingsHistogramHeader and ratingsHistogramCaption when the band changes on a second emission`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val firstReadingLife = buildReadingLife(ratingBand = RatingBand.EXACTING)
+                val secondReadingLife = buildReadingLife(ratingBand = RatingBand.POLARISED)
+                val dependencies = stubDependencies(this)
+                val collector = ReadingLifeCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                readingLifeFlow.emit(firstReadingLife)
+                readingLifeFlow.emit(secondReadingLife)
+
+                // ----- Assert -----
+                stateFlow.value.ratingsHistogramHeader shouldBe RatingBand.POLARISED.toRatingsHistogramHeader()
+                stateFlow.value.ratingsHistogramCaption shouldBe RatingBand.POLARISED.toRatingsHistogramCaption()
                 job.cancel()
             }
     }

@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
@@ -55,7 +57,6 @@ import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileS
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RatingsHistogramSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ReadingAtlasSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RecentlyLovedSection
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.SectionLabel
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ShareEntryRow
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColumnHistorySection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
@@ -129,6 +130,7 @@ internal actual fun ProfileScreenLayout(
                 name = state.userProfileData?.name.orEmpty(),
                 bio = state.userProfileData?.bio.orEmpty(),
                 isLoading = state.isLoading,
+                header = state.theReaderHeader,
             )
 
             Spacer(modifier = Modifier.height(36.dp))
@@ -136,6 +138,7 @@ internal actual fun ProfileScreenLayout(
             ReadingAtlasSection(
                 userProfileData = state.userProfileData,
                 isLoading = state.isLoading,
+                header = state.readingAtlasHeader,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 
@@ -152,6 +155,7 @@ internal actual fun ProfileScreenLayout(
             YearColumnHistorySection(
                 readingLife = state.readingLife,
                 isLoading = readingLifeLoading,
+                header = state.yearColumnHistoryHeader,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 
@@ -160,6 +164,7 @@ internal actual fun ProfileScreenLayout(
             GenreRankingSection(
                 genres = state.readingLife?.genres ?: GenreBreakdown(),
                 isLoading = readingLifeLoading,
+                header = state.genreRankingHeader,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 
@@ -170,6 +175,7 @@ internal actual fun ProfileScreenLayout(
                 hideUntaggedAuthors = state.hideUntaggedAuthors,
                 canHideUntaggedAuthors = state.hasUntaggedAuthors,
                 isLoading = readingLifeLoading,
+                header = state.authorRepresentationHeader,
                 onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
@@ -179,6 +185,8 @@ internal actual fun ProfileScreenLayout(
             RatingsHistogramSection(
                 ratings = state.readingLife?.ratings ?: RatingsDistribution(),
                 isLoading = readingLifeLoading,
+                header = state.ratingsHistogramHeader,
+                caption = state.ratingsHistogramCaption,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 
@@ -187,6 +195,7 @@ internal actual fun ProfileScreenLayout(
             RecentlyLovedSection(
                 books = state.readingLife?.recentlyLoved.orEmpty(),
                 isLoading = readingLifeLoading,
+                header = state.recentlyLovedHeader,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 
@@ -203,6 +212,7 @@ internal actual fun ProfileScreenLayout(
     if (showShareSheet && shareContent != null) {
         ProfileShareBottomSheet(
             content = shareContent,
+            header = state.shareYourYearHeader,
             onDismissRequest = { showShareSheet = false },
         )
     }
@@ -221,6 +231,7 @@ private fun ProfileHeader(
     name: String,
     bio: String,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
 ) {
     Column(
         modifier = Modifier
@@ -236,7 +247,7 @@ private fun ProfileHeader(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        SectionLabel(text = "The reader")
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(10.dp))
 

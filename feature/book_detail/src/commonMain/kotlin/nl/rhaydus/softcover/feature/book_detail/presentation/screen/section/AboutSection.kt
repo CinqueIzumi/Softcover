@@ -18,6 +18,7 @@ import nl.rhaydus.designsystem.editorial.component.DropCapText
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -29,7 +30,7 @@ internal fun AboutSection(state: BookDetailUiState) {
     val description = state.book?.description.orEmpty()
 
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        SectionLabel(text = "About")
+        SectionHeader(model = state.aboutSectionHeader)
 
         Spacer(modifier = Modifier.height(12.dp))
 

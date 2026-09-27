@@ -35,6 +35,8 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -88,6 +90,7 @@ internal fun HiddenSuggestionsContent(
 
             if (state.hiddenBooks.isNotEmpty()) {
                 HiddenBooksSection(
+                    header = state.hiddenBooksHeader,
                     books = state.hiddenBooks,
                     covers = state.hiddenBookCovers,
                     runAction = runAction,
@@ -98,6 +101,7 @@ internal fun HiddenSuggestionsContent(
 
             if (state.hiddenSeries.isNotEmpty()) {
                 HiddenSeriesSection(
+                    header = state.hiddenSeriesHeader,
                     series = state.hiddenSeries,
                     covers = state.hiddenSeriesCovers,
                     runAction = runAction,
@@ -111,13 +115,14 @@ internal fun HiddenSuggestionsContent(
 
 @Composable
 private fun HiddenBooksSection(
+    header: SectionHeaderUiModel,
     books: List<DismissedSeriesBook>,
     covers: Map<Int, CoverUiModel>,
     runAction: (HiddenSuggestionsAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         HiddenSuggestionsGroupHeader(
-            eyebrow = "Hidden books",
+            header = header,
             count = books.size,
             subline = "Set aside — tap Restore to shelve them again.",
         )
@@ -140,13 +145,14 @@ private fun HiddenBooksSection(
 
 @Composable
 private fun HiddenSeriesSection(
+    header: SectionHeaderUiModel,
     series: List<DismissedSeries>,
     covers: Map<Int, CoverUiModel>,
     runAction: (HiddenSuggestionsAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         HiddenSuggestionsGroupHeader(
-            eyebrow = "Hidden series",
+            header = header,
             count = series.size,
             subline = "A muted series hides every book in it.",
         )
@@ -176,17 +182,16 @@ private fun HiddenSeriesSection(
 }
 
 /**
- * The compact header opening each group within the page: the DS §2.3 inline 20×1 hairline bar +
- * `eyebrowSmall` (the same anatomy book detail's `InlineAccentLabel` uses for a compact in-card label),
- * extended with a demoted tabular-figure [count] trailing the eyebrow and a one-line italic [subline]
- * standing in for a headline (the screen's own title lives in the top bar). "Hidden books" / "Hidden
- * series" are the only
- * two consumers today, so this stays screen-local; promote it to a shared component only once a second
- * screen needs the same "nested group inside an already-opened page" header shape.
+ * The compact header opening each group within the page: [SectionHeader]'s [SectionHeaderUiModel.Inline]
+ * register, extended with a demoted tabular-figure [count] trailing the eyebrow and a one-line italic
+ * [subline] standing in for a headline (the screen's own title lives in the top bar). "Hidden books" /
+ * "Hidden series" are the only two consumers today, so this stays screen-local; promote it to a shared
+ * component only once a second screen needs the same "nested group inside an already-opened page" header
+ * shape.
  */
 @Composable
 private fun HiddenSuggestionsGroupHeader(
-    eyebrow: String,
+    header: SectionHeaderUiModel,
     count: Int,
     subline: String,
 ) {
@@ -195,19 +200,8 @@ private fun HiddenSuggestionsGroupHeader(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
-                modifier = Modifier
-                    .height(1.dp)
-                    .width(20.dp)
-                    .background(MaterialTheme.colorScheme.primary),
-            )
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Text(
-                text = eyebrow.uppercase(),
-                style = MaterialTheme.editorialTypography.eyebrowSmall,
-                color = MaterialTheme.colorScheme.primary,
+            SectionHeader(
+                model = header,
                 modifier = Modifier.weight(1f),
             )
 

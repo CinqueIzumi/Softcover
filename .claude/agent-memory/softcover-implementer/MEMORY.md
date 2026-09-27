@@ -4,3 +4,5 @@
 - [styleCheck pulls unrelated module failures](feedback_styleCheck_pulls_unrelated_module_failures.md) — a pre-existing break elsewhere in the tree can fail your Verify command; isolate before treating it as your bug
 - [Verify a "clean" claim by running the gate](feedback_verify_clean_claim_by_running_the_gate.md) — a brief's "already clean" claim for a new gate still needs the gate run over the tree, not a looser grep
 - [Kotlin block comments nest](feedback_kotlin_block_comments_nest.md) — a literal `/*` inside KDoc opens a nested comment; "Unclosed comment" errors often point far from the real cause
+- [:app lacks toad/voyager-koin by default](feedback_app_module_lacks_toad_voyager_koin.md) — add both to debugImplementation before wiring a TOAD ScreenModel into an app/src/debug screen; also detekt task is `detektDebug`, not `detektAndroidDebug`
+- [Component migration can drop more than the flagged style](project_component_migration_style_drops.md) — diff old vs new for every property (color, weight, size, spacing), not just the one named in the brief

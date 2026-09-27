@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.state
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
@@ -44,8 +45,16 @@ internal data class ExploreScreenUiState(
     val loadingMoreQueriedBooks: Boolean = false,
     val trendingBooks: List<Book> = emptyList(),
     val loadingTrendingBooks: Boolean = true,
+    val trendingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Trending this week",
+        headline = "What everyone's reading",
+    ),
     val continueSeriesBooks: List<Book> = emptyList(),
     val loadingContinueSeriesBooks: Boolean = true,
+    val upNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Pick up where you left off",
+        headline = "Up next in your series",
+    ),
     val searchText: String = "",
     /** The search chrome, derived off the four fields below by `SearchTopBarCollector` (R9). */
     val searchTopBar: SearchTopBarUiModel = SearchTopBarUiModel(
@@ -54,6 +63,8 @@ internal data class ExploreScreenUiState(
         focused = false,
         isLoading = false,
     ),
+    /** The search-results opener, mapped by `SearchResultsHeaderCollector` (R9). */
+    val searchResultsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Showing 0 results"),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val searchError: String? = null,

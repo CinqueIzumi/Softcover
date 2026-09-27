@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnLoadMoreSearchResultsAction
@@ -53,16 +54,7 @@ internal fun DesktopSearchResults(
             )
         }
 
-        val subtitle = when {
-            state.searchText.isNotEmpty() -> "for \"${state.searchText}\""
-            state.activeMoodFilter != null -> "for \"${state.activeMoodFilter.label}\""
-            else -> null
-        }
-
-        SearchResultsHeader(
-            resultCount = state.queriedBooks.size,
-            subtitle = subtitle,
-        )
+        SectionHeader(model = state.searchResultsHeader)
 
         Spacer(modifier = Modifier.height(16.dp))
 

@@ -128,6 +128,8 @@ internal actual fun ReadingScreenLayout(
                             trendingBooks = state.trendingBooks,
                             pickUpNextCovers = state.pickUpNextCovers,
                             trendingTileCover = state.trendingTileCover,
+                            pickUpNextHeader = state.pickUpNextHeader,
+                            trendingHeader = state.trendingHeader,
                             streakEnabled = state.streakEnabled,
                             recentReadingActivity = state.recentReadingActivity,
                             onExpandStreak = { showStreakSheet = true },

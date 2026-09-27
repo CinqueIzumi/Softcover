@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.state
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
@@ -17,6 +18,15 @@ import nl.rhaydus.toad.UiState
 internal data class ReadingScreenUiState(
     val books: List<Book> = emptyList(),
     val isLoading: Boolean = true,
+
+    /**
+     * The "also reading" section opener, mapped off the composition by
+     * `CurrentlyReadingBooksCollector` (R9) from [books]`.drop(1)`'s size — never by the render.
+     */
+    val alsoReadingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "0 more in motion",
+        headline = "Also between your fingers",
+    ),
     val bookToUpdate: Book? = null,
     val progressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
     val showProgressSheet: Boolean = false,
@@ -35,6 +45,9 @@ internal data class ReadingScreenUiState(
 
     val wantToReadBooks: List<Book> = emptyList(),
     val trendingBooks: List<Book> = emptyList(),
+
+    val pickUpNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Pick up next"),
+    val trendingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Trending now"),
 
     val recentReadingActivity: List<ReadingDayActivity> = emptyList(),
     val streakEnabled: Boolean = true,

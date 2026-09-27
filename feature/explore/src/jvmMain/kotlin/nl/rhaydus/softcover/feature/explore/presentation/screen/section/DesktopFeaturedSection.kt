@@ -27,7 +27,7 @@ internal fun DesktopFeaturedSection(
     // below never resizes the feed around it.
     if (isLoading.not() && book == null) return
 
-    // No SectionHeaderBar above this one - the card names itself with an inline eyebrow; see the
+    // No section header above this one - the card names itself with an inline eyebrow; see the
     // mobile FeaturedSection for why.
     SkeletonCrossfade(
         isLoading = isLoading,

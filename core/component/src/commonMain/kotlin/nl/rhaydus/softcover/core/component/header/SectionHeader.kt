@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import kotlin.math.abs
@@ -119,16 +120,25 @@ private fun SectionHeaderRegion(
 }
 
 @Composable
+private fun sectionHeaderToneColor(tone: SectionHeaderTone) = when (tone) {
+    SectionHeaderTone.Accent -> MaterialTheme.colorScheme.primary
+    SectionHeaderTone.Error -> MaterialTheme.colorScheme.error
+    SectionHeaderTone.Muted -> MaterialTheme.colorScheme.onSurfaceVariant
+}
+
+@Composable
 private fun SectionHeaderInline(
     model: SectionHeaderUiModel.Inline,
     modifier: Modifier = Modifier,
 ) {
+    val color = sectionHeaderToneColor(tone = model.tone)
+
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
                 .height(1.dp)
                 .width(20.dp)
-                .background(MaterialTheme.colorScheme.primary),
+                .background(color),
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -136,7 +146,7 @@ private fun SectionHeaderInline(
         Text(
             text = model.eyebrow.uppercase(),
             style = MaterialTheme.editorialTypography.eyebrowSmall,
-            color = MaterialTheme.colorScheme.primary,
+            color = color,
         )
     }
 }
@@ -146,10 +156,14 @@ private fun SectionHeaderLabel(
     model: SectionHeaderUiModel.Label,
     modifier: Modifier = Modifier,
 ) {
+    val style = MaterialTheme.editorialTypography.eyebrowSmall.let { base ->
+        if (model.letterSpacing.isUnspecified) base else base.copy(letterSpacing = model.letterSpacing)
+    }
+
     Text(
         text = model.eyebrow.uppercase(),
-        style = MaterialTheme.editorialTypography.eyebrowSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = style,
+        color = sectionHeaderToneColor(tone = model.tone),
         modifier = modifier,
     )
 }

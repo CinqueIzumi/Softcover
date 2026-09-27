@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,9 +44,9 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -86,7 +85,7 @@ internal fun ShelveControlCard(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
             ) {
-                InlineAccentLabel(text = "Shelve this book")
+                SectionHeader(model = state.shelveControlHeader)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -131,14 +130,7 @@ internal fun ShelveControlCard(
                         .padding(horizontal = 16.dp),
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        if (mutationFailed) {
-                            InlineAccentLabel(
-                                text = "Couldn't save — tap to retry",
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        } else {
-                            InlineAccentLabel(text = "Shelve this book")
-                        }
+                        SectionHeader(model = state.shelveControlHeader)
 
                         Spacer(modifier = Modifier.height(10.dp))
 
@@ -372,33 +364,5 @@ private fun ShelveRow(
                 )
             }
         }
-    }
-}
-
-/**
- * Small in-flow section label with the 20×1 inline hairline bar + `eyebrowSmall` (design-system.md
- * §2.3 "inline bar" contract). Used for compact labels living inside a card or hero region — here,
- * the "Shelve this book" opener — never mixed with the full [SectionLabel] bar.
- */
-@Composable
-private fun InlineAccentLabel(
-    text: String,
-    color: Color = MaterialTheme.colorScheme.primary,
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .height(1.dp)
-                .width(20.dp)
-                .background(color),
-        )
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        Text(
-            text = text.uppercase(),
-            style = MaterialTheme.editorialTypography.eyebrowSmall,
-            color = color,
-        )
     }
 }

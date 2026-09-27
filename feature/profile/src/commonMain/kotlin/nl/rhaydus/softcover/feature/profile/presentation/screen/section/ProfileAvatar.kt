@@ -14,7 +14,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.screen.ProfileScreenLay
 
 /**
  * Shared Profile content reused by both the mobile ([ProfileScreenLayout] in `mobileMain`) and desktop
- * (`jvmMain`) layouts. The cookie-cut avatar, the eyebrow [SectionLabel], and the whole "Reading atlas"
+ * (`jvmMain`) layouts. The cookie-cut avatar, the section headers, and the whole "Reading atlas"
  * stat block are identical on both platforms — only their arrangement (centered single column vs. the
  * desktop identity sidebar beside a wider stats column) differs, which is what each `actual` decides.
  */

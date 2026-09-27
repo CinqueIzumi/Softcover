@@ -25,6 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -53,7 +55,7 @@ private val GENDER_STACK_ALPHAS = listOf(1f, 0.82f, 0.64f)
  * sits *outside* the empty-state branch on purpose, so a reader whose authors are entirely untagged
  * can always switch back rather than being stranded in an empty section.
  *
- * Mirroring [GenreRankingSection]/[RatingsHistogramSection], this always renders the [SectionIntro] and
+ * Mirroring [GenreRankingSection]/[RatingsHistogramSection], this always renders its section header and
  * falls back to a quiet placeholder line when there is nothing to show, so the section never collapses
  * to nothing between the surrounding `Spacer`s.
  */
@@ -63,6 +65,7 @@ internal fun AuthorRepresentationSection(
     hideUntaggedAuthors: Boolean,
     canHideUntaggedAuthors: Boolean,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
     onHideUntaggedAuthorsChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -72,10 +75,7 @@ internal fun AuthorRepresentationSection(
     val hasContent = hasGenderData || hasBipocData || hasLgbtqData
 
     Column(modifier = modifier) {
-        SectionIntro(
-            eyebrow = "Who you read",
-            headline = "The authors behind your shelf",
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(20.dp))
 

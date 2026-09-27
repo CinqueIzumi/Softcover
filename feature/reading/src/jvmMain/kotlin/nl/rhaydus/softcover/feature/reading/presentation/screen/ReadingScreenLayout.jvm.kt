@@ -31,6 +31,7 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
@@ -40,7 +41,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTod
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
-import nl.rhaydus.softcover.feature.reading.presentation.screen.section.AlsoReadingSectionHeader
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.CompactBookEntry
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBookCard
@@ -119,6 +119,8 @@ internal actual fun ReadingScreenLayout(
                         trendingBooks = state.trendingBooks,
                         pickUpNextCovers = state.pickUpNextCovers,
                         trendingTileCover = state.trendingTileCover,
+                        pickUpNextHeader = state.pickUpNextHeader,
+                        trendingHeader = state.trendingHeader,
                         streakEnabled = state.streakEnabled,
                         recentReadingActivity = state.recentReadingActivity,
                         onExpandStreak = { showStreakSheet = true },
@@ -205,7 +207,7 @@ private fun DesktopReadingContent(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                        AlsoReadingSectionHeader(count = rest.size)
+                        SectionHeader(model = state.alsoReadingHeader)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))

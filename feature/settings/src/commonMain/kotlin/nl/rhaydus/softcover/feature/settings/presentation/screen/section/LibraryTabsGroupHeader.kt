@@ -22,25 +22,23 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val LIST_DOT_INLINE_CONTENT_ID = "library-tabs-list-dot"
 
 /**
- * The group-level opener above the row list: a small primary eyebrow and an italic Fraunces subhead —
- * deliberately bar-less (§2.3's no-bar register), since
+ * The group-level opener above the row list: [SectionHeader]'s [SectionHeaderUiModel.Label] register
+ * plus an italic Fraunces subhead — deliberately bar-less, since
  * [EditorialSectionHeader][nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader] already
  * opened the screen once above and a second accent bar here would be group-level ceremony the redesign
  * retires.
  */
 @Composable
-internal fun LibraryTabsGroupHeader() {
+internal fun LibraryTabsGroupHeader(header: SectionHeaderUiModel) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Your tabs".uppercase(),
-            style = MaterialTheme.editorialTypography.eyebrowSmall.copy(letterSpacing = 2.2.sp),
-            color = MaterialTheme.colorScheme.primary,
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(6.dp))
 

@@ -23,6 +23,8 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -30,13 +32,14 @@ import nl.rhaydus.softcover.core.domain.model.Book
 internal fun PickUpNextSection(
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
+    header: SectionHeaderUiModel,
     onBookClick: (Book) -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        SectionLabel(text = "Pick up next")
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(16.dp))
 

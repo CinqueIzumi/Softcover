@@ -24,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
@@ -40,10 +42,11 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 internal fun ReadingAtlasSection(
     userProfileData: UserProfileData?,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        SectionLabel(text = "Reading atlas")
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(14.dp))
 

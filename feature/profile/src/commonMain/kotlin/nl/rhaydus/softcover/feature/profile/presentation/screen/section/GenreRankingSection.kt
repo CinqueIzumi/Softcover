@@ -21,6 +21,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
@@ -52,13 +54,11 @@ private const val GENRE_SKELETON_ROWS = 3
 internal fun GenreRankingSection(
     genres: GenreBreakdown,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        SectionIntro(
-            eyebrow = "What you reach for",
-            headline = "The genres you read most",
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(20.dp))
 

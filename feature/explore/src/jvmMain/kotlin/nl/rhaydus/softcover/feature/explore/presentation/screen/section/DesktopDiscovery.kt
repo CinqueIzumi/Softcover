@@ -48,6 +48,7 @@ internal fun DesktopDiscovery(
                 covers = state.continueSeriesCovers,
                 unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
+                header = state.upNextHeader,
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
@@ -68,6 +69,7 @@ internal fun DesktopDiscovery(
                 covers = state.trendingCovers,
                 unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
+                header = state.trendingHeader,
                 onBookClick = onBookClick,
             )
 

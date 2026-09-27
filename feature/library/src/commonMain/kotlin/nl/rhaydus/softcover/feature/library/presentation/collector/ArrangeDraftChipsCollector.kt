@@ -11,9 +11,9 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Derives the Arrange sheet's layout and sort chip models (`component-contract.md` § 7.2 R9) off
- * [LibraryUiState.arrangeDraft] — recomputes on every draft edit, and produces empty rows while the
- * sheet is closed (`draft == null`).
+ * Derives the Arrange sheet's layout chips, sort chips and sort-row header
+ * (`component-contract.md` § 7.2 R9) off [LibraryUiState.arrangeDraft] — recomputes on every draft
+ * edit, and produces empty rows while the sheet is closed (`draft == null`).
  */
 internal class ArrangeDraftChipsCollector : LibraryCollector {
     override suspend fun onLaunch(
@@ -32,14 +32,15 @@ internal class ArrangeDraftChipsCollector : LibraryCollector {
             }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
-                val (layoutChips, sortChips) = withContext(dependencies.defaultDispatcher) {
+                val chips = withContext(dependencies.defaultDispatcher) {
                     snapshot.compute()
                 }
 
                 scope.setState {
                     it.copy(
-                        arrangeLayoutChips = layoutChips,
-                        arrangeSortChips = sortChips,
+                        arrangeLayoutChips = chips.layoutChips,
+                        arrangeSortChips = chips.sortChips,
+                        arrangeSortHeader = chips.sortHeader,
                     )
                 }
             }

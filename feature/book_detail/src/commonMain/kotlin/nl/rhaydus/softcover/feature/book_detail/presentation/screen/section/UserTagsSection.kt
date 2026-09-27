@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenTagEditorAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -31,7 +32,7 @@ internal fun UserTagsSection(
     }
 
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-        SmallSectionLabel(text = "Your tags")
+        SectionHeader(model = state.yourTagsLabel)
 
         Spacer(modifier = Modifier.height(16.dp))
 

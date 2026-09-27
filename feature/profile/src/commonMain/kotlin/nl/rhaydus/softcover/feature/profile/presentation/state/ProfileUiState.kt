@@ -1,9 +1,13 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
 import nl.rhaydus.toad.UiState
 
 internal data class ProfileUiState(
@@ -12,6 +16,28 @@ internal data class ProfileUiState(
     val readingLifeShareCard: ReadingLifeShareCardUiModel? = null,
     val hideUntaggedAuthors: Boolean = false,
     val isLoading: Boolean = true,
+
+    val shareYourYearHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Share your year"),
+    val readingAtlasHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Reading atlas"),
+    val theReaderHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "The reader"),
+    val authorRepresentationHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Who you read",
+        headline = "The authors behind your shelf",
+    ),
+    val genreRankingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "What you reach for",
+        headline = "The genres you read most",
+    ),
+    val recentlyLovedHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Recently loved",
+        headline = "The last few that landed",
+    ),
+    val yearColumnHistoryHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "The shape of the years",
+        headline = "Reading, year by year",
+    ),
+    val ratingsHistogramHeader: SectionHeaderUiModel = RatingBand.NEW_READER.toRatingsHistogramHeader(),
+    val ratingsHistogramCaption: String = RatingBand.NEW_READER.toRatingsHistogramCaption(),
 ) : UiState {
     private val allAuthorDemographics: AuthorDemographics
         get() = readingLife?.authorDemographics ?: AuthorDemographics()

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -64,7 +65,7 @@ internal fun ExternalLinksSection(
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Spacer(modifier = Modifier.height(36.dp))
 
-                SmallSectionLabel(text = "Find it")
+                SectionHeader(model = state.findItLabel)
 
                 Spacer(modifier = Modifier.height(12.dp))
 

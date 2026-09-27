@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -179,6 +180,111 @@ class CurrentlyReadingBooksCollectorTest {
             // ----- Assert -----
             stateFlow.value.showProgressSheet shouldBe true
             stateFlow.value.books shouldBe books
+            job.cancel()
+        }
+    }
+
+    @Nested
+    inner class AlsoReadingHeader {
+        @Test
+        fun `eyebrow reads "0 more in motion" when the flow emits an empty list`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = CurrentlyReadingBooksCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+
+            // ----- Act -----
+            booksFlow.emit(emptyList())
+
+            // ----- Assert -----
+            stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
+                eyebrow = "0 more in motion",
+                headline = "Also between your fingers",
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `eyebrow reads "0 more in motion" when the flow emits a single book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = CurrentlyReadingBooksCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+
+            // ----- Act -----
+            booksFlow.emit(listOf(stubBook()))
+
+            // ----- Assert -----
+            stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
+                eyebrow = "0 more in motion",
+                headline = "Also between your fingers",
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `eyebrow reads the singular "One more in motion" when the flow emits exactly two books`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = CurrentlyReadingBooksCollector()
+                val job = launch { collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                ) }
+
+                // ----- Act -----
+                booksFlow.emit(listOf(stubBook(), stubBook()))
+
+                // ----- Assert -----
+                stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
+                    eyebrow = "One more in motion",
+                    headline = "Also between your fingers",
+                )
+                job.cancel()
+            }
+
+        @Test
+        fun `eyebrow reads the count when the flow emits more than two books`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = CurrentlyReadingBooksCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+
+            // ----- Act -----
+            booksFlow.emit(listOf(stubBook(), stubBook(), stubBook(), stubBook()))
+
+            // ----- Assert -----
+            stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
+                eyebrow = "3 more in motion",
+                headline = "Also between your fingers",
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `recomputes the eyebrow off the latest emission's count`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = CurrentlyReadingBooksCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+            booksFlow.emit(listOf(stubBook(), stubBook(), stubBook()))
+
+            // ----- Act -----
+            booksFlow.emit(listOf(stubBook()))
+
+            // ----- Assert -----
+            stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
+                eyebrow = "0 more in motion",
+                headline = "Also between your fingers",
+            )
             job.cancel()
         }
     }

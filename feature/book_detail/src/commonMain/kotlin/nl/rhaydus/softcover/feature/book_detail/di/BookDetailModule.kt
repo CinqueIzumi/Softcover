@@ -42,6 +42,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedP
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveControlHeaderCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagSuggestionsCollector
@@ -88,6 +89,7 @@ val bookDetailModule = module {
     factory { ShareCardsCollector() } bind BookDetailCollector::class
     factory { ProgressSheetCollector() } bind BookDetailCollector::class
     factory { ChooseListsCollector() } bind BookDetailCollector::class
+    factory { ShelveControlHeaderCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())

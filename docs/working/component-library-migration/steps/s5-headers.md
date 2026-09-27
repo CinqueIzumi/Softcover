@@ -11,7 +11,7 @@ The feature-local headers and the foundation `EditorialSectionHeader` collapse o
 | Sub | Scope | Status |
 |---|---|---|
 | S5-4 | `SectionHeader` / `PageMasthead` design, plus the sidebar labels and the settings page headers | [x] |
-| S5-5 | Section labels and headers across the features | [ ] |
+| S5-5 | Section labels and headers across the features | [x] |
 | S5-5b | Every `EditorialSectionHeader` call site onto `SectionHeader` | [ ] |
 | S5-6 | Mastheads and the desktop headers | [ ] |
 | S5-C-headers | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
@@ -39,6 +39,17 @@ The feature-local headers and the foundation `EditorialSectionHeader` collapse o
   sheet headers and the core `EditorialHeader` move to S6-3.
 - **S5-5b:** every `EditorialSectionHeader` call site moves onto `SectionHeader.Section`; the app stops
   consuming the foundation component. `EditorialSectionHeaderSkeleton` (S5-8) mirrors `SectionHeader`.
+- **S5-5 → `Section`:** `SectionLabel` (book_detail, profile, reading), `SectionIntro`, `SectionHeaderBar`
+  (wrapper deleted, 24dp padding via modifier), `AlsoReadingSectionHeader` (collector formats the count),
+  `SearchResultsHeader` (bar goes inline, subtitle becomes `description`).
+- **S5-5 → `Label`:** `SmallSectionLabel`, `ArrangeSubLabel`, and the debug `MotionDebugScreen`
+  `SectionLabel`; the debug screen gets a ScreenModel + `UiState` holding its header models (R10, no exemption).
+- **`Inline` gains `tone: SectionHeaderTone` (`Accent` / `Error`)**, on `Inline` only, resolved in the
+  component; `InlineAccentLabel` folds onto it, its retry state using `Error`.
+- **Local wrappers composing `SectionHeader`:** `HiddenSuggestionsGroupHeader` (`Inline` + trailing count +
+  subline) and `LibraryTabsGroupHeader` (`Label` eyebrow + local rich-text subhead).
+- **Out of the family:** the reading `EditorialHeader` is a masthead and moves to S5-6; `RowLabel` (row
+  title) and `SelectionHeader` (selection toolbar) are not headers.
 
 ## S5-4 — design + sidebar labels + settings page headers
 
@@ -54,7 +65,6 @@ The feature-local headers and the foundation `EditorialSectionHeader` collapse o
 | Symbol(s) | Current path:line | Note |
 |---|---|---|
 | `SectionLabel` | `app/src/debug/.../MotionDebugScreen.kt:364`, `feature/book_detail/presentation/screen/section/BookDetailSectionShared.kt:42`, `feature/profile/presentation/screen/section/ProfileSectionShared.kt:22`, `feature/reading/presentation/screen/section/ReadingSectionShared.kt:18` | × 4 name collision |
-| `EditorialHeader` | `feature/reading/presentation/screen/section/EditorialHeader.kt:27` | × 2, the core one is in S6-3 |
 | `SmallSectionLabel` | `feature/book_detail/presentation/screen/section/BookDetailSectionShared.kt:33` | |
 | `InlineAccentLabel` | `feature/book_detail/presentation/screen/section/ShelveControlCard.kt:384` | |
 | `SectionIntro` | `feature/profile/presentation/screen/section/ProfileSectionShared.kt:47` | |
@@ -63,9 +73,7 @@ The feature-local headers and the foundation `EditorialSectionHeader` collapse o
 | `SearchResultsHeader` | `feature/explore/presentation/screen/section/SearchResultsHeader.kt:20` | |
 | `HiddenSuggestionsGroupHeader` | `feature/explore/presentation/screen/HiddenSuggestionsShelf.kt:188` | |
 | `LibraryTabsGroupHeader` | `feature/settings/presentation/screen/section/LibraryTabsGroupHeader.kt:37` | |
-| `RowLabel` | `feature/settings/presentation/screen/section/ReorderableRow.kt:163` | |
-| `ArrangeSubLabel` | `feature/library/presentation/component/LibraryArrangeSheet.kt:191` | |
-| `SelectionHeader` | `feature/library/presentation/screen/section/SelectionHeader.kt:41` | |
+| `ArrangeSubLabel` | `feature/library/presentation/component/LibraryArrangeSheet.kt:152` | |
 
 ## S5-5b — `EditorialSectionHeader` call sites
 
@@ -80,3 +88,4 @@ Every `EditorialSectionHeader(` call in `feature/`, `core/` and `app/src/debug` 
 | `DesktopExploreHeader` | `feature/explore/presentation/screen/section/DesktopExploreHeader.kt:27` | |
 | `DesktopLibraryHeader` | `feature/library/presentation/screen/LibraryScreenLayout.jvm.kt:489` | |
 | `DesktopReadingHeader` | `feature/reading/presentation/screen/ReadingScreenLayout.jvm.kt:240` | |
+| `EditorialHeader` | `feature/reading/presentation/screen/section/EditorialHeader.kt:27` (mobileMain) | × 2, the core one is in S6-3 |

@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
@@ -53,27 +54,29 @@ class ArrangeDraftChipsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `arrangeLayoutChips and arrangeSortChips stay empty while the sheet is closed`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val collector = ArrangeDraftChipsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
+        fun `arrangeLayoutChips, arrangeSortChips and arrangeSortHeader reset while the sheet is closed`() =
+            runTest(testDispatcher) {
+                // ----- Arrange -----
+                val collector = ArrangeDraftChipsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = LibraryUiState(visibleTabs = listOf(readingTab))
+
+                // ----- Assert -----
+                stateFlow.value.arrangeLayoutChips shouldBe emptyList()
+                stateFlow.value.arrangeSortChips shouldBe emptyList()
+                stateFlow.value.arrangeSortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort")
+                job.cancel()
             }
 
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(visibleTabs = listOf(readingTab))
-
-            // ----- Assert -----
-            stateFlow.value.arrangeLayoutChips shouldBe emptyList()
-            stateFlow.value.arrangeSortChips shouldBe emptyList()
-            job.cancel()
-        }
-
         @Test
-        fun `opening the sheet with a draft populates the layout and sort chips for the matching tab`() =
+        fun `opening the sheet with a draft populates the layout chips, sort chips and sort header for the matching tab`() =
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 val collector = ArrangeDraftChipsCollector()
@@ -102,8 +105,40 @@ class ArrangeDraftChipsCollectorTest {
                 val sortChip = stateFlow.value.arrangeSortChips.first { it.key == "sort:MANUAL" }
                 sortChip.tone shouldBe ChipTone.Choice
                 sortChip.selected shouldBe true
+                stateFlow.value.arrangeSortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Currently Reading")
                 job.cancel()
             }
+
+        @Test
+        fun `switching the draft's tab recomputes the sort header's tab label`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val wantToReadTab = LibraryTab.Status.of(UserBookStatus.WANT_TO_READ)
+            val collector = ArrangeDraftChipsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            stateFlow.value = LibraryUiState(
+                visibleTabs = listOf(readingTab, wantToReadTab),
+                arrangeDraft = LibraryArrangeDraft(
+                    tabId = readingTab.id,
+                    sortMode = LibrarySortMode.MANUAL,
+                    sortDirection = SortDirection.ASCENDING,
+                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+                ),
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                arrangeDraft = stateFlow.value.arrangeDraft?.copy(tabId = wantToReadTab.id),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.arrangeSortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Want to Read")
+            job.cancel()
+        }
 
         @Test
         fun `editing the draft's sort mode recomputes which sort chip is selected`() = runTest(testDispatcher) {
@@ -141,6 +176,7 @@ class ArrangeDraftChipsCollectorTest {
                 icon = SoftcoverIcon.ArrowDropUp,
                 description = "Ascending",
             )
+            stateFlow.value.arrangeSortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Currently Reading")
             job.cancel()
         }
 
@@ -166,12 +202,14 @@ class ArrangeDraftChipsCollectorTest {
                 )
                 val layoutChipsAfterFirstEmit = stateFlow.value.arrangeLayoutChips
                 val sortChipsAfterFirstEmit = stateFlow.value.arrangeSortChips
+                val sortHeaderAfterFirstEmit = stateFlow.value.arrangeSortHeader
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
 
                 // ----- Assert -----
                 (stateFlow.value.arrangeLayoutChips === layoutChipsAfterFirstEmit) shouldBe true
+                (stateFlow.value.arrangeSortHeader === sortHeaderAfterFirstEmit) shouldBe true
                 (stateFlow.value.arrangeSortChips === sortChipsAfterFirstEmit) shouldBe true
                 job.cancel()
             }

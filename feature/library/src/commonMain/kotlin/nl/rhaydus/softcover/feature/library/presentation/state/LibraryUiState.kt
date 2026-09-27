@@ -86,11 +86,16 @@ internal data class LibraryUiState(
      */
     val arrangeDraft: LibraryArrangeDraft? = null,
 
+    val arrangeLayoutHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Layout"),
+
     /** The Arrange sheet's layout row, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
     val arrangeLayoutChips: List<ChipUiModel> = emptyList(),
 
     /** The Arrange sheet's sort row, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
     val arrangeSortChips: List<ChipUiModel> = emptyList(),
+
+    /** The Arrange sheet's sort-row header, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
+    val arrangeSortHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Sort"),
 
     /** The Shelves sheet — the tab switcher on mobile; desktop keeps its permanent sidebar. */
     val isShelvesSheetExpanded: Boolean = false,

@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
@@ -30,6 +29,7 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
@@ -89,7 +89,7 @@ internal fun LibraryArrangeSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            ArrangeSubLabel(text = "Layout")
+            SectionHeader(model = state.arrangeLayoutHeader)
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -109,7 +109,7 @@ internal fun LibraryArrangeSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            ArrangeSubLabel(text = "Sort by · ${tab.label}")
+            SectionHeader(model = state.arrangeSortHeader)
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -146,15 +146,6 @@ internal fun LibraryArrangeSheet(
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
-}
-
-@Composable
-private fun ArrangeSubLabel(text: String) {
-    Text(
-        text = text.uppercase(),
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)

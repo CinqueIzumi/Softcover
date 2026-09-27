@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
@@ -64,15 +65,8 @@ internal fun ActiveSearchContent(
             )
         }
 
-        val subtitle = when {
-            state.searchText.isNotEmpty() -> "for \"${state.searchText}\""
-            state.activeMoodFilter != null -> "for \"${state.activeMoodFilter.label}\""
-            else -> null
-        }
-
-        SearchResultsHeader(
-            resultCount = state.queriedBooks.size,
-            subtitle = subtitle,
+        SectionHeader(
+            model = state.searchResultsHeader,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
 

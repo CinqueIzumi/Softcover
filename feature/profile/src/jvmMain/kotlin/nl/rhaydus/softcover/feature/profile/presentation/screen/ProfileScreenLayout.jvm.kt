@@ -36,6 +36,7 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -55,7 +56,6 @@ import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileS
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RatingsHistogramSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ReadingAtlasSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RecentlyLovedSection
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.SectionLabel
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ShareEntryRow
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColumnHistorySection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
@@ -78,7 +78,7 @@ private val TWO_COLUMN_MIN_WIDTH = 720.dp
  * column. A static top strip carries the back control plus a share glyph; there is no scroll-collapsing
  * top bar. The whole surface paints an opaque [Surface] background so a pushed Profile never lets the
  * screen beneath it bleed through during the navigation transition. The avatar, section labels, and the
- * whole reading-life content block are shared shelf code ([ProfileAvatar], [SectionLabel],
+ * whole reading-life content block are shared shelf code ([ProfileAvatar],
  * [ReadingAtlasSection] and the other "reading life" sections in `section/`) — only the
  * arrangement is desktop-specific.
  */
@@ -170,6 +170,7 @@ private fun ProfileContent(
     if (showShareSheet && shareContent != null) {
         ProfileShareBottomSheet(
             content = shareContent,
+            header = state.shareYourYearHeader,
             onDismissRequest = { showShareSheet = false },
         )
     }
@@ -318,6 +319,7 @@ private fun ReadingLifeContent(
         ReadingAtlasSection(
             userProfileData = state.userProfileData,
             isLoading = state.isLoading,
+            header = state.readingAtlasHeader,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -332,6 +334,7 @@ private fun ReadingLifeContent(
         YearColumnHistorySection(
             readingLife = state.readingLife,
             isLoading = readingLifeLoading,
+            header = state.yearColumnHistoryHeader,
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -339,6 +342,7 @@ private fun ReadingLifeContent(
         GenreRankingSection(
             genres = state.readingLife?.genres ?: GenreBreakdown(),
             isLoading = readingLifeLoading,
+            header = state.genreRankingHeader,
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -348,6 +352,7 @@ private fun ReadingLifeContent(
             hideUntaggedAuthors = state.hideUntaggedAuthors,
             canHideUntaggedAuthors = state.hasUntaggedAuthors,
             isLoading = readingLifeLoading,
+            header = state.authorRepresentationHeader,
             onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
         )
 
@@ -356,6 +361,8 @@ private fun ReadingLifeContent(
         RatingsHistogramSection(
             ratings = state.readingLife?.ratings ?: RatingsDistribution(),
             isLoading = readingLifeLoading,
+            header = state.ratingsHistogramHeader,
+            caption = state.ratingsHistogramCaption,
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -363,6 +370,7 @@ private fun ReadingLifeContent(
         RecentlyLovedSection(
             books = state.readingLife?.recentlyLoved.orEmpty(),
             isLoading = readingLifeLoading,
+            header = state.recentlyLovedHeader,
         )
     }
 }
@@ -390,7 +398,7 @@ private fun ReaderIdentity(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        SectionLabel(text = "The reader")
+        SectionHeader(model = state.theReaderHeader)
 
         Spacer(modifier = Modifier.height(10.dp))
 

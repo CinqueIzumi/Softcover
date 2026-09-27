@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
@@ -28,6 +30,7 @@ internal fun DesktopUpNextSection(
     covers: Map<Int, CoverUiModel>,
     unreleasedBadges: Map<Int, BadgeUiModel>,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
@@ -36,9 +39,9 @@ internal fun DesktopUpNextSection(
     var sheetBook by remember { mutableStateOf<Book?>(null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        SectionHeaderBar(
-            eyebrow = "Pick up where you left off",
-            headline = "Up next in your series",
+        SectionHeader(
+            model = header,
+            modifier = Modifier.padding(horizontal = 24.dp),
         )
 
         SkeletonCrossfade(

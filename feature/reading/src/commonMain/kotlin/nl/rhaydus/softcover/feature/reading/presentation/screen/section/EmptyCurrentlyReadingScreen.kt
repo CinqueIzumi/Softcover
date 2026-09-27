@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -37,6 +38,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 
 @Composable
 internal fun EmptyCurrentlyReadingScreen(
+    pickUpNextHeader: SectionHeaderUiModel,
+    trendingHeader: SectionHeaderUiModel,
     wantToReadBooks: List<Book> = emptyList(),
     trendingBooks: List<Book> = emptyList(),
     pickUpNextCovers: Map<Int, CoverUiModel> = emptyMap(),
@@ -148,6 +151,7 @@ internal fun EmptyCurrentlyReadingScreen(
             PickUpNextSection(
                 books = pickUpNext,
                 covers = pickUpNextCovers,
+                header = pickUpNextHeader,
                 onBookClick = onBookClick,
             )
         } else if (trendingTile != null) {
@@ -156,6 +160,7 @@ internal fun EmptyCurrentlyReadingScreen(
             TrendingTileSection(
                 book = trendingTile,
                 cover = trendingTileCover,
+                header = trendingHeader,
                 onBookClick = onBookClick,
             )
         }

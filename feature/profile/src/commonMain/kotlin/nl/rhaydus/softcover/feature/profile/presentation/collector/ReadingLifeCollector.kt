@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import kotlinx.coroutines.flow.filterNotNull
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -22,6 +24,8 @@ internal class ReadingLifeCollector : ProfileCollector {
                         readingLifeShareCard = it.userProfileData?.let { profile ->
                             readingLife.toReadingLifeShareCardUiModel(profile)
                         },
+                        ratingsHistogramHeader = readingLife.ratings.band.toRatingsHistogramHeader(),
+                        ratingsHistogramCaption = readingLife.ratings.band.toRatingsHistogramCaption(),
                     )
                 }
             }

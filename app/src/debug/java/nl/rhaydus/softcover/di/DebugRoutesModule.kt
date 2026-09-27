@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.di
 import androidx.compose.runtime.Composable
 import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.debug.DebugRoutesSection
+import nl.rhaydus.softcover.debug.MotionDebugScreenModel
 import org.koin.dsl.module
 
 /**
@@ -16,4 +17,6 @@ internal val debugRoutesModule = module {
             override fun Render() = DebugRoutesSection()
         }
     }
+
+    factory { MotionDebugScreenModel(appDispatchers = get()) }
 }

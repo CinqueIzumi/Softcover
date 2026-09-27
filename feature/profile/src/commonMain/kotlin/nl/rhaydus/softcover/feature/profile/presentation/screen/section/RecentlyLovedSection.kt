@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -44,13 +46,11 @@ private const val RECENTLY_LOVED_LIMIT = 3
 internal fun RecentlyLovedSection(
     books: List<LovedBook>,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        SectionIntro(
-            eyebrow = "Recently loved",
-            headline = "The last few that landed",
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(20.dp))
 

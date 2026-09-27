@@ -45,6 +45,8 @@ import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.ShareOutcome
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
@@ -61,6 +63,7 @@ import kotlin.math.roundToInt
 @Composable
 internal fun ProfileShareBottomSheet(
     content: ReadingLifeShareCardUiModel,
+    header: SectionHeaderUiModel,
     onDismissRequest: () -> Unit,
 ) {
     val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
@@ -78,7 +81,7 @@ internal fun ProfileShareBottomSheet(
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            SectionLabel(text = "Share your year")
+            SectionHeader(model = header)
 
             Spacer(modifier = Modifier.height(6.dp))
 

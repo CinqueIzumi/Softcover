@@ -14,22 +14,25 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, S5-1–S5-3b, S5-C-chips (`c09e3750`) and S5-4 done. S5-4 added `SectionHeader`
-  (Section / Inline / Label registers) and `PageMasthead` (+ `PageMastheadDimensions`) in
-  `:core:component/header/`; the sidebar labels and settings page / pane headers use them, with every
-  header model a `UiState` default field. `:core:component` now holds kotlinx-datetime on `api`. S11-1 is
-  now a gate-driven R10 sweep. 14 files with Apollo alias imports wait on foundation F24.
-- **Next:** [`steps/s5-headers.md`](steps/s5-headers.md) S5-5 (its `## Approved shape` binds it). Run
-  Gradle with `JAVA_HOME` set to JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S0–S4, S5-1–S5-3b, S5-C-chips and S5-4 (`498948c2`) done. S5-5 is done, uncommitted:
+  every feature section label is on `SectionHeader`, each model a stored `UiState` field set by a default
+  or collector. `SectionHeaderTone` gained `Muted`; `Label` takes `letterSpacing` and `tone` (settings
+  "Your tabs" uses 2.2sp + `Accent`); `buildLibraryArrangeChips` returns `LibraryArrangeChips`.
+  14 files with Apollo alias imports wait on foundation F24.
+- **Next:** commit S5-5 (ask first), then S5-5b in [`steps/s5-headers.md`](steps/s5-headers.md). Gradle
+  under JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
   stale for a frame on open; if visible, seed them in the open action.
-- **Verification:** on JBR 21, compile, `projectHealth` (core:component, settings, library),
-  `checkModuleGraph`, `ktlintCheck`, `styleCheck`, `checkDocBudgets` and `testAndroidHostTest` for
-  `:core:component`, settings and library pass; `softcover-reviewer` findings fixed (its "use the
-  foundation `EditorialSectionHeader`" note rejected, it contradicts the approved shape).
-- **Uncommitted:** nothing.
+- **Verification:** on JBR 21, compile (core:component, six features, `:app` debug), `projectHealth`
+  for each, `checkModuleGraph`, `ktlintCheck`, `styleCheck` and `checkDocBudgets` pass. New and
+  extended header tests pass (`:app` now has a JUnit 5 `testDebug` set). Two `softcover-reviewer`
+  passes ✅ after fixes; `InProgressSection`'s header takes `weight(1f)` so the Update pill keeps its room.
+- **Uncommitted:** all of S5-5 — `:core:component` header tone / spacing; book_detail, profile,
+  reading, explore, library and settings migrations; `LibraryArrangeChips`; the debug `MotionDebug*`
+  TOAD files, `app/build.gradle.kts` debug + test deps and `app/src/testDebug`; the new tests; five
+  design-system reference docs; this tracker and `steps/s5-headers.md`; agent memories.
 
 ## Local verification
 

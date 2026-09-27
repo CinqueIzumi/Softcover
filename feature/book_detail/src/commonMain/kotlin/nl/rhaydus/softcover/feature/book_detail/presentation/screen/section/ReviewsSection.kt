@@ -36,6 +36,7 @@ import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -71,7 +72,7 @@ internal fun ReviewsSection(
     Spacer(modifier = Modifier.height(36.dp))
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        SectionLabel(text = "Voices")
+        SectionHeader(model = state.reviewsSectionHeader)
 
         Spacer(modifier = Modifier.height(4.dp))
 

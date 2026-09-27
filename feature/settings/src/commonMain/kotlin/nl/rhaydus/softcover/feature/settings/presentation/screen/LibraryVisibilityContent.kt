@@ -41,7 +41,7 @@ internal fun LibraryVisibilityContent(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        LibraryTabsGroupHeader()
+        LibraryTabsGroupHeader(header = state.libraryTabsHeader)
 
         Spacer(modifier = Modifier.height(12.dp))
 

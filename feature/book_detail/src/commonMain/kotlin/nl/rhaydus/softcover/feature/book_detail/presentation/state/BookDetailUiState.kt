@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
@@ -61,6 +62,19 @@ internal data class BookDetailUiState(
     val progressSheet: ProgressSheetUiModel? = null,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val selectedLens: BookDetailLens = BookDetailLens.THE_BOOK,
+
+    val aboutSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "About"),
+    val inProgressSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "In progress"),
+    val reviewsSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Voices"),
+    val findItLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Find it"),
+    val tagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
+    val yourTagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your tags"),
+
+    /**
+     * The "Shelve this book" opener, mapped by `ShelveControlHeaderCollector` (R9) off [book] and
+     * [failedMutationBookIds] — the retry label when the last shelve write for this book failed.
+     */
+    val shelveControlHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Shelve this book"),
 
     val deadline: BookDeadline? = null,
     val deadlineProgress: DeadlineProgress? = null,

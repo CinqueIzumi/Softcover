@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -14,10 +15,10 @@ import nl.rhaydus.softcover.feature.library.presentation.sort.librarySortOptions
 
 /**
  * Pure, dispatcher-friendly builder mapping the Arrange sheet's [LibraryArrangeDraft] to its two
- * chip rows (`component-contract.md` § 7.2 R9) — kept top-level, like [buildLibraryFilterChips], so
- * `ArrangeDraftChipsCollector` can call it on `Dispatchers.Default`. `tab` resolves [draft]'s tabId
- * against [visibleTabs] rather than taking a [LibraryTab] directly, since the collector only holds
- * state slices, not the render's own tab reference.
+ * chip rows and its sort-row header (`component-contract.md` § 7.2 R9) — kept top-level, like
+ * [buildLibraryFilterChips], so `ArrangeDraftChipsCollector` can call it on `Dispatchers.Default`.
+ * `tab` resolves [draft]'s tabId against [visibleTabs] rather than taking a [LibraryTab] directly,
+ * since the collector only holds state slices, not the render's own tab reference.
  */
 internal fun buildLibraryArrangeChips(
     draft: LibraryArrangeDraft,
@@ -25,8 +26,9 @@ internal fun buildLibraryArrangeChips(
     customLists: List<BookList>,
     booksByTab: Map<String, List<Book>>,
     deadlines: Map<Int, BookDeadline>,
-): Pair<List<ChipUiModel>, List<ChipUiModel>> {
-    val tab = visibleTabs.firstOrNull { it.id == draft.tabId } ?: return emptyList<ChipUiModel>() to emptyList()
+): LibraryArrangeChips {
+    val tab = visibleTabs.firstOrNull { it.id == draft.tabId }
+        ?: return LibraryArrangeChips.Empty
 
     val layoutChips = LibraryLayoutChip.entries.map { chip ->
         ChipUiModel(
@@ -65,7 +67,13 @@ internal fun buildLibraryArrangeChips(
         )
     }
 
-    return layoutChips to sortChips
+    val sortHeader = SectionHeaderUiModel.Label(eyebrow = "Sort by · ${tab.label}")
+
+    return LibraryArrangeChips(
+        layoutChips = layoutChips,
+        sortChips = sortChips,
+        sortHeader = sortHeader,
+    )
 }
 
 private fun LibrarySortMode.directionTrailing(direction: SortDirection): ChipTrailing.Icon =

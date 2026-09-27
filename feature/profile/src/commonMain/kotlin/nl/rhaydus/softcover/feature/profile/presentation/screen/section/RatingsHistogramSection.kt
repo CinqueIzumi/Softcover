@@ -24,6 +24,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
@@ -31,47 +33,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.feature.profile.presentation.screen.RatingBandCopy
-
-// The band → copy mapping is authored here in presentation from the domain-classified RatingBand,
-// mirroring the InlineErrorState precedent of keeping user-facing copy out of the domain layer.
-private fun RatingBand.toCopy(): RatingBandCopy = when (this) {
-    RatingBand.GENEROUS -> RatingBandCopy(
-        headline = "A generous but honest hand",
-        caption = "Half-stars count. Most of yours land between four and five — you round up when a book earns it.",
-    )
-
-    RatingBand.SUPERFAN -> RatingBandCopy(
-        headline = "Easily, happily impressed",
-        caption = "Your average sits north of four and a half — you finish what you start, and it usually earns the " +
-            "top shelf.",
-    )
-
-    RatingBand.CENTRIST -> RatingBandCopy(
-        headline = "You keep to the middle of the shelf",
-        caption = "Your ratings cluster around three and a half — steady and considered, rarely swinging to an " +
-            "extreme.",
-    )
-
-    RatingBand.EXACTING -> RatingBandCopy(
-        headline = "A hard star to earn",
-        caption = "Your average runs low — a five-star read is rare here, which makes the ones you give out mean " +
-            "something.",
-    )
-
-    RatingBand.POLARISED -> RatingBandCopy(
-        headline = "Love it or leave it",
-        caption = "Your ratings split into two camps, low and high, with little in between — a book either wins " +
-            "you over or it doesn't.",
-    )
-
-    RatingBand.NEW_READER -> RatingBandCopy(
-        headline = "Still finding your scale",
-        caption = "Not enough ratings yet to say much about your taste — a few more books will fill this in.",
-    )
-}
 
 private val RATINGS_BAR_AREA_HEIGHT = 88.dp
 private val RATINGS_LABEL_HEIGHT = 16.dp
@@ -82,23 +44,19 @@ private const val RATINGS_HALF_STEP_WIDTH_FRACTION = 0.48f
 private const val RATINGS_HALF_STEP_ALPHA = 0.55f
 
 /**
- * "How you score" — a band-driven headline and caption over a number-forward average and a half-star
- * histogram. The headline/caption pair is chosen from [RatingsDistribution.band] (average + distribution
- * shape), never from the bare average.
+ * "How you score" — a number-forward average and a half-star histogram, with [header] and [caption]
+ * supplying the band-driven copy.
  */
 @Composable
 internal fun RatingsHistogramSection(
     ratings: RatingsDistribution,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
+    caption: String,
     modifier: Modifier = Modifier,
 ) {
-    val copy = ratings.band.toCopy()
-
     Column(modifier = modifier) {
-        SectionIntro(
-            eyebrow = "How you score",
-            headline = copy.headline,
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -124,7 +82,7 @@ internal fun RatingsHistogramSection(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = copy.caption,
+                text = caption,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

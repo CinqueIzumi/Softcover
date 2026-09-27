@@ -15,3 +15,4 @@
 - [Bash hook and Gradle task testing](project_bash_hook_and_gradle_task_testing.md) — base64 TSV harness for PreToolUse hooks; ProjectBuilder for DefaultTask actions; single-branch merge-base gotcha; concurrent-edit handling
 - [ktlintFormat nested-call trailing comma](feedback_ktlintformat_nested_call_trailing_comma.md) — grep for `),)` after ktlintFormat; wrap the outer call too
 - [Composable style resolution is untestable at unit level](feedback_composable_style_resolution_untestable.md) — no compose-ui-test dep in core:component; proxy "style resolution" coverage via enum/sealed-slot fixture coverage instead
+- [`:app` has no testDebug source set by default](feedback_app_module_testdebug_source_set.md) — add JUnit5/MockK/Kotest/coroutines-test + useJUnitPlatform() by hand; static-state ScreenModel test pattern

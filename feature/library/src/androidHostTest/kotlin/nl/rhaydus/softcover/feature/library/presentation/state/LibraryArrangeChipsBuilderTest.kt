@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -29,7 +30,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (layoutChips, _) = buildLibraryArrangeChips(
+            val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
                 customLists = emptyList(),
@@ -38,10 +39,38 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            layoutChips.map { it.key } shouldBe listOf("layout:GRID_TWO", "layout:GRID_THREE", "layout:LIST")
-            layoutChips.map { it.label } shouldBe listOf("Grid · 2", "Grid · 3", "List")
-            layoutChips.map { it.tone } shouldBe listOf(ChipTone.Choice, ChipTone.Choice, ChipTone.Choice)
-            layoutChips.map { it.selected } shouldBe listOf(false, true, false)
+            result.layoutChips.map { it.key } shouldBe listOf("layout:GRID_TWO", "layout:GRID_THREE", "layout:LIST")
+            result.layoutChips.map { it.label } shouldBe listOf("Grid · 2", "Grid · 3", "List")
+            result.layoutChips.map { it.tone } shouldBe listOf(ChipTone.Choice, ChipTone.Choice, ChipTone.Choice)
+            result.layoutChips.map { it.selected } shouldBe listOf(false, true, false)
+            result.sortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Currently Reading")
+        }
+
+        @Test
+        fun `sort header names the sort row after the draft's resolved tab label`() {
+            // ----- Arrange -----
+            val customListTab = LibraryTab.CustomList(
+                listId = 10,
+                listName = "Winter reading",
+            )
+            val draft = LibraryArrangeDraft(
+                tabId = customListTab.id,
+                sortMode = LibrarySortMode.TITLE,
+                sortDirection = SortDirection.ASCENDING,
+                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
+
+            // ----- Act -----
+            val result = buildLibraryArrangeChips(
+                draft = draft,
+                visibleTabs = listOf(customListTab),
+                customLists = emptyList(),
+                booksByTab = emptyMap(),
+                deadlines = emptyMap(),
+            )
+
+            // ----- Assert -----
+            result.sortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Winter reading")
         }
 
         @Test
@@ -55,7 +84,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (_, sortChips) = buildLibraryArrangeChips(
+            val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
                 customLists = emptyList(),
@@ -64,7 +93,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            val titleChip = sortChips.single { it.key == "sort:TITLE" }
+            val titleChip = result.sortChips.single { it.key == "sort:TITLE" }
             titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
             titleChip.trailing shouldBe ChipTrailing.Icon(
@@ -84,7 +113,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (_, sortChips) = buildLibraryArrangeChips(
+            val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
                 customLists = emptyList(),
@@ -93,7 +122,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            val titleChip = sortChips.single { it.key == "sort:TITLE" }
+            val titleChip = result.sortChips.single { it.key == "sort:TITLE" }
             titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
             titleChip.trailing shouldBe ChipTrailing.Icon(
@@ -113,7 +142,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (_, sortChips) = buildLibraryArrangeChips(
+            val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
                 customLists = emptyList(),
@@ -122,7 +151,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            val manualChip = sortChips.single { it.key == "sort:MANUAL" }
+            val manualChip = result.sortChips.single { it.key == "sort:MANUAL" }
             manualChip.tone shouldBe ChipTone.Choice
             manualChip.selected shouldBe true
             manualChip.trailing shouldBe null
@@ -139,7 +168,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (_, sortChips) = buildLibraryArrangeChips(
+            val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
                 customLists = emptyList(),
@@ -148,7 +177,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            val authorChip = sortChips.single { it.key == "sort:AUTHOR" }
+            val authorChip = result.sortChips.single { it.key == "sort:AUTHOR" }
             authorChip.tone shouldBe ChipTone.Choice
             authorChip.selected shouldBe false
             authorChip.trailing shouldBe null
@@ -176,7 +205,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (_, sortChips) = buildLibraryArrangeChips(
+            val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(customListTab),
                 customLists = listOf(rankedList),
@@ -185,13 +214,13 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            sortChips.first().key shouldBe "sort:ORDER"
-            sortChips.first().tone shouldBe ChipTone.Choice
-            sortChips.first().selected shouldBe true
+            result.sortChips.first().key shouldBe "sort:ORDER"
+            result.sortChips.first().tone shouldBe ChipTone.Choice
+            result.sortChips.first().selected shouldBe true
         }
 
         @Test
-        fun `a draft tabId absent from visibleTabs yields no chips`() {
+        fun `a draft tabId absent from visibleTabs yields the shared Empty result`() {
             // ----- Arrange -----
             val draft = LibraryArrangeDraft(
                 tabId = "missing-tab",
@@ -201,7 +230,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (layoutChips, sortChips) = buildLibraryArrangeChips(
+            val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = listOf(readingTab),
                 customLists = emptyList(),
@@ -210,12 +239,11 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            layoutChips shouldBe emptyList()
-            sortChips shouldBe emptyList()
+            result shouldBe LibraryArrangeChips.Empty
         }
 
         @Test
-        fun `an empty visibleTabs list yields no chips`() {
+        fun `an empty visibleTabs list yields the shared Empty result`() {
             // ----- Arrange -----
             val draft = LibraryArrangeDraft(
                 tabId = readingTab.id,
@@ -225,7 +253,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Act -----
-            val (layoutChips, sortChips) = buildLibraryArrangeChips(
+            val result = buildLibraryArrangeChips(
                 draft = draft,
                 visibleTabs = emptyList(),
                 customLists = emptyList(),
@@ -234,8 +262,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            layoutChips shouldBe emptyList()
-            sortChips shouldBe emptyList()
+            result shouldBe LibraryArrangeChips.Empty
         }
     }
 

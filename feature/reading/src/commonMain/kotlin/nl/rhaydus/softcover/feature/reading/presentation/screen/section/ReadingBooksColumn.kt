@@ -21,6 +21,7 @@ import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
@@ -99,7 +100,7 @@ internal fun ReadingBooksColumn(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                        AlsoReadingSectionHeader(count = rest.size)
+                        SectionHeader(model = state.alsoReadingHeader)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))

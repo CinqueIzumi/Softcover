@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.Test
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -114,7 +115,7 @@ dependencies {
     // (LinearWavyProgressIndicator) are exactly what CMP's stable material3 strips. One material3 on
     // the classpath, at one version.
     //
-    // Only these three are declared. `designsystem-core` and `core-common` are already on :app's
+    // Only these are declared. `designsystem-core` and `core-common` are already on :app's
     // compile classpath in every variant, through `:core:designsystem`'s `api` edges; `designsystem-
     // editorial` is not, because that module holds it on `implementation`. `voyager-navigator` is
     // declared rather than taken from `:core:presentation`'s `api` edge, so the debug screens do not
@@ -122,5 +123,22 @@ dependencies {
     debugImplementation(project(":core:component"))
     debugImplementation(libs.compose.material3.expressive)
     debugImplementation(libs.voyager.navigator)
+    debugImplementation(libs.voyager.koin)
     debugImplementation(libs.rhaydus.designsystemEditorial)
+    debugImplementation(libs.rhaydus.toad)
+
+    // Unit tests for the debug-only TOAD ScreenModel above (app/src/testDebug). Mirrors the JUnit5 +
+    // MockK + Kotest + coroutines-test stack the KMP feature modules get from their convention plugin,
+    // which :app does not apply.
+    testDebugImplementation(libs.junit.api)
+    testDebugImplementation(libs.junit.params)
+    testDebugRuntimeOnly(libs.junit.engine)
+    testDebugRuntimeOnly(libs.junit.platform.launcher)
+    testDebugImplementation(libs.mockk)
+    testDebugImplementation(libs.kotest)
+    testDebugImplementation(libs.coroutines.test)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

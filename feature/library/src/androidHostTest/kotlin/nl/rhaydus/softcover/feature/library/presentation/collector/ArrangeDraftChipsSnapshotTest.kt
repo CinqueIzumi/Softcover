@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryArrangeChips
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryArrangeDraft
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -19,7 +20,7 @@ class ArrangeDraftChipsSnapshotTest {
     @Nested
     inner class Compute {
         @Test
-        fun `compute returns empty layout and sort chip lists while the draft is null (sheet closed)`() {
+        fun `compute returns the shared Empty result while the draft is null (sheet closed)`() {
             // ----- Arrange -----
             val snapshot = ArrangeDraftChipsSnapshot(
                 draft = null,
@@ -30,11 +31,10 @@ class ArrangeDraftChipsSnapshotTest {
             )
 
             // ----- Act -----
-            val (layoutChips, sortChips) = snapshot.compute()
+            val result = snapshot.compute()
 
             // ----- Assert -----
-            layoutChips shouldBe emptyList()
-            sortChips shouldBe emptyList()
+            result shouldBe LibraryArrangeChips.Empty
         }
 
         @Test
@@ -55,13 +55,13 @@ class ArrangeDraftChipsSnapshotTest {
             )
 
             // ----- Act -----
-            val (layoutChips, sortChips) = snapshot.compute()
+            val result = snapshot.compute()
 
             // ----- Assert -----
-            val layoutChip = layoutChips.first { it.key == "layout:GRID_TWO" }
+            val layoutChip = result.layoutChips.first { it.key == "layout:GRID_TWO" }
             layoutChip.tone shouldBe ChipTone.Choice
             layoutChip.selected shouldBe true
-            val titleChip = sortChips.first { it.key == "sort:TITLE" }
+            val titleChip = result.sortChips.first { it.key == "sort:TITLE" }
             titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
             titleChip.trailing shouldBe ChipTrailing.Icon(
@@ -71,7 +71,7 @@ class ArrangeDraftChipsSnapshotTest {
         }
 
         @Test
-        fun `compute returns empty chip lists when the draft's tabId matches no visible tab`() {
+        fun `compute returns the shared Empty result when the draft's tabId matches no visible tab`() {
             // ----- Arrange -----
             val draft = LibraryArrangeDraft(
                 tabId = "missing-tab",
@@ -88,11 +88,10 @@ class ArrangeDraftChipsSnapshotTest {
             )
 
             // ----- Act -----
-            val (layoutChips, sortChips) = snapshot.compute()
+            val result = snapshot.compute()
 
             // ----- Assert -----
-            layoutChips shouldBe emptyList()
-            sortChips shouldBe emptyList()
+            result shouldBe LibraryArrangeChips.Empty
         }
     }
 }

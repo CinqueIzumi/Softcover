@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.component.header
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
@@ -23,9 +25,20 @@ sealed interface SectionHeaderUiModel {
         val pulseKey: Int = 0,
     ) : SectionHeaderUiModel
 
-    data class Inline(val eyebrow: String) : SectionHeaderUiModel
+    data class Inline(
+        val eyebrow: String,
+        val tone: SectionHeaderTone = SectionHeaderTone.Accent,
+    ) : SectionHeaderUiModel
 
-    data class Label(val eyebrow: String) : SectionHeaderUiModel
+    /**
+     * @property letterSpacing Overrides `eyebrowSmall`'s own tracking when set; [TextUnit.Unspecified]
+     * (the default) keeps the style's tracking as-is.
+     */
+    data class Label(
+        val eyebrow: String,
+        val letterSpacing: TextUnit = TextUnit.Unspecified,
+        val tone: SectionHeaderTone = SectionHeaderTone.Muted,
+    ) : SectionHeaderUiModel
 
     companion object : UiModelPreviews<SectionHeaderUiModel> {
         /** One fixture per register, plus [Section] with and without headline/description. */
@@ -37,7 +50,16 @@ sealed interface SectionHeaderUiModel {
             ),
             Section(eyebrow = "Currently reading"),
             Inline(eyebrow = "Recently added"),
+            Inline(
+                eyebrow = "Couldn't save — tap to retry",
+                tone = SectionHeaderTone.Error,
+            ),
             Label(eyebrow = "Shelves"),
+            Label(
+                eyebrow = "Your tabs",
+                letterSpacing = 2.2.sp,
+                tone = SectionHeaderTone.Accent,
+            ),
         )
     }
 }

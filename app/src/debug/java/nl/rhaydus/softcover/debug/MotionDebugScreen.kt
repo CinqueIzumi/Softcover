@@ -31,7 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
@@ -43,6 +45,8 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
@@ -62,12 +66,22 @@ object MotionDebugScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        Screen(onNavigateBack = navigator::pop)
+        val screenModel = koinScreenModel<MotionDebugScreenModel>()
+
+        val state by screenModel.state.collectAsStateWithLifecycle()
+
+        Screen(
+            state = state,
+            onNavigateBack = navigator::pop,
+        )
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(onNavigateBack: () -> Unit) {
+    fun Screen(
+        state: MotionDebugUiState,
+        onNavigateBack: () -> Unit,
+    ) {
         Scaffold(
             topBar = {
                 TopBar(
@@ -98,23 +112,23 @@ object MotionDebugScreen : Screen {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                HapticsSection()
+                HapticsSection(header = state.hapticsHeader)
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                MarkAsReadBurstSection()
+                MarkAsReadBurstSection(header = state.markAsReadBurstHeader)
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                ShakeOnErrorSection()
+                ShakeOnErrorSection(header = state.shakeOnErrorHeader)
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                StatNumberSection()
+                StatNumberSection(header = state.statNumberHeader)
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                WavyProgressSection()
+                WavyProgressSection(header = state.wavyProgressHeader)
 
                 Spacer(modifier = Modifier.height(48.dp))
             }
@@ -122,10 +136,10 @@ object MotionDebugScreen : Screen {
     }
 
     @Composable
-    private fun HapticsSection() {
+    private fun HapticsSection(header: SectionHeaderUiModel.Label) {
         val haptics = rememberHaptics()
 
-        SectionLabel(text = "Haptics")
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -198,10 +212,10 @@ object MotionDebugScreen : Screen {
     }
 
     @Composable
-    private fun MarkAsReadBurstSection() {
+    private fun MarkAsReadBurstSection(header: SectionHeaderUiModel.Label) {
         var triggerKey by remember { mutableIntStateOf(0) }
 
-        SectionLabel(text = "Mark-as-read burst")
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -234,10 +248,10 @@ object MotionDebugScreen : Screen {
     }
 
     @Composable
-    private fun ShakeOnErrorSection() {
+    private fun ShakeOnErrorSection(header: SectionHeaderUiModel.Label) {
         var trigger by remember { mutableStateOf(false) }
 
-        SectionLabel(text = "Shake on error")
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -276,10 +290,10 @@ object MotionDebugScreen : Screen {
     }
 
     @Composable
-    private fun StatNumberSection() {
+    private fun StatNumberSection(header: SectionHeaderUiModel.Label) {
         var value by remember { mutableIntStateOf(0) }
 
-        SectionLabel(text = "Animated stat number")
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -316,7 +330,7 @@ object MotionDebugScreen : Screen {
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     @Composable
-    private fun WavyProgressSection() {
+    private fun WavyProgressSection(header: SectionHeaderUiModel.Label) {
         var progress by remember { mutableFloatStateOf(0.35f) }
 
         LaunchedEffect(Unit) {
@@ -327,7 +341,7 @@ object MotionDebugScreen : Screen {
             }
         }
 
-        SectionLabel(text = "Wavy progress")
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -358,14 +372,5 @@ object MotionDebugScreen : Screen {
                 )
             }
         }
-    }
-
-    @Composable
-    private fun SectionLabel(text: String) {
-        Text(
-            text = text.uppercase(),
-            style = MaterialTheme.editorialTypography.eyebrow,
-            color = MaterialTheme.colorScheme.primary,
-        )
     }
 }
