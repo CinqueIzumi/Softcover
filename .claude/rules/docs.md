@@ -17,7 +17,7 @@ paths:
   | Component existence and role | one line in `docs/reference/design-system/components.md` |
   | Screen or recipe behaviour | `docs/reference/design-system/patterns/<surface>.md` (one line in `patterns.md`) |
   | Build gotcha | `.claude/rules/build-wiring.md` |
-  | Migration decision | one line in the migration tracker's Appendix A |
+  | Migration decision | one line in `docs/working/component-library-migration/README.md` § Decisions |
   | Why a change was made | the PR description (never a reference doc) |
   | Reviewer or agent learning | that agent's memory |
   | Something the foundation should adopt | `docs/working/foundation-upstream-candidates.md` |

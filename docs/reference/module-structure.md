@@ -69,12 +69,82 @@ only on modules **below** its tier.
 | `core:preferences` | `SettingsRepository`, `Get*AsFlowUseCase` readers, `AppSettingsDataStore`, `ApiKeyLocalDataSource` |
 | `core:identity` | `GetUserIdUseCase`, `UpdateApiKeyUseCase` (storage lives in `core:preferences/data`) |
 | `core:connectivity` | offline write-queue / sync infra (contracts in `core:domain/connectivity`) |
-| `core:designsystem` | **Tokens only.** Material 3 theme, editorial typography, the icon/illustration catalogs, modifiers, the bottom-chrome padding seam, shared-element scopes. Holds **zero project dependencies** — asserted by `checkModuleGraph`, with a scoped detekt `ForbiddenImport` closing the source-level half (migration tracker § 6, G2). The last components left in S4-5b; see the three rows below for where they went |
+| `core:designsystem` | **Tokens only.** Material 3 theme, editorial typography, the icon/illustration catalogs, modifiers, the bottom-chrome padding seam, shared-element scopes. Holds **zero project dependencies** — asserted by `checkModuleGraph`, with a scoped detekt `ForbiddenImport` closing the source-level half (`docs/working/component-library-migration/README.md` § Gates, G2). The last components left in S4-5b; see the three rows below for where they went |
 | `core:component` | The component library: every component the app renders, driven by a UI model. Depends on `core:designsystem` and nothing else — domain, data, DI, navigation and Apollo are build failures (`checkModuleGraph` for the dependency graph, a scoped detekt `ForbiddenImport` for the source). One directory per family, model + component + fixtures together: `badge/`, `callout/`, `celebration/`, `chip/`, `control/`, `cover/`, `lists/`, `progress/`, `richtext/`, `share/`, `sheet/`, `state/`, `statistic/`, `topbar/`, `verdict/`, `gallery/` so far. It owns its own `composeResources` for the copy that belongs to a component rather than to a feature (the offline banner and offline screen say the same thing on every surface that shows them) |
 | `core:uibinding` | Adapters mapping a domain model to the UI type that renders it, for mappings two or more consumers need. `api`-exposes both sides of every mapping — `core:domain`, `core:component`, `core:designsystem` — so a consumer sees the type it maps from and the type it maps to without re-declaring either. Residents: `ColorPalette.toSpinePalette()` (the reader's persisted spine colour as the design system's palette token); the `ReviewDocument` ↔ `RichTextUiModel` pair, which is **bidirectional** because the verdict sheet is an editor and the edited model has to travel back out to be persisted; `ProgressUnit` ↔ `ProgressSheetTab` plus `Book.toProgressSheetUiModel()`; and the two `List<BookList>` → `ChooseListsUiModel` entry points (single-book and bulk). The last two were promoted straight here rather than starting feature-local, because each landed with two consumers already (R6). S4-5b added three more on the same grounds: `DeadlineProgress` → the badge / cover-overlay / summary-line models (`deadline/`), `LocalDate.toUnreleasedBadgeUiModel(style)` with its three-entry `UnreleasedBadgeStyle` (`release/`), and the two neutral date formatters `formatCompactDate` / `formatLongDate` (`date/`) — the latter named for the shape they render rather than for releases, since the roadmap's "Last updated" footer is a non-release consumer |
 | `core:presentation` | The non-component residents evicted from `core:designsystem`: the cross-tier contracts whose impls live in orchestration (`AppNavigator`, `AppEntryPoint`, `BookDetailPresenter`, `CreateListPresenter`, `ActiveSessionController`, `SessionAuthenticator`, `ReadingSessionLauncher`), the nav destinations (`ScreenDestination`, `TabDestination`, `TransientNavArg`, `BookInitialCover`), `LibraryTab`, API-error mapping (`toUserMessage` / `onApiFailure`), `SplashState` / `ReAuthState`, `BookDetailPrefetcher`, the app-update composition locals, the reader's appearance preference as composition state (`LocalThemeConfiguration`, `ThemeMode.isDark()`), the `DebugRoutesContent` seam, `LocalCoverImagePersister` / `ProvideCoverImagePersister` (mounted once in `App.kt`), and `presentationModule` — the app's one Koin module below the feature tier. `api`-depends on `core:domain` and `core:component` (the latter for `ActiveSession`'s `CoverUiModel` and for the cover-persister seam); `implementation` on `core:book`. **Not** on `core:designsystem` |
 | `core:network` | Apollo client, interceptors, `safeQuery` / `safeMutation`, and the plain-HTTP seam `safeGetText` |
 | `core:database` | Room database, migrations, **all** persisted entities + DAOs (incl. those a feature's data source uses) |
+
+### The UI stack — target shape
+
+Four `core` modules split the UI stack by role, each tier `core` so `tierOf()` in the root build
+classifies all four from their path:
+
+- `core:designsystem` — tokens only: theme, color roles, editorial typography, shape, spacing, motion,
+  the icon catalog, illustrations, modifiers, shared-element transition scopes. Zero project
+  dependencies (G2).
+- `core:component` — the component library: every component, its UI model and its preview fixtures.
+  Depends on `core:designsystem` only; domain, data-area modules, Koin, Voyager and Apollo are gated
+  bans (G1).
+- `core:uibinding` — adapters mapping a domain model to the UI model that renders it, for mappings two
+  or more consumers need. `api`-depends on `core:component` + `core:designsystem` + `core:domain`, so a
+  consuming feature sees both sides of a mapping without re-declaring them.
+- `core:presentation` — the non-component residents: navigation contracts, session controllers,
+  API-error mapping, splash/re-auth state, the book-detail prefetcher, the cover-persister seam, and
+  `presentationModule`. `api`-depends on `core:domain` and `core:component`; `implementation` on
+  `core:book`. Not on `core:designsystem`.
+
+### `:core:component` package layout
+
+One directory per family. Model, component, and preview fixtures live together. **`+` = landed,
+`·` = planned.** Kept in step with `GalleryFamily` (`gallery/GalleryFamily.kt`), whose KDoc points back
+here.
+
+```
+component/
++ badge/       Badge  BadgeUiModel/Tone/Variant/Dimensions  CoverOverlay(+UiModel)
++              DeadlineSummaryLine(+UiModel, +Tone)
++ callout/     Banner  BannerUiModel  BannerTone            · Callout
++ celebration/ MarkAsReadBurst  MarkAsReadBurstUiModel
++ chip/        Chip  ChipUiModel  ChipEvent
++ control/     ThemePreviewTile  ColorPalettePreviewTile  PreviewTile
++              ThemeTilePainting  RichTextFormattingToolbar
++              · Toggle  · SegmentedControl  · TextField                     S8
++ cover/       Cover  CoverUiModel  CoverVariant  CoverSource
++              CoverDimensions  CoverlessTitleCover  MonogramCoverMetrics
++ dialog/      SoftcoverDatePickerDialog  PickerDates (internal)   — owes R1
++ gallery/     GalleryRegistry  GalleryEntry  GalleryFamily
++              GalleryFixture  UiModelPreviews
++ lists/       ChooseListsBottomSheet  ChooseListsUiModel/RowUiModel
++              ChooseListsVariant  ChooseListsEvent  ListMembership
++ progress/    UpdateProgressBottomSheet  ProgressSheetUiModel
++              ProgressSheetEvent  ProgressSheetTab  ProgressSheetMedium
++              · ProgressIndicator                                           S9
++ richtext/    RichText  RichTextUiModel  RichTextRun/Mark/Paragraph
++              RichTextEditing  RichTextEditorBuffer  ClickableText(+UiModel)
++ share/       ShareCard  ShareCardUiModel  ShareCardDimensions
++              one file per card body  ShareCardNumerals
++ sheet/       LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent
++              · SheetScaffold  · SheetHeader  · SheetRow  · SheetFooter     S6
++ state/       EmptyState  EmptyStateUiModel   · Skeleton  · ErrorState
++ statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
++              · StatTile  · Chart  · Legend
++ topbar/      TopBar  TopBarUiModel/Event/Navigation/Surface
++              SearchTopBar(+UiModel, +Event)   · BackBar
++ verdict/     VerdictBlock  VerdictSheet  VerdictSheetContext
+· bookcard/    BookCard  BookCardUiModel/Variant/Content/Decorations
+·              BookCardEvent  BookCardKey                                    S7
+· row/         ListRow  ListRowUiModel                                       S6
+· header/      SectionHeader  PageMasthead  SidebarLabel                     S5/S6
+```
+
+**No `*Previews.kt` third file.** Fixtures live on the model's companion via `UiModelPreviews<T>`
+(`:core:component/gallery/`), so forgetting one is a compile error rather than a missing file.
+
+**The gallery splits across two modules.** The registry (`:core:component/gallery/`) is pure data; the
+screen lives in `feature:settings`, because it is a shipped, navigable screen and G1 bans
+`:core:component` from Voyager.
 
 The `core` tier holds two **kinds** of module, and a new one should land deliberately in one bucket:
 
@@ -94,6 +164,10 @@ The `core` tier holds two **kinds** of module, and a new one should land deliber
   stay outside it: domain is a dependency-free contract module, and designsystem is a leaf once S4
   finishes.
 
+  A `:core:uibinding` → `:core:<data>` edge is **pre-approved** in `allowedApiDataEdges` for a shared
+  mapper that genuinely needs a data-area type (e.g. `:core:book`'s `IsbnEditionMatch` /
+  `CreatedBook`) — write the allowlist row when the edge exists, not speculatively.
+
 ### The vertical-slice rule (Softcover concretization)
 
 A `core:<concept>` operations module owns only the **repository + use cases** (and its data
@@ -107,6 +181,10 @@ Room DB.
 
 ### Build wiring conventions
 
+- **An absence gate lands with the deletion that empties it.** A dependency edge or an allowlist row
+  that exists only because some code still needs it gets removed in the same commit as the code that
+  stops needing it, never a commit scheduled later — an empty allowance is indistinguishable from a
+  forgotten one until something is written to it.
 - **Convention plugins** in `build-logic/` keep module build files uniform. Apply the smallest set:
   - `softcover.android.library` — base for every Android-only `:core:*` / `:feature:*` /
     `:orchestration` module (SDK/JDK, the shared coroutines/Koin runtime (logging is Kermit via `AppLog`, transitive from `:core:domain`) + JUnit5/Kotest/MockK/

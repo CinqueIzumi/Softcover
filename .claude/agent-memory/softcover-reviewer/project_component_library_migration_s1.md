@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-Tracked in `docs/working/component-library-migration.md` (delete-on-completion working doc, NOT a
+Tracked in `docs/working/component-library-migration/README.md` (delete-on-completion working plan, NOT a
 roadmap doc). One branch, one PR, staged commits S1–S11. Work happens as **uncommitted changes** on
 `component-library-migration` — `HEAD` stayed equal to `release/3.2.0` through S1, so
 `git diff release/3.2.0...HEAD` was empty; the real diff was the working tree (`git diff` / `git status`).

@@ -363,15 +363,14 @@ val allowedApiDataEdges = setOf(
     ":feature:book_detail" to ":core:presentation",
 )
 
-// Layering direction inside the UI stack (docs/working/component-library-migration.md § 5g). The
-// tier rule lets any `:core:*` module depend on any other, so it has nothing to say about the one
-// direction that matters here: `:core:component` -> `:core:designsystem`, `:core:uibinding` ->
-// `:core:component`, and **never** the reverse.
+// Layering direction inside the UI stack (docs/reference/module-structure.md § Build wiring
+// conventions). The tier rule lets any `:core:*` module depend on any other, so it has nothing to say
+// about the one direction that matters here: `:core:component` -> `:core:designsystem`,
+// `:core:uibinding` -> `:core:component`, and **never** the reverse.
 //
 // A reverse edge is a Gradle dependency cycle, so it does fail the build — but with a task-graph
-// error that says nothing about why it is wrong. This exists for the error message: the direction
-// rule is what forced S4's sub-commits to be re-cut consumer-first, and someone hitting it should be
-// told that rather than left reading a cycle trace. It also catches the non-cyclic case:
+// error that says nothing about why it is wrong. This exists for the error message. It also catches
+// the non-cyclic case:
 // `:core:designsystem` -> `:core:presentation` is not a cycle, and is still forbidden — the whole
 // point of S3's split was to establish that those two sit side by side rather than stacking.
 val bannedReverseEdges = setOf(
@@ -380,20 +379,17 @@ val bannedReverseEdges = setOf(
     ":core:designsystem" to ":core:presentation",
 )
 
-// Token-module isolation (docs/working/component-library-migration.md § 6 G2). `:core:designsystem` is
-// tokens — theme, editorial typography, the icon/illustration catalogs, modifiers, shared-element
+// Token-module isolation (docs/reference/module-structure.md § The UI stack — target shape, G2).
+// `:core:designsystem` is tokens — theme, editorial typography, the icon/illustration catalogs, modifiers, shared-element
 // scopes. A token is a value the whole app may read; it has nothing to ask of the app in return, so the
 // module needs no project dependency at all, and the modules listed here must declare none.
 //
 // This is asserted rather than left to hold by accident. It held by accident once before and stopped:
 // the module accumulated an `api` edge per component that wanted a domain type, which is how a token
-// module became the god-module S3 and S4 spent six sub-commits unwinding. The last two edges
-// (`:core:domain` and `kotlinx-datetime`, both for the `Deadline*` trio) went in S4-5b when those
-// components moved to `:core:component`.
+// module became the god-module S3 and S4 spent six sub-commits unwinding.
 //
 // Pairs with the detekt `ForbiddenImport` rule scoped to `**/core/designsystem/**` in
-// `config/detekt/detekt.yml`. The two are NOT redundant, and § 6's G2 entry records how that was
-// learned: S4-1 left fully-qualified `nl.rhaydus.softcover.core.domain.model.*` references in `Color.kt`
+// `config/detekt/detekt.yml`. The two are NOT redundant: S4-1 left fully-qualified `nl.rhaydus.softcover.core.domain.model.*` references in `Color.kt`
 // and `LocalDarkTheme.kt`'s KDoc, and BOTH gates were blind to them — they are neither imports nor
 // declared dependencies. A reviewer caught them. What the import rule does close is the case where a
 // stray `import` outlives a dependency removal, which stays compilable for as long as some other module
@@ -402,8 +398,8 @@ val zeroProjectDependencyModules = setOf(
     ":core:designsystem",
 )
 
-// Component-library isolation (docs/working/component-library-migration.md §6 G1). The tier rule
-// above lets any `:core:*` module depend on any other, which is too loose for the component library:
+// Component-library isolation (docs/reference/module-structure.md § The UI stack — target shape, G1).
+// The tier rule above lets any `:core:*` module depend on any other, which is too loose for the component library:
 // `:core:component` renders UI from UI models and must never reach a domain model, a use case, DI, or
 // navigation. That is the property that keeps it a *library* rather than a second god-module — the
 // exact failure `:core:designsystem` already lived through — so it is a build failure, not a
@@ -613,14 +609,14 @@ tasks.register("checkModuleGraph") {
                         if (module.path in zeroProjectDependencyModules) {
                             violations += "${module.path} → ${dependency.path}  " +
                                 "(tokens only — this module must declare NO project dependency at " +
-                                "all. See docs/working/component-library-migration.md § 6 G2)"
+                                "all. See docs/reference/module-structure.md § The UI stack — target shape)"
                         }
 
                         if ((module.path to dependency.path) in bannedReverseEdges) {
                             violations += "${module.path} → ${dependency.path}  " +
                                 "(wrong direction — the UI stack layers component → designsystem and " +
                                 "uibinding → component; a stayer may never depend on a mover. See " +
-                                "docs/working/component-library-migration.md § 5g)"
+                                "docs/reference/module-structure.md § Build wiring conventions)"
                         }
 
                         // Component-library isolation: an explicit per-module allowlist, tighter than

@@ -154,7 +154,7 @@ TopBar(model = state.topBar)
   keyed by identity; a cover carries a per-rail shared-element key and needs one map per rail, a badge with
   no surface-scoped data needs exactly one.
 - **Not yet satisfied by the whole library.** The retrofit is a dedicated stage in
-  `docs/working/component-library-migration.md` (S11). Write new components to R10 and do not take an
+  `docs/working/component-library-migration/steps/s11-contract-retrofit.md`. Write new components to R10 and do not take an
   existing call site as precedent. That stage, not this rule, settles three edges: copy the library owns and
   resolves from its own `composeResources` (`offlineBannerUiModel()`); preview fixtures and the gallery, which
   construct models by definition; and a model that depends on a value only composition has (scroll

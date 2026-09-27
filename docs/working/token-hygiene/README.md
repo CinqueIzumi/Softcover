@@ -31,7 +31,7 @@
 
 1. Start a fresh session (`/clear`) and ask it to resume from this `## Now` block.
 2. Read **this file's `## Now` block and the one step file it names**. Do not read the other step
-   files, and do not read `docs/working/component-library-migration.md` unless the step says so.
+   files, and do not read `docs/working/component-library-migration/` unless the step says so.
 3. Every step ends the same way: the step's acceptance checks pass → update `## Now` → tick the step
    below → update its row in [`foundation-upstream.md`](foundation-upstream.md) if it has one → delete
    the step's file under `steps/` (it is no longer needed once the step is fully done) and unlink its
