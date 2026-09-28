@@ -11,6 +11,13 @@
 | S5-9 | All five divider declarations | [ ] |
 | S5-C-dividers | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
+## Approved shape
+
+- `DividerUiModel(variant: DividerVariant)`; `DividerVariant` is sealed and surface-named: `DebugRoutesRow`, `ReadingLifeShareCard`, `SettingsRoadmap`, `CreateListQuote`, `OnboardingOrTypeIt(label: String)` — variant-specific data rides on the variant (R2).
+- `Divider(model, modifier)` resolves ink, thickness and inset per variant from a table; the centred quote glyph and label layouts are private to the component.
+- All five declarations fold in, `ReadingLifeDivider` included (`ReadingLifeShareCard` → content colour at 25% alpha).
+- Package `core/component/divider/`. No mapper — models are stored on the `UiState` (R10). `:feature:lists` gains its `:core:component` dependency.
+
 ## S5-9 — inventory
 
 | Symbol(s) | Current path:line | Note |

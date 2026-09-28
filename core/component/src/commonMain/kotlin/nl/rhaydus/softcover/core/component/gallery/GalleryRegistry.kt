@@ -66,6 +66,8 @@ import nl.rhaydus.softcover.core.component.share.StatShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.YearRecapShareCardUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
+import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
@@ -287,6 +289,20 @@ object GalleryRegistry {
             },
         ),
         galleryEntry(
+            name = "Skeleton",
+            family = GalleryFamily.STATE,
+            blurb = "The shimmering loading placeholder a screen renders in place of content it " +
+                "does not have yet, one per surface it mirrors.",
+            previews = SkeletonUiModel,
+            label = { model -> model.variant.name },
+            content = { model, modifier ->
+                Skeleton(
+                    model = model,
+                    modifier = modifier.width(SKELETON_FIXTURE_WIDTH),
+                )
+            },
+        ),
+        galleryEntry(
             name = "StatNumber",
             family = GalleryFamily.STATISTIC,
             blurb = "A number bound to live state: it tweens between values, holds tabular figures " +
@@ -422,6 +438,8 @@ private val BURST_FIXTURE_SIZE = 160.dp
 
 /** `CoverOverlay`'s fixture cover — sized like the gallery's other thumbnail-ish jackets. */
 private val BADGE_COVER_FIXTURE_WIDTH = 96.dp
+
+private val SKELETON_FIXTURE_WIDTH = 140.dp
 
 /** Names what a [ChipUiModel] fixture demonstrates — its tone or slot, not its words. */
 private fun chipFixtureLabel(model: ChipUiModel): String = when {

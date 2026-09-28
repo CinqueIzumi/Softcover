@@ -19,6 +19,8 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.BECAUSE_YOU_READ_SKELETON_COUNT
@@ -32,12 +34,14 @@ private val BECAUSE_YOU_READ_CARD_WIDTH = 118.dp
 internal fun BecauseYouReadSection(
     genre: String?,
     header: SectionHeaderUiModel?,
+    headerSkeleton: SkeletonUiModel,
     genreOptions: List<String>,
     genrePickerHeader: SectionHeaderUiModel,
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
     unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
     isLoading: Boolean,
+    skeleton: SkeletonUiModel,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
@@ -60,7 +64,7 @@ internal fun BecauseYouReadSection(
             label = "BecauseYouReadHeader",
         ) { loading ->
             if (loading) {
-                EditorialSectionHeaderSkeleton()
+                Skeleton(model = headerSkeleton)
             } else if (header != null) {
                 SectionHeader(model = header)
             }
@@ -95,7 +99,10 @@ internal fun BecauseYouReadSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     items(BECAUSE_YOU_READ_SKELETON_COUNT) {
-                        BecauseYouReadCardSkeleton(modifier = Modifier.width(BECAUSE_YOU_READ_CARD_WIDTH))
+                        Skeleton(
+                            model = skeleton,
+                            modifier = Modifier.width(BECAUSE_YOU_READ_CARD_WIDTH),
+                        )
                     }
                 }
             } else {

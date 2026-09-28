@@ -2,13 +2,11 @@ package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,11 +21,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -147,109 +143,6 @@ internal fun FeaturedCard(
             label = if (inLibrary) "Added to library" else "Want to read",
             style = ButtonStyle.FILLED,
             onClick = if (inLibrary) onRemoveFromLibraryClick else onWantToReadClick,
-        )
-    }
-}
-
-/**
- * Mirrors [FeaturedCard]'s own anatomy - the inline eyebrow row, the badge/readers row, the
- * cover-and-text row (title, author, and a headline placeholder line), and the trailing button - as
- * shimmer bars, rather than just the cover-and-title pair the card's *content* leads with. Matching
- * every row the loaded card renders (including the button) keeps the two within a few dp of the same
- * total height, so `SkeletonCrossfade` swaps between them without a visible resize.
- */
-@Composable
-internal fun FeaturedCardSkeleton(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(18.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .height(12.dp)
-                .width(180.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .shimmer(isLoading = true),
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .height(20.dp)
-                    .width(120.dp)
-                    .clip(RoundedCornerShape(percent = 50))
-                    .shimmer(isLoading = true),
-            )
-
-            Box(
-                modifier = Modifier
-                    .height(14.dp)
-                    .width(90.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .shimmer(isLoading = true),
-            )
-        }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(96.dp)
-                    .aspectRatio(2f / 3f)
-                    .clip(RoundedCornerShape(4.dp))
-                    .shimmer(isLoading = true),
-            )
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .height(24.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp))
-                        .shimmer(isLoading = true),
-                )
-
-                Box(
-                    modifier = Modifier
-                        .height(12.dp)
-                        .fillMaxWidth(0.6f)
-                        .clip(RoundedCornerShape(4.dp))
-                        .shimmer(isLoading = true),
-                )
-
-                Box(
-                    modifier = Modifier
-                        .height(12.dp)
-                        .fillMaxWidth(0.85f)
-                        .clip(RoundedCornerShape(4.dp))
-                        .shimmer(isLoading = true),
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Box(
-            modifier = Modifier
-                .height(ButtonSize.S.height)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(percent = 50))
-                .shimmer(isLoading = true),
         )
     }
 }

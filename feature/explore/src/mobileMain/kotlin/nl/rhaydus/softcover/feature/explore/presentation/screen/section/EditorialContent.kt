@@ -71,6 +71,7 @@ internal fun EditorialContent(
                 cover = state.featuredCover,
                 releaseBadge = state.featuredReleaseBadge,
                 header = state.featuredHeader,
+                skeleton = state.featuredSkeleton,
                 isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -82,6 +83,7 @@ internal fun EditorialContent(
                 unreleasedCoverOverlays = state.unreleasedCoverOverlays,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 header = state.upNextHeader,
+                skeleton = state.seriesSkeleton,
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
@@ -89,12 +91,14 @@ internal fun EditorialContent(
             BecauseYouReadSection(
                 genre = state.becauseYouReadGenre,
                 header = state.becauseYouReadHeader,
+                headerSkeleton = state.becauseYouReadHeaderSkeleton,
                 genreOptions = state.becauseYouReadGenreOptions,
                 genrePickerHeader = state.becauseYouReadGenrePickerHeader,
                 books = state.becauseYouReadBooks,
                 covers = state.becauseYouReadCovers,
                 unreleasedCoverOverlays = state.unreleasedCoverOverlays,
                 isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
+                skeleton = state.becauseYouReadSkeleton,
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
@@ -105,6 +109,7 @@ internal fun EditorialContent(
                 unreleasedCoverOverlays = state.unreleasedCoverOverlays,
                 isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
                 header = state.trendingHeader,
+                skeleton = state.trendingSkeleton,
                 onBookClick = onBookClick,
             )
 
@@ -112,6 +117,7 @@ internal fun EditorialContent(
                 moods = state.moodTags,
                 isLoading = state.loadingMoodTags && state.moodTags.isEmpty(),
                 header = state.moodGridHeader,
+                skeleton = state.moodTileSkeleton,
                 runAction = runAction,
             )
 

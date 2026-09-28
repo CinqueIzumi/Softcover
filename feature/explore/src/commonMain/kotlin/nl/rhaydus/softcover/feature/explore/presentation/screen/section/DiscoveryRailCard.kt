@@ -1,29 +1,24 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -81,55 +76,6 @@ private fun DiscoveryRailCard(
     }
 }
 
-/**
- * Mirrors [DiscoveryRailCard]'s own anatomy: the cover, the 2-line (`minLines = 2`) title, and the
- * fixed 16dp-tall subline row. The title reserves two 20dp bars rather than one 16dp bar: the
- * real `titleMedium` (M3's default 16sp/24dp) two-line block is 48dp tall, and splitting it across
- * two `Column` children (each carrying the outer 8dp `spacedBy` gap) means the bars only need to
- * sum to 40dp (48 minus the one extra 8dp gap this split introduces) for the reserved footprint to
- * still land on 48dp - a single 16dp bar would leave the crossfade shrinking once the real 2-line
- * title lands.
- */
-@Composable
-private fun RailCardSkeleton(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f / 3f)
-                .clip(RoundedCornerShape(6.dp))
-                .shimmer(isLoading = true),
-        )
-
-        Box(
-            modifier = Modifier
-                .height(20.dp)
-                .fillMaxWidth(0.9f)
-                .clip(RoundedCornerShape(4.dp))
-                .shimmer(isLoading = true),
-        )
-
-        Box(
-            modifier = Modifier
-                .height(20.dp)
-                .fillMaxWidth(0.55f)
-                .clip(RoundedCornerShape(4.dp))
-                .shimmer(isLoading = true),
-        )
-
-        Box(
-            modifier = Modifier
-                .height(16.dp)
-                .fillMaxWidth(0.4f)
-                .clip(RoundedCornerShape(4.dp))
-                .shimmer(isLoading = true),
-        )
-    }
-}
-
 /** Trending rail cell — subline is a `★` rating (explore-3a §4 "Rail cards"). */
 @Composable
 internal fun TrendingCard(
@@ -173,9 +119,6 @@ internal fun TrendingCard(
     }
 }
 
-@Composable
-internal fun TrendingCardSkeleton(modifier: Modifier = Modifier) = RailCardSkeleton(modifier = modifier)
-
 /** "Because you read {genre}" rail cell — subline is the author name (explore-3a §4 "Rail cards"). */
 @Composable
 internal fun BecauseYouReadCard(
@@ -201,6 +144,3 @@ internal fun BecauseYouReadCard(
         )
     }
 }
-
-@Composable
-internal fun BecauseYouReadCardSkeleton(modifier: Modifier = Modifier) = RailCardSkeleton(modifier = modifier)

@@ -15,6 +15,8 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
 
@@ -26,6 +28,7 @@ internal fun DesktopTrendingSection(
     unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
+    skeleton: SkeletonUiModel,
     onBookClick: (Book, String?) -> Unit,
 ) {
     if (isLoading.not() && books.isEmpty()) return
@@ -49,7 +52,10 @@ internal fun DesktopTrendingSection(
             ) {
                 if (loading) {
                     repeat(DESKTOP_DISCOVERY_SKELETON_COUNT) {
-                        TrendingCardSkeleton(modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH))
+                        Skeleton(
+                            model = skeleton,
+                            modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
+                        )
                     }
                 } else {
                     books.forEach { book ->

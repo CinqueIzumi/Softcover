@@ -1,14 +1,14 @@
 # Design System — Components
 
-Shared components; a `detail` link opens the family file holding the full contract.
+Shared components; a `detail` link opens the family file with the full contract.
 
 ## Navigation & chrome
 
 - **Top app bar** — `core:component/topbar` — page title, back/trailing actions, opaque or over-media.
 - **Search top app bar** — `core:component/topbar` — mobile search chrome.
 - **Section header** — `core:component/header` — region opener in three accent-bar registers.
-- **Page masthead** — `core:component/header` — a page's own title block.
-- **Masthead refresh action** — `core:component/header` — masthead trailing refresh button.
+- **Page masthead** — `core:component/header` — a page's title block.
+- **Masthead refresh action** — `core:component/header` — trailing refresh button.
 - **Editorial search field** — [detail](components/navigation.md#editorial-search-field) — persistent search pill for editorial headers.
 - **Bottom navigation** — [detail](components/navigation.md#bottom-navigation) — compact-width tab chrome, docked or floating.
 - **Navigation rail** — [detail](components/navigation.md#navigation-rail) — medium-width tab chrome.
@@ -21,7 +21,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 
 - **Button** — [detail](components/buttons-controls.md#button) — five styles/sizes; filled is the one primary per region.
 - **Toggle button / icon toggle button** — [detail](components/buttons-controls.md#toggle-buttons) — shape-morph active state.
-- **Split button** — [detail](components/buttons-controls.md#split-button) — primary action with an attached chevron menu of variants.
+- **Split button** — [detail](components/buttons-controls.md#split-button) — primary action with a chevron menu of variants.
 - **Theme preview tile** — `core:component/control` — miniature-page choice control for the theme picker.
 - **Preview tile frame** — `core:component/control` — the tiles' internal frame primitives.
 - **Colour palette preview tile** — `core:component/control` — miniature-page choice control for the spine-colour picker.
@@ -41,10 +41,11 @@ Shared components; a `detail` link opens the family file holding the full contra
 
 ## States & feedback
 
-- **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error slot.
+- **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error.
 - **Banner** — `core:component/callout` — full-width slide-in chrome for a screen-level condition.
 - **Empty state** — `core:component/state` — centred headline-and-body placeholder for missing content.
-- **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — the exception to the wavy-progress rule.
+- **Skeleton** — `core:component/state` — per-surface shimmer placeholder mirroring each loading section's anatomy.
+- **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — exception to the wavy-progress rule.
 - **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.
 - **Deadline badge / cover overlay / summary line** — `core:component/badge` + `deadline` — deadline marks.
 - **Unreleased badge** — `core:component/badge` — `Primary` tone; resolved in `core:uibinding` `release/`.
@@ -52,7 +53,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 - **Mark-as-read celebration** — `core:component/celebration` — particle-burst on a mark-as-read commit.
 - **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.
 - **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner` + `EmptyState` + `rememberIsOnline()`.
-- **Update highlight card** — [detail](components/states-feedback.md#update-highlight-card) — Settings app-update `primaryContainer` callout.
+- **Update highlight card** — [detail](components/states-feedback.md#update-highlight-card) — Settings app-update callout.
 
 ## Sheets
 
@@ -62,7 +63,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 - **Because-you-read genre picker** (feature-owned) — [detail](components/sheets.md#because-you-read-genre-picker) — genre-override sheet.
 - **Tag editor sheet** (feature-local) — [detail](components/sheets.md#tag-editor-sheet) — manages the user's own tags on a book.
 - **Choose-lists sheet** — `core:component/lists` — add/remove one or many books to the user's custom lists.
-- **Change edition sheet** (feature-local) — [detail](components/sheets.md#change-edition-sheet) — picks which edition of a book the reader tracks.
+- **Change edition sheet** (feature-local) — [detail](components/sheets.md#change-edition-sheet) — picks which edition the reader tracks.
 
 ## Statistics
 
@@ -81,20 +82,20 @@ Shared components; a `detail` link opens the family file holding the full contra
 
 ## Editorial
 
-- **Drop-cap text** — [detail](components/editorial.md#drop-cap-text) — editorial body prose with a 3-line drop cap.
+- **Drop-cap text** — [detail](components/editorial.md#drop-cap-text) — body prose with a 3-line drop cap.
 - **Editable hero-stat field** — [detail](components/editorial.md#editable-hero-stat-field) — hero-numeral input for progress sheets.
-- **Star rating input** — [detail](components/editorial.md#star-rating-input) — the half-star interactive/read-only rating control.
+- **Star rating input** — [detail](components/editorial.md#star-rating-input) — half-star interactive/read-only rating control.
 - **Verdict sheet** — `core:component/verdict` — the combined rating-and-review surface.
 - **Verdict block** — `core:component/verdict` — the book-page rating+review card that opens the verdict sheet.
-- **Personal review section** — [detail](components/editorial.md#personal-review-section) — book-detail entry point into the review editor.
+- **Personal review section** — [detail](components/editorial.md#personal-review-section) — book-detail entry point to the review editor.
 - **Browse-by-mood grid** (feature-owned) — [detail](components/editorial.md#browse-by-mood-grid) — 2-column mood-tile grid.
 
 ## Platform helpers
 
 - **Desktop tooltip** — [detail](components/platform-helpers.md#desktop-tooltip) — hover tooltip on desktop, no-op on touch.
 - **Desktop context menu** — [detail](components/platform-helpers.md#desktop-context-menu) — right-click menu on desktop, no-op on touch.
-- **Haptics helper** — [detail](components/platform-helpers.md#haptics-helper) — eight-case single entry point for haptic feedback.
-- **Lazy-item mutation animator** — [detail](components/platform-helpers.md#lazy-item-mutation-animator) — animates user list add/move/remove.
-- **Staggered entry coordinator** — [detail](components/platform-helpers.md#staggered-entry-coordinator) — welcome stagger for carousels/lists.
+- **Haptics helper** — [detail](components/platform-helpers.md#haptics-helper) — eight-case entry point for haptic feedback.
+- **Lazy-item mutation animator** — [detail](components/platform-helpers.md#lazy-item-mutation-animator) — animates list add/move/remove.
+- **Staggered entry coordinator** — [detail](components/platform-helpers.md#staggered-entry-coordinator) — stagger for carousels/lists.
 - **Barcode scanner** (feature-owned) — [detail](components/platform-helpers.md#barcode-scanner) — CameraX/ML Kit ISBN-scan surface.
 - **Active reading session** — [detail](components/platform-helpers.md#active-reading-session) — controller behind the peek bar and Focus Mode.

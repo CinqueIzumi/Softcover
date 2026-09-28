@@ -131,14 +131,15 @@ component/
 +              one file per card body  ShareCardNumerals
 + sheet/       LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent
 +              · SheetScaffold  · SheetHeader  · SheetRow  · SheetFooter     S6
-+ state/       EmptyState  EmptyStateUiModel   · Skeleton  · ErrorState
++ state/       EmptyState  EmptyStateUiModel  Skeleton  SkeletonUiModel/Variant
++              · ErrorState
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
 +              · StatTile  · Chart  · Legend
 + topbar/      TopBar  TopBarUiModel/Event/Navigation/Surface
 +              SearchTopBar(+UiModel, +Event)   · BackBar
 + verdict/     VerdictBlock  VerdictSheet  VerdictSheetContext
 · bookcard/    BookCard  BookCardUiModel/Variant/Content/Decorations
-·              BookCardEvent  BookCardKey                                    S7
+·              BookCardEvent  BookCardKey  + MoodTileDimensions              S7
 · row/         ListRow  ListRowUiModel                                       S6
 ```
 

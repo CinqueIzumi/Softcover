@@ -14,13 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4 and the S5 chips, headers and badges families done. `Badge` is `BadgeSize` × `BadgeTone`
-  (5 tones) with pure `BadgeColors`; `CoverOverlay` takes a `CoverOverlayCorner` and derives its inset from
-  the badge size; Explore's rail/series cover badges ride `CoverOverlay`; `SelectionMark` is
-  `SelectionMarkBackdrop` with one size; `DeadlineSummaryLine` lives in `core/component/deadline/`. S7-1's
-  selection answer is recorded in `steps/s7-bookcard.md`. `EditorialSectionHeaderSkeleton` stays for S5-8.
-  14 files with Apollo alias imports wait on foundation F24.
-- **Next:** S5-8 in [`steps/s5-skeletons.md`](steps/s5-skeletons.md) (Phase 1). Gradle under JBR 21
+- **State:** S0–S4, the S5 chips, headers and badges families, and S5-8 done. `Skeleton` +
+  `SkeletonUiModel(SkeletonVariant)` (7 surface-named entries) live in `core/component/state/`; the models
+  are stored on `ExploreScreenUiState` / `RoadmapUiState`. The mood tile's 104dp min height has one home,
+  `core/component/bookcard/MoodTileDimensions` (folds into `BookCard`'s `Tile` metrics in S7-4). S7-1's
+  selection answer is recorded in `steps/s7-bookcard.md`. 14 files with Apollo alias imports wait on
+  foundation F24.
+- **Next:** S5-9 Phase 2 in [`steps/s5-dividers.md`](steps/s5-dividers.md) (shape approved and recorded),
+  then S5-C-skeletons and S5-C-dividers. Gradle under JBR 21
   (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
@@ -31,11 +32,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
   `FeaturedCard`'s eyebrow gap (10 → 8dp); the whole badge family in the gallery and on device (never
   visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
   cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`.
-- **Verification:** S5-C-badges on JBR 21: `styleCheck`, `checkModuleGraph`, `checkDocBudgets`,
-  `:desktopApp` compile, `projectHealth` and `testAndroidHostTest` for core:component / core:uibinding /
-  library / reading / book_detail / explore passed; reviewer ✅ (two nits fixed). Brief implementers on
-  ≤~15 mostly-mechanical files; split families into sequential slices when they share `GalleryRegistry`.
-- **Uncommitted:** all of S5-C-badges, one commit.
+- **Verification:** S5-8 on JBR 21: `styleCheck`, `ktlintCheck`, `checkModuleGraph`, `checkDocBudgets`,
+  `:desktopApp` compile, `projectHealth` and `testAndroidHostTest` for core:component / explore / settings
+  passed; new skeleton tests pass; reviewer's two findings (missing `components.md` line, duplicated
+  mood-tile height) fixed. The S5-8 implementer hit its turn limit twice — brief S5-9 tighter. Split
+  families into sequential slices when they share `GalleryRegistry`.
+- **Uncommitted:** all of S5-8 (on top of `c1bdf7a2`).
 
 ## Local verification
 

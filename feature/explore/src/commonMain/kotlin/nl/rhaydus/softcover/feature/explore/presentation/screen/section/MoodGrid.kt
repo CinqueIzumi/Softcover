@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -30,10 +29,12 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.bookcard.MoodTileDimensions
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkCosyBackground
@@ -50,8 +51,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodChipClickA
 import nl.rhaydus.softcover.feature.explore.presentation.util.toTitleCaseWords
 
 internal const val MOOD_SKELETON_COUNT = 4
-
-private val MOOD_TILE_MIN_HEIGHT = 104.dp
 
 // Mood-tile title exception (design-system.md §2.2): the spec's own literal type role for this
 // title ("Mood tile title · italic 600 · 19/22") sits between headlineSmall and titleLarge in the
@@ -73,6 +72,7 @@ internal fun MoodGrid(
     moods: List<MoodTag>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
+    skeleton: SkeletonUiModel,
     runAction: (ExploreAction) -> Unit,
 ) {
     if (isLoading.not() && moods.isEmpty()) return
@@ -92,9 +92,15 @@ internal fun MoodGrid(
                 if (loading) {
                     repeat(MOOD_SKELETON_COUNT / 2) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            MoodTileSkeleton(modifier = Modifier.weight(1f))
+                            Skeleton(
+                                model = skeleton,
+                                modifier = Modifier.weight(1f),
+                            )
 
-                            MoodTileSkeleton(modifier = Modifier.weight(1f))
+                            Skeleton(
+                                model = skeleton,
+                                modifier = Modifier.weight(1f),
+                            )
                         }
                     }
                 } else {
@@ -169,7 +175,7 @@ private fun MoodTile(
 
     Column(
         modifier = modifier
-            .heightIn(min = MOOD_TILE_MIN_HEIGHT)
+            .heightIn(min = MoodTileDimensions.minHeight)
             .clip(RoundedCornerShape(16.dp))
             .background(background)
             .pointerHandCursor()
@@ -229,14 +235,4 @@ private fun MoodTile(
             )
         }
     }
-}
-
-@Composable
-private fun MoodTileSkeleton(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .heightIn(min = MOOD_TILE_MIN_HEIGHT)
-            .clip(RoundedCornerShape(16.dp))
-            .shimmer(isLoading = true),
-    )
 }

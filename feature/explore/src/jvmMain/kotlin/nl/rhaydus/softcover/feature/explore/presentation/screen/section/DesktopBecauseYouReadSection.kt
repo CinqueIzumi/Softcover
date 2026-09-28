@@ -15,6 +15,8 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
@@ -24,12 +26,14 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_
 internal fun DesktopBecauseYouReadSection(
     genre: String?,
     header: SectionHeaderUiModel?,
+    headerSkeleton: SkeletonUiModel,
     genreOptions: List<String>,
     genrePickerHeader: SectionHeaderUiModel,
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
     unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
     isLoading: Boolean,
+    skeleton: SkeletonUiModel,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
@@ -47,7 +51,7 @@ internal fun DesktopBecauseYouReadSection(
             label = "DesktopBecauseYouReadHeader",
         ) { loading ->
             if (loading) {
-                EditorialSectionHeaderSkeleton()
+                Skeleton(model = headerSkeleton)
             } else if (header != null) {
                 SectionHeader(model = header)
             }
@@ -84,7 +88,10 @@ internal fun DesktopBecauseYouReadSection(
             ) {
                 if (loading) {
                     repeat(DESKTOP_DISCOVERY_SKELETON_COUNT) {
-                        BecauseYouReadCardSkeleton(modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH))
+                        Skeleton(
+                            model = skeleton,
+                            modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
+                        )
                     }
                 } else {
                     books.forEach { book ->

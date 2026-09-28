@@ -8,6 +8,8 @@ import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
@@ -20,6 +22,7 @@ internal fun FeaturedSection(
     cover: CoverUiModel?,
     releaseBadge: BadgeUiModel?,
     header: SectionHeaderUiModel,
+    skeleton: SkeletonUiModel,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -38,7 +41,7 @@ internal fun FeaturedSection(
         label = "FeaturedSection",
     ) { loading ->
         if (loading) {
-            FeaturedCardSkeleton()
+            Skeleton(model = skeleton)
         } else if (book != null) {
             FeaturedCard(
                 book = book,

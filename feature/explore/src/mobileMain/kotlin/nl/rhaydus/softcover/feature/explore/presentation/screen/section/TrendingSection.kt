@@ -19,6 +19,8 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
 import nl.rhaydus.softcover.feature.explore.presentation.screen.TRENDING_SKELETON_COUNT
@@ -34,6 +36,7 @@ internal fun TrendingSection(
     unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
+    skeleton: SkeletonUiModel,
     onBookClick: (Book, String?) -> Unit,
 ) {
     if (isLoading.not() && books.isEmpty()) return
@@ -62,7 +65,10 @@ internal fun TrendingSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     items(TRENDING_SKELETON_COUNT) {
-                        TrendingCardSkeleton(modifier = Modifier.width(TRENDING_CARD_WIDTH))
+                        Skeleton(
+                            model = skeleton,
+                            modifier = Modifier.width(TRENDING_CARD_WIDTH),
+                        )
                     }
                 }
             } else {

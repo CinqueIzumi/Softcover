@@ -4,14 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -19,12 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -93,64 +89,6 @@ internal fun SeriesCard(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             minLines = 1,
             maxLines = 1,
-        )
-    }
-}
-
-/**
- * Mirrors [SeriesCard] / [UnreleasedSeriesCard]'s own anatomy: cover, series eyebrow
- * (`eyebrowSmall`, M3's default 16dp line height), the 2-line (`minLines = 2`) `titleSmall` title
- * as two bars, and the "Book #N" `bodySmall` line. Every bar here is 16dp: the real title's
- * 2×20dp lines total 40dp, and splitting that across two `Column` children (each carrying the
- * outer 8dp `spacedBy` gap) only needs 2×16dp (32dp, plus the one extra 8dp gap the split
- * introduces) to still land on the same 40dp footprint - so, unlike a rail card's `titleMedium`
- * (§ `RailCardSkeleton`), the smaller `titleSmall` line height happens to converge on the same
- * 16dp bar height every other line here already uses.
- */
-@Composable
-internal fun SeriesCardSkeleton(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f / 3f)
-                .clip(RoundedCornerShape(6.dp))
-                .shimmer(isLoading = true),
-        )
-
-        Box(
-            modifier = Modifier
-                .height(16.dp)
-                .fillMaxWidth(0.7f)
-                .clip(RoundedCornerShape(4.dp))
-                .shimmer(isLoading = true),
-        )
-
-        Box(
-            modifier = Modifier
-                .height(16.dp)
-                .fillMaxWidth(0.95f)
-                .clip(RoundedCornerShape(4.dp))
-                .shimmer(isLoading = true),
-        )
-
-        Box(
-            modifier = Modifier
-                .height(16.dp)
-                .fillMaxWidth(0.55f)
-                .clip(RoundedCornerShape(4.dp))
-                .shimmer(isLoading = true),
-        )
-
-        Box(
-            modifier = Modifier
-                .height(16.dp)
-                .fillMaxWidth(0.4f)
-                .clip(RoundedCornerShape(4.dp))
-                .shimmer(isLoading = true),
         )
     }
 }

@@ -8,8 +8,15 @@
 
 | Sub | Scope | Status |
 |---|---|---|
-| S5-8 | All nine skeleton declarations | [ ] |
+| S5-8 | All nine skeleton declarations | [x] |
 | S5-C-skeletons | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
+
+## Approved shape
+
+- `SkeletonUiModel(variant: SkeletonVariant)`; `SkeletonVariant` is surface-named, not tied to `BookCardVariant`: `ExploreSectionHeader`, `ExploreFeatured`, `ExploreTrendingRail`, `ExploreBecauseYouReadRail`, `ExploreSeries`, `ExploreMoodTile`, `RoadmapEntry`.
+- `Skeleton(model, modifier)` dispatches `when (model.variant)` to private per-variant layouts; metrics resolve from a table keyed off the variant (R2). Trending and BecauseYouRead stay separate entries despite sharing metrics today.
+- All nine declarations fold in; `RoadmapSkeletonLine` becomes the component's private shimmer-block helper, and explore's `MOOD_TILE_MIN_HEIGHT` moves into the metrics table.
+- Package `core/component/state/` (the planned home in `module-structure.md`), gallery family `STATE`. No mapper — the models are stored on each feature's `UiState` (R10).
 
 ## S5-8 — inventory
 

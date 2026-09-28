@@ -10,13 +10,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
@@ -28,16 +26,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.InlineErrorState
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
+import nl.rhaydus.softcover.core.component.state.Skeleton
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
@@ -76,7 +73,7 @@ internal fun RoadmapContent(
         modifier = modifier.fillMaxWidth(),
     ) { loading ->
         if (loading) {
-            RoadmapSkeleton()
+            Skeleton(model = state.skeleton)
         } else {
             RoadmapLoadedBody(
                 state = state,
@@ -375,69 +372,5 @@ private fun roadmapAnnotatedString(
 
         if (leadingMarker != null) pop()
     }
-}
-// endregion
-// region Skeleton
-/**
- * The loading placeholder: a version-eyebrow line, a headline line, and a few body lines, shimmering
- * in place of a release section. Kept light — there is always *some* content within the frame — rather
- * than mimicking the document's full variable-length shape.
- */
-@Composable
-private fun RoadmapSkeleton() {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        RoadmapSkeletonLine(
-            height = 14.dp,
-            width = 120.dp,
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        RoadmapSkeletonLine(
-            height = 24.dp,
-            width = 220.dp,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        RoadmapSkeletonLine(
-            height = 16.dp,
-            widthFraction = 1f,
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        RoadmapSkeletonLine(
-            height = 16.dp,
-            widthFraction = 0.92f,
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        RoadmapSkeletonLine(
-            height = 16.dp,
-            widthFraction = 0.6f,
-        )
-    }
-}
-
-@Composable
-private fun RoadmapSkeletonLine(
-    height: Dp,
-    width: Dp? = null,
-    widthFraction: Float? = null,
-) {
-    val widthModifier = when {
-        width != null -> Modifier.width(width)
-        widthFraction != null -> Modifier.fillMaxWidth(widthFraction)
-        else -> Modifier.fillMaxWidth()
-    }
-
-    Box(
-        modifier = widthModifier
-            .height(height)
-            .clip(RoundedCornerShape(4.dp))
-            .shimmer(isLoading = true),
-    )
 }
 // endregion
