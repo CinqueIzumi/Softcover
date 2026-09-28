@@ -226,12 +226,12 @@ class ExploreScreenUiStateTest {
         }
 
         @Test
-        fun `trendingSkeleton defaults to the ExploreTrendingRail variant`() {
+        fun `trendingSkeleton defaults to the ExploreRail variant`() {
             // ----- Arrange & Act -----
             val state = ExploreScreenUiState()
 
             // ----- Assert -----
-            state.trendingSkeleton.variant shouldBe SkeletonVariant.ExploreTrendingRail
+            state.trendingSkeleton.variant shouldBe SkeletonVariant.ExploreRail
         }
 
         @Test
@@ -262,12 +262,12 @@ class ExploreScreenUiStateTest {
         }
 
         @Test
-        fun `becauseYouReadSkeleton defaults to the ExploreBecauseYouReadRail variant`() {
+        fun `becauseYouReadSkeleton defaults to the ExploreRail variant`() {
             // ----- Arrange & Act -----
             val state = ExploreScreenUiState()
 
             // ----- Assert -----
-            state.becauseYouReadSkeleton.variant shouldBe SkeletonVariant.ExploreBecauseYouReadRail
+            state.becauseYouReadSkeleton.variant shouldBe SkeletonVariant.ExploreRail
         }
 
         @Test

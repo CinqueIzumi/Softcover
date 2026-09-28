@@ -14,17 +14,16 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, the S5 chips, headers and badges families, S5-8 and S5-9 done. `Divider` +
-  `DividerUiModel(DividerVariant)` (sealed, 5 surface-named entries) live in `core/component/divider/`
-  (gallery family `DIVIDER`); `ReadingLifeShareCardBody` uses a file-level model. `Skeleton` +
-  `SkeletonUiModel(SkeletonVariant)` (7 surface-named entries) live in `core/component/state/`; the models
-  are stored on `ExploreScreenUiState` / `RoadmapUiState`. The mood tile's 104dp min height has one home,
-  `core/component/bookcard/MoodTileDimensions` (folds into `BookCard`'s `Tile` metrics in S7-4). S7-1's
-  selection answer is recorded in `steps/s7-bookcard.md`. 14 files with Apollo alias imports wait on
-  foundation F24.
-- **Next:** S5-C-skeletons in [`steps/s5-skeletons.md`](steps/s5-skeletons.md), then S5-C-dividers in
-  [`steps/s5-dividers.md`](steps/s5-dividers.md) (family-procedure.md § Phase 3). Gradle under JBR 21
-  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S0–S4, the S5 chips, headers, badges and skeletons families, and S5-9 (`a54622db`) done.
+  `Skeleton` (6 surface-named variants, one `ExploreRail`, `core/component/state/`) renders through a
+  private `SkeletonBar` / `CoverStackSkeleton` pair and a `SkeletonMetrics` table, and reports as an
+  indeterminate progress bar. `Divider` (sealed, 5 variants, `core/component/divider/`, gallery family
+  `DIVIDER`) and `Skeleton` have their models stored on the UiStates; `ReadingLifeShareCardBody` uses a
+  file-level model. The mood tile's 104dp lives once, in `core/component/bookcard/MoodTileDimensions`
+  (folds into `BookCard`'s `Tile` metrics in S7-4). 14 files with Apollo alias imports wait on foundation
+  F24. #275's S5 box stays open until S5-C-dividers lands.
+- **Next:** S5-C-dividers in [`steps/s5-dividers.md`](steps/s5-dividers.md) (family-procedure.md
+  § Phase 3). Gradle under JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
@@ -34,13 +33,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
   `FeaturedCard`'s eyebrow gap (10 → 8dp); the whole badge family in the gallery and on device (never
   visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
   cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`.
-- **Verification:** S5-9 on JBR 21: compile for core:component / settings / lists / onboarding /
-  desktopApp / `:app:compileDebugKotlin`, `checkModuleGraph`, four `projectHealth`, `checkDocBudgets`,
-  `ktlintCheck`, `styleCheck`, four `testAndroidHostTest` passed; 7 new divider tests pass; reviewer's one
-  finding (merged preview-tile lines in `components.md`) fixed. `components.md` sits at its 8192B budget —
-  every new index line now costs a trim. Implementers hit the 80-turn limit on both S5-8 and S5-9; resume
-  them with an explicit remaining-work list.
-- **Uncommitted:** all of S5-9 (S5-8 is `2a4c16f8`).
+- **Verification:** S5-C-skeletons on JBR 21: compile for core:component / explore / settings,
+  `:core:component` and `:feature:explore` `testAndroidHostTest`, `styleCheck` passed; reviewer verified
+  every dp unchanged, no blockers (its one nit — a `foundations.md` line on skeleton semantics — declined:
+  contracts live in KDoc). No new tests: all new code is private, and the variant merge is covered by the
+  existing fixture and UiState default tests. `components.md` sits at its 8192B budget.
+- **Uncommitted:** all of S5-C-skeletons.
 
 ## Local verification
 
@@ -79,7 +77,7 @@ every sub-step's Verify.
 | S5 | — (chips) | S5-1–S5-3b, S5-C-chips | [x] |
 | S5 | — (headers) | S5-4–S5-6, S5-C-headers | [x] |
 | S5 | — (badges) | S5-7, S5-C-badges | [x] |
-| S5 | [steps/s5-skeletons.md](steps/s5-skeletons.md) | S5-8 | [ ] |
+| S5 | — (skeletons) | S5-8, S5-C-skeletons | [x] |
 | S5 | [steps/s5-dividers.md](steps/s5-dividers.md) | S5-9 | [ ] |
 | S6 | [steps/s6-list-rows.md](steps/s6-list-rows.md) | S6-1–S6-2 | [ ] |
 | S6 | [steps/s6-sheet-chrome.md](steps/s6-sheet-chrome.md) | S6-3–S6-7 | [ ] |

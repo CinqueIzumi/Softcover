@@ -56,7 +56,7 @@ internal data class ExploreScreenUiState(
         eyebrow = "Trending this week",
         headline = "What everyone's reading",
     ),
-    val trendingSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreTrendingRail),
+    val trendingSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreRail),
     val continueSeriesBooks: List<Book> = emptyList(),
     val loadingContinueSeriesBooks: Boolean = true,
     val upNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
@@ -111,7 +111,7 @@ internal data class ExploreScreenUiState(
     /** `null` hides the because-you-read rail, as a `null` [becauseYouReadGenre] does. */
     val becauseYouReadHeader: SectionHeaderUiModel? = null,
     val becauseYouReadHeaderSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreSectionHeader),
-    val becauseYouReadSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreBecauseYouReadRail),
+    val becauseYouReadSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreRail),
     val becauseYouReadGenreOptions: List<String> = emptyList(),
     val becauseYouReadGenrePickerHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Genre",
