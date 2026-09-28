@@ -13,6 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -38,8 +40,8 @@ fun PageMasthead(
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Column(modifier = Modifier.weight(1f)) {
             if (model.eyebrow != null) {
-                Text(
-                    text = model.eyebrow.uppercase(),
+                SectionHeaderEyebrowText(
+                    eyebrow = model.eyebrow,
                     style = MaterialTheme.editorialTypography.eyebrow,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -53,6 +55,7 @@ fun PageMasthead(
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.semantics { heading() },
             )
 
             if (model.subtitle != null) {
@@ -62,7 +65,7 @@ fun PageMasthead(
                     text = model.subtitle,
                     style = dimensions.subtitleStyle,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.widthIn(max = dimensions.subtitleMaxWidth),
+                    modifier = Modifier.widthIn(max = SUBTITLE_MAX_WIDTH),
                 )
             }
         }

@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
@@ -18,6 +19,7 @@ internal fun FeaturedSection(
     book: Book?,
     cover: CoverUiModel?,
     releaseBadge: BadgeUiModel?,
+    header: SectionHeaderUiModel,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -27,9 +29,9 @@ internal fun FeaturedSection(
     // below never resizes the feed around it.
     if (isLoading.not() && book == null) return
 
-    // No SectionHeader above this one, unlike every rail below it: the card names itself
-    // with an inline eyebrow on its own top row (see FeaturedCard), which keeps the feed's opening
-    // screen for the book rather than for a header introducing it.
+    // No section header above this one, unlike every rail below it: the card names itself
+    // with an inline SectionHeader on its own top row (see FeaturedCard), which keeps the feed's
+    // opening screen for the book rather than for a header introducing it.
     SkeletonCrossfade(
         isLoading = isLoading,
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -42,6 +44,7 @@ internal fun FeaturedSection(
                 book = book,
                 cover = cover,
                 releaseBadge = releaseBadge,
+                header = header,
                 onClick = {
                     onBookClick(
                         book,

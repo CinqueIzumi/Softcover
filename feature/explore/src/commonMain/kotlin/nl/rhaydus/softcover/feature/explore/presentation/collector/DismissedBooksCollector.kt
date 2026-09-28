@@ -21,6 +21,7 @@ internal class DismissedBooksCollector : HiddenSuggestionsCollector {
                 it.copy(
                     hiddenBooks = books,
                     hiddenBookCovers = books.associate { book -> book.bookId to book.toCoverUiModel() },
+                    hiddenBooksGroupHeader = it.hiddenBooksGroupHeader.copy(count = books.size.toString()),
                     initialized = true,
                 )
             }

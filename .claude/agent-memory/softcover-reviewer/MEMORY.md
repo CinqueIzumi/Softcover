@@ -15,3 +15,5 @@
 - [R2 lookup table applies to small enums](architecture_r2_lookup_table_applies_to_small_enums.md) — a size/scale enum branched on more than once inline (not just a big sealed variant) needs one table, per R2
 - [R10 computed-getter trap](project_r10_computed_getter_trap.md) — a UiState `get()` property that builds a UI model still violates R10; only a stored field/default counts
 - [Embedded-content ScreenModel scoping](architecture_embedded_content_screenmodel_scoping.md) — koinNavigatorScreenModel from a non-Screen composable ties the model to the whole Navigator, not the embedding Screen
+- [Heading semantics needs a text leaf](architecture_heading_semantics_needs_text_leaf.md) — `semantics { heading() }` on a wrapper Row over bar+Text is inert for screen readers; compare against a sibling component that does it on the Text itself
+- [Scaffold merge widens fillMaxWidth](architecture_scaffold_merge_widens_fillmaxwidth.md) — collapsing N variants into one scaffold + outer Row can give every variant a modifier only one used to have; diff each branch's old modifier chain

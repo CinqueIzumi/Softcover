@@ -47,6 +47,7 @@ import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockBookAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockSeriesAction
+import nl.rhaydus.softcover.feature.explore.presentation.model.HiddenGroupHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
 
 // Cover widths for the two row leads. The book cover matches the redline's single-cover measure; the
@@ -90,7 +91,7 @@ internal fun HiddenSuggestionsContent(
 
             if (state.hiddenBooks.isNotEmpty()) {
                 HiddenBooksSection(
-                    header = state.hiddenBooksHeader,
+                    header = state.hiddenBooksGroupHeader,
                     books = state.hiddenBooks,
                     covers = state.hiddenBookCovers,
                     runAction = runAction,
@@ -101,7 +102,7 @@ internal fun HiddenSuggestionsContent(
 
             if (state.hiddenSeries.isNotEmpty()) {
                 HiddenSeriesSection(
-                    header = state.hiddenSeriesHeader,
+                    header = state.hiddenSeriesGroupHeader,
                     series = state.hiddenSeries,
                     covers = state.hiddenSeriesCovers,
                     runAction = runAction,
@@ -115,17 +116,13 @@ internal fun HiddenSuggestionsContent(
 
 @Composable
 private fun HiddenBooksSection(
-    header: SectionHeaderUiModel,
+    header: HiddenGroupHeaderUiModel,
     books: List<DismissedSeriesBook>,
     covers: Map<Int, CoverUiModel>,
     runAction: (HiddenSuggestionsAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        HiddenSuggestionsGroupHeader(
-            header = header,
-            count = books.size,
-            subline = "Set aside — tap Restore to shelve them again.",
-        )
+        HiddenSuggestionsGroupHeader(model = header)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -145,17 +142,13 @@ private fun HiddenBooksSection(
 
 @Composable
 private fun HiddenSeriesSection(
-    header: SectionHeaderUiModel,
+    header: HiddenGroupHeaderUiModel,
     series: List<DismissedSeries>,
     covers: Map<Int, CoverUiModel>,
     runAction: (HiddenSuggestionsAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        HiddenSuggestionsGroupHeader(
-            header = header,
-            count = series.size,
-            subline = "A muted series hides every book in it.",
-        )
+        HiddenSuggestionsGroupHeader(model = header)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -183,30 +176,17 @@ private fun HiddenSeriesSection(
 
 /**
  * The compact header opening each group within the page: [SectionHeader]'s [SectionHeaderUiModel.Inline]
- * register, extended with a demoted tabular-figure [count] trailing the eyebrow and a one-line italic
- * [subline] standing in for a headline (the screen's own title lives in the top bar). "Hidden books" /
- * "Hidden series" are the only two consumers today, so this stays screen-local; promote it to a shared
- * component only once a second screen needs the same "nested group inside an already-opened page" header
- * shape.
+ * register, with a demoted tabular-figure count trailing the eyebrow and a one-line italic subline
+ * standing in for a headline (the screen's own title lives in the top bar). "Hidden books" / "Hidden
+ * series" are the only two consumers today, so this stays screen-local; promote it to a shared component
+ * only once a second screen needs the same "nested group inside an already-opened page" header shape.
  */
 @Composable
-private fun HiddenSuggestionsGroupHeader(
-    header: SectionHeaderUiModel,
-    count: Int,
-    subline: String,
-) {
+private fun HiddenSuggestionsGroupHeader(model: HiddenGroupHeaderUiModel) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SectionHeader(
-                model = header,
-                modifier = Modifier.weight(1f),
-            )
-
+        SectionHeader(model = model.header) {
             Text(
-                text = count.toString(),
+                text = model.count,
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontFeatureSettings = "tnum"),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -215,7 +195,7 @@ private fun HiddenSuggestionsGroupHeader(
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = subline,
+            text = model.subline,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

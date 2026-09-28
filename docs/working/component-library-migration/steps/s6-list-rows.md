@@ -14,6 +14,10 @@
 
 ## S6-1 — design + core, debug, settings, about
 
+Carried from S5-C-headers: the sidebar label inset `padding(start = 26.dp, top = 8.dp, bottom = 6.dp)`,
+repeated on every sidebar `SectionHeader.Label` in library and settings, belongs to the sidebar's grid;
+absorb it with the sidebar rows here.
+
 | Symbol(s) | Current path:line | Note |
 |---|---|---|
 | `ChooseListsRow` | `core/component/lists/ChooseListsBottomSheet.kt:290` | takes one `ChooseListsRowUiModel` |

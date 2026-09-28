@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
+import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.toad.UiState
@@ -88,6 +89,13 @@ internal data class ExploreScreenUiState(
     // Featured upcoming release card (explore-3a §4 "Featured card").
     val featuredUpcomingRelease: Book? = null,
     val loadingFeaturedUpcomingRelease: Boolean = true,
+    // The eyebrow states the whole pick rule: the window comes from the same domain constant the
+    // query is bounded by, and the "N readers waiting" line on the card below supplies the ranking
+    // basis, so the two together say "the most-shelved book out in the next 30 days" without
+    // spending a sentence on it.
+    val featuredHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(
+        eyebrow = "Most anticipated · next $FEATURED_RELEASE_WINDOW_DAYS days",
+    ),
     // "Because you read {genre}" rail (explore-3a deviation 2, made user-selectable by feedback
     // item 10). `becauseYouReadGenre` is the *effective* genre - the user's persisted choice when
     // one exists, otherwise the auto-derived most-read genre - and null hides the section.

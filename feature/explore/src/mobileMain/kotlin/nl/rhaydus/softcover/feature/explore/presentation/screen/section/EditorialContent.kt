@@ -70,6 +70,7 @@ internal fun EditorialContent(
                 book = state.featuredUpcomingRelease,
                 cover = state.featuredCover,
                 releaseBadge = state.featuredReleaseBadge,
+                header = state.featuredHeader,
                 isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
                 onBookClick = onBookClick,
                 runAction = runAction,

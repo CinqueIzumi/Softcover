@@ -32,9 +32,10 @@ import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 
 /**
  * The feed-opening "upcoming release" hero (explore-3a §4 "Featured card"). Cover-beside-text, never
@@ -42,9 +43,9 @@ import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW
  * 3a deviation 1: the spec's "Remind me" pill and the release-reminder sheet are dropped — the app has no
  * future-notification scheduling infrastructure).
  *
- * The card **names itself** with the DS §2.3 inline 20×1 hairline eyebrow on its own top row, rather
- * than being introduced by a full `SectionHeader` the way every rail below it is. It briefly
- * had one: accent bar, `headline` headline and a description sentence together pushed the card most of
+ * The card **names itself** with [SectionHeader]'s [SectionHeaderUiModel.Inline] register on its own top
+ * row, rather than being introduced by the `Section` register every rail below it uses. It briefly used
+ * that: accent bar, `headline` headline and a description sentence together pushed the card most of
  * the way down the first screen — far too much chrome for a single card whose pick rotates weekly. The
  * inline register says the same thing in one line, which is exactly what the register exists for.
  */
@@ -56,6 +57,7 @@ internal fun FeaturedCard(
     // deriving its cover: the hero must keep its footprint rather than vanish and pop back in.
     cover: CoverUiModel?,
     releaseBadge: BadgeUiModel?,
+    header: SectionHeaderUiModel,
     onClick: () -> Unit,
     onWantToReadClick: () -> Unit,
     onRemoveFromLibraryClick: () -> Unit,
@@ -72,26 +74,7 @@ internal fun FeaturedCard(
             .pressScaleClickable(onClick = onClick)
             .padding(18.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .height(1.dp)
-                    .width(20.dp)
-                    .background(MaterialTheme.colorScheme.primary),
-            )
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            // The eyebrow states the whole pick rule: the window comes from the same domain
-            // constant the query is bounded by, and the "N readers waiting" line below supplies
-            // the ranking basis, so the two rows together say "the most-shelved book out in the
-            // next 30 days" without spending a sentence on it.
-            Text(
-                text = "Most anticipated · next $FEATURED_RELEASE_WINDOW_DAYS days".uppercase(),
-                style = MaterialTheme.editorialTypography.eyebrowSmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(12.dp))
 

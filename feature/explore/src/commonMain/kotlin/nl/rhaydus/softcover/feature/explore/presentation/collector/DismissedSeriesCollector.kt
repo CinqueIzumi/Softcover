@@ -21,6 +21,7 @@ internal class DismissedSeriesCollector : HiddenSuggestionsCollector {
                 it.copy(
                     hiddenSeries = series,
                     hiddenSeriesCovers = series.associate { entry -> entry.seriesId to entry.toCoverUiModel() },
+                    hiddenSeriesGroupHeader = it.hiddenSeriesGroupHeader.copy(count = series.size.toString()),
                     initialized = true,
                 )
             }

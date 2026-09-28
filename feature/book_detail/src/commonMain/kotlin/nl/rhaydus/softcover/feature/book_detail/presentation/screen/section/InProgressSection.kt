@@ -68,16 +68,7 @@ internal fun InProgressSection(
     val isAudiobook = edition.isAudiobook
 
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SectionHeader(
-                model = state.inProgressSectionHeader,
-                modifier = Modifier.weight(1f),
-            )
-
+        SectionHeader(model = state.inProgressSectionHeader) {
             Surface(
                 shape = RoundedCornerShape(percent = 50),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,

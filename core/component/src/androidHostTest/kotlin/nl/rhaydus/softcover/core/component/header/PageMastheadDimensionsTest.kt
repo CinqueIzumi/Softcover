@@ -48,24 +48,6 @@ class PageMastheadDimensionsTest {
         }
 
         @Test
-        fun `subtitleMaxWidth is 300dp for Regular`() {
-            // ----- Act -----
-            val dimensions = dimensionsFor(PageMastheadSize.Regular)
-
-            // ----- Assert -----
-            dimensions.subtitleMaxWidth shouldBe 300.dp
-        }
-
-        @Test
-        fun `subtitleMaxWidth is 300dp for Compact`() {
-            // ----- Act -----
-            val dimensions = dimensionsFor(PageMastheadSize.Compact)
-
-            // ----- Assert -----
-            dimensions.subtitleMaxWidth shouldBe 300.dp
-        }
-
-        @Test
         fun `Regular resolves pageTitle, body and a 6dp title-to-subtitle gap`() {
             // ----- Act -----
             val dimensions = dimensionsFor(PageMastheadSize.Regular)

@@ -33,7 +33,8 @@ Chrome only, extracted from 18 sheets into `SheetScaffold` + `SheetHeader` + `Sh
 
 **Phase 1 questions:** design `SheetScaffold`/`SheetHeader`/`SheetRow`/`SheetFooter` against these four
 sheets first, since they are already contract-shaped and expose the chrome boundary cleanly.
-`SheetHeader` is a `SectionHeader.Section` (built in S5-4) plus a trailing jacket slot.
+`SheetHeader` is a `SectionHeader.Section` with the jacket in `SectionHeader`'s `trailing` slot (added in
+S5-C-headers); decide whether a separate `SheetHeader` is still warranted at all.
 
 ## S6-4 — `VerdictSheet` and `SoftcoverDatePickerDialog`
 

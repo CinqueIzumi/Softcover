@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.component.header
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
@@ -17,12 +15,15 @@ sealed interface SectionHeaderUiModel {
     /**
      * @property pulseKey Bumped to replay the bar's widen-and-settle pulse; `0` plays nothing, so a
      * header that never needs the pulse can leave it at the default.
+     * @property tone Colours the bar and eyebrow only; the headline and description stay onSurface /
+     * onSurfaceVariant regardless.
      */
     data class Section(
         val eyebrow: String,
         val headline: String? = null,
         val description: String? = null,
         val pulseKey: Int = 0,
+        val tone: SectionHeaderTone = SectionHeaderTone.Accent,
     ) : SectionHeaderUiModel
 
     data class Inline(
@@ -30,13 +31,8 @@ sealed interface SectionHeaderUiModel {
         val tone: SectionHeaderTone = SectionHeaderTone.Accent,
     ) : SectionHeaderUiModel
 
-    /**
-     * @property letterSpacing Overrides `eyebrowSmall`'s own tracking when set; [TextUnit.Unspecified]
-     * (the default) keeps the style's tracking as-is.
-     */
     data class Label(
         val eyebrow: String,
-        val letterSpacing: TextUnit = TextUnit.Unspecified,
         val tone: SectionHeaderTone = SectionHeaderTone.Muted,
     ) : SectionHeaderUiModel
 
@@ -49,6 +45,10 @@ sealed interface SectionHeaderUiModel {
                 description = "You're on pace to finish by the deadline.",
             ),
             Section(eyebrow = "Currently reading"),
+            Section(
+                eyebrow = "Couldn't sync — tap to retry",
+                tone = SectionHeaderTone.Error,
+            ),
             Inline(eyebrow = "Recently added"),
             Inline(
                 eyebrow = "Couldn't save — tap to retry",
@@ -57,7 +57,6 @@ sealed interface SectionHeaderUiModel {
             Label(eyebrow = "Shelves"),
             Label(
                 eyebrow = "Your tabs",
-                letterSpacing = 2.2.sp,
                 tone = SectionHeaderTone.Accent,
             ),
         )

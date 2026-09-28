@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
-import androidx.compose.ui.unit.sp
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -34,14 +33,13 @@ class LibraryVisibilitySettingsUiStateTest {
     @Nested
     inner class LibraryTabsHeader {
         @Test
-        fun `defaults to an Accent-tone Label with the Your tabs eyebrow and 2_2sp letterSpacing`() {
+        fun `defaults to an Accent-tone Label with the Your tabs eyebrow`() {
             // ----- Arrange & Act -----
             val state = LibraryVisibilitySettingsUiState()
 
             // ----- Assert -----
             state.libraryTabsHeader shouldBe SectionHeaderUiModel.Label(
                 eyebrow = "Your tabs",
-                letterSpacing = 2.2.sp,
                 tone = SectionHeaderTone.Accent,
             )
         }

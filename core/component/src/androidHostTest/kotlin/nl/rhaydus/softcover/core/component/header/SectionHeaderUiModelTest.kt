@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.core.component.header
 
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -50,21 +48,6 @@ class SectionHeaderUiModelTest {
 
             // ----- Assert -----
             pulseKeys shouldBe setOf(0)
-        }
-
-        @Test
-        fun `Label fixtures cover both the default and an explicit letterSpacing`() {
-            // ----- Arrange -----
-            val expectedLetterSpacings = setOf(TextUnit.Unspecified, 2.2.sp)
-
-            // ----- Act -----
-            val coveredLetterSpacings = SectionHeaderUiModel.previews
-                .filterIsInstance<SectionHeaderUiModel.Label>()
-                .map { it.letterSpacing }
-                .toSet()
-
-            // ----- Assert -----
-            coveredLetterSpacings shouldBe expectedLetterSpacings
         }
 
         @Test
@@ -128,6 +111,15 @@ class SectionHeaderUiModelTest {
         }
 
         @Test
+        fun `Section tone defaults to Accent`() {
+            // ----- Arrange & Act -----
+            val model = SectionHeaderUiModel.Section(eyebrow = "Eyebrow")
+
+            // ----- Assert -----
+            model.tone shouldBe SectionHeaderTone.Accent
+        }
+
+        @Test
         fun `Inline tone defaults to Accent`() {
             // ----- Arrange & Act -----
             val model = SectionHeaderUiModel.Inline(eyebrow = "Eyebrow")
@@ -146,27 +138,6 @@ class SectionHeaderUiModelTest {
 
             // ----- Assert -----
             model.tone shouldBe SectionHeaderTone.Error
-        }
-
-        @Test
-        fun `Label letterSpacing defaults to Unspecified`() {
-            // ----- Arrange & Act -----
-            val model = SectionHeaderUiModel.Label(eyebrow = "Eyebrow")
-
-            // ----- Assert -----
-            model.letterSpacing shouldBe TextUnit.Unspecified
-        }
-
-        @Test
-        fun `Label letterSpacing carries an explicit value`() {
-            // ----- Arrange & Act -----
-            val model = SectionHeaderUiModel.Label(
-                eyebrow = "Eyebrow",
-                letterSpacing = 2.2.sp,
-            )
-
-            // ----- Assert -----
-            model.letterSpacing shouldBe 2.2.sp
         }
 
         @Test

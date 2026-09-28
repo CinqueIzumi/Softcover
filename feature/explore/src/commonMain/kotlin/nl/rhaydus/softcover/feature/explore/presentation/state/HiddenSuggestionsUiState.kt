@@ -4,13 +4,22 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
+import nl.rhaydus.softcover.feature.explore.presentation.model.HiddenGroupHeaderUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class HiddenSuggestionsUiState(
     val hiddenBooks: List<DismissedSeriesBook> = emptyList(),
     val hiddenSeries: List<DismissedSeries> = emptyList(),
-    val hiddenBooksHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Hidden books"),
-    val hiddenSeriesHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Hidden series"),
+    val hiddenBooksGroupHeader: HiddenGroupHeaderUiModel = HiddenGroupHeaderUiModel(
+        header = SectionHeaderUiModel.Inline(eyebrow = "Hidden books"),
+        count = "0",
+        subline = "Set aside — tap Restore to shelve them again.",
+    ),
+    val hiddenSeriesGroupHeader: HiddenGroupHeaderUiModel = HiddenGroupHeaderUiModel(
+        header = SectionHeaderUiModel.Inline(eyebrow = "Hidden series"),
+        count = "0",
+        subline = "A muted series hides every book in it.",
+    ),
     // Keyed by DismissedSeriesBook.bookId / DismissedSeries.seriesId respectively — two maps
     // because book ids and series ids share the same Int namespace. Mapped by DismissedBooksCollector
     // / DismissedSeriesCollector directly (component-contract.md § 7.2 R9); no snapshot type and no

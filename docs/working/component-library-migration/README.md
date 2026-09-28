@@ -14,25 +14,25 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, S5-1–S5-3b, S5-C-chips, S5-4–S5-6 done (S5-6 uncommitted). The desktop explore /
-  library / reading headers and reading's mobile `ReadingMasthead` compose `PageMasthead` (+ its new
-  `actions` slot and `MastheadRefreshAction`); per-feature `MastheadCollector`s write every masthead model.
-  Library mobile `MastheadHeader` and `ProfileHeader` stay feature-local. `EditorialSectionHeaderSkeleton`
-  stays for S5-8. 14 files with Apollo alias imports wait on foundation F24.
-- **Next:** S5-C-headers in [`steps/s5-headers.md`](steps/s5-headers.md) — the convergence pass over
-  `SectionHeader` / `PageMasthead` / `MastheadRefreshAction` (family-procedure.md § Phase 3). Gradle under
+- **State:** S0–S4 and the S5 chips and headers families (S5-1–S5-6, both convergence passes) done;
+  S5-C-headers uncommitted. `SectionHeader`'s three registers share one private scaffold, carry `tone`,
+  announce as headings, and take an optional `trailing` slot (`InProgressSection`, `HiddenGroupHeaderUiModel`).
+  `EditorialSectionHeaderSkeleton` stays for S5-8. 14 files with Apollo alias imports wait on foundation F24.
+- **Next:** S5-7 in [`steps/s5-badges.md`](steps/s5-badges.md) — Phase 1 design with the user. Gradle under
   JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** none. Confirm on device that the Arrange / Filter sheets no longer render empty or
-  stale for a frame on open (their headers are now seeded as `UiState` defaults). Eyeball the S5-6
-  accepted shifts: 4dp eyebrow gap, 1-line titles, and reading's mobile masthead line height.
-- **Verification:** S5-6 on JBR 21: core:component / explore / library / reading / settings JVM + Android
-  compiles, `:desktopApp` compile, `ktlintCheck`, `styleCheck`, `checkDocBudgets`, `checkModuleGraph`
-  passed; new header, masthead-collector, `ReadingHeaderCopy` and `LibraryUiState` tests pass; reviewer ✅
-  after one fix round. Brief implementers on ≤~12 files each — the library slice (8 files + collector)
-  still hit the 80-turn limit once.
-- **Uncommitted:** all of S5-6, plus the S5-5b tick and `## Now` update carried from the last session.
+  stale for a frame on open (their headers are now seeded as `UiState` defaults). Eyeball the accepted
+  shifts: S5-6's 4dp eyebrow gap, 1-line titles, reading's mobile masthead line height; S5-C's "Your tabs"
+  tracking (2.2 → 1.2sp) and `FeaturedCard`'s eyebrow gap (10 → 8dp).
+- **Verification:** S5-C-headers on JBR 21: core:component / explore / book_detail / settings JVM compiles,
+  `:desktopApp` compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`, `checkDocBudgets`
+  and the four modules' `testAndroidHostTest` passed; reviewer's two valid findings (heading merge, forced
+  `fillMaxWidth` on an empty slot) fixed. Brief implementers on ≤~12 files each (brief B's 13 files ran
+  into the 80-turn limit right after it reported).
+- **Uncommitted:** all of S5-C-headers, plus carried-forward notes in `s6-sheet-chrome.md`,
+  `s6-list-rows.md` and `s8-screen-states.md`.
 
 ## Local verification
 
@@ -69,7 +69,7 @@ every sub-step's Verify.
 |---|---|---|---|
 | S0–S4 | — | module scaffolding through tokens-only designsystem | [x] |
 | S5 | — (chips) | S5-1–S5-3b, S5-C-chips | [x] |
-| S5 | [steps/s5-headers.md](steps/s5-headers.md) | S5-4–S5-6 | [ ] |
+| S5 | — (headers) | S5-4–S5-6, S5-C-headers | [x] |
 | S5 | [steps/s5-badges.md](steps/s5-badges.md) | S5-7 | [ ] |
 | S5 | [steps/s5-skeletons.md](steps/s5-skeletons.md) | S5-8 | [ ] |
 | S5 | [steps/s5-dividers.md](steps/s5-dividers.md) | S5-9 | [ ] |

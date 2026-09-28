@@ -29,7 +29,8 @@
 
 The four `*Callout`s are one component with a tone variant. `ConnectivityBanner` already migrated in
 S4-5a as `Banner` + `BannerUiModel` + `BannerTone` (`core/component/callout/`), called once from
-`RootScreen.kt`.
+`RootScreen.kt`. Carried from S5-C-headers: `AppUpdateSection`'s hand-rolled accent bar + eyebrow on
+`primaryContainer` (container ink, strings built in composition) is a callout and lands here.
 
 | Symbol(s) | Current path:line | Note |
 |---|---|---|

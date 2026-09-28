@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
-import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.header.SectionHeaderTone
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -17,7 +16,6 @@ internal data class LibraryVisibilitySettingsUiState(
     ),
     val libraryTabsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(
         eyebrow = "Your tabs",
-        letterSpacing = 2.2.sp,
         tone = SectionHeaderTone.Accent,
     ),
     val persistedEnabledStatusCodes: Set<Int> = emptySet(),
