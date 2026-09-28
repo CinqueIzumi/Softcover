@@ -26,9 +26,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -49,6 +50,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouRead
 internal fun BecauseYouReadGenreControl(
     genre: String,
     options: List<String>,
+    header: SectionHeaderUiModel,
     runAction: (ExploreAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -90,6 +92,7 @@ internal fun BecauseYouReadGenreControl(
         BecauseYouReadGenreSheet(
             genre = genre,
             options = options,
+            header = header,
             runAction = runAction,
             onDismissRequest = { sheetVisible = false },
         )
@@ -97,10 +100,8 @@ internal fun BecauseYouReadGenreControl(
 }
 
 /**
- * The genre-picker sheet body: [EditorialSectionHeader] (accent bar + "GENRE" eyebrow + "Pick a
- * genre" headline — a short neutral category word rather than repeating the "Because you read"
- * rail name, which read as redundant and option-like once opened inside the sheet) over a vertical
- * list of hairline-divided rows, one for "Auto (most-read)"
+ * The genre-picker sheet body: a [SectionHeader] over a vertical list of hairline-divided rows, one
+ * for "Auto (most-read)"
  * (the null-genre default, checked whenever [genre] doesn't match any switchable [options] entry)
  * and one per [options] entry — laid out exactly like `LibraryShelvesSheet`'s shelf rows
  * ([BecauseYouReadGenreSheetRow] mirrors `ShelvesSheetRow`'s italic label + active check, minus the
@@ -111,6 +112,7 @@ internal fun BecauseYouReadGenreControl(
 private fun BecauseYouReadGenreSheet(
     genre: String,
     options: List<String>,
+    header: SectionHeaderUiModel,
     runAction: (ExploreAction) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
@@ -123,10 +125,7 @@ private fun BecauseYouReadGenreSheet(
                 .verticalScroll(state = rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 8.dp),
         ) {
-            EditorialSectionHeader(
-                eyebrow = "Genre",
-                headline = "Pick a genre",
-            )
+            SectionHeader(model = header)
 
             Spacer(modifier = Modifier.height(6.dp))
 

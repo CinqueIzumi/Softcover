@@ -261,7 +261,7 @@ It is a **shipped easter egg**, rendered on Android, iOS and desktop from `commo
   destination and no sidebar row.
 - **It is a user-visible surface**, so it gets a design pass like any other screen.
 
-**Anatomy.** An intro line, then a "Preview controls" region opened by an `EditorialSectionHeader` with two
+**Anatomy.** An intro line, then a "Preview controls" region opened by a `SectionHeader` (Section register) with two
 override chip rows, **Brightness** (`ThemeMode`) and **Spine colour** (`ColorPalette`), each a wrapping row
 of `Chip`s under a bar-less `eyebrowSmall` sub-label. Both rows always render, even with an empty registry.
 Tapping the selected chip clears the override back to the app's own setting (tap-to-toggle-off), and a
@@ -272,7 +272,7 @@ the overridden theme.
 Below sits the **themed region**: a `SoftcoverTheme` resolved from the overrides (each falling back to
 `LocalThemeConfiguration` when `null`; dynamic colour forced off whenever a palette override is set),
 wrapping a hairline-bordered, rounded surface filled with that theme's `background`. Inside, each visible
-family gets an `EditorialSectionHeader`, then per component its name and blurb, then each fixture as a small
+family gets a `SectionHeader` (Section register), then per component its name and blurb, then each fixture as a small
 label over a tonal tile that constrains the fixture's width and lets it size its own height.
 
 With the registry empty, the frame shows the empty-state variant of the

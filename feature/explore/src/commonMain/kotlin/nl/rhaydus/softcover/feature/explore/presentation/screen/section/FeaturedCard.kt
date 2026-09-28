@@ -43,7 +43,7 @@ import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW
  * future-notification scheduling infrastructure).
  *
  * The card **names itself** with the DS §2.3 inline 20×1 hairline eyebrow on its own top row, rather
- * than being introduced by a full `EditorialSectionHeader` the way every rail below it is. It briefly
+ * than being introduced by a full `SectionHeader` the way every rail below it is. It briefly
  * had one: accent bar, `headline` headline and a description sentence together pushed the card most of
  * the way down the first screen — far too much chrome for a single card whose pick rotates weekly. The
  * inline register says the same thing in one line, which is exactly what the register exists for.

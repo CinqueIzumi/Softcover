@@ -55,13 +55,14 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.component.StarRatingInput
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.control.RichTextFormattingToolbar
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextMark
 import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
@@ -224,11 +225,7 @@ fun VerdictSheet(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                EditorialSectionHeader(
-                    eyebrow = copy.eyebrow,
-                    headline = copy.headline,
-                    description = copy.description,
-                )
+                SectionHeader(model = copy.header)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -426,11 +423,9 @@ fun VerdictSheet(
     }
 }
 
-/** The eyebrow/headline/description/dismiss/save copy that swaps per [VerdictSheetContext] (§Copy). */
+/** The header/dismiss/save copy that swaps per [VerdictSheetContext] (§Copy). */
 private data class VerdictCopy(
-    val eyebrow: String,
-    val headline: String,
-    val description: String?,
+    val header: SectionHeaderUiModel.Section,
     val dismissLabel: String,
     val saveLabel: String,
 )
@@ -440,17 +435,20 @@ private fun verdictCopyFor(
     bookTitle: String,
 ): VerdictCopy = when (context) {
     VerdictSheetContext.FINISHED -> VerdictCopy(
-        eyebrow = "The last page",
-        headline = "You finished $bookTitle.",
-        description = "A rating and a few words, if you like — both are optional.",
+        header = SectionHeaderUiModel.Section(
+            eyebrow = "The last page",
+            headline = "You finished $bookTitle.",
+            description = "A rating and a few words, if you like — both are optional.",
+        ),
         dismissLabel = "Not now",
         saveLabel = "Save",
     )
 
     VerdictSheetContext.EDIT -> VerdictCopy(
-        eyebrow = "Your verdict",
-        headline = "Your take on $bookTitle.",
-        description = null,
+        header = SectionHeaderUiModel.Section(
+            eyebrow = "Your verdict",
+            headline = "Your take on $bookTitle.",
+        ),
         dismissLabel = "Cancel",
         saveLabel = "Save changes",
     )

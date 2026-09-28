@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingDependencies
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.LocalOnboardingVariables
@@ -86,7 +87,7 @@ class OnApiKeyValueChangeActionTest {
             stateFlow.value = OnboardingUiState(
                 apiKeyValue = "old-key",
                 saveApiKeyButtonEnabled = false,
-                isLoading = true,
+                loadingSheet = OnboardingUiState().loadingSheet.copy(isLoading = true),
             )
             dependencies = stubDependencies(this)
             val action = OnApiKeyValueChangeAction(newValue = "new-key")
@@ -100,7 +101,13 @@ class OnApiKeyValueChangeActionTest {
             // ----- Assert -----
             stateFlow.value.apiKeyValue shouldBe "new-key"
             stateFlow.value.saveApiKeyButtonEnabled shouldBe false
-            stateFlow.value.isLoading shouldBe true
+            stateFlow.value.loadingSheet.isLoading shouldBe true
+            stateFlow.value.loadingSheet.header shouldBe
+                SectionHeaderUiModel.Section(
+                    eyebrow = "Setting up",
+                    headline = "Pulling your library together.",
+                    description = "Depending on its size, this might take a moment.",
+                )
         }
 
         @Test

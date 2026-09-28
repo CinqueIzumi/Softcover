@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class ExploreScreenUiState(
@@ -55,6 +56,7 @@ internal data class ExploreScreenUiState(
         eyebrow = "Pick up where you left off",
         headline = "Up next in your series",
     ),
+    val continueSeriesEntries: List<ContinueSeriesEntryUiModel> = emptyList(),
     val searchText: String = "",
     /** The search chrome, derived off the four fields below by `SearchTopBarCollector` (R9). */
     val searchTopBar: SearchTopBarUiModel = SearchTopBarUiModel(
@@ -80,12 +82,22 @@ internal data class ExploreScreenUiState(
     // `becauseYouReadGenreOptions` is the picker's choice list: the distinct Genre-category tags
     // across the user's own books, same derivation as Library's `LibraryFilterOptionsBuilder`.
     val becauseYouReadGenre: String? = null,
+    /** `null` hides the because-you-read rail, as a `null` [becauseYouReadGenre] does. */
+    val becauseYouReadHeader: SectionHeaderUiModel? = null,
     val becauseYouReadGenreOptions: List<String> = emptyList(),
+    val becauseYouReadGenrePickerHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Genre",
+        headline = "Pick a genre",
+    ),
     val becauseYouReadBooks: List<Book> = emptyList(),
     val loadingBecauseYouReadBooks: Boolean = true,
     // Browse-by-mood grid + the active mood filter, when a mood tile/chip drove the current
     // results (see the "Modelling choice" note on [ExploreSearchPhase]).
     val moodTags: List<MoodTag> = emptyList(),
+    val moodGridHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Browse by mood",
+        headline = "How do you want to feel?",
+    ),
     // Built off `moodTags` by `MoodChipsCollector` (`component-contract.md` § 7.2 R9).
     val moodChips: ChipSet<MoodTag> = ChipSet(),
     val loadingMoodTags: Boolean = true,

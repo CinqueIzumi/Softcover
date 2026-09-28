@@ -44,7 +44,7 @@ internal fun DesktopDiscovery(
             )
 
             DesktopUpNextSection(
-                books = state.continueSeriesBooks,
+                entries = state.continueSeriesEntries,
                 covers = state.continueSeriesCovers,
                 unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
@@ -55,7 +55,9 @@ internal fun DesktopDiscovery(
 
             DesktopBecauseYouReadSection(
                 genre = state.becauseYouReadGenre,
+                header = state.becauseYouReadHeader,
                 genreOptions = state.becauseYouReadGenreOptions,
+                genrePickerHeader = state.becauseYouReadGenrePickerHeader,
                 books = state.becauseYouReadBooks,
                 covers = state.becauseYouReadCovers,
                 unreleasedBadges = state.unreleasedBadges,
@@ -76,6 +78,7 @@ internal fun DesktopDiscovery(
             MoodGrid(
                 moods = state.moodTags,
                 isLoading = state.loadingMoodTags && state.moodTags.isEmpty(),
+                header = state.moodGridHeader,
                 runAction = runAction,
             )
 

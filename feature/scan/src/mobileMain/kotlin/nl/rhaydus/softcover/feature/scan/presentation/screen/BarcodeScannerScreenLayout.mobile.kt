@@ -59,6 +59,7 @@ internal actual fun BarcodeScannerScreenLayout(
                 manualMode -> ManualEntryContent(
                     isResolving = state.isResolving,
                     isAddingBook = state.isAddingBook,
+                    header = state.manualEntryHeader,
                     onIsbnSubmit = onIsbnSubmit,
                     autoFocus = false,
                     modifier = Modifier

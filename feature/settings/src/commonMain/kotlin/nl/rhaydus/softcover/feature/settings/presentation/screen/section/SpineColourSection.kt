@@ -16,9 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTile
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileEvent
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnColorPaletteSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDynamicColorToggledAction
@@ -55,10 +55,7 @@ internal fun SpineColourSection(
     runAction: (SettingsAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Spine colour",
-            headline = "The paper and the ink",
-        )
+        SectionHeader(model = state.spineColourSectionHeader)
 
         Spacer(modifier = Modifier.height(20.dp))
 

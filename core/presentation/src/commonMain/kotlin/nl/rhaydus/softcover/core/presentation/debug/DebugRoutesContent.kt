@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.presentation.debug
 
 import androidx.compose.runtime.Composable
+import cafe.adriel.voyager.core.screen.Screen
 
 /**
  * Seam for the debug-only routes section surfaced in Settings. Bound per build type in `:app` — the
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
  * `:core:component`.
  */
 interface DebugRoutesContent {
+    /** @param host The screen rendering this section; the debug binding scopes its screen model to it. */
     @Composable
-    fun Render()
+    fun Render(host: Screen)
 }

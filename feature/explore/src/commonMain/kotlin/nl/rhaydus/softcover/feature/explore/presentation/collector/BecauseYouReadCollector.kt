@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -16,6 +17,12 @@ internal class BecauseYouReadCollector : ExploreCollector {
             scope.setState {
                 it.copy(
                     becauseYouReadGenre = recommendation?.genre,
+                    becauseYouReadHeader = recommendation?.genre?.let { genre ->
+                        SectionHeaderUiModel.Section(
+                            eyebrow = "Because you read",
+                            headline = genre,
+                        )
+                    },
                     becauseYouReadGenreOptions = recommendation?.genreOptions.orEmpty(),
                     becauseYouReadBooks = recommendation?.books.orEmpty(),
                     // Mapped from the recommendation rather than hardcoded false - see

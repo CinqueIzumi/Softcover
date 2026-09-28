@@ -19,15 +19,17 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
 internal fun UnknownIsbnSheet(
     isbn: String,
     isAdding: Boolean,
+    header: SectionHeaderUiModel,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -39,11 +41,7 @@ internal fun UnknownIsbnSheet(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 16.dp),
         ) {
-            EditorialSectionHeader(
-                eyebrow = "Not in Hardcover",
-                headline = "We don't have this one yet.",
-                description = "Double-check the ISBN below — if it's right, add it to Hardcover so you can track it.",
-            )
+            SectionHeader(model = header)
 
             Spacer(modifier = Modifier.height(24.dp))
 

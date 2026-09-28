@@ -32,7 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +51,6 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
-import nl.rhaydus.softcover.core.component.sheet.LoadingSheetUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
@@ -138,20 +136,8 @@ internal actual fun OnboardingScreenLayout(
             }
         }
 
-        // The literal copy is the caller's (component-contract.md R4/R9), so it is built once here
-        // rather than on every recomposition; only the loading/progress fields actually vary.
-        val loadingSheetModel = remember(state.isLoading, state.progress) {
-            LoadingSheetUiModel(
-                eyebrow = "Setting up",
-                headline = "Pulling your library together.",
-                description = "Depending on its size, this might take a moment.",
-                progress = state.progress,
-                isLoading = state.isLoading,
-            )
-        }
-
         LoadingSheet(
-            model = loadingSheetModel,
+            model = state.loadingSheet,
             onEvent = { event ->
                 when (event) {
                     LoadingSheetEvent.LoaderFinished -> onInitializingComplete()
@@ -163,7 +149,7 @@ internal actual fun OnboardingScreenLayout(
 
 /**
  * The persistent chrome above the pager: an accent-bar eyebrow on the left (the established
- * hand-composed pattern — `EditorialSectionHeader` has no trailing slot for the folio, see
+ * hand-composed pattern — `SectionHeader` has no trailing slot for the folio, see
  * `TagEditorHeader`/`AppUpdateSection` for the same convention elsewhere) and the "01 — 02 — 03" folio
  * indicator on the right. Rendered once above the pager rather than per-page, so its position never
  * shifts as pages swipe — only the [eyebrow] label cross-fades and the folio's active digit updates as
@@ -541,10 +527,14 @@ private fun FirstIntroScreenPreview() {
 private fun LoadingDialogIntroScreenPreview() {
     SoftcoverTheme {
         OnboardingScreenLayout(
-            state = OnboardingUiState(
-                isLoading = true,
-                progress = 0.2f,
-            ),
+            state = OnboardingUiState().let {
+                it.copy(
+                    loadingSheet = it.loadingSheet.copy(
+                        isLoading = true,
+                        progress = 0.2f,
+                    ),
+                )
+            },
             runAction = {},
             getCopiedText = { "" },
             openUrl = {},

@@ -14,10 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.BECAUSE_YOU_READ_SKELETON_COUNT
@@ -30,7 +31,9 @@ private val BECAUSE_YOU_READ_CARD_WIDTH = 118.dp
 @Composable
 internal fun BecauseYouReadSection(
     genre: String?,
+    header: SectionHeaderUiModel?,
     genreOptions: List<String>,
+    genrePickerHeader: SectionHeaderUiModel,
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
     unreleasedBadges: Map<Int, BadgeUiModel>,
@@ -58,11 +61,8 @@ internal fun BecauseYouReadSection(
         ) { loading ->
             if (loading) {
                 EditorialSectionHeaderSkeleton()
-            } else if (genre != null) {
-                EditorialSectionHeader(
-                    eyebrow = "Because you read",
-                    headline = genre,
-                )
+            } else if (header != null) {
+                SectionHeader(model = header)
             }
         }
 
@@ -79,6 +79,7 @@ internal fun BecauseYouReadSection(
                 BecauseYouReadGenreControl(
                     genre = genre,
                     options = genreOptions,
+                    header = genrePickerHeader,
                     runAction = runAction,
                 )
             }

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.di
 
 import androidx.compose.runtime.Composable
+import cafe.adriel.voyager.core.screen.Screen
 import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
 import org.koin.dsl.module
 
@@ -16,7 +17,7 @@ internal val debugRoutesModule = module {
     single<DebugRoutesContent> {
         object : DebugRoutesContent {
             @Composable
-            override fun Render() = Unit
+            override fun Render(host: Screen) = Unit
         }
     }
 }

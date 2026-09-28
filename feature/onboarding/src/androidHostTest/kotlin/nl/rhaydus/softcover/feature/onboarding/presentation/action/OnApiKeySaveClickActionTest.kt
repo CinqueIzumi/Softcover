@@ -112,7 +112,7 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateAtReset?.saveApiKeyButtonEnabled shouldBe false
-            stateAtReset?.isLoading shouldBe true
+            stateAtReset?.loadingSheet?.isLoading shouldBe true
             stateAtReset?.submissionError shouldBe null
         }
 
@@ -294,7 +294,7 @@ class OnApiKeySaveClickActionTest {
             coEvery {
                 updateApiKeyUseCase(key = any())
             } coAnswers {
-                progressAfterReset = stateFlow.value.progress
+                progressAfterReset = stateFlow.value.loadingSheet.progress
                 Result.success(Unit)
             }
 
@@ -328,7 +328,7 @@ class OnApiKeySaveClickActionTest {
             coEvery {
                 initializeUserIdAndBooksUseCase()
             } coAnswers {
-                progressAfterUpdate = stateFlow.value.progress
+                progressAfterUpdate = stateFlow.value.loadingSheet.progress
                 Result.success(Unit)
             }
 
@@ -371,7 +371,7 @@ class OnApiKeySaveClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.progress shouldBe 1f
+            stateFlow.value.loadingSheet.progress shouldBe 1f
             stateFlow.value.submissionError shouldBe null
         }
 
@@ -395,8 +395,8 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.progress shouldBe 0f
+            stateFlow.value.loadingSheet.isLoading shouldBe false
+            stateFlow.value.loadingSheet.progress shouldBe 0f
             stateFlow.value.submissionError shouldBe
                 "You're offline. Check your connection and try again."
         }
@@ -449,8 +449,8 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.progress shouldBe 0f
+            stateFlow.value.loadingSheet.isLoading shouldBe false
+            stateFlow.value.loadingSheet.progress shouldBe 0f
             stateFlow.value.submissionError shouldBe
                 "That API key wasn't accepted. Double-check it and try again."
         }
@@ -512,8 +512,8 @@ class OnApiKeySaveClickActionTest {
 
                 // ----- Assert -----
                 stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-                stateFlow.value.isLoading shouldBe false
-                stateFlow.value.progress shouldBe 0f
+                stateFlow.value.loadingSheet.isLoading shouldBe false
+                stateFlow.value.loadingSheet.progress shouldBe 0f
                 stateFlow.value.submissionError shouldBe
                     "That API key wasn't accepted. Double-check it and try again."
             }
@@ -546,8 +546,8 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.progress shouldBe 0f
+            stateFlow.value.loadingSheet.isLoading shouldBe false
+            stateFlow.value.loadingSheet.progress shouldBe 0f
             stateFlow.value.submissionError shouldBe
                 "Something went wrong setting up your account. Please try again."
         }

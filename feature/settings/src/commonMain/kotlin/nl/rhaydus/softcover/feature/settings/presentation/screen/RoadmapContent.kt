@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.InlineErrorState
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
@@ -45,6 +45,7 @@ import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSource
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan
 import nl.rhaydus.softcover.feature.settings.presentation.action.RefreshRoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
+import nl.rhaydus.softcover.feature.settings.presentation.model.RoadmapRenderUnit
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 
 private val LIST_ITEM_RESTLINE_INDENT = 20.sp
@@ -53,9 +54,10 @@ private const val URL_ANNOTATION_TAG = "url"
 /**
  * The Roadmap screen body, shared by the mobile [RoadmapScreen] page, the desktop standalone
  * fallback, and the desktop Settings master–detail pane's `Roadmap` category. Renders the parsed
- * public roadmap ([RoadmapDocument]) as an editorial spread rather than raw markdown: headings shaped
- * `## 3.2.0: Title` split into an eyebrow + headline through [EditorialSectionHeader], consecutive
- * bullet/ordered items grouped into one hanging-indent list per run, a hairline [HorizontalBreak] for
+ * public roadmap ([RoadmapDocument]) as an editorial spread rather than raw markdown, from
+ * [RoadmapUiState.renderUnits]: headings shaped `## 3.2.0: Title` split into an eyebrow + headline
+ * through [SectionHeader], consecutive bullet/ordered items grouped into one hanging-indent list per
+ * run, a hairline [HorizontalBreak] for
  * `---`, and the file's blockquote as a quiet accent-bar aside. [SkeletonCrossfade] carries the
  * ~150ms handoff from [RoadmapUiState.isLoading]'s skeleton to the loaded body; a
  * [RoadmapUiState.roadmapError] renders *above* a document that is already on screen (a
@@ -106,6 +108,7 @@ private fun RoadmapLoadedBody(
 
             RoadmapDocumentBody(
                 document = document,
+                renderUnits = state.renderUnits,
                 lastUpdatedText = state.lastUpdatedText,
                 openUrl = openUrl,
             )
@@ -134,6 +137,7 @@ private fun RoadmapErrorBanner(
 @Composable
 private fun RoadmapDocumentBody(
     document: RoadmapDocument,
+    renderUnits: List<RoadmapRenderUnit>,
     lastUpdatedText: String?,
     openUrl: (String) -> Unit,
 ) {
@@ -149,9 +153,7 @@ private fun RoadmapDocumentBody(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        val units = groupRoadmapBlocks(blocks = document.blocks)
-
-        units.forEachIndexed { index, unit ->
+        renderUnits.forEachIndexed { index, unit ->
             if (index > 0) {
                 Spacer(modifier = Modifier.height(unit.leadingSpacing()))
             }
@@ -180,60 +182,12 @@ private fun RoadmapLastUpdatedFooter(text: String) {
 }
 // endregion
 // region Block grouping
-/**
- * One render pass over a [RoadmapDocument]'s flat block list, grouping any consecutive run of
- * [RoadmapBlock.BulletListItem] / [RoadmapBlock.OrderedListItem] into a single [ListGroup] — the
- * domain model emits list items as flat top-level blocks (see [RoadmapBlock]'s KDoc) and leaves this
- * grouping to the renderer.
- */
-private sealed interface RoadmapRenderUnit {
-    data class Single(val block: RoadmapBlock) : RoadmapRenderUnit
-
-    data class ListGroup(val items: List<RoadmapBlock>) : RoadmapRenderUnit
-}
-
-private fun groupRoadmapBlocks(blocks: List<RoadmapBlock>): List<RoadmapRenderUnit> {
-    val units = mutableListOf<RoadmapRenderUnit>()
-    var index = 0
-
-    while (index < blocks.size) {
-        val block = blocks[index]
-
-        if (block is RoadmapBlock.BulletListItem || block is RoadmapBlock.OrderedListItem) {
-            val runStart = index
-
-            while (
-                index < blocks.size &&
-                (blocks[index] is RoadmapBlock.BulletListItem || blocks[index] is RoadmapBlock.OrderedListItem)
-            ) {
-                index += 1
-            }
-
-            val runItems = blocks.subList(
-                runStart,
-                index,
-            )
-
-            units += RoadmapRenderUnit.ListGroup(items = runItems)
-        } else {
-            units += RoadmapRenderUnit.Single(block = block)
-            index += 1
-        }
-    }
-
-    return units
-}
-
 private fun RoadmapRenderUnit.leadingSpacing() = when (this) {
     is RoadmapRenderUnit.ListGroup -> 12.dp
-
-    is RoadmapRenderUnit.Single -> when (block) {
-        is RoadmapBlock.Heading -> 32.dp
-        is RoadmapBlock.ThematicBreak -> 28.dp
-        is RoadmapBlock.BlockQuote -> 20.dp
-        is RoadmapBlock.Paragraph -> 16.dp
-        is RoadmapBlock.BulletListItem, is RoadmapBlock.OrderedListItem -> 12.dp
-    }
+    is RoadmapRenderUnit.Heading, is RoadmapRenderUnit.PlainHeading -> 32.dp
+    is RoadmapRenderUnit.ThematicBreak -> 28.dp
+    is RoadmapRenderUnit.BlockQuote -> 20.dp
+    is RoadmapRenderUnit.Paragraph -> 16.dp
 }
 // endregion
 // region Block renderers
@@ -243,55 +197,30 @@ private fun RoadmapUnitContent(
     openUrl: (String) -> Unit,
 ) {
     when (unit) {
+        is RoadmapRenderUnit.Heading -> SectionHeader(model = unit.header)
+
+        is RoadmapRenderUnit.PlainHeading -> Text(
+            text = unit.text,
+            style = MaterialTheme.editorialTypography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+
         is RoadmapRenderUnit.ListGroup -> RoadmapList(
             items = unit.items,
             openUrl = openUrl,
         )
 
-        is RoadmapRenderUnit.Single -> when (val block = unit.block) {
-            is RoadmapBlock.Heading -> RoadmapHeading(block = block)
-
-            is RoadmapBlock.Paragraph -> RoadmapParagraph(
-                spans = block.spans,
-                openUrl = openUrl,
-            )
-
-            is RoadmapBlock.BlockQuote -> RoadmapBlockQuote(
-                spans = block.spans,
-                openUrl = openUrl,
-            )
-
-            RoadmapBlock.ThematicBreak -> HorizontalBreak()
-            is RoadmapBlock.BulletListItem, is RoadmapBlock.OrderedListItem -> Unit
-        }
-    }
-}
-
-/**
- * A release heading shaped `"3.2.0: Widgets, and a lot of small things"` splits on the first `": "`
- * into an eyebrow (the version) + headline (the title) through [EditorialSectionHeader] — the
- * editorial move the shape invites. A heading without that shape (`"Under consideration"`) degrades to
- * a plain headline, since [EditorialSectionHeader] always needs both.
- */
-@Composable
-private fun RoadmapHeading(block: RoadmapBlock.Heading) {
-    val plainText = block.spans.joinToString(separator = "") { it.text }
-    val separatorIndex = plainText.indexOf(": ")
-
-    if (separatorIndex > 0 && separatorIndex < plainText.length - 2) {
-        EditorialSectionHeader(
-            eyebrow = plainText.substring(
-                startIndex = 0,
-                endIndex = separatorIndex,
-            ),
-            headline = plainText.substring(startIndex = separatorIndex + 2),
+        is RoadmapRenderUnit.Paragraph -> RoadmapParagraph(
+            spans = unit.spans,
+            openUrl = openUrl,
         )
-    } else {
-        Text(
-            text = plainText,
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+
+        is RoadmapRenderUnit.BlockQuote -> RoadmapBlockQuote(
+            spans = unit.spans,
+            openUrl = openUrl,
         )
+
+        RoadmapRenderUnit.ThematicBreak -> HorizontalBreak()
     }
 }
 

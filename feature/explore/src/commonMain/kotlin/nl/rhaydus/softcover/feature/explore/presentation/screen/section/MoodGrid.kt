@@ -28,11 +28,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatGroupedNumber
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkCosyBackground
@@ -71,14 +72,14 @@ private val MOOD_TILE_TITLE_LINE_HEIGHT = 22.sp
 internal fun MoodGrid(
     moods: List<MoodTag>,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
     runAction: (ExploreAction) -> Unit,
 ) {
     if (isLoading.not() && moods.isEmpty()) return
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        EditorialSectionHeader(
-            eyebrow = "Browse by mood",
-            headline = "How do you want to feel?",
+        SectionHeader(
+            model = header,
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 

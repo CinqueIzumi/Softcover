@@ -52,6 +52,11 @@ internal data class ReadingScreenUiState(
     val recentReadingActivity: List<ReadingDayActivity> = emptyList(),
     val streakEnabled: Boolean = true,
 
+    val streakStripHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Last 0 days",
+        headline = "No reading logged yet",
+    ),
+
     val featuredBookPace: ReadingPaceForecast? = null,
 
     val verdictPromptBook: Book? = null,

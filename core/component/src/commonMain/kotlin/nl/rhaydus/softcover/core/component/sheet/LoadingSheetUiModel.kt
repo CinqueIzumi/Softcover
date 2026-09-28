@@ -4,9 +4,10 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
 /**
- * Everything [LoadingSheet] renders: the editorial header copy and how far along the wait is.
+ * Everything [LoadingSheet] renders: the header copy and how far along the wait is.
  *
  * @property progress Fraction complete, or `null` for an indeterminate wait. A non-null value that
  * reaches `1f` fires [LoadingSheetEvent.LoaderFinished] after a one-second settle, so the reader sees
@@ -17,25 +18,26 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  */
 @Immutable
 data class LoadingSheetUiModel(
-    val eyebrow: String,
-    val headline: String,
+    val header: SectionHeaderUiModel.Section,
     val progress: Float?,
     val isLoading: Boolean,
-    val description: String? = null,
 ) {
     companion object : UiModelPreviews<LoadingSheetUiModel> {
         override val previews: ImmutableList<LoadingSheetUiModel> = persistentListOf(
             LoadingSheetUiModel(
-                eyebrow = "Setting up",
-                headline = "Pulling your library together.",
-                description = "Depending on its size, this might take a moment.",
+                header = SectionHeaderUiModel.Section(
+                    eyebrow = "Setting up",
+                    headline = "Pulling your library together.",
+                    description = "Depending on its size, this might take a moment.",
+                ),
                 progress = 0.4f,
                 isLoading = true,
             ),
             LoadingSheetUiModel(
-                eyebrow = "Setting up",
-                headline = "Pulling your library together.",
-                description = null,
+                header = SectionHeaderUiModel.Section(
+                    eyebrow = "Setting up",
+                    headline = "Pulling your library together.",
+                ),
                 progress = null,
                 isLoading = true,
             ),

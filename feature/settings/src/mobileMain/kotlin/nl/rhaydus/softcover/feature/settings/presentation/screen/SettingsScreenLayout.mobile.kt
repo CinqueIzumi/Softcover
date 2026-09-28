@@ -37,7 +37,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
@@ -45,6 +44,7 @@ import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.header.PageMasthead
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -130,10 +130,7 @@ internal actual fun SettingsScreenLayout(
                 Spacer(modifier = Modifier.height(40.dp))
             }
 
-            EditorialSectionHeader(
-                eyebrow = "Account",
-                headline = "Your reader",
-            )
+            SectionHeader(model = state.settingsMenuAccountHeader)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -149,10 +146,7 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            EditorialSectionHeader(
-                eyebrow = "Personalisation",
-                headline = "Make it yours",
-            )
+            SectionHeader(model = state.settingsMenuPersonalisationHeader)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -188,10 +182,7 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            EditorialSectionHeader(
-                eyebrow = "About",
-                headline = "The fine print",
-            )
+            SectionHeader(model = state.settingsMenuAboutHeader)
 
             Spacer(modifier = Modifier.height(16.dp))
 

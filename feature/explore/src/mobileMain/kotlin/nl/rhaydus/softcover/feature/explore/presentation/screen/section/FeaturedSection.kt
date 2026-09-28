@@ -27,7 +27,7 @@ internal fun FeaturedSection(
     // below never resizes the feed around it.
     if (isLoading.not() && book == null) return
 
-    // No EditorialSectionHeader above this one, unlike every rail below it: the card names itself
+    // No SectionHeader above this one, unlike every rail below it: the card names itself
     // with an inline eyebrow on its own top row (see FeaturedCard), which keeps the feed's opening
     // screen for the book rather than for a header introducing it.
     SkeletonCrossfade(

@@ -13,9 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTile
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTileEvent
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnThemeModeSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -34,10 +34,7 @@ internal fun ThemeSection(
     runAction: (SettingsAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Theme",
-            headline = "The coat it wears",
-        )
+        SectionHeader(model = state.themeSectionHeader)
 
         Spacer(modifier = Modifier.height(20.dp))
 

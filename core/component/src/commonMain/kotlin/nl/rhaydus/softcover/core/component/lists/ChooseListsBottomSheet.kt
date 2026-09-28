@@ -134,7 +134,7 @@ fun ChooseListsBottomSheet(
 
 /**
  * The canonical opening — accent bar, eyebrow, italic headline, italic description — composed locally
- * rather than through `EditorialSectionHeader` (which has no trailing slot and can't tint a substring of
+ * rather than through `SectionHeader` (which has no trailing slot and can't tint a substring of
  * its headline), following the Tag-editor-sheet precedent. The headline names the act: the book's own
  * title in a `primary` span for the single case, or "{n} books" for bulk.
  */

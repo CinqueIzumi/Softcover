@@ -9,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDateStyleClickAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -21,10 +21,7 @@ internal fun DateStyleSection(
     runAction: (SettingsAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Date notation",
-            headline = "How dates read",
-        )
+        SectionHeader(model = state.dateStyleSectionHeader)
 
         Spacer(modifier = Modifier.height(20.dp))
 

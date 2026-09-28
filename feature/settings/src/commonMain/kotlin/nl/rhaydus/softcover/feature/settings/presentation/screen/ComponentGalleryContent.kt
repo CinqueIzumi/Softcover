@@ -18,13 +18,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.gallery.GalleryEntry
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.component.gallery.GalleryFixture
 import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -66,10 +67,7 @@ internal fun ComponentGalleryContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        EditorialSectionHeader(
-            eyebrow = "Preview controls",
-            headline = "See it in every light",
-        )
+        SectionHeader(model = state.previewControlsHeader)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -156,8 +154,7 @@ private fun GalleryFamilyFilterRow(
 
 /**
  * A bar-less, in-flow sub-label (§2.3's third eyebrow register) for a control living inside the
- * "Preview controls" section [EditorialSectionHeader] already opened above — never paired with an
- * accent bar of its own.
+ * "Preview controls" [SectionHeader] already opened above — never paired with an accent bar of its own.
  */
 @Composable
 private fun GalleryControlLabel(text: String) {
@@ -241,7 +238,10 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
                     visibleFamilies.forEachIndexed { index, family ->
                         if (index > 0) Spacer(modifier = Modifier.height(40.dp))
 
-                        GalleryFamilySection(family = family)
+                        GalleryFamilySection(
+                            family = family,
+                            header = state.familySectionHeaders.getValue(family),
+                        )
                     }
                 }
             }
@@ -250,12 +250,12 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
 }
 
 @Composable
-private fun GalleryFamilySection(family: GalleryFamily) {
+private fun GalleryFamilySection(
+    family: GalleryFamily,
+    header: SectionHeaderUiModel,
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Family",
-            headline = family.label,
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(20.dp))
 

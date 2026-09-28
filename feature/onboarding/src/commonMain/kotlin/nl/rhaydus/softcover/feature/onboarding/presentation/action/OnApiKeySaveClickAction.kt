@@ -17,8 +17,10 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
             scope.setState {
                 it.copy(
                     saveApiKeyButtonEnabled = true,
-                    isLoading = false,
-                    progress = 0f,
+                    loadingSheet = it.loadingSheet.copy(
+                        isLoading = false,
+                        progress = 0f,
+                    ),
                     submissionError = mapError(error),
                 )
             }
@@ -27,7 +29,7 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
         scope.setState {
             it.copy(
                 saveApiKeyButtonEnabled = false,
-                isLoading = true,
+                loadingSheet = it.loadingSheet.copy(isLoading = true),
                 submissionError = null,
             )
         }
@@ -42,21 +44,23 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
                 return@launch
             }
 
-            scope.setState { it.copy(progress = 0.1f) }
+            scope.setState { it.copy(loadingSheet = it.loadingSheet.copy(progress = 0.1f)) }
 
             dependencies.updateApiKeyUseCase(key = updatedKey).onFailure { error ->
                 stopLoading(error)
                 return@launch
             }
 
-            scope.setState { it.copy(progress = 0.2f) }
+            scope.setState { it.copy(loadingSheet = it.loadingSheet.copy(progress = 0.2f)) }
 
             dependencies.initializeUserIdAndBooksUseCase()
                 .onFailure { error ->
                     stopLoading(error)
                     return@launch
                 }
-                .onSuccess { scope.setState { it.copy(progress = 1f) } }
+                .onSuccess {
+                    scope.setState { it.copy(loadingSheet = it.loadingSheet.copy(progress = 1f)) }
+                }
         }
     }
 

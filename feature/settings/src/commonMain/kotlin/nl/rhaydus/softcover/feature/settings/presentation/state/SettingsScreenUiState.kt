@@ -36,6 +36,37 @@ internal data class SettingsScreenUiState(
     val privacySidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Privacy"),
     val aboutSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "About"),
 
+    val settingsMenuAccountHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Account",
+        headline = "Your reader",
+    ),
+    val settingsMenuPersonalisationHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Personalisation",
+        headline = "Make it yours",
+    ),
+    val settingsMenuAboutHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "About",
+        headline = "The fine print",
+    ),
+
+    val appUpdateSimulatorHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Debug",
+        headline = "App update simulator",
+    ),
+
+    val aboutCreditsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Credits",
+        headline = "Powered by Hardcover",
+    ),
+    val aboutSourceHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Source",
+        headline = "Built in the open",
+    ),
+    val aboutContactHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Contact",
+        headline = "Say hello",
+    ),
+
     val aboutPaneMasthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = "About",
         title = "About Softcover",
@@ -45,6 +76,27 @@ internal data class SettingsScreenUiState(
         eyebrow = "Personalise",
         title = "Appearance",
         subtitle = "Make Softcover yours.",
+    ),
+    val themeSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Theme",
+        headline = "The coat it wears",
+    ),
+    val spineColourSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Spine colour",
+        headline = "The paper and the ink",
+    ),
+    val uiScaleSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Display scale",
+        headline = "Text & interface size",
+        description = "Scales all text and controls. Try a larger size if the app looks too small on your display.",
+    ),
+    val dateStyleSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Date notation",
+        headline = "How dates read",
+    ),
+    val displaySectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Display",
+        headline = "The look",
     ),
     val themeMode: ThemeMode = ThemeMode.DEFAULT,
     val colorPalette: ColorPalette = ColorPalette.DEFAULT,

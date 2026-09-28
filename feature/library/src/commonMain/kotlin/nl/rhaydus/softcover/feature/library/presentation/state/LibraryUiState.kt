@@ -86,6 +86,11 @@ internal data class LibraryUiState(
      */
     val arrangeDraft: LibraryArrangeDraft? = null,
 
+    val arrangeSheetHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Arrange the shelf",
+        headline = "Arrange this shelf.",
+    ),
+
     val arrangeLayoutHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Layout"),
 
     /** The Arrange sheet's layout row, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
@@ -102,6 +107,12 @@ internal data class LibraryUiState(
 
     val filtersByTab: Map<String, LibraryFilters> = emptyMap(),
     val isFilterSheetExpanded: Boolean = false,
+
+    val filterSheetHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Filter this shelf",
+        headline = "Narrow this shelf.",
+        description = "Combine facets to find the corner of your library you're after.",
+    ),
 
     /**
      * The Filter sheet's uncommitted draft — seeded by `OnFilterSheetExpandedChangeAction` on open,

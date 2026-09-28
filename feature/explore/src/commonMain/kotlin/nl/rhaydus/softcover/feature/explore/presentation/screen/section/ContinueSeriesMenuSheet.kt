@@ -22,9 +22,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -43,6 +44,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnDismissContinu
 @Composable
 internal fun ContinueSeriesMenuSheet(
     book: Book,
+    header: SectionHeaderUiModel,
     runAction: (ExploreAction) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -51,6 +53,7 @@ internal fun ContinueSeriesMenuSheet(
 
         ContinueSeriesDismissSheet(
             book = book,
+            header = header,
             onDismissBookClick = {
                 runAction(
                     OnDismissContinueSeriesBookAction(
@@ -93,6 +96,7 @@ internal fun ContinueSeriesMenuSheet(
 @Composable
 private fun ContinueSeriesDismissSheet(
     book: Book,
+    header: SectionHeaderUiModel,
     onDismissBookClick: () -> Unit,
     onDismissSeriesClick: () -> Unit,
     onCancelClick: () -> Unit,
@@ -104,9 +108,8 @@ private fun ContinueSeriesDismissSheet(
             .imePadding()
             .padding(bottom = 24.dp),
     ) {
-        EditorialSectionHeader(
-            eyebrow = book.bookSeries?.name ?: "Up next",
-            headline = book.title,
+        SectionHeader(
+            model = header,
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 

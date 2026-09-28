@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
@@ -82,10 +81,7 @@ internal fun LibraryArrangeSheet(
                 .verticalScroll(state = rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 8.dp),
         ) {
-            EditorialSectionHeader(
-                eyebrow = "ARRANGE THE SHELF",
-                headline = "Arrange this shelf.",
-            )
+            SectionHeader(model = state.arrangeSheetHeader)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -119,10 +115,12 @@ internal fun LibraryArrangeSheet(
                 chips = state.arrangeSortChips,
                 onChipEvent = { key -> runAction(OnArrangeSortChipClickedAction(key = key)) },
                 onMakeListOrdered = { listId ->
-                    runAction(OnSetListRankedAction(
-                        listId = listId,
-                        ranked = true,
-                    ),)
+                    runAction(
+                        OnSetListRankedAction(
+                            listId = listId,
+                            ranked = true,
+                        ),
+                    )
                 },
             )
 

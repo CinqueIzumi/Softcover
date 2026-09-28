@@ -9,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnFloatingBarToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReadingStreakToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnShelfSwipeToggledAction
@@ -64,10 +64,7 @@ internal fun DisplaySection(
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Display",
-            headline = "The look",
-        )
+        SectionHeader(model = state.displaySectionHeader)
 
         Spacer(modifier = Modifier.height(20.dp))
 

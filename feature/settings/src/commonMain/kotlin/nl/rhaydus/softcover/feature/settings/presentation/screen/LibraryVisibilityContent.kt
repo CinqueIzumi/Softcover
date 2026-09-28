@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryTabsGroupHeader
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.NewListFootAction
@@ -33,11 +33,7 @@ internal fun LibraryVisibilityContent(
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(8.dp))
 
-        EditorialSectionHeader(
-            eyebrow = "Library tabs",
-            headline = "Arrange your shelves.",
-            description = "Choose which shelves ride along the top of your library — and the order they sit in.",
-        )
+        SectionHeader(model = state.libraryTabsPageHeader)
 
         Spacer(modifier = Modifier.height(28.dp))
 

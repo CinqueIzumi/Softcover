@@ -21,12 +21,13 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun DesktopUpNextSection(
-    books: List<Book>,
+    entries: List<ContinueSeriesEntryUiModel>,
     covers: Map<Int, CoverUiModel>,
     unreleasedBadges: Map<Int, BadgeUiModel>,
     isLoading: Boolean,
@@ -34,9 +35,9 @@ internal fun DesktopUpNextSection(
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
-    if (isLoading.not() && books.isEmpty()) return
+    if (isLoading.not() && entries.isEmpty()) return
 
-    var sheetBook by remember { mutableStateOf<Book?>(null) }
+    var sheetEntry by remember { mutableStateOf<ContinueSeriesEntryUiModel?>(null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
@@ -60,7 +61,8 @@ internal fun DesktopUpNextSection(
                         SeriesCardSkeleton(modifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH))
                     }
                 } else {
-                    books.forEach { book ->
+                    entries.forEach { item ->
+                        val book = item.book
                         val cover = covers[book.id]
                         val cardModifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH)
 
@@ -76,7 +78,7 @@ internal fun DesktopUpNextSection(
                                         SURFACE_UP_NEXT,
                                     )
                                 },
-                                onMenuClick = { sheetBook = book },
+                                onMenuClick = { sheetEntry = item },
                             )
                         } else {
                             SeriesCard(
@@ -89,7 +91,7 @@ internal fun DesktopUpNextSection(
                                         SURFACE_UP_NEXT,
                                     )
                                 },
-                                onMenuClick = { sheetBook = book },
+                                onMenuClick = { sheetEntry = item },
                             )
                         }
                     }
@@ -98,11 +100,12 @@ internal fun DesktopUpNextSection(
         }
     }
 
-    sheetBook?.let { book ->
+    sheetEntry?.let { item ->
         ContinueSeriesMenuSheet(
-            book = book,
+            book = item.book,
+            header = item.menuHeader,
             runAction = runAction,
-            onDismiss = { sheetBook = null },
+            onDismiss = { sheetEntry = null },
         )
     }
 }

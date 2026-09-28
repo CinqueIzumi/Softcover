@@ -76,17 +76,20 @@ internal fun EditorialContent(
             )
 
             ContinueSeriesSection(
-                books = state.continueSeriesBooks,
+                entries = state.continueSeriesEntries,
                 covers = state.continueSeriesCovers,
                 unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
+                header = state.upNextHeader,
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
 
             BecauseYouReadSection(
                 genre = state.becauseYouReadGenre,
+                header = state.becauseYouReadHeader,
                 genreOptions = state.becauseYouReadGenreOptions,
+                genrePickerHeader = state.becauseYouReadGenrePickerHeader,
                 books = state.becauseYouReadBooks,
                 covers = state.becauseYouReadCovers,
                 unreleasedBadges = state.unreleasedBadges,
@@ -100,12 +103,14 @@ internal fun EditorialContent(
                 covers = state.trendingCovers,
                 unreleasedBadges = state.unreleasedBadges,
                 isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
+                header = state.trendingHeader,
                 onBookClick = onBookClick,
             )
 
             MoodGrid(
                 moods = state.moodTags,
                 isLoading = state.loadingMoodTags && state.moodTags.isEmpty(),
+                header = state.moodGridHeader,
                 runAction = runAction,
             )
 

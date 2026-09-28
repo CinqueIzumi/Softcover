@@ -10,9 +10,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -66,10 +69,22 @@ class ContinueSeriesBooksCollectorTest {
         }
     }
 
-    private fun stubBook(id: Int): Book = mockk {
+    private fun stubBook(
+        id: Int,
+        title: String = "Book $id",
+        bookSeries: BookSeries? = null,
+    ): Book = mockk {
         every {
             this@mockk.id
         } returns id
+
+        every {
+            this@mockk.title
+        } returns title
+
+        every {
+            this@mockk.bookSeries
+        } returns bookSeries
     }
 
     // ----- OnLaunch -----
@@ -208,6 +223,75 @@ class ContinueSeriesBooksCollectorTest {
             // ----- Assert -----
             stateFlow.value.searchText shouldBe "sci-fi"
             stateFlow.value.loadingTrendingBooks shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `builds one continueSeriesEntries per book in the same order`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val firstBook = stubBook(
+                id = 1,
+                title = "Mistborn",
+                bookSeries = BookSeries(
+                    id = 1,
+                    name = "Mistborn Era",
+                    amountOfBooks = 3,
+                ),
+            )
+            val secondBook = stubBook(
+                id = 2,
+                title = "Elantris",
+            )
+            val collector = ContinueSeriesBooksCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+
+            // ----- Act -----
+            continueSeriesBooksFlow.emit(listOf(firstBook, secondBook))
+            allUserBooksFlow.emit(emptyList())
+
+            // ----- Assert -----
+            stateFlow.value.continueSeriesEntries shouldBe listOf(
+                ContinueSeriesEntryUiModel(
+                    book = firstBook,
+                    menuHeader = SectionHeaderUiModel.Section(
+                        eyebrow = "Mistborn Era",
+                        headline = "Mistborn",
+                    ),
+                ),
+                ContinueSeriesEntryUiModel(
+                    book = secondBook,
+                    menuHeader = SectionHeaderUiModel.Section(
+                        eyebrow = "Up next",
+                        headline = "Elantris",
+                    ),
+                ),
+            )
+            job.cancel()
+        }
+
+        @Test
+        fun `shrinks continueSeriesEntries when a later emission drops a book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val firstBook = stubBook(id = 1)
+            val secondBook = stubBook(id = 2)
+            val collector = ContinueSeriesBooksCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+            continueSeriesBooksFlow.emit(listOf(firstBook, secondBook))
+            allUserBooksFlow.emit(emptyList())
+            stateFlow.value.continueSeriesEntries.size shouldBe 2
+
+            // ----- Act -----
+            continueSeriesBooksFlow.emit(listOf(firstBook))
+
+            // ----- Assert -----
+            stateFlow.value.continueSeriesEntries.size shouldBe 1
+            stateFlow.value.continueSeriesEntries.single().book shouldBe firstBook
             job.cancel()
         }
     }

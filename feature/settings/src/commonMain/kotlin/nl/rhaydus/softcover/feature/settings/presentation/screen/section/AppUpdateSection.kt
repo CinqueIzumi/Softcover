@@ -27,8 +27,8 @@ import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 /**
  * The Settings screen's one tinted surface: a `primaryContainer` editorial highlight, led by the accent-bar
  * + eyebrow ceremony (hand-composed rather than
- * [EditorialSectionHeader][nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader], since the
- * headline needs `onPrimaryContainer` rather than that component's fixed `onSurface`). No badge, no
+ * [SectionHeader][nl.rhaydus.softcover.core.component.header.SectionHeader], since the headline needs
+ * `onPrimaryContainer` rather than that component's fixed `onSurface`). No badge, no
  * chevron, no alert chrome — the state's action is the pill button (or, while downloading, an indeterminate
  * wavy progress bar; the client has no reliable percentage to show). Headlines and body copy are
  * deliberately version-less: [appUpdateState] carries no version string or download percent.

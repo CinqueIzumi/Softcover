@@ -30,9 +30,8 @@ private const val LIST_DOT_INLINE_CONTENT_ID = "library-tabs-list-dot"
 
 /**
  * The group-level opener above the row list: [SectionHeader]'s [SectionHeaderUiModel.Label] register
- * plus an italic Fraunces subhead — deliberately bar-less, since
- * [EditorialSectionHeader][nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader] already
- * opened the screen once above and a second accent bar here would be group-level ceremony the redesign
+ * plus an italic Fraunces subhead — deliberately bar-less, since a [SectionHeader] already opened the
+ * screen once above and a second accent bar here would be group-level ceremony the redesign
  * retires.
  */
 @Composable

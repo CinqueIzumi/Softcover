@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
 /**
  * Standalone desktop About page — a fallback for a direct push (the primary desktop entry is the
@@ -24,6 +25,9 @@ import nl.rhaydus.designsystem.layout.cappedContentWidth
 internal actual fun AboutScreenLayout(
     versionName: String,
     versionCode: Int,
+    creditsHeader: SectionHeaderUiModel,
+    sourceHeader: SectionHeaderUiModel,
+    contactHeader: SectionHeaderUiModel,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
     onRoadmapClick: () -> Unit,
@@ -45,6 +49,9 @@ internal actual fun AboutScreenLayout(
             AboutContent(
                 versionName = versionName,
                 versionCode = versionCode,
+                creditsHeader = creditsHeader,
+                sourceHeader = sourceHeader,
+                contactHeader = contactHeader,
                 openUrl = openUrl,
                 onRoadmapClick = onRoadmapClick,
                 onComponentGalleryUnlocked = onComponentGalleryUnlocked,

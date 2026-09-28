@@ -38,7 +38,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
@@ -103,12 +102,7 @@ object MotionDebugScreen : Screen {
                         vertical = 16.dp,
                     ),
             ) {
-                EditorialSectionHeader(
-                    eyebrow = "Debug",
-                    headline = "Motion & haptics.",
-                    description = "Fire individual animations and haptics in isolation. Useful for " +
-                        "tuning timing and verifying reduced-motion behaviour.",
-                )
+                SectionHeader(model = state.pageHeader)
 
                 Spacer(modifier = Modifier.height(32.dp))
 

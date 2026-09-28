@@ -22,10 +22,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -35,7 +36,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.section.Version
  * The About screen body, shared by the mobile [AboutScreen] page, the desktop standalone fallback, and
  * the desktop Settings master–detail pane's `About` category. Opens with an unheaded italic intro line
  * (the page title itself is chrome the caller already renders — a top bar on mobile, a static header on
- * desktop), then three [EditorialSectionHeader] groups — **Credits**, **Source**, **Contact** — each a
+ * desktop), then three [SectionHeader] groups — **Credits**, **Source**, **Contact** — each a
  * flat, hairline-separated stack of [AboutLinkRow] / [AboutUsernameRow] / [AboutNavigationRow] (the
  * Source section's `Roadmap` row, [onRoadmapClick]) — and closes with `VersionFooter`. About is the
  * app's **one and only** place the version shows: the mobile Settings menu and the desktop sidebar both
@@ -48,6 +49,9 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.section.Version
 internal fun AboutContent(
     versionName: String,
     versionCode: Int,
+    creditsHeader: SectionHeaderUiModel,
+    sourceHeader: SectionHeaderUiModel,
+    contactHeader: SectionHeaderUiModel,
     openUrl: (String) -> Unit,
     onRoadmapClick: () -> Unit,
     onComponentGalleryUnlocked: () -> Unit,
@@ -63,18 +67,25 @@ internal fun AboutContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        CreditsSection(openUrl = openUrl)
+        CreditsSection(
+            header = creditsHeader,
+            openUrl = openUrl,
+        )
 
         Spacer(modifier = Modifier.height(40.dp))
 
         SourceSection(
+            header = sourceHeader,
             openUrl = openUrl,
             onRoadmapClick = onRoadmapClick,
         )
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        ContactSection(openUrl = openUrl)
+        ContactSection(
+            header = contactHeader,
+            openUrl = openUrl,
+        )
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -91,12 +102,12 @@ internal fun AboutContent(
  * neither runs nor endorses this client.
  */
 @Composable
-private fun CreditsSection(openUrl: (String) -> Unit) {
+private fun CreditsSection(
+    header: SectionHeaderUiModel,
+    openUrl: (String) -> Unit,
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Credits",
-            headline = "Powered by Hardcover",
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -122,14 +133,12 @@ private fun CreditsSection(openUrl: (String) -> Unit) {
 
 @Composable
 private fun SourceSection(
+    header: SectionHeaderUiModel,
     openUrl: (String) -> Unit,
     onRoadmapClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Source",
-            headline = "Built in the open",
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -155,12 +164,12 @@ private fun SourceSection(
  * reach the wider community — a real invite link, not a plain mention, once one exists.
  */
 @Composable
-private fun ContactSection(openUrl: (String) -> Unit) {
+private fun ContactSection(
+    header: SectionHeaderUiModel,
+    openUrl: (String) -> Unit,
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Contact",
-            headline = "Say hello",
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(20.dp))
 

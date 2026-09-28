@@ -19,6 +19,7 @@ import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.screen.AboutContent
 
@@ -35,6 +36,9 @@ internal fun AboutPane(
     masthead: PageMastheadUiModel,
     versionName: String,
     versionCode: Int,
+    creditsHeader: SectionHeaderUiModel,
+    sourceHeader: SectionHeaderUiModel,
+    contactHeader: SectionHeaderUiModel,
     appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
     openUrl: (String) -> Unit,
@@ -66,6 +70,9 @@ internal fun AboutPane(
                 AboutContent(
                     versionName = versionName,
                     versionCode = versionCode,
+                    creditsHeader = creditsHeader,
+                    sourceHeader = sourceHeader,
+                    contactHeader = contactHeader,
                     openUrl = openUrl,
                     onRoadmapClick = onRoadmapClick,
                     onComponentGalleryUnlocked = onComponentGalleryUnlocked,

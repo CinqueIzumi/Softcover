@@ -16,27 +16,31 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.modifier.noRippleClickable
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
-fun DebugRoutesSection() {
+fun DebugRoutesSection(host: Screen) {
     val navigator = LocalNavigator.currentOrThrow
 
+    val screenModel = host.koinScreenModel<DebugRoutesScreenModel>()
+
+    val state by screenModel.state.collectAsStateWithLifecycle()
+
     Column(modifier = Modifier.fillMaxWidth()) {
-        EditorialSectionHeader(
-            eyebrow = "Debug",
-            headline = "Behind the scenes.",
-            description = "Debug-only previews compiled out of release builds.",
-        )
+        SectionHeader(model = state.pageHeader)
 
         Spacer(modifier = Modifier.height(16.dp))
 

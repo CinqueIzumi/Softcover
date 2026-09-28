@@ -18,12 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screen.CONTINUE_SERIES_SKELETON_COUNT
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 
@@ -33,24 +35,24 @@ private val UP_NEXT_CARD_WIDTH = 126.dp
 
 @Composable
 internal fun ContinueSeriesSection(
-    books: List<Book>,
+    entries: List<ContinueSeriesEntryUiModel>,
     covers: Map<Int, CoverUiModel>,
     unreleasedBadges: Map<Int, BadgeUiModel>,
     isLoading: Boolean,
+    header: SectionHeaderUiModel,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
-    if (isLoading.not() && books.isEmpty()) return
+    if (isLoading.not() && entries.isEmpty()) return
 
-    var sheetBook by remember { mutableStateOf<Book?>(null) }
+    var sheetEntry by remember { mutableStateOf<ContinueSeriesEntryUiModel?>(null) }
 
     // Hoisted above the crossfade - see TrendingSection's comment for why.
     val entry = rememberStaggeredEntryCoordinator(key = "explore:continue_series")
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        EditorialSectionHeader(
-            eyebrow = "Pick up where you left off",
-            headline = "Up next in your series",
+        SectionHeader(
+            model = header,
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 
@@ -73,7 +75,8 @@ internal fun ContinueSeriesSection(
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
+                    itemsIndexed(entries, key = { _, item -> item.book.id }) { index, item ->
+                        val book = item.book
                         val cover = covers[book.id]
                         val cardModifier = Modifier
                             .width(UP_NEXT_CARD_WIDTH)
@@ -91,7 +94,7 @@ internal fun ContinueSeriesSection(
                                         SURFACE_UP_NEXT,
                                     )
                                 },
-                                onMenuClick = { sheetBook = book },
+                                onMenuClick = { sheetEntry = item },
                             )
                         } else {
                             SeriesCard(
@@ -104,7 +107,7 @@ internal fun ContinueSeriesSection(
                                         SURFACE_UP_NEXT,
                                     )
                                 },
-                                onMenuClick = { sheetBook = book },
+                                onMenuClick = { sheetEntry = item },
                             )
                         }
                     }
@@ -113,11 +116,12 @@ internal fun ContinueSeriesSection(
         }
     }
 
-    sheetBook?.let { book ->
+    sheetEntry?.let { item ->
         ContinueSeriesMenuSheet(
-            book = book,
+            book = item.book,
+            header = item.menuHeader,
             runAction = runAction,
-            onDismiss = { sheetBook = null },
+            onDismiss = { sheetEntry = null },
         )
     }
 }

@@ -1,11 +1,16 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
+import nl.rhaydus.softcover.feature.settings.presentation.model.RoadmapRenderUnit
 import nl.rhaydus.toad.UiState
 
 internal data class RoadmapUiState(
     val document: RoadmapDocument? = null,
+
+    val renderUnits: ImmutableList<RoadmapRenderUnit> = persistentListOf(),
 
     /** Desktop only — mobile's pushed Roadmap screen renders its own top bar instead. */
     val masthead: PageMastheadUiModel = PageMastheadUiModel(

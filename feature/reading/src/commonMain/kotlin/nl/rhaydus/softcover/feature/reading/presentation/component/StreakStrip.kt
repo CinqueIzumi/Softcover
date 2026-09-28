@@ -34,10 +34,11 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
@@ -160,16 +161,22 @@ internal fun currentStreakLength(activity: List<ReadingDayActivity>): Int {
 @Composable
 internal fun StreakStripSheet(
     activity: List<ReadingDayActivity>,
+    header: SectionHeaderUiModel,
     onDismiss: () -> Unit,
 ) {
     AdaptiveModalSheet(onDismissRequest = onDismiss) {
-        StreakStripSheetContent(activity = activity)
+        StreakStripSheetContent(
+            activity = activity,
+            header = header,
+        )
     }
 }
 
 @Composable
-private fun StreakStripSheetContent(activity: List<ReadingDayActivity>) {
-    val readDays = activity.count { it.didRead }
+private fun StreakStripSheetContent(
+    activity: List<ReadingDayActivity>,
+    header: SectionHeaderUiModel,
+) {
     val today = activity.lastOrNull()?.date
 
     Column(
@@ -180,13 +187,7 @@ private fun StreakStripSheetContent(activity: List<ReadingDayActivity>) {
             .padding(top = 8.dp, bottom = 24.dp)
             .navigationBarsPadding(),
     ) {
-        EditorialSectionHeader(
-            eyebrow = "Last ${activity.size} days",
-            headline = readDaysSummary(
-                readDays = readDays,
-                totalDays = activity.size,
-            ),
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -248,15 +249,6 @@ private fun StreakStripSheetRow(
     }
 }
 
-private fun readDaysSummary(
-    readDays: Int,
-    totalDays: Int,
-): String = when (readDays) {
-    0 -> "No reading logged yet"
-    1 -> "You read on 1 of the last $totalDays days"
-    else -> "You read on $readDays of the last $totalDays days"
-}
-
 private fun sheetDayLabel(
     date: LocalDate,
     today: LocalDate?,
@@ -309,6 +301,10 @@ private fun StreakStripSheetPreview() {
         StreakStripSheetContent(
             activity = previewActivity(
                 litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20),
+            ),
+            header = SectionHeaderUiModel.Section(
+                eyebrow = "Last 21 days",
+                headline = "You read on 16 of the last 21 days",
             ),
         )
     }

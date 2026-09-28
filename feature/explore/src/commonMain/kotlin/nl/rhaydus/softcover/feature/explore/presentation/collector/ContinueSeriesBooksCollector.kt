@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -37,10 +39,21 @@ internal class ContinueSeriesBooksCollector : ExploreCollector {
         ) { books, allUserBooks ->
             books.map { book -> allUserBooks.find { it.id == book.id } ?: book }
         }.collectLatest { books ->
+            val entries = books.map { book ->
+                ContinueSeriesEntryUiModel(
+                    book = book,
+                    menuHeader = SectionHeaderUiModel.Section(
+                        eyebrow = book.bookSeries?.name ?: "Up next",
+                        headline = book.title,
+                    ),
+                )
+            }
+
             scope.setState {
                 it.copy(
                     continueSeriesBooks = books,
                     loadingContinueSeriesBooks = false,
+                    continueSeriesEntries = entries,
                 )
             }
         }

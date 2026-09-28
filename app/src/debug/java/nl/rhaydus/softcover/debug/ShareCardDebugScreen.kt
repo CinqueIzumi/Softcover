@@ -24,7 +24,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.collections.immutable.persistentListOf
@@ -32,7 +34,6 @@ import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.common.runCatchingCancellable
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.share.CapturableShareCard
@@ -40,6 +41,7 @@ import nl.rhaydus.designsystem.share.SaveOutcome
 import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.rememberGalleryWritePermissionRequester
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.QuoteShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCard
@@ -64,12 +66,22 @@ object ShareCardDebugScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        Screen(onNavigateBack = navigator::pop)
+        val screenModel = koinScreenModel<ShareCardDebugScreenModel>()
+
+        val state by screenModel.state.collectAsStateWithLifecycle()
+
+        Screen(
+            state = state,
+            onNavigateBack = navigator::pop,
+        )
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Screen(onNavigateBack: () -> Unit) {
+    fun Screen(
+        state: ShareCardDebugUiState,
+        onNavigateBack: () -> Unit,
+    ) {
         val snackbarHostState = remember { SnackbarHostState() }
 
         val scope = rememberCoroutineScope()
@@ -144,13 +156,7 @@ object ShareCardDebugScreen : Screen {
                         vertical = 16.dp,
                     ),
             ) {
-                EditorialSectionHeader(
-                    eyebrow = "Debug",
-                    headline = "Share card variants.",
-                    description = "Tap a card's “Save to gallery” button to write the rendered PNG to " +
-                        "Pictures/Softcover. On Android 9 and below the system will ask for storage " +
-                        "permission first.",
-                )
+                SectionHeader(model = state.pageHeader)
 
                 Spacer(modifier = Modifier.height(32.dp))
 

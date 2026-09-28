@@ -2,7 +2,7 @@
 - [Full-height sheet pinning is safe](architecture_full_height_sheet_pinning.md) — pinned rows + `weight(1f)+verticalScroll` body in AdaptiveModalSheet fills height on both forms; don't re-litigate
 - [Foundation press/click modifiers](architecture_foundation_press_modifiers.md) — pressScaleClickable hides its InteractionSource; hand-rolling pressScale+clickable is correct when the source is shared
 - [Skeleton dimension math](project_skeleton_dimension_math.md) — check a skeleton bar against the real lineHeight; a Row next to a tall cover masks a gap, a Column sums it
-- [Design-system doc drift](project_design_system_doc_drift_pattern.md) — one UI fact is stated in several sections; grep the old value across every design-system section file
+- [Design-system doc drift](project_design_system_doc_drift_pattern.md) — one UI fact/component is stated in several sections incl. patterns/*.md; grep the old value/name everywhere
 - [Staged vs unstaged review scope](feedback_staged_vs_unstaged_review_scope.md) — "unstaged changes" may mean everything uncommitted; reconcile `git diff HEAD` against the brief's prose
 - [Hook script not registered](project_hook_script_not_registered.md) — a new `.claude/hooks/*.sh` does nothing until `.claude/settings.json` wires its matcher; always check both
 - [File-split KDoc link scope](project_file_split_kdoc_link_scope.md) — a token-hygiene split can legitimately downgrade a `[Symbol]` doc-link to backticks when the target left the file's import scope; a stale unresolvable link left behind is the real finding
@@ -13,3 +13,5 @@
 - [ChipSet double `.chips` field](project_chipset_double_chips_field.md) — a wrapper's own `chips`/`fooChips` field holding a `ChipSet<P>` forces `.chips.chips` at render sites; flag readability, suggest Iterable/isEmpty on ChipSet
 - [New component shadows foundation](architecture_new_component_shadows_foundation.md) — grep CAPABILITIES.md for a matching foundation anatomy before accepting a new :core:component that just bolts on one extra behavior
 - [R2 lookup table applies to small enums](architecture_r2_lookup_table_applies_to_small_enums.md) — a size/scale enum branched on more than once inline (not just a big sealed variant) needs one table, per R2
+- [R10 computed-getter trap](project_r10_computed_getter_trap.md) — a UiState `get()` property that builds a UI model still violates R10; only a stored field/default counts
+- [Embedded-content ScreenModel scoping](architecture_embedded_content_screenmodel_scoping.md) — koinNavigatorScreenModel from a non-Screen composable ties the model to the whole Navigator, not the embedding Screen

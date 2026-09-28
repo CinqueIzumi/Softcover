@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.BecauseYouReadRecommendation
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetBecauseYouReadBooksUseCase
@@ -81,6 +82,10 @@ class BecauseYouReadCollectorTest {
             stateFlow.value.becauseYouReadGenre shouldBe "Romance"
             stateFlow.value.becauseYouReadBooks shouldBe listOf(book)
             stateFlow.value.loadingBecauseYouReadBooks shouldBe false
+            stateFlow.value.becauseYouReadHeader shouldBe SectionHeaderUiModel.Section(
+                eyebrow = "Because you read",
+                headline = "Romance",
+            )
             job.cancel()
         }
 
@@ -154,6 +159,7 @@ class BecauseYouReadCollectorTest {
             stateFlow.value.becauseYouReadGenre shouldBe null
             stateFlow.value.becauseYouReadBooks shouldBe emptyList()
             stateFlow.value.loadingBecauseYouReadBooks shouldBe false
+            stateFlow.value.becauseYouReadHeader shouldBe null
             job.cancel()
         }
 
@@ -188,6 +194,10 @@ class BecauseYouReadCollectorTest {
             // ----- Assert -----
             stateFlow.value.becauseYouReadGenre shouldBe "Horror"
             stateFlow.value.becauseYouReadBooks shouldBe listOf(secondBook)
+            stateFlow.value.becauseYouReadHeader shouldBe SectionHeaderUiModel.Section(
+                eyebrow = "Because you read",
+                headline = "Horror",
+            )
             job.cancel()
         }
 

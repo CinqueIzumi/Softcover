@@ -27,10 +27,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
 /**
  * The manual ISBN-entry form, shared by the mobile scanner (reached via "Enter ISBN manually") and the
@@ -44,6 +45,7 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 internal fun ManualEntryContent(
     isResolving: Boolean,
     isAddingBook: Boolean,
+    header: SectionHeaderUiModel,
     onIsbnSubmit: (String) -> Unit,
     autoFocus: Boolean,
     modifier: Modifier = Modifier,
@@ -76,11 +78,7 @@ internal fun ManualEntryContent(
     ) {
         Spacer(modifier = Modifier.height(8.dp))
 
-        EditorialSectionHeader(
-            eyebrow = "By ISBN",
-            headline = "Enter the ISBN.",
-            description = "Type the ISBN-10 or ISBN-13 printed near the barcode.",
-        )
+        SectionHeader(model = header)
 
         Spacer(modifier = Modifier.height(24.dp))
 

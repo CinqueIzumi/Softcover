@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -27,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
-import nl.rhaydus.softcover.core.component.sheet.LoadingSheetUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
@@ -134,20 +132,8 @@ internal actual fun OnboardingScreenLayout(
             )
         }
 
-        // The literal copy is the caller's (component-contract.md R4/R9), so it is built once here
-        // rather than on every recomposition; only the loading/progress fields actually vary.
-        val loadingSheetModel = remember(state.isLoading, state.progress) {
-            LoadingSheetUiModel(
-                eyebrow = "Setting up",
-                headline = "Pulling your library together.",
-                description = "Depending on its size, this might take a moment.",
-                progress = state.progress,
-                isLoading = state.isLoading,
-            )
-        }
-
         LoadingSheet(
-            model = loadingSheetModel,
+            model = state.loadingSheet,
             onEvent = { event ->
                 when (event) {
                     LoadingSheetEvent.LoaderFinished -> onInitializingComplete()

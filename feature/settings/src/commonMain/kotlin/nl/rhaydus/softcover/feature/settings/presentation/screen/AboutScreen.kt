@@ -8,6 +8,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 
 class AboutScreen : Screen {
@@ -24,6 +25,9 @@ class AboutScreen : Screen {
         AboutScreenLayout(
             versionName = state.appVersionName,
             versionCode = state.appVersionCode,
+            creditsHeader = state.aboutCreditsHeader,
+            sourceHeader = state.aboutSourceHeader,
+            contactHeader = state.aboutContactHeader,
             openUrl = uriHandler::openUri,
             onNavigateBack = navigator::pop,
             onRoadmapClick = { navigator.push(RoadmapScreen()) },
@@ -50,6 +54,9 @@ class AboutScreen : Screen {
 internal expect fun AboutScreenLayout(
     versionName: String,
     versionCode: Int,
+    creditsHeader: SectionHeaderUiModel,
+    sourceHeader: SectionHeaderUiModel,
+    contactHeader: SectionHeaderUiModel,
     openUrl: (String) -> Unit,
     onNavigateBack: () -> Unit,
     onRoadmapClick: () -> Unit,

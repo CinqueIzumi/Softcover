@@ -1,6 +1,6 @@
 ---
 name: project_design_system_doc_drift_pattern
-description: docs/reference/design-system.md drifts when a later edit changes a UI detail but the author only re-edits one paragraph, not every mention
+description: docs/reference/design-system.md drifts when a later edit changes a UI detail, or retires a component, but the author only re-edits one paragraph, not every mention
 metadata:
   type: project
 ---
@@ -20,3 +20,10 @@ technically only gets enforced against whichever paragraph the author remembered
 or a section's shape, `grep` the OLD value/name across every section file under `docs/reference/design-system/` (not just the
 paragraph that seems most relevant) before signing off — e.g. `grep -n "old headline text\|old alpha
 list"`. Treat every hit as a doc-accuracy finding, not just the first one found.
+
+Same trap when a change retires one shared component in favour of another across many call sites: the
+component-existence index (`components/<family>.md`) is an obvious place to update, but a
+`patterns/*.md` entry describing a specific screen's recipe by the retired component's name is easy to
+miss — a call-site swap can fully migrate a screen's code while its `patterns/*.md` prose still names
+the retired component. Grep the retired symbol name across `patterns/*.md` too, not just
+`components.md`.

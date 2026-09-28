@@ -10,6 +10,11 @@ import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.toad.UiState
 
 internal data class LibraryVisibilitySettingsUiState(
+    val libraryTabsPageHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Library tabs",
+        headline = "Arrange your shelves.",
+        description = "Choose which shelves ride along the top of your library — and the order they sit in.",
+    ),
     val libraryTabsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(
         eyebrow = "Your tabs",
         letterSpacing = 2.2.sp,

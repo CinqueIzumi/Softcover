@@ -13,10 +13,13 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.softcover.core.uibinding.date.formatLongDate
+import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSource
+import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapSpan
 import nl.rhaydus.softcover.feature.settings.domain.usecase.ObserveRoadmapUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.RoadmapEvent
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.toRoadmapRenderUnits
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
@@ -82,6 +85,30 @@ class RoadmapDocumentCollectorTest {
             stateFlow.value.isLoading shouldBe false
             job.cancel()
         }
+
+        @Test
+        fun `folds renderUnits from the emitted document's blocks alongside document in the same state update`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val documentWithBlocks = TEST_DOCUMENT.copy(
+                    blocks = listOf(RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(text = "Body")))),
+                )
+                val collector = RoadmapDocumentCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                documentFlow.emit(documentWithBlocks)
+
+                // ----- Assert -----
+                stateFlow.value.document shouldBe documentWithBlocks
+                stateFlow.value.renderUnits shouldBe documentWithBlocks.blocks.toRoadmapRenderUnits()
+                job.cancel()
+            }
 
         @Test
         fun `updates document to the latest emission when the flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {

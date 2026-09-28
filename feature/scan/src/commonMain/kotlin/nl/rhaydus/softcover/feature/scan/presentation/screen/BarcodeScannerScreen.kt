@@ -101,6 +101,7 @@ class BarcodeScannerScreen : Screen {
             UnknownIsbnSheet(
                 isbn = unknownIsbn,
                 isAdding = state.isAddingBook,
+                header = state.unknownIsbnHeader,
                 onConfirm = { screenModel.runAction(OnAddUnknownIsbnConfirmedAction()) },
                 onDismiss = { screenModel.runAction(OnAddUnknownIsbnDismissedAction()) },
             )

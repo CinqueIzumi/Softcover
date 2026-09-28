@@ -7,6 +7,7 @@ import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.uibinding.date.formatLongDate
 import nl.rhaydus.softcover.feature.settings.presentation.event.RoadmapEvent
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.toRoadmapRenderUnits
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.RoadmapDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
@@ -57,6 +58,7 @@ internal class RoadmapDocumentCollector : RoadmapCollector {
                 scope.setState {
                     it.copy(
                         document = document,
+                        renderUnits = document.blocks.toRoadmapRenderUnits(),
                         isLoading = false,
                         lastUpdatedText = lastUpdatedText,
                     )

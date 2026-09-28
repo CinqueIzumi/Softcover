@@ -17,9 +17,10 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
@@ -122,9 +123,12 @@ object SettingsScreen : Screen {
             onStartAppUpdate = onStartAppUpdate,
             openUrl = uriHandler::openUri,
             debugSection = {
-                debugRoutesContent.Render()
+                debugRoutesContent.Render(host = this)
 
-                AppUpdateSimulatorSection(simulator = appUpdateSimulator)
+                AppUpdateSimulatorSection(
+                    simulator = appUpdateSimulator,
+                    header = state.appUpdateSimulatorHeader,
+                )
             },
         )
     }
@@ -177,15 +181,15 @@ internal expect fun SettingsScreenLayout(
  * raised by [SettingsScreen.Content] as the `debugSection` slot, which both platform layouts render.
  */
 @Composable
-internal fun AppUpdateSimulatorSection(simulator: AppUpdateSimulator) {
+internal fun AppUpdateSimulatorSection(
+    simulator: AppUpdateSimulator,
+    header: SectionHeaderUiModel,
+) {
     if (simulator.isEnabled.not()) return
 
     val scope = rememberCoroutineScope()
 
-    EditorialSectionHeader(
-        eyebrow = "Debug",
-        headline = "App update simulator",
-    )
+    SectionHeader(model = header)
 
     Spacer(modifier = Modifier.height(16.dp))
 

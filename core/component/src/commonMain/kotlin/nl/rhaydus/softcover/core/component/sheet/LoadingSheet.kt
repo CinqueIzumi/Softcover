@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.editorial.component.EditorialSectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -44,11 +44,7 @@ fun LoadingSheet(
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp),
         ) {
-            EditorialSectionHeader(
-                eyebrow = model.eyebrow,
-                headline = model.headline,
-                description = model.description,
-            )
+            SectionHeader(model = model.header)
 
             Spacer(modifier = Modifier.height(32.dp))
 

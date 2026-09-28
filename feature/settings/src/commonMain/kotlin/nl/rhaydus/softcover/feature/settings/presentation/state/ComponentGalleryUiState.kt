@@ -1,7 +1,11 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toPersistentMap
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
+import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
@@ -23,6 +27,19 @@ import nl.rhaydus.toad.UiState
  * override row's chip list, mapped the same way.
  */
 internal data class ComponentGalleryUiState(
+    val previewControlsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Preview controls",
+        headline = "See it in every light",
+    ),
+
+    val familySectionHeaders: ImmutableMap<GalleryFamily, SectionHeaderUiModel> = GalleryRegistry.families
+        .associateWith { family ->
+            SectionHeaderUiModel.Section(
+                eyebrow = "Family",
+                headline = family.label,
+            )
+        }
+        .toPersistentMap(),
     val selectedFamily: GalleryFamily? = null,
     val themeModeOverride: ThemeMode? = null,
     val paletteOverride: ColorPalette? = null,
