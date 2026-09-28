@@ -60,11 +60,10 @@ Coverless-monogram (`CoverlessTitleCover`, `MonogramCoverMetrics`) — also done
   `BookCardKey` — none of these types exist yet; settle the full shape here.
 - Stacked covers: `StackedJackets` and `SeriesCoverStack` are not on `Cover` yet — decide whether
   stacking becomes a `CoverVariant` or a `BookCard`-level composition of several `CoverUiModel`s.
-- Selection: `SelectableCover` and `LibraryGridCover` still wrap `Cover` locally
-  (`feature/library/presentation/screen/section/SelectableCover.kt`,
-  `feature/library/presentation/screen/section/LayoutBookEntry.kt`) — decide whether selection state
-  joins `CoverUiModel` or `BookCardDecorations`. Coordinate with `steps/s5-badges.md` S5-7, which asks
-  the same question about `SelectionCircleIndicator`.
+- Selection (decided in S5-7): `BookCardDecorations.selection: SelectionMarkUiModel?` (null = not in
+  selection mode), not a `CoverUiModel` field. Library's per-book marks are already collector-built
+  (`SelectionMarksCollector`); `SelectableCover` still places `SelectionMark` by hand (TopEnd, 8dp) —
+  fold that placement into `BookCard`.
 - Deadline overlay: shipped as the separate `CoverOverlay` component (S4-5b) — decide whether it folds
   onto `CoverUiModel` or stays beside it as a `BookCardDecorations` entry.
 

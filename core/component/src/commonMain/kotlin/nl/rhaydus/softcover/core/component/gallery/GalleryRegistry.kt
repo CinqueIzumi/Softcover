@@ -13,15 +13,12 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
-import nl.rhaydus.softcover.core.component.badge.BadgeVariant
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayVariant
-import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryLine
-import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryTone
-import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.callout.Banner
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
@@ -41,6 +38,9 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.cover.CoverlessTitleCover
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
@@ -53,8 +53,8 @@ import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkVariant
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.QuoteShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
@@ -446,18 +446,16 @@ private fun chipFixtureLabel(model: ChipUiModel): String = when {
 
 private const val CHIP_LONG_LABEL_FLOOR = 30
 
-/** Names what a [BadgeUiModel] fixture demonstrates — its variant when that differs, else its tone. */
-private fun badgeFixtureLabel(model: BadgeUiModel): String = when (model.variant) {
-    BadgeVariant.FeaturedRelease -> "Release, featured (larger pad)"
-    BadgeVariant.TrackingTag -> "Tracking tag"
-    BadgeVariant.OwnedCover -> "Owned cover, with icon"
-    BadgeVariant.GridCountdown -> "Grid countdown, with icon"
-    BadgeVariant.Standard -> when (model.tone) {
+/** Names what a [BadgeUiModel] fixture demonstrates — its icon or size when that differs, else its tone. */
+private fun badgeFixtureLabel(model: BadgeUiModel): String = when {
+    model.icon != null -> "${model.label}, with icon"
+    model.size == BadgeSize.Regular -> "${model.label}, regular"
+    else -> when (model.tone) {
         BadgeTone.PrimaryContainer -> "On track"
         BadgeTone.ErrorContainer -> "Behind"
-        BadgeTone.Muted -> "Expired"
+        BadgeTone.Neutral -> "Expired"
         BadgeTone.Primary -> "Release"
-        BadgeTone.Neutral, BadgeTone.Scrim -> model.label
+        BadgeTone.Scrim -> model.label
     }
 }
 
@@ -475,22 +473,21 @@ private fun pageMastheadFixtureLabel(model: PageMastheadUiModel): String = when 
     else -> "Regular"
 }
 
-/** Names what a [CoverOverlayUiModel] fixture demonstrates — its variant, or grayscale when that differs. */
+/** Names what a [CoverOverlayUiModel] fixture demonstrates — its corner, or grayscale when that differs. */
 private fun coverOverlayFixtureLabel(model: CoverOverlayUiModel): String = when {
-    model.variant == CoverOverlayVariant.LibraryCountdown -> "Library countdown (top-start)"
+    model.corner == CoverOverlayCorner.TopStart -> "Library countdown (top-start)"
     model.grayscale -> "Expired (grayscale cover)"
     else -> "On track"
 }
 
-/** Names what a [SelectionMarkUiModel] fixture demonstrates — its variant and selected state. */
+/** Names what a [SelectionMarkUiModel] fixture demonstrates — its backdrop and selected state. */
 private fun selectionMarkFixtureLabel(model: SelectionMarkUiModel): String {
-    val surface = when (model.variant) {
-        SelectionMarkVariant.OnCover -> "On cover"
-        SelectionMarkVariant.RowLeading -> "Row leading"
-        SelectionMarkVariant.EditionCard -> "Edition card"
+    val backdrop = when (model.backdrop) {
+        SelectionMarkBackdrop.Image -> "On image"
+        SelectionMarkBackdrop.Surface -> "On surface"
     }
 
-    return if (model.selected) "$surface, selected" else "$surface, unselected"
+    return if (model.selected) "$backdrop, selected" else "$backdrop, unselected"
 }
 
 /** Names what a [DeadlineSummaryUiModel] fixture demonstrates, derived from its anatomy branch. */

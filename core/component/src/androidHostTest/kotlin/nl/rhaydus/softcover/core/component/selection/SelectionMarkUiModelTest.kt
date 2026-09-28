@@ -8,29 +8,29 @@ class SelectionMarkUiModelTest {
     @Nested
     inner class Previews {
         @Test
-        fun `every SelectionMarkVariant value appears in at least one fixture`() {
+        fun `every SelectionMarkBackdrop value appears in at least one fixture`() {
             // ----- Arrange -----
-            val expectedVariants = SelectionMarkVariant.entries.toSet()
+            val expectedBackdrops = SelectionMarkBackdrop.entries.toSet()
 
             // ----- Act -----
-            val coveredVariants = SelectionMarkUiModel.previews.map { it.variant }.toSet()
+            val coveredBackdrops = SelectionMarkUiModel.previews.map { it.backdrop }.toSet()
 
             // ----- Assert -----
-            coveredVariants shouldBe expectedVariants
+            coveredBackdrops shouldBe expectedBackdrops
         }
 
         @Test
-        fun `both selected states appear for every variant`() {
+        fun `both selected states appear for every backdrop`() {
             // ----- Arrange -----
             val expectedSelectedStates = setOf(true, false)
 
             // ----- Act -----
-            val coveredSelectedStatesByVariant = SelectionMarkUiModel.previews
-                .groupBy { it.variant }
+            val coveredSelectedStatesByBackdrop = SelectionMarkUiModel.previews
+                .groupBy { it.backdrop }
                 .mapValues { (_, fixtures) -> fixtures.map { it.selected }.toSet() }
 
             // ----- Assert -----
-            coveredSelectedStatesByVariant.values.forEach { states ->
+            coveredSelectedStatesByBackdrop.values.forEach { states ->
                 states shouldBe expectedSelectedStates
             }
         }

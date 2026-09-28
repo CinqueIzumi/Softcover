@@ -20,15 +20,15 @@ class BadgeUiModelTest {
         }
 
         @Test
-        fun `every BadgeVariant value appears in at least one fixture`() {
+        fun `every BadgeSize value appears in at least one fixture`() {
             // ----- Arrange -----
-            val expectedVariants = BadgeVariant.entries.toSet()
+            val expectedSizes = BadgeSize.entries.toSet()
 
             // ----- Act -----
-            val coveredVariants = BadgeUiModel.previews.map { it.variant }.toSet()
+            val coveredSizes = BadgeUiModel.previews.map { it.size }.toSet()
 
             // ----- Assert -----
-            coveredVariants shouldBe expectedVariants
+            coveredSizes shouldBe expectedSizes
         }
 
         @Test
@@ -44,7 +44,7 @@ class BadgeUiModelTest {
     @Nested
     inner class Defaults {
         @Test
-        fun `variant defaults to Standard`() {
+        fun `size defaults to Compact`() {
             // ----- Arrange & Act -----
             val model = BadgeUiModel(
                 label = "label",
@@ -52,7 +52,7 @@ class BadgeUiModelTest {
             )
 
             // ----- Assert -----
-            model.variant shouldBe BadgeVariant.Standard
+            model.size shouldBe BadgeSize.Compact
         }
 
         @Test

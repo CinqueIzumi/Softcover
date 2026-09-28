@@ -9,9 +9,8 @@ import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
 
 /**
- * A [Badge] pinned to the corner `model.variant` names (see [CoverOverlayVariant]) over `content`,
- * with `content` itself optionally desaturated — a reading deadline's status laid over its book
- * cover.
+ * A [Badge] pinned to `model.corner` over `content`, with `content` itself optionally desaturated —
+ * a reading deadline's status laid over its book cover.
  *
  * **[model] is nullable, and that is the whole point** — the same reasoning `Cover(model:
  * CoverUiModel?)` documents: mapping happens in a collector (§ 7.2 R9), so a deadline's overlay model
@@ -38,13 +37,17 @@ fun CoverOverlay(
         }
 
         if (model != null) {
-            val dimensions = CoverOverlayDimensions.forVariant(variant = model.variant)
+            val alignment = when (model.corner) {
+                CoverOverlayCorner.TopStart -> Alignment.TopStart
+                CoverOverlayCorner.TopEnd -> Alignment.TopEnd
+            }
+            val inset = CoverOverlayDimensions.insetFor(size = model.badge.size)
 
             Badge(
                 model = model.badge,
                 modifier = Modifier
-                    .align(dimensions.alignment)
-                    .padding(all = dimensions.padding),
+                    .align(alignment)
+                    .padding(all = inset),
             )
         }
     }

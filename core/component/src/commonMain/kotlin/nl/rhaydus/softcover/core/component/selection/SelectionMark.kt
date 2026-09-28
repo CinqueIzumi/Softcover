@@ -10,48 +10,38 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 /**
  * A circular selection mark: filled with a check mark when selected, an empty ring of
- * `model.variant`'s unselected tone otherwise — the check-off overlay on a library grid cover, a
- * row's leading indicator, or an edition card's centre mark. Inert: a mark is read, never tapped, so
- * it takes no event lambda (§ 7.2 R1 — the caller hoists selection onto the tappable surface around
- * it).
+ * `model.backdrop`'s unselected fill otherwise. Inert: a mark is read, never tapped, so it takes no
+ * event lambda (§ 7.2 R1 — the caller hoists selection onto the tappable surface around it).
  */
 @Composable
 fun SelectionMark(
     model: SelectionMarkUiModel,
     modifier: Modifier = Modifier,
 ) {
-    val dimensions = SelectionMarkDimensions.forVariant(variant = model.variant)
-
-    val container = if (model.selected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        unselectedContainerFor(variant = model.variant)
-    }
-
-    val content = if (model.selected) {
-        MaterialTheme.colorScheme.onPrimary
-    } else {
-        Color.Unspecified
-    }
+    val colors = SelectionMarkColors.of(
+        selected = model.selected,
+        backdrop = model.backdrop,
+        scheme = MaterialTheme.colorScheme,
+    )
 
     Surface(
         modifier = modifier
-            .size(dimensions.size)
+            .size(MARK_SIZE)
             .semantics {
                 selected = model.selected
                 stateDescription = if (model.selected) "Selected" else "Not selected"
             },
-        color = container,
-        contentColor = content,
+        color = colors.container,
+        contentColor = colors.content,
         shape = CircleShape,
     ) {
         if (model.selected) {
@@ -67,18 +57,12 @@ fun SelectionMark(
                 Icon(
                     painter = icon.getIconPainter(),
                     contentDescription = null,
-                    modifier = Modifier.size(dimensions.iconSize),
+                    modifier = Modifier.size(CHECK_ICON_SIZE),
                 )
             }
         }
     }
 }
 
-@Composable
-private fun unselectedContainerFor(variant: SelectionMarkVariant): Color = when (variant) {
-    SelectionMarkVariant.OnCover -> MaterialTheme.colorScheme.surface.copy(alpha = UNSELECTED_ON_COVER_ALPHA)
-    SelectionMarkVariant.RowLeading -> MaterialTheme.colorScheme.surfaceContainerHigh
-    SelectionMarkVariant.EditionCard -> Color.Transparent
-}
-
-private const val UNSELECTED_ON_COVER_ALPHA = 0.72f
+private val MARK_SIZE = 24.dp
+private val CHECK_ICON_SIZE = 16.dp

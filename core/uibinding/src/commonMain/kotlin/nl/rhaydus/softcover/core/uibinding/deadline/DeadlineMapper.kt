@@ -1,13 +1,13 @@
 package nl.rhaydus.softcover.core.uibinding.deadline
 
 import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
-import nl.rhaydus.softcover.core.component.badge.BadgeVariant
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayVariant
-import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryTone
-import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
@@ -22,13 +22,13 @@ fun DeadlineProgress.toBadgeUiModel(): BadgeUiModel {
     val tone = when (status) {
         DeadlineStatus.OnTrack -> BadgeTone.PrimaryContainer
         DeadlineStatus.Behind -> BadgeTone.ErrorContainer
-        DeadlineStatus.Expired -> BadgeTone.Muted
+        DeadlineStatus.Expired -> BadgeTone.Neutral
     }
 
     return BadgeUiModel(
         label = status.label,
         tone = tone,
-        variant = BadgeVariant.Standard,
+        size = BadgeSize.Compact,
     )
 }
 
@@ -39,7 +39,7 @@ fun DeadlineProgress.toBadgeUiModel(): BadgeUiModel {
 fun DeadlineProgress.toCoverOverlayUiModel(): CoverOverlayUiModel =
     CoverOverlayUiModel(
         badge = toBadgeUiModel(),
-        variant = CoverOverlayVariant.ReadingStatus,
+        corner = CoverOverlayCorner.TopEnd,
         grayscale = status == DeadlineStatus.Expired,
     )
 

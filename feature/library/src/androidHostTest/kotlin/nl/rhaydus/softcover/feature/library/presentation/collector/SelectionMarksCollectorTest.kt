@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkVariant
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -100,18 +100,18 @@ class SelectionMarksCollectorTest {
             stateFlow.value.selectionMarks shouldBe mapOf(
                 1 to SelectionMarkUiModel(
                     selected = true,
-                    variant = SelectionMarkVariant.OnCover,
+                    backdrop = SelectionMarkBackdrop.Image,
                 ),
                 2 to SelectionMarkUiModel(
                     selected = false,
-                    variant = SelectionMarkVariant.OnCover,
+                    backdrop = SelectionMarkBackdrop.Image,
                 ),
             )
             job.cancel()
         }
 
         @Test
-        fun `LIST_COMPACT layout picks the RowLeading variant`() = runTest(testDispatcher) {
+        fun `LIST_COMPACT layout picks the Surface backdrop`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val book = stubBook(id = 1)
             val collector = SelectionMarksCollector()
@@ -131,12 +131,12 @@ class SelectionMarksCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.selectionMarks.getValue(1).variant shouldBe SelectionMarkVariant.RowLeading
+            stateFlow.value.selectionMarks.getValue(1).backdrop shouldBe SelectionMarkBackdrop.Surface
             job.cancel()
         }
 
         @Test
-        fun `every cover grid layout picks the OnCover variant`() = runTest(testDispatcher) {
+        fun `every cover grid layout picks the Image backdrop`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val book = stubBook(id = 1)
             val collector = SelectionMarksCollector()
@@ -156,7 +156,7 @@ class SelectionMarksCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.selectionMarks.getValue(1).variant shouldBe SelectionMarkVariant.OnCover
+            stateFlow.value.selectionMarks.getValue(1).backdrop shouldBe SelectionMarkBackdrop.Image
             job.cancel()
         }
 

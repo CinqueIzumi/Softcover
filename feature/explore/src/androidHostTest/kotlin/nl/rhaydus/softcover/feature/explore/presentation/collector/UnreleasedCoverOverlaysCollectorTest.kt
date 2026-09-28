@@ -9,6 +9,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.release.UnreleasedBadgeStyle
 import nl.rhaydus.softcover.core.uibinding.release.toUnreleasedBadgeUiModel
@@ -27,7 +29,13 @@ private val RELEASE_DATE = LocalDate(
     20,
 )
 
-class UnreleasedBadgeModelsCollectorTest {
+private val EXPECTED_OVERLAY = CoverOverlayUiModel(
+    badge = RELEASE_DATE.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Compact),
+    corner = CoverOverlayCorner.TopStart,
+    grayscale = false,
+)
+
+class UnreleasedCoverOverlaysCollectorTest {
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
     private lateinit var scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>
@@ -64,12 +72,12 @@ class UnreleasedBadgeModelsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `puts an unreleased book with a release date into unreleasedBadges keyed by its id`() =
+        fun `puts an unreleased book with a release date into unreleasedCoverOverlays keyed by its id`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val book = stubBook(id = 1)
                 stateFlow.value = ExploreScreenUiState(trendingBooks = listOf(book))
-                val collector = UnreleasedBadgeModelsCollector()
+                val collector = UnreleasedCoverOverlaysCollector()
 
                 // ----- Act -----
                 val job = launch {
@@ -80,19 +88,19 @@ class UnreleasedBadgeModelsCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.unreleasedBadges[1] shouldBe RELEASE_DATE.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Compact)
+                stateFlow.value.unreleasedCoverOverlays[1] shouldBe EXPECTED_OVERLAY
                 job.cancel()
             }
 
         @Test
-        fun `excludes a released book from unreleasedBadges`() = runTest(UnconfinedTestDispatcher()) {
+        fun `excludes a released book from unreleasedCoverOverlays`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
                 isUnreleased = false,
             )
             stateFlow.value = ExploreScreenUiState(trendingBooks = listOf(book))
-            val collector = UnreleasedBadgeModelsCollector()
+            val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
             val job = launch {
@@ -103,19 +111,19 @@ class UnreleasedBadgeModelsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.unreleasedBadges shouldBe emptyMap()
+            stateFlow.value.unreleasedCoverOverlays shouldBe emptyMap()
             job.cancel()
         }
 
         @Test
-        fun `excludes an unreleased book with no release date from unreleasedBadges`() = runTest(UnconfinedTestDispatcher()) {
+        fun `excludes an unreleased book with no release date from unreleasedCoverOverlays`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
                 effectiveReleaseDate = null,
             )
             stateFlow.value = ExploreScreenUiState(trendingBooks = listOf(book))
-            val collector = UnreleasedBadgeModelsCollector()
+            val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
             val job = launch {
@@ -126,7 +134,7 @@ class UnreleasedBadgeModelsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.unreleasedBadges shouldBe emptyMap()
+            stateFlow.value.unreleasedCoverOverlays shouldBe emptyMap()
             job.cancel()
         }
 
@@ -135,7 +143,7 @@ class UnreleasedBadgeModelsCollectorTest {
             // ----- Arrange -----
             val book = stubBook(id = 2)
             stateFlow.value = ExploreScreenUiState(becauseYouReadBooks = listOf(book))
-            val collector = UnreleasedBadgeModelsCollector()
+            val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
             val job = launch {
@@ -146,7 +154,7 @@ class UnreleasedBadgeModelsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.unreleasedBadges.containsKey(2) shouldBe true
+            stateFlow.value.unreleasedCoverOverlays.containsKey(2) shouldBe true
             job.cancel()
         }
 
@@ -155,7 +163,7 @@ class UnreleasedBadgeModelsCollectorTest {
             // ----- Arrange -----
             val book = stubBook(id = 3)
             stateFlow.value = ExploreScreenUiState(continueSeriesBooks = listOf(book))
-            val collector = UnreleasedBadgeModelsCollector()
+            val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
             val job = launch {
@@ -166,7 +174,7 @@ class UnreleasedBadgeModelsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.unreleasedBadges.containsKey(3) shouldBe true
+            stateFlow.value.unreleasedCoverOverlays.containsKey(3) shouldBe true
             job.cancel()
         }
 
@@ -175,7 +183,7 @@ class UnreleasedBadgeModelsCollectorTest {
             // ----- Arrange -----
             val book = stubBook(id = 4)
             stateFlow.value = ExploreScreenUiState(queriedBooks = listOf(book))
-            val collector = UnreleasedBadgeModelsCollector()
+            val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
             val job = launch {
@@ -186,7 +194,7 @@ class UnreleasedBadgeModelsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.unreleasedBadges.containsKey(4) shouldBe true
+            stateFlow.value.unreleasedCoverOverlays.containsKey(4) shouldBe true
             job.cancel()
         }
 
@@ -198,7 +206,7 @@ class UnreleasedBadgeModelsCollectorTest {
                 trendingBooks = listOf(book),
                 becauseYouReadBooks = listOf(book),
             )
-            val collector = UnreleasedBadgeModelsCollector()
+            val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
             val job = launch {
@@ -209,30 +217,31 @@ class UnreleasedBadgeModelsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.unreleasedBadges.size shouldBe 1
-            stateFlow.value.unreleasedBadges.containsKey(5) shouldBe true
+            stateFlow.value.unreleasedCoverOverlays.size shouldBe 1
+            stateFlow.value.unreleasedCoverOverlays.containsKey(5) shouldBe true
             job.cancel()
         }
 
         @Test
-        fun `featuredReleaseBadge uses the Featured copy and FeaturedRelease variant`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val featured = stubBook(id = 6)
-            stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)
-            val collector = UnreleasedBadgeModelsCollector()
+        fun `featuredReleaseBadge uses the Featured copy and is unaffected by the cover-overlay corner`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val featured = stubBook(id = 6)
+                stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)
+                val collector = UnreleasedCoverOverlaysCollector()
 
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
+                // ----- Act -----
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Assert -----
+                stateFlow.value.featuredReleaseBadge shouldBe RELEASE_DATE.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Featured)
+                job.cancel()
             }
-
-            // ----- Assert -----
-            stateFlow.value.featuredReleaseBadge shouldBe RELEASE_DATE.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Featured)
-            job.cancel()
-        }
 
         @Test
         fun `featuredReleaseBadge does not gate on isUnreleased`() = runTest(UnconfinedTestDispatcher()) {
@@ -242,7 +251,7 @@ class UnreleasedBadgeModelsCollectorTest {
                 isUnreleased = false,
             )
             stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)
-            val collector = UnreleasedBadgeModelsCollector()
+            val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
             val job = launch {
@@ -261,7 +270,7 @@ class UnreleasedBadgeModelsCollectorTest {
         fun `featuredReleaseBadge is null when featuredUpcomingRelease is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = null)
-            val collector = UnreleasedBadgeModelsCollector()
+            val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
             val job = launch {
@@ -284,7 +293,7 @@ class UnreleasedBadgeModelsCollectorTest {
                 effectiveReleaseDate = null,
             )
             stateFlow.value = ExploreScreenUiState(featuredUpcomingRelease = featured)
-            val collector = UnreleasedBadgeModelsCollector()
+            val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
             val job = launch {

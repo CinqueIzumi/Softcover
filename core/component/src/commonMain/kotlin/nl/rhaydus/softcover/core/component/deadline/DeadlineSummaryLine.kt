@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.component.badge
+package nl.rhaydus.softcover.core.component.deadline
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -16,9 +16,16 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
 
 /**
- * The deadline date paired with the pace needed to still make it — "28 Aug • 18 pages/day", or the
- * status label alone once the deadline has passed — both already resolved onto [model] by the
- * mapper (§ 7.2 R4); this component only lays the calendar glyph and the string beside each other.
+ * The deadline date paired with the pace needed to still make it — "28 Aug • 18 pages/day", or with
+ * the status label in place of the pace once the deadline has passed — "12 Jul • Expired" — both
+ * already resolved onto [model] by the mapper (§ 7.2 R4); this component only lays the calendar
+ * glyph and the string beside each other.
+ *
+ * Pair this with the family's status badge (`Badge`/`CoverOverlay`) rather than alone — the badge
+ * carries the status, this line carries the date and pace, and Book detail's `DeadlineRow` is the
+ * only surface that also spells out how far behind schedule the reader is. That badge-plus-line
+ * pairing is the intended full readout, not duplication. Never pair either with a stale rating row
+ * in the same card — a book is either time-bound or rated, not both.
  *
  * **Give this the full width of its row.** It is deliberately single-line: the date comes from the
  * reader's own date style and the pace is unbounded (a short deadline on a long book reads "1149

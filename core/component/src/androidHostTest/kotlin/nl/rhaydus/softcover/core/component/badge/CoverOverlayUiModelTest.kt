@@ -8,15 +8,15 @@ class CoverOverlayUiModelTest {
     @Nested
     inner class Previews {
         @Test
-        fun `every CoverOverlayVariant value appears in at least one fixture`() {
+        fun `every CoverOverlayCorner value appears in at least one fixture`() {
             // ----- Arrange -----
-            val expectedVariants = CoverOverlayVariant.entries.toSet()
+            val expectedCorners = CoverOverlayCorner.entries.toSet()
 
             // ----- Act -----
-            val coveredVariants = CoverOverlayUiModel.previews.map { it.variant }.toSet()
+            val coveredCorners = CoverOverlayUiModel.previews.map { it.corner }.toSet()
 
             // ----- Assert -----
-            coveredVariants shouldBe expectedVariants
+            coveredCorners shouldBe expectedCorners
         }
 
         @Test

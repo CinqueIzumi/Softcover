@@ -43,15 +43,15 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
-import nl.rhaydus.softcover.core.component.badge.BadgeVariant
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -536,13 +536,13 @@ private fun EditionBottomSheetContentPreview() {
             badge = BadgeUiModel(
                 label = "TRACKING NOW",
                 tone = BadgeTone.Neutral,
-                variant = BadgeVariant.TrackingTag,
+                size = BadgeSize.Regular,
             ),
         ),
         editions[2].id to EditionTrailingUiModel.Selected(
             mark = SelectionMarkUiModel(
                 selected = true,
-                variant = SelectionMarkVariant.EditionCard,
+                backdrop = SelectionMarkBackdrop.Surface,
             ),
         ),
     )

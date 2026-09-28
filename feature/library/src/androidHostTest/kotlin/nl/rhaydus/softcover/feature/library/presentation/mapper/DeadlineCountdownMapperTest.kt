@@ -2,11 +2,11 @@ package nl.rhaydus.softcover.feature.library.presentation.mapper
 
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
-import nl.rhaydus.softcover.core.component.badge.BadgeVariant
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
@@ -58,10 +58,10 @@ class DeadlineCountdownMapperTest {
                 badge = BadgeUiModel(
                     label = "3 days",
                     tone = BadgeTone.Primary,
-                    variant = BadgeVariant.GridCountdown,
+                    size = BadgeSize.Regular,
                     icon = SoftcoverIcon.DateRange,
                 ),
-                variant = CoverOverlayVariant.LibraryCountdown,
+                corner = CoverOverlayCorner.TopStart,
                 grayscale = false,
             )
         }
@@ -84,7 +84,7 @@ class DeadlineCountdownMapperTest {
         }
 
         @Test
-        fun `Expired status maps to the Muted tone with the Expired label and is grayscale`() {
+        fun `Expired status maps to the Neutral tone with the Expired label and is grayscale`() {
             // ----- Arrange -----
             val subject = progress(
                 daysRemaining = -1,
@@ -99,11 +99,11 @@ class DeadlineCountdownMapperTest {
             result shouldBe CoverOverlayUiModel(
                 badge = BadgeUiModel(
                     label = "Expired",
-                    tone = BadgeTone.Muted,
-                    variant = BadgeVariant.GridCountdown,
+                    tone = BadgeTone.Neutral,
+                    size = BadgeSize.Regular,
                     icon = SoftcoverIcon.DateRange,
                 ),
-                variant = CoverOverlayVariant.LibraryCountdown,
+                corner = CoverOverlayCorner.TopStart,
                 grayscale = true,
             )
         }

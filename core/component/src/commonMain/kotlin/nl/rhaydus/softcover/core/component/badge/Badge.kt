@@ -12,8 +12,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 /**
@@ -27,41 +27,21 @@ fun Badge(
     model: BadgeUiModel,
     modifier: Modifier = Modifier,
 ) {
-    val (container, content) = when (model.tone) {
-        BadgeTone.Primary -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
-        BadgeTone.PrimaryContainer ->
-            MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
-        BadgeTone.ErrorContainer ->
-            MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
-        BadgeTone.Muted -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
-        BadgeTone.Neutral ->
-            MaterialTheme.colorScheme.surfaceContainerHigh to MaterialTheme.colorScheme.onSurfaceVariant
-        BadgeTone.Scrim -> Color.Black.copy(alpha = SCRIM_ALPHA) to Color.White
-    }
-
-    val dimensions = BadgeDimensions.forVariant(variant = model.variant)
-
-    val labelStyle = MaterialTheme.typography.labelSmall
-    val resolvedStyle = labelStyle.copy(
-        fontWeight = dimensions.fontWeight ?: labelStyle.fontWeight,
-        letterSpacing = if (dimensions.letterSpacing == TextUnit.Unspecified) {
-            labelStyle.letterSpacing
-        } else {
-            dimensions.letterSpacing
-        },
+    val colors = BadgeColors.of(
+        tone = model.tone,
+        scheme = MaterialTheme.colorScheme,
     )
+    val padding = BadgeDimensions.paddingFor(size = model.size)
+    val style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
 
     Surface(
         modifier = modifier,
-        color = container,
-        contentColor = content,
-        shape = dimensions.shape,
+        color = colors.container,
+        contentColor = colors.content,
+        shape = BadgeDimensions.shape,
     ) {
         Row(
-            modifier = Modifier.padding(
-                horizontal = dimensions.horizontal,
-                vertical = dimensions.vertical,
-            ),
+            modifier = Modifier.padding(padding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (model.icon != null) {
@@ -73,19 +53,18 @@ fun Badge(
                 Icon(
                     painter = icon.getIconPainter(),
                     contentDescription = null,
-                    modifier = Modifier.size(dimensions.iconSize),
+                    modifier = Modifier.size(BadgeDimensions.iconSize),
                 )
 
-                Spacer(modifier = Modifier.width(dimensions.iconGap))
+                Spacer(modifier = Modifier.width(BadgeDimensions.iconGap))
             }
 
             Text(
                 text = model.label,
-                style = resolvedStyle,
-                color = Color.Unspecified,
+                style = style,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
 }
-
-private const val SCRIM_ALPHA = 0.55f

@@ -56,7 +56,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchC
 import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchResultsHeaderCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchTopBarCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
-import nl.rhaydus.softcover.feature.explore.presentation.collector.UnreleasedBadgeModelsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.UnreleasedCoverOverlaysCollector
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsScreenModel
 import org.koin.dsl.bind
@@ -134,7 +134,7 @@ val exploreModule = module {
 
     factory { CoverModelsCollector() } bind ExploreCollector::class
 
-    factory { UnreleasedBadgeModelsCollector() } bind ExploreCollector::class
+    factory { UnreleasedCoverOverlaysCollector() } bind ExploreCollector::class
 
     factory {
         HiddenSuggestionsScreenModel(

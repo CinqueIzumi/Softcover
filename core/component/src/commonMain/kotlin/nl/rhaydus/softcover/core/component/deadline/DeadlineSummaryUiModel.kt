@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.component.badge
+package nl.rhaydus.softcover.core.component.deadline
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
@@ -8,7 +8,8 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 /**
  * Everything [DeadlineSummaryLine] renders: the deadline date and the pace needed to still make it,
  * already formatted by the mapper — "28 Aug" and "18 pages/day" become one line, "28 Aug • 18
- * pages/day" — or the status label alone once the deadline has passed.
+ * pages/day" — or, once the deadline has passed, the status label in place of the pace, "12 Jul •
+ * Expired".
  *
  * @property dateText The deadline date, already formatted with the reader's own date style — the
  * mapper's job (§ 7.2 R4), not this component's.

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,8 +24,8 @@ import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.shimmer
-import nl.rhaydus.softcover.core.component.badge.Badge
-import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.CoverOverlay
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -45,7 +44,7 @@ import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 private fun DiscoveryRailCard(
     book: Book,
     cover: CoverUiModel?,
-    unreleasedBadge: BadgeUiModel?,
+    unreleasedCoverOverlay: CoverOverlayUiModel?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     subline: @Composable () -> Unit,
@@ -57,20 +56,11 @@ private fun DiscoveryRailCard(
             .pressScaleClickable(onClick = onClick),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        CoverOverlay(model = unreleasedCoverOverlay) {
             Cover(
-               model = cover,
+                model = cover,
                 modifier = Modifier.fillMaxWidth(),
             )
-
-            if (unreleasedBadge != null) {
-                Badge(
-                    model = unreleasedBadge,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(all = 6.dp),
-                )
-            }
         }
 
         Text(
@@ -145,14 +135,14 @@ private fun RailCardSkeleton(modifier: Modifier = Modifier) {
 internal fun TrendingCard(
     book: Book,
     cover: CoverUiModel?,
-    unreleasedBadge: BadgeUiModel?,
+    unreleasedCoverOverlay: CoverOverlayUiModel?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     DiscoveryRailCard(
         book = book,
         cover = cover,
-        unreleasedBadge = unreleasedBadge,
+        unreleasedCoverOverlay = unreleasedCoverOverlay,
         onClick = onClick,
         modifier = modifier,
     ) {
@@ -191,14 +181,14 @@ internal fun TrendingCardSkeleton(modifier: Modifier = Modifier) = RailCardSkele
 internal fun BecauseYouReadCard(
     book: Book,
     cover: CoverUiModel?,
-    unreleasedBadge: BadgeUiModel?,
+    unreleasedCoverOverlay: CoverOverlayUiModel?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     DiscoveryRailCard(
         book = book,
         cover = cover,
-        unreleasedBadge = unreleasedBadge,
+        unreleasedCoverOverlay = unreleasedCoverOverlay,
         onClick = onClick,
         modifier = modifier,
     ) {

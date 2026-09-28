@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryTone
-import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress

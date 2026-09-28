@@ -5,11 +5,11 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
-import nl.rhaydus.softcover.core.component.badge.BadgeVariant
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -73,19 +73,19 @@ internal class EditionSelectionCollector : BookDetailCollector {
     private companion object {
         val SELECTED_MARK = SelectionMarkUiModel(
             selected = true,
-            variant = SelectionMarkVariant.EditionCard,
+            backdrop = SelectionMarkBackdrop.Surface,
         )
 
         val TRACKING_BADGE = BadgeUiModel(
             label = "TRACKING NOW",
             tone = BadgeTone.Neutral,
-            variant = BadgeVariant.TrackingTag,
+            size = BadgeSize.Regular,
         )
 
         val OWNED_BADGE = BadgeUiModel(
             label = "Owned",
             tone = BadgeTone.Scrim,
-            variant = BadgeVariant.OwnedCover,
+            size = BadgeSize.Regular,
             icon = SoftcoverIcon.Check,
         )
     }

@@ -15,7 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -29,7 +29,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 internal fun DesktopUpNextSection(
     entries: List<ContinueSeriesEntryUiModel>,
     covers: Map<Int, CoverUiModel>,
-    unreleasedBadges: Map<Int, BadgeUiModel>,
+    unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
     onBookClick: (Book, String?) -> Unit,
@@ -71,7 +71,7 @@ internal fun DesktopUpNextSection(
                                 modifier = cardModifier,
                                 book = book,
                                 cover = cover,
-                                unreleasedBadge = unreleasedBadges[book.id],
+                                unreleasedCoverOverlay = unreleasedCoverOverlays[book.id],
                                 onClick = {
                                     onBookClick(
                                         book,

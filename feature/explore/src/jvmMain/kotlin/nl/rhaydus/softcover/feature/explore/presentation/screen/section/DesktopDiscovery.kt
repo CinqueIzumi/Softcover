@@ -47,7 +47,7 @@ internal fun DesktopDiscovery(
             DesktopUpNextSection(
                 entries = state.continueSeriesEntries,
                 covers = state.continueSeriesCovers,
-                unreleasedBadges = state.unreleasedBadges,
+                unreleasedCoverOverlays = state.unreleasedCoverOverlays,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 header = state.upNextHeader,
                 onBookClick = onBookClick,
@@ -61,7 +61,7 @@ internal fun DesktopDiscovery(
                 genrePickerHeader = state.becauseYouReadGenrePickerHeader,
                 books = state.becauseYouReadBooks,
                 covers = state.becauseYouReadCovers,
-                unreleasedBadges = state.unreleasedBadges,
+                unreleasedCoverOverlays = state.unreleasedCoverOverlays,
                 isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -70,7 +70,7 @@ internal fun DesktopDiscovery(
             DesktopTrendingSection(
                 books = state.trendingBooks,
                 covers = state.trendingCovers,
-                unreleasedBadges = state.unreleasedBadges,
+                unreleasedCoverOverlays = state.unreleasedCoverOverlays,
                 isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
                 header = state.trendingHeader,
                 onBookClick = onBookClick,

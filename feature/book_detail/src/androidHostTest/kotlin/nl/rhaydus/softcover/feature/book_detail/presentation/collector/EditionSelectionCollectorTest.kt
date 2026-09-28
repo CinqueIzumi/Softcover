@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
-import nl.rhaydus.softcover.core.component.badge.BadgeVariant
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -30,19 +30,19 @@ import org.junit.jupiter.api.Test
 private val TRACKING_BADGE = BadgeUiModel(
     label = "TRACKING NOW",
     tone = BadgeTone.Neutral,
-    variant = BadgeVariant.TrackingTag,
+    size = BadgeSize.Regular,
 )
 
 private val OWNED_BADGE = BadgeUiModel(
     label = "Owned",
     tone = BadgeTone.Scrim,
-    variant = BadgeVariant.OwnedCover,
+    size = BadgeSize.Regular,
     icon = SoftcoverIcon.Check,
 )
 
 private val SELECTED_MARK = SelectionMarkUiModel(
     selected = true,
-    variant = SelectionMarkVariant.EditionCard,
+    backdrop = SelectionMarkBackdrop.Surface,
 )
 
 class EditionSelectionCollectorTest {

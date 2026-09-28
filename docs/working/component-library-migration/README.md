@@ -14,30 +14,28 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, the S5 chips and headers families, and S5-7 done. `Badge` has a colour-axis
-  `BadgeTone`, an optional icon and surface-named variants; `CoverOverlay` has a placement variant and greys
-  the cover only; new `SelectionMark` (`core/component/selection/`). `deadlineProgressByBook` is gone from
-  library and reading; book_detail's `selectedEditionId` lives in `BookDetailUiState`. S7-1's selection
-  question is answered in `steps/s5-badges.md` § Approved shape. `EditorialSectionHeaderSkeleton` stays for
-  S5-8. 14 files with Apollo alias imports wait on foundation F24.
-- **Next:** S5-C-badges in [`steps/s5-badges.md`](steps/s5-badges.md) (family-procedure.md § Phase 3).
-  Open it with the deadline-trio visual pass that S5-7 still owes (`Badge`, `CoverOverlay`,
-  `DeadlineSummaryLine` in the gallery and on device). Gradle under JBR 21
+- **State:** S0–S4 and the S5 chips, headers and badges families done. `Badge` is `BadgeSize` × `BadgeTone`
+  (5 tones) with pure `BadgeColors`; `CoverOverlay` takes a `CoverOverlayCorner` and derives its inset from
+  the badge size; Explore's rail/series cover badges ride `CoverOverlay`; `SelectionMark` is
+  `SelectionMarkBackdrop` with one size; `DeadlineSummaryLine` lives in `core/component/deadline/`. S7-1's
+  selection answer is recorded in `steps/s7-bookcard.md`. `EditorialSectionHeaderSkeleton` stays for S5-8.
+  14 files with Apollo alias imports wait on foundation F24.
+- **Next:** S5-8 in [`steps/s5-skeletons.md`](steps/s5-skeletons.md) (Phase 1). Gradle under JBR 21
   (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
-  `dispatcherModule`; confirm or move that home in S5-C. Confirm on device that the Arrange / Filter sheets no longer render empty or
-  stale for a frame on open (their headers are now seeded as `UiState` defaults). Eyeball the accepted
-  shifts: S5-6's 4dp eyebrow gap, 1-line titles, reading's mobile masthead line height; S5-C's "Your tabs"
-  tracking (2.2 → 1.2sp) and `FeaturedCard`'s eyebrow gap (10 → 8dp).
-- **Verification:** S5-7 on JBR 21: `styleCheck`, `checkModuleGraph`, `ktlintCheck`, `checkDocBudgets`,
-  `:desktopApp` compile, JVM + Android compiles and `projectHealth` for core:component / core:uibinding /
-  library / reading / book_detail, and their `testAndroidHostTest` passed; reviewer's two findings (badge
-  greyscaled with the cover, plan-today dismissal stale across midnight) fixed. `ktlintCheck` is root-only
-  (`-Pktlint.root=<dir>`). Brief implementers on ≤~10 files; three S5-7 briefs hit the 80-turn limit.
-- **Uncommitted:** all of S5-7, plus the S5-C-headers bookkeeping (Now hash, corrected reviewer memory);
-  one commit.
+  `dispatcherModule`; confirm or move that home. Confirm on device that the Arrange / Filter sheets no longer
+  render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
+  titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
+  `FeaturedCard`'s eyebrow gap (10 → 8dp); the whole badge family in the gallery and on device (never
+  visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
+  cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`.
+- **Verification:** S5-C-badges on JBR 21: `styleCheck`, `checkModuleGraph`, `checkDocBudgets`,
+  `:desktopApp` compile, `projectHealth` and `testAndroidHostTest` for core:component / core:uibinding /
+  library / reading / book_detail / explore passed; reviewer ✅ (two nits fixed). Brief implementers on
+  ≤~15 mostly-mechanical files; split families into sequential slices when they share `GalleryRegistry`.
+- **Uncommitted:** all of S5-C-badges, one commit.
 
 ## Local verification
 
@@ -75,7 +73,7 @@ every sub-step's Verify.
 | S0–S4 | — | module scaffolding through tokens-only designsystem | [x] |
 | S5 | — (chips) | S5-1–S5-3b, S5-C-chips | [x] |
 | S5 | — (headers) | S5-4–S5-6, S5-C-headers | [x] |
-| S5 | [steps/s5-badges.md](steps/s5-badges.md) | S5-7 | [ ] |
+| S5 | — (badges) | S5-7, S5-C-badges | [x] |
 | S5 | [steps/s5-skeletons.md](steps/s5-skeletons.md) | S5-8 | [ ] |
 | S5 | [steps/s5-dividers.md](steps/s5-dividers.md) | S5-9 | [ ] |
 | S6 | [steps/s6-list-rows.md](steps/s6-list-rows.md) | S6-1–S6-2 | [ ] |

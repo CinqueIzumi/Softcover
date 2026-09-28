@@ -2,12 +2,12 @@ package nl.rhaydus.softcover.core.uibinding.deadline
 
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
-import nl.rhaydus.softcover.core.component.badge.BadgeVariant
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayVariant
-import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryTone
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
@@ -58,7 +58,7 @@ class DeadlineMapperTest {
             result shouldBe BadgeUiModel(
                 label = "On track",
                 tone = BadgeTone.PrimaryContainer,
-                variant = BadgeVariant.Standard,
+                size = BadgeSize.Compact,
             )
         }
 
@@ -77,7 +77,7 @@ class DeadlineMapperTest {
             result shouldBe BadgeUiModel(
                 label = "Behind",
                 tone = BadgeTone.ErrorContainer,
-                variant = BadgeVariant.Standard,
+                size = BadgeSize.Compact,
             )
         }
 
@@ -95,8 +95,8 @@ class DeadlineMapperTest {
             // ----- Assert -----
             result shouldBe BadgeUiModel(
                 label = "Expired",
-                tone = BadgeTone.Muted,
-                variant = BadgeVariant.Standard,
+                tone = BadgeTone.Neutral,
+                size = BadgeSize.Compact,
             )
         }
     }
@@ -117,7 +117,7 @@ class DeadlineMapperTest {
             // ----- Assert -----
             result shouldBe CoverOverlayUiModel(
                 badge = subject.toBadgeUiModel(),
-                variant = CoverOverlayVariant.ReadingStatus,
+                corner = CoverOverlayCorner.TopEnd,
                 grayscale = false,
             )
         }
@@ -136,7 +136,7 @@ class DeadlineMapperTest {
             // ----- Assert -----
             result shouldBe CoverOverlayUiModel(
                 badge = subject.toBadgeUiModel(),
-                variant = CoverOverlayVariant.ReadingStatus,
+                corner = CoverOverlayCorner.TopEnd,
                 grayscale = false,
             )
         }
@@ -155,7 +155,7 @@ class DeadlineMapperTest {
             // ----- Assert -----
             result shouldBe CoverOverlayUiModel(
                 badge = subject.toBadgeUiModel(),
-                variant = CoverOverlayVariant.ReadingStatus,
+                corner = CoverOverlayCorner.TopEnd,
                 grayscale = true,
             )
         }

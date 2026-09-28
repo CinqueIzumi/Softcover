@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -36,7 +36,7 @@ internal fun BecauseYouReadSection(
     genrePickerHeader: SectionHeaderUiModel,
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
-    unreleasedBadges: Map<Int, BadgeUiModel>,
+    unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -113,7 +113,7 @@ internal fun BecauseYouReadSection(
                                 .staggeredEntry(coordinator = entry, index = index),
                             book = book,
                             cover = cover,
-                            unreleasedBadge = unreleasedBadges[book.id],
+                            unreleasedCoverOverlay = unreleasedCoverOverlays[book.id],
                             onClick = {
                                 onBookClick(
                                     book,

@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
@@ -92,14 +92,14 @@ internal data class ReadingScreenUiState(
 
     /**
      * Each book's deadline summary line for surfaces painted [nl.rhaydus.softcover.core.component
-     * .badge.DeadlineSummaryTone.OnSurface], mapped off the composition by `DeadlineModelsCollector`
+     * .deadline.DeadlineSummaryTone.OnSurface], mapped off the composition by `DeadlineModelsCollector`
      * (R9) — never by the render.
      */
     val deadlineSummaries: Map<Int, DeadlineSummaryUiModel> = emptyMap(),
 
     /**
      * The featured book's ([books] `.firstOrNull()`) deadline summary line, in the
-     * [nl.rhaydus.softcover.core.component.badge.DeadlineSummaryTone.OnHeroBackdrop] ink for the
+     * [nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone.OnHeroBackdrop] ink for the
      * blurred-cover hero backdrop — the same book as [deadlineSummaries] would key on, but a
      * different UI model, because that surface takes a different ink. Kept as its own field rather
      * than a second map for the same reason [featuredCover] / [featuredBackdropCover] /

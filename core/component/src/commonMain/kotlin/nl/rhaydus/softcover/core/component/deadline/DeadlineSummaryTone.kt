@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.component.badge
+package nl.rhaydus.softcover.core.component.deadline
 
 /**
  * The ink [DeadlineSummaryLine] paints in — a *meaning* (which surface the line sits on), not a flat

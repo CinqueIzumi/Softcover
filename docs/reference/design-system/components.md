@@ -46,8 +46,8 @@ Shared components; a `detail` link opens the family file holding the full contra
 - **Empty state** — `core:component/state` — centred headline-and-body placeholder for missing content.
 - **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — the exception to the wavy-progress rule.
 - **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.
-- **Deadline badge / cover overlay / summary line** — `core:component/badge` — deadline status marks.
-- **Unreleased badge** — [detail](components/states-feedback.md#unreleased-badge) — `Badge`/`Primary` mark for a book not yet out.
+- **Deadline badge / cover overlay / summary line** — `core:component/badge` + `deadline` — deadline marks.
+- **Unreleased badge** — `core:component/badge` — `Primary` tone; resolved in `core:uibinding` `release/`.
 - **Selection mark** — `core:component/selection` — selected-state circle mark for a cover, row or edition card.
 - **Mark-as-read celebration** — `core:component/celebration` — particle-burst on a mark-as-read commit.
 - **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.

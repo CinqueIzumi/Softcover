@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkVariant
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -19,7 +19,7 @@ import nl.rhaydus.toad.ActionScope
 /**
  * Maps [LibraryUiState.selectionMode] and [LibraryUiState.selectedBookIds] to a
  * [SelectionMarkUiModel] per book off the composition (`component-contract.md` § 7.2 R9), keyed
- * by [Book.id] into [LibraryUiState.selectionMarks]. Empty outside selection mode. The variant
+ * by [Book.id] into [LibraryUiState.selectionMarks]. Empty outside selection mode. The backdrop
  * follows [LibraryUiState.gridLayout]: [LibraryGridLayout.LIST_COMPACT] renders a leading row mark,
  * every other layout an on-cover mark.
  */
@@ -43,10 +43,10 @@ internal class SelectionMarksCollector : LibraryCollector {
                     if (snapshot.selectionMode.not()) {
                         persistentMapOf()
                     } else {
-                        val variant = if (snapshot.gridLayout == LibraryGridLayout.LIST_COMPACT) {
-                            SelectionMarkVariant.RowLeading
+                        val backdrop = if (snapshot.gridLayout == LibraryGridLayout.LIST_COMPACT) {
+                            SelectionMarkBackdrop.Surface
                         } else {
-                            SelectionMarkVariant.OnCover
+                            SelectionMarkBackdrop.Image
                         }
 
                         snapshot.booksByTab.values.asSequence()
@@ -54,7 +54,7 @@ internal class SelectionMarksCollector : LibraryCollector {
                             .associate { book ->
                                 book.id to SelectionMarkUiModel(
                                     selected = book.id in snapshot.selectedBookIds,
-                                    variant = variant,
+                                    backdrop = backdrop,
                                 )
                             }
                             .toImmutableMap()

@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.shimmer
-import nl.rhaydus.softcover.core.component.badge.Badge
-import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.CoverOverlay
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -160,7 +160,7 @@ internal fun SeriesCardSkeleton(modifier: Modifier = Modifier) {
  * "Unreleased card"): the same [Cover] every other card uses — real art when the edition has
  * it, the shared monogram fallback when it doesn't (explore-3a feedback item 1: an unreleased book is
  * never keyed off release status for its cover, only off whether art actually resolves) — plus a dated
- * [Badge]. Otherwise it renders exactly like a released [SeriesCard] — same overflow
+ * [CoverOverlay] badge. Otherwise it renders exactly like a released [SeriesCard] — same overflow
  * affordance, series eyebrow, title, and "Book #N" position subline (explore-3a feedback: the
  * "Pre-order" prefix carried no information the series number didn't); only the dated badge differs.
  */
@@ -168,7 +168,7 @@ internal fun SeriesCardSkeleton(modifier: Modifier = Modifier) {
 internal fun UnreleasedSeriesCard(
     book: Book,
     cover: CoverUiModel?,
-    unreleasedBadge: BadgeUiModel?,
+    unreleasedCoverOverlay: CoverOverlayUiModel?,
     onClick: () -> Unit,
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -181,20 +181,10 @@ internal fun UnreleasedSeriesCard(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Cover(
-               model = cover,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            // The dated badge (explore-3a feedback item 8: names the release date, e.g. "Out Sep 2" —
-            // never the generic "Coming soon" a discovery rail's ordinary badge doesn't carry either),
-            // same top-start placement and Standard variant every other unreleased cover uses.
-            if (unreleasedBadge != null) {
-                Badge(
-                    model = unreleasedBadge,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(all = 6.dp),
+            CoverOverlay(model = unreleasedCoverOverlay) {
+                Cover(
+                    model = cover,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 

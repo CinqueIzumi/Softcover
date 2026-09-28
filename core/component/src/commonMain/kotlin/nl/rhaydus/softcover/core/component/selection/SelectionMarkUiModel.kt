@@ -6,44 +6,36 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
- * Everything [SelectionMark] renders: whether the mark reads as selected, and which surface's size
- * and icon size apply — see [SelectionMarkVariant].
+ * Everything [SelectionMark] renders: whether the mark reads as selected, and what it sits over —
+ * see [SelectionMarkBackdrop].
  *
  * @property selected Selected shows a filled circle with a check mark; unselected shows an empty
  * circle with no icon.
- * @property variant Which surface's size/icon size apply — see [SelectionMarkVariant].
+ * @property backdrop What the unselected ring's fill reads against — see [SelectionMarkBackdrop].
  */
 @Immutable
 data class SelectionMarkUiModel(
     val selected: Boolean,
-    val variant: SelectionMarkVariant,
+    val backdrop: SelectionMarkBackdrop,
 ) {
     companion object : UiModelPreviews<SelectionMarkUiModel> {
-        /** Per R5: both anatomy branches — selected and unselected — for every variant. */
+        /** Per R5: both anatomy branches — selected and unselected — for every backdrop. */
         override val previews: ImmutableList<SelectionMarkUiModel> = persistentListOf(
             SelectionMarkUiModel(
                 selected = true,
-                variant = SelectionMarkVariant.OnCover,
+                backdrop = SelectionMarkBackdrop.Image,
             ),
             SelectionMarkUiModel(
                 selected = false,
-                variant = SelectionMarkVariant.OnCover,
+                backdrop = SelectionMarkBackdrop.Image,
             ),
             SelectionMarkUiModel(
                 selected = true,
-                variant = SelectionMarkVariant.RowLeading,
+                backdrop = SelectionMarkBackdrop.Surface,
             ),
             SelectionMarkUiModel(
                 selected = false,
-                variant = SelectionMarkVariant.RowLeading,
-            ),
-            SelectionMarkUiModel(
-                selected = true,
-                variant = SelectionMarkVariant.EditionCard,
-            ),
-            SelectionMarkUiModel(
-                selected = false,
-                variant = SelectionMarkVariant.EditionCard,
+                backdrop = SelectionMarkBackdrop.Surface,
             ),
         )
     }
