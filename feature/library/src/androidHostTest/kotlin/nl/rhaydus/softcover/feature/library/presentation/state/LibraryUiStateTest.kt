@@ -1,6 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentMapOf
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -193,6 +196,69 @@ class LibraryUiStateTest {
 
             // ----- Assert -----
             state.listsSidebarLabel shouldBe SectionHeaderUiModel.Label(eyebrow = "Lists")
+        }
+
+        @Test
+        fun `fallbackMasthead matches MastheadCollector's idle output before it has run`() {
+            // ----- Arrange & Act -----
+            val state = LibraryUiState()
+
+            // ----- Assert -----
+            state.fallbackMasthead shouldBe PageMastheadUiModel(
+                eyebrow = "Refreshing your shelf…",
+                title = "Library",
+                subtitle = "Loading your shelf…",
+            )
+        }
+
+        @Test
+        fun `mastheadRefresh matches MastheadCollector's idle output before it has run`() {
+            // ----- Arrange & Act -----
+            val state = LibraryUiState()
+
+            // ----- Assert -----
+            state.mastheadRefresh shouldBe MastheadRefreshUiModel(
+                label = "Refreshing…",
+                enabled = false,
+            )
+        }
+    }
+
+    @Nested
+    inner class MastheadFor {
+        @Test
+        fun `returns the tab's own masthead when its id is present in mastheads`() {
+            // ----- Arrange -----
+            val readMasthead = PageMastheadUiModel(title = "Read")
+            val state = LibraryUiState(
+                mastheads = persistentMapOf(readTabId to readMasthead),
+            )
+
+            // ----- Act & Assert -----
+            state.mastheadFor(readTabId) shouldBe readMasthead
+        }
+
+        @Test
+        fun `falls back to fallbackMasthead when the tab id is not in mastheads`() {
+            // ----- Arrange -----
+            val fallback = PageMastheadUiModel(title = "Fallback")
+            val state = LibraryUiState(
+                mastheads = persistentMapOf(readTabId to PageMastheadUiModel(title = "Read")),
+                fallbackMasthead = fallback,
+            )
+
+            // ----- Act & Assert -----
+            state.mastheadFor(otherTabId) shouldBe fallback
+        }
+
+        @Test
+        fun `falls back to fallbackMasthead when the tab id is null`() {
+            // ----- Arrange -----
+            val fallback = PageMastheadUiModel(title = "Fallback")
+            val state = LibraryUiState(fallbackMasthead = fallback)
+
+            // ----- Act & Assert -----
+            state.mastheadFor(null) shouldBe fallback
         }
     }
 

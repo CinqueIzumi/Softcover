@@ -8,6 +8,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 - **Search top app bar** — `core:component/topbar` — mobile search chrome.
 - **Section header** — `core:component/header` — region opener in three accent-bar registers.
 - **Page masthead** — `core:component/header` — a page's own title block.
+- **Masthead refresh action** — `core:component/header` — masthead trailing refresh button.
 - **Editorial search field** — [detail](components/navigation.md#editorial-search-field) — persistent inline search pill for editorial headers.
 - **Bottom navigation** — [detail](components/navigation.md#bottom-navigation) — compact-width tab chrome, docked or floating.
 - **Navigation rail** — [detail](components/navigation.md#navigation-rail) — medium-width tab chrome.
@@ -30,7 +31,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 ## Chips
 
 - **Pill chip** — `core:component/chip` — tonal/choice/filled/container/outlined/dashed/spoiler tone + slots.
-- **Expandable flow row** — [detail](components/chips.md#expandable-flow-row) — wrapping chip/tag container that collapses past N lines.
+- **Expandable flow row** — [detail](components/chips.md#expandable-flow-row) — wrapping chip/tag container, collapsing past N lines.
 
 ## Covers
 
@@ -43,13 +44,13 @@ Shared components; a `detail` link opens the family file holding the full contra
 - **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error slot.
 - **Banner** — `core:component/callout` — full-width slide-in chrome reporting a screen-level condition.
 - **Empty state** — `core:component/state` — centred headline-and-body placeholder for missing content.
-- **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — the one exception to the wavy-progress rule.
-- **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — contextual eyebrow copy synced to pull progress.
+- **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — the exception to the wavy-progress rule.
+- **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.
 - **Deadline badge / cover overlay / summary line** — `core:component/badge` — deadline status marks.
-- **Unreleased badge** — [detail](components/states-feedback.md#unreleased-badge) — the `Badge`/`Release` mark for a book not yet out.
+- **Unreleased badge** — [detail](components/states-feedback.md#unreleased-badge) — `Badge`/`Release` mark for a book not yet out.
 - **Mark-as-read celebration** — `core:component/celebration` — particle-burst hero moment for a mark-as-read commit.
 - **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.
-- **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner` + `EmptyState` + `rememberIsOnline()`, offline surfaces.
+- **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner` + `EmptyState` + `rememberIsOnline()`.
 - **Update highlight card** — [detail](components/states-feedback.md#update-highlight-card) — Settings app-update `primaryContainer` callout.
 
 ## Sheets
@@ -65,7 +66,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 ## Statistics
 
 - **Animated stat number** — `core:component/statistic` — renders a numeric stat that tweens in place.
-- **Editorial figure / chart** (feature-local) — [detail](components/statistics.md#editorial-figure--chart) — five hand-drawn monochrome chart shapes.
+- **Editorial figure / chart** (feature-local) — [detail](components/statistics.md#editorial-figure--chart) — five hand-drawn monochrome charts.
 
 ## Share
 
@@ -80,7 +81,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 ## Editorial
 
 - **Drop-cap text** — [detail](components/editorial.md#drop-cap-text) — editorial body prose with a 3-line drop cap.
-- **Editable hero-stat field** — [detail](components/editorial.md#editable-hero-stat-field) — borderless hero-numeral input for progress sheets.
+- **Editable hero-stat field** — [detail](components/editorial.md#editable-hero-stat-field) — hero-numeral input for progress sheets.
 - **Star rating input** — [detail](components/editorial.md#star-rating-input) — the half-star interactive/read-only rating control.
 - **Verdict sheet** — `core:component/verdict` — the combined rating-and-review surface.
 - **Verdict block** — `core:component/verdict` — the book-page rating+review card that opens the verdict sheet.
@@ -91,8 +92,8 @@ Shared components; a `detail` link opens the family file holding the full contra
 
 - **Desktop tooltip** — [detail](components/platform-helpers.md#desktop-tooltip) — hover tooltip on desktop, no-op on touch.
 - **Desktop context menu** — [detail](components/platform-helpers.md#desktop-context-menu) — right-click menu on desktop, no-op on touch.
-- **Haptics helper** — [detail](components/platform-helpers.md#haptics-helper) — the eight-case single entry point for haptic feedback.
-- **Lazy-item mutation animator** — [detail](components/platform-helpers.md#lazy-item-mutation-animator) — animates user-triggered list add/move/remove.
-- **Staggered entry coordinator** — [detail](components/platform-helpers.md#staggered-entry-coordinator) — welcome-moment stagger for carousels/lists.
+- **Haptics helper** — [detail](components/platform-helpers.md#haptics-helper) — eight-case single entry point for haptic feedback.
+- **Lazy-item mutation animator** — [detail](components/platform-helpers.md#lazy-item-mutation-animator) — animates user list add/move/remove.
+- **Staggered entry coordinator** — [detail](components/platform-helpers.md#staggered-entry-coordinator) — welcome stagger for carousels/lists.
 - **Barcode scanner** (feature-owned) — [detail](components/platform-helpers.md#barcode-scanner) — CameraX/ML Kit ISBN-scan surface.
 - **Active reading session** — [detail](components/platform-helpers.md#active-reading-session) — controller behind the peek bar and Focus Mode.

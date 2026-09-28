@@ -12,8 +12,8 @@ The feature-local headers and the foundation `EditorialSectionHeader` collapse o
 |---|---|---|
 | S5-4 | `SectionHeader` / `PageMasthead` design, plus the sidebar labels and the settings page headers | [x] |
 | S5-5 | Section labels and headers across the features | [x] |
-| S5-5b | Every `EditorialSectionHeader` call site onto `SectionHeader` | [ ] |
-| S5-6 | Mastheads and the desktop headers | [ ] |
+| S5-5b | Every `EditorialSectionHeader` call site onto `SectionHeader` | [x] |
+| S5-6 | Mastheads and the desktop headers | [x] |
 | S5-C-headers | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## Approved shape
@@ -48,6 +48,22 @@ The feature-local headers and the foundation `EditorialSectionHeader` collapse o
   component; `InlineAccentLabel` folds onto it, its retry state using `Error`.
 - **Local wrappers composing `SectionHeader`:** `HiddenSuggestionsGroupHeader` (`Inline` + trailing count +
   subline) and `LibraryTabsGroupHeader` (`Label` eyebrow + local rich-text subhead).
+- **S5-6 → `PageMasthead` gains a trailing `actions` content slot** (§ 7.1); the title column takes the
+  remaining width, the slot sits top-end. The masthead stays inert; interaction lives in the slot.
+- **S5-6 → `MastheadRefreshAction(model, onEvent)`** in `header/`: `MastheadRefreshUiModel(label, enabled)`,
+  collector-built, one `Refresh` event. Replaces the three copied desktop Refresh `TextButton`s.
+- **S5-6 → `PageMasthead` title is single-line with ellipsis; eyebrow → title gap becomes 4dp** (accepted shift).
+- **S5-6 → desktop explore / library / reading** compose `PageMasthead(Regular)` + `MastheadRefreshAction` in
+  the slot; explore's scan button stays feature-local in the slot; reading's `StreakStrip` stays below, local.
+- **S5-6 → mobile reading `EditorialHeader` → `ReadingMasthead`** (ends the core-name collision):
+  `PullToRefreshEyebrow` + `PageMasthead(Compact)` + `StreakStrip`; the 32sp line-height override and the added
+  4dp title → subtitle gap are accepted shifts.
+- **S5-6 → stay feature-local:** mobile library `MastheadHeader` (title is the shelf-switcher button, autosize,
+  scroll collapse) and `ProfileHeader` (centred avatar hero, no shared anatomy, § 7.6).
+- **S5-6 → R10:** the library, reading and explore collectors build one stored `PageMastheadUiModel` + a
+  `MastheadRefreshUiModel` (eyebrow refresh swap, `subtitleFor`, `buildSubtitle`, `greetingForNow()` all move
+  out of composition). The mobile library / reading headers read title + subtitle from the same model and keep
+  their own `PullToRefreshEyebrow` base / refreshing strings. No mapper.
 - **Out of the family:** the reading `EditorialHeader` is a masthead and moves to S5-6; `RowLabel` (row
   title) and `SelectionHeader` (selection toolbar) are not headers.
 

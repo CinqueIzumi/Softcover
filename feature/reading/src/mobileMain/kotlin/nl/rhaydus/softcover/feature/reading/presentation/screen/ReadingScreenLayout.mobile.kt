@@ -44,9 +44,9 @@ import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
-import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EditorialHeader
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingMasthead
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
@@ -110,14 +110,10 @@ internal actual fun ReadingScreenLayout(
                                 listState = booksListState,
                                 contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
                             ) {
-                                EditorialHeader(
-                                    bookCount = state.books.size,
-                                    averageProgress = state.books.averageProgress(),
-                                    recentReadingActivity = state.recentReadingActivity,
-                                    streakEnabled = state.streakEnabled,
+                                ReadingMasthead(
+                                    state = state,
                                     onExpandStreak = { showStreakSheet = true },
                                     pullToRefreshState = pullToRefreshState,
-                                    isRefreshing = state.isLoading,
                                 )
                             }
                         }

@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.library.presentation.screen
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -46,13 +44,15 @@ import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
+import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -81,7 +81,6 @@ import nl.rhaydus.softcover.feature.library.presentation.screen.section.BulkRemo
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.EditionList
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.SelectionHeader
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.util.totalPages
 
 /**
  * Desktop Library: a vertical shelf **source list** (the native desktop pattern for switching
@@ -108,25 +107,6 @@ internal actual fun LibraryScreenLayout(
     val haptics = LocalHaptics.current
 
     val currentTab = tabs.firstOrNull { it.id == state.selectedTabId } ?: tabs.firstOrNull()
-
-    val currentTabBooks: List<Book>? = currentTab?.let { tab ->
-        when (tab) {
-            is LibraryContentTab.CustomList -> null
-            is LibraryContentTab.All,
-            is LibraryContentTab.Status,
-                -> state.displayBooksFor(tabId = tab.id)
-        }
-    }
-
-    val currentTabEditions: List<BookEdition>? = currentTab?.let { tab ->
-        when (tab) {
-            is LibraryContentTab.CustomList -> state.displayEditionsFor(tabId = tab.id)
-            else -> null
-        }
-    }
-
-    val currentTabBookCount = currentTabBooks?.size ?: currentTabEditions?.size
-    val currentTabPageCount = currentTabBooks?.totalPages() ?: 0
 
     val selectionBackState = rememberNavigationEventState(NavigationEventInfo.None)
 
@@ -198,14 +178,19 @@ internal actual fun LibraryScreenLayout(
                     },
                 )
             } else {
-                DesktopLibraryHeader(
-                    tabLabel = currentTab?.label,
-                    tab = currentTab,
-                    bookCount = currentTabBookCount,
-                    totalPages = currentTabPageCount,
-                    isRefreshing = state.isLoading,
-                    onRefreshClick = { runAction(OnRefreshAction()) },
-                )
+                PageMasthead(
+                    model = state.mastheadFor(currentTab?.id),
+                    modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp),
+                ) {
+                    MastheadRefreshAction(
+                        model = state.mastheadRefresh,
+                        onEvent = { event ->
+                            when (event) {
+                                MastheadRefreshEvent.Refresh -> runAction(OnRefreshAction())
+                            }
+                        },
+                    )
+                }
 
                 // Search is persistent (no toggle) per the redesign.
                 Spacer(modifier = Modifier.height(4.dp))
@@ -485,68 +470,6 @@ private fun ShelfSidebarRow(
             ),
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
         )
-    }
-}
-
-@Composable
-private fun DesktopLibraryHeader(
-    tabLabel: String?,
-    tab: LibraryContentTab?,
-    bookCount: Int?,
-    totalPages: Int,
-    isRefreshing: Boolean,
-    onRefreshClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 24.dp, end = 12.dp, top = 16.dp),
-        verticalAlignment = Alignment.Top,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = if (isRefreshing) "Refreshing your shelf…" else "Your collection",
-                style = MaterialTheme.editorialTypography.eyebrow,
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = tabLabel ?: "Library",
-                style = MaterialTheme.editorialTypography.pageTitle,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(end = 16.dp),
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = subtitleFor(
-                    tab = tab,
-                    bookCount = bookCount,
-                    totalPages = totalPages,
-                ),
-                style = MaterialTheme.editorialTypography.body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(end = 16.dp),
-            )
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            TextButton(
-                onClick = onRefreshClick,
-                enabled = isRefreshing.not(),
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                Text(text = if (isRefreshing) "Refreshing…" else "Refresh")
-            }
-        }
     }
 }
 

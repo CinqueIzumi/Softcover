@@ -214,12 +214,11 @@ internal actual fun LibraryScreenLayout(
                     },
                 )
             } else {
-                val currentTabStats = currentTab?.let { tab -> state.tabStatsFor(tabId = tab.id) }
+                val masthead = state.mastheadFor(currentTab?.id)
 
                 MastheadHeader(
-                    tab = currentTab,
-                    bookCount = currentTabStats?.itemCount,
-                    totalPages = currentTabStats?.totalPages ?: 0,
+                    title = masthead.title,
+                    subtitle = masthead.subtitle.orEmpty(),
                     pullToRefreshState = pullToRefreshState,
                     isRefreshing = state.isLoading,
                     topAppBarState = topAppBarState,

@@ -54,7 +54,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
-import nl.rhaydus.softcover.feature.reading.presentation.screen.greetingForNow
+import nl.rhaydus.softcover.feature.reading.presentation.collector.greetingForNow
 
 /**
  * The single full-card blurred-cover backdrop, restored to the pre-redesign treatment: ONE

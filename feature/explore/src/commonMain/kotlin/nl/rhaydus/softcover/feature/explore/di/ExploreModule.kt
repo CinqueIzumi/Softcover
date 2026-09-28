@@ -46,6 +46,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichMetadat
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ExploreCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.FeaturedUpcomingReleaseCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.HiddenSuggestionsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.MastheadCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodChipsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTagsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueriesCollector
@@ -112,6 +113,8 @@ val exploreModule = module {
     factory { QueriedBooksHasMoreCollector() } bind ExploreCollector::class
 
     factory { SearchResultsHeaderCollector() } bind ExploreCollector::class
+
+    factory { MastheadCollector() } bind ExploreCollector::class
 
     factory { TrendingBooksCollector() } bind ExploreCollector::class
 

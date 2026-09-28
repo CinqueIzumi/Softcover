@@ -1,0 +1,75 @@
+package nl.rhaydus.softcover.feature.library.presentation.collector
+
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toImmutableMap
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTabStats
+import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
+import nl.rhaydus.softcover.feature.library.presentation.util.formatPageCount
+
+internal data class MastheadSnapshot(
+    val visibleTabs: List<LibraryTab>,
+    val tabStatsByTab: Map<String, LibraryTabStats>,
+    val isLoading: Boolean,
+) {
+    fun mastheads(): ImmutableMap<String, PageMastheadUiModel> = visibleTabs.associate { tab ->
+        val stats = tabStatsByTab.getValue(tab.id)
+
+        tab.id to PageMastheadUiModel(
+            eyebrow = eyebrow(),
+            title = tab.label,
+            subtitle = subtitleFor(
+                tab = tab,
+                bookCount = stats.itemCount,
+                totalPages = stats.totalPages,
+            ),
+        )
+    }.toImmutableMap()
+
+    fun fallbackMasthead(): PageMastheadUiModel = PageMastheadUiModel(
+        eyebrow = eyebrow(),
+        title = "Library",
+        subtitle = subtitleFor(
+            tab = null,
+            bookCount = null,
+            totalPages = 0,
+        ),
+    )
+
+    fun refresh(): MastheadRefreshUiModel = mastheadRefreshFor(isLoading = isLoading)
+
+    private fun eyebrow(): String = if (isLoading) "Refreshing your shelf…" else "Your collection"
+}
+
+internal fun mastheadRefreshFor(isLoading: Boolean): MastheadRefreshUiModel = MastheadRefreshUiModel(
+    label = if (isLoading) "Refreshing…" else "Refresh",
+    enabled = isLoading.not(),
+)
+
+/** `null` [bookCount] means there is no tab to report stats for (the pre-[visibleTabs] cold start). */
+private fun subtitleFor(
+    tab: LibraryTab?,
+    bookCount: Int?,
+    totalPages: Int,
+): String {
+    if (bookCount == null) return "Loading your shelf…"
+    if (bookCount == 0) {
+        return when {
+            tab is LibraryTab.Status && tab.status == UserBookStatus.READ ->
+                "Nothing finished yet — the page is still open."
+            tab is LibraryTab.Status && tab.status == UserBookStatus.WANT_TO_READ ->
+                "No titles set aside — discover one next."
+            tab is LibraryTab.Status && tab.status == UserBookStatus.CURRENTLY_READING ->
+                "No book open — pick one up."
+            else -> "No titles yet — your story starts here."
+        }
+    }
+
+    val titlesPart = formatBookCount(count = bookCount)
+    val pagesPart = formatPageCount(pages = totalPages)
+
+    return if (pagesPart != null) "$titlesPart · $pagesPart" else titlesPart
+}

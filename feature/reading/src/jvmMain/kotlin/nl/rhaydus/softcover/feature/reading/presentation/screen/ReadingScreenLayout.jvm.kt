@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.reading.presentation.screen
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -23,18 +19,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
+import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
@@ -92,13 +87,9 @@ internal actual fun ReadingScreenLayout(
                     state.books.isNotEmpty() -> {
                         Column(modifier = Modifier.fillMaxSize()) {
                             DesktopReadingHeader(
-                                bookCount = state.books.size,
-                                averageProgress = state.books.averageProgress(),
-                                recentReadingActivity = state.recentReadingActivity,
-                                streakEnabled = state.streakEnabled,
-                                isRefreshing = state.isLoading,
+                                state = state,
+                                runAction = runAction,
                                 onExpandStreak = { showStreakSheet = true },
-                                onRefreshClick = { runAction(RefreshAction) },
                             )
 
                             DesktopReadingContent(
@@ -240,70 +231,31 @@ private fun DesktopReadingContent(
 
 @Composable
 private fun DesktopReadingHeader(
-    bookCount: Int,
-    averageProgress: Float?,
-    recentReadingActivity: List<ReadingDayActivity>,
-    streakEnabled: Boolean,
-    isRefreshing: Boolean,
+    state: ReadingScreenUiState,
+    runAction: (ReadingAction) -> Unit,
     onExpandStreak: () -> Unit,
-    onRefreshClick: () -> Unit,
 ) {
-    val greeting = remember { greetingForNow() }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 24.dp, end = 12.dp, top = 16.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (isRefreshing) "Catching up on your reading…" else "Now reading",
-                    style = MaterialTheme.editorialTypography.eyebrow,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = greeting,
-                    style = MaterialTheme.editorialTypography.pageTitle,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(end = 16.dp),
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = buildSubtitle(
-                        bookCount = bookCount,
-                        averageProgress = averageProgress,
-                    ),
-                    style = MaterialTheme.editorialTypography.body,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(end = 16.dp),
-                )
-            }
-
-            TextButton(
-                onClick = onRefreshClick,
-                enabled = isRefreshing.not(),
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                Text(text = if (isRefreshing) "Refreshing…" else "Refresh")
-            }
+        PageMasthead(model = state.masthead) {
+            MastheadRefreshAction(
+                model = state.mastheadRefresh,
+                onEvent = {
+                    when (it) {
+                        MastheadRefreshEvent.Refresh -> runAction(RefreshAction)
+                    }
+                },
+            )
         }
 
-        if (streakEnabled && recentReadingActivity.isNotEmpty()) {
+        if (state.streakEnabled && state.recentReadingActivity.isNotEmpty()) {
             Spacer(modifier = Modifier.height(14.dp))
 
             StreakStrip(
-                activity = recentReadingActivity,
+                activity = state.recentReadingActivity,
                 onClick = onExpandStreak,
             )
         }

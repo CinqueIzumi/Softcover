@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.explore.presentation.state
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -57,6 +59,16 @@ internal data class ExploreScreenUiState(
         headline = "Up next in your series",
     ),
     val continueSeriesEntries: List<ContinueSeriesEntryUiModel> = emptyList(),
+    /** The desktop masthead and its refresh action, derived off [isRefreshing] by `MastheadCollector` (R9). */
+    val masthead: PageMastheadUiModel = PageMastheadUiModel(
+        eyebrow = "Discover",
+        title = "Explore",
+        subtitle = "Trending books, the next in your series, and anything you search for.",
+    ),
+    val mastheadRefresh: MastheadRefreshUiModel = MastheadRefreshUiModel(
+        label = "Refresh",
+        enabled = true,
+    ),
     val searchText: String = "",
     /** The search chrome, derived off the four fields below by `SearchTopBarCollector` (R9). */
     val searchTopBar: SearchTopBarUiModel = SearchTopBarUiModel(

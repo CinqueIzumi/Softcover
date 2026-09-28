@@ -20,7 +20,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.DesktopDiscovery
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.DesktopExploreHeader
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.DesktopSearchResults
@@ -79,8 +78,9 @@ internal actual fun ExploreScreenLayout(
             },
     ) {
         DesktopExploreHeader(
-            isRefreshing = state.isRefreshing,
-            onRefreshClick = { runAction(OnRefreshAction) },
+            masthead = state.masthead,
+            refresh = state.mastheadRefresh,
+            runAction = runAction,
             onScanClick = onScanClick,
         )
 

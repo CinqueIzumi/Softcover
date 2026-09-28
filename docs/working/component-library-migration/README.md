@@ -14,24 +14,25 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, S5-1–S5-3b, S5-C-chips, S5-4 (`498948c2`) and S5-5 (`1726f730`) done. Every
-  feature section label is on `SectionHeader`; `Label` takes `letterSpacing` and `tone`
-  (`SectionHeaderTone` has `Accent` / `Error` / `Muted`). 14 files with Apollo alias imports wait on
-  foundation F24.
-- **Next:** S5-5b in [`steps/s5-headers.md`](steps/s5-headers.md) § S5-5b — `git grep` every
-  `EditorialSectionHeader(` call in `feature/`, `core/`, `app/src/debug` (~40) and brief
-  `softcover-implementer` to move them onto `SectionHeader.Section`. Tell it to diff each old call's
-  styling (letter-spacing, colour, padding) and check `Section`'s `fillMaxWidth` inside `Row`s with a
-  trailing sibling (use `weight(1f)`). Gradle under JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S0–S4, S5-1–S5-3b, S5-C-chips, S5-4–S5-6 done (S5-6 uncommitted). The desktop explore /
+  library / reading headers and reading's mobile `ReadingMasthead` compose `PageMasthead` (+ its new
+  `actions` slot and `MastheadRefreshAction`); per-feature `MastheadCollector`s write every masthead model.
+  Library mobile `MastheadHeader` and `ProfileHeader` stay feature-local. `EditorialSectionHeaderSkeleton`
+  stays for S5-8. 14 files with Apollo alias imports wait on foundation F24.
+- **Next:** S5-C-headers in [`steps/s5-headers.md`](steps/s5-headers.md) — the convergence pass over
+  `SectionHeader` / `PageMasthead` / `MastheadRefreshAction` (family-procedure.md § Phase 3). Gradle under
+  JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
-- **Open questions:** none. Check on device whether the Arrange / Filter sheet chip rows render empty or
-  stale for a frame on open; if visible, seed them in the open action.
-- **Verification:** S5-5 on JBR 21: `styleCheck`, `ktlintCheck`, `checkDocBudgets` passed; all new
-  header tests pass (`:app` has a JUnit 5 `testDebug` set, run via `:app:testDebugUnitTest`);
-  `softcover-reviewer` ✅. Keep reviewer scopes to ~15 files — a whole-stage scope stalled / hit its
-  turn limit.
-- **Uncommitted:** this `## Now` block only.
+- **Open questions:** none. Confirm on device that the Arrange / Filter sheets no longer render empty or
+  stale for a frame on open (their headers are now seeded as `UiState` defaults). Eyeball the S5-6
+  accepted shifts: 4dp eyebrow gap, 1-line titles, and reading's mobile masthead line height.
+- **Verification:** S5-6 on JBR 21: core:component / explore / library / reading / settings JVM + Android
+  compiles, `:desktopApp` compile, `ktlintCheck`, `styleCheck`, `checkDocBudgets`, `checkModuleGraph`
+  passed; new header, masthead-collector, `ReadingHeaderCopy` and `LibraryUiState` tests pass; reviewer ✅
+  after one fix round. Brief implementers on ≤~12 files each — the library slice (8 files + collector)
+  still hit the 80-turn limit once.
+- **Uncommitted:** all of S5-6, plus the S5-5b tick and `## Now` update carried from the last session.
 
 ## Local verification
 

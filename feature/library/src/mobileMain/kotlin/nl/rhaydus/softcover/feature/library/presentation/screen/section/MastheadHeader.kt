@@ -29,15 +29,12 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
-import nl.rhaydus.softcover.feature.library.presentation.screen.subtitleFor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MastheadHeader(
-    tab: LibraryContentTab?,
-    bookCount: Int?,
-    totalPages: Int,
+    title: String,
+    subtitle: String,
     pullToRefreshState: PullToRefreshState,
     isRefreshing: Boolean,
     topAppBarState: TopAppBarState,
@@ -104,7 +101,7 @@ internal fun MastheadHeader(
                     verticalAlignment = Alignment.Top,
                 ) {
                     Text(
-                        text = tab?.label ?: "Library",
+                        text = title,
                         style = MaterialTheme.editorialTypography.pageTitle,
                         color = MaterialTheme.colorScheme.onSurface,
                         autoSize = TextAutoSize.StepBased(
@@ -133,12 +130,6 @@ internal fun MastheadHeader(
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
-
-                val subtitle = subtitleFor(
-                    tab = tab,
-                    bookCount = bookCount,
-                    totalPages = totalPages,
-                )
 
                 Text(
                     text = subtitle,

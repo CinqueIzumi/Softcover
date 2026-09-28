@@ -1,9 +1,13 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -17,6 +21,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.feature.library.presentation.collector.mastheadRefreshFor
 import nl.rhaydus.toad.UiState
 
 internal data class LibraryUiState(
@@ -163,6 +168,24 @@ internal data class LibraryUiState(
      */
     val tabStatsByTab: Map<String, LibraryTabStats> = emptyMap(),
 
+    /**
+     * Masthead copy per visible tab, mapped by `MastheadCollector` off each tab's stats and
+     * [isLoading]. Resolve through [mastheadFor] rather than indexing directly — a tab id absent
+     * here (cold start, before `VisibleTabsCollector` populates [visibleTabs]) falls back to
+     * [fallbackMasthead].
+     */
+    val mastheads: ImmutableMap<String, PageMastheadUiModel> = persistentMapOf(),
+
+    /** [mastheadFor]'s result when there is no tab yet, mapped by `MastheadCollector` off [isLoading]. */
+    val fallbackMasthead: PageMastheadUiModel = PageMastheadUiModel(
+        eyebrow = "Refreshing your shelf…",
+        title = "Library",
+        subtitle = "Loading your shelf…",
+    ),
+
+    /** The masthead's trailing refresh action, mapped by `MastheadCollector` off [isLoading]. */
+    val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = true),
+
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
@@ -278,6 +301,8 @@ internal data class LibraryUiState(
             itemCount = 0,
             totalPages = 0,
         )
+
+    fun mastheadFor(tabId: String?): PageMastheadUiModel = tabId?.let(mastheads::get) ?: fallbackMasthead
 
     /**
      * Resolves [bookIds] (defaulting to the current [selectedBookIds]) to the underlying [Book]

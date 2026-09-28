@@ -40,6 +40,8 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.cover.CoverlessTitleCover
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
@@ -180,6 +182,30 @@ object GalleryRegistry {
             content = { model, modifier ->
                 PageMasthead(
                     model = model,
+                    modifier = modifier,
+                ) {
+                    if (model.eyebrow == null && model.size == PageMastheadSize.Regular) {
+                        MastheadRefreshAction(
+                            model = MastheadRefreshUiModel(
+                                label = "Refresh",
+                                enabled = true,
+                            ),
+                            onEvent = {},
+                        )
+                    }
+                }
+            },
+        ),
+        galleryEntry(
+            name = "MastheadRefreshAction",
+            family = GalleryFamily.HEADER,
+            blurb = "A masthead's trailing text action — the desktop headers' refresh control.",
+            previews = MastheadRefreshUiModel,
+            label = { model -> if (model.enabled) "Idle" else "Refreshing" },
+            content = { model, modifier ->
+                MastheadRefreshAction(
+                    model = model,
+                    onEvent = {},
                     modifier = modifier,
                 )
             },

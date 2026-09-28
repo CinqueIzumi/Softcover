@@ -117,6 +117,7 @@ component/
 + gallery/     GalleryRegistry  GalleryEntry  GalleryFamily
 +              GalleryFixture  UiModelPreviews
 + header/      SectionHeader  PageMasthead
++              MastheadRefreshAction(+UiModel, +Event)
 + lists/       ChooseListsBottomSheet  ChooseListsUiModel/RowUiModel
 +              ChooseListsVariant  ChooseListsEvent  ListMembership
 + progress/    UpdateProgressBottomSheet  ProgressSheetUiModel

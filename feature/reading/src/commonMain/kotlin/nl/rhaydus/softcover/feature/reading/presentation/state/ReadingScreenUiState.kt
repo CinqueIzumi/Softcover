@@ -3,6 +3,9 @@ package nl.rhaydus.softcover.feature.reading.presentation.state
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
+import nl.rhaydus.softcover.core.component.header.PageMastheadSize
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
@@ -13,6 +16,8 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
+import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadEyebrowFor
+import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadRefreshFor
 import nl.rhaydus.toad.UiState
 
 internal data class ReadingScreenUiState(
@@ -105,4 +110,24 @@ internal data class ReadingScreenUiState(
      * [featuredBookPace] are their own fields rather than keyed off [books].
      */
     val featuredDeadlineSummary: DeadlineSummaryUiModel? = null,
+
+    /**
+     * The desktop masthead's eyebrow, greeting title and subtitle, mapped off the composition by
+     * `MastheadCollector` (R9/R10) from [books] and [isLoading] — never by the render.
+     */
+    val masthead: PageMastheadUiModel = PageMastheadUiModel(
+        eyebrow = mastheadEyebrowFor(isLoading = true),
+        title = "Good morning.",
+        subtitle = "0 titles in motion",
+    ),
+
+    /** The same greeting and subtitle at [PageMastheadSize.Compact], for the mobile header. */
+    val compactMasthead: PageMastheadUiModel = PageMastheadUiModel(
+        title = "Good morning.",
+        subtitle = "0 titles in motion",
+        size = PageMastheadSize.Compact,
+    ),
+
+    /** [masthead]'s trailing refresh action label and enabled state, tracking [isLoading]. */
+    val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = true),
 ) : UiState
