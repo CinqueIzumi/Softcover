@@ -14,14 +14,16 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, the S5 chips, headers and badges families, and S5-8 done. `Skeleton` +
+- **State:** S0–S4, the S5 chips, headers and badges families, S5-8 and S5-9 done. `Divider` +
+  `DividerUiModel(DividerVariant)` (sealed, 5 surface-named entries) live in `core/component/divider/`
+  (gallery family `DIVIDER`); `ReadingLifeShareCardBody` uses a file-level model. `Skeleton` +
   `SkeletonUiModel(SkeletonVariant)` (7 surface-named entries) live in `core/component/state/`; the models
   are stored on `ExploreScreenUiState` / `RoadmapUiState`. The mood tile's 104dp min height has one home,
   `core/component/bookcard/MoodTileDimensions` (folds into `BookCard`'s `Tile` metrics in S7-4). S7-1's
   selection answer is recorded in `steps/s7-bookcard.md`. 14 files with Apollo alias imports wait on
   foundation F24.
-- **Next:** S5-9 Phase 2 in [`steps/s5-dividers.md`](steps/s5-dividers.md) (shape approved and recorded),
-  then S5-C-skeletons and S5-C-dividers. Gradle under JBR 21
+- **Next:** S5-C-skeletons in [`steps/s5-skeletons.md`](steps/s5-skeletons.md), then S5-C-dividers in
+  [`steps/s5-dividers.md`](steps/s5-dividers.md) (family-procedure.md § Phase 3). Gradle under JBR 21
   (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
@@ -32,12 +34,13 @@ checkboxes in step with `## Steps` and `## Gates` here.
   `FeaturedCard`'s eyebrow gap (10 → 8dp); the whole badge family in the gallery and on device (never
   visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
   cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`.
-- **Verification:** S5-8 on JBR 21: `styleCheck`, `ktlintCheck`, `checkModuleGraph`, `checkDocBudgets`,
-  `:desktopApp` compile, `projectHealth` and `testAndroidHostTest` for core:component / explore / settings
-  passed; new skeleton tests pass; reviewer's two findings (missing `components.md` line, duplicated
-  mood-tile height) fixed. The S5-8 implementer hit its turn limit twice — brief S5-9 tighter. Split
-  families into sequential slices when they share `GalleryRegistry`.
-- **Uncommitted:** all of S5-8 (on top of `c1bdf7a2`).
+- **Verification:** S5-9 on JBR 21: compile for core:component / settings / lists / onboarding /
+  desktopApp / `:app:compileDebugKotlin`, `checkModuleGraph`, four `projectHealth`, `checkDocBudgets`,
+  `ktlintCheck`, `styleCheck`, four `testAndroidHostTest` passed; 7 new divider tests pass; reviewer's one
+  finding (merged preview-tile lines in `components.md`) fixed. `components.md` sits at its 8192B budget —
+  every new index line now costs a trim. Implementers hit the 80-turn limit on both S5-8 and S5-9; resume
+  them with an explicit remaining-work list.
+- **Uncommitted:** all of S5-9 (S5-8 is `2a4c16f8`).
 
 ## Local verification
 

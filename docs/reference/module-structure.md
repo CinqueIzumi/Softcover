@@ -115,6 +115,7 @@ component/
 +              CoverDimensions  CoverlessTitleCover  MonogramCoverMetrics
 + deadline/    DeadlineSummaryLine(+UiModel, +Tone)
 + dialog/      SoftcoverDatePickerDialog  PickerDates (internal)   — owes R1
++ divider/     Divider  DividerUiModel/Variant
 + gallery/     GalleryRegistry  GalleryEntry  GalleryFamily
 +              GalleryFixture  UiModelPreviews
 + header/      SectionHeader  PageMasthead

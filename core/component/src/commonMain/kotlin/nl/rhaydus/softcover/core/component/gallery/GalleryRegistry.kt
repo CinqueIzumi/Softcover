@@ -41,6 +41,9 @@ import nl.rhaydus.softcover.core.component.cover.CoverlessTitleCover
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.divider.DividerVariant
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
@@ -269,6 +272,20 @@ object GalleryRegistry {
             label = ::bannerFixtureLabel,
             content = { model, modifier ->
                 Banner(
+                    model = model,
+                    modifier = modifier,
+                )
+            },
+        ),
+        galleryEntry(
+            name = "Divider",
+            family = GalleryFamily.DIVIDER,
+            blurb = "A hairline rule; anatomy and ink resolve per call site, from a plain row " +
+                "break to a labelled or glyph-broken one.",
+            previews = DividerUiModel,
+            label = ::dividerFixtureLabel,
+            content = { model, modifier ->
+                Divider(
                     model = model,
                     modifier = modifier,
                 )
@@ -538,6 +555,14 @@ private fun searchTopBarFixtureLabel(model: SearchTopBarUiModel): String = when 
 /** Names what a [BannerUiModel] fixture demonstrates — its tone is its anatomy. */
 private fun bannerFixtureLabel(model: BannerUiModel): String =
     model.tone.name.lowercase().replaceFirstChar(Char::uppercase)
+
+private fun dividerFixtureLabel(model: DividerUiModel): String = when (model.variant) {
+    DividerVariant.DebugRoutesRow -> "Debug routes row"
+    DividerVariant.ReadingLifeShareCard -> "Reading life share card"
+    DividerVariant.SettingsRoadmap -> "Settings roadmap"
+    DividerVariant.CreateListQuote -> "Create list quote"
+    is DividerVariant.OnboardingOrTypeIt -> "Onboarding label"
+}
 
 /** Names what a [StatNumberUiModel] fixture demonstrates — its format, which is its anatomy. */
 private fun statNumberFixtureLabel(model: StatNumberUiModel): String = when (model.format) {

@@ -8,7 +8,7 @@
 
 | Sub | Scope | Status |
 |---|---|---|
-| S5-9 | All five divider declarations | [ ] |
+| S5-9 | All five divider declarations | [x] |
 | S5-C-dividers | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## Approved shape

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
@@ -54,7 +55,7 @@ private const val URL_ANNOTATION_TAG = "url"
  * public roadmap ([RoadmapDocument]) as an editorial spread rather than raw markdown, from
  * [RoadmapUiState.renderUnits]: headings shaped `## 3.2.0: Title` split into an eyebrow + headline
  * through [SectionHeader], consecutive bullet/ordered items grouped into one hanging-indent list per
- * run, a hairline [HorizontalBreak] for
+ * run, a hairline [Divider] for
  * `---`, and the file's blockquote as a quiet accent-bar aside. [SkeletonCrossfade] carries the
  * ~150ms handoff from [RoadmapUiState.isLoading]'s skeleton to the loaded body; a
  * [RoadmapUiState.roadmapError] renders *above* a document that is already on screen (a
@@ -107,6 +108,7 @@ private fun RoadmapLoadedBody(
                 document = document,
                 renderUnits = state.renderUnits,
                 lastUpdatedText = state.lastUpdatedText,
+                thematicBreakDivider = state.thematicBreakDivider,
                 openUrl = openUrl,
             )
         } else if (state.roadmapError != null) {
@@ -136,6 +138,7 @@ private fun RoadmapDocumentBody(
     document: RoadmapDocument,
     renderUnits: List<RoadmapRenderUnit>,
     lastUpdatedText: String?,
+    thematicBreakDivider: DividerUiModel,
     openUrl: (String) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -157,6 +160,7 @@ private fun RoadmapDocumentBody(
 
             RoadmapUnitContent(
                 unit = unit,
+                thematicBreakDivider = thematicBreakDivider,
                 openUrl = openUrl,
             )
         }
@@ -191,6 +195,7 @@ private fun RoadmapRenderUnit.leadingSpacing() = when (this) {
 @Composable
 private fun RoadmapUnitContent(
     unit: RoadmapRenderUnit,
+    thematicBreakDivider: DividerUiModel,
     openUrl: (String) -> Unit,
 ) {
     when (unit) {
@@ -217,7 +222,7 @@ private fun RoadmapUnitContent(
             openUrl = openUrl,
         )
 
-        RoadmapRenderUnit.ThematicBreak -> HorizontalBreak()
+        RoadmapRenderUnit.ThematicBreak -> Divider(model = thematicBreakDivider)
     }
 }
 
@@ -308,14 +313,6 @@ private fun RoadmapBlockQuote(
             style = MaterialTheme.editorialTypography.body.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
         )
     }
-}
-
-@Composable
-private fun HorizontalBreak() {
-    HorizontalDivider(
-        color = MaterialTheme.colorScheme.outlineVariant,
-        thickness = 1.dp,
-    )
 }
 // endregion
 // region Spans

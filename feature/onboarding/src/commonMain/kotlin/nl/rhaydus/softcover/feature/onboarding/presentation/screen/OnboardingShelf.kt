@@ -41,6 +41,7 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
@@ -123,7 +124,7 @@ internal fun ApiKeyEntryContent(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        OrTypeItDivider()
+        Divider(model = state.orTypeItDivider)
 
         Spacer(modifier = Modifier.height(18.dp))
 
@@ -231,35 +232,6 @@ private fun PasteFromClipboardRow(onClick: () -> Unit) {
             contentDescription = arrowIcon.contentDescription,
             modifier = Modifier.size(20.dp),
             tint = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
-    }
-}
-
-@Composable
-private fun OrTypeItDivider() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.outlineVariant,
-        )
-
-        Text(
-            text = "Or type it".uppercase(),
-            style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
-                fontSize = 10.sp,
-                lineHeight = 14.sp,
-                letterSpacing = 2.sp,
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 12.dp),
-        )
-
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.outlineVariant,
         )
     }
 }

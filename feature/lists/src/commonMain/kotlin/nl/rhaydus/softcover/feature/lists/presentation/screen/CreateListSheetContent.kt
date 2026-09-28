@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -55,6 +54,7 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
@@ -123,7 +123,7 @@ internal fun CreateListSheetContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        QuoteRule()
+        Divider(model = state.quoteDivider)
 
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -161,44 +161,6 @@ internal fun CreateListSheetContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .pointerHandCursor(),
-        )
-    }
-}
-
-/**
- * The full-width hairline broken in the centre by a low-alpha quote glyph — replaces the usual
- * accent-bar-led eyebrow for this sheet's title-page composition. The glyph's `lineHeight` is pinned
- * to its `fontSize` (rather than inheriting `quoteGlyph`'s display-scale line box) so the rule stays a
- * thin row instead of reserving a whole display line; the residual baseline offset is corrected with
- * the `y` nudge below.
- */
-@Composable
-private fun QuoteRule(modifier: Modifier = Modifier) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            thickness = 1.dp,
-            modifier = Modifier.weight(1f),
-        )
-
-        Text(
-            text = "“",
-            style = MaterialTheme.editorialTypography.quoteGlyph.copy(
-                fontSize = 40.sp,
-                lineHeight = 40.sp,
-            ),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
-            modifier = Modifier.offset(y = 6.dp),
-        )
-
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            thickness = 1.dp,
-            modifier = Modifier.weight(1f),
         )
     }
 }

@@ -19,12 +19,12 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 ## Buttons & controls
 
-- **Button** — [detail](components/buttons-controls.md#button) — five styles/sizes; filled is the one primary per region.
+- **Button** — [detail](components/buttons-controls.md#button) — five styles/sizes; filled is one primary per region.
 - **Toggle button / icon toggle button** — [detail](components/buttons-controls.md#toggle-buttons) — shape-morph active state.
 - **Split button** — [detail](components/buttons-controls.md#split-button) — primary action with a chevron menu of variants.
-- **Theme preview tile** — `core:component/control` — miniature-page choice control for the theme picker.
-- **Preview tile frame** — `core:component/control` — the tiles' internal frame primitives.
-- **Colour palette preview tile** — `core:component/control` — miniature-page choice control for the spine-colour picker.
+- **Theme preview tile** — `core:component/control` — mini-page theme choice.
+- **Colour palette preview tile** — `core:component/control` — mini-page spine-colour choice.
+- **Preview tile frame** — `core:component/control` — tiles' internal frame primitives.
 - **Bookmark toggle** — [detail](components/buttons-controls.md#bookmark-toggle) — inline add/remove-library row control.
 - **Swipe row actions** — [detail](components/buttons-controls.md#swipe-row-actions) — swipe-to-mark-as-read / swipe-to-remove.
 
@@ -44,7 +44,8 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error.
 - **Banner** — `core:component/callout` — full-width slide-in chrome for a screen-level condition.
 - **Empty state** — `core:component/state` — centred headline-and-body placeholder for missing content.
-- **Skeleton** — `core:component/state` — per-surface shimmer placeholder mirroring each loading section's anatomy.
+- **Skeleton** — `core:component/state` — per-surface shimmer placeholder matching its loaded footprint.
+- **Divider** — `core:component/divider` — per-surface hairline rule, bare or labelled.
 - **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — exception to the wavy-progress rule.
 - **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.
 - **Deadline badge / cover overlay / summary line** — `core:component/badge` + `deadline` — deadline marks.
@@ -77,7 +78,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 ## Rich text
 
 - **Clickable text** — `core:component/richtext` — prose with a tappable substring resolved to a link event.
-- **Rich text** — `core:component/richtext` — the read-only renderer for formatted, spoiler-maskable prose.
+- **Rich text** — `core:component/richtext` — read-only renderer for formatted, spoiler-maskable prose.
 - **Rich-text formatting toolbar** — `core:component/control` — bold/italic/spoiler control row inside `VerdictSheet`.
 
 ## Editorial
@@ -85,9 +86,9 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Drop-cap text** — [detail](components/editorial.md#drop-cap-text) — body prose with a 3-line drop cap.
 - **Editable hero-stat field** — [detail](components/editorial.md#editable-hero-stat-field) — hero-numeral input for progress sheets.
 - **Star rating input** — [detail](components/editorial.md#star-rating-input) — half-star interactive/read-only rating control.
-- **Verdict sheet** — `core:component/verdict` — the combined rating-and-review surface.
-- **Verdict block** — `core:component/verdict` — the book-page rating+review card that opens the verdict sheet.
-- **Personal review section** — [detail](components/editorial.md#personal-review-section) — book-detail entry point to the review editor.
+- **Verdict sheet** — `core:component/verdict` — combined rating-and-review surface.
+- **Verdict block** — `core:component/verdict` — book-page rating+review card that opens the verdict sheet.
+- **Personal review section** — [detail](components/editorial.md#personal-review-section) — book-detail entry point to review editor.
 - **Browse-by-mood grid** (feature-owned) — [detail](components/editorial.md#browse-by-mood-grid) — 2-column mood-tile grid.
 
 ## Platform helpers
@@ -98,4 +99,4 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Lazy-item mutation animator** — [detail](components/platform-helpers.md#lazy-item-mutation-animator) — animates list add/move/remove.
 - **Staggered entry coordinator** — [detail](components/platform-helpers.md#staggered-entry-coordinator) — stagger for carousels/lists.
 - **Barcode scanner** (feature-owned) — [detail](components/platform-helpers.md#barcode-scanner) — CameraX/ML Kit ISBN-scan surface.
-- **Active reading session** — [detail](components/platform-helpers.md#active-reading-session) — controller behind the peek bar and Focus Mode.
+- **Active reading session** — [detail](components/platform-helpers.md#active-reading-session) — controller behind peek bar and Focus Mode.

@@ -38,10 +38,15 @@ import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.divider.DividerVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+
+private val readingLifeDividerModel = DividerUiModel(DividerVariant.ReadingLifeShareCard)
 
 @Composable
 internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
@@ -126,7 +131,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         if (content.topGenres.isNotEmpty()) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            ReadingLifeDivider()
+            Divider(model = readingLifeDividerModel)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -157,7 +162,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        ReadingLifeDivider()
+        Divider(model = readingLifeDividerModel)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -448,16 +453,6 @@ private fun ReadingLifeFooterStat(
             color = LocalContentColor.current.copy(alpha = 0.75f),
         )
     }
-}
-
-@Composable
-private fun ReadingLifeDivider() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(LocalContentColor.current.copy(alpha = 0.25f)),
-    )
 }
 
 private fun normalizedReadingLifeMonths(monthlyPages: List<Int>): List<Int> {
