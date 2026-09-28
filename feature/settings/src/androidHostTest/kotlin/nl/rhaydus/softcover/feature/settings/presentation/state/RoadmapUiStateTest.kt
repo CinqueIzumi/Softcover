@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.divider.DividerVariant
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.divider.HorizontalDividerSurface
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.state.SkeletonVariant
@@ -43,12 +44,12 @@ class RoadmapUiStateTest {
         }
 
         @Test
-        fun `thematicBreakDivider defaults to the SettingsRoadmap variant`() {
+        fun `thematicBreakDivider defaults to the SettingsRoadmap surface`() {
             // ----- Arrange & Act -----
             val state = RoadmapUiState()
 
             // ----- Assert -----
-            state.thematicBreakDivider.variant shouldBe DividerVariant.SettingsRoadmap
+            state.thematicBreakDivider shouldBe DividerUiModel.Horizontal(HorizontalDividerSurface.SettingsRoadmap)
         }
     }
 }

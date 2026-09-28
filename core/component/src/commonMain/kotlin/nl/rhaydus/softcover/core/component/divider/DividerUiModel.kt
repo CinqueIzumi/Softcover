@@ -7,14 +7,28 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /** Which hairline rule a [Divider] renders. */
 @Immutable
-data class DividerUiModel(val variant: DividerVariant) {
+sealed interface DividerUiModel {
+    data class Horizontal(
+        val surface: HorizontalDividerSurface,
+        val center: DividerCenter? = null,
+    ) : DividerUiModel
+
+    data class Vertical(val surface: VerticalDividerSurface) : DividerUiModel
+
     companion object : UiModelPreviews<DividerUiModel> {
         override val previews: ImmutableList<DividerUiModel> = persistentListOf(
-            DividerUiModel(DividerVariant.DebugRoutesRow),
-            DividerUiModel(DividerVariant.ReadingLifeShareCard),
-            DividerUiModel(DividerVariant.SettingsRoadmap),
-            DividerUiModel(DividerVariant.CreateListQuote),
-            DividerUiModel(DividerVariant.OnboardingOrTypeIt(label = "Or type it")),
+            Horizontal(HorizontalDividerSurface.DebugRoutesRow),
+            Horizontal(HorizontalDividerSurface.ReadingLifeShareCard),
+            Horizontal(HorizontalDividerSurface.SettingsRoadmap),
+            Horizontal(
+                surface = HorizontalDividerSurface.CreateListQuote,
+                center = DividerCenter.QuoteMark,
+            ),
+            Horizontal(
+                surface = HorizontalDividerSurface.OnboardingOrTypeIt,
+                center = DividerCenter.Label(text = "Or type it"),
+            ),
+            Vertical(VerticalDividerSurface.WidePaneSeparator),
         )
     }
 }

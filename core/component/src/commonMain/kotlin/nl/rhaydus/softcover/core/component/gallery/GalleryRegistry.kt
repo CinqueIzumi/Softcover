@@ -43,7 +43,8 @@ import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
-import nl.rhaydus.softcover.core.component.divider.DividerVariant
+import nl.rhaydus.softcover.core.component.divider.HorizontalDividerSurface
+import nl.rhaydus.softcover.core.component.divider.VerticalDividerSurface
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
@@ -281,13 +282,16 @@ object GalleryRegistry {
             name = "Divider",
             family = GalleryFamily.DIVIDER,
             blurb = "A hairline rule; anatomy and ink resolve per call site, from a plain row " +
-                "break to a labelled or glyph-broken one.",
+                "break to a labelled or glyph-broken one, or a vertical pane separator.",
             previews = DividerUiModel,
             label = ::dividerFixtureLabel,
             content = { model, modifier ->
                 Divider(
                     model = model,
-                    modifier = modifier,
+                    modifier = when (model) {
+                        is DividerUiModel.Horizontal -> modifier
+                        is DividerUiModel.Vertical -> modifier.height(VERTICAL_DIVIDER_FIXTURE_HEIGHT)
+                    },
                 )
             },
         ),
@@ -447,6 +451,9 @@ object GalleryRegistry {
  */
 private val EMPTY_STATE_FIXTURE_HEIGHT = 180.dp
 
+/** A vertical rule fills its parent's height, which a gallery fixture tile leaves unbounded. */
+private val VERTICAL_DIVIDER_FIXTURE_HEIGHT = 48.dp
+
 /** The Appearance pickers size their tiles to the row they sit in; the gallery picks one width. */
 private val PREVIEW_TILE_FIXTURE_WIDTH = 120.dp
 
@@ -556,12 +563,18 @@ private fun searchTopBarFixtureLabel(model: SearchTopBarUiModel): String = when 
 private fun bannerFixtureLabel(model: BannerUiModel): String =
     model.tone.name.lowercase().replaceFirstChar(Char::uppercase)
 
-private fun dividerFixtureLabel(model: DividerUiModel): String = when (model.variant) {
-    DividerVariant.DebugRoutesRow -> "Debug routes row"
-    DividerVariant.ReadingLifeShareCard -> "Reading life share card"
-    DividerVariant.SettingsRoadmap -> "Settings roadmap"
-    DividerVariant.CreateListQuote -> "Create list quote"
-    is DividerVariant.OnboardingOrTypeIt -> "Onboarding label"
+private fun dividerFixtureLabel(model: DividerUiModel): String = when (model) {
+    is DividerUiModel.Horizontal -> when (model.surface) {
+        HorizontalDividerSurface.DebugRoutesRow -> "Debug routes row"
+        HorizontalDividerSurface.ReadingLifeShareCard -> "Reading life share card"
+        HorizontalDividerSurface.SettingsRoadmap -> "Settings roadmap"
+        HorizontalDividerSurface.CreateListQuote -> "Create list quote"
+        HorizontalDividerSurface.OnboardingOrTypeIt -> "Onboarding label"
+    }
+
+    is DividerUiModel.Vertical -> when (model.surface) {
+        VerticalDividerSurface.WidePaneSeparator -> "Wide pane separator"
+    }
 }
 
 /** Names what a [StatNumberUiModel] fixture demonstrates — its format, which is its anatomy. */

@@ -40,13 +40,13 @@ import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
-import nl.rhaydus.softcover.core.component.divider.DividerVariant
+import nl.rhaydus.softcover.core.component.divider.HorizontalDividerSurface
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-private val readingLifeDividerModel = DividerUiModel(DividerVariant.ReadingLifeShareCard)
+private val readingLifeDividerModel = DividerUiModel.Horizontal(HorizontalDividerSurface.ReadingLifeShareCard)
 
 @Composable
 internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {

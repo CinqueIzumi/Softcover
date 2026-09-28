@@ -6,3 +6,4 @@
 - [Kotlin block comments nest](feedback_kotlin_block_comments_nest.md) — a literal `/*` inside KDoc opens a nested comment; "Unclosed comment" errors often point far from the real cause
 - [:app lacks toad/voyager-koin by default](feedback_app_module_lacks_toad_voyager_koin.md) — add both to debugImplementation before wiring a TOAD ScreenModel into an app/src/debug screen; also detekt task is `detektDebug`, not `detektAndroidDebug`
 - [Component migration can drop more than the flagged style](project_component_migration_style_drops.md) — diff old vs new for every property (color, weight, size, spacing), not just the one named in the brief
+- [Style table needs one type per file](feedback_style_table_one_type_per_file.md) — split an ink/token sealed type from its style data class into two files, or ktlintCheck fails one-type-per-file late

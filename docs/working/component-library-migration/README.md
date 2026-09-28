@@ -14,16 +14,17 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, the S5 chips, headers, badges and skeletons families, and S5-9 (`a54622db`) done.
-  `Skeleton` (6 surface-named variants, one `ExploreRail`, `core/component/state/`) renders through a
-  private `SkeletonBar` / `CoverStackSkeleton` pair and a `SkeletonMetrics` table, and reports as an
-  indeterminate progress bar. `Divider` (sealed, 5 variants, `core/component/divider/`, gallery family
-  `DIVIDER`) and `Skeleton` have their models stored on the UiStates; `ReadingLifeShareCardBody` uses a
-  file-level model. The mood tile's 104dp lives once, in `core/component/bookcard/MoodTileDimensions`
-  (folds into `BookCard`'s `Tile` metrics in S7-4). 14 files with Apollo alias imports wait on foundation
-  F24. #275's S5 box stays open until S5-C-dividers lands.
-- **Next:** S5-C-dividers in [`steps/s5-dividers.md`](steps/s5-dividers.md) (family-procedure.md
-  § Phase 3). Gradle under JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S0–S4, the S5 chips, headers, badges and skeletons families, S5-9 and S5-C-dividers done.
+  `DividerUiModel` is sealed `Horizontal(surface, center?)` / `Vertical(surface)`, drawn by one private
+  scaffold from a per-surface `DividerStyle` table and a pure `DividerInk.resolve(ColorScheme, contentColor)`;
+  `VerticalDividerSurface.WidePaneSeparator` has no caller yet. `Divider` and `Skeleton` models are stored on
+  the UiStates; `ReadingLifeShareCardBody` uses a file-level model. The mood tile's 104dp lives once, in
+  `core/component/bookcard/MoodTileDimensions` (folds into `BookCard`'s `Tile` metrics in S7-4). 14 files
+  with Apollo alias imports wait on foundation F24. #275's S5 box stays open until S5-10 lands.
+- **Next:** S5-10 in [`steps/s5-dividers.md`](steps/s5-dividers.md): inventory the 34 raw
+  `HorizontalDivider(` / `VerticalDivider(` sites (`git grep`) into a step-file table, then absorb them.
+  `TagEditorCollection:85` goes to the headers family. Gradle under JBR 21
+  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
@@ -32,13 +33,13 @@ checkboxes in step with `## Steps` and `## Gates` here.
   titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
   `FeaturedCard`'s eyebrow gap (10 → 8dp); the whole badge family in the gallery and on device (never
   visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
-  cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`.
-- **Verification:** S5-C-skeletons on JBR 21: compile for core:component / explore / settings,
-  `:core:component` and `:feature:explore` `testAndroidHostTest`, `styleCheck` passed; reviewer verified
-  every dp unchanged, no blockers (its one nit — a `foundations.md` line on skeleton semantics — declined:
-  contracts live in KDoc). No new tests: all new code is private, and the variant merge is covered by the
-  existing fixture and UiState default tests. `components.md` sits at its 8192B budget.
-- **Uncommitted:** all of S5-C-skeletons.
+  cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`; S5-C-dividers' quote-glyph gap
+  (14 → 12dp) and the "Or type it" label on plain `eyebrowSmall`.
+- **Verification:** S5-C-dividers on JBR 21: main compile (core:component, settings, lists, onboarding, app
+  debug), divider + Roadmap / CreateList / Onboarding UiState tests, `styleCheck`, `checkDocBudgets` passed.
+  New `DividerInkTest` / `DividerStyleTest`. Reviewer: no blockers, every dp and colour verified; its finding
+  (the vertical fixture had zero height in the gallery) fixed with `VERTICAL_DIVIDER_FIXTURE_HEIGHT`.
+- **Uncommitted:** this `## Now` block, `steps/s5-dividers.md`, and all of S5-C-dividers.
 
 ## Local verification
 

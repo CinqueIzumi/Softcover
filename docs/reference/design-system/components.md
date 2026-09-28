@@ -45,7 +45,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Banner** — `core:component/callout` — full-width slide-in chrome for a screen-level condition.
 - **Empty state** — `core:component/state` — centred headline-and-body placeholder for missing content.
 - **Skeleton** — `core:component/state` — per-surface shimmer placeholder matching its loaded footprint.
-- **Divider** — `core:component/divider` — per-surface hairline rule, bare or labelled.
+- **Divider** — `core:component/divider` — hairline rule, bare, centred, or vertical.
 - **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — exception to the wavy-progress rule.
 - **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.
 - **Deadline badge / cover overlay / summary line** — `core:component/badge` + `deadline` — deadline marks.

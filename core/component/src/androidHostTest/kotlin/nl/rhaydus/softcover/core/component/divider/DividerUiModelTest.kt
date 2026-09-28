@@ -7,28 +7,56 @@ import org.junit.jupiter.api.Test
 class DividerUiModelTest {
     @Nested
     inner class Previews {
-        private val expectedVariants = listOf(
-            DividerVariant.DebugRoutesRow::class,
-            DividerVariant.ReadingLifeShareCard::class,
-            DividerVariant.SettingsRoadmap::class,
-            DividerVariant.CreateListQuote::class,
-            DividerVariant.OnboardingOrTypeIt::class,
-        )
-
         @Test
-        fun `there is exactly one fixture per DividerVariant subtype`() {
-            // ----- Act & Assert -----
-            DividerUiModel.previews.size shouldBe expectedVariants.size
+        fun `every HorizontalDividerSurface value appears in at least one Horizontal fixture`() {
+            // ----- Arrange -----
+            val expectedSurfaces = setOf(
+                HorizontalDividerSurface.DebugRoutesRow,
+                HorizontalDividerSurface.ReadingLifeShareCard,
+                HorizontalDividerSurface.SettingsRoadmap,
+                HorizontalDividerSurface.CreateListQuote,
+                HorizontalDividerSurface.OnboardingOrTypeIt,
+            )
+
+            // ----- Act -----
+            val coveredSurfaces = DividerUiModel.previews
+                .filterIsInstance<DividerUiModel.Horizontal>()
+                .map { it.surface }
+                .toSet()
+
+            // ----- Assert -----
+            coveredSurfaces shouldBe expectedSurfaces
         }
 
         @Test
-        fun `the fixtures cover every subtype with no duplicates`() {
-            // ----- Act -----
-            val variants = DividerUiModel.previews.map { it.variant::class }
+        fun `at least one fixture carries a QuoteMark centre`() {
+            // ----- Arrange & Act -----
+            val withQuoteMark = DividerUiModel.previews
+                .filterIsInstance<DividerUiModel.Horizontal>()
+                .filter { it.center == DividerCenter.QuoteMark }
 
             // ----- Assert -----
-            variants.toSet() shouldBe expectedVariants.toSet()
-            variants.distinct().size shouldBe variants.size
+            withQuoteMark.size shouldBe 1
+        }
+
+        @Test
+        fun `at least one fixture carries a Label centre`() {
+            // ----- Arrange & Act -----
+            val withLabel = DividerUiModel.previews
+                .filterIsInstance<DividerUiModel.Horizontal>()
+                .filter { it.center is DividerCenter.Label }
+
+            // ----- Assert -----
+            withLabel.size shouldBe 1
+        }
+
+        @Test
+        fun `at least one fixture is Vertical`() {
+            // ----- Arrange & Act -----
+            val vertical = DividerUiModel.previews.filterIsInstance<DividerUiModel.Vertical>()
+
+            // ----- Assert -----
+            vertical.size shouldBe 1
         }
     }
 }
