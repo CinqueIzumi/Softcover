@@ -12,11 +12,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
@@ -28,7 +26,6 @@ import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetc
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
-import nl.rhaydus.softcover.feature.reading.presentation.screen.planTodayNudgeFor
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 /**
@@ -60,8 +57,6 @@ internal fun ReadingBooksColumn(
     val isInspection = LocalInspectionMode.current
     val prefetcher = if (isInspection) null else rememberBookDetailPrefetcher()
 
-    val today = remember { currentLocalDate().toString() }
-
     CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
         LazyColumn(
             state = listState,
@@ -72,10 +67,6 @@ internal fun ReadingBooksColumn(
                 header()
             }
 
-            val featuredDeadlineProgress = state.deadlineProgressByBook[featured.id]
-            val planTodayMessage = planTodayNudgeFor(progress = featuredDeadlineProgress)
-            val isPlanTodayDismissed = state.dismissedPlanTodayByBook[featured.id] == today
-
             item(key = "featured-${featured.id}") {
                 FeaturedBookCard(
                     book = featured,
@@ -85,7 +76,7 @@ internal fun ReadingBooksColumn(
                     deadlineSummary = state.featuredDeadlineSummary,
                     mutationFailed = featured.id in state.failedMutationBookIds,
                     paceForecast = state.featuredBookPace,
-                    planTodayMessage = planTodayMessage.takeIf { isPlanTodayDismissed.not() },
+                    planTodayMessage = state.featuredPlanTodayMessage,
                     onDismissPlanToday = {
                         runAction(OnDismissPlanTodayAction(bookId = featured.id))
                     },

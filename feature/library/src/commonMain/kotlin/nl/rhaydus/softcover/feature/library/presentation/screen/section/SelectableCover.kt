@@ -3,22 +3,16 @@ package nl.rhaydus.softcover.feature.library.presentation.screen.section
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.component.selection.SelectionMark
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 
 /**
  * The cover radius the selection-ring overlay ([SelectableCover]) hard-codes so its clip shape
@@ -32,25 +26,25 @@ private val LIBRARY_COVER_CORNER_RADIUS = 10.dp
 
 @Composable
 internal fun SelectableCover(
-    isSelectionMode: Boolean,
-    isSelected: Boolean,
+    selectionMark: SelectionMarkUiModel?,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val coverShape = RoundedCornerShape(LIBRARY_COVER_CORNER_RADIUS)
+    val isSelected = selectionMark?.selected == true
 
     Box(modifier = modifier) {
         Box(
             modifier = Modifier
                 .matchParentSize()
                 .graphicsLayer {
-                    alpha = if (isSelectionMode && isSelected.not()) UNSELECTED_COVER_ALPHA else 1f
+                    alpha = if (selectionMark != null && isSelected.not()) UNSELECTED_COVER_ALPHA else 1f
                 },
         ) {
             content()
         }
 
-        if (isSelectionMode && isSelected) {
+        if (isSelected) {
             // The redesign's selected-cover treatment: an inset primary ring + a 16% primary wash,
             // on top of the (undimmed, per the alpha branch above) cover.
             Box(
@@ -68,60 +62,12 @@ internal fun SelectableCover(
             )
         }
 
-        if (isSelectionMode) {
-            SelectionCircleIndicator(
-                isSelected = isSelected,
-                unselectedContainer = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-                size = 26.dp,
+        if (selectionMark != null) {
+            SelectionMark(
+                model = selectionMark,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp),
-            )
-        }
-    }
-}
-
-@Composable
-internal fun SelectionLeadingIcon(isSelected: Boolean) {
-    SelectionCircleIndicator(
-        isSelected = isSelected,
-        unselectedContainer = MaterialTheme.colorScheme.surfaceContainerHigh,
-    )
-}
-
-@Composable
-private fun SelectionCircleIndicator(
-    isSelected: Boolean,
-    unselectedContainer: Color,
-    modifier: Modifier = Modifier,
-    size: Dp = 24.dp,
-) {
-    val container = if (isSelected) MaterialTheme.colorScheme.primary else unselectedContainer
-
-    val content = if (isSelected) {
-        MaterialTheme.colorScheme.onPrimary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
-    Surface(
-        color = container,
-        contentColor = content,
-        shape = RoundedCornerShape(percent = 50),
-        modifier = modifier.size(size),
-    ) {
-        if (isSelected) {
-            val checkIcon = drawableIconResource(
-                icon = SoftcoverIcon.Check,
-                contentDescription = "",
-            )
-
-            Icon(
-                painter = checkIcon.getIconPainter(),
-                contentDescription = checkIcon.contentDescription,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp),
             )
         }
     }

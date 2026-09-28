@@ -17,7 +17,7 @@ fun LocalDate.toUnreleasedBadgeUiModel(style: UnreleasedBadgeStyle): BadgeUiMode
 
     return BadgeUiModel(
         label = label,
-        tone = BadgeTone.Release,
+        tone = BadgeTone.Primary,
         variant = variant,
     )
 }

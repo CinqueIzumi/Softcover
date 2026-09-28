@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -33,6 +34,8 @@ class DeadlineModelsCollectorTest {
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
+    private lateinit var observeCurrentDateUseCase: ObserveCurrentDateUseCase
+    private lateinit var todayFlow: MutableStateFlow<LocalDate>
 
     @BeforeEach
     fun setUp() {
@@ -42,7 +45,17 @@ class DeadlineModelsCollectorTest {
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
-        dependencies = mockk(relaxed = true)
+        todayFlow = MutableStateFlow(today())
+        observeCurrentDateUseCase = mockk()
+        every {
+            observeCurrentDateUseCase()
+        } returns todayFlow
+
+        dependencies = mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
+            every {
+                mock.observeCurrentDateUseCase
+            } returns observeCurrentDateUseCase
+        }
     }
 
     private fun today(): LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -136,7 +149,6 @@ class DeadlineModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.deadlineProgressByBook.keys shouldBe setOf(1)
                 stateFlow.value.deadlineCoverOverlays.keys shouldBe setOf(1)
                 stateFlow.value.deadlineSummaries.keys shouldBe setOf(1)
                 stateFlow.value.deadlineSummaries.getValue(1).paceText shouldBe "10 pages/day"
@@ -167,7 +179,6 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgressByBook shouldBe emptyMap()
             stateFlow.value.deadlineCoverOverlays shouldBe emptyMap()
             stateFlow.value.deadlineSummaries shouldBe emptyMap()
             stateFlow.value.featuredDeadlineSummary shouldBe null
@@ -201,7 +212,7 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgressByBook shouldBe emptyMap()
+            stateFlow.value.deadlineCoverOverlays shouldBe emptyMap()
             job.cancel()
         }
 
@@ -370,5 +381,187 @@ class DeadlineModelsCollectorTest {
             stateFlow.value.featuredDeadlineSummary shouldBe null
             job.cancel()
         }
+
+        @Test
+        fun `featuredPlanTodayMessage carries the nudge for an active undismissed deadline`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val edition = stubEdition(pages = 100)
+                val userBookRead = stubUserBookRead(currentPage = 0)
+                val book = stubBook(
+                    id = 1,
+                    edition = edition,
+                    userBookRead = userBookRead,
+                )
+                val deadline = buildDeadline(
+                    bookId = 1,
+                    unit = DeadlineUnit.PAGES,
+                    daysFromToday = 10,
+                )
+                val collector = DeadlineModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = ReadingScreenUiState(
+                    books = listOf(book),
+                    deadlines = mapOf(1 to deadline),
+                )
+
+                // ----- Assert -----
+                stateFlow.value.featuredPlanTodayMessage shouldBe "Read 10 pages today to stay on pace."
+                job.cancel()
+            }
+
+        @Test
+        fun `featuredPlanTodayMessage is null when dismissed today`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val edition = stubEdition(pages = 100)
+            val userBookRead = stubUserBookRead(currentPage = 0)
+            val book = stubBook(
+                id = 1,
+                edition = edition,
+                userBookRead = userBookRead,
+            )
+            val deadline = buildDeadline(
+                bookId = 1,
+                unit = DeadlineUnit.PAGES,
+                daysFromToday = 10,
+            )
+            val collector = DeadlineModelsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = ReadingScreenUiState(
+                books = listOf(book),
+                deadlines = mapOf(1 to deadline),
+                dismissedPlanTodayByBook = mapOf(1 to today().toString()),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.featuredPlanTodayMessage shouldBe null
+            job.cancel()
+        }
+
+        @Test
+        fun `featuredPlanTodayMessage returns once the dismissal for that book is cleared`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val edition = stubEdition(pages = 100)
+                val userBookRead = stubUserBookRead(currentPage = 0)
+                val book = stubBook(
+                    id = 1,
+                    edition = edition,
+                    userBookRead = userBookRead,
+                )
+                val deadline = buildDeadline(
+                    bookId = 1,
+                    unit = DeadlineUnit.PAGES,
+                    daysFromToday = 10,
+                )
+                val collector = DeadlineModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = ReadingScreenUiState(
+                    books = listOf(book),
+                    deadlines = mapOf(1 to deadline),
+                    dismissedPlanTodayByBook = mapOf(1 to today().toString()),
+                )
+                val dismissedMessage = stateFlow.value.featuredPlanTodayMessage
+                stateFlow.value = stateFlow.value.copy(dismissedPlanTodayByBook = emptyMap())
+
+                // ----- Assert -----
+                dismissedMessage shouldBe null
+                stateFlow.value.featuredPlanTodayMessage shouldBe "Read 10 pages today to stay on pace."
+                job.cancel()
+            }
+
+        @Test
+        fun `featuredPlanTodayMessage is null for an expired deadline`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val edition = stubEdition(pages = 100)
+            val userBookRead = stubUserBookRead(currentPage = 0)
+            val book = stubBook(
+                id = 1,
+                edition = edition,
+                userBookRead = userBookRead,
+            )
+            val deadline = buildDeadline(
+                bookId = 1,
+                unit = DeadlineUnit.PAGES,
+                daysFromToday = -1,
+            )
+            val collector = DeadlineModelsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = ReadingScreenUiState(
+                books = listOf(book),
+                deadlines = mapOf(1 to deadline),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.featuredPlanTodayMessage shouldBe null
+            job.cancel()
+        }
+
+        @Test
+        fun `featuredPlanTodayMessage reappears once the date rolls over past the dismissal`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val edition = stubEdition(pages = 100)
+                val userBookRead = stubUserBookRead(currentPage = 0)
+                val book = stubBook(
+                    id = 1,
+                    edition = edition,
+                    userBookRead = userBookRead,
+                )
+                val deadline = buildDeadline(
+                    bookId = 1,
+                    unit = DeadlineUnit.PAGES,
+                    daysFromToday = 10,
+                )
+                val collector = DeadlineModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = ReadingScreenUiState(
+                    books = listOf(book),
+                    deadlines = mapOf(1 to deadline),
+                    dismissedPlanTodayByBook = mapOf(1 to today().toString()),
+                )
+                val dismissedMessage = stateFlow.value.featuredPlanTodayMessage
+                todayFlow.value = today().plus(DatePeriod(days = 1))
+
+                // ----- Assert -----
+                dismissedMessage shouldBe null
+                stateFlow.value.featuredPlanTodayMessage shouldBe "Read 10 pages today to stay on pace."
+                job.cancel()
+            }
     }
 }

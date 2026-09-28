@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -26,10 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,9 +42,16 @@ import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.badge.BadgeTone
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.BadgeVariant
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.selection.SelectionMark
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -57,6 +59,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.feature.book_detail.presentation.model.EditionTrailingUiModel
 
 @Composable
 internal fun EditionBottomSheetSelector(
@@ -65,9 +68,12 @@ internal fun EditionBottomSheetSelector(
     headerCover: CoverUiModel?,
     editions: List<BookEdition>,
     editionCovers: Map<Int, CoverUiModel>,
+    editionTrailingMarks: Map<Int, EditionTrailingUiModel>,
+    selectedEditionId: Int?,
     isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    onEditionSelected: (Int) -> Unit,
     onDismissRequest: () -> Unit,
     onConfirmClick: (BookEdition) -> Unit,
 ) {
@@ -78,9 +84,12 @@ internal fun EditionBottomSheetSelector(
             headerCover = headerCover,
             editions = editions,
             editionCovers = editionCovers,
+            editionTrailingMarks = editionTrailingMarks,
+            selectedEditionId = selectedEditionId,
             isLoading = isLoading,
             searchQuery = searchQuery,
             onSearchQueryChange = onSearchQueryChange,
+            onEditionSelected = onEditionSelected,
             onConfirmClick = onConfirmClick,
         )
     }
@@ -94,14 +103,15 @@ private fun EditionBottomSheetContent(
     headerCover: CoverUiModel?,
     editions: List<BookEdition>,
     editionCovers: Map<Int, CoverUiModel>,
+    editionTrailingMarks: Map<Int, EditionTrailingUiModel>,
+    selectedEditionId: Int?,
     isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    onEditionSelected: (Int) -> Unit,
     onConfirmClick: (BookEdition) -> Unit,
 ) {
-    var selectedEdition by remember {
-        mutableStateOf(currentEdition)
-    }
+    val selectedEdition = editions.firstOrNull { it.id == selectedEditionId } ?: currentEdition
 
     Column(
         modifier = Modifier
@@ -178,9 +188,9 @@ private fun EditionBottomSheetContent(
                 items(editions, key = { it.id }) { edition ->
                     EditionItem(
                         edition = edition,
-                        currentEdition = currentEdition,
-                        selected = edition.id == selectedEdition.id,
-                        onEditionClick = { selectedEdition = edition },
+                        selected = edition.id == selectedEditionId,
+                        trailing = editionTrailingMarks[edition.id],
+                        onEditionClick = { onEditionSelected(edition.id) },
                         cover = editionCovers[edition.id],
                     )
                 }
@@ -273,13 +283,12 @@ private fun editionsDescription(
 @Composable
 private fun EditionItem(
     edition: BookEdition,
-    currentEdition: BookEdition,
     cover: CoverUiModel?,
     selected: Boolean,
+    trailing: EditionTrailingUiModel?,
     onEditionClick: () -> Unit,
 ) {
     val cardShape = RoundedCornerShape(12.dp)
-    val isTracked = edition.id == currentEdition.id
     val emphasized = selected || edition.owned
 
     Column(
@@ -348,9 +357,10 @@ private fun EditionItem(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    when {
-                        selected -> SelectedCheckBadge()
-                        isTracked -> TrackingNowChip()
+                    when (trailing) {
+                        is EditionTrailingUiModel.Selected -> SelectionMark(model = trailing.mark)
+                        is EditionTrailingUiModel.Tracking -> Badge(model = trailing.badge)
+                        null -> Unit
                     }
                 }
 
@@ -404,45 +414,6 @@ private fun EditionItem(
             }
         }
     }
-}
-
-@Composable
-private fun SelectedCheckBadge() {
-    Box(
-        modifier = Modifier
-            .size(24.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary),
-        contentAlignment = Alignment.Center,
-    ) {
-        val icon = drawableIconResource(
-            icon = SoftcoverIcon.Check,
-            contentDescription = "Selected edition",
-        )
-
-        Icon(
-            painter = icon.getIconPainter(),
-            contentDescription = icon.contentDescription,
-            tint = MaterialTheme.colorScheme.onPrimary,
-            modifier = Modifier.size(15.dp),
-        )
-    }
-}
-
-@Composable
-private fun TrackingNowChip() {
-    Text(
-        text = "TRACKING NOW",
-        style = MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = 0.6.sp,
-        ),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
-            .clip(RoundedCornerShape(percent = 50))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(horizontal = 9.dp, vertical = 4.dp),
-    )
 }
 
 /** Format icon: the differentiator that leads each card — `readingFormat` maps to a single glyph. */
@@ -560,6 +531,22 @@ private fun EditionBottomSheetContentPreview() {
         )
     }
 
+    val editionTrailingMarks = mapOf(
+        editions[1].id to EditionTrailingUiModel.Tracking(
+            badge = BadgeUiModel(
+                label = "TRACKING NOW",
+                tone = BadgeTone.Neutral,
+                variant = BadgeVariant.TrackingTag,
+            ),
+        ),
+        editions[2].id to EditionTrailingUiModel.Selected(
+            mark = SelectionMarkUiModel(
+                selected = true,
+                variant = SelectionMarkVariant.EditionCard,
+            ),
+        ),
+    )
+
     SoftcoverTheme {
         EditionBottomSheetContent(
             bookTitle = "King Sorrow",
@@ -567,9 +554,12 @@ private fun EditionBottomSheetContentPreview() {
             headerCover = editionCovers[editions[1].id],
             editions = editions,
             editionCovers = editionCovers,
+            editionTrailingMarks = editionTrailingMarks,
+            selectedEditionId = editions[2].id,
             isLoading = false,
             searchQuery = "",
             onSearchQueryChange = {},
+            onEditionSelected = {},
             onConfirmClick = {},
         )
     }

@@ -38,6 +38,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ChooseLis
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
@@ -76,6 +77,7 @@ val bookDetailModule = module {
     factory { DateStyleCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class
     factory { UnreleasedBadgeCollector() } bind BookDetailCollector::class
+    factory { EditionSelectionCollector() } bind BookDetailCollector::class
     factory { UserListsFlowCollector() } bind BookDetailCollector::class
     factory { CurrentUserCollector() } bind BookDetailCollector::class
     factory { UserTagsCollector() } bind BookDetailCollector::class

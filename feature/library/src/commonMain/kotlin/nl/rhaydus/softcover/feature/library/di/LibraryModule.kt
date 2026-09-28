@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.GridLayoutCol
 import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.MastheadCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.RearrangeChipCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.SelectionMarksCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.SortModeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.VisibleTabsCollector
@@ -49,6 +50,7 @@ val libraryModule = module {
     factory { ChooseListsCollector() } bind LibraryCollector::class
     factory { CoverModelsCollector() } bind LibraryCollector::class
     factory { DeadlineModelsCollector() } bind LibraryCollector::class
+    factory { SelectionMarksCollector() } bind LibraryCollector::class
 
     factory { VisibleTabsCollector() } bind LibraryCollector::class
 

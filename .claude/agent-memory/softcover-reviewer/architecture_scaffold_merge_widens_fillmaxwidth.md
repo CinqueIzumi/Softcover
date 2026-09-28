@@ -14,9 +14,10 @@ unconditionally to every branch — even the ones that previously did not have i
 `trailing` slot. Only one of the three registers used to `fillMaxWidth()`; the new outer `Row` applies it
 to all three, so the other two silently went from self-sizing (shrink-wrap to bar+eyebrow content) to
 always stretching to the available width, even with the default empty trailing slot. Invisible today
-because every call site happens to sit inside an already-`fillMaxWidth()` container, but a latent crash
-risk (`fillMaxWidth()` inside an unbounded-width parent, e.g. a horizontal scroll, throws) and an
-unrequested contract widening the approved shape never asked for.
+because every call site happens to sit inside an already-`fillMaxWidth()` container, but an unrequested
+contract widening the approved shape never asked for (it changes a `Row` sibling's or a centred parent's
+layout the moment a caller relies on shrink-wrap). `fillMaxWidth()` under unbounded width is a no-op, not
+a crash; do not claim otherwise.
 
 **How to apply:** when reviewing a "collapse N composables into one + shared outer container" diff, diff
 each branch's *old* modifier chain against what the *new* shared container now imposes on it. A width/

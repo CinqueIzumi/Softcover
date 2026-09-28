@@ -1,8 +1,10 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
@@ -27,6 +29,7 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.model.EditionTrailingUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class BookDetailUiState(
@@ -47,6 +50,13 @@ internal data class BookDetailUiState(
     val editions: List<BookEdition> = emptyList(),
     val loadingEditions: Boolean = false,
     val editionSearchQuery: String = "",
+
+    /**
+     * The edition selector's in-progress pick, set to [displayedEdition]'s id when the sheet opens
+     * and cleared on dismiss or save. Unlike [previewEdition] and [scannedEditionId], it never
+     * outlives the sheet.
+     */
+    val selectedEditionId: Int? = null,
     val previewEdition: BookEdition? = null,
     val scannedEditionId: Int? = null,
     val scannedEditionBannerDismissed: Boolean = false,
@@ -87,6 +97,9 @@ internal data class BookDetailUiState(
     /** [Book.effectiveReleaseDate] mapped to an unreleased-release badge by `UnreleasedBadgeCollector` (R9), off [book]. */
     val unreleasedBadge: BadgeUiModel? = null,
 
+    /** Non-null only while `isEditionOwned(displayedEdition)`, mapped by `EditionSelectionCollector` (R9). */
+    val ownedCoverBadge: BadgeUiModel? = null,
+
     val reviews: ImmutableList<BookReviewUiModel> = persistentListOf(),
     val loadingReviews: Boolean = false,
     val revealedSpoilerReviewIds: Set<Int> = emptySet(),
@@ -117,6 +130,9 @@ internal data class BookDetailUiState(
 
     /** Keyed by [BookEdition.id]. Mapped from [editions], never from the derived `filteredEditions`. */
     val editionCovers: Map<Int, CoverUiModel> = emptyMap(),
+
+    /** Keyed by [BookEdition.id], mapped from [editions] by `EditionSelectionCollector` (R9). See [EditionTrailingUiModel]. */
+    val editionTrailingMarks: ImmutableMap<Int, EditionTrailingUiModel> = persistentMapOf(),
     val tagEditorCover: CoverUiModel? = null,
 
     val showChooseListsSheet: Boolean = false,

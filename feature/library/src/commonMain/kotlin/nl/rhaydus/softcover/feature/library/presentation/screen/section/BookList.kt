@@ -329,9 +329,8 @@ internal fun BookList(
                         layout = state.gridLayout,
                         onClick = onClick,
                         onLongClick = onLongClick,
-                        isSelectionMode = selectionMode,
-                        isSelected = isSelected,
-                        deadlineProgress = state.deadlineProgressByBook[book.id],
+                        deadlineCountdownOverlay = state.deadlineCountdownOverlays[book.id],
+                        selectionMark = state.selectionMarks[book.id],
                         deadlineBadge = state.deadlineBadges[book.id],
                         deadlineSummary = state.deadlineSummaries[book.id],
                         dragHandle = if (isRearranging) {

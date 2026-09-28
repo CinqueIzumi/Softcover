@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissSha
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissTagEditorAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSearchQueryChangeAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
@@ -173,11 +174,16 @@ internal fun BookDetailOverlays(
             currentEdition = currentEditionForSheet,
             headerCover = state.editionSheetHeaderCover,
             editionCovers = state.editionCovers,
+            editionTrailingMarks = state.editionTrailingMarks,
+            selectedEditionId = state.selectedEditionId,
             editions = state.filteredEditions,
             isLoading = state.loadingEditions,
             searchQuery = state.editionSearchQuery,
             onSearchQueryChange = {
                 runAction(OnEditionSearchQueryChangeAction(query = it))
+            },
+            onEditionSelected = { editionId ->
+                runAction(OnEditionSelectedAction(editionId = editionId))
             },
             onDismissRequest = {
                 runAction(OnDismissEditEditionSheetClickAction())

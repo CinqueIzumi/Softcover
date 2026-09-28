@@ -13,6 +13,7 @@ package nl.rhaydus.softcover.core.component.gallery
 enum class GalleryFamily(val label: String) {
     CHIP(label = "Chips"),
     BADGE(label = "Badges"),
+    SELECTION(label = "Selection"),
     HEADER(label = "Headers"),
     CONTROL(label = "Controls"),
     STATE(label = "States"),

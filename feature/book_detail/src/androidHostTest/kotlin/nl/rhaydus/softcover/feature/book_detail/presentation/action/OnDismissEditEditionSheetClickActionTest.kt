@@ -105,6 +105,7 @@ class OnDismissEditEditionSheetClickActionTest {
                 fabMenuExpanded = true,
                 showUpdateProgressSheet = true,
                 editionSearchQuery = "isbn",
+                selectedEditionId = 7,
             )
             stateFlow.value = initialState
             val action = OnDismissEditEditionSheetClickAction()
@@ -119,7 +120,40 @@ class OnDismissEditEditionSheetClickActionTest {
             stateFlow.value shouldBe initialState.copy(
                 showEditEditionSheet = false,
                 editionSearchQuery = "",
+                selectedEditionId = null,
             )
+        }
+
+        @Test
+        fun `clears selectedEditionId when one was set`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(selectedEditionId = 7)
+            val action = OnDismissEditEditionSheetClickAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectedEditionId shouldBe null
+        }
+
+        @Test
+        fun `leaves selectedEditionId null when it was already null`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(selectedEditionId = null)
+            val action = OnDismissEditEditionSheetClickAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectedEditionId shouldBe null
         }
     }
 }

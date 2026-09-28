@@ -1,24 +1,29 @@
 package nl.rhaydus.softcover.core.component.badge
 
 /**
- * The colour register a [Badge] speaks in. A tone is a *meaning*, not a palette entry — the
- * component resolves each one onto the theme's container roles, so a caller cannot hand a badge a
- * colour that does not belong to the design system.
- *
- * [Badge] resolves each entry onto exactly today's colour pairs: [OnTrack] to
- * `primaryContainer`/`onPrimaryContainer`, [Behind] to `errorContainer`/`onErrorContainer`,
- * [Expired] to `surfaceVariant`/`onSurfaceVariant`, and [Release] to `primary`/`onPrimary`.
+ * The colour register a [Badge] speaks in — a pure colour axis, not a status. What a tone *means*
+ * (on-track, behind, owned, tracking) is a mapper's decision; [Badge] only resolves each entry onto
+ * the theme's container roles: [Primary] to `primary`/`onPrimary`, [PrimaryContainer] to
+ * `primaryContainer`/`onPrimaryContainer`, [ErrorContainer] to `errorContainer`/`onErrorContainer`,
+ * [Muted] to `surfaceVariant`/`onSurfaceVariant`, [Neutral] to
+ * `surfaceContainerHigh`/`onSurfaceVariant`, and [Scrim] to a translucent black over white.
  */
 enum class BadgeTone {
-    /** On pace to make the deadline. */
-    OnTrack,
-
-    /** Behind pace — the reader needs to pick up speed to still make the deadline. */
-    Behind,
-
-    /** The deadline has passed. */
-    Expired,
-
     /** An edition's release date, past or upcoming. */
-    Release,
+    Primary,
+
+    /** On pace to make a deadline. */
+    PrimaryContainer,
+
+    /** Behind pace, or another state that needs attention. */
+    ErrorContainer,
+
+    /** A deadline that has expired, or another inert/dimmed state. */
+    Muted,
+
+    /** A quiet, chrome-toned label such as an edition's tracking tag. */
+    Neutral,
+
+    /** A badge laid directly over imagery, such as a cover's "Owned" mark. */
+    Scrim,
 }

@@ -1,10 +1,12 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -14,6 +16,7 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.uibinding.deadline.toBadgeUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.mapper.toCountdownCoverOverlayUiModel
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -21,10 +24,9 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Computes each book's [DeadlineProgress] off the composition (`component-contract.md` § 7.2 R9)
- * and maps it to the [BadgeUiModel] and [DeadlineSummaryUiModel] the shelf renders, keyed by
- * [Book.id] into [LibraryUiState.deadlineProgressByBook], [LibraryUiState.deadlineBadges], and
- * [LibraryUiState.deadlineSummaries]. `LayoutBookEntry` used to run
- * [DeadlineProgress.compute] inline during composition (R9's original violation).
+ * and maps it to the [BadgeUiModel], [CoverOverlayUiModel] and [DeadlineSummaryUiModel] the shelf
+ * renders, keyed by [Book.id] into [LibraryUiState.deadlineBadges],
+ * [LibraryUiState.deadlineCountdownOverlays], and [LibraryUiState.deadlineSummaries].
  *
  * Deriving off [ActionScope.state] rather than patched into each writer: [LibraryUiState.booksByTab]
  * is written by both `AllBooksCollector` and `BooksByStatusCollector`, [LibraryUiState.deadlines] by
@@ -34,12 +36,6 @@ import nl.rhaydus.toad.ActionScope
  * The mapping work runs on [LibraryDependencies.defaultDispatcher] for the same reason
  * [CoverModelsCollector] does: scanning every book across every shelf is exactly the main-thread
  * cost a UI-model mapper should not pay inline.
- *
- * [LibraryUiState.deadlineProgressByBook] is deliberately kept as the domain [DeadlineProgress]
- * rather than folded away once [deadlineBadges]/[deadlineSummaries] exist: Library's own
- * `LibraryDeadlineCountdownBadge` and the expired-cover grayscale branch need `status` and
- * `daysRemaining` directly, and neither of those is a `:core:component` component — they are
- * feature-local render decisions, not UI models this collector should invent.
  */
 internal class DeadlineModelsCollector : LibraryCollector {
     override suspend fun onLaunch(
@@ -56,13 +52,14 @@ internal class DeadlineModelsCollector : LibraryCollector {
             }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
-                val (deadlineProgressByBook, deadlineBadges, deadlineSummaries) = withContext(dependencies.defaultDispatcher) {
+                val (deadlineCountdownOverlays, deadlineBadges, deadlineSummaries) = withContext(dependencies.defaultDispatcher) {
                     val progressByBook = snapshot.booksByTab.values.asSequence()
                         .flatten()
                         .associateBy { it.id }
                         .mapNotNull { (id, book) -> book.toDeadlineProgress(snapshot.deadlines[id])?.let { id to it } }
                         .toMap()
 
+                    val overlays = progressByBook.mapValues { (_, progress) -> progress.toCountdownCoverOverlayUiModel() }
                     val badges = progressByBook.mapValues { (_, progress) -> progress.toBadgeUiModel() }
 
                     val summaries = progressByBook.mapValues { (_, progress) ->
@@ -73,7 +70,7 @@ internal class DeadlineModelsCollector : LibraryCollector {
                     }
 
                     Triple(
-                        progressByBook,
+                        overlays.toImmutableMap(),
                         badges,
                         summaries,
                     )
@@ -81,7 +78,7 @@ internal class DeadlineModelsCollector : LibraryCollector {
 
                 scope.setState {
                     it.copy(
-                        deadlineProgressByBook = deadlineProgressByBook,
+                        deadlineCountdownOverlays = deadlineCountdownOverlays,
                         deadlineBadges = deadlineBadges,
                         deadlineSummaries = deadlineSummaries,
                     )

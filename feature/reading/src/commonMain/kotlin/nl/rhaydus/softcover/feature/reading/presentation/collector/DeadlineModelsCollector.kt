@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -11,16 +11,16 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.uibinding.deadline.toCoverOverlayUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.planTodayNudgeFor
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps every deadline surface on the Reading screen off the composition (R9): each book's raw
- * [DeadlineProgress] (used by `planTodayNudgeFor`, which is why [ReadingScreenUiState
- * .deadlineProgressByBook] stays a domain type rather than a UI model), its cover overlay badge,
- * and its summary line.
+ * Maps every deadline surface on the Reading screen off the composition (R9): each book's cover
+ * overlay badge, its summary line, and — for the featured book only — the plan-today nudge, which
+ * is suppressed once [ReadingScreenUiState.dismissedPlanTodayByBook] carries today's date for it.
  *
  * [ReadingScreenUiState.featuredDeadlineSummary] is a separate field rather than a second entry in
  * [ReadingScreenUiState.deadlineSummaries] because the featured book's summary line sits on the
@@ -36,24 +36,31 @@ internal class DeadlineModelsCollector : ReadingCollector {
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
         dependencies: ReadingScreenDependencies,
     ) {
-        scope.state
-            .map {
-                DeadlineModelsSnapshot(
-                    featuredBook = it.books.firstOrNull(),
-                    books = it.books,
-                    deadlines = it.deadlines,
-                    dateStyle = it.dateStyle,
-                )
-            }
+        combine(
+            scope.state,
+            dependencies.observeCurrentDateUseCase(),
+        ) { state, today ->
+            DeadlineModelsSnapshot(
+                featuredBook = state.books.firstOrNull(),
+                books = state.books,
+                deadlines = state.deadlines,
+                dateStyle = state.dateStyle,
+                dismissedPlanTodayByBook = state.dismissedPlanTodayByBook,
+                today = today,
+            )
+        }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 val progressByBook = snapshot.books.mapNotNull { book ->
                     book.deadlineProgress(snapshot.deadlines)?.let { progress -> book.id to progress }
                 }.toMap()
 
+                val featuredId = snapshot.featuredBook?.id
+                val isFeaturedPlanTodayDismissed =
+                    snapshot.dismissedPlanTodayByBook[featuredId] == snapshot.today.toString()
+
                 scope.setState {
                     it.copy(
-                        deadlineProgressByBook = progressByBook,
                         deadlineCoverOverlays = progressByBook.mapValues { (_, progress) ->
                             progress.toCoverOverlayUiModel()
                         },
@@ -63,10 +70,12 @@ internal class DeadlineModelsCollector : ReadingCollector {
                                 tone = DeadlineSummaryTone.OnSurface,
                             )
                         },
-                        featuredDeadlineSummary = progressByBook[snapshot.featuredBook?.id]?.toDeadlineSummaryUiModel(
+                        featuredDeadlineSummary = progressByBook[featuredId]?.toDeadlineSummaryUiModel(
                             dateStyle = snapshot.dateStyle,
                             tone = DeadlineSummaryTone.OnHeroBackdrop,
                         ),
+                        featuredPlanTodayMessage = planTodayNudgeFor(progressByBook[featuredId])
+                            .takeIf { isFeaturedPlanTodayDismissed.not() },
                     )
                 }
             }

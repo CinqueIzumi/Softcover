@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -10,12 +11,12 @@ import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.DateStyle
-import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -190,18 +191,15 @@ internal data class LibraryUiState(
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
     /**
-     * Each deadline-tracked book's [DeadlineProgress] keyed by [Book.id], computed by
-     * `DeadlineModelsCollector` (R9) off [booksByTab] and [deadlines]. Kept as the domain type
-     * rather than only its UI models below because `LibraryDeadlineCountdownBadge` and the
-     * expired-cover grayscale branch need `status`/`daysRemaining` directly, and neither is a
-     * `:core:component` component.
+     * Each deadline-tracked book's grid-cover countdown overlay keyed by [Book.id], mapped by
+     * `DeadlineModelsCollector` (R9) off [booksByTab] and [deadlines].
      */
-    val deadlineProgressByBook: Map<Int, DeadlineProgress> = emptyMap(),
+    val deadlineCountdownOverlays: ImmutableMap<Int, CoverOverlayUiModel> = persistentMapOf(),
 
-    /** [deadlineProgressByBook] mapped to its status badge, keyed by [Book.id]. */
+    /** Each deadline-tracked book's status badge keyed by [Book.id]. */
     val deadlineBadges: Map<Int, BadgeUiModel> = emptyMap(),
 
-    /** [deadlineProgressByBook] mapped to its summary line, keyed by [Book.id]. */
+    /** Each deadline-tracked book's summary line keyed by [Book.id]. */
     val deadlineSummaries: Map<Int, DeadlineSummaryUiModel> = emptyMap(),
 
     val searchQuery: String = "",
@@ -214,6 +212,12 @@ internal data class LibraryUiState(
      */
     val selectionMode: Boolean = false,
     val selectedBookIds: Set<Int> = emptySet(),
+
+    /**
+     * A [SelectionMarkUiModel] per book keyed by [Book.id], mapped by `SelectionMarksCollector`
+     * (R9) off [selectionMode], [selectedBookIds] and [gridLayout]. Empty outside selection mode.
+     */
+    val selectionMarks: ImmutableMap<Int, SelectionMarkUiModel> = persistentMapOf(),
 
     /**
      * Rearrange mode. A transient editing state entered from the drag-handle icon-button in the

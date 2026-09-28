@@ -377,7 +377,7 @@ private fun BookHero(
             releaseYear = state.displayedEdition?.releaseYear.takeIf { it != -1 }
                 ?: state.book?.releaseYear,
             unreleasedBadge = state.unreleasedBadge,
-            isOwned = state.isEditionOwned(edition = state.displayedEdition),
+            ownedCoverBadge = state.ownedCoverBadge,
             onCoverClick = onCoverClick,
         )
     }

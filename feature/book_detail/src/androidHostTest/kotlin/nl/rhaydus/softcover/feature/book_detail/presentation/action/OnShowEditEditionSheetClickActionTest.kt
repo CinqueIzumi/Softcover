@@ -62,16 +62,83 @@ class OnShowEditEditionSheetClickActionTest {
         }
     }
 
-    private fun stubBook(id: Int = 1): Book = mockk<Book>().also { mock ->
+    private fun stubBook(
+        id: Int = 1,
+        currentEdition: BookEdition? = null,
+    ): Book = mockk<Book>().also { mock ->
+        every {
+            mock.id
+        } returns id
+
+        every {
+            mock.userBook
+        } returns null
+
+        every {
+            mock.currentEdition
+        } returns currentEdition
+    }
+
+    private fun stubEdition(id: Int = 1): BookEdition = mockk<BookEdition>().also { mock ->
         every {
             mock.id
         } returns id
     }
 
-    private fun stubEdition(): BookEdition = mockk()
-
     @Nested
     inner class Execute {
+        @Test
+        fun `seeds selectedEditionId with the displayed edition's id`() = runTest {
+            // ----- Arrange -----
+            val bookId = 42
+            val currentEdition = stubEdition(id = 7)
+            val book = stubBook(
+                id = bookId,
+                currentEdition = currentEdition,
+            )
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                getEditionsByBookIdUseCase(bookId = bookId)
+            } returns Result.success(emptyList())
+
+            val action = OnShowEditEditionSheetClickAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectedEditionId shouldBe 7
+        }
+
+        @Test
+        fun `leaves selectedEditionId null when the book has no current edition`() = runTest {
+            // ----- Arrange -----
+            val bookId = 42
+            val book = stubBook(id = bookId)
+            stateFlow.value = BookDetailUiState(book = book)
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                getEditionsByBookIdUseCase(bookId = bookId)
+            } returns Result.success(emptyList())
+
+            val action = OnShowEditEditionSheetClickAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.selectedEditionId shouldBe null
+        }
+
         @Test
         fun `sets showEditEditionSheet to true immediately on first open`() = runTest {
             // ----- Arrange -----

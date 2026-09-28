@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -70,7 +69,7 @@ internal fun GeneralBookInfoSection(
     unreleasedBadge: BadgeUiModel?,
     isLoading: Boolean,
     isExpired: Boolean,
-    isOwned: Boolean,
+    ownedCoverBadge: BadgeUiModel?,
     onCoverClick: () -> Unit,
 ) {
     val imageHeight = with(LocalDensity.current) {
@@ -140,13 +139,14 @@ internal fun GeneralBookInfoSection(
                 val enterSettled = navScope == null ||
                     navScope.transition.currentState == EnterExitState.Visible
 
-                if (isOwned) {
+                if (ownedCoverBadge != null) {
                     val badgeAlpha by animateFloatAsState(
                         targetValue = if (enterSettled) 1f else 0f,
                         label = "OwnedCoverBadgeAlpha",
                     )
 
-                    OwnedCoverBadge(
+                    Badge(
+                        model = ownedCoverBadge,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(8.dp)
@@ -419,44 +419,5 @@ internal fun GeneralBookInfoSection(
                     ),
                 ),
         )
-    }
-}
-
-@Composable
-private fun OwnedCoverBadge(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        color = Color.Black.copy(alpha = 0.55f),
-    ) {
-        Row(
-            modifier = Modifier.padding(
-                horizontal = 8.dp,
-                vertical = 4.dp,
-            ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            val ownedIcon = drawableIconResource(
-                icon = SoftcoverIcon.Check,
-                contentDescription = "Owned",
-            )
-
-            Icon(
-                painter = ownedIcon.getIconPainter(),
-                contentDescription = ownedIcon.contentDescription,
-                tint = Color.White,
-                modifier = Modifier.size(14.dp),
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
-
-            Text(
-                text = "Owned",
-                color = Color.White,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                ),
-            )
-        }
     }
 }

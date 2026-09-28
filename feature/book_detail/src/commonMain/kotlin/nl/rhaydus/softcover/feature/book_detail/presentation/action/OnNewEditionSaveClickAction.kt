@@ -23,6 +23,7 @@ internal data class OnNewEditionSaveClickAction(val edition: BookEdition) : Book
                     previewEdition = edition,
                     scannedEditionId = null,
                     showEditEditionSheet = false,
+                    selectedEditionId = null,
                 )
             }
 
@@ -48,6 +49,7 @@ internal data class OnNewEditionSaveClickAction(val edition: BookEdition) : Book
             it.copy(
                 scannedEditionId = null,
                 showEditEditionSheet = false,
+                selectedEditionId = null,
             )
         }
     }

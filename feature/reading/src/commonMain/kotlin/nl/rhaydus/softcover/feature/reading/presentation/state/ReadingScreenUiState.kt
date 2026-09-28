@@ -13,7 +13,6 @@ import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
-import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadEyebrowFor
@@ -86,18 +85,15 @@ internal data class ReadingScreenUiState(
     val verdictCover: CoverUiModel? = null,
 
     /**
-     * Every book's raw deadline progress, mapped off the composition by `DeadlineModelsCollector`
-     * (R9) from [books] and [deadlines]. Stays a domain type rather than a UI model because
-     * `planTodayNudgeFor` still reads it directly.
+     * Each book's deadline cover overlay badge, mapped off the composition by
+     * `DeadlineModelsCollector` (R9) — never by the render.
      */
-    val deadlineProgressByBook: Map<Int, DeadlineProgress> = emptyMap(),
-
-    /** Each book's deadline cover overlay badge, derived from [deadlineProgressByBook]. */
     val deadlineCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
 
     /**
      * Each book's deadline summary line for surfaces painted [nl.rhaydus.softcover.core.component
-     * .badge.DeadlineSummaryTone.OnSurface], derived from [deadlineProgressByBook].
+     * .badge.DeadlineSummaryTone.OnSurface], mapped off the composition by `DeadlineModelsCollector`
+     * (R9) — never by the render.
      */
     val deadlineSummaries: Map<Int, DeadlineSummaryUiModel> = emptyMap(),
 
@@ -110,6 +106,13 @@ internal data class ReadingScreenUiState(
      * [featuredBookPace] are their own fields rather than keyed off [books].
      */
     val featuredDeadlineSummary: DeadlineSummaryUiModel? = null,
+
+    /**
+     * The featured book's plan-today nudge copy, mapped off the composition by
+     * `DeadlineModelsCollector` (R9). `null` means either there is nothing to say today or the
+     * reader already dismissed it — [dismissedPlanTodayByBook] is folded in upstream.
+     */
+    val featuredPlanTodayMessage: String? = null,
 
     /**
      * The desktop masthead's eyebrow, greeting title and subtitle, mapped off the composition by

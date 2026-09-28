@@ -14,25 +14,30 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4 and the S5 chips and headers families (S5-1–S5-6, both convergence passes) done;
-  S5-C-headers uncommitted. `SectionHeader`'s three registers share one private scaffold, carry `tone`,
-  announce as headings, and take an optional `trailing` slot (`InProgressSection`, `HiddenGroupHeaderUiModel`).
-  `EditorialSectionHeaderSkeleton` stays for S5-8. 14 files with Apollo alias imports wait on foundation F24.
-- **Next:** S5-7 in [`steps/s5-badges.md`](steps/s5-badges.md) — Phase 1 design with the user. Gradle under
-  JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S0–S4, the S5 chips and headers families, and S5-7 done. `Badge` has a colour-axis
+  `BadgeTone`, an optional icon and surface-named variants; `CoverOverlay` has a placement variant and greys
+  the cover only; new `SelectionMark` (`core/component/selection/`). `deadlineProgressByBook` is gone from
+  library and reading; book_detail's `selectedEditionId` lives in `BookDetailUiState`. S7-1's selection
+  question is answered in `steps/s5-badges.md` § Approved shape. `EditorialSectionHeaderSkeleton` stays for
+  S5-8. 14 files with Apollo alias imports wait on foundation F24.
+- **Next:** S5-C-badges in [`steps/s5-badges.md`](steps/s5-badges.md) (family-procedure.md § Phase 3).
+  Open it with the deadline-trio visual pass that S5-7 still owes (`Badge`, `CoverOverlay`,
+  `DeadlineSummaryLine` in the gallery and on device). Gradle under JBR 21
+  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
-- **Open questions:** none. Confirm on device that the Arrange / Filter sheets no longer render empty or
+- **Open questions:** `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
+  `dispatcherModule`; confirm or move that home in S5-C. Confirm on device that the Arrange / Filter sheets no longer render empty or
   stale for a frame on open (their headers are now seeded as `UiState` defaults). Eyeball the accepted
   shifts: S5-6's 4dp eyebrow gap, 1-line titles, reading's mobile masthead line height; S5-C's "Your tabs"
   tracking (2.2 → 1.2sp) and `FeaturedCard`'s eyebrow gap (10 → 8dp).
-- **Verification:** S5-C-headers on JBR 21: core:component / explore / book_detail / settings JVM compiles,
-  `:desktopApp` compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`, `checkDocBudgets`
-  and the four modules' `testAndroidHostTest` passed; reviewer's two valid findings (heading merge, forced
-  `fillMaxWidth` on an empty slot) fixed. Brief implementers on ≤~12 files each (brief B's 13 files ran
-  into the 80-turn limit right after it reported).
-- **Uncommitted:** all of S5-C-headers, plus carried-forward notes in `s6-sheet-chrome.md`,
-  `s6-list-rows.md` and `s8-screen-states.md`.
+- **Verification:** S5-7 on JBR 21: `styleCheck`, `checkModuleGraph`, `ktlintCheck`, `checkDocBudgets`,
+  `:desktopApp` compile, JVM + Android compiles and `projectHealth` for core:component / core:uibinding /
+  library / reading / book_detail, and their `testAndroidHostTest` passed; reviewer's two findings (badge
+  greyscaled with the cover, plan-today dismissal stale across midnight) fixed. `ktlintCheck` is root-only
+  (`-Pktlint.root=<dir>`). Brief implementers on ≤~10 files; three S5-7 briefs hit the 80-turn limit.
+- **Uncommitted:** all of S5-7, plus the S5-C-headers bookkeeping (Now hash, corrected reviewer memory);
+  one commit.
 
 ## Local verification
 

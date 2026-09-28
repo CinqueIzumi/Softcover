@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveAllBookDeadlinesUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.DismissPlanTodayUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
@@ -30,6 +31,7 @@ internal data class ReadingScreenDependencies(
     val refreshLibraryUseCase: RefreshLibraryUseCase,
     val recordBookProgressUseCase: RecordBookProgressUseCase,
     val observeAllBookDeadlinesUseCase: ObserveAllBookDeadlinesUseCase,
+    val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val observePlanTodayDismissalsUseCase: ObservePlanTodayDismissalsUseCase,
     val dismissPlanTodayUseCase: DismissPlanTodayUseCase,

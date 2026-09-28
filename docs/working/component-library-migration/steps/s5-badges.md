@@ -9,8 +9,30 @@
 
 | Sub | Scope | Status |
 |---|---|---|
-| S5-7 | The remaining badge/overlay call sites, `deadlineProgressByBook`, the deadline-trio visual pass | [ ] |
+| S5-7 | The remaining badge/overlay call sites, `deadlineProgressByBook`, the deadline-trio visual pass | [x] |
 | S5-C-badges | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
+
+## Approved shape
+
+- `BadgeUiModel` gains `icon: SoftcoverIcon? = null`, rendered decorative (the label announces).
+- `BadgeTone` becomes a colour axis: `Primary`, `PrimaryContainer`, `ErrorContainer`, `Muted`, `Neutral`
+  (`surfaceContainerHigh`/`onSurfaceVariant`), `Scrim` (black 0.55 / white); meaning lives in the mappers.
+- `BadgeVariant` adds `GridCountdown` (8/4, 6dp, SemiBold, 11dp icon), `OwnedCover` (8/4, 8dp, Bold, 14dp
+  icon), `TrackingTag` (9/4, pill, SemiBold, 0.6sp tracking); today's metrics kept, collapse deferred to S5-C.
+- `LibraryDeadlineCountdownBadge`, `OwnedCoverBadge`, `TrackingNowChip` fold onto `Badge`.
+- `CoverOverlayUiModel` gains `variant`: `ReadingStatus` (TopEnd, 6dp) / `LibraryCountdown` (TopStart, 8dp);
+  `LibraryGridCover` folds onto it. Countdown mapper feature-local in library `presentation/mapper/`.
+- Owned hero badge stays a caller-placed `Badge` (nav-transition fade is composition-only).
+- New `SelectionMark` in `core/component/selection/`: `SelectionMarkUiModel(selected, variant)`, variants
+  `OnCover` (26dp, surface 0.72) / `RowLeading` (24dp, `surfaceContainerHigh`) / `EditionCard` (24dp);
+  announces selected state. Replaces `SelectionCircleIndicator` and `SelectedCheckBadge`.
+- S7-1 answer: selection becomes `BookCardDecorations.selection: SelectionMarkUiModel?` (null = not in
+  selection mode), not a `CoverUiModel` field. Library per-book marks built in a collector now.
+- `selectedEdition` hoisted from composition into `BookDetailUiState`.
+- Stay out: `BookmarkGlyph` (S6-1, add PARTIAL description), `CoverGridOverlay` (S7-2), `GripOrPinGlyph`
+  (S6-1 with `ReorderableRow`), `FolioIndicator` (feature-local, pager-driven).
+- `deadlineProgressByBook` deleted in library and reading; reading's plan-today nudge + dismissal check move
+  into `DeadlineModelsCollector` as `featuredPlanTodayMessage: String?`.
 
 ## S5-7 — inventory
 

@@ -47,6 +47,7 @@ val readingModule = module {
             refreshLibraryUseCase = get(),
             recordBookProgressUseCase = get(),
             observeAllBookDeadlinesUseCase = get(),
+            observeCurrentDateUseCase = get(),
             getDateStyleAsFlowUseCase = get(),
             observePlanTodayDismissalsUseCase = get(),
             dismissPlanTodayUseCase = get(),

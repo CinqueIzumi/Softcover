@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.BadgeVariant
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayVariant
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.badge.DeadlineSummaryUiModel
@@ -51,6 +52,9 @@ import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.selection.SelectionMark
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkVariant
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.QuoteShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
@@ -128,8 +132,8 @@ object GalleryRegistry {
         galleryEntry(
             name = "CoverOverlay",
             family = GalleryFamily.BADGE,
-            blurb = "A Badge pinned to a cover's top-end corner, with the cover itself optionally " +
-                "desaturated — a reading deadline's status laid over its book.",
+            blurb = "A Badge pinned to one of a cover's corners, with the cover itself optionally " +
+                "desaturated — a reading deadline's status, or a countdown, laid over its book.",
             previews = CoverOverlayUiModel,
             label = ::coverOverlayFixtureLabel,
             content = { model, modifier ->
@@ -142,6 +146,20 @@ object GalleryRegistry {
                         modifier = Modifier.width(BADGE_COVER_FIXTURE_WIDTH),
                     )
                 }
+            },
+        ),
+        galleryEntry(
+            name = "SelectionMark",
+            family = GalleryFamily.SELECTION,
+            blurb = "A circular selection mark — filled with a check when selected, an empty ring " +
+                "otherwise — for a library grid cover, a row's leading indicator, or an edition card.",
+            previews = SelectionMarkUiModel,
+            label = ::selectionMarkFixtureLabel,
+            content = { model, modifier ->
+                SelectionMark(
+                    model = model,
+                    modifier = modifier,
+                )
             },
         ),
         galleryEntry(
@@ -428,14 +446,18 @@ private fun chipFixtureLabel(model: ChipUiModel): String = when {
 
 private const val CHIP_LONG_LABEL_FLOOR = 30
 
-/** Names what a [BadgeUiModel] fixture demonstrates — its tone, or its variant when that differs. */
-private fun badgeFixtureLabel(model: BadgeUiModel): String = when {
-    model.variant == BadgeVariant.FeaturedRelease -> "Release, featured (larger pad)"
-    else -> when (model.tone) {
-        BadgeTone.OnTrack -> "On track"
-        BadgeTone.Behind -> "Behind"
-        BadgeTone.Expired -> "Expired"
-        BadgeTone.Release -> "Release"
+/** Names what a [BadgeUiModel] fixture demonstrates — its variant when that differs, else its tone. */
+private fun badgeFixtureLabel(model: BadgeUiModel): String = when (model.variant) {
+    BadgeVariant.FeaturedRelease -> "Release, featured (larger pad)"
+    BadgeVariant.TrackingTag -> "Tracking tag"
+    BadgeVariant.OwnedCover -> "Owned cover, with icon"
+    BadgeVariant.GridCountdown -> "Grid countdown, with icon"
+    BadgeVariant.Standard -> when (model.tone) {
+        BadgeTone.PrimaryContainer -> "On track"
+        BadgeTone.ErrorContainer -> "Behind"
+        BadgeTone.Muted -> "Expired"
+        BadgeTone.Primary -> "Release"
+        BadgeTone.Neutral, BadgeTone.Scrim -> model.label
     }
 }
 
@@ -453,9 +475,23 @@ private fun pageMastheadFixtureLabel(model: PageMastheadUiModel): String = when 
     else -> "Regular"
 }
 
-/** Names what a [CoverOverlayUiModel] fixture demonstrates — whether the cover desaturates. */
-private fun coverOverlayFixtureLabel(model: CoverOverlayUiModel): String =
-    if (model.grayscale) "Expired (grayscale cover)" else "On track"
+/** Names what a [CoverOverlayUiModel] fixture demonstrates — its variant, or grayscale when that differs. */
+private fun coverOverlayFixtureLabel(model: CoverOverlayUiModel): String = when {
+    model.variant == CoverOverlayVariant.LibraryCountdown -> "Library countdown (top-start)"
+    model.grayscale -> "Expired (grayscale cover)"
+    else -> "On track"
+}
+
+/** Names what a [SelectionMarkUiModel] fixture demonstrates — its variant and selected state. */
+private fun selectionMarkFixtureLabel(model: SelectionMarkUiModel): String {
+    val surface = when (model.variant) {
+        SelectionMarkVariant.OnCover -> "On cover"
+        SelectionMarkVariant.RowLeading -> "Row leading"
+        SelectionMarkVariant.EditionCard -> "Edition card"
+    }
+
+    return if (model.selected) "$surface, selected" else "$surface, unselected"
+}
 
 /** Names what a [DeadlineSummaryUiModel] fixture demonstrates, derived from its anatomy branch. */
 private fun deadlineSummaryLineFixtureLabel(model: DeadlineSummaryUiModel): String = when {

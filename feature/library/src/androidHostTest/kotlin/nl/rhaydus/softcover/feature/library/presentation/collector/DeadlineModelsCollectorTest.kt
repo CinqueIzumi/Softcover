@@ -140,7 +140,7 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgressByBook.keys shouldBe setOf(1)
+            stateFlow.value.deadlineCountdownOverlays.keys shouldBe setOf(1)
             stateFlow.value.deadlineBadges.keys shouldBe setOf(1)
             stateFlow.value.deadlineSummaries.keys shouldBe setOf(1)
             stateFlow.value.deadlineSummaries.getValue(1).paceText shouldBe "10 pages/day"
@@ -170,7 +170,7 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgressByBook shouldBe emptyMap()
+            stateFlow.value.deadlineCountdownOverlays shouldBe emptyMap()
             stateFlow.value.deadlineBadges shouldBe emptyMap()
             stateFlow.value.deadlineSummaries shouldBe emptyMap()
             job.cancel()
@@ -203,7 +203,7 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgressByBook shouldBe emptyMap()
+            stateFlow.value.deadlineCountdownOverlays shouldBe emptyMap()
             job.cancel()
         }
 
@@ -307,7 +307,7 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgressByBook.keys shouldBe setOf(1)
+            stateFlow.value.deadlineCountdownOverlays.keys shouldBe setOf(1)
             job.cancel()
         }
     }

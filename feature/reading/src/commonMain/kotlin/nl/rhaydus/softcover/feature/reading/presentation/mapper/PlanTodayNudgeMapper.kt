@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.reading.presentation.screen
+package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit

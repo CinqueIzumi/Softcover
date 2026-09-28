@@ -15,7 +15,12 @@ internal class OnShowEditEditionSheetClickAction : BookDetailAction {
         val bookId = scope.currentState.book?.id ?: return
         val alreadyLoaded = scope.currentLocalVariables.editionsLoadedForBookId == bookId
 
-        scope.setState { it.copy(showEditEditionSheet = true) }
+        scope.setState {
+            it.copy(
+                showEditEditionSheet = true,
+                selectedEditionId = it.displayedEdition?.id,
+            )
+        }
 
         if (alreadyLoaded) return
 

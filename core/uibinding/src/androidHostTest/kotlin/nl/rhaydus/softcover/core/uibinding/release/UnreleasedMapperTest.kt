@@ -22,7 +22,7 @@ class UnreleasedMapperTest {
         // ----- Assert -----
         result shouldBe BadgeUiModel(
             label = "Out Sep 2",
-            tone = BadgeTone.Release,
+            tone = BadgeTone.Primary,
             variant = BadgeVariant.Standard,
         )
     }
@@ -35,7 +35,7 @@ class UnreleasedMapperTest {
         // ----- Assert -----
         result shouldBe BadgeUiModel(
             label = "Releases September 2, 2026",
-            tone = BadgeTone.Release,
+            tone = BadgeTone.Primary,
             variant = BadgeVariant.Standard,
         )
     }
@@ -48,7 +48,7 @@ class UnreleasedMapperTest {
         // ----- Assert -----
         result shouldBe BadgeUiModel(
             label = "Arriving Sep 2",
-            tone = BadgeTone.Release,
+            tone = BadgeTone.Primary,
             variant = BadgeVariant.FeaturedRelease,
         )
     }

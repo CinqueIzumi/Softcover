@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
@@ -160,14 +159,8 @@ private fun DesktopReadingContent(
     val featured = state.books.first()
     val rest = state.books.drop(1)
 
-    val today = remember { currentLocalDate().toString() }
-
     val isInspection = LocalInspectionMode.current
     val prefetcher = if (isInspection) null else rememberBookDetailPrefetcher()
-
-    val featuredDeadlineProgress = state.deadlineProgressByBook[featured.id]
-    val planTodayMessage = planTodayNudgeFor(progress = featuredDeadlineProgress)
-    val isPlanTodayDismissed = state.dismissedPlanTodayByBook[featured.id] == today
 
     Box(modifier = modifier) {
         CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
@@ -185,7 +178,7 @@ private fun DesktopReadingContent(
                     deadlineSummary = state.featuredDeadlineSummary,
                     mutationFailed = featured.id in state.failedMutationBookIds,
                     paceForecast = state.featuredBookPace,
-                    planTodayMessage = planTodayMessage.takeIf { isPlanTodayDismissed.not() },
+                    planTodayMessage = state.featuredPlanTodayMessage,
                     onDismissPlanToday = {
                         runAction(OnDismissPlanTodayAction(bookId = featured.id))
                     },

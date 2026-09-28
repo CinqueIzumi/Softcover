@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.reading.presentation.screen
+package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.DateTimeUnit
@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class PlanTodayNudgeTest {
+class PlanTodayNudgeMapperTest {
     private fun buildProgress(
         daysRemaining: Long = 5L,
         unitsRemaining: Int = 50,

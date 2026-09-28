@@ -4,18 +4,18 @@ Shared components; a `detail` link opens the family file holding the full contra
 
 ## Navigation & chrome
 
-- **Top app bar** — `core:component/topbar` — page title, optional back/trailing actions, opaque or over-media.
+- **Top app bar** — `core:component/topbar` — page title, back/trailing actions, opaque or over-media.
 - **Search top app bar** — `core:component/topbar` — mobile search chrome.
 - **Section header** — `core:component/header` — region opener in three accent-bar registers.
 - **Page masthead** — `core:component/header` — a page's own title block.
 - **Masthead refresh action** — `core:component/header` — masthead trailing refresh button.
-- **Editorial search field** — [detail](components/navigation.md#editorial-search-field) — persistent inline search pill for editorial headers.
+- **Editorial search field** — [detail](components/navigation.md#editorial-search-field) — persistent search pill for editorial headers.
 - **Bottom navigation** — [detail](components/navigation.md#bottom-navigation) — compact-width tab chrome, docked or floating.
 - **Navigation rail** — [detail](components/navigation.md#navigation-rail) — medium-width tab chrome.
-- **Editorial sidebar** — [detail](components/navigation.md#editorial-sidebar) — expanded-width permanent tab chrome.
-- **Session peek bar** — [detail](components/navigation.md#session-peek-bar) — live-timer bar for an active session.
-- **Settings menu row** — [detail](components/navigation.md#settings-menu-row) — hairline-separated navigational menu row anatomy.
-- **About link/username row** — [detail](components/navigation.md#about-linkusername-row) — leaf-action variant of the settings row.
+- **Editorial sidebar** — [detail](components/navigation.md#editorial-sidebar) — expanded-width tab chrome.
+- **Session peek bar** — [detail](components/navigation.md#session-peek-bar) — live-timer bar for a session.
+- **Settings menu row** — [detail](components/navigation.md#settings-menu-row) — hairline-separated menu-row anatomy.
+- **About link/username row** — [detail](components/navigation.md#about-linkusername-row) — leaf-action settings-row variant.
 
 ## Buttons & controls
 
@@ -25,7 +25,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 - **Theme preview tile** — `core:component/control` — miniature-page choice control for the theme picker.
 - **Preview tile frame** — `core:component/control` — the tiles' internal frame primitives.
 - **Colour palette preview tile** — `core:component/control` — miniature-page choice control for the spine-colour picker.
-- **Bookmark toggle** — [detail](components/buttons-controls.md#bookmark-toggle) — inline add/remove-from-library row control.
+- **Bookmark toggle** — [detail](components/buttons-controls.md#bookmark-toggle) — inline add/remove-library row control.
 - **Swipe row actions** — [detail](components/buttons-controls.md#swipe-row-actions) — swipe-to-mark-as-read / swipe-to-remove.
 
 ## Chips
@@ -35,20 +35,21 @@ Shared components; a `detail` link opens the family file holding the full contra
 
 ## Covers
 
-- **Cover** — `core:component/cover` — the only way the app draws a book cover; variant-driven, never blank.
+- **Cover** — `core:component/cover` — the app's only book-cover renderer; variant-driven, never blank.
 - **Coverless title cover** — `core:component/cover` — the monogram/title jacket `Cover` falls back to.
 - **Rhaydus shimmer image** — [detail](components/covers.md#rhaydus-shimmer-image) — the loader for every non-cover image.
 
 ## States & feedback
 
 - **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error slot.
-- **Banner** — `core:component/callout` — full-width slide-in chrome reporting a screen-level condition.
+- **Banner** — `core:component/callout` — full-width slide-in chrome for a screen-level condition.
 - **Empty state** — `core:component/state` — centred headline-and-body placeholder for missing content.
 - **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — the exception to the wavy-progress rule.
 - **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.
 - **Deadline badge / cover overlay / summary line** — `core:component/badge` — deadline status marks.
-- **Unreleased badge** — [detail](components/states-feedback.md#unreleased-badge) — `Badge`/`Release` mark for a book not yet out.
-- **Mark-as-read celebration** — `core:component/celebration` — particle-burst hero moment for a mark-as-read commit.
+- **Unreleased badge** — [detail](components/states-feedback.md#unreleased-badge) — `Badge`/`Primary` mark for a book not yet out.
+- **Selection mark** — `core:component/selection` — selected-state circle mark for a cover, row or edition card.
+- **Mark-as-read celebration** — `core:component/celebration` — particle-burst on a mark-as-read commit.
 - **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.
 - **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner` + `EmptyState` + `rememberIsOnline()`.
 - **Update highlight card** — [detail](components/states-feedback.md#update-highlight-card) — Settings app-update `primaryContainer` callout.
@@ -57,7 +58,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 
 - **Loading sheet** — `core:component/sheet` — full-screen blocking wavy-progress surface for an unavoidable wait.
 - **Date picker dialog** — `core:component/dialog` — single-day calendar dialog; owns the UTC-millis conversion.
-- **Update progress sheet** — `core:component/progress` — the pages/percentage/time reading-progress editor sheet.
+- **Update progress sheet** — `core:component/progress` — pages/percentage/time reading-progress editor.
 - **Because-you-read genre picker** (feature-owned) — [detail](components/sheets.md#because-you-read-genre-picker) — genre-override sheet.
 - **Tag editor sheet** (feature-local) — [detail](components/sheets.md#tag-editor-sheet) — manages the user's own tags on a book.
 - **Choose-lists sheet** — `core:component/lists` — add/remove one or many books to the user's custom lists.
@@ -65,12 +66,12 @@ Shared components; a `detail` link opens the family file holding the full contra
 
 ## Statistics
 
-- **Animated stat number** — `core:component/statistic` — renders a numeric stat that tweens in place.
+- **Animated stat number** — `core:component/statistic` — tweens a numeric stat into place.
 - **Editorial figure / chart** (feature-local) — [detail](components/statistics.md#editorial-figure--chart) — five hand-drawn monochrome charts.
 
 ## Share
 
-- **Share card** — `core:component/share` — renders any share artefact (book, stat, quote, recap) into one composition.
+- **Share card** — `core:component/share` — one renderer for every share artefact (book, stat, quote, recap).
 
 ## Rich text
 
@@ -86,7 +87,7 @@ Shared components; a `detail` link opens the family file holding the full contra
 - **Verdict sheet** — `core:component/verdict` — the combined rating-and-review surface.
 - **Verdict block** — `core:component/verdict` — the book-page rating+review card that opens the verdict sheet.
 - **Personal review section** — [detail](components/editorial.md#personal-review-section) — book-detail entry point into the review editor.
-- **Browse-by-mood grid** (feature-owned) — [detail](components/editorial.md#browse-by-mood-grid) — the 2-column mood-tile grid.
+- **Browse-by-mood grid** (feature-owned) — [detail](components/editorial.md#browse-by-mood-grid) — 2-column mood-tile grid.
 
 ## Platform helpers
 

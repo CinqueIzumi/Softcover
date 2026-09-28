@@ -15,6 +15,7 @@ internal class OnDismissEditEditionSheetClickAction : BookDetailAction {
             it.copy(
                 showEditEditionSheet = false,
                 editionSearchQuery = "",
+                selectedEditionId = null,
             )
         }
     }

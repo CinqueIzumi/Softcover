@@ -19,6 +19,8 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.selection.SelectionMark
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -28,8 +30,7 @@ internal fun CompactRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
-    isSelectionMode: Boolean = false,
-    isSelected: Boolean = false,
+    selectionMark: SelectionMarkUiModel? = null,
     deadlineBadge: BadgeUiModel? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
@@ -48,8 +49,8 @@ internal fun CompactRow(
                 .padding(vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (isSelectionMode) {
-                SelectionLeadingIcon(isSelected = isSelected)
+            if (selectionMark != null) {
+                SelectionMark(model = selectionMark)
 
                 Spacer(modifier = Modifier.width(12.dp))
             }
