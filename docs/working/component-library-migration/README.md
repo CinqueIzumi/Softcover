@@ -14,12 +14,13 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** the S6 row family is done and committed (`aa1ffef1`, S6-C-rows: `Sidebar` / `SidebarUiModel<K>`,
-  the `SettingsRow` scaffold + `SettingsRowGroup`, UiState-held row models). Mood tile → S7-4; 14
-  Apollo-alias files wait on F24.
-- **Next:** the S6 sheet-chrome Workflow run. Part 1 is approved (`steps/s6-sheet-chrome.md` § Run
-  mode; family-procedure § Workflow mode). First commit the workflow-mode doc edits, so the tree is
-  clean for the preflight.
+- **State:** the S6 row family is committed (`aa1ffef1`). S6 sheet chrome Part 1 is approved and
+  committed (`405ee525`): `steps/s6-sheet-chrome.md` § Approved shape. Workflow mode and
+  `step.workflow.js` are in place for S6–S11. Mood tile → S7-4; 14 Apollo-alias files wait on F24.
+- **Next:** start the S6 run: auto mode, then Workflow with `scriptPath:
+  docs/working/component-library-migration/step.workflow.js` and the args in
+  `steps/s6-sheet-chrome.md` § Run mode (`family-procedure.md` § Workflow mode). The user has opted in.
+  The run needs more agents than the default guideline; say so when starting it.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** should chip keys get the same typed-key treatment as the sidebar, as a tracked step?
@@ -34,9 +35,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
   (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`;
   S6-C-rows' settings rows (16dp vertical everywhere, 4dp title gap, top rule and press feedback on
   toggle / choice lists).
-- **Verification:** S6-C-rows: compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`
-  and the sidebar / mapper / collector suites pass under JBR 21. Reviewer: no blockers.
-- **Uncommitted:** nothing.
+- **Verification:** the snapshot commands were tested (they capture untracked files, and leave the branch and
+  index untouched). `step.workflow.js` syntax-checks clean, but it has never run. Last Gradle gate: S6-C-rows,
+  green.
+- **Uncommitted:** this `## Now` block only.
 
 ## Local verification
 
