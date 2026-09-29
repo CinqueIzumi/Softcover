@@ -15,11 +15,13 @@ checkboxes in step with `## Steps` and `## Gates` here.
 ## Now
 
 - **State:** S6 Phase 1 is approved and S6-2 is audited; `steps/s6-list-rows.md` § Approved shape has
-  both. S6-1 slice A (`core/component/sidebar/`, typed `SidebarRowUiModel<K>`) is done and reviewed.
+  both. S6-1 slice A (`core/component/sidebar/`, typed `SidebarRowUiModel<K>`) is committed (`10415f15`).
   Mood tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** S6-1 slice B per § Approved shape: merge `SettingsMenuRow` + the `AboutRow` family into one
-  settings-local row (ask the user for its single press treatment first), then the row semantics fixes,
-  then `components.md`'s settings/About lines. JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **Next:** S6-1 slice B, the row semantics fixes (`steps/s6-list-rows.md` § Approved shape):
+  `SettingsToggleRow` becomes a `Role.Switch` whole-row toggle and `SettingsSelectableRow` becomes a
+  `Role.RadioButton` `selectable`; then `SearchFocusRecentRow`'s 15dp remove target and selected
+  semantics on `SidebarItem`. The merged `SettingsMenuRow` (interactive rows only) may need
+  `Role.Button`. JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** should chip keys get the same typed-key treatment as the sidebar, as a tracked step?
@@ -34,14 +36,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
   (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`.
 - **Verification:** slice A, after the review fixes: compile, `styleCheck` and `checkModuleGraph` pass,
   and the sidebar and `OnSettingsCategorySelectedAction` host tests pass.
-- **Uncommitted:** S6-1 slice A:
-  - the `core/component/sidebar/` package and its gallery entry;
-  - settings sidebar state, action, mapper, key and model, with `SettingsCategory` moved to commonMain;
-  - the library sidebar collector and state;
-  - three new test files;
-  - `components.md` / `module-structure.md`;
-  - tracker and step docs;
-  - one reviewer memory.
+- **Uncommitted:** the S6-1 slice B row merge. It is one internal commonMain `SettingsMenuRow` +
+  `SettingsRowAccessory` (`feature/settings/.../screen/section/`) replacing mobile's `SettingsMenuRow`
+  and the `AboutRow` family. Decided with the user: scale + `surfaceContainer` wash + hand cursor on both
+  surfaces, and the gloss wraps. The accessory is standardised at 20dp, the leading icon is decorative
+  (`""`), and `navigation.md` / `components.md` / `patterns/settings.md` are updated. Reviewed; compile +
+  `styleCheck` pass.
 
 ## Local verification
 

@@ -7,3 +7,4 @@
 - [:app lacks toad/voyager-koin by default](feedback_app_module_lacks_toad_voyager_koin.md) — add both to debugImplementation before wiring a TOAD ScreenModel into an app/src/debug screen; also detekt task is `detektDebug`, not `detektAndroidDebug`
 - [Component migration can drop more than the flagged style](project_component_migration_style_drops.md) — diff old vs new for every property (color, weight, size, spacing), not just the one named in the brief
 - [Style table needs one type per file](feedback_style_table_one_type_per_file.md) — split an ink/token sealed type from its style data class into two files, or ktlintCheck fails one-type-per-file late
+- [MatchingDeclarationName ignores sibling functions](feedback_matching_declaration_name_ignores_sibling_functions.md) — a lone enum in a composable's file fails detekt even with no second type; give it its own file

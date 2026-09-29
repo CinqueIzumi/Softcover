@@ -19,7 +19,9 @@ S6-1 (approved 2026-09-30):
   own radius, icon, type role, badge and pulse.
 - `SettingsMenuRow` and `AboutRow` (with `AboutLinkRow`, `AboutNavigationRow`, `AboutUsernameRow`)
   merge into one settings-local row in `commonMain`, not into `:core:component`: no other feature uses
-  the anatomy. Its one open decision is a single press treatment for both surfaces.
+  the anatomy. Press treatment (decided 2026-09-30): `SettingsMenuRow`'s press-scale plus the animated
+  `surfaceContainer` wash (gated on `playDecorativeMotion()`) on both surfaces, with `pointerHandCursor`.
+  The gloss wraps rather than truncating. Built as `SettingsMenuRow` + `SettingsRowAccessory`.
 - `SettingsToggleRow` / `SettingsSelectableRow` stay separate. They get toggle and selection semantics
   (a `Role.Switch` whole-row toggle, and `Role.RadioButton` `selectable`).
 - Stay as they are: `ChooseListsRow` (already model-driven and private to its sheet), `NewListRow` (its
