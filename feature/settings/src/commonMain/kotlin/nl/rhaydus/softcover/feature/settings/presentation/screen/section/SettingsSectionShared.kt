@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen.section
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,16 +9,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.designsystem.modifier.noRippleClickable
+import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -43,9 +48,19 @@ internal fun SettingsToggleRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .pointerHandCursor()
+            .toggleable(
+                value = checked,
+                interactionSource = interactionSource,
+                indication = null,
+                role = Role.Switch,
+                onValueChange = onCheckedChange,
+            )
             .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -69,7 +84,7 @@ internal fun SettingsToggleRow(
 
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = null,
         )
     }
 }
@@ -84,13 +99,21 @@ internal fun SettingsSelectableRow(
     label: String,
     example: String?,
     isSelected: Boolean,
-    checkContentDescription: String,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .noRippleClickable(onClick = onClick)
+            .pointerHandCursor()
+            .selectable(
+                selected = isSelected,
+                interactionSource = interactionSource,
+                indication = null,
+                role = Role.RadioButton,
+                onClick = onClick,
+            )
             .padding(vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -124,7 +147,7 @@ internal fun SettingsSelectableRow(
 
             val checkIcon = drawableIconResource(
                 icon = SoftcoverIcon.Check,
-                contentDescription = checkContentDescription,
+                contentDescription = "",
             )
 
             Icon(

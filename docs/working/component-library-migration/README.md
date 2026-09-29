@@ -14,14 +14,15 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S6 Phase 1 is approved and S6-2 is audited; `steps/s6-list-rows.md` § Approved shape has
-  both. S6-1 slice A (`core/component/sidebar/`, typed `SidebarRowUiModel<K>`) is committed (`10415f15`).
-  Mood tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** S6-1 slice B, the row semantics fixes (`steps/s6-list-rows.md` § Approved shape):
-  `SettingsToggleRow` becomes a `Role.Switch` whole-row toggle and `SettingsSelectableRow` becomes a
-  `Role.RadioButton` `selectable`; then `SearchFocusRecentRow`'s 15dp remove target and selected
-  semantics on `SidebarItem`. The merged `SettingsMenuRow` (interactive rows only) may need
-  `Role.Button`. JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S6-1 and S6-2 are done. Sidebar (`10415f15`) and the settings row merge (`c5d43d29`) are
+  committed. The row semantics fixes are uncommitted. They make `SettingsToggleRow` a whole-row
+  `Role.Switch` toggle, make `SettingsSelectableRow` a `Role.RadioButton` `selectable` in a
+  `selectableGroup`, and give `SettingsMenuRow` `Role.Button`. `SearchFocusRecentRow`'s remove target is
+  now a sibling ≥48dp box, and `SidebarItem` is a `Role.Tab` `selectable` in a `selectableGroup`. Mood
+  tile → S7-4; 14 Apollo-alias files wait on F24.
+- **Next:** S6-C-rows, the convergence pass over the row family (`family-procedure.md` § Phase 3,
+  `steps/s6-list-rows.md`). Then `steps/s6-sheet-chrome.md`, which needs a clean tree first. JBR 21
+  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** should chip keys get the same typed-key treatment as the sidebar, as a tracked step?
@@ -34,14 +35,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
   visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
   cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`; S5-C-dividers' quote-glyph gap
   (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`.
-- **Verification:** slice A, after the review fixes: compile, `styleCheck` and `checkModuleGraph` pass,
-  and the sidebar and `OnSettingsCategorySelectedAction` host tests pass.
-- **Uncommitted:** the S6-1 slice B row merge. It is one internal commonMain `SettingsMenuRow` +
-  `SettingsRowAccessory` (`feature/settings/.../screen/section/`) replacing mobile's `SettingsMenuRow`
-  and the `AboutRow` family. Decided with the user: scale + `surfaceContainer` wash + hand cursor on both
-  surfaces, and the gloss wraps. The accessory is standardised at 20dp, the leading icon is decorative
-  (`""`), and `navigation.md` / `components.md` / `patterns/settings.md` are updated. Reviewed; compile +
-  `styleCheck` pass.
+- **Verification:** the semantics fixes, after the review fixes: `:feature:settings`, `:feature:explore`
+  and `:orchestration` JVM compile and `styleCheck` pass. No tests: semantics only, no logic.
+- **Uncommitted:** the S6-1 semantics fixes (6 Kotlin files) and this block. `steps/s6-sheet-chrome.md`
+  has a concurrent edit that is not part of this step.
 
 ## Local verification
 

@@ -45,7 +45,7 @@ S6-2 (approved 2026-09-30), audited, not built:
 
 | Sub | Scope | Status |
 |---|---|---|
-| S6-1 | `SidebarRow`, the settings menu-row merge, the row semantics fixes | [ ] |
+| S6-1 | `SidebarRow`, the settings menu-row merge, the row semantics fixes | [x] |
 | S6-2 | Audit of the remaining features; nothing to build (see `## Approved shape`) | [x] |
 | S6-C-rows | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 

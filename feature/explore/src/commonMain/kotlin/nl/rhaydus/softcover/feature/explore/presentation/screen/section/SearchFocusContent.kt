@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -11,18 +12,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
@@ -114,48 +116,62 @@ private fun SearchFocusRecentRow(
 ) {
     Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .pointerHandCursor()
-                .clickable(onClick = onClick)
-                .padding(vertical = 12.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(13.dp),
         ) {
-            val clockIcon = drawableIconResource(
-                icon = SoftcoverIcon.History,
-                contentDescription = "",
-            )
-
-            Icon(
-                painter = clockIcon.getIconPainter(),
-                contentDescription = clockIcon.contentDescription,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp),
-            )
-
-            Text(
-                text = query,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            val closeIcon = drawableIconResource(
-                icon = SoftcoverIcon.Close,
-                contentDescription = "Remove query",
-            )
-
-            Icon(
-                painter = closeIcon.getIconPainter(),
-                contentDescription = closeIcon.contentDescription,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            Row(
                 modifier = Modifier
-                    .size(15.dp)
-                    .noRippleClickable(onClick = onRemoveClick),
-            )
+                    .weight(1f)
+                    .pointerHandCursor()
+                    .clickable(onClick = onClick)
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(13.dp),
+            ) {
+                val clockIcon = drawableIconResource(
+                    icon = SoftcoverIcon.History,
+                    contentDescription = "",
+                )
+
+                Icon(
+                    painter = clockIcon.getIconPainter(),
+                    contentDescription = clockIcon.contentDescription,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp),
+                )
+
+                Text(
+                    text = query,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                    .pointerHandCursor()
+                    .clickable(
+                        role = Role.Button,
+                        onClick = onRemoveClick,
+                    ),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                val closeIcon = drawableIconResource(
+                    icon = SoftcoverIcon.Close,
+                    contentDescription = "Remove query",
+                )
+
+                Icon(
+                    painter = closeIcon.getIconPainter(),
+                    contentDescription = closeIcon.contentDescription,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(15.dp),
+                )
+            }
         }
 
         Divider(model = DividerUiModel.Horizontal())

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,18 +26,19 @@ internal fun DateStyleSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        DateStyle.entries.forEachIndexed { index, style ->
-            if (index > 0) {
-                Divider(model = DividerUiModel.Horizontal())
-            }
+        Column(modifier = Modifier.selectableGroup()) {
+            DateStyle.entries.forEachIndexed { index, style ->
+                if (index > 0) {
+                    Divider(model = DividerUiModel.Horizontal())
+                }
 
-            SettingsSelectableRow(
-                label = style.label,
-                example = state.dateStyleExamples[style].orEmpty(),
-                isSelected = state.userDateStyle == style,
-                checkContentDescription = "Current date format",
-                onClick = { runAction(OnDateStyleClickAction(style = style)) },
-            )
+                SettingsSelectableRow(
+                    label = style.label,
+                    example = state.dateStyleExamples[style].orEmpty(),
+                    isSelected = state.userDateStyle == style,
+                    onClick = { runAction(OnDateStyleClickAction(style = style)) },
+                )
+            }
         }
     }
 }

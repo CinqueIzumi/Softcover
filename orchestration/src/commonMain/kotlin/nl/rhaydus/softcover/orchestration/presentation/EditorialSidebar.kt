@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -28,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -71,7 +73,10 @@ internal fun EditorialSidebar(modifier: Modifier = Modifier) {
                 ),
             )
 
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(
+                modifier = Modifier.selectableGroup(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 navItems.forEach { item ->
                     val iconPainter = item.tab.options.icon ?: return@forEach
 
@@ -110,7 +115,11 @@ private fun SidebarItem(
             .fillMaxWidth()
             .clip(SIDEBAR_ITEM_SHAPE)
             .background(containerColor)
-            .clickable(onClick = onClick)
+            .selectable(
+                selected = item.selected,
+                role = Role.Tab,
+                onClick = onClick,
+            )
             .padding(
                 horizontal = 16.dp,
                 vertical = 12.dp,
