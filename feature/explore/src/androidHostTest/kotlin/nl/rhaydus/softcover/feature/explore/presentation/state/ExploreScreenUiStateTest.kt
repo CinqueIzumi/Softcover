@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.state.SkeletonVariant
 import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import org.junit.jupiter.api.Nested
@@ -223,60 +222,6 @@ class ExploreScreenUiStateTest {
             result shouldBe SectionHeaderUiModel.Inline(
                 eyebrow = "Most anticipated · next $FEATURED_RELEASE_WINDOW_DAYS days",
             )
-        }
-
-        @Test
-        fun `trendingSkeleton defaults to the ExploreRail variant`() {
-            // ----- Arrange & Act -----
-            val state = ExploreScreenUiState()
-
-            // ----- Assert -----
-            state.trendingSkeleton.variant shouldBe SkeletonVariant.ExploreRail
-        }
-
-        @Test
-        fun `seriesSkeleton defaults to the ExploreSeries variant`() {
-            // ----- Arrange & Act -----
-            val state = ExploreScreenUiState()
-
-            // ----- Assert -----
-            state.seriesSkeleton.variant shouldBe SkeletonVariant.ExploreSeries
-        }
-
-        @Test
-        fun `featuredSkeleton defaults to the ExploreFeatured variant`() {
-            // ----- Arrange & Act -----
-            val state = ExploreScreenUiState()
-
-            // ----- Assert -----
-            state.featuredSkeleton.variant shouldBe SkeletonVariant.ExploreFeatured
-        }
-
-        @Test
-        fun `becauseYouReadHeaderSkeleton defaults to the ExploreSectionHeader variant`() {
-            // ----- Arrange & Act -----
-            val state = ExploreScreenUiState()
-
-            // ----- Assert -----
-            state.becauseYouReadHeaderSkeleton.variant shouldBe SkeletonVariant.ExploreSectionHeader
-        }
-
-        @Test
-        fun `becauseYouReadSkeleton defaults to the ExploreRail variant`() {
-            // ----- Arrange & Act -----
-            val state = ExploreScreenUiState()
-
-            // ----- Assert -----
-            state.becauseYouReadSkeleton.variant shouldBe SkeletonVariant.ExploreRail
-        }
-
-        @Test
-        fun `moodTileSkeleton defaults to the ExploreMoodTile variant`() {
-            // ----- Arrange & Act -----
-            val state = ExploreScreenUiState()
-
-            // ----- Assert -----
-            state.moodTileSkeleton.variant shouldBe SkeletonVariant.ExploreMoodTile
         }
     }
 }

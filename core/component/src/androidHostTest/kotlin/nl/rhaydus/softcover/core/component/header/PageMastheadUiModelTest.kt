@@ -37,34 +37,4 @@ class PageMastheadUiModelTest {
             hasNoEyebrow shouldBe true
         }
     }
-
-    @Nested
-    inner class Defaults {
-        @Test
-        fun `size defaults to Regular`() {
-            // ----- Arrange & Act -----
-            val model = PageMastheadUiModel(title = "Title")
-
-            // ----- Assert -----
-            model.size shouldBe PageMastheadSize.Regular
-        }
-
-        @Test
-        fun `eyebrow defaults to null`() {
-            // ----- Arrange & Act -----
-            val model = PageMastheadUiModel(title = "Title")
-
-            // ----- Assert -----
-            model.eyebrow shouldBe null
-        }
-
-        @Test
-        fun `subtitle defaults to null`() {
-            // ----- Arrange & Act -----
-            val model = PageMastheadUiModel(title = "Title")
-
-            // ----- Assert -----
-            model.subtitle shouldBe null
-        }
-    }
 }

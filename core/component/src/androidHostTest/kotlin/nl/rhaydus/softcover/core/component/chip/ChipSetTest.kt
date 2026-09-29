@@ -107,25 +107,4 @@ class ChipSetTest {
             chipSet.isEmpty shouldBe false
         }
     }
-
-    @Nested
-    inner class Defaults {
-        @Test
-        fun `chips defaults to empty`() {
-            // ----- Arrange & Act -----
-            val chipSet = ChipSet<String>()
-
-            // ----- Assert -----
-            chipSet.chips shouldBe emptyList()
-        }
-
-        @Test
-        fun `payloadByKey defaults to empty`() {
-            // ----- Arrange & Act -----
-            val chipSet = ChipSet<String>()
-
-            // ----- Assert -----
-            chipSet.payloadByKey shouldBe emptyMap()
-        }
-    }
 }

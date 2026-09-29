@@ -40,31 +40,4 @@ class BadgeUiModelTest {
             withIcon.size shouldBe 2
         }
     }
-
-    @Nested
-    inner class Defaults {
-        @Test
-        fun `size defaults to Compact`() {
-            // ----- Arrange & Act -----
-            val model = BadgeUiModel(
-                label = "label",
-                tone = BadgeTone.Primary,
-            )
-
-            // ----- Assert -----
-            model.size shouldBe BadgeSize.Compact
-        }
-
-        @Test
-        fun `icon defaults to null`() {
-            // ----- Arrange & Act -----
-            val model = BadgeUiModel(
-                label = "label",
-                tone = BadgeTone.Primary,
-            )
-
-            // ----- Assert -----
-            model.icon shouldBe null
-        }
-    }
 }

@@ -14,17 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4 and every S5 divider sub-step done. S5-10 has been built on the reworked shape but
-  not committed: `DividerUiModel` is data-free with defaults, every site builds it inline, surfaces, style
-  tables and UiState divider fields are gone except `versionFooterDivider`, and § 7.4a carries the R10
-  exception. A new no-change-detector test rule is in `.claude/rules/tests.md`, the test-writer agent and
-  § 7.5. S5-T is a new step. Mood tile 104dp: `bookcard/MoodTileDimensions` (→ S7-4). 14 Apollo-alias files
-  wait on F24.
-- **Next:** the user commits S5-10 and ticks #275's S5 box. Then run S5-T (`steps/s5-test-prune.md`) before
-  S6. Gradle under JBR 21.
+- **State:** S0–S5 are done, S5-T included (75 change-detector tests pruned; 9 files deleted, 9 trimmed).
+  The no-change-detector test rule lives in `.claude/rules/tests.md`, `softcover-test-writer.md` and
+  contract § 7.5. Mood tile 104dp: `bookcard/MoodTileDimensions` (→ S7-4). 14 Apollo-alias files wait on F24.
+- **Next:** S6-1 in `steps/s6-list-rows.md` — Phase 1 (the `ListRow` design) is the user's, then
+  `softcover-implementer`. Gradle under JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
-- **Open questions:** `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
+- **Open questions:** tick #275's S5 box on GitHub. `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
   `dispatcherModule`; confirm or move that home. Confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
   titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
@@ -32,14 +29,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
   visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
   cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`; S5-C-dividers' quote-glyph gap
   (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`.
-- **Verification:** on JBR 21, `:app:assembleDebug`, `:desktopApp:compileKotlin`, `checkModuleGraph`,
-  `:feature:session:projectHealth`, `checkDocBudgets` and `styleCheck` passed. The full `testAndroidHostTest`
-  suites of `core:component`, the seven touched features and `orchestration` passed. Reviewer: ✅; both
-  minor findings are fixed.
-- **Uncommitted** (mostly staged): the S5-10 rework (the divider package, 4 files deleted, call sites in
-  `app/debug`, `core/component` and eight features, and `DesktopAppModule`'s `Render(host)` fix), the
-  contract § 7.4a / § 7.5, `patterns/library.md`, the tests rule, `softcover-test-writer.md`, a reviewer
-  memory, `steps/s5-dividers.md`, `steps/s5-test-prune.md`, `steps/s11-contract-retrofit.md` and this block.
+- **Verification:** on JBR 21 for S5-T, `testAndroidHostTest` of `core:component`, explore, library and
+  settings, and `styleCheck`, passed.
+- **Uncommitted:** S5-T — the pruned test files, `steps/s5-test-prune.md` deleted, test-writer memory, this
+  block.
 
 ## Local verification
 
@@ -80,7 +73,7 @@ every sub-step's Verify.
 | S5 | — (badges) | S5-7, S5-C-badges | [x] |
 | S5 | — (skeletons) | S5-8, S5-C-skeletons | [x] |
 | S5 | [steps/s5-dividers.md](steps/s5-dividers.md) | S5-9–S5-10 | [x] |
-| S5 | [steps/s5-test-prune.md](steps/s5-test-prune.md) | S5-T | [ ] |
+| S5 | — (test prune) | S5-T | [x] |
 | S6 | [steps/s6-list-rows.md](steps/s6-list-rows.md) | S6-1–S6-2 | [ ] |
 | S6 | [steps/s6-sheet-chrome.md](steps/s6-sheet-chrome.md) | S6-3–S6-7 | [ ] |
 | S7 | [steps/s7-bookcard.md](steps/s7-bookcard.md) | S7-1–S7-7 | [ ] |

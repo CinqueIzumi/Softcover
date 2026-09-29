@@ -5,8 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
-import nl.rhaydus.softcover.core.component.header.SectionHeaderTone
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
@@ -28,21 +26,6 @@ class LibraryVisibilitySettingsUiStateTest {
         every {
             this@mockk.books
         } returns List(bookCount) { mockk() }
-    }
-
-    @Nested
-    inner class LibraryTabsHeader {
-        @Test
-        fun `defaults to an Accent-tone Label with the Your tabs eyebrow`() {
-            // ----- Arrange & Act -----
-            val state = LibraryVisibilitySettingsUiState()
-
-            // ----- Assert -----
-            state.libraryTabsHeader shouldBe SectionHeaderUiModel.Label(
-                eyebrow = "Your tabs",
-                tone = SectionHeaderTone.Accent,
-            )
-        }
     }
 
     @Nested
