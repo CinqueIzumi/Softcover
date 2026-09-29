@@ -94,3 +94,74 @@ Then:
   rather than treating a split as free.
 - Hunting an unused import set: delete every import and let the compiler name what it cannot resolve,
   round by round, rather than eyeballing which imports are dead.
+
+## Workflow mode — a whole step file in one unattended run
+
+This is an alternative to one sub-step per session. A step file's `## Run mode` section says whether it
+fits and what changes for it.
+
+**Fits** when every build sub-step's design can be decided before any of them is built. **Does not fit**
+when a sub-step's design depends on what an earlier one reveals, or when the step mostly ends in user
+decisions.
+
+**Before.** The previous step file is committed, and the working tree is clean.
+
+**Part 1 — design (interactive, one session).**
+1. Run Phase 1 for every build sub-step at once. Fan the inventory out to parallel read-only `Explore`
+   agents, one per group of sub-steps. They report facts and divergences, not designs.
+2. Propose one combined design, and ask only the questions that are really the user's to decide.
+3. Record it in `## Approved shape`, complete enough that the workflow reads nothing else. Every symbol
+   in the inventory tables gets a line saying which part it adopts, or why it stays local. No open lines
+   may remain.
+4. Add `## How this step runs`, `## Deferred` and `## Convergence proposals` to the step file.
+
+**Part 2 — build (one Workflow).** The user opts in explicitly ("use a workflow"). The run is larger
+than the default ~10-agent guideline; say so when starting it.
+
+To start it, call Workflow with `scriptPath: docs/working/component-library-migration/step.workflow.js`
+and the `args` from the step file's `## Run mode`:
+- `stepFiles`: paths relative to this directory.
+- `subSteps`: the sub-step IDs, in build order.
+- `snapshotPrefix`: the snapshot refs go under `refs/<snapshotPrefix>-snapshots/`.
+- `convergence`: whether the Phase 3 audit runs at the end.
+
+Start it in auto mode. The project allowlist does not cover the Gradle, edit or snapshot commands, so
+in the default mode the run stalls at the first permission prompt.
+
+If a run stops, fix the cause. In the same session, relaunch with `resumeFromRunId`. From a new
+session, relaunch with the same `args`, with two changes: `subSteps` lists only the unfinished ones, and
+`resumeAfter` names the last finished sub-step. The review diff then starts from that sub-step's
+snapshot, and the clean-tree check is skipped. The script starts with a preflight:
+a clean tree, and no open lines left in `## Approved shape`.
+
+For each build sub-step, in order:
+1. `softcover-implementer`, briefed from `## Approved shape` and the sub-step's inventory.
+2. Verify (§ Phase 2).
+3. `softcover-test-writer`.
+4. `softcover-reviewer`, scoped to `git diff <previous snapshot>`. Blockers go back to the implementer,
+   for at most two rounds.
+5. Snapshot the tree, then tick the sub-step's row.
+
+The last agent runs the Phase 3 audit, writes `## Convergence proposals`, and stops.
+
+Run rules:
+- **No commits.** The run leaves one uncommitted diff. Each boundary is a snapshot tree, which touches
+  neither the branch nor the index:
+  ```
+  GIT_INDEX_FILE=<scratch>/idx git read-tree HEAD
+  GIT_INDEX_FILE=<scratch>/idx git add -A
+  git update-ref refs/<step>-snapshots/<sub-step> "$(GIT_INDEX_FILE=<scratch>/idx git write-tree)"
+  ```
+- **A symbol that does not fit** the approved shape stays local. It gets a `## Deferred` line, and the
+  run continues.
+- **The only hard stop:** a failing test whose diagnosis points at production behaviour. Test-side
+  fallout gets one fix round.
+- **Hands off:** the run never touches the README's `## Now` or `## Steps`, or the checkboxes on #275.
+
+**Part 3 — converge and close (interactive).**
+1. The user approves the convergence proposals, and they are built per § Phase 2.
+2. The user reviews the diff manually.
+3. After the user approves the commits, split the diff: for each snapshot in order, `git read-tree
+   refs/<step>-snapshots/<sub-step>`, then commit with a subject line only. The last commit takes the
+   convergence changes and the manual-review edits. Delete the snapshot refs afterwards.
+4. Tick #275, update the README, and delete the step file.

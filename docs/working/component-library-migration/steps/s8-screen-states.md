@@ -2,6 +2,14 @@
 
 **Stage:** S8 — Screen states. **Delegation:** user (Phase 1), `softcover-implementer` (Phase 2).
 
+## Run mode
+
+Workflow mode (`family-procedure.md` § Workflow mode). It can share one Part 1 session and one run with
+`steps/s8-controls.md`, since the families do not overlap: S8-1 to S8-6, then both Phase 3 audits.
+
+- **Args:** `{stepFiles: ["steps/s8-screen-states.md", "steps/s8-controls.md"], subSteps: ["S8-1",
+  "S8-2", "S8-3", "S8-4", "S8-5", "S8-6"], snapshotPrefix: "s8", convergence: true}`.
+
 ## Sub-steps
 
 | Sub | Scope | Status |

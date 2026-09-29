@@ -1,17 +1,169 @@
 # S6 — Sheet chrome
 
-**Stage:** S6 — Rows & sheet chrome. **Delegation:** user (Phase 1), `softcover-implementer` (Phase 2).
+**Stage:** S6 — Rows & sheet chrome. **Delegation:** user (Part 1, done), one Workflow (Part 2), user
+(Part 3). See § Run mode.
 
 Chrome only, extracted from 18 sheets into `SheetScaffold` + `SheetHeader` + `SheetRow` +
 `SheetFooter`. Each sheet's **body** stays a feature composable (`component-contract.md` § 7.6).
+
+## Run mode
+
+Workflow mode (`family-procedure.md` § Workflow mode).
+
+- **Before:** met. The S6 row family is committed, and `SheetRow` builds on its semantics and typed
+  keys (`Sidebar` / `SidebarUiModel<K>`).
+- **Part 1:** done. The approved design is in `## Approved shape` below.
+- **Part 2:** one run covers S6-3 to S6-7, then the Phase 3 audit. S6-3 builds the chrome parts, and
+  every later sub-step adopts them.
+- **Args:** `{stepFiles: ["steps/s6-sheet-chrome.md"], subSteps: ["S6-3", "S6-4", "S6-5", "S6-6",
+  "S6-7"], snapshotPrefix: "s6", convergence: true}`.
+- **A sheet that does not fit the approved chrome** keeps its chrome feature-local, with a
+  `## Deferred` line.
+
+## Approved shape
+
+Part 1 ran on 2026-09-30, and the user approved every point below.
+
+**Container.** Every sheet already uses the foundation's `AdaptiveModalSheet`. It owns the container:
+the sheet or panel form, the colour, the grabber, the insets and the animated dismiss. There is no
+container to extract.
+
+**`SheetScaffold` (public, `core/component/sheet/`).**
+- Signature: `SheetScaffold(model: SheetScaffoldUiModel, onEvent: (SheetScaffoldEvent) -> Unit, modifier,
+  content: @Composable ColumnScope.() -> Unit)`. It wraps `AdaptiveModalSheet`.
+- `SheetScaffoldUiModel`: `header: SheetHeaderUiModel`, `topAction: String?`,
+  `footer: SheetFooterUiModel?`, `layout: SheetLayout`, `dismissible: Boolean = true`.
+- `SheetScaffoldEvent`: `TopActionClicked`, `PrimaryClicked`, `SecondaryClicked`,
+  `HeaderActionClicked`, `Dismissed`.
+- `SheetLayout.Scrolling`: the whole sheet scrolls, and the footer comes at the end of the content.
+- `SheetLayout.Pinned`: the top action and the header stay fixed. The body is `weight(1f)` and owns its
+  own scroll or lazy list. The footer sticks, with a `Divider` above it.
+- One padding everywhere: h24, top 8, bottom 16. `imePadding` in both layouts.
+- `dismissible = false` sets both dismiss flags to false (`LoadingSheet`, `ReAuthDialog`).
+- The top action takes the `labelLarge` SemiBold `primary` style, right-aligned. It is used by
+  TagEditor ("Done") and Verdict ("Not now").
+
+**`SheetHeaderUiModel` (model only; no public `SheetHeader`).**
+- Fields: `section: SectionHeaderUiModel.Section` and `trailing: SheetHeaderTrailing?`.
+- `SheetHeaderTrailing` is one of `Jacket(CoverUiModel)`, `JacketStack(...)` (ChooseLists) or
+  `Action(label)` (Shelves' "Manage", which emits `HeaderActionClicked`).
+- The scaffold renders it privately, as `SectionHeader` with its `trailing` slot.
+- Every sheet has a header with a headline (foundations § 5.6). Gaps come from `SectionHeader`
+  (12/8/8). Jackets are 56dp.
+- Deleted: `ChooseListsHeader`, `ChangeEditionHeader`, `TagEditorHeader`, `TagEditorTopBar`,
+  `EditorialHeader`, `ShelvesSheetHeader`. Remove the stale "SectionHeader has no trailing slot" KDoc
+  with them.
+
+**`SectionHeaderUiModel.Section` emphasis.**
+- `headline` and `description` each take an optional `TextEmphasis(substring, treatment)`.
+- `EmphasisTreatment` is an enum of named treatments that the component resolves to theme tokens. It
+  ships with `Accent` → `primary` only; adding a treatment means one entry plus one line in the
+  component. No raw `SpanStyle` or `Color`: a collector cannot read the theme.
+- Consumers: ChooseLists' headline and TagEditor's description.
+
+**`SheetFooterUiModel`.**
+- Fields: `primary: SheetFooterButton?`, `secondary: SheetFooterButton?`, `layout`.
+- `SheetFooterButton` has `label`, `enabled` and `loading`.
+- `layout = Stacked`: a FILLED M primary, full width, with a TEXT M secondary below it.
+- `layout = Inline`: the TEXT secondary on the left and the weighted FILLED primary on the right (Filter).
+- `FilterSheetFooter` is deleted.
+
+**`SheetRow<K>` (public, `core/component/sheet/`).**
+- Model: typed key `K` (as the sidebar has), `label`, `selected`, optional leading icon, optional
+  `count: String`.
+- Anatomy: top `Divider`, v13, gap 12, italic `titleLarge`, `primary` when selected, trailing 18dp
+  check.
+- Semantics: `selectable` with `Role.RadioButton`. Emits `SheetRowEvent.Selected(key)`.
+- Replaces `ShelvesSheetRow` and `BecauseYouReadGenreSheetRow`.
+- `ChooseListsRow` stays separate: its tri-state glyph, caption and chip trailing are a different
+  anatomy.
+
+**R10.** Every scaffold model arrives on the feature's `UiState`, built in a collector or action.
+Values computed in composition inside a sheet *body* are not fixed here. List each under `## Deferred`
+for S10 or S11. The exception is TagEditor's description, which moves into the header model.
+
+**Per sheet.**
+- S6-3 ChooseLists: Pinned layout, `JacketStack`. `NewListRow` stays in the body.
+- S6-3 UpdateProgress: Scrolling layout. Its buttons stay in the tab bodies, because they submit
+  local per-tab drafts. `TabSwitcher` is body content and does not change.
+- S6-3 LoadingSheet: `dismissible = false`.
+- S6-4 Verdict: Pinned layout, top action, Stacked footer. See the models below.
+- S6-5 Filter: Pinned layout, Inline footer. The facet labels become `SectionHeader.Label`.
+- S6-5 Arrange: Scrolling layout, Stacked footer.
+- S6-5 Shelves: Scrolling layout, `Action("Manage")`, `SheetRow`. Header: "Your shelves" /
+  "Jump to a shelf".
+- S6-5 BulkRemove: moves from `Dialog` to a scaffold sheet. Header: "Library" / "Remove N books?".
+  Footer: primary "Remove" (`loading` from `inProgress`), secondary "Cancel".
+- S6-5 ReAuthDialog (`orchestration/.../ReAuthDialog.kt`): becomes a scaffold sheet with
+  `dismissible = false`, a header, the token field and error in the body, and a Stacked footer
+  (submit, then "Log out"). Delete it from the README's `## Out of scope` list in the same sub-step.
+- S6-6 TagEditor: Pinned layout, `Jacket`, top action "Done".
+- S6-6 Edition: Pinned layout, `Jacket`, Stacked footer. The search field and card rows stay in the
+  body.
+- S6-6 ShareBook: header "Share" / "Share this book". Its capture and share footer stays in the body.
+- S6-6 UnknownIsbn: Stacked footer.
+- S6-6 CreateList: keeps its own chrome. It is the documented title-page exception, with nested
+  navigator hosting.
+- S6-6 tag category group header: stays local (one consumer). Its raw `HorizontalDivider` becomes
+  `Divider`.
+- S6-7 Genre: Scrolling layout, `SheetRow`.
+- S6-7 ContinueSeries: Stacked footer with the secondary "Cancel" only. The action rows stay local.
+- S6-7 Streak: its day rows stay local. Drop the extra `navigationBarsPadding`.
+- S6-7 ProfileShare: header "Share" / "Share your profile". Its footer stays in the body.
+- S6-7 LogOut: header "Account" / "Log out?", no longer centred. Stacked footer: "Log out", then
+  "Stay".
+
+**S6-4 models.**
+- `VerdictSheetUiModel(scaffold, cover: CoverUiModel?, initialRating, initialReview,
+  initialHasSpoilers)`.
+- `VerdictSheetEvent`: `Saved(rating, review, hasSpoilers)`, `DeleteRequested`, `Dismissed`. Events
+  carry no key: the sheet is a singleton.
+- The signature is `(model, onEvent, modifier)`. The `cover` slot goes.
+- The draft (text, marks, rating, spoilers) stays local and is seeded once, as in the progress sheet.
+  The score captions stay in the component.
+- The mapper goes straight to `:core:uibinding`, because Book Detail and Reading map it identically.
+- Delete shows only when deletion applies. Reading's empty `onDelete` goes.
+- Reading stops gating the sheet on the cover. The component renders the cover when it is present.
+- `VerdictBlock` joins the step: `VerdictBlockUiModel` plus `VerdictBlockEvent.EditRequested`, built
+  in `VerdictReviewCollector`.
+- `RichTextFormattingToolbar` is not in this step: `steps/s8-controls.md` S8-4 owns it.
+- Doc updates, in the same sub-step (G5):
+  - `patterns/book-detail.md`: `VerdictSheetContext` becomes the shared mapper's input, and the copy
+    rides on the model.
+  - `component-contract.md` § 7.4a and the R11 holdout list: drop `VerdictSheet` and `VerdictBlock`.
+  - `steps/s11-contract-retrofit.md` S11-2: drop them from its list too.
+- `SoftcoverDatePickerDialog` stays an M3 dialog.
+  - `DatePickerUiModel(initialDate: LocalDate, confirmLabel, cancelLabel)`.
+  - `DatePickerEvent`: `Confirmed(date)`, `Dismissed`.
+  - Book Detail gains `deadlinePicker: DatePickerUiModel?`, built in `OnOpenDeadlinePickerAction`. It
+    replaces `showDeadlinePicker` and the `currentLocalDate()` read in composition.
+  - No date bounds.
+  - `component-contract.md` R4 gains one line: `kotlinx.datetime.LocalDate` is an allowed value type.
+
+**Accepted visual shifts**, to eyeball on device afterwards:
+- Header gaps become 12/8/8. Jackets become 56dp.
+- `EditorialHeader`'s bar moves inline.
+- Sheet vertical padding becomes top 8 / bottom 16.
+- Edition's footer gains a divider. Filter's footer inset goes from 22 to 24.
+- One text-button style for "Stay", "Cancel" and "Delete".
+- ShareBook's eyebrow gains a bar.
+- Streak's insets: confirm them on device.
+
+## Deferred
+
+_Empty._
+
+## Convergence proposals
+
+_Written by the workflow's last agent._
 
 ## Sub-steps
 
 | Sub | Scope | Status |
 |---|---|---|
 | S6-3 | `SheetScaffold`/`SheetHeader`/`SheetRow`/`SheetFooter` design, plus `ChooseListsBottomSheet`, `UpdateProgressBottomSheet`/`TabSwitcher`, `LoadingSheet` | [ ] |
-| S6-4 | `VerdictSheet` (owes R1) and `SoftcoverDatePickerDialog` (owes R1 + R11) | [ ] |
-| S6-5 | The library sheets and the bulk-remove dialog | [ ] |
+| S6-4 | `VerdictSheet` + `VerdictBlock` (owe R1) and `SoftcoverDatePickerDialog` (owes R1 + R11) | [ ] |
+| S6-5 | The library sheets, the bulk-remove dialog and `ReAuthDialog` | [ ] |
 | S6-6 | The book_detail, lists and scan sheets | [ ] |
 | S6-7 | The explore, reading and profile sheets | [ ] |
 | S6-C-sheets | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
@@ -45,6 +197,7 @@ to the S6-1 bar: extract it only where two sheets share the anatomy, not the nam
 |---|---|---|
 | `VerdictSheet` | `core/component/verdict/VerdictSheet.kt:124` | owes R1 |
 | `SoftcoverDatePickerDialog` | `core/component/dialog/SoftcoverDatePickerDialog.kt:29` | + internal `PickerDates.kt` helpers; owes R1 + R11, not just chrome |
+| `VerdictBlock` | `core/component/verdict/VerdictBlock.kt:51` | owes R1 + R11; call site `YoursLensContent.kt:172` derives from the domain `Book` in composition |
 
 ## S6-5 — library sheets and bulk-remove dialog
 
@@ -56,7 +209,8 @@ to the S6-1 bar: extract it only where two sheets share the anatomy, not the nam
 | `TagSearchField` | `feature/library/presentation/component/LibraryFilterSheet.kt:345` | |
 | `LibraryArrangeSheet` | `feature/library/presentation/component/LibraryArrangeSheet.kt:81` | |
 | `LibraryShelvesSheet` | `feature/library/presentation/component/LibraryShelvesSheet.kt:50` | |
-| `BulkRemoveConfirmationDialog` | `feature/library/presentation/screen/section/BulkRemoveConfirmationDialog.kt:24` | |
+| `BulkRemoveConfirmationDialog` | `feature/library/presentation/screen/section/BulkRemoveConfirmationDialog.kt:24` | dialog → scaffold sheet |
+| `ReAuthDialog` | `orchestration/presentation/ReAuthDialog.kt:45` | dialog → non-dismissible scaffold sheet; drop it from the README's `## Out of scope` |
 
 ## S6-6 — book_detail, lists, scan sheets
 

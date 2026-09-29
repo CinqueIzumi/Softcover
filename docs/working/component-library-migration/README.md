@@ -14,12 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** the row family is done. S6-C-rows is built, tested and reviewed, but not committed: `Sidebar`
-  / `SidebarUiModel<K>` and a `SettingsRow` scaffold with UiState-held row models. Mood tile → S7-4; 14
+- **State:** the S6 row family is done and committed (`aa1ffef1`, S6-C-rows: `Sidebar` / `SidebarUiModel<K>`,
+  the `SettingsRow` scaffold + `SettingsRowGroup`, UiState-held row models). Mood tile → S7-4; 14
   Apollo-alias files wait on F24.
-- **Next:** `steps/s6-sheet-chrome.md` (S6-3). Its `## How this step runs` section was written outside a
-  session and has not been reviewed; review it first. JBR 21
-  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **Next:** the S6 sheet-chrome Workflow run. Part 1 is approved (`steps/s6-sheet-chrome.md` § Run
+  mode; family-procedure § Workflow mode). First commit the workflow-mode doc edits, so the tree is
+  clean for the preflight.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** should chip keys get the same typed-key treatment as the sidebar, as a tracked step?
@@ -36,8 +36,7 @@ checkboxes in step with `## Steps` and `## Gates` here.
   toggle / choice lists).
 - **Verification:** S6-C-rows: compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`
   and the sidebar / mapper / collector suites pass under JBR 21. Reviewer: no blockers.
-- **Uncommitted:** S6-C-rows and this block. Also in the tree, from outside this session: edits to
-  `family-procedure.md` and the `s6-sheet-chrome` / `s7`–`s12` step files, plus `step.workflow.js`.
+- **Uncommitted:** nothing.
 
 ## Local verification
 
@@ -67,6 +66,9 @@ every sub-step's Verify.
    [#275](https://github.com/CinqueIzumi/Softcover/issues/275) via `gh` → delete the step file once its
    last sub-step lands, and drop its `## Steps` link → **ask the user before committing** (subject-only
    message) → `/handoff` → the user types `/clear`.
+
+A step file whose `## Run mode` says so runs as one unattended Workflow instead
+([`family-procedure.md`](family-procedure.md) § Workflow mode).
 
 ## Steps
 

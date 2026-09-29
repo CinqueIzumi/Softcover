@@ -3,6 +3,11 @@
 **Stage:** S12 — final gate values, doc rewrite, and deleting this directory. **Delegation:** user
 (Phase 1 items), `softcover-implementer` (Phase 2 items).
 
+## Run mode
+
+Interactive. Workflow mode does not fit here. The step is small, S12-3 is mostly user decisions, and
+S12-4 closes the rollout.
+
 ## Sub-steps
 
 | Sub | Scope | Status |

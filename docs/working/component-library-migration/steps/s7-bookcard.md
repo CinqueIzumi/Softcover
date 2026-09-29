@@ -7,6 +7,25 @@
 shared-element transitions via `bookCoverTransitionKey`; several sit inside selection modes and lazy
 grids where a stability regression is a dropped frame, not a compile error.
 
+## Run mode
+
+Workflow mode (`family-procedure.md` § Workflow mode), in **two runs**, because this is the riskiest
+family:
+
+- **Part 1.** Settle every item in § S7-1 Phase 1 questions, and map all 21 declarations in § Variant
+  mapping to a variant.
+- **Run A: S7-1 alone.** Then the user checks the `BookCard` variants in the Component Gallery before
+  any call site moves.
+- **Run B: S7-2 to S7-7, and the Phase 3 audit.**
+- **Args:**
+  - Run A: `{stepFiles: ["steps/s7-bookcard.md"], subSteps: ["S7-1"], snapshotPrefix: "s7", convergence:
+    false}`.
+  - Run B: the same, with `subSteps: ["S7-2", "S7-3", "S7-4", "S7-5", "S7-6", "S7-7"]` and `convergence:
+    true`.
+- **What the runs cover of S7-7:** the compiler metrics / skippability check.
+- **What stays with the user in Part 3:** the shared-element transitions (library → detail,
+  explore → detail), checked by hand on device.
+
 ## Sub-steps
 
 | Sub | Scope | Status |

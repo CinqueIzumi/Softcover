@@ -4,6 +4,11 @@
 
 22 declarations collapse onto `Toggle` + `SegmentedControl` + `TextField` + `PillButton`.
 
+## Run mode
+
+Workflow mode (`family-procedure.md` § Workflow mode), in one run with `steps/s8-screen-states.md` (see
+there). Part 1 settles the § S8-4 Phase 1 questions, `RichTextFormattingToolbar` included.
+
 ## Sub-steps
 
 | Sub | Scope | Status |

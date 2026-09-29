@@ -7,6 +7,19 @@ render parameter, before the migration's final verification. **Delegation:** use
 **Completion bar:** `component-contract.md` § 7.4a ends with only its standing exceptions (data-free
 primitives among them).
 
+## Run mode
+
+Workflow mode (`family-procedure.md` § Workflow mode). Part 1 moves the decisions forward:
+
+- **S11-3:** the `TopBarSurface` / R10-edge decision.
+- **S11-4:** the per-family minimal-shape audit and its proposals, all approved before the run.
+- **S11-1:** its work list comes from the gate, so it cannot be enumerated up front. Part 1 approves
+  the fix pattern instead: the model moves onto the `UiState` and is built by the collector. A finding
+  that does not fit that pattern is a `## Deferred` line.
+
+The run builds S11-1 to S11-4. **Args:** `{stepFiles: ["steps/s11-contract-retrofit.md"], subSteps:
+["S11-1", "S11-2", "S11-3", "S11-4"], snapshotPrefix: "s11", convergence: true}`.
+
 ## Sub-steps
 
 | Sub | Scope | Status |
@@ -41,8 +54,8 @@ size class, a `CompositionLocal`), is decided in S11-3 through `TopBarSurface`.
 ## S11-2 — R11 holdouts
 
 Components still taking a loose render parameter instead of the model deciding it: `RichText`,
-`StatNumber`, `ClickableText`, `MarkAsReadBurst`, `CoverlessTitleCover`, and `VerdictBlock` /
-`VerdictSheet` (whose R1 exception closes here too).
+`StatNumber`, `ClickableText`, `MarkAsReadBurst` and `CoverlessTitleCover`. `VerdictBlock` and
+`VerdictSheet` close in `steps/s6-sheet-chrome.md` S6-4.
 
 ## S11-3 — `TopBarSurface`, `ShareCardPalette`, final check
 
