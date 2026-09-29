@@ -60,6 +60,7 @@ S5-C-headers); decide whether a separate `SheetHeader` is still warranted at all
 | Symbol(s) | Current path:line | Note |
 |---|---|---|
 | `TagEditorBottomSheet` | `feature/book_detail/presentation/component/TagEditorBottomSheet.kt:81` | |
+| category group header | `feature/book_detail/presentation/component/TagEditorCollection.kt:73` | eyebrow · raw `HorizontalDivider` · count; header anatomy, so a `SectionHeader` variant, not `Divider` |
 | `EditionBottomSheetSelector` | `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:62` | |
 | `EditionBottomSheetContent` | `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:91` | |
 | `ShareBookBottomSheet` | `feature/book_detail/presentation/component/ShareBookBottomSheet.kt:55` | |

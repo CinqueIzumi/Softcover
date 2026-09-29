@@ -7,7 +7,7 @@ metadata:
 
 When a brief asks for a private style/ink lookup table (ink token + a style
 data class bundling it with dp values), putting both top-level types in the
-one file the brief names (e.g. `DividerStyle.kt`) fails
+one file the brief names (e.g. `ChipStyle.kt`) fails
 `rhaydus:one-type-per-file` at `ktlintCheck` — it only allows a single sealed
 type's own variants, or an interface plus its implementing class, to
 co-locate. A sealed ink/token type plus an unrelated data class is neither.

@@ -14,14 +14,15 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S5 are done, S5-T included (75 change-detector tests pruned; 9 files deleted, 9 trimmed).
-  The no-change-detector test rule lives in `.claude/rules/tests.md`, `softcover-test-writer.md` and
-  contract § 7.5. Mood tile 104dp: `bookcard/MoodTileDimensions` (→ S7-4). 14 Apollo-alias files wait on F24.
-- **Next:** S6-1 in `steps/s6-list-rows.md` — Phase 1 (the `ListRow` design) is the user's, then
-  `softcover-implementer`. Gradle under JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S0–S5 are done, S5-T included (`eb11fdf6`); #275's S5 box is ticked. The no-change-detector
+  test rule lives in `.claude/rules/tests.md`, `softcover-test-writer.md` and contract § 7.5. Mood tile
+  104dp: `bookcard/MoodTileDimensions` (→ S7-4). 14 Apollo-alias files wait on F24.
+- **Next:** `steps/s6-list-rows.md` § S6-1 — Phase 1 (the `ListRow` design, per `family-procedure.md`) is
+  the user's; then brief `softcover-implementer`. Gradle under JBR 21
+  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
-- **Open questions:** tick #275's S5 box on GitHub. `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
+- **Open questions:** `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
   `dispatcherModule`; confirm or move that home. Confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
   titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
@@ -31,8 +32,7 @@ checkboxes in step with `## Steps` and `## Gates` here.
   (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`.
 - **Verification:** on JBR 21 for S5-T, `testAndroidHostTest` of `core:component`, explore, library and
   settings, and `styleCheck`, passed.
-- **Uncommitted:** S5-T — the pruned test files, `steps/s5-test-prune.md` deleted, test-writer memory, this
-  block.
+- **Uncommitted:** nothing.
 
 ## Local verification
 
@@ -72,7 +72,7 @@ every sub-step's Verify.
 | S5 | — (headers) | S5-4–S5-6, S5-C-headers | [x] |
 | S5 | — (badges) | S5-7, S5-C-badges | [x] |
 | S5 | — (skeletons) | S5-8, S5-C-skeletons | [x] |
-| S5 | [steps/s5-dividers.md](steps/s5-dividers.md) | S5-9–S5-10 | [x] |
+| S5 | — (dividers) | S5-9–S5-10 | [x] |
 | S5 | — (test prune) | S5-T | [x] |
 | S6 | [steps/s6-list-rows.md](steps/s6-list-rows.md) | S6-1–S6-2 | [ ] |
 | S6 | [steps/s6-sheet-chrome.md](steps/s6-sheet-chrome.md) | S6-3–S6-7 | [ ] |
