@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
@@ -12,6 +13,7 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
+import nl.rhaydus.softcover.core.component.sidebar.SidebarSectionUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -23,6 +25,7 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.collector.mastheadRefreshFor
+import nl.rhaydus.softcover.feature.library.presentation.collector.shelfSidebarSectionsFor
 import nl.rhaydus.toad.UiState
 
 internal data class LibraryUiState(
@@ -36,6 +39,13 @@ internal data class LibraryUiState(
     /** Static text, so the default below is its own source of truth — no collector sets it. */
     val shelvesSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Shelves"),
     val listsSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Lists"),
+
+    val shelfSidebarSections: ImmutableList<SidebarSectionUiModel<String>> = shelfSidebarSectionsFor(
+        visibleTabs = visibleTabs,
+        selectedTabId = selectedTabId,
+        shelvesSidebarLabel = shelvesSidebarLabel,
+        listsSidebarLabel = listsSidebarLabel,
+    ),
     val booksByTab: Map<String, List<Book>> = emptyMap(),
     val editionsByTab: Map<String, List<BookEdition>> = emptyMap(),
 

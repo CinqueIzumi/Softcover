@@ -11,9 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.header.PageMasthead
-import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategory
+import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
+import nl.rhaydus.softcover.core.component.sidebar.SidebarSection
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnSettingsCategorySelectedAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
+import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarKey
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
 /**
@@ -25,12 +27,21 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUi
 @Composable
 internal fun SettingsCategorySidebar(
     state: SettingsScreenUiState,
-    selected: SettingsCategory,
-    onSelect: (SettingsCategory) -> Unit,
+    runAction: (SettingsAction) -> Unit,
     onProfileClick: () -> Unit,
     onHiddenSuggestionsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val onRowEvent: (SidebarEvent<SettingsSidebarKey>) -> Unit = onRowEvent@{ event ->
+        val key = (event as? SidebarEvent.Clicked)?.key ?: return@onRowEvent
+
+        when (key) {
+            SettingsSidebarKey.Profile -> onProfileClick()
+            SettingsSidebarKey.HiddenSuggestions -> onHiddenSuggestionsClick()
+            is SettingsSidebarKey.Category -> runAction(OnSettingsCategorySelectedAction(category = key.category))
+        }
+    }
+
     Column(modifier = modifier) {
         Column(
             modifier = Modifier
@@ -45,78 +56,30 @@ internal fun SettingsCategorySidebar(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            SectionHeader(
-                model = state.accountSidebarLabel,
-                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
-            )
-
-            SettingsSidebarRow(
-                label = "Your profile",
-                icon = SoftcoverIcon.Account,
-                selected = false,
-                showTrailingArrow = true,
-                onClick = onProfileClick,
+            SidebarSection(
+                model = state.settingsSidebarSections.account,
+                onEvent = onRowEvent,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SectionHeader(
-                model = state.personaliseSidebarLabel,
-                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
-            )
-
-            SettingsSidebarRow(
-                label = "Appearance",
-                icon = SoftcoverIcon.Palette,
-                selected = selected == SettingsCategory.APPEARANCE,
-                showTrailingArrow = false,
-                onClick = { onSelect(SettingsCategory.APPEARANCE) },
-            )
-
-            SettingsSidebarRow(
-                label = "Library tabs",
-                icon = SoftcoverIcon.Shelf,
-                selected = selected == SettingsCategory.LIBRARY_TABS,
-                showTrailingArrow = false,
-                onClick = { onSelect(SettingsCategory.LIBRARY_TABS) },
+            SidebarSection(
+                model = state.settingsSidebarSections.personalise,
+                onEvent = onRowEvent,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SectionHeader(
-                model = state.privacySidebarLabel,
-                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
-            )
-
-            SettingsSidebarRow(
-                label = "Hidden suggestions",
-                icon = SoftcoverIcon.FilterList,
-                selected = false,
-                showTrailingArrow = true,
-                onClick = onHiddenSuggestionsClick,
+            SidebarSection(
+                model = state.settingsSidebarSections.privacy,
+                onEvent = onRowEvent,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SectionHeader(
-                model = state.aboutSidebarLabel,
-                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
-            )
-
-            SettingsSidebarRow(
-                label = "About",
-                icon = SoftcoverIcon.Settings,
-                selected = selected == SettingsCategory.ABOUT,
-                showTrailingArrow = false,
-                onClick = { onSelect(SettingsCategory.ABOUT) },
-            )
-
-            SettingsSidebarRow(
-                label = "Roadmap",
-                icon = SoftcoverIcon.Explore,
-                selected = selected == SettingsCategory.ROADMAP,
-                showTrailingArrow = false,
-                onClick = { onSelect(SettingsCategory.ROADMAP) },
+            SidebarSection(
+                model = state.settingsSidebarSections.about,
+                onEvent = onRowEvent,
             )
         }
     }

@@ -1,8 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,42 +13,34 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
-import nl.rhaydus.designsystem.modifier.hoverHighlight
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
-import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
+import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
+import nl.rhaydus.softcover.core.component.sidebar.SidebarSection
+import nl.rhaydus.softcover.core.component.sidebar.SidebarSectionUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -139,10 +128,7 @@ internal actual fun LibraryScreenLayout(
             },
     ) {
         ShelfSidebar(
-            tabs = tabs,
-            selectedTabId = currentTab?.id,
-            shelvesSidebarLabel = state.shelvesSidebarLabel,
-            listsSidebarLabel = state.listsSidebarLabel,
+            sections = state.shelfSidebarSections,
             onTabClick = { id -> runAction(OnTabSelectedAction(tabId = id)) },
             onTabLongPress = onTabLongPress,
             modifier = Modifier
@@ -366,17 +352,11 @@ internal actual fun LibraryScreenLayout(
  */
 @Composable
 private fun ShelfSidebar(
-    tabs: List<LibraryContentTab>,
-    selectedTabId: String?,
-    shelvesSidebarLabel: SectionHeaderUiModel,
-    listsSidebarLabel: SectionHeaderUiModel,
+    sections: ImmutableList<SidebarSectionUiModel<String>>,
     onTabClick: (String) -> Unit,
     onTabLongPress: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val shelves = tabs.filter { it !is LibraryContentTab.CustomList }
-    val lists = tabs.filterIsInstance<LibraryContentTab.CustomList>()
-
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -385,92 +365,21 @@ private fun ShelfSidebar(
                 bottom = 16.dp + rememberBottomBarPadding(),
             ),
     ) {
-        SectionHeader(
-            model = shelvesSidebarLabel,
-            modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
-        )
-
-        shelves.forEach { tab ->
-            ShelfSidebarRow(
-                label = tab.label,
-                selected = tab.id == selectedTabId,
-                onClick = { onTabClick(tab.id) },
-                onLongClick = onTabLongPress,
-            )
-        }
-
-        if (lists.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SectionHeader(
-                model = listsSidebarLabel,
-                modifier = Modifier.padding(start = 26.dp, top = 8.dp, bottom = 6.dp),
-            )
-
-            lists.forEach { tab ->
-                ShelfSidebarRow(
-                    label = tab.label,
-                    selected = tab.id == selectedTabId,
-                    onClick = { onTabClick(tab.id) },
-                    onLongClick = onTabLongPress,
-                )
+        sections.forEachIndexed { index, section ->
+            if (index > 0) {
+                Spacer(modifier = Modifier.height(16.dp))
             }
-        }
-    }
-}
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ShelfSidebarRow(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
-) {
-    val container = if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
-
-    val content = if (selected) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
-    val haptics = LocalHaptics.current
-    val interactionSource = remember { MutableInteractionSource() }
-    val rowShape = RoundedCornerShape(10.dp)
-
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp)
-            .pointerHandCursor()
-            .hoverHighlight(
-                interactionSource = interactionSource,
-                shape = rowShape,
-            )
-            .combinedClickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick,
-                onLongClick = {
-                    haptics.threshold()
-
-                    onLongClick()
+            SidebarSection(
+                model = section,
+                onEvent = { event ->
+                    when (event) {
+                        is SidebarEvent.Clicked -> onTabClick(event.key)
+                        is SidebarEvent.LongPressed -> onTabLongPress()
+                    }
                 },
-            ),
-        color = container,
-        contentColor = content,
-        shape = rowShape,
-    ) {
-        Text(
-            text = label,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-            ),
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
-        )
+            )
+        }
     }
 }
 

@@ -12,9 +12,12 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.paletteChoicesFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebarSectionsFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.themeChoicesFor
 import nl.rhaydus.softcover.feature.settings.presentation.model.PaletteChoice
+import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarSections
 import nl.rhaydus.softcover.feature.settings.presentation.model.ThemeChoice
+import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategory
 import nl.rhaydus.toad.UiState
 
 internal data class SettingsScreenUiState(
@@ -33,10 +36,9 @@ internal data class SettingsScreenUiState(
         size = PageMastheadSize.Compact,
     ),
 
-    val accountSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Account"),
-    val personaliseSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Personalise"),
-    val privacySidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Privacy"),
-    val aboutSidebarLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "About"),
+    val selectedCategory: SettingsCategory = SettingsCategory.APPEARANCE,
+
+    val settingsSidebarSections: SettingsSidebarSections = settingsSidebarSectionsFor(selectedCategory = selectedCategory),
 
     val settingsMenuAccountHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Account",

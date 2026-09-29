@@ -30,11 +30,14 @@ Chrome only, extracted from 18 sheets into `SheetScaffold` + `SheetHeader` + `Sh
 | `ChangeEditionHeader` | `feature/book_detail/presentation/component/EditionBottomSheetSelector.kt:213` | |
 | `ShelvesSheetHeader` | `feature/library/presentation/component/LibraryShelvesSheet.kt:90` | |
 | `TagEditorHeader` | `feature/book_detail/presentation/component/TagEditorHeader.kt:37` | |
+| `ShelvesSheetRow` | `feature/library/presentation/component/LibraryShelvesSheet.kt:129` | `SheetRow` candidate, from S6-2: the same anatomy as the genre row, plus a leading glyph and a count |
+| `BecauseYouReadGenreSheetRow` | `feature/explore/presentation/screen/section/BecauseYouReadGenreControl.kt:166` | `SheetRow` candidate, from S6-2 |
 
 **Phase 1 questions:** design `SheetScaffold`/`SheetHeader`/`SheetRow`/`SheetFooter` against these four
 sheets first, since they are already contract-shaped and expose the chrome boundary cleanly.
 `SheetHeader` is a `SectionHeader.Section` with the jacket in `SectionHeader`'s `trailing` slot (added in
-S5-C-headers); decide whether a separate `SheetHeader` is still warranted at all.
+S5-C-headers); decide whether a separate `SheetHeader` is still warranted at all. Hold every chrome part
+to the S6-1 bar: extract it only where two sheets share the anatomy, not the name.
 
 ## S6-4 — `VerdictSheet` and `SoftcoverDatePickerDialog`
 

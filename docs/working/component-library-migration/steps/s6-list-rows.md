@@ -2,17 +2,52 @@
 
 **Stage:** S6 — Rows & sheet chrome. **Delegation:** user (Phase 1), `softcover-implementer` (Phase 2).
 
-22 declarations collapse onto `ListRow` + `ListRowUiModel`.
+There is no generic `ListRow`. "Row" is a category name, not shared anatomy (contract § 7.6); each
+declaration is audited for a real counterpart before anything is extracted.
+
+## Approved shape
+
+S6-1 (approved 2026-09-30):
+
+- No `ListRow` / `ListRowUiModel`.
+- `SidebarRow` + `SidebarRowUiModel` in `:core:component`. It replaces `SettingsSidebarRow` and library's
+  `ShelfSidebarRow`, which share one `Surface` anatomy: h12/v2 outer, 10dp shape, `secondaryContainer`
+  when selected, `hoverHighlight`, `labelLarge` SemiBold/Medium, h14/v11 inner. The model chooses only
+  the optional parts: a leading icon, a trailing arrow and a long-press. The row adds selected semantics
+  and absorbs the sidebar's 26dp `SectionHeader.Label` inset. The app shell's `SidebarItem`
+  (`orchestration/.../EditorialSidebar.kt`) is not a third copy and stays: a different surface, with its
+  own radius, icon, type role, badge and pulse.
+- `SettingsMenuRow` and `AboutRow` (with `AboutLinkRow`, `AboutNavigationRow`, `AboutUsernameRow`)
+  merge into one settings-local row in `commonMain`, not into `:core:component`: no other feature uses
+  the anatomy. Its one open decision is a single press treatment for both surfaces.
+- `SettingsToggleRow` / `SettingsSelectableRow` stay separate. They get toggle and selection semantics
+  (a `Role.Switch` whole-row toggle, and `Role.RadioButton` `selectable`).
+- Stay as they are: `ChooseListsRow` (already model-driven and private to its sheet), `NewListRow` (its
+  "+" text glyph becomes an icon), `DebugNavigationRow` / `HapticRow` (debug only), `ReorderableRow`
+  (one caller, its own anatomy).
+- `WhenReadRow` is not a row. Its R10 lift leaves S6 for the S11 retrofit: its model depends on a
+  composition-read `now`, one of R10's unsettled edges.
+
+S6-2 (approved 2026-09-30), audited, not built:
+
+- `ShelvesSheetRow` (library) and `BecauseYouReadGenreSheetRow` (explore) are the one cross-feature
+  pair. They are sheet rows, so they move to S6-3's `SheetRow` inventory (`s6-sheet-chrome.md`).
+- Every other S6-2 row stays feature-local: its container, ink, type role or interaction differs, so a
+  shared model would be all variants. This covers `ShareEntryRow`, `PasteFromClipboardRow`,
+  `DismissSheetOption`, `ShowTitlesToggleRow`, `ShelveRow`, `DeadlineRow`, `StreakStripSheetRow`,
+  `SearchFocusRecentRow` and `ExplainerStepRow`.
+- Folded into S6-1 as local fixes: `SearchFocusRecentRow`'s 15dp remove target, which is nested in a
+  clickable row, and selected semantics on `SidebarItem`.
 
 ## Sub-steps
 
 | Sub | Scope | Status |
 |---|---|---|
-| S6-1 | `ListRow` design, plus the core, debug, settings and about rows | [ ] |
-| S6-2 | The remaining features | [ ] |
+| S6-1 | `SidebarRow`, the settings menu-row merge, the row semantics fixes | [ ] |
+| S6-2 | Audit of the remaining features; nothing to build (see `## Approved shape`) | [x] |
 | S6-C-rows | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
-## S6-1 — design + core, debug, settings, about
+## S6-1 — audit inventory: core, debug, settings, about
 
 Carried from S5-C-headers: the sidebar label inset `padding(start = 26.dp, top = 8.dp, bottom = 6.dp)`,
 repeated on every sidebar `SectionHeader.Label` in library and settings, belongs to the sidebar's grid;
@@ -35,12 +70,8 @@ absorb it with the sidebar rows here.
 | `SettingsMenuRow` | `feature/settings/presentation/screen/SettingsScreenLayout.mobile.kt:254` | |
 | `SettingsSidebarRow` | `feature/settings/presentation/screen/section/SettingsSidebarRow.kt:30` | |
 
-**Phase 1 questions:** `ChooseListsRow` / `NewListRow` already take a resolved `ChooseListsRowUiModel`
-— decide whether `ListRowUiModel` generalizes that shape (leading slot, title, trailing slot, event) or
-whether `ChooseListsRowUiModel` becomes a specialisation. `ReorderableRow` carries drag affordance —
-decide whether that is a `ListRowUiModel` variant or a decorator around `ListRow`.
 
-## S6-2 — the remaining features
+## S6-2 — audit inventory: the remaining features
 
 | Symbol(s) | Current path:line | Note |
 |---|---|---|

@@ -14,15 +14,17 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S5 are done, S5-T included (`eb11fdf6`); #275's S5 box is ticked. The no-change-detector
-  test rule lives in `.claude/rules/tests.md`, `softcover-test-writer.md` and contract § 7.5. Mood tile
-  104dp: `bookcard/MoodTileDimensions` (→ S7-4). 14 Apollo-alias files wait on F24.
-- **Next:** `steps/s6-list-rows.md` § S6-1 — Phase 1 (the `ListRow` design, per `family-procedure.md`) is
-  the user's; then brief `softcover-implementer`. Gradle under JBR 21
-  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S6 Phase 1 is approved and S6-2 is audited; `steps/s6-list-rows.md` § Approved shape has
+  both. S6-1 slice A (`core/component/sidebar/`, typed `SidebarRowUiModel<K>`) is done and reviewed.
+  Mood tile → S7-4; 14 Apollo-alias files wait on F24.
+- **Next:** S6-1 slice B per § Approved shape: merge `SettingsMenuRow` + the `AboutRow` family into one
+  settings-local row (ask the user for its single press treatment first), then the row semantics fixes,
+  then `components.md`'s settings/About lines. JBR 21 (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
-- **Open questions:** `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
+- **Open questions:** should chip keys get the same typed-key treatment as the sidebar, as a tracked step?
+  That means `ChipUiModel<K>` / `ChipEvent<K>` across ~15 files, plus a contract R1 line saying keys are
+  typed, not raw strings. `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
   `dispatcherModule`; confirm or move that home. Confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
   titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
@@ -30,9 +32,16 @@ checkboxes in step with `## Steps` and `## Gates` here.
   visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
   cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`; S5-C-dividers' quote-glyph gap
   (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`.
-- **Verification:** on JBR 21 for S5-T, `testAndroidHostTest` of `core:component`, explore, library and
-  settings, and `styleCheck`, passed.
-- **Uncommitted:** nothing.
+- **Verification:** slice A, after the review fixes: compile, `styleCheck` and `checkModuleGraph` pass,
+  and the sidebar and `OnSettingsCategorySelectedAction` host tests pass.
+- **Uncommitted:** S6-1 slice A:
+  - the `core/component/sidebar/` package and its gallery entry;
+  - settings sidebar state, action, mapper, key and model, with `SettingsCategory` moved to commonMain;
+  - the library sidebar collector and state;
+  - three new test files;
+  - `components.md` / `module-structure.md`;
+  - tracker and step docs;
+  - one reviewer memory.
 
 ## Local verification
 
@@ -74,7 +83,7 @@ every sub-step's Verify.
 | S5 | — (skeletons) | S5-8, S5-C-skeletons | [x] |
 | S5 | — (dividers) | S5-9–S5-10 | [x] |
 | S5 | — (test prune) | S5-T | [x] |
-| S6 | [steps/s6-list-rows.md](steps/s6-list-rows.md) | S6-1–S6-2 | [ ] |
+| S6 | [steps/s6-list-rows.md](steps/s6-list-rows.md) | S6-1, S6-2 (audit only), S6-C-rows | [ ] |
 | S6 | [steps/s6-sheet-chrome.md](steps/s6-sheet-chrome.md) | S6-3–S6-7 | [ ] |
 | S7 | [steps/s7-bookcard.md](steps/s7-bookcard.md) | S7-1–S7-7 | [ ] |
 | S8 | [steps/s8-screen-states.md](steps/s8-screen-states.md) | S8-1–S8-3 | [ ] |
