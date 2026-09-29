@@ -22,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +30,8 @@ import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -206,7 +207,7 @@ private fun TwoColumnContent(
             Spacer(modifier = Modifier.height(24.dp + bottomChromePadding()))
         }
 
-        VerticalDivider()
+        Divider(model = DividerUiModel.Vertical())
 
         NarrativeColumn(
             state = state,

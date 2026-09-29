@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +41,8 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerCenter
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
@@ -124,7 +125,7 @@ internal fun ApiKeyEntryContent(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        Divider(model = state.orTypeItDivider)
+        Divider(model = DividerUiModel.Horizontal(center = DividerCenter.Label(text = "Or type it")))
 
         Spacer(modifier = Modifier.height(18.dp))
 
@@ -340,7 +341,7 @@ private fun HelperLine(openUrl: (String) -> Unit) {
 @Composable
 private fun WhereToFindItExplainer() {
     Column(modifier = Modifier.fillMaxWidth()) {
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Divider(model = DividerUiModel.Horizontal())
 
         Spacer(modifier = Modifier.height(16.dp))
 

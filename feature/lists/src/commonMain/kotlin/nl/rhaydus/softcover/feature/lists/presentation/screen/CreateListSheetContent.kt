@@ -20,7 +20,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -55,6 +54,8 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerCenter
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
@@ -123,7 +124,7 @@ internal fun CreateListSheetContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Divider(model = state.quoteDivider)
+        Divider(model = DividerUiModel.Horizontal(center = DividerCenter.QuoteMark))
 
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -137,11 +138,7 @@ internal fun CreateListSheetContent(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            thickness = 1.dp,
-            modifier = Modifier.padding(horizontal = 40.dp),
-        )
+        Divider(model = DividerUiModel.Horizontal(inset = 40.dp))
 
         Spacer(modifier = Modifier.height(30.dp))
 

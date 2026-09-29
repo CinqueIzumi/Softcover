@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -47,8 +48,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.section.Version
  */
 @Composable
 internal fun AboutContent(
-    versionName: String,
-    versionCode: Int,
+    versionFooterDivider: DividerUiModel,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,
@@ -90,8 +90,7 @@ internal fun AboutContent(
         Spacer(modifier = Modifier.height(40.dp))
 
         VersionFooter(
-            versionName = versionName,
-            versionCode = versionCode,
+            divider = versionFooterDivider,
             onSecretUnlocked = onComponentGalleryUnlocked,
         )
     }

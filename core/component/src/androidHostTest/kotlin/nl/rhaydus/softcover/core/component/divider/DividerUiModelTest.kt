@@ -8,55 +8,57 @@ class DividerUiModelTest {
     @Nested
     inner class Previews {
         @Test
-        fun `every HorizontalDividerSurface value appears in at least one Horizontal fixture`() {
-            // ----- Arrange -----
-            val expectedSurfaces = setOf(
-                HorizontalDividerSurface.DebugRoutesRow,
-                HorizontalDividerSurface.ReadingLifeShareCard,
-                HorizontalDividerSurface.SettingsRoadmap,
-                HorizontalDividerSurface.CreateListQuote,
-                HorizontalDividerSurface.OnboardingOrTypeIt,
-            )
+        fun `covers both horizontal and vertical variants`() {
+            // ----- Arrange & Act -----
+            val variants = DividerUiModel.previews.map { it::class }.toSet()
 
-            // ----- Act -----
-            val coveredSurfaces = DividerUiModel.previews
-                .filterIsInstance<DividerUiModel.Horizontal>()
-                .map { it.surface }
+            // ----- Assert -----
+            variants shouldBe setOf(DividerUiModel.Horizontal::class, DividerUiModel.Vertical::class)
+        }
+
+        @Test
+        fun `covers every DividerInk variant`() {
+            // ----- Arrange & Act -----
+            val inkVariants = DividerUiModel.previews
+                .map { model ->
+                    when (model) {
+                        is DividerUiModel.Horizontal -> model.ink
+                        is DividerUiModel.Vertical -> model.ink
+                    }
+                }
+                .map { it::class }
                 .toSet()
 
             // ----- Assert -----
-            coveredSurfaces shouldBe expectedSurfaces
+            inkVariants shouldBe setOf(
+                DividerInk.Outline::class,
+                DividerInk.ContentTint::class,
+                DividerInk.OnImage::class,
+            )
         }
 
         @Test
-        fun `at least one fixture carries a QuoteMark centre`() {
+        fun `covers both DividerCenter variants`() {
             // ----- Arrange & Act -----
-            val withQuoteMark = DividerUiModel.previews
+            val centerVariants = DividerUiModel.previews
                 .filterIsInstance<DividerUiModel.Horizontal>()
-                .filter { it.center == DividerCenter.QuoteMark }
+                .mapNotNull { it.center }
+                .map { it::class }
+                .toSet()
 
             // ----- Assert -----
-            withQuoteMark.size shouldBe 1
+            centerVariants shouldBe setOf(DividerCenter.QuoteMark::class, DividerCenter.Label::class)
         }
 
         @Test
-        fun `at least one fixture carries a Label centre`() {
+        fun `includes a Vertical with a non-null length`() {
             // ----- Arrange & Act -----
-            val withLabel = DividerUiModel.previews
-                .filterIsInstance<DividerUiModel.Horizontal>()
-                .filter { it.center is DividerCenter.Label }
+            val hasLength = DividerUiModel.previews
+                .filterIsInstance<DividerUiModel.Vertical>()
+                .any { it.length != null }
 
             // ----- Assert -----
-            withLabel.size shouldBe 1
-        }
-
-        @Test
-        fun `at least one fixture is Vertical`() {
-            // ----- Arrange & Act -----
-            val vertical = DividerUiModel.previews.filterIsInstance<DividerUiModel.Vertical>()
-
-            // ----- Assert -----
-            vertical.size shouldBe 1
+            hasLength shouldBe true
         }
     }
 }

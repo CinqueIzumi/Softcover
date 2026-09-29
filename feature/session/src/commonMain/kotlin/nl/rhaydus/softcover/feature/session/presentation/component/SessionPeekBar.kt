@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +35,8 @@ import nl.rhaydus.common.currentInstant
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -113,7 +114,7 @@ private fun SessionPeekBarContent(
         // The flush desktop strip is led by a top hairline so it reads as docked chrome rather than
         // a card hovering over the page; the floating form needs none.
         if (flush) {
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Divider(model = DividerUiModel.Horizontal())
         }
 
         Surface(

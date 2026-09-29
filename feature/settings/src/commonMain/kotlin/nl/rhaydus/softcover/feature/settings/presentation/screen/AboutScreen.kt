@@ -8,6 +8,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 
@@ -23,8 +24,7 @@ class AboutScreen : Screen {
         val uriHandler = LocalUriHandler.current
 
         AboutScreenLayout(
-            versionName = state.appVersionName,
-            versionCode = state.appVersionCode,
+            versionFooterDivider = state.versionFooterDivider,
             creditsHeader = state.aboutCreditsHeader,
             sourceHeader = state.aboutSourceHeader,
             contactHeader = state.aboutContactHeader,
@@ -52,8 +52,7 @@ class AboutScreen : Screen {
  */
 @Composable
 internal expect fun AboutScreenLayout(
-    versionName: String,
-    versionCode: Int,
+    versionFooterDivider: DividerUiModel,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,

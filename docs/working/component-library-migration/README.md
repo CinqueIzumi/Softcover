@@ -14,17 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S0–S4, the S5 chips, headers, badges and skeletons families, S5-9 and S5-C-dividers done.
-  `DividerUiModel` is sealed `Horizontal(surface, center?)` / `Vertical(surface)`, drawn by one private
-  scaffold from a per-surface `DividerStyle` table and a pure `DividerInk.resolve(ColorScheme, contentColor)`;
-  `VerticalDividerSurface.WidePaneSeparator` has no caller yet. `Divider` and `Skeleton` models are stored on
-  the UiStates; `ReadingLifeShareCardBody` uses a file-level model. The mood tile's 104dp lives once, in
-  `core/component/bookcard/MoodTileDimensions` (folds into `BookCard`'s `Tile` metrics in S7-4). 14 files
-  with Apollo alias imports wait on foundation F24. #275's S5 box stays open until S5-10 lands.
-- **Next:** S5-10 in [`steps/s5-dividers.md`](steps/s5-dividers.md): inventory the 34 raw
-  `HorizontalDivider(` / `VerticalDivider(` sites (`git grep`) into a step-file table, then absorb them.
-  `TagEditorCollection:85` goes to the headers family. Gradle under JBR 21
-  (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
+- **State:** S0–S4 and every S5 divider sub-step done. S5-10 has been built on the reworked shape but
+  not committed: `DividerUiModel` is data-free with defaults, every site builds it inline, surfaces, style
+  tables and UiState divider fields are gone except `versionFooterDivider`, and § 7.4a carries the R10
+  exception. A new no-change-detector test rule is in `.claude/rules/tests.md`, the test-writer agent and
+  § 7.5. S5-T is a new step. Mood tile 104dp: `bookcard/MoodTileDimensions` (→ S7-4). 14 Apollo-alias files
+  wait on F24.
+- **Next:** the user commits S5-10 and ticks #275's S5 box. Then run S5-T (`steps/s5-test-prune.md`) before
+  S6. Gradle under JBR 21.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
@@ -34,12 +31,15 @@ checkboxes in step with `## Steps` and `## Gates` here.
   `FeaturedCard`'s eyebrow gap (10 → 8dp); the whole badge family in the gallery and on device (never
   visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
   cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`; S5-C-dividers' quote-glyph gap
-  (14 → 12dp) and the "Or type it" label on plain `eyebrowSmall`.
-- **Verification:** S5-C-dividers on JBR 21: main compile (core:component, settings, lists, onboarding, app
-  debug), divider + Roadmap / CreateList / Onboarding UiState tests, `styleCheck`, `checkDocBudgets` passed.
-  New `DividerInkTest` / `DividerStyleTest`. Reviewer: no blockers, every dp and colour verified; its finding
-  (the vertical fixture had zero height in the gallery) fixed with `VERTICAL_DIVIDER_FIXTURE_HEIGHT`.
-- **Uncommitted:** this `## Now` block, `steps/s5-dividers.md`, and all of S5-C-dividers.
+  (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`.
+- **Verification:** on JBR 21, `:app:assembleDebug`, `:desktopApp:compileKotlin`, `checkModuleGraph`,
+  `:feature:session:projectHealth`, `checkDocBudgets` and `styleCheck` passed. The full `testAndroidHostTest`
+  suites of `core:component`, the seven touched features and `orchestration` passed. Reviewer: ✅; both
+  minor findings are fixed.
+- **Uncommitted** (mostly staged): the S5-10 rework (the divider package, 4 files deleted, call sites in
+  `app/debug`, `core/component` and eight features, and `DesktopAppModule`'s `Render(host)` fix), the
+  contract § 7.4a / § 7.5, `patterns/library.md`, the tests rule, `softcover-test-writer.md`, a reviewer
+  memory, `steps/s5-dividers.md`, `steps/s5-test-prune.md`, `steps/s11-contract-retrofit.md` and this block.
 
 ## Local verification
 
@@ -79,7 +79,8 @@ every sub-step's Verify.
 | S5 | — (headers) | S5-4–S5-6, S5-C-headers | [x] |
 | S5 | — (badges) | S5-7, S5-C-badges | [x] |
 | S5 | — (skeletons) | S5-8, S5-C-skeletons | [x] |
-| S5 | [steps/s5-dividers.md](steps/s5-dividers.md) | S5-9 | [ ] |
+| S5 | [steps/s5-dividers.md](steps/s5-dividers.md) | S5-9–S5-10 | [x] |
+| S5 | [steps/s5-test-prune.md](steps/s5-test-prune.md) | S5-T | [ ] |
 | S6 | [steps/s6-list-rows.md](steps/s6-list-rows.md) | S6-1–S6-2 | [ ] |
 | S6 | [steps/s6-sheet-chrome.md](steps/s6-sheet-chrome.md) | S6-3–S6-7 | [ ] |
 | S7 | [steps/s7-bookcard.md](steps/s7-bookcard.md) | S7-1–S7-7 | [ ] |
@@ -92,7 +93,7 @@ every sub-step's Verify.
 
 ## Decisions
 
-- Test posture: no Compose UI tests; unit tests cover every UI model and mapper, and the Component Gallery is the visual-acceptance surface.
+- Test posture: no Compose UI tests; unit tests follow `.claude/rules/tests.md`; the Component Gallery is the visual-acceptance surface.
 - A `:core:uibinding` → `:core:<data>` edge is pre-approved when a mapper needs one; write it when the edge exists.
 - A step spanning several sessions splits into sub-steps, one session each, in the step file's `## Sub-steps`.
 

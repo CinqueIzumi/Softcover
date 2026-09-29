@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private val DIVIDER_THICKNESS = 1.dp
+private val CENTER_GAP = 12.dp
 
 /** A hairline rule, bare or broken by a centred glyph or label. */
 @Composable
@@ -45,15 +47,14 @@ private fun HorizontalDividerScaffold(
     model: DividerUiModel.Horizontal,
     modifier: Modifier,
 ) {
-    val style = model.surface.style()
-    val color = style.ink.resolve(
+    val color = model.ink.resolve(
         colorScheme = MaterialTheme.colorScheme,
         contentColor = LocalContentColor.current,
     )
 
     if (model.center == null) {
         HorizontalDivider(
-            modifier = modifier.padding(horizontal = style.inset),
+            modifier = modifier.padding(horizontal = model.inset),
             thickness = DIVIDER_THICKNESS,
             color = color,
         )
@@ -62,10 +63,10 @@ private fun HorizontalDividerScaffold(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(style.centerGap),
+        horizontalArrangement = Arrangement.spacedBy(CENTER_GAP),
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = style.inset),
+            .padding(horizontal = model.inset),
     ) {
         HorizontalDivider(
             color = color,
@@ -124,13 +125,14 @@ private fun VerticalDividerScaffold(
     model: DividerUiModel.Vertical,
     modifier: Modifier,
 ) {
-    val color = model.surface.ink().resolve(
+    val color = model.ink.resolve(
         colorScheme = MaterialTheme.colorScheme,
         contentColor = LocalContentColor.current,
     )
+    val length = model.length
 
     VerticalDivider(
-        modifier = modifier.fillMaxHeight(),
+        modifier = if (length != null) modifier.height(length) else modifier.fillMaxHeight(),
         thickness = DIVIDER_THICKNESS,
         color = color,
     )

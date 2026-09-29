@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
 /**
@@ -23,8 +24,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
  */
 @Composable
 internal actual fun AboutScreenLayout(
-    versionName: String,
-    versionCode: Int,
+    versionFooterDivider: DividerUiModel,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,
@@ -47,8 +47,7 @@ internal actual fun AboutScreenLayout(
                 .fillMaxWidth(),
         ) {
             AboutContent(
-                versionName = versionName,
-                versionCode = versionCode,
+                versionFooterDivider = versionFooterDivider,
                 creditsHeader = creditsHeader,
                 sourceHeader = sourceHeader,
                 contactHeader = contactHeader,

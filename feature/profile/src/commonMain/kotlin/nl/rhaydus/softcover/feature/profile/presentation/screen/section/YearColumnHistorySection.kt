@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -30,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -95,7 +96,7 @@ internal fun YearColumnHistorySection(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Divider(model = DividerUiModel.Horizontal())
 
             Spacer(modifier = Modifier.height(10.dp))
 

@@ -108,7 +108,6 @@ private fun RoadmapLoadedBody(
                 document = document,
                 renderUnits = state.renderUnits,
                 lastUpdatedText = state.lastUpdatedText,
-                thematicBreakDivider = state.thematicBreakDivider,
                 openUrl = openUrl,
             )
         } else if (state.roadmapError != null) {
@@ -138,7 +137,6 @@ private fun RoadmapDocumentBody(
     document: RoadmapDocument,
     renderUnits: List<RoadmapRenderUnit>,
     lastUpdatedText: String?,
-    thematicBreakDivider: DividerUiModel,
     openUrl: (String) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -160,7 +158,6 @@ private fun RoadmapDocumentBody(
 
             RoadmapUnitContent(
                 unit = unit,
-                thematicBreakDivider = thematicBreakDivider,
                 openUrl = openUrl,
             )
         }
@@ -195,7 +192,6 @@ private fun RoadmapRenderUnit.leadingSpacing() = when (this) {
 @Composable
 private fun RoadmapUnitContent(
     unit: RoadmapRenderUnit,
-    thematicBreakDivider: DividerUiModel,
     openUrl: (String) -> Unit,
 ) {
     when (unit) {
@@ -222,7 +218,7 @@ private fun RoadmapUnitContent(
             openUrl = openUrl,
         )
 
-        RoadmapRenderUnit.ThematicBreak -> Divider(model = thematicBreakDivider)
+        RoadmapRenderUnit.ThematicBreak -> Divider(model = DividerUiModel.Horizontal())
     }
 }
 

@@ -44,6 +44,11 @@ failures, thrown exceptions), state transitions, and delegation to dependencies.
 implementation. Each test is deterministic and independent of order, and would fail if the code under test
 broke.
 
+Do not write change-detector tests: no assertion on a value copied straight out of production code, such as
+a style table's dp, alpha, colour role or typography, or a constructor default. For a UI model, test only the
+logic that turns input into output, and the fixture coverage (every variant appears in `previews`). If a brief
+asks for a change-detector test, skip it and say so in the report.
+
 ## Running
 
 - Run exactly the `## Verify` command. It uses `scripts/gradle-quiet.sh`, which prints a summary and the path

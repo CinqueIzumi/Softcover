@@ -2,8 +2,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
-import nl.rhaydus.softcover.core.component.divider.HorizontalDividerSurface
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.component.state.SkeletonVariant
@@ -23,7 +21,6 @@ internal data class RoadmapUiState(
         subtitle = "What we're building next, and roughly when.",
     ),
     val skeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.RoadmapEntry),
-    val thematicBreakDivider: DividerUiModel = DividerUiModel.Horizontal(HorizontalDividerSurface.SettingsRoadmap),
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val roadmapError: String? = null,

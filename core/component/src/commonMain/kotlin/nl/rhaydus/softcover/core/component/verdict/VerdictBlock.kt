@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.isBlank
@@ -124,7 +125,7 @@ fun VerdictBlock(
                         if (displayedReview != null) {
                             Spacer(modifier = Modifier.height(14.dp))
 
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            Divider(model = DividerUiModel.Horizontal())
 
                             Spacer(modifier = Modifier.height(14.dp))
                         }

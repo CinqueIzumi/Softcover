@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerInk
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
@@ -148,9 +150,7 @@ private fun HeroStatCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.25f),
-            )
+            Divider(model = DividerUiModel.Horizontal(ink = DividerInk.ContentTint(alpha = 0.25f)))
 
             Spacer(modifier = Modifier.height(10.dp))
 

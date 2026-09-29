@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -34,8 +35,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.AboutContent
 @Composable
 internal fun AboutPane(
     masthead: PageMastheadUiModel,
-    versionName: String,
-    versionCode: Int,
+    versionFooterDivider: DividerUiModel,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,
@@ -68,8 +68,7 @@ internal fun AboutPane(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 AboutContent(
-                    versionName = versionName,
-                    versionCode = versionCode,
+                    versionFooterDivider = versionFooterDivider,
                     creditsHeader = creditsHeader,
                     sourceHeader = sourceHeader,
                     contactHeader = contactHeader,

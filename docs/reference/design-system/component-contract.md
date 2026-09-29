@@ -234,8 +234,10 @@ Consequences:
   grep that every new field is both declared and assigned; prefer deriving a field with `map` over writing
   it from a second place.
 
-### 7.4a Known exceptions to R1
+### 7.4a Known exceptions
 
+- **A data-free UI model may be built at the call site (R10).** When no field derives from data, as with
+  `DividerUiModel`, the call site builds it inline with its defaults and any overrides.
 - **`VerdictSheet`, `VerdictBlock` and `RichTextFormattingToolbar`** still take loose parameters and N
   callbacks; they are fixed with the verdict family's sheet-chrome consolidation. Do not copy their shape.
   `VerdictSheet`'s `cover` slot stays a slot on purpose (R11).
@@ -247,7 +249,8 @@ Consequences:
 
 The gallery is the library's **visual acceptance surface**: every UI model's `previews`, rendered across
 both brightnesses and all five spine colours (§ 2.1). There are no Compose UI tests and none are planned —
-the gallery plus per-model unit tests are the coverage.
+the gallery is the visual check. Unit tests cover model logic and fixture coverage, never copied style
+values or defaults (`.claude/rules/tests.md`).
 
 It is a **shipped easter egg**, rendered on Android, iOS and desktop from `commonMain`:
 

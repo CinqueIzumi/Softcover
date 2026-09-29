@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +23,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
@@ -136,10 +137,7 @@ private fun RatingsAverageRow(
 
         Spacer(modifier = Modifier.width(20.dp))
 
-        VerticalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            modifier = Modifier.height(32.dp),
-        )
+        Divider(model = DividerUiModel.Vertical(length = 32.dp))
 
         Spacer(modifier = Modifier.width(20.dp))
 

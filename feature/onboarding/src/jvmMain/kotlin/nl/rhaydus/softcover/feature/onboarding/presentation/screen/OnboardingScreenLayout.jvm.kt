@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -109,7 +110,7 @@ internal actual fun OnboardingScreenLayout(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    Divider(model = DividerUiModel.Horizontal())
 
                     Spacer(modifier = Modifier.height(32.dp))
 

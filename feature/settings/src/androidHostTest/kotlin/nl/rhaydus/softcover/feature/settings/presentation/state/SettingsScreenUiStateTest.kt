@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.component.divider.DividerCenter
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -93,6 +95,17 @@ class SettingsScreenUiStateTest {
                 eyebrow = "Personalise",
                 title = "Appearance",
                 subtitle = "Make Softcover yours.",
+            )
+        }
+
+        @Test
+        fun `versionFooterDivider defaults to a Horizontal divider labelled from the app version`() {
+            // ----- Arrange & Act -----
+            val state = SettingsScreenUiState()
+
+            // ----- Assert -----
+            state.versionFooterDivider shouldBe DividerUiModel.Horizontal(
+                center = DividerCenter.Label(text = "Version  (0)"),
             )
         }
     }

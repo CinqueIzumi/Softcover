@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,6 +47,9 @@ import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerInk
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -72,6 +74,7 @@ internal fun GeneralBookInfoSection(
     ownedCoverBadge: BadgeUiModel?,
     onCoverClick: () -> Unit,
 ) {
+    val divider = DividerUiModel.Horizontal(ink = DividerInk.OnImage(alpha = 0.3f))
     val imageHeight = with(LocalDensity.current) {
         (LocalWindowInfo.current.containerSize.height * 0.3f).toDp()
     }
@@ -214,7 +217,7 @@ internal fun GeneralBookInfoSection(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
+                        Divider(model = divider)
 
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -320,7 +323,7 @@ internal fun GeneralBookInfoSection(
                         if (showRating || showLength) {
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            HorizontalDivider(color = Color.White.copy(alpha = 0.3f))
+                            Divider(model = divider)
 
                             Spacer(modifier = Modifier.height(8.dp))
 

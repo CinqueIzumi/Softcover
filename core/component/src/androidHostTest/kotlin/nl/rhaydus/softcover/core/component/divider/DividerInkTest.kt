@@ -38,5 +38,29 @@ class DividerInkTest {
             // ----- Assert -----
             color shouldBe contentColor.copy(alpha = 0.25f)
         }
+
+        @Test
+        fun `OnImage resolves to white at its alpha`() {
+            // ----- Act -----
+            val color = DividerInk.OnImage(alpha = 0.3f).resolve(
+                colorScheme = colorScheme,
+                contentColor = contentColor,
+            )
+
+            // ----- Assert -----
+            color shouldBe Color.White.copy(alpha = 0.3f)
+        }
+
+        @Test
+        fun `OnImage ignores the colour scheme and content colour`() {
+            // ----- Act -----
+            val color = DividerInk.OnImage(alpha = 0.3f).resolve(
+                colorScheme = lightColorScheme(outlineVariant = Color(color = 0xFF999999)),
+                contentColor = Color(color = 0xFF333333),
+            )
+
+            // ----- Assert -----
+            color shouldBe Color.White.copy(alpha = 0.3f)
+        }
     }
 }

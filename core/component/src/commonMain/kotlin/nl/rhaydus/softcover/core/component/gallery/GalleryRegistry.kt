@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.component.gallery
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -42,9 +44,9 @@ import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerCenter
+import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
-import nl.rhaydus.softcover.core.component.divider.HorizontalDividerSurface
-import nl.rhaydus.softcover.core.component.divider.VerticalDividerSurface
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
@@ -286,13 +288,19 @@ object GalleryRegistry {
             previews = DividerUiModel,
             label = ::dividerFixtureLabel,
             content = { model, modifier ->
-                Divider(
-                    model = model,
-                    modifier = when (model) {
-                        is DividerUiModel.Horizontal -> modifier
-                        is DividerUiModel.Vertical -> modifier.height(VERTICAL_DIVIDER_FIXTURE_HEIGHT)
-                    },
-                )
+                val onDarkBackdrop = model is DividerUiModel.Horizontal &&
+                    model.ink is DividerInk.OnImage
+                Box(
+                    modifier = if (onDarkBackdrop) Modifier.background(Color.Black) else Modifier,
+                ) {
+                    Divider(
+                        model = model,
+                        modifier = when (model) {
+                            is DividerUiModel.Horizontal -> modifier
+                            is DividerUiModel.Vertical -> modifier.height(VERTICAL_DIVIDER_FIXTURE_HEIGHT)
+                        },
+                    )
+                }
             },
         ),
         galleryEntry(
@@ -564,17 +572,16 @@ private fun bannerFixtureLabel(model: BannerUiModel): String =
     model.tone.name.lowercase().replaceFirstChar(Char::uppercase)
 
 private fun dividerFixtureLabel(model: DividerUiModel): String = when (model) {
-    is DividerUiModel.Horizontal -> when (model.surface) {
-        HorizontalDividerSurface.DebugRoutesRow -> "Debug routes row"
-        HorizontalDividerSurface.ReadingLifeShareCard -> "Reading life share card"
-        HorizontalDividerSurface.SettingsRoadmap -> "Settings roadmap"
-        HorizontalDividerSurface.CreateListQuote -> "Create list quote"
-        HorizontalDividerSurface.OnboardingOrTypeIt -> "Onboarding label"
+    is DividerUiModel.Horizontal -> when {
+        model.center == DividerCenter.QuoteMark -> "Quote mark centre"
+        model.center is DividerCenter.Label -> "Labelled centre"
+        model.ink is DividerInk.OnImage -> "On-image rule"
+        model.ink is DividerInk.ContentTint -> "Content-tint rule"
+        model.inset > 0.dp -> "Inset rule"
+        else -> "Plain rule"
     }
 
-    is DividerUiModel.Vertical -> when (model.surface) {
-        VerticalDividerSurface.WidePaneSeparator -> "Wide pane separator"
-    }
+    is DividerUiModel.Vertical -> if (model.length != null) "Fixed-length vertical rule" else "Vertical rule"
 }
 
 /** Names what a [StatNumberUiModel] fixture demonstrates — its format, which is its anatomy. */

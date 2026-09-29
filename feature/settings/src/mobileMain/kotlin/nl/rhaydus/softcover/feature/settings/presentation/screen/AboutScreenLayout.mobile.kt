@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.divider.DividerCenter
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
@@ -27,8 +29,7 @@ private val ABOUT_TOP_BAR = TopBarUiModel(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal actual fun AboutScreenLayout(
-    versionName: String,
-    versionCode: Int,
+    versionFooterDivider: DividerUiModel,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,
@@ -50,8 +51,7 @@ internal actual fun AboutScreenLayout(
         },
     ) { innerPadding ->
         AboutContent(
-            versionName = versionName,
-            versionCode = versionCode,
+            versionFooterDivider = versionFooterDivider,
             creditsHeader = creditsHeader,
             sourceHeader = sourceHeader,
             contactHeader = contactHeader,
@@ -77,8 +77,9 @@ private fun AboutScreenPreview() {
 
     SoftcoverTheme {
         AboutScreenLayout(
-            versionName = "1.0.0",
-            versionCode = 1,
+            versionFooterDivider = DividerUiModel.Horizontal(
+                center = DividerCenter.Label(text = "Version 1.0.0 (1)"),
+            ),
             creditsHeader = state.aboutCreditsHeader,
             sourceHeader = state.aboutSourceHeader,
             contactHeader = state.aboutContactHeader,

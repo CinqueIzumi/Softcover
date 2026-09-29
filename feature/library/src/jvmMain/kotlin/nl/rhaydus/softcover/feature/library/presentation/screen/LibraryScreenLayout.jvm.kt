@@ -23,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarState
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,6 +43,8 @@ import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
@@ -149,7 +150,7 @@ internal actual fun LibraryScreenLayout(
                 .fillMaxHeight(),
         )
 
-        VerticalDivider()
+        Divider(model = DividerUiModel.Vertical())
 
         Column(
             modifier = Modifier

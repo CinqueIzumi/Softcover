@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -25,6 +24,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -237,12 +238,11 @@ private fun GenderLegend(
     slices: List<GenderSlice>,
     isLoading: Boolean,
 ) {
-    val hairlineColor = MaterialTheme.colorScheme.outlineVariant
     val stackIndices = genderStackIndices(slices)
 
     Column(modifier = Modifier.shimmer(isLoading = isLoading)) {
         slices.forEachIndexed { index, slice ->
-            HorizontalDivider(color = hairlineColor)
+            Divider(model = DividerUiModel.Horizontal())
 
             Row(
                 modifier = Modifier
@@ -457,15 +457,12 @@ private fun DemographicLegend(
     breakdown: DemographicBreakdown,
     isLoading: Boolean,
 ) {
-    val hairlineColor = MaterialTheme.colorScheme.outlineVariant
-
     Column(modifier = Modifier.shimmer(isLoading = isLoading)) {
         DemographicLegendRow(
             label = "Yes",
             count = breakdown.yesCount,
             total = breakdown.total,
             swatchColor = MaterialTheme.colorScheme.primary.copy(alpha = DEMOGRAPHIC_YES_ALPHA),
-            hairlineColor = hairlineColor,
         )
 
         DemographicLegendRow(
@@ -473,7 +470,6 @@ private fun DemographicLegend(
             count = breakdown.noCount,
             total = breakdown.total,
             swatchColor = MaterialTheme.colorScheme.primary.copy(alpha = DEMOGRAPHIC_NO_ALPHA),
-            hairlineColor = hairlineColor,
         )
 
         // Yes/No are the fixed categories and stay even at 0%, but Unknown is only a row when there is
@@ -485,7 +481,6 @@ private fun DemographicLegend(
                 count = breakdown.unknownCount,
                 total = breakdown.total,
                 swatchColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = DEMOGRAPHIC_UNKNOWN_ALPHA),
-                hairlineColor = hairlineColor,
             )
         }
     }
@@ -497,14 +492,13 @@ private fun DemographicLegendRow(
     count: Int,
     total: Int,
     swatchColor: Color,
-    hairlineColor: Color,
 ) {
     val percentage = demographicPercentage(
         count = count,
         total = total,
     )
 
-    HorizontalDivider(color = hairlineColor)
+    Divider(model = DividerUiModel.Horizontal())
 
     Row(
         modifier = Modifier

@@ -11,6 +11,8 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
+import nl.rhaydus.softcover.core.component.divider.DividerCenter
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.domain.app.AppVersionInfo
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -77,6 +79,50 @@ class SettingsScreenScreenModelTest {
             // ----- Assert -----
             screenModel.state.value.appVersionName shouldBe "9.9.9"
             screenModel.state.value.appVersionCode shouldBe 42
+        }
+
+        @Test
+        fun `initial state builds versionFooterDivider label from AppVersionProvider name and code`() {
+            // ----- Arrange -----
+            val appVersionProvider = mockk<AppVersionProvider>()
+
+            every {
+                appVersionProvider.versionInfo
+            } returns AppVersionInfo(
+                name = "9.9.9",
+                code = 42,
+            )
+
+            val appDispatchers = AppDispatchers(
+                main = dispatcher,
+                io = dispatcher,
+                default = dispatcher,
+            )
+
+            // ----- Act -----
+            val screenModel = SettingsScreenScreenModel(
+                getDateStyleAsFlowUseCase = mockk(relaxed = true),
+                setDateStyleUseCase = mockk(relaxed = true),
+                setBottomBarStyleUseCase = mockk(relaxed = true),
+                setThemeModeUseCase = mockk(relaxed = true),
+                setColorPaletteUseCase = mockk(relaxed = true),
+                setDynamicColorUseCase = mockk(relaxed = true),
+                getThemeConfigurationUseCase = mockk(relaxed = true),
+                getReadingStreakEnabledAsFlowUseCase = mockk(relaxed = true),
+                setReadingStreakEnabledUseCase = mockk(relaxed = true),
+                getShelfSwipeEnabledAsFlowUseCase = mockk(relaxed = true),
+                setShelfSwipeEnabledUseCase = mockk(relaxed = true),
+                getUiScaleAsFlowUseCase = mockk(relaxed = true),
+                setUiScaleUseCase = mockk(relaxed = true),
+                appVersionProvider = appVersionProvider,
+                appDispatchers = appDispatchers,
+                flows = emptyList(),
+            )
+
+            // ----- Assert -----
+            screenModel.state.value.versionFooterDivider shouldBe DividerUiModel.Horizontal(
+                center = DividerCenter.Label(text = "Version 9.9.9 (42)"),
+            )
         }
 
         @Test

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,6 +12,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
@@ -82,7 +83,7 @@ internal actual fun SettingsScreenLayout(
                 .fillMaxHeight(),
         )
 
-        VerticalDivider()
+        Divider(model = DividerUiModel.Vertical())
 
         Box(
             modifier = Modifier
@@ -103,8 +104,7 @@ internal actual fun SettingsScreenLayout(
 
                 SettingsCategory.ABOUT -> AboutPane(
                     masthead = state.aboutPaneMasthead,
-                    versionName = state.appVersionName,
-                    versionCode = state.appVersionCode,
+                    versionFooterDivider = state.versionFooterDivider,
                     creditsHeader = state.aboutCreditsHeader,
                     sourceHeader = state.aboutSourceHeader,
                     contactHeader = state.aboutContactHeader,

@@ -5,12 +5,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.UiScale
@@ -30,7 +31,7 @@ internal fun UiScaleSection(
 
         UiScale.entries.forEachIndexed { index, scale ->
             if (index > 0) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Divider(model = DividerUiModel.Horizontal())
             }
 
             SettingsSelectableRow(
