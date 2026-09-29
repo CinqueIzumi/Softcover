@@ -69,6 +69,23 @@ class UiScaleCollectorTest {
         }
 
         @Test
+        fun `recomputes uiScaleRows so the emitted scale is the selected row`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = UiScaleCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+
+            // ----- Act -----
+            uiScaleFlow.emit(UiScale.PERCENT_175)
+
+            // ----- Assert -----
+            stateFlow.value.uiScaleRows.first { it.selected }.key shouldBe UiScale.PERCENT_175
+            job.cancel()
+        }
+
+        @Test
         fun `updates uiScale to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UiScaleCollector()

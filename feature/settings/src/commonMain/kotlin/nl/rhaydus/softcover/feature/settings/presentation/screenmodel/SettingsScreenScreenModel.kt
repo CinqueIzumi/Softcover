@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsColl
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
+import nl.rhaydus.softcover.feature.settings.presentation.util.settingsDisplayToggleAvailability
 import nl.rhaydus.toad.ToadScreenModel
 import kotlin.time.Clock
 
@@ -45,13 +46,19 @@ internal class SettingsScreenScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<SettingsCollector>,
 ) : ToadScreenModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsCollector, SettingsLocalVariables>(
-    initialState = SettingsScreenUiState(
-        appVersionName = appVersionProvider.versionInfo.name,
-        appVersionCode = appVersionProvider.versionInfo.code,
-        dateStyleExamples = DateStyle.entries.associateWith {
-            it.format(Clock.System.todayIn(TimeZone.currentSystemDefault()))
-        },
-    ),
+    initialState = run {
+        val displayToggleAvailability = settingsDisplayToggleAvailability()
+
+        SettingsScreenUiState(
+            appVersionName = appVersionProvider.versionInfo.name,
+            appVersionCode = appVersionProvider.versionInfo.code,
+            dateStyleExamples = DateStyle.entries.associateWith {
+                it.format(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+            },
+            showFloatingBarToggle = displayToggleAvailability.showsFloatingBarToggle,
+            showShelfSwipeToggle = displayToggleAvailability.showsShelfSwipeToggle,
+        )
+    },
     initialLocalVariables = SettingsLocalVariables(),
     initializers = flows,
 ) {

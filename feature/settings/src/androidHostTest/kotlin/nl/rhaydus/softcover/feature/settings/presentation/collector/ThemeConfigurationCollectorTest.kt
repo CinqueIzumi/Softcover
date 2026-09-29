@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
+import nl.rhaydus.softcover.feature.settings.presentation.model.DisplayToggle
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -190,5 +191,43 @@ class ThemeConfigurationCollectorTest {
             stateFlow.value.colorPalette shouldBe ColorPalette.SEA
             job.cancel()
         }
+
+        @Test
+        fun `recomputes displayToggleRows so the floating-bar row's checked value follows the emitted style`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = ThemeConfigurationCollector()
+                val job = launch { collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                ) }
+
+                // ----- Act -----
+                themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.FLOATING))
+
+                // ----- Assert -----
+                stateFlow.value.displayToggleRows
+                    .first { it.key == DisplayToggle.FLOATING_BOTTOM_BAR }
+                    .checked shouldBe true
+                job.cancel()
+            }
+
+        @Test
+        fun `recomputes dynamicColorToggleRow so its checked value follows the emitted configuration`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = ThemeConfigurationCollector()
+                val job = launch { collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                ) }
+
+                // ----- Act -----
+                themeConfigFlow.emit(ThemeConfiguration(useDynamicColor = true))
+
+                // ----- Assert -----
+                stateFlow.value.dynamicColorToggleRow.checked shouldBe true
+                job.cancel()
+            }
     }
 }

@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.displayToggleRowsFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.dynamicColorToggleRowFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.paletteChoicesFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.themeChoicesFor
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
@@ -18,7 +20,9 @@ import nl.rhaydus.toad.ActionScope
  * and [nl.rhaydus.softcover.feature.settings.presentation.screen.section.SpineColourSection] render
  * [SettingsScreenUiState.themeChoices] / [SettingsScreenUiState.paletteChoices] /
  * [SettingsScreenUiState.spinePalette] / [SettingsScreenUiState.paletteGloss] as-is rather than
- * calling `toSpinePalette()` themselves.
+ * calling `toSpinePalette()` themselves. Also recomputes [SettingsScreenUiState.displayToggleRows]
+ * (its floating-bar row) and [SettingsScreenUiState.dynamicColorToggleRow], since this is the only
+ * collector that changes either of their `checked` values.
  */
 internal class ThemeConfigurationCollector : SettingsCollector {
     override suspend fun onLaunch(
@@ -29,7 +33,7 @@ internal class ThemeConfigurationCollector : SettingsCollector {
             val spinePalette = configuration.colorPalette.toSpinePalette()
 
             scope.setState {
-                it.copy(
+                val next = it.copy(
                     useFloatingBarChecked = configuration.bottomBarStyle == BottomBarStyle.FLOATING,
                     themeMode = configuration.themeMode,
                     colorPalette = configuration.colorPalette,
@@ -42,6 +46,17 @@ internal class ThemeConfigurationCollector : SettingsCollector {
                         dynamicColor = configuration.useDynamicColor,
                     ),
                     paletteChoices = paletteChoicesFor(selected = configuration.colorPalette),
+                )
+
+                next.copy(
+                    displayToggleRows = displayToggleRowsFor(
+                        showFloatingBarToggle = next.showFloatingBarToggle,
+                        showShelfSwipeToggle = next.showShelfSwipeToggle,
+                        useFloatingBarChecked = next.useFloatingBarChecked,
+                        shelfSwipeEnabledChecked = next.shelfSwipeEnabledChecked,
+                        readingStreakEnabledChecked = next.readingStreakEnabledChecked,
+                    ),
+                    dynamicColorToggleRow = dynamicColorToggleRowFor(checked = next.useDynamicColorChecked),
                 )
             }
         }

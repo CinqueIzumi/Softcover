@@ -69,6 +69,23 @@ class DateStyleCollectorTest {
         }
 
         @Test
+        fun `recomputes dateStyleRows so the emitted style is the selected row`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = DateStyleCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+
+            // ----- Act -----
+            dateStyleFlow.emit(DateStyle.YEAR_MONTH_DAY)
+
+            // ----- Assert -----
+            stateFlow.value.dateStyleRows.first { it.selected }.key shouldBe DateStyle.YEAR_MONTH_DAY
+            job.cancel()
+        }
+
+        @Test
         fun `updates userDateStyle to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DateStyleCollector()

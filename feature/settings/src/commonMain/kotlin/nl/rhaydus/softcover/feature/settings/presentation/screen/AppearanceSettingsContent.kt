@@ -24,21 +24,17 @@ import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicCo
  * cards. The theme picker leads on every platform — it is the one control that repaints the whole app
  * — followed by the spine-colour picker, which carries the dynamic-colour switch beneath its tiles
  * (gated on [supportsDynamicColor], always `false` on desktop) since that switch replaces the very
- * look those tiles offer. The Display section that follows collapses the floating-bar, shelf-swipe,
- * and reading-streak switches into one flat toggle-row stack: [showBottomBarToggle] hides the
- * floating-bottom-bar row on desktop (there is no bottom bar there — it is a compact-only
- * preference), [showShelfSwipeToggle] hides the swipe-between-shelves row on desktop (whose Library
- * switches shelves from a permanent sidebar, not a pager), and reading streak always shows.
- * [showUiScaleControl] is desktop-only (hidden on mobile, where the OS handles DPI) and surfaces the
- * "Display scale" picker directly after the two colour pickers, since on desktop it is the appearance
- * control that matters next. The caller supplies the scroll / width [modifier].
+ * look those tiles offer. The Display section that follows renders whichever toggle rows
+ * [SettingsScreenUiState.displayToggleRows] holds — the floating-bar and shelf-swipe rows are already
+ * dropped there on desktop, reading streak always shows. [showUiScaleControl] is desktop-only (hidden
+ * on mobile, where the OS handles DPI) and surfaces the "Display scale" picker directly after the two
+ * colour pickers, since on desktop it is the appearance control that matters next. The caller supplies
+ * the scroll / width [modifier].
  */
 @Composable
 internal fun AppearanceSettingsContent(
     state: SettingsScreenUiState,
     runAction: (SettingsAction) -> Unit,
-    showBottomBarToggle: Boolean,
-    showShelfSwipeToggle: Boolean,
     showUiScaleControl: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -76,8 +72,6 @@ internal fun AppearanceSettingsContent(
 
         DisplaySection(
             state = state,
-            showBottomBarToggle = showBottomBarToggle,
-            showShelfSwipeToggle = showShelfSwipeToggle,
             runAction = runAction,
         )
 

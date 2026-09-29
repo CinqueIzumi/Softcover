@@ -132,7 +132,7 @@ component/
 +              one file per card body  ShareCardNumerals
 + sheet/       LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent
 +              · SheetScaffold  · SheetHeader  · SheetRow  · SheetFooter     S6
-+ sidebar/     SidebarSection  SidebarSectionUiModel  SidebarRowUiModel/Variant  SidebarEvent
++ sidebar/     Sidebar  SidebarUiModel  SidebarSectionUiModel  SidebarRowUiModel/Variant  SidebarEvent
 + state/       EmptyState  EmptyStateUiModel  Skeleton  SkeletonUiModel/Variant
 +              · ErrorState
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat

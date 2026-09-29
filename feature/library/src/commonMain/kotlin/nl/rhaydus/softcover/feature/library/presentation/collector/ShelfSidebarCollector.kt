@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -9,6 +8,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarRowUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarRowVariant
 import nl.rhaydus.softcover.core.component.sidebar.SidebarSectionUiModel
+import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
@@ -16,14 +16,14 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class ShelfSidebarSectionsCollector : LibraryCollector {
+internal class ShelfSidebarCollector : LibraryCollector {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
         dependencies: LibraryDependencies,
     ) {
         scope.state
             .map { state ->
-                shelfSidebarSectionsFor(
+                shelfSidebarFor(
                     visibleTabs = state.visibleTabs,
                     selectedTabId = state.selectedTabId,
                     shelvesSidebarLabel = state.shelvesSidebarLabel,
@@ -31,18 +31,18 @@ internal class ShelfSidebarSectionsCollector : LibraryCollector {
                 )
             }
             .distinctUntilChanged()
-            .collectLatest { sections ->
-                scope.setState { it.copy(shelfSidebarSections = sections) }
+            .collectLatest { sidebar ->
+                scope.setState { it.copy(shelfSidebar = sidebar) }
             }
     }
 }
 
-internal fun shelfSidebarSectionsFor(
+internal fun shelfSidebarFor(
     visibleTabs: List<LibraryTab>,
     selectedTabId: String,
     shelvesSidebarLabel: SectionHeaderUiModel,
     listsSidebarLabel: SectionHeaderUiModel,
-): ImmutableList<SidebarSectionUiModel<String>> {
+): SidebarUiModel<String> {
     val shelves = visibleTabs.filterNot { it is LibraryTab.CustomList }
     val lists = visibleTabs.filterIsInstance<LibraryTab.CustomList>()
 
@@ -73,5 +73,5 @@ internal fun shelfSidebarSectionsFor(
         }
     }
 
-    return sections.toImmutableList()
+    return SidebarUiModel(sections = sections.toImmutableList())
 }

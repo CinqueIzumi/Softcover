@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.sidebar.SidebarRowUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarRowVariant
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
-import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebarSectionsFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebarFor
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarKey
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategory
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
@@ -67,8 +67,8 @@ class OnSettingsCategorySelectedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.settingsSidebarSections shouldBe
-                settingsSidebarSectionsFor(selectedCategory = SettingsCategory.ABOUT)
+            stateFlow.value.settingsSidebar shouldBe
+                settingsSidebarFor(selectedCategory = SettingsCategory.ABOUT)
         }
 
         @Test
@@ -76,7 +76,7 @@ class OnSettingsCategorySelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = SettingsScreenUiState(
                 selectedCategory = SettingsCategory.APPEARANCE,
-                settingsSidebarSections = settingsSidebarSectionsFor(selectedCategory = SettingsCategory.APPEARANCE),
+                settingsSidebar = settingsSidebarFor(selectedCategory = SettingsCategory.APPEARANCE),
             )
             val action = OnSettingsCategorySelectedAction(category = SettingsCategory.ROADMAP)
 
@@ -87,7 +87,7 @@ class OnSettingsCategorySelectedActionTest {
             )
 
             // ----- Assert -----
-            val rows = with(stateFlow.value.settingsSidebarSections) { personalise.rows + about.rows }
+            val rows = stateFlow.value.settingsSidebar.sections.flatMap { it.rows }
             rows.single { it.selected }.key shouldBe
                 SettingsSidebarKey.Category(category = SettingsCategory.ROADMAP)
         }
@@ -97,7 +97,7 @@ class OnSettingsCategorySelectedActionTest {
             // ----- Arrange -----
             stateFlow.value = SettingsScreenUiState(
                 selectedCategory = SettingsCategory.APPEARANCE,
-                settingsSidebarSections = settingsSidebarSectionsFor(selectedCategory = SettingsCategory.APPEARANCE),
+                settingsSidebar = settingsSidebarFor(selectedCategory = SettingsCategory.APPEARANCE),
             )
             val action = OnSettingsCategorySelectedAction(category = SettingsCategory.APPEARANCE)
 
@@ -109,7 +109,7 @@ class OnSettingsCategorySelectedActionTest {
 
             // ----- Assert -----
             stateFlow.value.selectedCategory shouldBe SettingsCategory.APPEARANCE
-            stateFlow.value.settingsSidebarSections.personalise.rows
+            stateFlow.value.settingsSidebar.sections[1].rows
                 .single { it.key == SettingsSidebarKey.Category(category = SettingsCategory.APPEARANCE) }
                 .selected shouldBe true
         }

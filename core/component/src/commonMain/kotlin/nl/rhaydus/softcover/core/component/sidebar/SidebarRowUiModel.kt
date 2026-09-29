@@ -6,7 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
-/** One row of a [SidebarSection]. */
+/** One row within a [Sidebar]. */
 @Immutable
 data class SidebarRowUiModel<K>(
     val key: K,

@@ -11,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.header.PageMasthead
+import nl.rhaydus.softcover.core.component.sidebar.Sidebar
 import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
-import nl.rhaydus.softcover.core.component.sidebar.SidebarSection
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSettingsCategorySelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarKey
@@ -56,29 +56,8 @@ internal fun SettingsCategorySidebar(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            SidebarSection(
-                model = state.settingsSidebarSections.account,
-                onEvent = onRowEvent,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SidebarSection(
-                model = state.settingsSidebarSections.personalise,
-                onEvent = onRowEvent,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SidebarSection(
-                model = state.settingsSidebarSections.privacy,
-                onEvent = onRowEvent,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SidebarSection(
-                model = state.settingsSidebarSections.about,
+            Sidebar(
+                model = state.settingsSidebar,
                 onEvent = onRowEvent,
             )
         }

@@ -14,14 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S6-1 and S6-2 are done. Sidebar (`10415f15`) and the settings row merge (`c5d43d29`) are
-  committed. The row semantics fixes are uncommitted. They make `SettingsToggleRow` a whole-row
-  `Role.Switch` toggle, make `SettingsSelectableRow` a `Role.RadioButton` `selectable` in a
-  `selectableGroup`, and give `SettingsMenuRow` `Role.Button`. `SearchFocusRecentRow`'s remove target is
-  now a sibling ≥48dp box, and `SidebarItem` is a `Role.Tab` `selectable` in a `selectableGroup`. Mood
-  tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** S6-C-rows, the convergence pass over the row family (`family-procedure.md` § Phase 3,
-  `steps/s6-list-rows.md`). Then `steps/s6-sheet-chrome.md`, which needs a clean tree first. JBR 21
+- **State:** the row family is done. S6-C-rows is built, tested and reviewed, but not committed: `Sidebar`
+  / `SidebarUiModel<K>` and a `SettingsRow` scaffold with UiState-held row models. Mood tile → S7-4; 14
+  Apollo-alias files wait on F24.
+- **Next:** `steps/s6-sheet-chrome.md` (S6-3). Its `## How this step runs` section was written outside a
+  session and has not been reviewed; review it first. JBR 21
   (`~/Library/Java/JavaVirtualMachines/jbr-21.0.11`).
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
@@ -34,11 +31,13 @@ checkboxes in step with `## Steps` and `## Gates` here.
   `FeaturedCard`'s eyebrow gap (10 → 8dp); the whole badge family in the gallery and on device (never
   visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
   cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`; S5-C-dividers' quote-glyph gap
-  (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`.
-- **Verification:** the semantics fixes, after the review fixes: `:feature:settings`, `:feature:explore`
-  and `:orchestration` JVM compile and `styleCheck` pass. No tests: semantics only, no logic.
-- **Uncommitted:** the S6-1 semantics fixes (6 Kotlin files) and this block. `steps/s6-sheet-chrome.md`
-  has a concurrent edit that is not part of this step.
+  (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`;
+  S6-C-rows' settings rows (16dp vertical everywhere, 4dp title gap, top rule and press feedback on
+  toggle / choice lists).
+- **Verification:** S6-C-rows: compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`
+  and the sidebar / mapper / collector suites pass under JBR 21. Reviewer: no blockers.
+- **Uncommitted:** S6-C-rows and this block. Also in the tree, from outside this session: edits to
+  `family-procedure.md` and the `s6-sheet-chrome` / `s7`–`s12` step files, plus `step.workflow.js`.
 
 ## Local verification
 
@@ -80,7 +79,7 @@ every sub-step's Verify.
 | S5 | — (skeletons) | S5-8, S5-C-skeletons | [x] |
 | S5 | — (dividers) | S5-9–S5-10 | [x] |
 | S5 | — (test prune) | S5-T | [x] |
-| S6 | [steps/s6-list-rows.md](steps/s6-list-rows.md) | S6-1, S6-2 (audit only), S6-C-rows | [ ] |
+| S6 | — (rows) | S6-1, S6-2 (audit only), S6-C-rows | [x] |
 | S6 | [steps/s6-sheet-chrome.md](steps/s6-sheet-chrome.md) | S6-3–S6-7 | [ ] |
 | S7 | [steps/s7-bookcard.md](steps/s7-bookcard.md) | S7-1–S7-7 | [ ] |
 | S8 | [steps/s8-screen-states.md](steps/s8-screen-states.md) | S8-1–S8-3 | [ ] |

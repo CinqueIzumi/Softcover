@@ -9,7 +9,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Section header** — `core:component/header` — region opener in three accent-bar registers.
 - **Page masthead** — `core:component/header` — a page's title block.
 - **Masthead refresh action** — `core:component/header` — trailing refresh button.
-- **Sidebar section** — `core:component/sidebar` — desktop in-screen sidebar rows.
+- **Sidebar** — `core:component/sidebar` — a desktop source list of grouped, selectable rows.
 - **Editorial search field** — [detail](components/navigation.md#editorial-search-field) — persistent search pill for editorial headers.
 - **Bottom navigation** — [detail](components/navigation.md#bottom-navigation) — compact-width tab chrome, docked or floating.
 - **Navigation rail** — [detail](components/navigation.md#navigation-rail) — medium-width tab chrome.

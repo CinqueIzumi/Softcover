@@ -36,7 +36,7 @@ private val SidebarRowUiModel<String>.selected: Boolean
 private val SidebarRowUiModel<String>.longPressable: Boolean
     get() = (variant as? SidebarRowVariant.Destination)?.longPressable == true
 
-class ShelfSidebarSectionsCollectorTest {
+class ShelfSidebarCollectorTest {
     private lateinit var dependencies: LibraryDependencies
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
@@ -55,11 +55,11 @@ class ShelfSidebarSectionsCollectorTest {
     }
 
     @Nested
-    inner class ShelfSidebarSectionsForFun {
+    inner class ShelfSidebarForFun {
         @Test
         fun `shelves-only tabs give one section`() {
             // ----- Act -----
-            val sections = shelfSidebarSectionsFor(
+            val sidebar = shelfSidebarFor(
                 visibleTabs = listOf(ALL_TAB, READING_TAB),
                 selectedTabId = ALL_TAB.id,
                 shelvesSidebarLabel = SHELVES_LABEL,
@@ -67,15 +67,15 @@ class ShelfSidebarSectionsCollectorTest {
             )
 
             // ----- Assert -----
-            sections.size shouldBe 1
-            sections.single().label shouldBe SHELVES_LABEL
-            sections.single().rows.map { it.key } shouldBe listOf(ALL_TAB.id, READING_TAB.id)
+            sidebar.sections.size shouldBe 1
+            sidebar.sections.single().label shouldBe SHELVES_LABEL
+            sidebar.sections.single().rows.map { it.key } shouldBe listOf(ALL_TAB.id, READING_TAB.id)
         }
 
         @Test
         fun `shelves plus custom lists give two sections, with lists second`() {
             // ----- Act -----
-            val sections = shelfSidebarSectionsFor(
+            val sidebar = shelfSidebarFor(
                 visibleTabs = listOf(ALL_TAB, LIST_TAB),
                 selectedTabId = ALL_TAB.id,
                 shelvesSidebarLabel = SHELVES_LABEL,
@@ -83,17 +83,17 @@ class ShelfSidebarSectionsCollectorTest {
             )
 
             // ----- Assert -----
-            sections.size shouldBe 2
-            sections[0].label shouldBe SHELVES_LABEL
-            sections[0].rows.map { it.key } shouldBe listOf(ALL_TAB.id)
-            sections[1].label shouldBe LISTS_LABEL
-            sections[1].rows.map { it.key } shouldBe listOf(LIST_TAB.id)
+            sidebar.sections.size shouldBe 2
+            sidebar.sections[0].label shouldBe SHELVES_LABEL
+            sidebar.sections[0].rows.map { it.key } shouldBe listOf(ALL_TAB.id)
+            sidebar.sections[1].label shouldBe LISTS_LABEL
+            sidebar.sections[1].rows.map { it.key } shouldBe listOf(LIST_TAB.id)
         }
 
         @Test
         fun `selected follows selectedTabId`() {
             // ----- Act -----
-            val sections = shelfSidebarSectionsFor(
+            val sidebar = shelfSidebarFor(
                 visibleTabs = listOf(ALL_TAB, READING_TAB, LIST_TAB),
                 selectedTabId = READING_TAB.id,
                 shelvesSidebarLabel = SHELVES_LABEL,
@@ -101,14 +101,14 @@ class ShelfSidebarSectionsCollectorTest {
             )
 
             // ----- Assert -----
-            val allRows = sections.flatMap { it.rows }
+            val allRows = sidebar.sections.flatMap { it.rows }
             allRows.single { it.selected }.key shouldBe READING_TAB.id
         }
 
         @Test
         fun `every row is long-pressable`() {
             // ----- Act -----
-            val sections = shelfSidebarSectionsFor(
+            val sidebar = shelfSidebarFor(
                 visibleTabs = listOf(ALL_TAB, READING_TAB, LIST_TAB),
                 selectedTabId = ALL_TAB.id,
                 shelvesSidebarLabel = SHELVES_LABEL,
@@ -116,13 +116,13 @@ class ShelfSidebarSectionsCollectorTest {
             )
 
             // ----- Assert -----
-            sections.flatMap { it.rows }.all { it.longPressable } shouldBe true
+            sidebar.sections.flatMap { it.rows }.all { it.longPressable } shouldBe true
         }
 
         @Test
         fun `no custom lists means no lists section at all`() {
             // ----- Act -----
-            val sections = shelfSidebarSectionsFor(
+            val sidebar = shelfSidebarFor(
                 visibleTabs = listOf(ALL_TAB),
                 selectedTabId = ALL_TAB.id,
                 shelvesSidebarLabel = SHELVES_LABEL,
@@ -130,21 +130,21 @@ class ShelfSidebarSectionsCollectorTest {
             )
 
             // ----- Assert -----
-            sections.none { it.label == LISTS_LABEL } shouldBe true
+            sidebar.sections.none { it.label == LISTS_LABEL } shouldBe true
         }
     }
 
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets shelfSidebarSections from the current visibleTabs and selectedTabId on launch`() =
+        fun `sets shelfSidebar from the current visibleTabs and selectedTabId on launch`() =
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
                     visibleTabs = listOf(ALL_TAB, LIST_TAB),
                     selectedTabId = LIST_TAB.id,
                 )
-                val collector = ShelfSidebarSectionsCollector()
+                val collector = ShelfSidebarCollector()
 
                 // ----- Act -----
                 val job = launch {
@@ -155,20 +155,20 @@ class ShelfSidebarSectionsCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.shelfSidebarSections.size shouldBe 2
-                stateFlow.value.shelfSidebarSections.flatMap { it.rows }
+                stateFlow.value.shelfSidebar.sections.size shouldBe 2
+                stateFlow.value.shelfSidebar.sections.flatMap { it.rows }
                     .single { it.selected }.key shouldBe LIST_TAB.id
                 job.cancel()
             }
 
         @Test
-        fun `a change to visibleTabs recomputes shelfSidebarSections`() = runTest(testDispatcher) {
+        fun `a change to visibleTabs recomputes shelfSidebar`() = runTest(testDispatcher) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 visibleTabs = listOf(ALL_TAB),
                 selectedTabId = ALL_TAB.id,
             )
-            val collector = ShelfSidebarSectionsCollector()
+            val collector = ShelfSidebarCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -180,7 +180,7 @@ class ShelfSidebarSectionsCollectorTest {
             stateFlow.value = stateFlow.value.copy(visibleTabs = listOf(ALL_TAB, LIST_TAB))
 
             // ----- Assert -----
-            stateFlow.value.shelfSidebarSections.size shouldBe 2
+            stateFlow.value.shelfSidebar.sections.size shouldBe 2
             job.cancel()
         }
 
@@ -191,7 +191,7 @@ class ShelfSidebarSectionsCollectorTest {
                 visibleTabs = listOf(ALL_TAB, READING_TAB),
                 selectedTabId = ALL_TAB.id,
             )
-            val collector = ShelfSidebarSectionsCollector()
+            val collector = ShelfSidebarCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -203,7 +203,7 @@ class ShelfSidebarSectionsCollectorTest {
             stateFlow.value = stateFlow.value.copy(selectedTabId = READING_TAB.id)
 
             // ----- Assert -----
-            stateFlow.value.shelfSidebarSections.flatMap { it.rows }
+            stateFlow.value.shelfSidebar.sections.flatMap { it.rows }
                 .single { it.selected }.key shouldBe READING_TAB.id
             job.cancel()
         }
@@ -215,20 +215,20 @@ class ShelfSidebarSectionsCollectorTest {
                 visibleTabs = listOf(ALL_TAB),
                 selectedTabId = ALL_TAB.id,
             )
-            val collector = ShelfSidebarSectionsCollector()
+            val collector = ShelfSidebarCollector()
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
                 )
             }
-            val sectionsAfterFirstEmit = stateFlow.value.shelfSidebarSections
+            val sidebarAfterFirstEmit = stateFlow.value.shelfSidebar
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(isArrangeSheetExpanded = true)
 
             // ----- Assert -----
-            (stateFlow.value.shelfSidebarSections === sectionsAfterFirstEmit) shouldBe true
+            (stateFlow.value.shelfSidebar === sidebarAfterFirstEmit) shouldBe true
             job.cancel()
         }
     }

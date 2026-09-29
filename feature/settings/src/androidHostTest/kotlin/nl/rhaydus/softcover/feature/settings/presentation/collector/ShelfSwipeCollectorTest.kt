@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
+import nl.rhaydus.softcover.feature.settings.presentation.model.DisplayToggle
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -87,6 +88,28 @@ class ShelfSwipeCollectorTest {
             stateFlow.value.shelfSwipeEnabledChecked shouldBe false
             job.cancel()
         }
+
+        @Test
+        fun `recomputes displayToggleRows so the shelf-swipe row's checked value follows the emitted value`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = ShelfSwipeCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                shelfSwipeEnabledFlow.emit(false)
+
+                // ----- Assert -----
+                stateFlow.value.displayToggleRows
+                    .first { it.key == DisplayToggle.SHELF_SWIPE }
+                    .checked shouldBe false
+                job.cancel()
+            }
 
         @Test
         fun `updates shelfSwipeEnabledChecked to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {

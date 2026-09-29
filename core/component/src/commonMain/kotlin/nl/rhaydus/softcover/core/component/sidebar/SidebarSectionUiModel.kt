@@ -6,7 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
-/** Everything [SidebarSection] renders: an optional [label] above its [rows]. */
+/** One group within a [Sidebar]: an optional [label] above its [rows]. */
 @Immutable
 data class SidebarSectionUiModel<K>(
     val label: SectionHeaderUiModel?,

@@ -46,8 +46,6 @@ internal actual fun AppearanceSettingsScreenLayout(
         AppearanceSettingsContent(
             state = state,
             runAction = runAction,
-            showBottomBarToggle = true,
-            showShelfSwipeToggle = true,
             showUiScaleControl = false,
             modifier = Modifier
                 .padding(innerPadding)

@@ -1,17 +1,17 @@
 package nl.rhaydus.softcover.core.component.sidebar
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -50,9 +50,31 @@ private object SidebarRowMetrics {
 private val SidebarLabelInsetStart = 26.dp
 private val SidebarLabelInsetTop = 8.dp
 private val SidebarLabelInsetBottom = 6.dp
+private val SidebarSectionGap = 16.dp
+
+/** Renders every section in [model] under one shared `selectableGroup()`, with a gap between sections. */
+@Composable
+fun <K> Sidebar(
+    model: SidebarUiModel<K>,
+    onEvent: (SidebarEvent<K>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.selectableGroup()) {
+        model.sections.forEachIndexed { index, section ->
+            if (index > 0) {
+                Spacer(modifier = Modifier.height(SidebarSectionGap))
+            }
+
+            SidebarSection(
+                model = section,
+                onEvent = onEvent,
+            )
+        }
+    }
+}
 
 @Composable
-fun <K> SidebarSection(
+private fun <K> SidebarSection(
     model: SidebarSectionUiModel<K>,
     onEvent: (SidebarEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
@@ -78,121 +100,29 @@ fun <K> SidebarSection(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun <K> SidebarRow(
     model: SidebarRowUiModel<K>,
     onEvent: (SidebarEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    when (val variant = model.variant) {
-        is SidebarRowVariant.Destination -> SidebarDestinationRow(
-            model = model,
-            variant = variant,
-            onEvent = onEvent,
-            modifier = modifier,
-        )
-
-        SidebarRowVariant.Push -> SidebarPushRow(
-            model = model,
-            onEvent = onEvent,
-            modifier = modifier,
-        )
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun <K> SidebarDestinationRow(
-    model: SidebarRowUiModel<K>,
-    variant: SidebarRowVariant.Destination,
-    onEvent: (SidebarEvent<K>) -> Unit,
-    modifier: Modifier = Modifier,
-) {
     val interactionSource = remember { MutableInteractionSource() }
     val haptics = LocalHaptics.current
-    val onClick = { onEvent(SidebarEvent.Clicked(key = model.key)) }
-
-    val interaction = if (variant.longPressable) {
-        Modifier
-            .semantics {
-                role = Role.Tab
-                selected = variant.selected
-            }
-            .combinedClickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick,
-                onLongClick = {
-                    haptics.threshold()
-                    onEvent(SidebarEvent.LongPressed(key = model.key))
-                },
-            )
+    val variant = model.variant
+    val isSelected = (variant as? SidebarRowVariant.Destination)?.selected ?: false
+    val rowRole = if (variant is SidebarRowVariant.Destination) Role.Tab else Role.Button
+    val onLongClick: (() -> Unit)? = if (variant is SidebarRowVariant.Destination && variant.longPressable) {
+        {
+            haptics.threshold()
+            onEvent(SidebarEvent.LongPressed(key = model.key))
+        }
     } else {
-        Modifier.selectable(
-            selected = variant.selected,
-            interactionSource = interactionSource,
-            indication = null,
-            role = Role.Tab,
-            onClick = onClick,
-        )
+        null
     }
 
-    SidebarRowFrame(
-        label = model.label,
-        icon = model.icon,
-        selected = variant.selected,
-        interactionSource = interactionSource,
-        interaction = interaction,
-        modifier = modifier,
-    )
-}
-
-@Composable
-private fun <K> SidebarPushRow(
-    model: SidebarRowUiModel<K>,
-    onEvent: (SidebarEvent<K>) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-
-    SidebarRowFrame(
-        label = model.label,
-        icon = model.icon,
-        selected = false,
-        interactionSource = interactionSource,
-        interaction = Modifier.clickable(
-            interactionSource = interactionSource,
-            indication = null,
-            role = Role.Button,
-            onClick = { onEvent(SidebarEvent.Clicked(key = model.key)) },
-        ),
-        modifier = modifier,
-    ) {
-        val arrowIcon = drawableIconResource(
-            icon = SoftcoverIcon.KeyboardArrowRight,
-            contentDescription = "",
-        )
-
-        Icon(
-            painter = arrowIcon.getIconPainter(),
-            contentDescription = arrowIcon.contentDescription,
-            modifier = Modifier.size(SidebarRowMetrics.ArrowSize),
-        )
-    }
-}
-
-@Composable
-private fun SidebarRowFrame(
-    label: String,
-    icon: SoftcoverIcon?,
-    selected: Boolean,
-    interactionSource: MutableInteractionSource,
-    interaction: Modifier,
-    modifier: Modifier = Modifier,
-    trailing: @Composable () -> Unit = {},
-) {
-    val container = if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
-    val content = if (selected) {
+    val container = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
+    val content = if (isSelected) {
         MaterialTheme.colorScheme.onSecondaryContainer
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
@@ -210,7 +140,18 @@ private fun SidebarRowFrame(
                 interactionSource = interactionSource,
                 shape = SidebarRowMetrics.Shape,
             )
-            .then(interaction),
+            .semantics {
+                role = rowRole
+                if (variant is SidebarRowVariant.Destination) {
+                    selected = variant.selected
+                }
+            }
+            .combinedClickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = { onEvent(SidebarEvent.Clicked(key = model.key)) },
+                onLongClick = onLongClick,
+            ),
         color = container,
         contentColor = content,
         shape = SidebarRowMetrics.Shape,
@@ -222,9 +163,9 @@ private fun SidebarRowFrame(
             ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (icon != null) {
+            if (model.icon != null) {
                 val leadingIcon = drawableIconResource(
-                    icon = icon,
+                    icon = model.icon,
                     contentDescription = "",
                 )
 
@@ -238,16 +179,27 @@ private fun SidebarRowFrame(
             }
 
             Text(
-                text = label,
+                text = model.label,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                 ),
                 modifier = Modifier.weight(1f),
             )
 
-            trailing()
+            if (variant is SidebarRowVariant.Push) {
+                val arrowIcon = drawableIconResource(
+                    icon = SoftcoverIcon.KeyboardArrowRight,
+                    contentDescription = "",
+                )
+
+                Icon(
+                    painter = arrowIcon.getIconPainter(),
+                    contentDescription = arrowIcon.contentDescription,
+                    modifier = Modifier.size(SidebarRowMetrics.ArrowSize),
+                )
+            }
         }
     }
 }

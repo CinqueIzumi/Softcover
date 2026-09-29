@@ -51,8 +51,6 @@ internal fun AppearancePane(
                 AppearanceSettingsContent(
                     state = state,
                     runAction = runAction,
-                    showBottomBarToggle = false,
-                    showShelfSwipeToggle = false,
                     showUiScaleControl = true,
                     modifier = Modifier.fillMaxWidth(),
                 )

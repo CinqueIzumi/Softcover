@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.collector
 
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.dateStyleRowsFor
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -14,7 +15,13 @@ internal class DateStyleCollector : SettingsCollector {
     ) {
         dependencies.getDateStyleAsFlowUseCase().collectLatest { style ->
             scope.setState {
-                it.copy(userDateStyle = style)
+                it.copy(
+                    userDateStyle = style,
+                    dateStyleRows = dateStyleRowsFor(
+                        examples = it.dateStyleExamples,
+                        selected = style,
+                    ),
+                )
             }
         }
     }

@@ -22,8 +22,8 @@ import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnColorPaletteSelectedAction
-import nl.rhaydus.softcover.feature.settings.presentation.action.OnDynamicColorToggledAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.displayToggleActionFor
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 import nl.rhaydus.softcover.feature.settings.presentation.util.supportsDynamicColor
 
@@ -109,10 +109,17 @@ internal fun SpineColourSection(
             Divider(model = DividerUiModel.Horizontal())
 
             SettingsToggleRow(
-                label = "Dynamic colour",
-                gloss = "Take the whole scheme from your wallpaper instead of a spine colour.",
-                checked = state.useDynamicColorChecked,
-                onCheckedChange = { runAction(OnDynamicColorToggledAction(newValue = it)) },
+                label = state.dynamicColorToggleRow.label,
+                gloss = state.dynamicColorToggleRow.gloss,
+                checked = state.dynamicColorToggleRow.checked,
+                onCheckedChange = {
+                    runAction(
+                        displayToggleActionFor(
+                            key = state.dynamicColorToggleRow.key,
+                            newValue = it,
+                        ),
+                    )
+                },
             )
         }
     }

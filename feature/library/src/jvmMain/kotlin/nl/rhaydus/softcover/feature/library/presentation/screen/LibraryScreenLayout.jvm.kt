@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.haptics.LocalHaptics
@@ -38,9 +37,9 @@ import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
+import nl.rhaydus.softcover.core.component.sidebar.Sidebar
 import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
-import nl.rhaydus.softcover.core.component.sidebar.SidebarSection
-import nl.rhaydus.softcover.core.component.sidebar.SidebarSectionUiModel
+import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -128,7 +127,7 @@ internal actual fun LibraryScreenLayout(
             },
     ) {
         ShelfSidebar(
-            sections = state.shelfSidebarSections,
+            sidebar = state.shelfSidebar,
             onTabClick = { id -> runAction(OnTabSelectedAction(tabId = id)) },
             onTabLongPress = onTabLongPress,
             modifier = Modifier
@@ -352,35 +351,26 @@ internal actual fun LibraryScreenLayout(
  */
 @Composable
 private fun ShelfSidebar(
-    sections: ImmutableList<SidebarSectionUiModel<String>>,
+    sidebar: SidebarUiModel<String>,
     onTabClick: (String) -> Unit,
     onTabLongPress: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    Sidebar(
+        model = sidebar,
+        onEvent = { event ->
+            when (event) {
+                is SidebarEvent.Clicked -> onTabClick(event.key)
+                is SidebarEvent.LongPressed -> onTabLongPress()
+            }
+        },
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .padding(
                 top = 16.dp,
                 bottom = 16.dp + rememberBottomBarPadding(),
             ),
-    ) {
-        sections.forEachIndexed { index, section ->
-            if (index > 0) {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            SidebarSection(
-                model = section,
-                onEvent = { event ->
-                    when (event) {
-                        is SidebarEvent.Clicked -> onTabClick(event.key)
-                        is SidebarEvent.LongPressed -> onTabLongPress()
-                    }
-                },
-            )
-        }
-    }
+    )
 }
 
 /**

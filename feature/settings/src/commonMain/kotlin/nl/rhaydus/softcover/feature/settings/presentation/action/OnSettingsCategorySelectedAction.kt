@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.action
 
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
-import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebarSectionsFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebarFor
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategory
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
@@ -16,7 +16,7 @@ internal class OnSettingsCategorySelectedAction(val category: SettingsCategory) 
         scope.setState {
             it.copy(
                 selectedCategory = category,
-                settingsSidebarSections = settingsSidebarSectionsFor(selectedCategory = category),
+                settingsSidebar = settingsSidebarFor(selectedCategory = category),
             )
         }
     }

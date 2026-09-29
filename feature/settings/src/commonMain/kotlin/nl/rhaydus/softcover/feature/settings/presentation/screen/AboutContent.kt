@@ -16,7 +16,8 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRow
-import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowAccessory
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRowTarget
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowGroup
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.VersionFooter
 // region About content
 /**
@@ -96,13 +97,16 @@ private fun CreditsSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        SettingsMenuRow(
-            title = "Hardcover.app",
-            gloss = "Every book, cover and rating comes from its API.",
-            icon = SoftcoverIcon.MenuBook,
-            accessory = SettingsRowAccessory.External,
-            onClick = { openUrl(HARDCOVER_URL) },
-        )
+        SettingsRowGroup {
+            row {
+                SettingsMenuRow(
+                    title = "Hardcover.app",
+                    gloss = "Every book, cover and rating comes from its API.",
+                    icon = SoftcoverIcon.MenuBook,
+                    target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(HARDCOVER_URL) }),
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -127,21 +131,24 @@ private fun SourceSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        SettingsMenuRow(
-            title = "View the code on GitHub",
-            gloss = "Browse the source, file a pull request, or fork it.",
-            icon = SoftcoverIcon.History,
-            accessory = SettingsRowAccessory.External,
-            onClick = { openUrl(GITHUB_REPO_URL) },
-        )
-
-        SettingsMenuRow(
-            title = "Roadmap",
-            gloss = "What we're building next, in the order we plan to ship it.",
-            icon = SoftcoverIcon.Explore,
-            accessory = SettingsRowAccessory.Chevron,
-            onClick = onRoadmapClick,
-        )
+        SettingsRowGroup {
+            row {
+                SettingsMenuRow(
+                    title = "View the code on GitHub",
+                    gloss = "Browse the source, file a pull request, or fork it.",
+                    icon = SoftcoverIcon.History,
+                    target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(GITHUB_REPO_URL) }),
+                )
+            }
+            row {
+                SettingsMenuRow(
+                    title = "Roadmap",
+                    gloss = "What we're building next, in the order we plan to ship it.",
+                    icon = SoftcoverIcon.Explore,
+                    target = SettingsMenuRowTarget.SubPage(onClick = onRoadmapClick),
+                )
+            }
+        }
     }
 }
 
@@ -159,29 +166,32 @@ private fun ContactSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        SettingsMenuRow(
-            title = "Report an issue",
-            gloss = "Found a bug, or something feels off? Tell us on GitHub.",
-            icon = SoftcoverIcon.Info,
-            accessory = SettingsRowAccessory.External,
-            onClick = { openUrl(GITHUB_ISSUES_URL) },
-        )
-
-        SettingsMenuRow(
-            title = DISCORD_USERNAME,
-            gloss = "The developer's Discord username.",
-            icon = SoftcoverIcon.ContentPaste,
-            accessory = SettingsRowAccessory.None,
-            onClick = null,
-        )
-
-        SettingsMenuRow(
-            title = "Join the Hardcover Discord",
-            gloss = "Softcover has its own channel in the official server.",
-            icon = SoftcoverIcon.Account,
-            accessory = SettingsRowAccessory.External,
-            onClick = { openUrl(DISCORD_INVITE_URL) },
-        )
+        SettingsRowGroup {
+            row {
+                SettingsMenuRow(
+                    title = "Report an issue",
+                    gloss = "Found a bug, or something feels off? Tell us on GitHub.",
+                    icon = SoftcoverIcon.Info,
+                    target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(GITHUB_ISSUES_URL) }),
+                )
+            }
+            row {
+                SettingsMenuRow(
+                    title = DISCORD_USERNAME,
+                    gloss = "The developer's Discord username.",
+                    icon = SoftcoverIcon.ContentPaste,
+                    target = SettingsMenuRowTarget.Copyable,
+                )
+            }
+            row {
+                SettingsMenuRow(
+                    title = "Join the Hardcover Discord",
+                    gloss = "Softcover has its own channel in the official server.",
+                    icon = SoftcoverIcon.Account,
+                    target = SettingsMenuRowTarget.ExternalLink(onClick = { openUrl(DISCORD_INVITE_URL) }),
+                )
+            }
+        }
     }
 }
 // endregion

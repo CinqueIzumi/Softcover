@@ -4,14 +4,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnDateStyleClickAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -26,18 +22,16 @@ internal fun DateStyleSection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Column(modifier = Modifier.selectableGroup()) {
-            DateStyle.entries.forEachIndexed { index, style ->
-                if (index > 0) {
-                    Divider(model = DividerUiModel.Horizontal())
+        SettingsRowGroup(selectableGroup = true) {
+            state.dateStyleRows.forEach { dateStyleRow ->
+                row {
+                    SettingsSelectableRow(
+                        label = dateStyleRow.label,
+                        example = dateStyleRow.example,
+                        isSelected = dateStyleRow.selected,
+                        onClick = { runAction(OnDateStyleClickAction(style = dateStyleRow.key)) },
+                    )
                 }
-
-                SettingsSelectableRow(
-                    label = style.label,
-                    example = state.dateStyleExamples[style].orEmpty(),
-                    isSelected = state.userDateStyle == style,
-                    onClick = { runAction(OnDateStyleClickAction(style = style)) },
-                )
             }
         }
     }

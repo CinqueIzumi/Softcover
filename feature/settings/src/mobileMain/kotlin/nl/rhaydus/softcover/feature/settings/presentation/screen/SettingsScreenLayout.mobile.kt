@@ -28,7 +28,8 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.AppUpdateSection
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRow
-import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowAccessory
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRowTarget
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowGroup
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -109,13 +110,16 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SettingsMenuRow(
-                title = "View user profile",
-                gloss = "Your shelves, stats and reading year",
-                icon = SoftcoverIcon.Account,
-                accessory = SettingsRowAccessory.Chevron,
-                onClick = navigateToProfile,
-            )
+            SettingsRowGroup {
+                row {
+                    SettingsMenuRow(
+                        title = "View user profile",
+                        gloss = "Your shelves, stats and reading year",
+                        icon = SoftcoverIcon.Account,
+                        target = SettingsMenuRowTarget.SubPage(onClick = navigateToProfile),
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -123,29 +127,32 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SettingsMenuRow(
-                title = "Appearance",
-                gloss = "Theme, accent and text size",
-                icon = SoftcoverIcon.Palette,
-                accessory = SettingsRowAccessory.Chevron,
-                onClick = navigateToAppearanceSettings,
-            )
-
-            SettingsMenuRow(
-                title = "Library tabs",
-                gloss = "Which shelves show, and their order",
-                icon = SoftcoverIcon.Shelf,
-                accessory = SettingsRowAccessory.Chevron,
-                onClick = navigateToLibraryVisibility,
-            )
-
-            SettingsMenuRow(
-                title = "Hidden suggestions",
-                gloss = "Books you've asked us to stop recommending",
-                icon = SoftcoverIcon.FilterList,
-                accessory = SettingsRowAccessory.Chevron,
-                onClick = navigateToHiddenSuggestions,
-            )
+            SettingsRowGroup {
+                row {
+                    SettingsMenuRow(
+                        title = "Appearance",
+                        gloss = "Theme, accent and text size",
+                        icon = SoftcoverIcon.Palette,
+                        target = SettingsMenuRowTarget.SubPage(onClick = navigateToAppearanceSettings),
+                    )
+                }
+                row {
+                    SettingsMenuRow(
+                        title = "Library tabs",
+                        gloss = "Which shelves show, and their order",
+                        icon = SoftcoverIcon.Shelf,
+                        target = SettingsMenuRowTarget.SubPage(onClick = navigateToLibraryVisibility),
+                    )
+                }
+                row {
+                    SettingsMenuRow(
+                        title = "Hidden suggestions",
+                        gloss = "Books you've asked us to stop recommending",
+                        icon = SoftcoverIcon.FilterList,
+                        target = SettingsMenuRowTarget.SubPage(onClick = navigateToHiddenSuggestions),
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -153,21 +160,24 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SettingsMenuRow(
-                title = "About Softcover",
-                gloss = "Credits, source, and how to reach us",
-                icon = SoftcoverIcon.Info,
-                accessory = SettingsRowAccessory.Chevron,
-                onClick = navigateToAbout,
-            )
-
-            SettingsMenuRow(
-                title = "Roadmap",
-                gloss = "What we're building next, in the order we plan to ship it",
-                icon = SoftcoverIcon.Explore,
-                accessory = SettingsRowAccessory.Chevron,
-                onClick = navigateToRoadmap,
-            )
+            SettingsRowGroup {
+                row {
+                    SettingsMenuRow(
+                        title = "About Softcover",
+                        gloss = "Credits, source, and how to reach us",
+                        icon = SoftcoverIcon.Info,
+                        target = SettingsMenuRowTarget.SubPage(onClick = navigateToAbout),
+                    )
+                }
+                row {
+                    SettingsMenuRow(
+                        title = "Roadmap",
+                        gloss = "What we're building next, in the order we plan to ship it",
+                        icon = SoftcoverIcon.Explore,
+                        target = SettingsMenuRowTarget.SubPage(onClick = navigateToRoadmap),
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
 

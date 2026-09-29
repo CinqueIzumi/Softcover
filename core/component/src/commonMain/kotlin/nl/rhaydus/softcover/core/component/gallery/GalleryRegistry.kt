@@ -70,8 +70,8 @@ import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.StatShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.YearRecapShareCardUiModel
-import nl.rhaydus.softcover.core.component.sidebar.SidebarSection
-import nl.rhaydus.softcover.core.component.sidebar.SidebarSectionUiModel
+import nl.rhaydus.softcover.core.component.sidebar.Sidebar
+import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.state.Skeleton
@@ -426,14 +426,14 @@ object GalleryRegistry {
             },
         ),
         galleryEntry(
-            name = "SidebarSection",
+            name = "Sidebar",
             family = GalleryFamily.ROW,
-            blurb = "A desktop sidebar group: an optional inset label over a stack of rows, each " +
-                "with an optional leading icon, a selected tint, a trailing arrow, or a long press.",
-            previews = SidebarSectionUiModel,
-            label = ::sidebarSectionFixtureLabel,
+            blurb = "A desktop source list: sections of rows, each with an optional leading icon, " +
+                "a selected tint, a trailing arrow, or a long press.",
+            previews = SidebarUiModel,
+            label = ::sidebarFixtureLabel,
             content = { model, modifier ->
-                SidebarSection(
+                Sidebar(
                     model = model,
                     onEvent = {},
                     modifier = modifier,
@@ -642,8 +642,8 @@ private fun coverFixtureLabel(model: CoverUiModel): String = when {
 
 private const val COVERLESS_LONG_TITLE_LABEL_FLOOR = 30
 
-private fun sidebarSectionFixtureLabel(model: SidebarSectionUiModel<String>): String =
-    if (model.label != null) "With label" else "No label"
+private fun sidebarFixtureLabel(model: SidebarUiModel<String>): String =
+    if (model.sections.firstOrNull()?.label != null) "With label" else "No label"
 
 /** Names which [ShareCardUiModel] variant a fixture is, distinguishing the two anatomy outliers. */
 private fun shareCardFixtureLabel(model: ShareCardUiModel): String = when (model) {

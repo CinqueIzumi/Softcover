@@ -6,16 +6,24 @@ import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.domain.model.UiScale
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.dateStyleRowsFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.displayToggleRowsFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.dynamicColorToggleRowFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.paletteChoicesFor
-import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebarSectionsFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebarFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.themeChoicesFor
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.uiScaleRowsFor
+import nl.rhaydus.softcover.feature.settings.presentation.model.DisplayToggle
 import nl.rhaydus.softcover.feature.settings.presentation.model.PaletteChoice
-import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarSections
+import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsChoiceRowUiModel
+import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarKey
+import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsToggleRowUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.model.ThemeChoice
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategory
 import nl.rhaydus.toad.UiState
@@ -38,7 +46,7 @@ internal data class SettingsScreenUiState(
 
     val selectedCategory: SettingsCategory = SettingsCategory.APPEARANCE,
 
-    val settingsSidebarSections: SettingsSidebarSections = settingsSidebarSectionsFor(selectedCategory = selectedCategory),
+    val settingsSidebar: SidebarUiModel<SettingsSidebarKey> = settingsSidebarFor(selectedCategory = selectedCategory),
 
     val settingsMenuAccountHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Account",
@@ -107,8 +115,22 @@ internal data class SettingsScreenUiState(
     val useDynamicColorChecked: Boolean = false,
     val readingStreakEnabledChecked: Boolean = true,
     val shelfSwipeEnabledChecked: Boolean = false,
+    val showFloatingBarToggle: Boolean = true,
+    val showShelfSwipeToggle: Boolean = true,
+    val displayToggleRows: ImmutableList<SettingsToggleRowUiModel<DisplayToggle>> = displayToggleRowsFor(
+        showFloatingBarToggle = showFloatingBarToggle,
+        showShelfSwipeToggle = showShelfSwipeToggle,
+        useFloatingBarChecked = useFloatingBarChecked,
+        shelfSwipeEnabledChecked = shelfSwipeEnabledChecked,
+        readingStreakEnabledChecked = readingStreakEnabledChecked,
+    ),
+    val dynamicColorToggleRow: SettingsToggleRowUiModel<DisplayToggle> = dynamicColorToggleRowFor(checked = useDynamicColorChecked),
     val userDateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
     val dateStyleExamples: Map<DateStyle, String> = emptyMap(),
+    val dateStyleRows: ImmutableList<SettingsChoiceRowUiModel<DateStyle>> = dateStyleRowsFor(
+        examples = dateStyleExamples,
+        selected = userDateStyle,
+    ),
     val dropDownExpanded: Boolean = false,
     val appVersionName: String = "",
     val appVersionCode: Int = 0,
@@ -116,6 +138,7 @@ internal data class SettingsScreenUiState(
         center = DividerCenter.Label(text = "Version $appVersionName ($appVersionCode)"),
     ),
     val uiScale: UiScale = UiScale.DEFAULT,
+    val uiScaleRows: ImmutableList<SettingsChoiceRowUiModel<UiScale>> = uiScaleRowsFor(selected = uiScale),
     val spinePalette: SpinePalette = SpinePalette.DEFAULT,
     val paletteGloss: String = SpinePalette.DEFAULT.gloss,
     val themeChoices: ImmutableList<ThemeChoice> = themeChoicesFor(
