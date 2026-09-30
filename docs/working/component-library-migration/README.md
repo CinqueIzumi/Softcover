@@ -14,13 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** the S6 row family is committed (`aa1ffef1`). S6 sheet chrome Part 1 is approved and
-  committed (`405ee525`): `steps/s6-sheet-chrome.md` § Approved shape. Workflow mode and
-  `step.workflow.js` are in place for S6–S11. Mood tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** start the S6 run: auto mode, then Workflow with `scriptPath:
-  docs/working/component-library-migration/step.workflow.js` and the args in
-  `steps/s6-sheet-chrome.md` § Run mode (`family-procedure.md` § Workflow mode). The user has opted in.
-  The run needs more agents than the default guideline; say so when starting it.
+- **State:** the S6 row family (`aa1ffef1`) and the S6 sheet-chrome Approved shape (`405ee525`,
+  `steps/s6-sheet-chrome.md` § Approved shape) stand. The S6-3 build attempt (one Workflow run) was
+  reverted in full, and Workflow runs are removed from the plan: every step runs interactively.
+  Mood tile → S7-4; 14 Apollo-alias files wait on F24.
+- **Next:** S6-3, built per `family-procedure.md` Phase 2 from `steps/s6-sheet-chrome.md` § Approved
+  shape, one sub-step per session.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** should chip keys get the same typed-key treatment as the sidebar, as a tracked step?
@@ -35,10 +34,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`;
   S6-C-rows' settings rows (16dp vertical everywhere, 4dp title gap, top rule and press feedback on
   toggle / choice lists).
-- **Verification:** the snapshot commands were tested (they capture untracked files, and leave the branch and
-  index untouched). `step.workflow.js` syntax-checks clean, but it has never run. Last Gradle gate: S6-C-rows,
-  green.
-- **Uncommitted:** this `## Now` block only.
+- **Verification:** no Gradle gate has run since S6-C-rows, which was green.
+- **Uncommitted:** the Workflow-run option removed from the plan: its script deleted, and its sections
+  dropped from `family-procedure.md`, the step files and this README.
 
 ## Local verification
 
@@ -68,9 +66,6 @@ every sub-step's Verify.
    [#275](https://github.com/CinqueIzumi/Softcover/issues/275) via `gh` → delete the step file once its
    last sub-step lands, and drop its `## Steps` link → **ask the user before committing** (subject-only
    message) → `/handoff` → the user types `/clear`.
-
-A step file whose `## Run mode` says so runs as one unattended Workflow instead
-([`family-procedure.md`](family-procedure.md) § Workflow mode).
 
 ## Steps
 

@@ -1,28 +1,16 @@
 # S6 — Sheet chrome
 
-**Stage:** S6 — Rows & sheet chrome. **Delegation:** user (Part 1, done), one Workflow (Part 2), user
-(Part 3). See § Run mode.
+**Stage:** S6 — Rows & sheet chrome. **Delegation:** user (Phase 1, done),
+`softcover-implementer` (Phase 2).
 
 Chrome only, extracted from 18 sheets into `SheetScaffold` + `SheetHeader` + `SheetRow` +
 `SheetFooter`. Each sheet's **body** stays a feature composable (`component-contract.md` § 7.6).
-
-## Run mode
-
-Workflow mode (`family-procedure.md` § Workflow mode).
-
-- **Before:** met. The S6 row family is committed, and `SheetRow` builds on its semantics and typed
-  keys (`Sidebar` / `SidebarUiModel<K>`).
-- **Part 1:** done. The approved design is in `## Approved shape` below.
-- **Part 2:** one run covers S6-3 to S6-7, then the Phase 3 audit. S6-3 builds the chrome parts, and
-  every later sub-step adopts them.
-- **Args:** `{stepFiles: ["steps/s6-sheet-chrome.md"], subSteps: ["S6-3", "S6-4", "S6-5", "S6-6",
-  "S6-7"], snapshotPrefix: "s6", convergence: true}`.
-- **A sheet that does not fit the approved chrome** keeps its chrome feature-local, with a
-  `## Deferred` line.
+S6-3 builds the chrome parts and every later sub-step adopts them; a sheet that does not fit the
+approved chrome keeps its chrome feature-local, with a `## Deferred` line.
 
 ## Approved shape
 
-Part 1 ran on 2026-09-30, and the user approved every point below.
+Phase 1 ran on 2026-09-30, and the user approved every point below.
 
 **Container.** Every sheet already uses the foundation's `AdaptiveModalSheet`. It owns the container:
 the sheet or panel form, the colour, the grabber, the insets and the animated dismiss. There is no
@@ -152,10 +140,6 @@ for S10 or S11. The exception is TagEditor's description, which moves into the h
 ## Deferred
 
 _Empty._
-
-## Convergence proposals
-
-_Written by the workflow's last agent._
 
 ## Sub-steps
 

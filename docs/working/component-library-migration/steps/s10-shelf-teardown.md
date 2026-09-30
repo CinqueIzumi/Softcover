@@ -10,17 +10,7 @@ composable per file under `…presentation.screen.section`, with the entry file 
 `git ls-files '*Shelf.kt'` finds today (2026-09-28); this step is about whether each still carries
 weight the S5–S9 families haven't already pulled out, not about repeating the Step 08 split.
 
-## Run mode
-
-Workflow mode (`family-procedure.md` § Workflow mode). It starts only after every S5–S9 step file is
-closed.
-
-- Part 1 does § Per sub-step's checks for all five files up front: re-measure, and give a per-symbol
-  verdict (composition wiring, or which component it becomes).
-- In the run, a symbol that turns out to belong to an unfinished family step is a `## Deferred` line,
-  not a stop.
-- **Args:** `{stepFiles: ["steps/s10-shelf-teardown.md"], subSteps: ["S10-1", "S10-2", "S10-3",
-  "S10-4", "S10-5"], snapshotPrefix: "s10", convergence: true}`.
+This step starts only after every S5–S9 step file is closed.
 
 ## Sub-steps
 

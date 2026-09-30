@@ -4,16 +4,9 @@
 
 The `/dataviz` skill conventions apply to everything in the chart group.
 
-## Run mode
-
-Workflow mode (`family-procedure.md` § Workflow mode).
-
-- Part 1 loads the `/dataviz` skill, and settles the chart model (S9-2) in full, including how S9-3's
-  charts and legends map onto it.
-- Every chart brief names the `/dataviz` conventions it must follow.
-- Chart colours in both themes are a Part 3 gallery check by the user.
-- **Args:** `{stepFiles: ["steps/s9-statistics.md"], subSteps: ["S9-1", "S9-2", "S9-3", "S9-4"],
-  snapshotPrefix: "s9", convergence: true}`.
+S9-2's Phase 1 settles the chart model in full, including how S9-3's charts and legends map onto it;
+every chart brief names the `/dataviz` conventions it must follow, and the user checks chart colours in
+both themes in the gallery.
 
 ## Sub-steps
 
