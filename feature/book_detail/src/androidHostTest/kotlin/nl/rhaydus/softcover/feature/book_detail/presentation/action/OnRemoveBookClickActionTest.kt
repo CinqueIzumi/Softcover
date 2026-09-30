@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -14,7 +16,6 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -117,7 +118,7 @@ class OnRemoveBookClickActionTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            (event is RefreshDetailBookEvent) shouldBe true
+            event.shouldBeInstanceOf<BookDetailEvent.RefreshDetailBookEvent>()
         }
 
         @Test
@@ -140,7 +141,7 @@ class OnRemoveBookClickActionTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            event shouldBe null
+            event.shouldBeNull()
         }
 
         @Test

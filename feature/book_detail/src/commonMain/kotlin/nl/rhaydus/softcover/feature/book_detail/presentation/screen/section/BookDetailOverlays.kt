@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.dialog.DatePickerEvent
 import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
@@ -30,7 +31,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAs
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveToGalleryFinishedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveToGalleryStartedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareFinishedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareStartedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareVariantSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagDraftChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagEditorCategoryChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
@@ -41,6 +47,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTime
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 /**
@@ -55,20 +62,31 @@ internal fun BookDetailOverlays(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
     onCreateNewListClick: () -> Unit,
+    shareCaptureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
 ) {
     val shareBookCard = state.shareBookCard
-    if (state.isShareSheetVisible && shareBookCard != null) {
+    val shareSheet = state.shareSheet
+    val shareSheetBody = state.shareSheetBody
+    if (state.isShareSheetVisible && shareBookCard != null && shareSheet != null && shareSheetBody != null) {
         ShareBookBottomSheet(
+            model = shareSheet,
             shareBookCard = shareBookCard,
             shareUpdateCard = state.shareUpdateCard,
+            body = shareSheetBody,
+            onVariantSelected = { runAction(OnShareVariantSelectedAction(variant = it)) },
+            captureEvents = shareCaptureEvents,
+            onShareClick = { runAction(OnShareStartedAction()) },
+            onShareFinished = { runAction(OnShareFinishedAction()) },
+            onSaveToGalleryClick = { runAction(OnSaveToGalleryStartedAction()) },
+            onSaveToGalleryFinished = { runAction(OnSaveToGalleryFinishedAction()) },
             onDismissRequest = { runAction(OnDismissShareSheetAction()) },
         )
     }
 
-    if (state.showTagEditorSheet && state.book != null) {
+    val tagEditorSheet = state.tagEditorSheet
+    if (state.showTagEditorSheet && tagEditorSheet != null) {
         TagEditorBottomSheet(
-            bookTitle = state.book.title,
-            cover = state.tagEditorCover,
+            model = tagEditorSheet,
             userTagEditorGroups = state.userTagEditorGroups,
             newlyAddedTagKey = state.newlyAddedTagKey,
             categoryChips = state.tagEditorCategoryChips,
@@ -160,12 +178,10 @@ internal fun BookDetailOverlays(
         )
     }
 
-    val currentEditionForSheet = state.displayedEdition
-    if (state.showEditEditionSheet && state.book != null && currentEditionForSheet != null) {
+    val editionSheet = state.editionSheet
+    if (state.showEditEditionSheet && editionSheet != null) {
         EditionBottomSheetSelector(
-            bookTitle = state.book.title,
-            currentEdition = currentEditionForSheet,
-            headerCover = state.editionSheetHeaderCover,
+            model = editionSheet,
             editionCovers = state.editionCovers,
             editionTrailingMarks = state.editionTrailingMarks,
             selectedEditionId = state.selectedEditionId,
@@ -182,7 +198,7 @@ internal fun BookDetailOverlays(
                 runAction(OnDismissEditEditionSheetClickAction())
             },
             onConfirmClick = {
-                runAction(OnNewEditionSaveClickAction(edition = it))
+                runAction(OnNewEditionSaveClickAction())
             },
         )
     }
@@ -235,11 +251,6 @@ internal fun BookDetailOverlays(
                     )
 
                     is ProgressSheetEvent.MarkAsReadRequested -> {
-                        // The same dispatchable action the Shelve control's "Read" row fires. Its celebration
-                        // (commit haptic + MarkAsReadBurst) is driven screen-wide off the ScreenModel's
-                        // BookMarkedAsReadEvent (BookDetailScreen.Content's ObserveAsEvents), not by anything
-                        // local to that row, so dispatching it from the sheet gets the same commit haptic +
-                        // burst for free — no new action/state needed. The picked backdate travels with it.
                         runAction(
                             OnMarkBookAsReadClickAction(
                                 book = bookToUpdate,

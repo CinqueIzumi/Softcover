@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -229,11 +228,13 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.showUpdateProgressSheet shouldBe true
-            coVerify(exactly = 0) { updateBookProgress(
-                any(),
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                updateBookProgress(
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
         }
 
         @Test
@@ -308,7 +309,7 @@ class OnUpdatePageProgressClickActionTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<BookMarkedAsReadEvent>()
+            event.shouldBeInstanceOf<BookDetailEvent.BookMarkedAsReadEvent>()
         }
 
         @Test

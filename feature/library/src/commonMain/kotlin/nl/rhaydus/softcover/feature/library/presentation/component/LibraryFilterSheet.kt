@@ -46,12 +46,6 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChip
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetSelection
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
-private val OwnershipFormatLabel = SectionHeaderUiModel.Label(eyebrow = "Ownership · Format")
-private val ReleaseYearLabel = SectionHeaderUiModel.Label(eyebrow = "Release year")
-private val YearFinishedLabel = SectionHeaderUiModel.Label(eyebrow = "Year finished")
-private val TagsLabel = SectionHeaderUiModel.Label(eyebrow = "Tags")
-private val RatingLabel = SectionHeaderUiModel.Label(eyebrow = "Rating")
-
 /**
  * The Filter sheet (redesign brief).
  *
@@ -127,7 +121,7 @@ private fun FacetSections(
     onTagSearchChanged: (String) -> Unit,
 ) {
     if (chips.ownershipChips.isEmpty.not() || chips.formatChips.isEmpty.not()) {
-        FacetSection(label = OwnershipFormatLabel) {
+        FacetSection(label = selection.ownershipFormatHeader) {
             (selection.ownershipChips + selection.formatChips).forEach { chip ->
                 Chip(
                     model = chip,
@@ -140,7 +134,7 @@ private fun FacetSections(
     }
 
     if (chips.releaseYearChips.isEmpty.not()) {
-        FacetSection(label = ReleaseYearLabel) {
+        FacetSection(label = selection.releaseYearHeader) {
             selection.releaseYearChips.forEach { chip ->
                 Chip(
                     model = chip,
@@ -153,7 +147,7 @@ private fun FacetSections(
     }
 
     if (chips.readYearChips.isEmpty.not()) {
-        FacetSection(label = YearFinishedLabel) {
+        FacetSection(label = selection.readYearHeader) {
             selection.readYearChips.forEach { chip ->
                 Chip(
                     model = chip,
@@ -167,7 +161,8 @@ private fun FacetSections(
 
     if (chips.tagChips.isEmpty.not()) {
         TagsFacetSection(
-            availableCount = chips.tagChips.chips.size,
+            header = selection.tagsHeader,
+            availableLabel = selection.tagsAvailableLabel,
             tagSearch = tagSearch,
             visibleChips = selection.tagChips,
             onChipEvent = onChipEvent,
@@ -178,7 +173,7 @@ private fun FacetSections(
     }
 
     if (chips.ratingChips.isEmpty.not()) {
-        FacetSection(label = RatingLabel) {
+        FacetSection(label = selection.ratingHeader) {
             selection.ratingChips.forEach { chip ->
                 Chip(
                     model = chip,
@@ -198,7 +193,8 @@ private fun FacetSections(
  */
 @Composable
 private fun TagsFacetSection(
-    availableCount: Int,
+    header: SectionHeaderUiModel,
+    availableLabel: String,
     tagSearch: String,
     visibleChips: List<ChipUiModel>,
     onChipEvent: (ChipEvent) -> Unit,
@@ -206,10 +202,10 @@ private fun TagsFacetSection(
 ) {
     Column {
         SectionHeader(
-            model = TagsLabel,
+            model = header,
             trailing = {
                 Text(
-                    text = "$availableCount available",
+                    text = availableLabel,
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -351,7 +347,10 @@ private fun EmptyFacetMessage() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 18.dp),
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 18.dp,
+                ),
         ) {
             Text(
                 text = "Nothing to filter yet",

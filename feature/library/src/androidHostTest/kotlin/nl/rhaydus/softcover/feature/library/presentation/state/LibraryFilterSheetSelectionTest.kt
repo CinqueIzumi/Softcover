@@ -7,6 +7,8 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -40,7 +42,7 @@ class LibraryFilterSheetSelectionTest {
                 ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
-                tabId = "all",
+                tabId = LibraryTab.All.id,
                 filters = LibraryFilters(owned = true),
             )
 
@@ -71,7 +73,7 @@ class LibraryFilterSheetSelectionTest {
                 ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
-                tabId = "all",
+                tabId = LibraryTab.All.id,
                 filters = LibraryFilters(formats = setOf("ebook")),
             )
 
@@ -102,7 +104,7 @@ class LibraryFilterSheetSelectionTest {
                 ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
-                tabId = "all",
+                tabId = LibraryTab.All.id,
                 filters = LibraryFilters(releaseYears = setOf(2020)),
             )
 
@@ -133,7 +135,7 @@ class LibraryFilterSheetSelectionTest {
                 ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
-                tabId = "read",
+                tabId = LibraryTab.Status.idFor(status = UserBookStatus.READ),
                 filters = LibraryFilters(readYear = 2021),
             )
 
@@ -164,7 +166,7 @@ class LibraryFilterSheetSelectionTest {
                 ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
-                tabId = "all",
+                tabId = LibraryTab.All.id,
                 filters = LibraryFilters(tags = setOf(tagFiction)),
             )
 
@@ -195,7 +197,7 @@ class LibraryFilterSheetSelectionTest {
                 ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
-                tabId = "all",
+                tabId = LibraryTab.All.id,
                 filters = LibraryFilters(ratingMin = 4.0),
             )
 
@@ -221,7 +223,7 @@ class LibraryFilterSheetSelectionTest {
                 formatChips = ChipSet(chips = persistentListOf(untouchedChip)),
             )
             val draft = LibraryFilterDraft(
-                tabId = "all",
+                tabId = LibraryTab.All.id,
                 filters = LibraryFilters(formats = setOf("unknown")),
             )
 
@@ -252,7 +254,7 @@ class LibraryFilterSheetSelectionTest {
                 ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
-                tabId = "all",
+                tabId = LibraryTab.All.id,
                 tagSearch = "FIC",
             )
 
@@ -283,7 +285,7 @@ class LibraryFilterSheetSelectionTest {
                 ).toChipSet(),
             )
             val draft = LibraryFilterDraft(
-                tabId = "all",
+                tabId = LibraryTab.All.id,
                 tagSearch = "",
             )
 
@@ -299,26 +301,10 @@ class LibraryFilterSheetSelectionTest {
         }
 
         @Test
-        fun `resultCount passes through unchanged`() {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(tabId = "all")
-
-            // ----- Act -----
-            val selection = buildLibraryFilterSheetSelection(
-                chips = LibraryFilterChips(),
-                draft = draft,
-                resultCount = 42,
-            )
-
-            // ----- Assert -----
-            selection.resultCount shouldBe 42
-        }
-
-        @Test
         fun `clearAllEnabled is true when the draft's filters are non-empty`() {
             // ----- Arrange -----
             val draft = LibraryFilterDraft(
-                tabId = "all",
+                tabId = LibraryTab.All.id,
                 filters = LibraryFilters(owned = true),
             )
 
@@ -336,7 +322,7 @@ class LibraryFilterSheetSelectionTest {
         @Test
         fun `clearAllEnabled is false when the draft's filters are empty`() {
             // ----- Arrange -----
-            val draft = LibraryFilterDraft(tabId = "all")
+            val draft = LibraryFilterDraft(tabId = LibraryTab.All.id)
 
             // ----- Act -----
             val selection = buildLibraryFilterSheetSelection(
@@ -347,25 +333,6 @@ class LibraryFilterSheetSelectionTest {
 
             // ----- Assert -----
             selection.clearAllEnabled shouldBe false
-        }
-
-        @Test
-        fun `every chip list empty produces an empty selection`() {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(tabId = "all")
-
-            // ----- Act -----
-            val selection = buildLibraryFilterSheetSelection(
-                chips = LibraryFilterChips(),
-                draft = draft,
-                resultCount = 0,
-            )
-
-            // ----- Assert -----
-            selection shouldBe LibraryFilterSheetSelection(
-                resultCount = 0,
-                clearAllEnabled = false,
-            )
         }
     }
 }

@@ -13,6 +13,8 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.rememberHaptics
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -28,9 +30,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissCho
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalLinkEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import org.koin.core.parameter.parametersOf
@@ -78,9 +78,13 @@ class BookDetailScreen(
 
         var celebrationKey by remember { mutableIntStateOf(0) }
 
+        val shareCaptureEvents = remember {
+            MutableSharedFlow<BookDetailEvent.ShareCaptureEvent>(extraBufferCapacity = 1)
+        }
+
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
-                is RefreshDetailBookEvent -> {
+                is BookDetailEvent.RefreshDetailBookEvent -> {
                     screenModel.runAction(
                         action = InitializeBookWithIdAction(id = id),
                     )
@@ -90,7 +94,7 @@ class BookDetailScreen(
                     )
                 }
 
-                is BookMarkedAsReadEvent -> {
+                is BookDetailEvent.BookMarkedAsReadEvent -> {
                     haptics.commit()
                     celebrationKey++
 
@@ -99,8 +103,12 @@ class BookDetailScreen(
                     )
                 }
 
-                is OpenExternalLinkEvent -> {
+                is BookDetailEvent.OpenExternalLinkEvent -> {
                     uriHandler.openUri(uri = it.url)
+                }
+
+                is BookDetailEvent.ShareCaptureEvent -> {
+                    shareCaptureEvents.tryEmit(it)
                 }
             }
         }
@@ -142,6 +150,7 @@ class BookDetailScreen(
             },
             isOnline = isOnline,
             celebrationKey = celebrationKey,
+            shareCaptureEvents = shareCaptureEvents,
         )
     }
 }
@@ -164,4 +173,5 @@ internal expect fun BookDetailScreenLayout(
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
     celebrationKey: Int,
+    shareCaptureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
 )

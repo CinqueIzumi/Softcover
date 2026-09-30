@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -47,6 +49,7 @@ import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection
@@ -66,6 +69,7 @@ internal actual fun BookDetailScreenLayout(
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
     celebrationKey: Int,
+    shareCaptureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val lazyListState = rememberLazyListState()
@@ -241,6 +245,7 @@ internal actual fun BookDetailScreenLayout(
             state = state,
             runAction = runAction,
             onCreateNewListClick = onCreateNewListClick,
+            shareCaptureEvents = shareCaptureEvents,
         )
     }
 }
@@ -277,6 +282,7 @@ private fun BookDetailScreenReadingPreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
+                shareCaptureEvents = emptyFlow(),
             )
         }
     }
@@ -306,6 +312,7 @@ private fun BookDetailScreenNonePreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
+                shareCaptureEvents = emptyFlow(),
             )
         }
     }
@@ -335,6 +342,7 @@ private fun BookDetailScreenDnfPreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
+                shareCaptureEvents = emptyFlow(),
             )
         }
     }
@@ -364,6 +372,7 @@ private fun BookDetailScreenWantToReadPreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
+                shareCaptureEvents = emptyFlow(),
             )
         }
     }
@@ -393,6 +402,7 @@ private fun BookDetailScreenReadPreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
+                shareCaptureEvents = emptyFlow(),
             )
         }
     }

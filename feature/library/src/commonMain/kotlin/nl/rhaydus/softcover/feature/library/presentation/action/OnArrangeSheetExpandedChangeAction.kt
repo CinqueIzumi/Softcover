@@ -20,18 +20,21 @@ internal class OnArrangeSheetExpandedChangeAction(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
         scope.setState { state ->
+            if (expanded.not()) {
+                return@setState state.copy(
+                    isArrangeSheetExpanded = false,
+                    arrangeDraft = null,
+                )
+            }
+
             state.copy(
-                isArrangeSheetExpanded = expanded,
-                arrangeDraft = if (expanded) {
-                    LibraryArrangeDraft(
-                        tabId = state.selectedTabId,
-                        sortMode = state.sortModeFor(tabId = state.selectedTabId),
-                        sortDirection = state.sortDirectionFor(tabId = state.selectedTabId),
-                        gridLayout = state.gridLayout,
-                    )
-                } else {
-                    null
-                },
+                isArrangeSheetExpanded = true,
+                arrangeDraft = LibraryArrangeDraft(
+                    tabId = state.selectedTabId,
+                    sortMode = state.sortModeFor(tabId = state.selectedTabId),
+                    sortDirection = state.sortDirectionFor(tabId = state.selectedTabId),
+                    gridLayout = state.gridLayout,
+                ),
             )
         }
     }

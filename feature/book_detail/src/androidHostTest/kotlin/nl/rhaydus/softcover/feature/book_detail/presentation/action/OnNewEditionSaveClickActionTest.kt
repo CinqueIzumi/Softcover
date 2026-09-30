@@ -69,10 +69,21 @@ class OnNewEditionSaveClickActionTest {
 
     private fun stubUserBook(): UserBook = mockk()
 
-    private fun stubBook(userBook: UserBook?): Book = mockk<Book>().also { mock ->
+    private fun stubBook(
+        userBook: UserBook?,
+        currentEdition: BookEdition? = stubEdition(id = 1),
+    ): Book = mockk<Book>().also { mock ->
         every {
             mock.userBook
         } returns userBook
+
+        every {
+            mock.currentEdition
+        } returns currentEdition
+
+        every {
+            mock.editions
+        } returns emptyList()
     }
 
     @Nested
@@ -85,6 +96,8 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition()
             stateFlow.value = BookDetailUiState(
                 book = book,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 showEditEditionSheet = true,
             )
             dependencies = stubDependencies(this)
@@ -96,7 +109,7 @@ class OnNewEditionSaveClickActionTest {
                 )
             } returns Result.success(Unit)
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -116,7 +129,8 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition()
             stateFlow.value = BookDetailUiState(
                 book = book,
-                selectedEditionId = 7,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 showEditEditionSheet = true,
             )
             dependencies = stubDependencies(this)
@@ -128,7 +142,7 @@ class OnNewEditionSaveClickActionTest {
                 )
             } returns Result.success(Unit)
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -147,12 +161,13 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition(id = 77)
             stateFlow.value = BookDetailUiState(
                 book = book,
-                selectedEditionId = 7,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 showEditEditionSheet = true,
             )
             dependencies = stubDependencies(this)
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -172,6 +187,8 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition()
             stateFlow.value = BookDetailUiState(
                 book = book,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 loadingBookDetails = false,
             )
             dependencies = stubDependencies(this)
@@ -183,7 +200,7 @@ class OnNewEditionSaveClickActionTest {
                 )
             } returns Result.success(Unit)
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -201,7 +218,11 @@ class OnNewEditionSaveClickActionTest {
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
             val edition = stubEdition(id = 99)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -211,7 +232,7 @@ class OnNewEditionSaveClickActionTest {
                 )
             } returns Result.success(Unit)
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -231,14 +252,13 @@ class OnNewEditionSaveClickActionTest {
         @Test
         fun `does not invoke use case when book is null`() = runTest {
             // ----- Arrange -----
-            val edition = stubEdition()
             stateFlow.value = BookDetailUiState(
                 book = null,
                 showEditEditionSheet = true,
             )
             dependencies = stubDependencies(this)
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -256,17 +276,93 @@ class OnNewEditionSaveClickActionTest {
         }
 
         @Test
+        fun `does nothing when there is no displayed edition`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = stubUserBook(),
+                currentEdition = null,
+            )
+            val initialState = BookDetailUiState(
+                book = book,
+                editions = listOf(stubEdition(id = 5)),
+                selectedEditionId = 5,
+                scannedEditionId = 42,
+                showEditEditionSheet = true,
+            )
+            stateFlow.value = initialState
+            dependencies = stubDependencies(this)
+
+            val action = OnNewEditionSaveClickAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value shouldBe initialState
+            coVerify(exactly = 0) {
+                updateBookEditionUseCase(
+                    any(),
+                    any(),
+                )
+            }
+        }
+
+        @Test
+        fun `falls back to the displayed edition when the selected id matches no listed edition`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook()
+            val current = stubEdition(id = 1)
+            stateFlow.value = BookDetailUiState(
+                book = stubBook(
+                    userBook = userBook,
+                    currentEdition = current,
+                ),
+                editions = listOf(stubEdition(id = 5)),
+                selectedEditionId = 99,
+            )
+            dependencies = stubDependencies(this)
+
+            coEvery {
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = any(),
+                )
+            } returns Result.success(Unit)
+
+            val action = OnNewEditionSaveClickAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify {
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = 1,
+                )
+            }
+        }
+
+        @Test
         fun `sets previewEdition and closes sheet when userBook is null`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
             val edition = stubEdition(id = 77)
             stateFlow.value = BookDetailUiState(
                 book = book,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 showEditEditionSheet = true,
             )
             dependencies = stubDependencies(this)
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -292,12 +388,14 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition(id = 77)
             stateFlow.value = BookDetailUiState(
                 book = book,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 scannedEditionId = 42,
                 showEditEditionSheet = true,
             )
             dependencies = stubDependencies(this)
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -317,6 +415,8 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition(id = 99)
             stateFlow.value = BookDetailUiState(
                 book = book,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 scannedEditionId = 42,
                 showEditEditionSheet = true,
             )
@@ -329,7 +429,7 @@ class OnNewEditionSaveClickActionTest {
                 )
             } returns Result.success(Unit)
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -349,6 +449,8 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition()
             stateFlow.value = BookDetailUiState(
                 book = book,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 loadingBookDetails = false,
             )
             dependencies = stubDependencies(this)
@@ -360,7 +462,7 @@ class OnNewEditionSaveClickActionTest {
                 )
             } returns Result.failure(RuntimeException("update failed"))
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -380,6 +482,8 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition()
             stateFlow.value = BookDetailUiState(
                 book = book,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 showEditEditionSheet = true,
             )
             dependencies = stubDependencies(this)
@@ -391,7 +495,7 @@ class OnNewEditionSaveClickActionTest {
                 )
             } returns Result.failure(RuntimeException("edition update failed"))
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(
@@ -411,6 +515,8 @@ class OnNewEditionSaveClickActionTest {
             val edition = stubEdition()
             stateFlow.value = BookDetailUiState(
                 book = book,
+                editions = listOf(edition),
+                selectedEditionId = edition.id,
                 loadingBookDetails = false,
             )
             dependencies = stubDependencies(this)
@@ -427,7 +533,7 @@ class OnNewEditionSaveClickActionTest {
                 Result.success(Unit)
             }
 
-            val action = OnNewEditionSaveClickAction(edition = edition)
+            val action = OnNewEditionSaveClickAction()
 
             // ----- Act -----
             action.execute(

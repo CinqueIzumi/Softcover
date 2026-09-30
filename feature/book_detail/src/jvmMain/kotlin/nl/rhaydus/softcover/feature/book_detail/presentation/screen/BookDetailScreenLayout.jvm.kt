@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
@@ -40,6 +41,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePa
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection
@@ -79,6 +81,7 @@ internal actual fun BookDetailScreenLayout(
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
     celebrationKey: Int,
+    shareCaptureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
 ) {
     val showOfflinePlaceholder =
         isOnline.not() && state.book == null && state.loadingBookDetails.not()
@@ -132,6 +135,7 @@ internal actual fun BookDetailScreenLayout(
         state = state,
         runAction = runAction,
         onCreateNewListClick = onCreateNewListClick,
+        shareCaptureEvents = shareCaptureEvents,
     )
 }
 

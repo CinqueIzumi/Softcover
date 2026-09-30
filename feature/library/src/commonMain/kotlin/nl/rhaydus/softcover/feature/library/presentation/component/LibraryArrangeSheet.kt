@@ -24,17 +24,15 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyArrangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeLayoutChipClickedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSortChipClickedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeTitlesToggleChangedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSetListRankedAction
-import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLayoutChip
+import nl.rhaydus.softcover.feature.library.presentation.state.ArrangeMakeOrderedUiModel
+import nl.rhaydus.softcover.feature.library.presentation.state.ArrangeTitlesToggleUiModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.state.chip
-import nl.rhaydus.softcover.feature.library.presentation.state.showsTitles
 
 /**
  * The Arrange sheet (redesign brief): replaces the old sort dropdown + layout dropdown with one
@@ -57,13 +55,10 @@ import nl.rhaydus.softcover.feature.library.presentation.state.showsTitles
  */
 @Composable
 internal fun LibraryArrangeSheet(
-    tab: LibraryTab,
     state: LibraryUiState,
     runAction: (LibraryAction) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    val draft = state.arrangeDraft
-
     SheetScaffold(
         model = state.arrangeSheet,
         onEvent = { event ->
@@ -88,11 +83,11 @@ internal fun LibraryArrangeSheet(
             onChipEvent = { key -> runAction(OnArrangeLayoutChipClickedAction(key = key)) },
         )
 
-        if (draft != null && draft.gridLayout.chip != LibraryLayoutChip.LIST) {
+        state.arrangeTitlesToggle?.let { titlesToggle ->
             Spacer(modifier = Modifier.height(16.dp))
 
             ShowTitlesToggleRow(
-                checked = draft.gridLayout.showsTitles,
+                model = titlesToggle,
                 onCheckedChange = { show -> runAction(OnArrangeTitlesToggleChangedAction(show = show)) },
             )
         }
@@ -104,9 +99,8 @@ internal fun LibraryArrangeSheet(
         Spacer(modifier = Modifier.height(10.dp))
 
         SortChipRow(
-            tab = tab,
-            state = state,
             chips = state.arrangeSortChips,
+            makeOrdered = state.arrangeMakeOrdered,
             onChipEvent = { key -> runAction(OnArrangeSortChipClickedAction(key = key)) },
             onMakeListOrdered = { listId ->
                 runAction(
@@ -141,7 +135,7 @@ private fun LayoutChipRow(
 
 @Composable
 private fun ShowTitlesToggleRow(
-    checked: Boolean,
+    model: ArrangeTitlesToggleUiModel,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
@@ -150,13 +144,13 @@ private fun ShowTitlesToggleRow(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
-            text = "Show titles & authors",
+            text = model.label,
             style = MaterialTheme.editorialTypography.body,
             color = MaterialTheme.colorScheme.onSurface,
         )
 
         Switch(
-            checked = checked,
+            checked = model.checked,
             onCheckedChange = onCheckedChange,
         )
     }
@@ -165,15 +159,11 @@ private fun ShowTitlesToggleRow(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SortChipRow(
-    tab: LibraryTab,
-    state: LibraryUiState,
     chips: List<ChipUiModel>,
+    makeOrdered: ArrangeMakeOrderedUiModel?,
     onChipEvent: (key: String) -> Unit,
     onMakeListOrdered: (listId: Int) -> Unit,
 ) {
-    val customListRanked: Boolean? = (tab as? LibraryTab.CustomList)
-        ?.let { customListTab -> state.customLists.firstOrNull { it.id == customListTab.listId }?.ranked }
-
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -186,16 +176,16 @@ private fun SortChipRow(
         }
     }
 
-    if (tab is LibraryTab.CustomList && customListRanked == false) {
+    if (makeOrdered != null) {
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "✶ Make this list ordered",
+            text = makeOrdered.label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .pointerHandCursor()
-                .pressScaleClickable(onClick = { onMakeListOrdered(tab.listId) })
+                .pressScaleClickable(onClick = { onMakeListOrdered(makeOrdered.listId) })
                 .padding(vertical = 4.dp),
         )
     }

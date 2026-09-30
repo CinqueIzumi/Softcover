@@ -40,13 +40,16 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CoverMode
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveControlHeaderCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorChipModelsCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagSuggestionsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagVocabularySyncCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UnreleasedBadgeCollector
@@ -93,6 +96,9 @@ val bookDetailModule = module {
     factory { VerdictReviewCollector() } bind BookDetailCollector::class
     factory { VerdictSheetCollector() } bind BookDetailCollector::class
     factory { ShareCardsCollector() } bind BookDetailCollector::class
+    factory { ShareSheetCollector() } bind BookDetailCollector::class
+    factory { TagEditorSheetCollector() } bind BookDetailCollector::class
+    factory { EditionSheetCollector() } bind BookDetailCollector::class
     factory { ProgressSheetCollector() } bind BookDetailCollector::class
     factory { ChooseListsCollector() } bind BookDetailCollector::class
     factory { ShelveControlHeaderCollector() } bind BookDetailCollector::class

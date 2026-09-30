@@ -14,11 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S6-5 committed (`00e6948c`). The `!!` sweep is built, reviewed and uncommitted: no `!!` left
-  (production restructured by type, tests on `shouldNotBeNull()`), detekt `UnsafeCallOnNullableType` gates
-  test sources too, rule in `docs/reference/code-style.md` § Null safety. S11-5 planned, F29 filed. Mood
-  tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** commit the `!!` sweep, then S6-6 (`steps/s6-sheet-chrome.md` § S6-6).
+- **State:** S6-6 done, uncommitted: four sheets on `SheetScaffold`; sheet-body values on state with one
+  collector writer each; share / save capture runs on a `BookDetailEvent` the busy-guarding action sends;
+  book_detail events nested in `BookDetailEvent.kt` (`docs/reference/code-style.md` § Events). Mood tile
+  → S7-4; 14 Apollo-alias files wait on F24.
+- **Next:** commit S6-6 (ask first); then nest the explore / lists / profile / scan / settings events
+  per § Events as its own commit; then S6-7 (`steps/s6-sheet-chrome.md` § S6-7).
 - **Open questions:** none.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
@@ -33,14 +34,15 @@ checkboxes in step with `## Steps` and `## Gates` here.
   toggle / choice lists); S6-3's sheet header gaps (12/8/8), 56dp jackets, sheet padding (top 8 / bottom 16,
   LoadingSheet 32 → 16), and the progress sheet's tap-to-clear-focus now covering the body only; S6-4's
   verdict cover as a 56dp header jacket (was above the header); S6-5's Filter footer inset (22 → 24),
-  bulk-remove and re-auth as sheets, and the animated close on Apply / Save / Delete / top action.
-- **Verification:** `!!` sweep green under JBR 21 — `styleCheck`, `checkDocBudgets`, a probe `!!` in a test
-  file failing `detektAndroidHostTest`, and the core (preferences, lists, profile, book, deadlines, domain,
-  uibinding) and feature (settings, library, explore, book_detail) suites; reviewer: no blockers, nits applied.
-  Run Gradle with `JAVA_HOME=$(/usr/libexec/java_home -v 21)`: the shell defaults to JDK 26, which breaks
-  detekt and the `AndroidLegacySecureApiKeyStorageTest` keystore tests.
-- **Uncommitted:** the whole `!!` sweep (3 production files, ~20 test files, `config/detekt/detekt.yml`,
-  `docs/reference/code-style.md`) and this block.
+  bulk-remove and re-auth as sheets, and the animated close on Apply / Save / Delete / top action; S6-6's
+  tag editor and edition jackets (56dp), the edition footer divider, ShareBook's eyebrow bar, and the
+  unknown-ISBN footer; that the Arrange sheet's "Show titles" row does not pop in a frame after open
+  (collector-only writer now).
+- **Verification:** `styleCheck` and the book_detail, library, scan, settings, core:presentation host
+  suites green under JBR 21; final production + test reviews applied. Run Gradle with
+  `JAVA_HOME=$(/usr/libexec/java_home -v 21)` (JDK 26 breaks detekt and the keystore tests).
+- **Uncommitted:** all of S6-6 — book_detail, library, scan, settings, core:presentation (prod + tests),
+  `docs/reference/code-style.md`, this README and `s6-sheet-chrome.md`.
 
 ## Local verification
 

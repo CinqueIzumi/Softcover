@@ -55,6 +55,12 @@ today — it is enforced by the guide + review. The un-glommed form is stable un
 candidate — see [`../working/foundation-upstream-candidates.md`](../working/foundation-upstream-candidates.md);
 once that rule lands it will auto-fix and gate the whole codebase.
 
+## Events
+
+A feature's `UiEvent` variants are nested inside its sealed `<Name>Event.kt` and referenced as
+`<Name>Event.<Variant>Event`, never one file per variant. This picks the co-located option of
+[§Sealed hierarchy variants](../rhaydus/0.3.1/code-style.md#one-declaration-per-file).
+
 ## Null safety
 
 No `!!`, in production or tests. Production excludes null by type (smart cast, `mapNotNull`, `let`); tests

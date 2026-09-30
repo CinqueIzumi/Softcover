@@ -8,6 +8,24 @@ import org.junit.jupiter.api.Test
 
 class LibraryTabTest {
     @Nested
+    inner class IdFor {
+        @Test
+        fun `ids never collide across tab kinds`() {
+            // ----- Arrange -----
+            val statuses = UserBookStatus.entries
+            val listId = 1
+
+            // ----- Act -----
+            val ids = statuses.map { LibraryTab.Status.idFor(status = it) } +
+                LibraryTab.CustomList.idFor(listId = listId) +
+                LibraryTab.All.id
+
+            // ----- Assert -----
+            ids.toSet().size shouldBe ids.size
+        }
+    }
+
+    @Nested
     inner class DefaultSortMode {
         @Test
         fun `returns DATE_FINISHED for the Read tab id`() {
@@ -22,7 +40,7 @@ class LibraryTabTest {
         }
 
         @Test
-        fun `returns DATE_ADDED for the All tab id`() {
+        fun `returns the default sort mode for the All tab id`() {
             // ----- Arrange -----
             val allTabId = LibraryTab.All.id
 
@@ -34,7 +52,7 @@ class LibraryTabTest {
         }
 
         @Test
-        fun `returns DATE_ADDED for a non-Read status tab id`() {
+        fun `returns the default sort mode for a non-Read status tab id`() {
             // ----- Arrange -----
             val wantToReadTabId = LibraryTab.Status.of(UserBookStatus.WANT_TO_READ).id
 
@@ -46,9 +64,9 @@ class LibraryTabTest {
         }
 
         @Test
-        fun `returns DATE_ADDED for a custom-list tab id`() {
+        fun `returns the default sort mode for a custom-list tab id`() {
             // ----- Arrange -----
-            val customListTabId = "list-99"
+            val customListTabId = LibraryTab.CustomList.idFor(listId = 99)
 
             // ----- Act -----
             val result = LibraryTab.defaultSortMode(tabId = customListTabId)

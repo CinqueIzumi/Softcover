@@ -1,12 +1,10 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
@@ -18,12 +16,14 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnAddUnknownIsbnDismissedActionTest {
+    private lateinit var dependencies: ScanDependencies
     private lateinit var stateFlow: MutableStateFlow<ScanUiState>
     private lateinit var eventChannel: Channel<ScanEvent>
     private lateinit var scope: ActionScope<ScanUiState, ScanEvent, LocalScanVariables>
 
     @BeforeEach
     fun setUp() {
+        dependencies = mockk(relaxed = true)
         stateFlow = MutableStateFlow(ScanUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -33,31 +33,12 @@ class OnAddUnknownIsbnDismissedActionTest {
         )
     }
 
-    private fun stubDependencies(testScope: TestScope): ScanDependencies {
-        val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
-
-        return mockk<ScanDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.coroutineScope
-            } returns testScope
-
-            every {
-                mock.mainDispatcher
-            } returns dispatcher
-
-            every {
-                mock.launch(any())
-            } answers { callOriginal() }
-        }
-    }
-
     @Nested
     inner class Execute {
         @Test
         fun `clears unknownIsbn`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
-            val dependencies = stubDependencies(this)
             val action = OnAddUnknownIsbnDismissedAction()
 
             // ----- Act -----
@@ -67,17 +48,17 @@ class OnAddUnknownIsbnDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.unknownIsbn shouldBe null
+            stateFlow.value.unknownIsbn.shouldBeNull()
         }
 
         @Test
-        fun `sets isAddingBook to false`() = runTest {
+        fun `leaves state unchanged and sends no event while a book is being added`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(
+            val addingState = ScanUiState(
                 unknownIsbn = "9780451524935",
                 isAddingBook = true,
             )
-            val dependencies = stubDependencies(this)
+            stateFlow.value = addingState
             val action = OnAddUnknownIsbnDismissedAction()
 
             // ----- Act -----
@@ -87,7 +68,8 @@ class OnAddUnknownIsbnDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isAddingBook shouldBe false
+            stateFlow.value shouldBe addingState
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
         @Test
@@ -97,7 +79,6 @@ class OnAddUnknownIsbnDismissedActionTest {
                 unknownIsbn = "9780451524935",
                 isResolving = true,
             )
-            val dependencies = stubDependencies(this)
             val action = OnAddUnknownIsbnDismissedAction()
 
             // ----- Act -----
@@ -114,7 +95,6 @@ class OnAddUnknownIsbnDismissedActionTest {
         fun `does not send any event`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
-            val dependencies = stubDependencies(this)
             val action = OnAddUnknownIsbnDismissedAction()
 
             // ----- Act -----
@@ -124,18 +104,17 @@ class OnAddUnknownIsbnDismissedActionTest {
             )
 
             // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull()
-            event shouldBe null
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
         @Test
         fun `is idempotent when unknownIsbn is already null`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(
+            val idleState = ScanUiState(
                 unknownIsbn = null,
                 isAddingBook = false,
             )
-            val dependencies = stubDependencies(this)
+            stateFlow.value = idleState
             val action = OnAddUnknownIsbnDismissedAction()
 
             // ----- Act -----
@@ -145,10 +124,7 @@ class OnAddUnknownIsbnDismissedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value shouldBe ScanUiState(
-                unknownIsbn = null,
-                isAddingBook = false,
-            )
+            stateFlow.value shouldBe idleState
         }
     }
 }

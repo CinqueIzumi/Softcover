@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.model
 
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 
 internal sealed class LibraryTabEntry(
     val id: String,
@@ -26,7 +27,7 @@ internal sealed class LibraryTabEntry(
         val statusLabel: String,
         val statusCount: Int,
     ) : LibraryTabEntry(
-        id = "status-${status.code}",
+        id = LibraryTab.Status.idFor(status = status),
         label = statusLabel,
         count = statusCount,
         isReorderable = true,
@@ -39,7 +40,7 @@ internal sealed class LibraryTabEntry(
         val listName: String,
         val listCount: Int,
     ) : LibraryTabEntry(
-        id = "list-$listId",
+        id = LibraryTab.CustomList.idFor(listId = listId),
         label = listName,
         count = listCount,
         isReorderable = true,
@@ -48,6 +49,6 @@ internal sealed class LibraryTabEntry(
     )
 
     companion object {
-        const val ALL_ID: String = "all"
+        val ALL_ID: String = LibraryTab.All.id
     }
 }

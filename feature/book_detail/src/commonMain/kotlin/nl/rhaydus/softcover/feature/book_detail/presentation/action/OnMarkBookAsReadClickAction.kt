@@ -4,7 +4,6 @@ import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookMarkedAsReadEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -33,7 +32,7 @@ internal class OnMarkBookAsReadClickAction(
                     // Celebrate only on a real transition — re-tapping the active "Read" chip
                     // must not replay the burst or rewrite finished_at.
                     if (outcome == ShelfMutationOutcome.Applied) {
-                        scope.sendEvent(BookMarkedAsReadEvent())
+                        scope.sendEvent(BookDetailEvent.BookMarkedAsReadEvent())
                     }
                 }
                 .onFailure { error ->

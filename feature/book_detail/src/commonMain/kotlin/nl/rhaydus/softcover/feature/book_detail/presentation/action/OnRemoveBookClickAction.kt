@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.RefreshDetailBookEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLens
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -31,7 +30,7 @@ internal class OnRemoveBookClickAction(val book: Book) : BookDetailAction {
                         it.copy(selectedLens = BookDetailLens.THE_BOOK)
                     }
 
-                    scope.sendEvent(event = RefreshDetailBookEvent())
+                    scope.sendEvent(event = BookDetailEvent.RefreshDetailBookEvent())
                 }
         }
 

@@ -131,7 +131,7 @@ internal actual fun LibraryScreenLayout(
             onTabClick = { id -> runAction(OnTabSelectedAction(tabId = id)) },
             onTabLongPress = onTabLongPress,
             modifier = Modifier
-                .width(SHELF_SIDEBAR_WIDTH)
+                .width(208.dp)
                 .fillMaxHeight(),
         )
 
@@ -166,7 +166,11 @@ internal actual fun LibraryScreenLayout(
             } else {
                 PageMasthead(
                     model = state.mastheadFor(currentTab?.id),
-                    modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp),
+                    modifier = Modifier.padding(
+                        start = 24.dp,
+                        end = 12.dp,
+                        top = 16.dp,
+                    ),
                 ) {
                     MastheadRefreshAction(
                         model = state.mastheadRefresh,
@@ -278,7 +282,6 @@ internal actual fun LibraryScreenLayout(
 
     if (state.isArrangeSheetExpanded && currentTab != null) {
         LibraryArrangeSheet(
-            tab = currentTab,
             state = state,
             runAction = runAction,
             onDismissRequest = {
@@ -391,5 +394,3 @@ private fun desktopGridColumns(layout: LibraryGridLayout): GridCells = when (lay
     LibraryGridLayout.LIST_LARGE,
         -> GridCells.Fixed(count = 1)
 }
-
-private val SHELF_SIDEBAR_WIDTH = 208.dp

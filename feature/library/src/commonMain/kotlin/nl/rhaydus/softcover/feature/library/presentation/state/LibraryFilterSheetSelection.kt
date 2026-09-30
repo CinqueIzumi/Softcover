@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
 /**
  * The Filter sheet's facet chip rows for the open draft, mapped by `FilterDraftChipsCollector`
@@ -19,6 +20,12 @@ internal data class LibraryFilterSheetSelection(
     val ratingChips: List<ChipUiModel> = emptyList(),
     val resultCount: Int = 0,
     val clearAllEnabled: Boolean = false,
+    val ownershipFormatHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Ownership · Format"),
+    val releaseYearHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Release year"),
+    val readYearHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Year finished"),
+    val tagsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
+    val ratingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Rating"),
+    val tagsAvailableLabel: String = "0 available",
 )
 
 /**
@@ -54,6 +61,7 @@ internal fun buildLibraryFilterSheetSelection(
         ratingChips = chips.ratingChips.resolveSelection(),
         resultCount = resultCount,
         clearAllEnabled = draft.filters.isEmpty.not(),
+        tagsAvailableLabel = "${chips.tagChips.chips.size} available",
     )
 }
 

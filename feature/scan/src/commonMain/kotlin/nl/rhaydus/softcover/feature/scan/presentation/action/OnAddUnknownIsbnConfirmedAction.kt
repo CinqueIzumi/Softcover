@@ -18,14 +18,18 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
 
         if (scope.currentState.isAddingBook) return
 
-        scope.setState { it.copy(isAddingBook = true) }
+        scope.setState {
+            it.copy(isAddingBook = true)
+        }
 
         dependencies.addBookByIsbnUseCase(isbn = isbn)
             .onSuccess { result ->
-                scope.setState { it.copy(
-                    unknownIsbn = null,
-                    isAddingBook = false,
-                ) }
+                scope.setState {
+                    it.copy(
+                        unknownIsbn = null,
+                        isAddingBook = false,
+                    )
+                }
 
                 scope.sendEvent(
                     event = BookResolvedEvent(
@@ -40,7 +44,9 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
                     "Failed to add scanned ISBN $isbn to Hardcover",
                 )
 
-                scope.setState { it.copy(isAddingBook = false) }
+                scope.setState {
+                    it.copy(isAddingBook = false)
+                }
 
                 scope.sendEvent(event = AddBookFailedEvent())
             }

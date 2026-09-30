@@ -11,6 +11,13 @@ internal class OnDismissShareSheetAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(isShareSheetVisible = false) }
+        scope.setState {
+            it.copy(
+                isShareSheetVisible = false,
+                chosenShareVariant = null,
+                isSharing = false,
+                isSavingToGallery = false,
+            )
+        }
     }
 }

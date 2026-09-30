@@ -118,6 +118,12 @@ internal data class LibraryUiState(
     /** The Arrange sheet's sort-row header, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
     val arrangeSortHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Sort"),
 
+    /** The Arrange sheet's titles toggle; null when the layout is a list. */
+    val arrangeTitlesToggle: ArrangeTitlesToggleUiModel? = null,
+
+    /** The Arrange sheet's "make ordered" affordance; null unless the shelf is an unranked custom list. */
+    val arrangeMakeOrdered: ArrangeMakeOrderedUiModel? = null,
+
     /** The Shelves sheet — the tab switcher on mobile; desktop keeps its permanent sidebar. */
     val isShelvesSheetExpanded: Boolean = false,
 

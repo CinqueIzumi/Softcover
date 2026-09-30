@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.ArrangeSheetSnapshot
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.arrangeSheetScaffoldFor
@@ -20,16 +21,16 @@ internal class ArrangeSheetCollector : LibraryCollector {
         dependencies: LibraryDependencies,
     ) {
         scope.state
-            .map { state ->
-                val tabId = state.selectedTabId
-
-                state.displayEditionsFor(tabId = tabId)?.size
-                    ?: state.displayBooksFor(tabId = tabId)?.size
-                    ?: state.tabStatsFor(tabId = tabId).itemCount
-            }
+            .map { state -> ArrangeSheetSnapshot.from(state = state) }
             .distinctUntilChanged()
-            .collectLatest { resultCount ->
-                scope.setState { it.copy(arrangeSheet = arrangeSheetScaffoldFor(resultCount = resultCount)) }
+            .collectLatest { snapshot ->
+                scope.setState {
+                    it.copy(
+                        arrangeSheet = arrangeSheetScaffoldFor(resultCount = snapshot.resultCount),
+                        arrangeTitlesToggle = snapshot.titlesToggle,
+                        arrangeMakeOrdered = snapshot.makeOrdered,
+                    )
+                }
             }
     }
 }

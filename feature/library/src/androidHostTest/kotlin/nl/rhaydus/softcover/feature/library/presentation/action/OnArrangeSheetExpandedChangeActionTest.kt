@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -8,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryArrangeDraft
@@ -91,7 +93,7 @@ class OnArrangeSheetExpandedChangeActionTest {
         @Test
         fun `opening seeds arrangeDraft from the selected tab's committed sort and layout`() = runTest {
             // ----- Arrange -----
-            val selectedTabId = "list-42"
+            val selectedTabId = LibraryTab.CustomList.idFor(listId = 42)
             stateFlow.value = LibraryUiState(
                 selectedTabId = selectedTabId,
                 sortModeByTab = mapOf(selectedTabId to LibrarySortMode.TITLE),
@@ -122,7 +124,7 @@ class OnArrangeSheetExpandedChangeActionTest {
             stateFlow.value = LibraryUiState(
                 isArrangeSheetExpanded = true,
                 arrangeDraft = LibraryArrangeDraft(
-                    tabId = "list-42",
+                    tabId = LibraryTab.CustomList.idFor(listId = 42),
                     sortMode = LibrarySortMode.RATING,
                     sortDirection = SortDirection.DESCENDING,
                     gridLayout = LibraryGridLayout.LIST_LARGE,
@@ -137,7 +139,7 @@ class OnArrangeSheetExpandedChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.arrangeDraft shouldBe null
+            stateFlow.value.arrangeDraft.shouldBeNull()
         }
     }
 }

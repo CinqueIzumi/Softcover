@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +31,8 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.divider.Divider
+import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditorChipGroup
@@ -82,9 +83,9 @@ private fun TagGroupSection(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            HorizontalDivider(
+            Divider(
+                model = DividerUiModel.Horizontal(),
                 modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.outlineVariant,
             )
 
             Spacer(modifier = Modifier.width(8.dp))

@@ -1,17 +1,14 @@
 package nl.rhaydus.softcover.feature.scan.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class ScanUiState(
     val isResolving: Boolean = false,
     val unknownIsbn: String? = null,
     val isAddingBook: Boolean = false,
-    val unknownIsbnHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Not in Hardcover",
-        headline = "We don't have this one yet.",
-        description = "Double-check the ISBN below — if it's right, add it to Hardcover so you can track it.",
-    ),
+    val unknownIsbnSheet: SheetScaffoldUiModel = unknownIsbnSheetScaffoldFor(isAdding = false),
     val manualEntryHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "By ISBN",
         headline = "Enter the ISBN.",

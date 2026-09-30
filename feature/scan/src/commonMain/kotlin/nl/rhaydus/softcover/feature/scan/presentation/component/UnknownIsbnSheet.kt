@@ -1,10 +1,7 @@
 package nl.rhaydus.softcover.feature.scan.presentation.component
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -16,35 +13,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
-import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.model.ButtonSize
-import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
 internal fun UnknownIsbnSheet(
     isbn: String,
-    isAdding: Boolean,
-    header: SectionHeaderUiModel,
+    model: SheetScaffoldUiModel,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    AdaptiveModalSheet(onDismissRequest = { if (isAdding.not()) onDismiss() }) {
-        val dismiss = LocalModalSheetDismiss.current
+    SheetScaffold(
+        model = model,
+        modifier = modifier,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.PrimaryClicked -> onConfirm()
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-        ) {
-            SectionHeader(model = header)
+                SheetScaffoldEvent.Dismissed -> onDismiss()
 
-            Spacer(modifier = Modifier.height(24.dp))
-
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
+            }
+        },
+        content = {
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 shape = RoundedCornerShape(8.dp),
@@ -65,28 +62,6 @@ internal fun UnknownIsbnSheet(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            RhaydusButton(
-                label = if (isAdding) "Adding to Hardcover" else "Add to Hardcover",
-                style = ButtonStyle.FILLED,
-                size = ButtonSize.M,
-                enabled = isAdding.not(),
-                onClick = onConfirm,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            RhaydusButton(
-                label = "Cancel",
-                style = ButtonStyle.TEXT,
-                size = ButtonSize.M,
-                enabled = isAdding.not(),
-                onClick = dismiss,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
+        },
+    )
 }

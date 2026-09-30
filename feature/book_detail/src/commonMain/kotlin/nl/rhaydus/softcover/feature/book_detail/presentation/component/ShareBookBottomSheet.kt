@@ -7,11 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -19,20 +16,18 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
@@ -48,69 +43,112 @@ import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardVariant
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetBodyUiModel
 import kotlin.math.roundToInt
 
 @Composable
 internal fun ShareBookBottomSheet(
+    model: SheetScaffoldUiModel,
     shareBookCard: BookShareCardUiModel,
     shareUpdateCard: ReadingUpdateShareCardUiModel?,
+    body: ShareSheetBodyUiModel,
+    onVariantSelected: (ShareCardVariant) -> Unit,
+    captureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
+    onShareClick: () -> Unit,
+    onShareFinished: () -> Unit,
+    onSaveToGalleryClick: () -> Unit,
+    onSaveToGalleryFinished: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
     val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
-    val coroutineScope = rememberCoroutineScope()
 
-    var isSharing by remember { mutableStateOf(false) }
-    var isSavingToGallery by remember { mutableStateOf(false) }
-    val isBusy = isSharing || isSavingToGallery
-
-    var selectedVariant by remember(shareUpdateCard != null) {
-        mutableStateOf(if (shareUpdateCard != null) ShareCardVariant.MY_UPDATE else ShareCardVariant.BOOK)
-    }
-
-    val displayedContent: ShareCardUiModel = when (selectedVariant) {
+    val displayedContent: ShareCardUiModel = when (body.variant) {
         ShareCardVariant.MY_UPDATE -> shareUpdateCard ?: shareBookCard
         ShareCardVariant.BOOK -> shareBookCard
     }
 
-    val subtitle = if (shareUpdateCard != null && selectedVariant == ShareCardVariant.MY_UPDATE) {
-        "Your reading update for ${shareBookCard.title}"
-    } else {
-        "An editorial card of ${shareBookCard.title}"
-    }
+    SheetScaffold(
+        model = model,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
-    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.PrimaryClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
+            }
+        },
+    ) {
         val dismiss = LocalModalSheetDismiss.current
 
+        val currentCapture by rememberUpdatedState(capture)
+        val currentTitle by rememberUpdatedState(shareBookCard.title)
+        val currentDismiss by rememberUpdatedState(dismiss)
+        val currentOnShareFinished by rememberUpdatedState(onShareFinished)
+        val currentOnSaveToGalleryFinished by rememberUpdatedState(onSaveToGalleryFinished)
+
+        LaunchedEffect(captureEvents) {
+            captureEvents.collect { event ->
+                when (event) {
+                    is BookDetailEvent.ShareCaptureRequestedEvent -> {
+                        try {
+                            reportingFailures(failureMessage = "Couldn't share — try again") {
+                                when (val outcome = currentCapture.share(displayName = currentTitle)) {
+                                    is ShareOutcome.Shared -> Unit
+
+                                    is ShareOutcome.Cancelled -> Unit
+
+                                    is ShareOutcome.Failure -> {
+                                        AppLog.e("Failed to share book card: ${outcome.reason}")
+
+                                        SnackBarManager.showSnackbar(title = "Couldn't share — try again")
+                                    }
+                                }
+                            }
+
+                            currentDismiss()
+                        } finally {
+                            currentOnShareFinished()
+                        }
+                    }
+
+                    is BookDetailEvent.SaveToGalleryCaptureRequestedEvent -> {
+                        try {
+                            reportingFailures(failureMessage = "Couldn't save to gallery") {
+                                val outcome = currentCapture.saveToGallery(displayName = currentTitle)
+
+                                val message = if (outcome is SaveOutcome.Saved) {
+                                    "Saved to gallery"
+                                } else {
+                                    "Couldn't save to gallery"
+                                }
+
+                                SnackBarManager.showSnackbar(title = message)
+                            }
+                        } finally {
+                            currentOnSaveToGalleryFinished()
+                        }
+                    }
+                }
+            }
+        }
+
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(state = rememberScrollState())
-                .imePadding()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = "SHARE",
-                style = MaterialTheme.editorialTypography.eyebrow,
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = subtitle,
-                style = MaterialTheme.editorialTypography.body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            if (shareUpdateCard != null) {
-                Spacer(modifier = Modifier.height(20.dp))
-
+            if (body.hasVariantToggle) {
                 ShareCardVariantToggle(
-                    selectedVariant = selectedVariant,
-                    onVariantSelected = { selectedVariant = it },
-                    enabled = isBusy.not(),
+                    selectedVariant = body.variant,
+                    onVariantSelected = onVariantSelected,
+                    enabled = body.isBusy.not(),
                 )
             }
 
@@ -133,75 +171,43 @@ internal fun ShareBookBottomSheet(
                     style = ButtonStyle.OUTLINED,
                     size = ButtonSize.M,
                     modifier = Modifier.weight(1f),
-                    enabled = isBusy.not(),
+                    enabled = body.isBusy.not(),
                 )
 
                 RhaydusButton(
-                    label = if (isSharing) "Sharing…" else "Share",
-                    onClick = {
-                        if (isBusy) return@RhaydusButton
-
-                        isSharing = true
-
-                        coroutineScope.launch {
-                            when (val outcome = capture.share(displayName = shareBookCard.title)) {
-                                is ShareOutcome.Shared -> Unit
-
-                                is ShareOutcome.Cancelled -> Unit
-
-                                is ShareOutcome.Failure -> {
-                                    AppLog.e("Failed to share book card: ${outcome.reason}")
-
-                                    SnackBarManager.showSnackbar(title = "Couldn't share — try again")
-                                }
-                            }
-
-                            isSharing = false
-                            dismiss()
-                        }
-                    },
+                    label = body.shareLabel,
+                    onClick = onShareClick,
                     style = ButtonStyle.FILLED,
                     size = ButtonSize.M,
                     modifier = Modifier.weight(1f),
-                    enabled = isBusy.not(),
+                    enabled = body.isBusy.not(),
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
             RhaydusButton(
-                label = if (isSavingToGallery) "Saving to gallery…" else "Save to gallery",
-                onClick = {
-                    if (isBusy) return@RhaydusButton
-
-                    isSavingToGallery = true
-
-                    coroutineScope.launch {
-                        val saved = runCatching {
-                            capture.saveToGallery(displayName = shareBookCard.title)
-                        }.onFailure {
-                            AppLog.e("$it")
-                        }.getOrNull()
-
-                        val message = if (saved is SaveOutcome.Saved) {
-                            "Saved to gallery"
-                        } else {
-                            "Couldn't save to gallery"
-                        }
-
-                        SnackBarManager.showSnackbar(title = message)
-
-                        isSavingToGallery = false
-                    }
-                },
+                label = body.saveToGalleryLabel,
+                onClick = onSaveToGalleryClick,
                 style = ButtonStyle.TEXT,
                 size = ButtonSize.M,
                 modifier = Modifier.fillMaxWidth(),
-                enabled = isBusy.not(),
+                enabled = body.isBusy.not(),
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
         }
+    }
+}
+
+private suspend fun reportingFailures(
+    failureMessage: String,
+    block: suspend () -> Unit,
+) {
+    runCatching { block() }.onFailure { error ->
+        if (error is CancellationException) throw error
+
+        AppLog.e("Share capture failed: $error")
+
+        SnackBarManager.showSnackbar(title = failureMessage)
     }
 }
 

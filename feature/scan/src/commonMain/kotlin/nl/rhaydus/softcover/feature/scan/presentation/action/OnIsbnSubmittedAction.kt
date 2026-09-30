@@ -37,10 +37,12 @@ internal class OnIsbnSubmittedAction(
                     }
 
                     is IsbnLookupResult.UnknownEdition -> {
-                        scope.setState { it.copy(
-                            isResolving = false,
-                            unknownIsbn = result.normalizedIsbn,
-                        ) }
+                        scope.setState {
+                            it.copy(
+                                isResolving = false,
+                                unknownIsbn = result.normalizedIsbn,
+                            )
+                        }
                     }
 
                     is IsbnLookupResult.InvalidIsbn -> {

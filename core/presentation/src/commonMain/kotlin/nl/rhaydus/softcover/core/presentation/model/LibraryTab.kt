@@ -16,7 +16,7 @@ sealed class LibraryTab(
         val status: UserBookStatus,
         label: String,
     ) : LibraryTab(
-        id = "status-${status.code}",
+        id = idFor(status = status),
         label = label,
     ) {
         override fun equals(other: Any?): Boolean {
@@ -37,6 +37,8 @@ sealed class LibraryTab(
                 UserBookStatus.DID_NOT_FINISH -> "Did Not Finish"
             }
 
+            fun idFor(status: UserBookStatus): String = "status-${status.code}"
+
             fun of(status: UserBookStatus) = Status(
                 status = status,
                 label = labelFor(status),
@@ -48,9 +50,13 @@ sealed class LibraryTab(
         val listId: Int,
         val listName: String,
     ) : LibraryTab(
-        id = "list-$listId",
+        id = idFor(listId = listId),
         label = listName,
-    )
+    ) {
+        companion object {
+            fun idFor(listId: Int): String = "list-$listId"
+        }
+    }
 
     companion object {
         // The Read tab is the only library surface where "when did I finish this?" is the obvious

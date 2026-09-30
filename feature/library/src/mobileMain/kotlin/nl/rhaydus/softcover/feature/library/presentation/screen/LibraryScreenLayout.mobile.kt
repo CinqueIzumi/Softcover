@@ -410,7 +410,6 @@ internal actual fun LibraryScreenLayout(
 
     if (state.isArrangeSheetExpanded && currentTab != null) {
         LibraryArrangeSheet(
-            tab = currentTab,
             state = state,
             runAction = runAction,
             onDismissRequest = {

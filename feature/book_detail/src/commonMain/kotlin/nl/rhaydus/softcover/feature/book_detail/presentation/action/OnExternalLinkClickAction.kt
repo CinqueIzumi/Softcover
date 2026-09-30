@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.OpenExternalLinkEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -12,6 +11,6 @@ internal class OnExternalLinkClickAction(val url: String) : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.sendEvent(event = OpenExternalLinkEvent(url = url))
+        scope.sendEvent(event = BookDetailEvent.OpenExternalLinkEvent(url = url))
     }
 }

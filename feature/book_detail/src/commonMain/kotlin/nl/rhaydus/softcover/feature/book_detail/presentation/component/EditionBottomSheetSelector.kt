@@ -5,14 +5,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,11 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.toHoursMinutesSeconds
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
-import nl.rhaydus.designsystem.model.ButtonSize
-import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
@@ -52,6 +46,9 @@ import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -63,9 +60,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.model.EditionTraili
 
 @Composable
 internal fun EditionBottomSheetSelector(
-    bookTitle: String,
-    currentEdition: BookEdition,
-    headerCover: CoverUiModel?,
+    model: SheetScaffoldUiModel,
     editions: List<BookEdition>,
     editionCovers: Map<Int, CoverUiModel>,
     editionTrailingMarks: Map<Int, EditionTrailingUiModel>,
@@ -75,13 +70,24 @@ internal fun EditionBottomSheetSelector(
     onSearchQueryChange: (String) -> Unit,
     onEditionSelected: (Int) -> Unit,
     onDismissRequest: () -> Unit,
-    onConfirmClick: (BookEdition) -> Unit,
+    onConfirmClick: () -> Unit,
 ) {
-    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+    SheetScaffold(
+        model = model,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.PrimaryClicked -> onConfirmClick()
+
+                SheetScaffoldEvent.Dismissed -> onDismissRequest()
+
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
+            }
+        },
+    ) {
         EditionBottomSheetContent(
-            bookTitle = bookTitle,
-            currentEdition = currentEdition,
-            headerCover = headerCover,
             editions = editions,
             editionCovers = editionCovers,
             editionTrailingMarks = editionTrailingMarks,
@@ -90,17 +96,13 @@ internal fun EditionBottomSheetSelector(
             searchQuery = searchQuery,
             onSearchQueryChange = onSearchQueryChange,
             onEditionSelected = onEditionSelected,
-            onConfirmClick = onConfirmClick,
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun EditionBottomSheetContent(
-    bookTitle: String,
-    currentEdition: BookEdition,
-    headerCover: CoverUiModel?,
+private fun ColumnScope.EditionBottomSheetContent(
     editions: List<BookEdition>,
     editionCovers: Map<Int, CoverUiModel>,
     editionTrailingMarks: Map<Int, EditionTrailingUiModel>,
@@ -109,27 +111,12 @@ private fun EditionBottomSheetContent(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onEditionSelected: (Int) -> Unit,
-    onConfirmClick: (BookEdition) -> Unit,
 ) {
-    val selectedEdition = editions.firstOrNull { it.id == selectedEditionId } ?: currentEdition
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight()
-            .imePadding(),
+            .weight(1f),
     ) {
-        ChangeEditionHeader(
-            bookTitle = bookTitle,
-            currentEdition = currentEdition,
-            headerCover = headerCover,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
         EditorialSearchField(
             query = searchQuery,
             onQueryChange = onSearchQueryChange,
@@ -151,7 +138,6 @@ private fun EditionBottomSheetContent(
             text = "${editions.size} EDITIONS",
             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(letterSpacing = 1.6.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 24.dp),
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -169,8 +155,7 @@ private fun EditionBottomSheetContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 24.dp),
+                    .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -182,7 +167,6 @@ private fun EditionBottomSheetContent(
         } else {
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(horizontal = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 items(editions, key = { it.id }) { edition ->
@@ -196,88 +180,8 @@ private fun EditionBottomSheetContent(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        RhaydusButton(
-            label = "Track this edition",
-            style = ButtonStyle.FILLED,
-            size = ButtonSize.M,
-            enabled = isLoading.not() && selectedEdition != currentEdition,
-            onClick = { onConfirmClick(selectedEdition) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
-
-/**
- * The canonical opening — accent bar, eyebrow, italic headline, italic description — composed locally,
- * with the book's mini jacket trailing.
- */
-@Composable
-private fun ChangeEditionHeader(
-    bookTitle: String,
-    currentEdition: BookEdition,
-    headerCover: CoverUiModel?,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 32.dp, height = 4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(MaterialTheme.colorScheme.primary),
-                )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Text(
-                    text = "EDITIONS",
-                    style = MaterialTheme.editorialTypography.eyebrow,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Change edition",
-                style = MaterialTheme.editorialTypography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = editionsDescription(
-                    bookTitle = bookTitle,
-                    author = currentEdition.authorString,
-                ),
-                style = MaterialTheme.editorialTypography.body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        Cover(
-            model = headerCover,
-            modifier = Modifier.width(56.dp),
-        )
-    }
-}
-
-private fun editionsDescription(
-    bookTitle: String,
-    author: String,
-): String = if (author.isBlank()) bookTitle else "$bookTitle · $author"
 
 @Composable
 private fun EditionItem(
@@ -547,19 +451,17 @@ private fun EditionBottomSheetContentPreview() {
     )
 
     SoftcoverTheme {
-        EditionBottomSheetContent(
-            bookTitle = "King Sorrow",
-            currentEdition = editions[1],
-            headerCover = editionCovers[editions[1].id],
-            editions = editions,
-            editionCovers = editionCovers,
-            editionTrailingMarks = editionTrailingMarks,
-            selectedEditionId = editions[2].id,
-            isLoading = false,
-            searchQuery = "",
-            onSearchQueryChange = {},
-            onEditionSelected = {},
-            onConfirmClick = {},
-        )
+        Column {
+            EditionBottomSheetContent(
+                editions = editions,
+                editionCovers = editionCovers,
+                editionTrailingMarks = editionTrailingMarks,
+                selectedEditionId = editions[2].id,
+                isLoading = false,
+                searchQuery = "",
+                onSearchQueryChange = {},
+                onEditionSelected = {},
+            )
+        }
     }
 }

@@ -11,6 +11,11 @@ internal class OnShareBookClickAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(isShareSheetVisible = true) }
+        scope.setState {
+            it.copy(
+                isShareSheetVisible = true,
+                chosenShareVariant = null,
+            )
+        }
     }
 }

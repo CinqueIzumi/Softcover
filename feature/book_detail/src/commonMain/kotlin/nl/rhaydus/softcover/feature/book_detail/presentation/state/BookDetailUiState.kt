@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -131,6 +132,14 @@ internal data class BookDetailUiState(
     val shareBookCard: BookShareCardUiModel? = null,
     val shareUpdateCard: ReadingUpdateShareCardUiModel? = null,
 
+    val shareSheet: SheetScaffoldUiModel? = null,
+
+    val shareSheetBody: ShareSheetBodyUiModel? = null,
+
+    val chosenShareVariant: ShareCardVariant? = null,
+    val isSharing: Boolean = false,
+    val isSavingToGallery: Boolean = false,
+
     /**
      * The book's covers, mapped by `CoverModelsCollector` (R9) so no composable ever resolves an
      * edition into a cover. [heroBackdropCover] deliberately carries a null `coverlessTitle`: it is
@@ -149,6 +158,14 @@ internal data class BookDetailUiState(
     /** Keyed by [BookEdition.id], mapped from [editions] by `EditionSelectionCollector` (R9). See [EditionTrailingUiModel]. */
     val editionTrailingMarks: ImmutableMap<Int, EditionTrailingUiModel> = persistentMapOf(),
     val tagEditorCover: CoverUiModel? = null,
+
+    val tagEditorSheet: SheetScaffoldUiModel? = null,
+
+    /**
+     * The edition selector's chrome, mapped by `EditionSheetCollector` (R9); `null` until [book] and
+     * [displayedEdition] exist.
+     */
+    val editionSheet: SheetScaffoldUiModel? = null,
 
     val showChooseListsSheet: Boolean = false,
     val userLists: List<BookList> = emptyList(),
