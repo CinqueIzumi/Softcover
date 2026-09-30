@@ -102,7 +102,7 @@ class OnApiKeyValueChangeActionTest {
             stateFlow.value.apiKeyValue shouldBe "new-key"
             stateFlow.value.saveApiKeyButtonEnabled shouldBe false
             stateFlow.value.loadingSheet.isLoading shouldBe true
-            stateFlow.value.loadingSheet.header shouldBe
+            stateFlow.value.loadingSheet.scaffold.header.section shouldBe
                 SectionHeaderUiModel.Section(
                     eyebrow = "Setting up",
                     headline = "Pulling your library together.",

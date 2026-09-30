@@ -58,6 +58,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 ## Sheets
 
+- **Sheet scaffold** — `core:component/sheet` — shared sheet chrome, plus `SheetRow`.
 - **Loading sheet** — `core:component/sheet` — full-screen blocking wavy-progress wait.
 - **Date picker dialog** — `core:component/dialog` — single-day calendar dialog; owns the UTC-millis conversion.
 - **Update progress sheet** — `core:component/progress` — pages/percentage/time reading-progress editor.

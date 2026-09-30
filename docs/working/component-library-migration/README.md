@@ -15,11 +15,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 ## Now
 
 - **State:** the S6 row family (`aa1ffef1`) and the S6 sheet-chrome Approved shape (`405ee525`,
-  `steps/s6-sheet-chrome.md` § Approved shape) stand. The S6-3 build attempt (one Workflow run) was
-  reverted in full, and Workflow runs are removed from the plan: every step runs interactively.
-  Mood tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** S6-3, built per `family-procedure.md` Phase 2 from `steps/s6-sheet-chrome.md` § Approved
-  shape, one sub-step per session.
+  `steps/s6-sheet-chrome.md` § Approved shape) are committed. S6-3 is built and reviewed: the sheet chrome
+  in `core/component/sheet/`, adopted by ChooseLists, UpdateProgress and LoadingSheet. The
+  `TextEmphasis` shape is open (§ Deferred). Mood tile → S7-4; 14 Apollo-alias files wait on F24.
+- **Next:** S6-4 (`VerdictSheet`, `VerdictBlock`, `SoftcoverDatePickerDialog`), built per
+  `family-procedure.md` Phase 2 from `steps/s6-sheet-chrome.md` § Approved shape.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Open questions:** should chip keys get the same typed-key treatment as the sidebar, as a tracked step?
@@ -33,10 +33,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
   cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`; S5-C-dividers' quote-glyph gap
   (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`;
   S6-C-rows' settings rows (16dp vertical everywhere, 4dp title gap, top rule and press feedback on
-  toggle / choice lists).
-- **Verification:** no Gradle gate has run since S6-C-rows, which was green.
-- **Uncommitted:** the Workflow-run option removed from the plan: its script deleted, and its sections
-  dropped from `family-procedure.md`, the step files and this README.
+  toggle / choice lists); S6-3's sheet header gaps (12/8/8), 56dp jackets, sheet padding (top 8 / bottom 16,
+  LoadingSheet 32 → 16), and the progress sheet's tap-to-clear-focus now covering the body only.
+- **Verification:** S6-3 green — compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`, and
+  the `:core:component` / `:core:uibinding` / onboarding / ChooseLists collector suites.
+- **Uncommitted:** all of S6-3; S11-5 (inline `.dp`) planned; F29 in `foundation-upstream-candidates.md`; the
+  inline-`.dp` rule in `code-style.md`.
 
 ## Local verification
 
@@ -85,7 +87,7 @@ every sub-step's Verify.
 | S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-5 | [ ] |
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
-| S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-3 | [ ] |
+| S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-5 | [ ] |
 | S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-4 | [ ] |
 
 ## Decisions

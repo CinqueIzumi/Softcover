@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.uibinding.progress
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import org.junit.jupiter.api.Nested
@@ -249,9 +250,26 @@ class ProgressSheetMapperTest {
     }
 
     @Nested
+    inner class Scaffold {
+        @Test
+        fun `header is the reading-progress eyebrow over the book title, in a scrolling sheet`() {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook.copy(title = "The Starless Sea")
+
+            // ----- Act -----
+            val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold
+
+            // ----- Assert -----
+            scaffold.header.section.eyebrow shouldBe "Reading progress"
+            scaffold.header.section.headline shouldBe "The Starless Sea"
+            scaffold.layout shouldBe SheetLayout.Scrolling
+        }
+    }
+
+    @Nested
     inner class PassThrough {
         @Test
-        fun `bookTitle passes through unchanged`() {
+        fun `book title becomes the scaffold headline`() {
             // ----- Arrange -----
             val book = PreviewData.baseBook.copy(title = "The Starless Sea")
 
@@ -259,7 +277,7 @@ class ProgressSheetMapperTest {
             val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
 
             // ----- Assert -----
-            result.bookTitle shouldBe "The Starless Sea"
+            result.scaffold.header.section.headline shouldBe "The Starless Sea"
         }
 
         @Test

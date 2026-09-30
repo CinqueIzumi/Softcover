@@ -1,8 +1,12 @@
 package nl.rhaydus.softcover.core.uibinding.progress
 
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetLayout
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import kotlin.math.roundToInt
 
@@ -37,9 +41,19 @@ fun Book.toProgressSheetUiModel(selectedTab: ProgressSheetTab): ProgressSheetUiM
     }
 
     return ProgressSheetUiModel(
-        bookTitle = title,
         medium = medium,
         progressPercent = userBookRead?.progress?.roundToInt() ?: 0,
         selectedTab = selectedTab,
+        scaffold = SheetScaffoldUiModel(
+            header = SheetHeaderUiModel(
+                section = SectionHeaderUiModel.Section(
+                    eyebrow = "Reading progress",
+                    headline = title,
+                ),
+            ),
+            topAction = null,
+            footer = null,
+            layout = SheetLayout.Scrolling,
+        ),
     )
 }

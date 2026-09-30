@@ -13,21 +13,62 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
+import nl.rhaydus.softcover.core.component.header.EmphasisTreatment
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.header.TextEmphasis
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetLayout
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
- * Everything `ChooseListsBottomSheet` renders: who is being shelved, and the reader's custom lists
- * with each one's membership relative to that selection.
+ * Everything `ChooseListsBottomSheet` renders: the [scaffold] chrome naming who is being shelved, and
+ * the reader's custom lists with each one's membership relative to that selection.
  *
  * Which lists to offer is the host's decision, not the mapping's — [rows] is exactly what the sheet
  * shows, in the order it shows them.
  */
 @Immutable
 data class ChooseListsUiModel(
-    val variant: ChooseListsVariant,
     val rows: ImmutableList<ChooseListsRowUiModel>,
+    val scaffold: SheetScaffoldUiModel,
 ) {
     companion object : UiModelPreviews<ChooseListsUiModel> {
+        private fun fixtureScaffold(
+            name: String,
+            description: String,
+            trailing: SheetHeaderTrailing,
+        ): SheetScaffoldUiModel = SheetScaffoldUiModel(
+            header = SheetHeaderUiModel(
+                section = SectionHeaderUiModel.Section(
+                    eyebrow = "Lists",
+                    headline = "Shelve $name",
+                    description = description,
+                    headlineEmphasis = TextEmphasis(
+                        substring = name,
+                        treatment = EmphasisTreatment.Accent,
+                    ),
+                ),
+                trailing = trailing,
+            ),
+            topAction = null,
+            footer = null,
+            layout = SheetLayout.Pinned,
+        )
+
+        private fun singleBookScaffold(name: String): SheetScaffoldUiModel = fixtureScaffold(
+            name = name,
+            description = "Tap a list to file it here — tap a filled one to take it off. Saved as you go.",
+            trailing = SheetHeaderTrailing.Jacket(
+                cover = CoverUiModel(
+                    source = null,
+                    coverlessTitle = name,
+                    variant = CoverVariant.ChooseListsSingleJacket,
+                ),
+            ),
+        )
+
         /**
          * Per R5, one fixture per branch that changes the anatomy: the single-book header (one
          * upright jacket, "tap to file it here" copy) against the bulk header (a rotated stack, and
@@ -36,14 +77,7 @@ data class ChooseListsUiModel(
          */
         override val previews: ImmutableList<ChooseListsUiModel> = persistentListOf(
             ChooseListsUiModel(
-                variant = ChooseListsVariant.SingleBook(
-                    name = "Piranesi",
-                    cover = CoverUiModel(
-                        source = null,
-                        coverlessTitle = "Piranesi",
-                        variant = CoverVariant.ChooseListsSingleJacket,
-                    ),
-                ),
+                scaffold = singleBookScaffold(name = "Piranesi"),
                 rows = persistentListOf(
                     ChooseListsRowUiModel(
                         listId = 1,
@@ -96,15 +130,18 @@ data class ChooseListsUiModel(
                 ),
             ),
             ChooseListsUiModel(
-                variant = ChooseListsVariant.ManyBooks(
-                    bookCount = 5,
-                    covers = listOf("Piranesi", "It", "The Name of the Wind").map { title ->
-                        CoverUiModel(
-                            source = null,
-                            coverlessTitle = title,
-                            variant = CoverVariant.ChooseListsStackJacket,
-                        )
-                    }.toImmutableList(),
+                scaffold = fixtureScaffold(
+                    name = "5 books",
+                    description = "A part-filled list adds the rest first — then a second tap takes all three off.",
+                    trailing = SheetHeaderTrailing.JacketStack(
+                        covers = listOf("Piranesi", "It", "The Name of the Wind").map { title ->
+                            CoverUiModel(
+                                source = null,
+                                coverlessTitle = title,
+                                variant = CoverVariant.ChooseListsStackJacket,
+                            )
+                        }.toImmutableList(),
+                    ),
                 ),
                 rows = persistentListOf(
                     ChooseListsRowUiModel(
@@ -158,14 +195,7 @@ data class ChooseListsUiModel(
                 ),
             ),
             ChooseListsUiModel(
-                variant = ChooseListsVariant.SingleBook(
-                    name = "The Name of the Wind",
-                    cover = CoverUiModel(
-                        source = null,
-                        coverlessTitle = "The Name of the Wind",
-                        variant = CoverVariant.ChooseListsSingleJacket,
-                    ),
-                ),
+                scaffold = singleBookScaffold(name = "The Name of the Wind"),
                 rows = persistentListOf(),
             ),
         )

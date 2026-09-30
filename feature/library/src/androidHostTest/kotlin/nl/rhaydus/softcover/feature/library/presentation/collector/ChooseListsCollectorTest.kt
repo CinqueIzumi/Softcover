@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.component.lists.ChooseListsVariant
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
@@ -94,9 +94,9 @@ class ChooseListsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.chooseListsSheet shouldNotBe null
-                val variant = stateFlow.value.chooseListsSheet?.variant as ChooseListsVariant.ManyBooks
-                variant.bookCount shouldBe 2
-                variant.covers.size shouldBe 2
+                val header = stateFlow.value.chooseListsSheet?.scaffold?.header
+                header?.section?.headline shouldBe "Shelve 2 books"
+                (header?.trailing as SheetHeaderTrailing.JacketStack).covers.size shouldBe 2
                 job.cancel()
             }
 
@@ -141,8 +141,8 @@ class ChooseListsCollectorTest {
             )
 
             // ----- Assert -----
-            val variant = stateFlow.value.chooseListsSheet?.variant as ChooseListsVariant.ManyBooks
-            variant.covers.size shouldBe 3
+            val trailing = stateFlow.value.chooseListsSheet?.scaffold?.header?.trailing
+            (trailing as SheetHeaderTrailing.JacketStack).covers.size shouldBe 3
             job.cancel()
         }
 

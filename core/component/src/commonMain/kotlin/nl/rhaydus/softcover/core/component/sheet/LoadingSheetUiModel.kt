@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
 /**
- * Everything [LoadingSheet] renders: the header copy and how far along the wait is.
+ * Everything [LoadingSheet] renders: the [scaffold] chrome and how far along the wait is.
  *
  * @property progress Fraction complete, or `null` for an indeterminate wait. A non-null value that
  * reaches `1f` fires [LoadingSheetEvent.LoaderFinished] after a one-second settle, so the reader sees
@@ -18,25 +18,37 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
  */
 @Immutable
 data class LoadingSheetUiModel(
-    val header: SectionHeaderUiModel.Section,
+    val scaffold: SheetScaffoldUiModel,
     val progress: Float?,
     val isLoading: Boolean,
 ) {
     companion object : UiModelPreviews<LoadingSheetUiModel> {
+        private fun fixtureScaffold(header: SectionHeaderUiModel.Section): SheetScaffoldUiModel = SheetScaffoldUiModel(
+            header = SheetHeaderUiModel(section = header),
+            topAction = null,
+            footer = null,
+            layout = SheetLayout.Scrolling,
+            dismissible = false,
+        )
+
         override val previews: ImmutableList<LoadingSheetUiModel> = persistentListOf(
             LoadingSheetUiModel(
-                header = SectionHeaderUiModel.Section(
-                    eyebrow = "Setting up",
-                    headline = "Pulling your library together.",
-                    description = "Depending on its size, this might take a moment.",
+                scaffold = fixtureScaffold(
+                    header = SectionHeaderUiModel.Section(
+                        eyebrow = "Setting up",
+                        headline = "Pulling your library together.",
+                        description = "Depending on its size, this might take a moment.",
+                    ),
                 ),
                 progress = 0.4f,
                 isLoading = true,
             ),
             LoadingSheetUiModel(
-                header = SectionHeaderUiModel.Section(
-                    eyebrow = "Setting up",
-                    headline = "Pulling your library together.",
+                scaffold = fixtureScaffold(
+                    header = SectionHeaderUiModel.Section(
+                        eyebrow = "Setting up",
+                        headline = "Pulling your library together.",
+                    ),
                 ),
                 progress = null,
                 isLoading = true,

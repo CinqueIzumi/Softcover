@@ -109,6 +109,19 @@ Filed but not yet implemented in the foundation.
   created the glom) is **deferred until this rule exists**, so the fix is applied once, by the tool,
   rather than hand-swept and left ungated.
 
+### F29 — detekt rule: no file-level `.dp` constants
+
+- **Type:** gate (lint rule)
+- **Home:** `nl.rhaydus:detekt-rules`
+- **Status:** **Open.** Softcover's `docs/reference/code-style.md` § Review-only rules says `.dp` values
+  stay inline at the use site. Only review enforces it, and agents keep reintroducing
+  `private val FooterGap = 12.dp` above composables.
+- **What to build:** a type-resolved detekt rule that flags a top-level (file-level) property whose type
+  is `Dp`, or whose initializer is a `.dp` literal. It also flags a top-level holder built only from
+  `.dp` arguments (e.g. a private `BarSpec(width = 32.dp, …)`). Locals inside a function stay allowed.
+- **Scope note:** Softcover inlines its existing 66 sites (30 files) as a tracked migration step. The rule
+  then gates them at zero, with no baseline.
+
 ### F26 — `dismissOnEscape` that listens without taking focus
 
 - **Type:** enhancement

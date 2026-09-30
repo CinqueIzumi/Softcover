@@ -215,9 +215,8 @@ private fun EditionBottomSheetContent(
 }
 
 /**
- * The canonical opening — accent bar, eyebrow, italic headline, italic description — composed locally
- * rather than through `SectionHeader`, which has no trailing slot for the book's mini jacket.
- * Mirrors the Choose-lists sheet's / Tag-editor sheet's header anatomy.
+ * The canonical opening — accent bar, eyebrow, italic headline, italic description — composed locally,
+ * with the book's mini jacket trailing.
  */
 @Composable
 private fun ChangeEditionHeader(

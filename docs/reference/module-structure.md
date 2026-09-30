@@ -121,7 +121,7 @@ component/
 + header/      SectionHeader  PageMasthead
 +              MastheadRefreshAction(+UiModel, +Event)
 + lists/       ChooseListsBottomSheet  ChooseListsUiModel/RowUiModel
-+              ChooseListsVariant  ChooseListsEvent  ListMembership
++              ChooseListsEvent  ListMembership
 + progress/    UpdateProgressBottomSheet  ProgressSheetUiModel
 +              ProgressSheetEvent  ProgressSheetTab  ProgressSheetMedium
 +              · ProgressIndicator                                           S9
@@ -131,7 +131,8 @@ component/
 + share/       ShareCard  ShareCardUiModel  ShareCardDimensions
 +              one file per card body  ShareCardNumerals
 + sheet/       LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent
-+              · SheetScaffold  · SheetHeader  · SheetRow  · SheetFooter     S6
++              SheetScaffold(+UiModel, +Event, +Layout)  SheetHeaderUiModel/Trailing
++              SheetFooterUiModel/Button/Layout  SheetRow(+UiModel, +Event)
 + sidebar/     Sidebar  SidebarUiModel  SidebarSectionUiModel  SidebarRowUiModel/Variant  SidebarEvent
 + state/       EmptyState  EmptyStateUiModel  Skeleton  SkeletonUiModel/Variant
 +              · ErrorState

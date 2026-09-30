@@ -30,25 +30,16 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import kotlin.math.abs
 
-private val SectionBarSpec = SectionHeaderEyebrowStyle.BarSpec(
-    width = 32.dp,
-    height = 4.dp,
-    shape = RoundedCornerShape(2.dp),
-)
-private val InlineBarSpec = SectionHeaderEyebrowStyle.BarSpec(
-    width = 20.dp,
-    height = 1.dp,
-    shape = RectangleShape,
-)
-private val SectionGap = 12.dp
-private val InlineGap = 8.dp
 private const val PULSE_BAR_WIDTH_DELTA_DP = 16
 private const val PULSE_SCALE_DELTA = 0.5f
 
@@ -144,8 +135,12 @@ private fun SectionHeaderRegion(
         SectionHeaderEyebrowRow(
             eyebrow = model.eyebrow,
             style = SectionHeaderEyebrowStyle(
-                bar = SectionBarSpec,
-                gap = SectionGap,
+                bar = SectionHeaderEyebrowStyle.BarSpec(
+                    width = 32.dp,
+                    height = 4.dp,
+                    shape = RoundedCornerShape(2.dp),
+                ),
+                gap = 12.dp,
                 textStyle = MaterialTheme.editorialTypography.eyebrow,
             ),
             color = sectionHeaderToneColor(
@@ -159,7 +154,11 @@ private fun SectionHeaderRegion(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = model.headline,
+                text = emphasisedText(
+                    text = model.headline,
+                    emphasis = model.headlineEmphasis,
+                    colorScheme = MaterialTheme.colorScheme,
+                ),
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -169,11 +168,38 @@ private fun SectionHeaderRegion(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = model.description,
+                text = emphasisedText(
+                    text = model.description,
+                    emphasis = model.descriptionEmphasis,
+                    colorScheme = MaterialTheme.colorScheme,
+                ),
                 style = MaterialTheme.editorialTypography.body,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+internal fun emphasisedText(
+    text: String,
+    emphasis: TextEmphasis?,
+    colorScheme: ColorScheme,
+): AnnotatedString {
+    val start = emphasis?.substring?.takeIf { it.isNotEmpty() }?.let { text.lastIndexOf(it) } ?: -1
+
+    if (emphasis == null || start < 0) return AnnotatedString(text)
+
+    val spanStyle = when (emphasis.treatment) {
+        EmphasisTreatment.Accent -> SpanStyle(color = colorScheme.primary)
+    }
+
+    return buildAnnotatedString {
+        append(text)
+        addStyle(
+            style = spanStyle,
+            start = start,
+            end = start + emphasis.substring.length,
+        )
     }
 }
 
@@ -194,8 +220,12 @@ private fun SectionHeaderInline(
     SectionHeaderEyebrowRow(
         eyebrow = model.eyebrow,
         style = SectionHeaderEyebrowStyle(
-            bar = InlineBarSpec,
-            gap = InlineGap,
+            bar = SectionHeaderEyebrowStyle.BarSpec(
+                width = 20.dp,
+                height = 1.dp,
+                shape = RectangleShape,
+            ),
+            gap = 8.dp,
             textStyle = MaterialTheme.editorialTypography.eyebrowSmall,
         ),
         color = sectionHeaderToneColor(

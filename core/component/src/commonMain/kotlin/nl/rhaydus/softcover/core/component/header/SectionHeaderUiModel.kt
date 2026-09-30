@@ -22,6 +22,8 @@ sealed interface SectionHeaderUiModel {
         val eyebrow: String,
         val headline: String? = null,
         val description: String? = null,
+        val headlineEmphasis: TextEmphasis? = null,
+        val descriptionEmphasis: TextEmphasis? = null,
         val pulseKey: Int = 0,
         val tone: SectionHeaderTone = SectionHeaderTone.Accent,
     ) : SectionHeaderUiModel
@@ -45,6 +47,14 @@ sealed interface SectionHeaderUiModel {
                 description = "You're on pace to finish by the deadline.",
             ),
             Section(eyebrow = "Currently reading"),
+            Section(
+                eyebrow = "Lists",
+                headline = "Shelve Piranesi",
+                headlineEmphasis = TextEmphasis(
+                    substring = "Piranesi",
+                    treatment = EmphasisTreatment.Accent,
+                ),
+            ),
             Section(
                 eyebrow = "Couldn't sync — tap to retry",
                 tone = SectionHeaderTone.Error,

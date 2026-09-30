@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
@@ -47,30 +46,20 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-// The jacket treatment now rides on the cover's own variant — `CoverVariant.ChooseListsSingleJacket`
-// and `ChooseListsStackJacket` in `CoverDimensions`. The stack sits a touch flatter than the lone
-// upright jacket because three overlapping shadows at the single jacket's depth read as mud. The
-// sheet still owns the widths and the rotations below: those are layout, not cover treatment.
-
 /**
  * The editorial "index of shelves" (redesign brief): a shared surface for adding/removing one or more
  * books to the user's custom lists, consumed by both `book_detail` and the library **bulk-select**
- * pattern — which of the two is [ChooseListsUiModel.variant], a sealed `SingleBook | ManyBooks`. The
- * header names the act ("Shelve {book}" / "Shelve {n} books") with the book's own jacket at top; the
+ * pattern. The header names the act ("Shelve {book}" / "Shelve {n} books") with the book's own jacket at top; the
  * list rows read like a ruled index — italic chapter-style names, a leading bookmark that fills when
  * the list already holds the selection, and a reversible trailing control (a removable
  * `primaryContainer` "On the list ×" chip, a quiet outline "+ Add", or — in bulk, for a part-filled
  * list — a filled "+ Add the other N"). Every toggle is instant/optimistic; there is no save button.
- *
- * The header jacket(s) come from the variant's own cover models — one upright cover for the
- * single-book case, up to three for the bulk rotated stack. They arrive already resolved on the
- * variant: resolving a cover needs the reader's chosen edition, the book's default, a fallback URL
- * and a locally persisted file, none of which a component may know (R4). The sheet still owns the
- * widths and the rotations.
  *
  * The sheet is a dumb renderer: the caller owns the `AddBookToListUseCase` / `RemoveBookFromListUseCase`
  * writes behind [ChooseListsEvent.MembershipToggled] and decides whether to stay open for consecutive
@@ -82,188 +71,55 @@ fun ChooseListsBottomSheet(
     onEvent: (ChooseListsEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AdaptiveModalSheet(
-        onDismissRequest = { onEvent(ChooseListsEvent.Dismissed) },
+    SheetScaffold(
+        model = model.scaffold,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.Dismissed -> onEvent(ChooseListsEvent.Dismissed)
+
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.PrimaryClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
+            }
+        },
         modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 8.dp),
-        ) {
-            ChooseListsHeader(
-                variant = model.variant,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(18.dp))
-
-            if (model.rows.isEmpty()) {
-                ChooseListsEmptyState()
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(bottom = 4.dp),
-                ) {
-                    items(items = model.rows, key = { it.listId }) { row ->
-                        ChooseListsRow(
-                            row = row,
-                            onClick = {
-                                if (row.isPending.not()) {
-                                    onEvent(
-                                        ChooseListsEvent.MembershipToggled(
-                                            listId = row.listId,
-                                            membership = row.membership,
-                                        ),
-                                    )
-                                }
-                            },
-                        )
-                    }
+        if (model.rows.isEmpty()) {
+            ChooseListsEmptyState()
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(
+                        weight = 1f,
+                        fill = false,
+                    ),
+                contentPadding = PaddingValues(bottom = 4.dp),
+            ) {
+                items(items = model.rows, key = { it.listId }) { row ->
+                    ChooseListsRow(
+                        row = row,
+                        onClick = {
+                            if (row.isPending.not()) {
+                                onEvent(
+                                    ChooseListsEvent.MembershipToggled(
+                                        listId = row.listId,
+                                        membership = row.membership,
+                                    ),
+                                )
+                            }
+                        },
+                    )
                 }
             }
-
-            NewListRow(
-                onClick = { onEvent(ChooseListsEvent.NewListRequested) },
-                modifier = Modifier.padding(top = 20.dp),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-/**
- * The canonical opening — accent bar, eyebrow, italic headline, italic description — composed locally
- * rather than through `SectionHeader` (which has no trailing slot and can't tint a substring of
- * its headline), following the Tag-editor-sheet precedent. The headline names the act: the book's own
- * title in a `primary` span for the single case, or "{n} books" for bulk.
- */
-@Composable
-private fun ChooseListsHeader(
-    variant: ChooseListsVariant,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 32.dp, height = 4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(MaterialTheme.colorScheme.primary),
-                )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Text(
-                    text = "LISTS",
-                    style = MaterialTheme.editorialTypography.eyebrow,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = chooseListsHeadline(name = variant.name),
-                style = MaterialTheme.editorialTypography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = when (variant) {
-                    is ChooseListsVariant.ManyBooks ->
-                        "A part-filled list adds the rest first — then a second tap takes all three off."
-
-                    is ChooseListsVariant.SingleBook ->
-                        "Tap a list to file it here — tap a filled one to take it off. Saved as you go."
-                },
-                style = MaterialTheme.editorialTypography.body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
 
-        when (variant) {
-            is ChooseListsVariant.ManyBooks -> StackedJackets(
-                variant = variant,
-            )
-
-            is ChooseListsVariant.SingleBook -> Cover(
-                model = variant.cover,
-                modifier = Modifier.width(56.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun chooseListsHeadline(name: String): AnnotatedString {
-    val primary = MaterialTheme.colorScheme.primary
-
-    return remember(name, primary) {
-        buildAnnotatedString {
-            append("Shelve ")
-            withStyle(SpanStyle(color = primary)) {
-                append(name)
-            }
-        }
-    }
-}
-
-/**
- * The bulk header's rotated jacket stack (behind → front: −8°, +4°, 0°), each a 52×78dp cover.
- *
- * The sheet owns the width and the rotation — they are handed to the slot in its `Modifier` — so a
- * caller that resolves the wrong cover can still not draw the stack wrong.
- */
-@Composable
-private fun StackedJackets(
-    variant: ChooseListsVariant.ManyBooks,
-    modifier: Modifier = Modifier,
-) {
-    val rotations = listOf(-8f, 4f, 0f)
-
-    // Built here rather than mapped in, so `covers` stays the single source of truth for the stack.
-    // Constructing a library model out of library data is not a domain mapping, so R9 is untouched.
-    val emptyStackCover = remember(variant.name) {
-        CoverUiModel(
-            source = null,
-            coverlessTitle = variant.name,
-            variant = CoverVariant.ChooseListsStackJacket,
+        NewListRow(
+            onClick = { onEvent(ChooseListsEvent.NewListRequested) },
+            modifier = Modifier.padding(top = 20.dp),
         )
-    }
-
-    Box(
-        modifier = modifier.size(
-            width = 72.dp,
-            height = 78.dp,
-        ),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (variant.covers.isEmpty()) {
-            // No cover resolved for any selected book: one jacket, and deliberately **not** rotated.
-            // A single tilted placeholder reads as a rendering mistake rather than as a stack, so the
-            // rotation only applies once there is more than a placeholder to stack.
-            Cover(
-                model = emptyStackCover,
-                modifier = Modifier.width(52.dp),
-            )
-        } else {
-            variant.covers.take(rotations.size).forEachIndexed { index, cover ->
-                Cover(
-                    model = cover,
-                    modifier = Modifier
-                        .width(52.dp)
-                        .rotate(rotations[index]),
-                )
-            }
-        }
     }
 }
 

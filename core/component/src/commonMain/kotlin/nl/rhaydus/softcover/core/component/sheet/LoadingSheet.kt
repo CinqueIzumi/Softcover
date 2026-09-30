@@ -1,21 +1,14 @@
 package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.softcover.core.component.header.SectionHeader
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -33,39 +26,28 @@ fun LoadingSheet(
 ) {
     if (model.isLoading.not()) return
 
-    AdaptiveModalSheet(
-        onDismissRequest = {},
-        dismissOnTapOutside = false,
-        dismissOnBackPress = false,
+    SheetScaffold(
+        model = model.scaffold,
+        onEvent = {},
         modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
-        ) {
-            SectionHeader(model = model.header)
+        if (model.progress != null) {
+            val animatedProgress by animateFloatAsState(targetValue = model.progress)
 
-            Spacer(modifier = Modifier.height(32.dp))
+            LaunchedEffect(animatedProgress) {
+                if (animatedProgress >= 1f) {
+                    delay(1.seconds)
 
-            if (model.progress != null) {
-                val animatedProgress by animateFloatAsState(targetValue = model.progress)
-
-                LaunchedEffect(animatedProgress) {
-                    if (animatedProgress >= 1f) {
-                        delay(1.seconds)
-
-                        onEvent(LoadingSheetEvent.LoaderFinished)
-                    }
+                    onEvent(LoadingSheetEvent.LoaderFinished)
                 }
-
-                LinearWavyProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            } else {
-                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
+
+            LinearWavyProgressIndicator(
+                progress = { animatedProgress },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        } else {
+            LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }
 }

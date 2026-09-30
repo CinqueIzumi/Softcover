@@ -28,9 +28,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 
 /**
  * The canonical sheet opening — accent bar, eyebrow, italic headline, italic description — composed
- * locally rather than through `SectionHeader`, which has no trailing slot for the book's mini
- * jacket and no way to tint a substring of its description. It shares that component's anatomy and type
- * roles, with spacing tuned to the redline rather than the generic component's defaults; the layout (a
+ * locally, with spacing tuned to the redline rather than `SectionHeader`'s defaults; the layout (a
  * trailing cover) and the mixed-color description are bespoke.
  */
 @Composable

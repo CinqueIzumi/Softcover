@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -70,6 +71,15 @@ import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.StatShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.YearRecapShareCardUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetFooter
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
+import nl.rhaydus.softcover.core.component.sheet.SheetLayout
+import nl.rhaydus.softcover.core.component.sheet.SheetRow
+import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldContent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.sidebar.Sidebar
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -149,11 +159,11 @@ object GalleryRegistry {
             content = { model, modifier ->
                 CoverOverlay(
                     model = model,
-                    modifier = modifier.width(BADGE_COVER_FIXTURE_WIDTH),
+                    modifier = modifier.width(96.dp),
                 ) {
                     CoverlessTitleCover(
                         title = "Piranesi",
-                        modifier = Modifier.width(BADGE_COVER_FIXTURE_WIDTH),
+                        modifier = Modifier.width(96.dp),
                     )
                 }
             },
@@ -299,7 +309,7 @@ object GalleryRegistry {
                         model = model,
                         modifier = when (model) {
                             is DividerUiModel.Horizontal -> modifier
-                            is DividerUiModel.Vertical -> modifier.height(VERTICAL_DIVIDER_FIXTURE_HEIGHT)
+                            is DividerUiModel.Vertical -> modifier.height(48.dp)
                         },
                     )
                 }
@@ -315,7 +325,7 @@ object GalleryRegistry {
             content = { model, modifier ->
                 EmptyState(
                     model = model,
-                    modifier = modifier.height(EMPTY_STATE_FIXTURE_HEIGHT),
+                    modifier = modifier.height(180.dp),
                 )
             },
         ),
@@ -329,7 +339,7 @@ object GalleryRegistry {
             content = { model, modifier ->
                 Skeleton(
                     model = model,
-                    modifier = modifier.width(SKELETON_FIXTURE_WIDTH),
+                    modifier = modifier.width(140.dp),
                 )
             },
         ),
@@ -359,7 +369,7 @@ object GalleryRegistry {
                 ThemePreviewTile(
                     model = model,
                     onEvent = {},
-                    modifier = modifier.width(PREVIEW_TILE_FIXTURE_WIDTH),
+                    modifier = modifier.width(120.dp),
                 )
             },
         ),
@@ -374,7 +384,7 @@ object GalleryRegistry {
                 ColorPalettePreviewTile(
                     model = model,
                     onEvent = {},
-                    modifier = modifier.width(PREVIEW_TILE_FIXTURE_WIDTH),
+                    modifier = modifier.width(120.dp),
                 )
             },
         ),
@@ -404,7 +414,7 @@ object GalleryRegistry {
             content = { model, modifier ->
                 MarkAsReadBurst(
                     model = model,
-                    modifier = modifier.size(BURST_FIXTURE_SIZE),
+                    modifier = modifier.size(160.dp),
                 )
             },
         ),
@@ -441,6 +451,62 @@ object GalleryRegistry {
             },
         ),
         galleryEntry(
+            name = "SheetScaffold",
+            family = GalleryFamily.SHEET,
+            blurb = "The chrome every modal sheet shares — top action, editorial header with an optional " +
+                "trailing jacket, jacket stack or action, and a footer. Scrolling lets the whole sheet " +
+                "scroll; Pinned fixes the header and footer around a body that scrolls itself. Shown " +
+                "inline, without the modal container.",
+            previews = SheetScaffoldUiModel,
+            label = ::sheetScaffoldFixtureLabel,
+            content = { model, modifier ->
+                SheetScaffoldContent(
+                    model = model,
+                    onEvent = {},
+                    modifier = if (model.layout == SheetLayout.Pinned) {
+                        modifier.height(420.dp)
+                    } else {
+                        modifier
+                    },
+                ) {
+                    Text(
+                        text = "The sheet's own body goes here.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+        ),
+        galleryEntry(
+            name = "SheetFooter",
+            family = GalleryFamily.SHEET,
+            blurb = "A sheet's closing button row: a filled primary and a text secondary, stacked or inline.",
+            previews = SheetFooterUiModel,
+            label = ::sheetFooterFixtureLabel,
+            content = { model, modifier ->
+                SheetFooter(
+                    model = model,
+                    onEvent = {},
+                    modifier = modifier,
+                )
+            },
+        ),
+        galleryEntry(
+            name = "SheetRow",
+            family = GalleryFamily.SHEET,
+            blurb = "One ruled row of a single-choice sheet list: italic label, optional leading icon " +
+                "and count, and a check that marks the selection.",
+            previews = SheetRowUiModel,
+            label = ::sheetRowFixtureLabel,
+            content = { model, modifier ->
+                SheetRow(
+                    model = model,
+                    onEvent = {},
+                    modifier = modifier,
+                )
+            },
+        ),
+        galleryEntry(
             name = "ShareCard",
             family = GalleryFamily.SHARE,
             blurb = "The exportable share-card family — book, reading update, stat, quote, year recap, and reading life.",
@@ -469,26 +535,6 @@ object GalleryRegistry {
         .filter { it.family == family }
         .toImmutableList()
 }
-
-/**
- * `EmptyState` fills whatever space it is given, and a gallery fixture tile has no height of its
- * own — so the tile lends it one rather than the component learning about the gallery (§ 7.3).
- */
-private val EMPTY_STATE_FIXTURE_HEIGHT = 180.dp
-
-/** A vertical rule fills its parent's height, which a gallery fixture tile leaves unbounded. */
-private val VERTICAL_DIVIDER_FIXTURE_HEIGHT = 48.dp
-
-/** The Appearance pickers size their tiles to the row they sit in; the gallery picks one width. */
-private val PREVIEW_TILE_FIXTURE_WIDTH = 120.dp
-
-/** The burst draws outward from the centre of whatever footprint it is given. */
-private val BURST_FIXTURE_SIZE = 160.dp
-
-/** `CoverOverlay`'s fixture cover — sized like the gallery's other thumbnail-ish jackets. */
-private val BADGE_COVER_FIXTURE_WIDTH = 96.dp
-
-private val SKELETON_FIXTURE_WIDTH = 140.dp
 
 /** Names what a [ChipUiModel] fixture demonstrates — its tone or slot, not its words. */
 private fun chipFixtureLabel(model: ChipUiModel): String = when {
@@ -528,7 +574,11 @@ private fun badgeFixtureLabel(model: BadgeUiModel): String = when {
 
 /** Names what a [SectionHeaderUiModel] fixture demonstrates, derived from its register. */
 private fun sectionHeaderFixtureLabel(model: SectionHeaderUiModel): String = when (model) {
-    is SectionHeaderUiModel.Section -> if (model.headline != null) "Section, with headline" else "Section, eyebrow only"
+    is SectionHeaderUiModel.Section -> when {
+        model.headlineEmphasis != null || model.descriptionEmphasis != null -> "Section, with emphasis"
+        model.headline != null -> "Section, with headline"
+        else -> "Section, eyebrow only"
+    }
     is SectionHeaderUiModel.Inline -> "Inline"
     is SectionHeaderUiModel.Label -> "Label"
 }
@@ -641,6 +691,27 @@ private fun coverFixtureLabel(model: CoverUiModel): String = when {
 }
 
 private const val COVERLESS_LONG_TITLE_LABEL_FLOOR = 30
+
+private fun sheetScaffoldFixtureLabel(model: SheetScaffoldUiModel): String = when {
+    model.dismissible.not() -> "Not dismissible"
+    model.topAction != null -> "Scrolling, top action and jacket"
+    model.layout == SheetLayout.Scrolling -> "Scrolling, footer"
+    model.header.trailing is SheetHeaderTrailing.Action -> "Pinned, header action"
+    else -> "Pinned, jacket stack and inline footer"
+}
+
+private fun sheetFooterFixtureLabel(model: SheetFooterUiModel): String = when {
+    model.primary?.loading == true -> "Stacked, loading"
+    model.primary?.enabled == false -> "Inline, primary disabled"
+    else -> if (model.layout == SheetFooterLayout.Stacked) "Stacked" else "Inline"
+}
+
+private fun sheetRowFixtureLabel(model: SheetRowUiModel<String>): String = when {
+    model.leadingIcon != null && model.selected -> "Selected, icon and count"
+    model.leadingIcon != null -> "Icon and count"
+    model.selected -> "Selected"
+    else -> "Unselected"
+}
 
 private fun sidebarFixtureLabel(model: SidebarUiModel<String>): String =
     if (model.sections.firstOrNull()?.label != null) "With label" else "No label"

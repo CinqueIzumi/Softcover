@@ -9,10 +9,17 @@ import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.header.EmphasisTreatment
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.header.TextEmphasis
 import nl.rhaydus.softcover.core.component.lists.ChooseListsRowUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
-import nl.rhaydus.softcover.core.component.lists.ChooseListsVariant
 import nl.rhaydus.softcover.core.component.lists.ListMembership
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetLayout
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 
@@ -34,14 +41,15 @@ fun List<BookList>.toChooseListsUiModel(
     cover: CoverUiModel,
     listsBeingMutated: Set<Int>,
 ): ChooseListsUiModel = ChooseListsUiModel(
-    variant = ChooseListsVariant.SingleBook(
-        name = bookTitle,
-        cover = cover,
-    ),
     rows = rowsFor(
         bookIds = setOf(bookId),
         listsBeingMutated = listsBeingMutated,
         isBulk = false,
+    ),
+    scaffold = chooseListsScaffold(
+        name = bookTitle,
+        description = "Tap a list to file it here — tap a filled one to take it off. Saved as you go.",
+        trailing = SheetHeaderTrailing.Jacket(cover = cover),
     ),
 )
 
@@ -57,16 +65,54 @@ fun List<BookList>.toBulkChooseListsUiModel(
     bookIds: Set<Int>,
     covers: List<CoverUiModel>,
     listsBeingMutated: Set<Int>,
-): ChooseListsUiModel = ChooseListsUiModel(
-    variant = ChooseListsVariant.ManyBooks(
-        bookCount = bookIds.size,
-        covers = covers.take(MAX_STACKED_COVERS).toImmutableList(),
+): ChooseListsUiModel {
+    val name = "${bookIds.size} books"
+    val stackCovers = covers.take(MAX_STACKED_COVERS)
+
+    return ChooseListsUiModel(
+        rows = rowsFor(
+            bookIds = bookIds,
+            listsBeingMutated = listsBeingMutated,
+            isBulk = true,
+        ),
+        scaffold = chooseListsScaffold(
+            name = name,
+            description = "A part-filled list adds the rest first — then a second tap takes all three off.",
+            trailing = if (stackCovers.isEmpty()) {
+                SheetHeaderTrailing.Jacket(
+                    cover = CoverUiModel(
+                        source = null,
+                        coverlessTitle = name,
+                        variant = CoverVariant.ChooseListsStackJacket,
+                    ),
+                )
+            } else {
+                SheetHeaderTrailing.JacketStack(covers = stackCovers.toImmutableList())
+            },
+        ),
+    )
+}
+
+private fun chooseListsScaffold(
+    name: String,
+    description: String,
+    trailing: SheetHeaderTrailing,
+): SheetScaffoldUiModel = SheetScaffoldUiModel(
+    header = SheetHeaderUiModel(
+        section = SectionHeaderUiModel.Section(
+            eyebrow = "Lists",
+            headline = "Shelve $name",
+            description = description,
+            headlineEmphasis = TextEmphasis(
+                substring = name,
+                treatment = EmphasisTreatment.Accent,
+            ),
+        ),
+        trailing = trailing,
     ),
-    rows = rowsFor(
-        bookIds = bookIds,
-        listsBeingMutated = listsBeingMutated,
-        isBulk = true,
-    ),
+    topAction = null,
+    footer = null,
+    layout = SheetLayout.Pinned,
 )
 
 private fun List<BookList>.rowsFor(

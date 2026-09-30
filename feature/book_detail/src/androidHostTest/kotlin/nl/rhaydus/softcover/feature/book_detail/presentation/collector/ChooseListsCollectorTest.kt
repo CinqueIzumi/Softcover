@@ -88,7 +88,7 @@ class ChooseListsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.chooseListsSheet shouldNotBe null
-            stateFlow.value.chooseListsSheet?.variant?.name shouldBe book.title
+            stateFlow.value.chooseListsSheet?.scaffold?.header?.section?.headline shouldBe "Shelve ${book.title}"
             job.cancel()
         }
 

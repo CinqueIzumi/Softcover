@@ -149,8 +149,7 @@ internal actual fun OnboardingScreenLayout(
 
 /**
  * The persistent chrome above the pager: an accent-bar eyebrow on the left (the established
- * hand-composed pattern — `SectionHeader` has no trailing slot for the folio, see
- * `TagEditorHeader`/`AppUpdateSection` for the same convention elsewhere) and the "01 — 02 — 03" folio
+ * hand-composed pattern) and the "01 — 02 — 03" folio
  * indicator on the right. Rendered once above the pager rather than per-page, so its position never
  * shifts as pages swipe — only the [eyebrow] label cross-fades and the folio's active digit updates as
  * the pager settles on a new page. Back/Skip live only in [PrimaryActionFooterRow], never here.

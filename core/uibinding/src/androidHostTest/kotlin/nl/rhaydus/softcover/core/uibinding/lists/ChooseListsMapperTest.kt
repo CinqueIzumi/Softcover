@@ -8,8 +8,9 @@ import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.component.lists.ChooseListsVariant
 import nl.rhaydus.softcover.core.component.lists.ListMembership
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
+import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
@@ -49,7 +50,7 @@ class ChooseListsMapperTest {
     @Nested
     inner class SingleBookMapping {
         @Test
-        fun `subject is SingleBook with the given title`() {
+        fun `header shelves the book with the title and a jacket of its cover`() {
             // ----- Arrange -----
             val lists = listOf(bookList(
                 id = 1,
@@ -66,10 +67,25 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.variant shouldBe ChooseListsVariant.SingleBook(
-                name = "Piranesi",
-                cover = cover,
+            val header = result.scaffold.header
+            header.section.headline shouldBe "Shelve Piranesi"
+            header.trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
+        }
+
+        @Test
+        fun `scaffold pins the sheet with no footer and no top action`() {
+            // ----- Act -----
+            val result = emptyList<BookList>().toChooseListsUiModel(
+                bookId = 42,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = emptySet(),
             )
+
+            // ----- Assert -----
+            result.scaffold.layout shouldBe SheetLayout.Pinned
+            result.scaffold.footer shouldBe null
+            result.scaffold.topAction shouldBe null
         }
 
         @Test
@@ -526,9 +542,8 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            val manyBooks = result.variant as ChooseListsVariant.ManyBooks
-            manyBooks.covers.size shouldBe 3
-            manyBooks.covers.toList() shouldBe covers.take(3)
+            val trailing = result.scaffold.header.trailing as SheetHeaderTrailing.JacketStack
+            trailing.covers.toList() shouldBe covers.take(3)
         }
 
         @Test
@@ -550,7 +565,44 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            (result.variant as ChooseListsVariant.ManyBooks).covers.isEmpty() shouldBe true
+            val trailing = result.scaffold.header.trailing as SheetHeaderTrailing.Jacket
+            trailing.cover shouldBe CoverUiModel(
+                source = null,
+                coverlessTitle = "1 books",
+                variant = CoverVariant.ChooseListsStackJacket,
+            )
+        }
+
+        @Test
+        fun `covers within the cap become a stack of exactly those covers`() {
+            // ----- Arrange -----
+            val covers = List(2) { coverUiModel() }
+
+            // ----- Act -----
+            val result = emptyList<BookList>().toBulkChooseListsUiModel(
+                bookIds = setOf(1, 2),
+                covers = covers,
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            val trailing = result.scaffold.header.trailing as SheetHeaderTrailing.JacketStack
+            trailing.covers.toList() shouldBe covers
+        }
+
+        @Test
+        fun `bulk header shelves the counted books`() {
+            // ----- Act -----
+            val result = emptyList<BookList>().toBulkChooseListsUiModel(
+                bookIds = setOf(1, 2, 3),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            val section = result.scaffold.header.section
+            section.headline shouldBe "Shelve 3 books"
+            result.scaffold.layout shouldBe SheetLayout.Pinned
         }
     }
 

@@ -5,10 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,13 +17,15 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.model.ModalSheetForm
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldContent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -52,8 +50,19 @@ fun UpdateProgressBottomSheet(
     onEvent: (ProgressSheetEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AdaptiveModalSheet(
-        onDismissRequest = { onEvent(ProgressSheetEvent.Dismissed) },
+    SheetScaffold(
+        model = model.scaffold,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.Dismissed -> onEvent(ProgressSheetEvent.Dismissed)
+
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.PrimaryClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
+            }
+        },
         modifier = modifier,
     ) {
         ProgressBottomSheetContent(
@@ -109,18 +118,10 @@ private fun ProgressBottomSheetContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(state = rememberScrollState())
-            .imePadding()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = { focusManager.clearFocus() })
-            }
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 16.dp),
+            },
     ) {
-        EditorialHeader(title = model.bookTitle)
-
-        Spacer(modifier = Modifier.height(32.dp))
-
         TabSwitcher(
             activeTab = activeTab,
             visibleTabs = visibleTabs,
@@ -189,51 +190,54 @@ private fun ProgressBottomSheetContent(
 @StandardPreview
 @Composable
 private fun ProgressSheetContentPagePreview() {
-    SoftcoverTheme {
-        ProgressBottomSheetContent(
-            model = ProgressSheetUiModel.previews.first {
-                it.selectedTab == ProgressSheetTab.PAGE && it.medium.hasKnownTotal
-            },
-            onEvent = {},
-        )
-    }
+    ProgressSheetPreview(
+        model = ProgressSheetUiModel.previews.first {
+            it.selectedTab == ProgressSheetTab.PAGE && it.medium.hasKnownTotal
+        },
+    )
 }
 
 @StandardPreview
 @Composable
 private fun ProgressSheetContentPercentagePreview() {
-    SoftcoverTheme {
-        ProgressBottomSheetContent(
-            model = ProgressSheetUiModel.previews.first { it.selectedTab == ProgressSheetTab.PERCENTAGE },
-            onEvent = {},
-        )
-    }
+    ProgressSheetPreview(
+        model = ProgressSheetUiModel.previews.first { it.selectedTab == ProgressSheetTab.PERCENTAGE },
+    )
 }
 
 /** The audiobook layout — three time fields and an hh:mm:ss suffix — which had no preview before. */
 @StandardPreview
 @Composable
 private fun ProgressSheetContentTimePreview() {
-    SoftcoverTheme {
-        ProgressBottomSheetContent(
-            model = ProgressSheetUiModel.previews.first {
-                it.selectedTab == ProgressSheetTab.TIME && it.medium.hasKnownTotal
-            },
-            onEvent = {},
-        )
-    }
+    ProgressSheetPreview(
+        model = ProgressSheetUiModel.previews.first {
+            it.selectedTab == ProgressSheetTab.TIME && it.medium.hasKnownTotal
+        },
+    )
 }
 
 /** No page count known: the Percentage tab disappears and the suffix + indicator drop out. */
 @StandardPreview
 @Composable
 private fun ProgressSheetContentNoTotalPreview() {
+    ProgressSheetPreview(
+        model = ProgressSheetUiModel.previews.first {
+            it.medium is ProgressSheetMedium.Paged && it.medium.hasKnownTotal.not()
+        },
+    )
+}
+
+@Composable
+private fun ProgressSheetPreview(model: ProgressSheetUiModel) {
     SoftcoverTheme {
-        ProgressBottomSheetContent(
-            model = ProgressSheetUiModel.previews.first {
-                it.medium is ProgressSheetMedium.Paged && it.medium.hasKnownTotal.not()
-            },
+        SheetScaffoldContent(
+            model = model.scaffold,
             onEvent = {},
-        )
+        ) {
+            ProgressBottomSheetContent(
+                model = model,
+                onEvent = {},
+            )
+        }
     }
 }

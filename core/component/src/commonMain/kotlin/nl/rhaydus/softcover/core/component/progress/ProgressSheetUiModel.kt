@@ -4,6 +4,10 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetLayout
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 
 /**
  * Everything `UpdateProgressBottomSheet` renders: the book it is logging against, what that book's
@@ -19,12 +23,34 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  */
 @Immutable
 data class ProgressSheetUiModel(
-    val bookTitle: String,
     val medium: ProgressSheetMedium,
     val progressPercent: Int,
     val selectedTab: ProgressSheetTab,
+    val scaffold: SheetScaffoldUiModel,
 ) {
     companion object : UiModelPreviews<ProgressSheetUiModel> {
+        private fun fixture(
+            bookTitle: String,
+            medium: ProgressSheetMedium,
+            progressPercent: Int,
+            selectedTab: ProgressSheetTab,
+        ): ProgressSheetUiModel = ProgressSheetUiModel(
+            medium = medium,
+            progressPercent = progressPercent,
+            selectedTab = selectedTab,
+            scaffold = SheetScaffoldUiModel(
+                header = SheetHeaderUiModel(
+                    section = SectionHeaderUiModel.Section(
+                        eyebrow = "Reading progress",
+                        headline = bookTitle,
+                    ),
+                ),
+                topAction = null,
+                footer = null,
+                layout = SheetLayout.Scrolling,
+            ),
+        )
+
         /**
          * Per R5, one fixture per branch that changes the sheet's anatomy — not per string. The two
          * "no total" fixtures are the interesting ones: with no page count or runtime to divide by,
@@ -32,7 +58,7 @@ data class ProgressSheetUiModel(
          * indicator, so they exercise a different layout rather than different copy.
          */
         override val previews: ImmutableList<ProgressSheetUiModel> = persistentListOf(
-            ProgressSheetUiModel(
+            fixture(
                 bookTitle = "The Dungeon Anarchist's Cookbook",
                 medium = ProgressSheetMedium.Paged(
                     totalPages = 534,
@@ -41,7 +67,7 @@ data class ProgressSheetUiModel(
                 progressPercent = 15,
                 selectedTab = ProgressSheetTab.PAGE,
             ),
-            ProgressSheetUiModel(
+            fixture(
                 bookTitle = "The Dungeon Anarchist's Cookbook",
                 medium = ProgressSheetMedium.Paged(
                     totalPages = 534,
@@ -50,7 +76,7 @@ data class ProgressSheetUiModel(
                 progressPercent = 35,
                 selectedTab = ProgressSheetTab.PERCENTAGE,
             ),
-            ProgressSheetUiModel(
+            fixture(
                 bookTitle = "Piranesi",
                 medium = ProgressSheetMedium.Paged(
                     totalPages = 0,
@@ -59,7 +85,7 @@ data class ProgressSheetUiModel(
                 progressPercent = 0,
                 selectedTab = ProgressSheetTab.PAGE,
             ),
-            ProgressSheetUiModel(
+            fixture(
                 bookTitle = "The Name of the Wind",
                 medium = ProgressSheetMedium.Timed(
                     totalSeconds = 100_320,
@@ -68,7 +94,7 @@ data class ProgressSheetUiModel(
                 progressPercent = 12,
                 selectedTab = ProgressSheetTab.TIME,
             ),
-            ProgressSheetUiModel(
+            fixture(
                 bookTitle = "The Name of the Wind",
                 medium = ProgressSheetMedium.Timed(
                     totalSeconds = 0,
