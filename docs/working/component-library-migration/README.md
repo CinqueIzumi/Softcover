@@ -14,13 +14,15 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S6-4 is built, tested and reviewed: `VerdictSheet` (on `SheetScaffold`, cover as the header
+- **State:** S6-4 is committed (`1df38138`): `VerdictSheet` (on `SheetScaffold`, cover as the header
   `Jacket`), `VerdictBlock` and `SoftcoverDatePickerDialog` take model + event; the shared mapper is
   `core/uibinding/verdict/`. S11-5 (inline `.dp`) is planned and F29 filed. Mood tile → S7-4; 14 Apollo-alias
   files wait on F24.
-- **Next:** move the `ObserveCurrentDateUseCase` binding out of `dispatcherModule` into its own Koin module
-  in `core/domain/di/` (user-approved), then S6-5 (library sheets, bulk-remove, `ReAuthDialog`) per
+  `ObserveCurrentDateUseCase` now binds in its own `currentDateModule` (`core/domain/di/`), included by
+  `readingModule` and `bookDetailModule` only — its sole consumers; built and reviewed, uncommitted.
+- **Next:** S6-5 (library sheets, bulk-remove, `ReAuthDialog`) per `steps/s6-sheet-chrome.md` § S6-5 and
   `family-procedure.md` Phase 2.
+- **Open questions:** none.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
@@ -36,7 +38,7 @@ checkboxes in step with `## Steps` and `## Gates` here.
   verdict cover as a 56dp header jacket (was above the header).
 - **Verification:** S6-4 green — compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`, and
   the `:core:component` / `:core:uibinding` / book_detail / reading suites.
-- **Uncommitted:** all of S6-4; F28 duplicate renumbered to F30.
+- **Uncommitted:** the `currentDateModule` split (4 Kotlin files) and this `## Now` block.
 
 ## Local verification
 

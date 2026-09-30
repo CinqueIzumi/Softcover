@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.database.SoftcoverDatabase
 import nl.rhaydus.softcover.core.database.di.databaseModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
+import nl.rhaydus.softcover.core.domain.di.currentDateModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
@@ -70,6 +71,7 @@ val bookDetailModule = module {
         apolloModule,
         personalModule,
         presentationModule,
+        currentDateModule,
         dispatcherModule,
     )
 

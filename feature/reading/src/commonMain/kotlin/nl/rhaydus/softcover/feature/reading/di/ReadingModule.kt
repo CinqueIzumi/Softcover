@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.reading.di
 
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.deadlines.di.deadlinesModule
+import nl.rhaydus.softcover.core.domain.di.currentDateModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.notification.di.notificationModule
 import nl.rhaydus.softcover.core.personal.di.personalModule
@@ -29,6 +30,7 @@ import org.koin.dsl.module
 
 val readingModule = module {
     includes(
+        currentDateModule,
         dispatcherModule,
         bookModule,
         deadlinesModule,

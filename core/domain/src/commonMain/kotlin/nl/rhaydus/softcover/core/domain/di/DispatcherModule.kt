@@ -6,9 +6,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
-import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
-import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCaseImpl
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val dispatcherModule = module {
@@ -23,6 +20,4 @@ val dispatcherModule = module {
     single {
         ApplicationScope(scope = CoroutineScope(Dispatchers.Default + SupervisorJob()))
     }
-
-    factory { ObserveCurrentDateUseCaseImpl() } bind ObserveCurrentDateUseCase::class
 }
