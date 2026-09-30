@@ -13,19 +13,27 @@ A few honest caveats:
 
 ---
 
-## 3.2.0: Widgets, and a lot of small things
-
-**Home-screen widgets** (Android first): the book you're **Currently Reading**, a **random pick from Want-to-Read** for when you can't decide, **Trending this week**, and a **reading-activity calendar**. Each one configurable — which book, which stat, how often it refreshes.
-
-Alongside them, a batch of smaller things:
+## 3.2.0: Themes, re-reads, and a lot of small things
 
 - **Pick your theme.** Light, Dark, System — and **Dim**, a warm low-contrast palette for reading at night. Plus **Spine colour**: a handful of named accent palettes to make the app feel like yours.
 - **An About page**, with a **per-version changelog** so you can see what changed, and an **in-app Roadmap** — this page, live in the app.
 - **Re-reads.** Book detail starts keeping a history of every time you've read a book, not just the last one.
-- See each edition's **format** (ebook / physical / audiobook) when you pick one.
+- **Paused** joins your reading statuses, for books you've put down but not given up on.
+- Your **tags** show up on book detail.
+- See each edition's **format** (ebook / physical / audiobook) when you pick one, and **add a book straight from the edition picker**.
 - Choose which **tab the app opens on**, and which **unit progress defaults to**.
+- A redesigned **share image** for book detail, with the cover as its backdrop.
 
-## 3.3.0: The reading record
+**And fixes:**
+- Adding a book by **ISBN** opens the edition you scanned, and tells you clearly when it can't.
+- **Your pace** and the **currently reading bar** keep up with progress as you log it, backdated updates included.
+- The **share card** shows your rating on the scale you rated it on.
+- **Last few that landed** shows the covers you picked.
+- **Anticipated** only shows books out in the next 30 days.
+- Moving several books at once shows **their covers stacked**.
+- Buttons no longer hide behind the **navigation bar**.
+
+## 3.3.0: The reading record, and widgets
 
 Everything you might want to record about a book, and every statistic that comes out of it. Your private notes never leave your device.
 
@@ -43,6 +51,10 @@ Everything you might want to record about a book, and every statistic that comes
 - **Every genre, not just your top five** — one tap opens the full ranking.
 - **How you read**: whether your year leaned plot- or character-driven, your pace and style mix, and the moods you reach for most.
 - **Diversity & publication**: your reading by author background and country, language and how much you read in translation, publication years, and where your books came from.
+
+**Home-screen widgets** (Android first): the book you're **Currently Reading**, a **random pick from Want-to-Read** for when you can't decide, **Trending this week**, and a **reading-activity calendar**. Each one configurable — which book, which stat, how often it refreshes.
+
+**Sign in with Hardcover.** No more copying an API key: sign in through Hardcover itself, and stay signed in.
 
 ## 3.4.0: Passages, logs & the calendar
 
