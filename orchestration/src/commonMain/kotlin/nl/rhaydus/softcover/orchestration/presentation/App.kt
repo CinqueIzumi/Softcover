@@ -62,6 +62,7 @@ internal fun App() {
     val themeConfig by viewModel.themeState.collectAsStateWithLifecycle()
     val spinePalette by viewModel.spinePalette.collectAsStateWithLifecycle()
     val reAuthState by viewModel.reAuthState.collectAsStateWithLifecycle()
+    val reAuthSheet by viewModel.reAuthSheet.collectAsStateWithLifecycle()
     val snackBarState by SnackBarManager.snackBarState.collectAsStateWithLifecycle()
 
     val appUpdateFlowLauncher = rememberAppUpdateFlowLauncher()
@@ -173,11 +174,18 @@ internal fun App() {
                         // Show the re-auth overlay only during an authenticated session — if the user
                         // is already on onboarding they can enter a token through the normal flow.
                         if (reAuthState.visible && state.authenticated) {
-                            ReAuthDialog(
-                                isSubmitting = reAuthState.isSubmitting,
-                                errorMessage = reAuthState.errorMessage,
-                                onSubmit = viewModel::reAuthenticate,
-                                onLogOut = viewModel::logOutFromReAuth,
+                            ReAuthSheet(
+                                model = reAuthSheet,
+                                onEvent = { event ->
+                                    when (event) {
+                                        is ReAuthSheetEvent.ApiKeyChanged ->
+                                            viewModel.onReAuthApiKeyChanged(event.value)
+
+                                        ReAuthSheetEvent.Submitted -> viewModel.reAuthenticate()
+
+                                        ReAuthSheetEvent.LoggedOut -> viewModel.logOutFromReAuth()
+                                    }
+                                },
                             )
                         }
                     }

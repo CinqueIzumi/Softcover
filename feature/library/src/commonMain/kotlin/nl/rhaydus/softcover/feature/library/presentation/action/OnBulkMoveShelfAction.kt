@@ -67,7 +67,7 @@ internal class OnBulkMoveShelfAction(
                 selectedBookIds = emptySet(),
                 bulkActionInProgress = false,
                 isBulkMoveMenuExpanded = false,
-                isBulkRemoveDialogShown = false,
+                isBulkRemoveSheetShown = false,
                 isBulkAddToListSheetShown = false,
                 listsBeingMutated = emptySet(),
             )

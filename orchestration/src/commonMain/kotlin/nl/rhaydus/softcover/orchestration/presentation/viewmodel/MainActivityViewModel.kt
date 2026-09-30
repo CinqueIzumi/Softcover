@@ -28,6 +28,8 @@ import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.presentation.state.SplashState
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import nl.rhaydus.softcover.core.uibinding.theme.toSpinePalette
+import nl.rhaydus.softcover.orchestration.presentation.ReAuthSheetUiModel
+import nl.rhaydus.softcover.orchestration.presentation.toSheetUiModel
 
 internal class MainActivityViewModel(
     private val getUserIdUseCase: GetUserIdUseCase,
@@ -63,6 +65,14 @@ internal class MainActivityViewModel(
     private val _reAuthState = MutableStateFlow(ReAuthState())
     val reAuthState = _reAuthState.asStateFlow()
 
+    val reAuthSheet: StateFlow<ReAuthSheetUiModel> = _reAuthState
+        .map { it.toSheetUiModel() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = ReAuthState().toSheetUiModel(),
+        )
+
     init {
         initializeCollectors()
     }
@@ -94,12 +104,18 @@ internal class MainActivityViewModel(
         _state.update { it.copy(authenticated = authenticated) }
     }
 
+    fun onReAuthApiKeyChanged(value: String) {
+        _reAuthState.update { it.copy(apiKey = value) }
+    }
+
     /**
      * Re-authenticates with a freshly entered token without wiping local data (the use case only
      * clears data when the token belongs to a different account). On success the dialog closes; on
      * failure it stays open with an inline error so the user can retry.
      */
-    fun reAuthenticate(apiKey: String) {
+    fun reAuthenticate() {
+        val apiKey = _reAuthState.value.apiKey
+
         viewModelScope.launch {
             _reAuthState.update {
                 it.copy(

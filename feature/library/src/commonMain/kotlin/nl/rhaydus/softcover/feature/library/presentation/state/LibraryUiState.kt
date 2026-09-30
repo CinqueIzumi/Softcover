@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
@@ -12,6 +14,8 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -101,10 +105,7 @@ internal data class LibraryUiState(
      */
     val arrangeDraft: LibraryArrangeDraft? = null,
 
-    val arrangeSheetHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Arrange the shelf",
-        headline = "Arrange this shelf.",
-    ),
+    val arrangeSheet: SheetScaffoldUiModel = arrangeSheetScaffoldFor(resultCount = 0),
 
     val arrangeLayoutHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Layout"),
 
@@ -120,13 +121,16 @@ internal data class LibraryUiState(
     /** The Shelves sheet — the tab switcher on mobile; desktop keeps its permanent sidebar. */
     val isShelvesSheetExpanded: Boolean = false,
 
+    val shelvesSheet: SheetScaffoldUiModel = shelvesSheetScaffold(),
+
+    val shelvesSheetRows: ImmutableList<SheetRowUiModel<String>> = persistentListOf(),
+
     val filtersByTab: Map<String, LibraryFilters> = emptyMap(),
     val isFilterSheetExpanded: Boolean = false,
 
-    val filterSheetHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Filter this shelf",
-        headline = "Narrow this shelf.",
-        description = "Combine facets to find the corner of your library you're after.",
+    val filterSheet: SheetScaffoldUiModel = filterSheetScaffoldFor(
+        resultCount = 0,
+        filtersActive = false,
     ),
 
     /**
@@ -240,7 +244,12 @@ internal data class LibraryUiState(
     val isRearranging: Boolean = false,
     val bulkActionInProgress: Boolean = false,
     val isBulkMoveMenuExpanded: Boolean = false,
-    val isBulkRemoveDialogShown: Boolean = false,
+    val isBulkRemoveSheetShown: Boolean = false,
+
+    val bulkRemoveSheet: SheetScaffoldUiModel = bulkRemoveSheetScaffoldFor(
+        bookCount = 0,
+        inProgress = false,
+    ),
     val isBulkAddToListSheetShown: Boolean = false,
 
     /**

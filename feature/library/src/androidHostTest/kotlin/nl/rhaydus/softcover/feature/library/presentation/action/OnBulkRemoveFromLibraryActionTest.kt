@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -183,6 +185,117 @@ class OnBulkRemoveFromLibraryActionTest {
             // ----- Assert -----
             coVerify(exactly = 0) { removeBookFromLibraryUseCase(book = selectedBook1) }
             coVerify(exactly = 0) { removeBookFromLibraryUseCase(book = selectedBook2) }
+        }
+
+        @Test
+        fun `keeps the bulk remove sheet open with progress on while the removal runs`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+                isBulkRemoveSheetShown = true,
+            )
+            var stateDuringRemoval: LibraryUiState? = null
+
+            coEvery {
+                removeBookFromLibraryUseCase(book = book)
+            } coAnswers {
+                stateDuringRemoval = stateFlow.value
+
+                Result.success(Unit)
+            }
+
+            val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val during = stateDuringRemoval.shouldNotBeNull()
+            during.isBulkRemoveSheetShown shouldBe true
+            during.bulkActionInProgress shouldBe true
+        }
+
+        @Test
+        fun `closes the bulk remove sheet and clears progress when the removal succeeds`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+                isBulkRemoveSheetShown = true,
+            )
+
+            coEvery {
+                removeBookFromLibraryUseCase(book = book)
+            } returns Result.success(Unit)
+
+            val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isBulkRemoveSheetShown shouldBe false
+            stateFlow.value.bulkActionInProgress shouldBe false
+        }
+
+        @Test
+        fun `closes the bulk remove sheet and clears progress when the removal fails`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+                isBulkRemoveSheetShown = true,
+            )
+
+            coEvery {
+                removeBookFromLibraryUseCase(book = book)
+            } returns Result.failure(RuntimeException("boom"))
+            every {
+                SnackBarManager.showSnackbar(title = any())
+            } returns mockk(relaxed = true)
+
+            val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isBulkRemoveSheetShown shouldBe false
+            stateFlow.value.bulkActionInProgress shouldBe false
+        }
+
+        @Test
+        fun `no books resolved — closes the sheet without starting progress`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = emptySet(),
+                isBulkRemoveSheetShown = true,
+            )
+
+            val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isBulkRemoveSheetShown shouldBe false
+            stateFlow.value.bulkActionInProgress shouldBe false
         }
     }
 }

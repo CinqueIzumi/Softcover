@@ -20,8 +20,6 @@ internal data class OnSaveVerdictAction(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(verdictSheetContext = null) }
-
         dependencies.saveBookVerdictUseCase(
             book = book,
             rating = rating,

@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.component
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -9,8 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -18,17 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
-import nl.rhaydus.designsystem.component.RhaydusButton
-import nl.rhaydus.designsystem.model.ButtonSize
-import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
@@ -37,13 +31,10 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeLayoutC
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSortChipClickedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeTitlesToggleChangedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSetListRankedAction
-import nl.rhaydus.softcover.feature.library.presentation.screen.resultCountFor
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLayoutChip
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.chip
 import nl.rhaydus.softcover.feature.library.presentation.state.showsTitles
-import nl.rhaydus.softcover.feature.library.presentation.state.withTitlesShown
-import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 
 /**
  * The Arrange sheet (redesign brief): replaces the old sort dropdown + layout dropdown with one
@@ -71,78 +62,61 @@ internal fun LibraryArrangeSheet(
     runAction: (LibraryAction) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
-        val dismiss = LocalModalSheetDismiss.current
-        val draft = state.arrangeDraft
+    val draft = state.arrangeDraft
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(state = rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 8.dp),
-        ) {
-            SectionHeader(model = state.arrangeSheetHeader)
+    SheetScaffold(
+        model = state.arrangeSheet,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.PrimaryClicked -> runAction(OnApplyArrangeAction())
 
-            Spacer(modifier = Modifier.height(20.dp))
+                SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
-            SectionHeader(model = state.arrangeLayoutHeader)
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            LayoutChipRow(
-                chips = state.arrangeLayoutChips,
-                onChipEvent = { key -> runAction(OnArrangeLayoutChipClickedAction(key = key)) },
-            )
-
-            if (draft != null && draft.gridLayout.chip != LibraryLayoutChip.LIST) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                ShowTitlesToggleRow(
-                    checked = draft.gridLayout.showsTitles,
-                    onCheckedChange = { show -> runAction(OnArrangeTitlesToggleChangedAction(show = show)) },
-                )
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
             }
+        },
+    ) {
+        SectionHeader(model = state.arrangeLayoutHeader)
 
-            Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-            SectionHeader(model = state.arrangeSortHeader)
+        LayoutChipRow(
+            chips = state.arrangeLayoutChips,
+            onChipEvent = { key -> runAction(OnArrangeLayoutChipClickedAction(key = key)) },
+        )
 
-            Spacer(modifier = Modifier.height(10.dp))
+        if (draft != null && draft.gridLayout.chip != LibraryLayoutChip.LIST) {
+            Spacer(modifier = Modifier.height(16.dp))
 
-            SortChipRow(
-                tab = tab,
-                state = state,
-                chips = state.arrangeSortChips,
-                onChipEvent = { key -> runAction(OnArrangeSortChipClickedAction(key = key)) },
-                onMakeListOrdered = { listId ->
-                    runAction(
-                        OnSetListRankedAction(
-                            listId = listId,
-                            ranked = true,
-                        ),
-                    )
-                },
+            ShowTitlesToggleRow(
+                checked = draft.gridLayout.showsTitles,
+                onCheckedChange = { show -> runAction(OnArrangeTitlesToggleChangedAction(show = show)) },
             )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            RhaydusButton(
-                label = "Show ${formatBookCount(count = tab.resultCountFor(state = state))}",
-                style = ButtonStyle.FILLED,
-                // ButtonSize.M on both sheet and panel forms — the same step-down the Update-progress
-                // sheet already takes for its primary action, applied unconditionally here rather than
-                // only on the panel form (the redesign's footer reads too tall at L on either form).
-                size = ButtonSize.M,
-                onClick = {
-                    runAction(OnApplyArrangeAction())
-
-                    dismiss()
-                },
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        SectionHeader(model = state.arrangeSortHeader)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        SortChipRow(
+            tab = tab,
+            state = state,
+            chips = state.arrangeSortChips,
+            onChipEvent = { key -> runAction(OnArrangeSortChipClickedAction(key = key)) },
+            onMakeListOrdered = { listId ->
+                runAction(
+                    OnSetListRankedAction(
+                        listId = listId,
+                        ranked = true,
+                    ),
+                )
+            },
+        )
     }
 }
 

@@ -29,7 +29,8 @@ container to extract.
 - One padding everywhere: h24, top 8, bottom 16. `imePadding` in both layouts.
 - `dismissible = false` sets both dismiss flags to false (`LoadingSheet`, `ReAuthDialog`).
 - The top action takes the `labelLarge` SemiBold `primary` style, right-aligned. It is used by
-  TagEditor ("Done") and Verdict ("Not now").
+  TagEditor ("Done") and Verdict ("Not now"). It always closes the sheet: the scaffold emits
+  `TopActionClicked`, then runs the animated dismiss.
 
 **`SheetHeaderUiModel` (model only; no public `SheetHeader`).**
 - Fields: `section: SectionHeaderUiModel.Section` and `trailing: SheetHeaderTrailing?`.
@@ -51,7 +52,7 @@ container to extract.
 
 **`SheetFooterUiModel`.**
 - Fields: `primary: SheetFooterButton?`, `secondary: SheetFooterButton?`, `layout`.
-- `SheetFooterButton` has `label`, `enabled` and `loading`.
+- `SheetFooterButton` has `label`, `enabled`, `loading` and `dismissesSheet` (the scaffold runs the animated dismiss after emitting the click; S6-6/S6-7 adopters use it instead of `LocalModalSheetDismiss` in bodies).
 - `layout = Stacked`: a FILLED M primary, full width, with a TEXT M secondary below it.
 - `layout = Inline`: the TEXT secondary on the left and the weighted FILLED primary on the right (Filter).
 - `FilterSheetFooter` is deleted.
@@ -141,6 +142,8 @@ for S10 or S11. The exception is TagEditor's description, which moves into the h
 
 - `TextEmphasis(substring, treatment)` stays as built for now (user, 2026-09-30): `SectionHeader`'s `emphasisedText` keeps its substring search. Revisit in S6-C-sheets.
 - `SheetRow` adopters (S6-5 Shelves, S6-7 Genre) wrap their rows in `Modifier.selectableGroup()`, because `Role.RadioButton` rows need a group. If both need it, fold it into the component.
+- S6-5 `LibraryFilterSheet` body, for S10/S11: the Tags facet's `"$availableCount available"` trailing text is built in composition, and the five facet `SectionHeaderUiModel.Label`s are file-level constants in the sheet file rather than state fields. `LibraryArrangeSheet`'s `ShowTitlesToggleRow` label and `SortChipRow`'s "Make this list ordered" affordance stay raw feature composables.
+- S6-C-sheets: no design-system section file covers `SheetScaffold` or `SheetFooterButton.dismissesSheet` yet — add one. Bulk-remove closes without animation when the removal finishes (state-driven close).
 
 ## Sub-steps
 
@@ -148,7 +151,7 @@ for S10 or S11. The exception is TagEditor's description, which moves into the h
 |---|---|---|
 | S6-3 | `SheetScaffold`/`SheetHeader`/`SheetRow`/`SheetFooter` design, plus `ChooseListsBottomSheet`, `UpdateProgressBottomSheet`/`TabSwitcher`, `LoadingSheet` | [x] |
 | S6-4 | `VerdictSheet` + `VerdictBlock` (owe R1) and `SoftcoverDatePickerDialog` (owes R1 + R11) | [x] |
-| S6-5 | The library sheets, the bulk-remove dialog and `ReAuthDialog` | [ ] |
+| S6-5 | The library sheets, the bulk-remove dialog and `ReAuthDialog` | [x] |
 | S6-6 | The book_detail, lists and scan sheets | [ ] |
 | S6-7 | The explore, reading and profile sheets | [ ] |
 | S6-C-sheets | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |

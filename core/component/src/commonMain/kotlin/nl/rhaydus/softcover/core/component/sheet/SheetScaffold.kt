@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
@@ -134,6 +135,8 @@ private fun SheetTop(
     model: SheetScaffoldUiModel,
     onEvent: (SheetScaffoldEvent) -> Unit,
 ) {
+    val dismissSheet = LocalModalSheetDismiss.current
+
     if (model.topAction != null) {
         Box(
             modifier = Modifier.fillMaxWidth(),
@@ -147,7 +150,11 @@ private fun SheetTop(
                     .pointerHandCursor()
                     .clickable(
                         role = Role.Button,
-                        onClick = { onEvent(SheetScaffoldEvent.TopActionClicked) },
+                        onClick = {
+                            onEvent(SheetScaffoldEvent.TopActionClicked)
+
+                            dismissSheet()
+                        },
                     )
                     .minimumInteractiveComponentSize(),
             )
@@ -293,6 +300,8 @@ private fun SheetFooterButtonView(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val dismissSheet = LocalModalSheetDismiss.current
+
     Box(
         modifier = modifier,
         contentAlignment = Alignment.CenterEnd,
@@ -300,7 +309,13 @@ private fun SheetFooterButtonView(
         RhaydusButton(
             label = button.label,
             style = style,
-            onClick = onClick,
+            onClick = {
+                onClick()
+
+                if (button.dismissesSheet) {
+                    dismissSheet()
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             enabled = button.enabled && button.loading.not(),
             size = ButtonSize.M,

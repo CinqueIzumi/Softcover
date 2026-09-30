@@ -17,8 +17,10 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilters
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.filterSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -64,6 +66,59 @@ class FilterDraftChipsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.filterSheetSelection shouldBe null
+            job.cancel()
+        }
+
+        @Test
+        fun `filterSheet footer follows the selection's result count and clear-all state`() =
+            runTest(testDispatcher) {
+                // ----- Arrange -----
+                val collector = FilterDraftChipsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = LibraryUiState(
+                    filterDraft = LibraryFilterDraft(
+                        tabId = "all",
+                        filters = LibraryFilters(formats = setOf("ebook")),
+                    ),
+                    booksByTab = mapOf("all" to emptyList()),
+                )
+
+                // ----- Assert -----
+                stateFlow.value.filterSheet shouldBe filterSheetScaffoldFor(
+                    resultCount = 0,
+                    filtersActive = true,
+                )
+                job.cancel()
+            }
+
+        @Test
+        fun `filterSheet is left untouched while the sheet is closed`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val seeded = filterSheetScaffoldFor(
+                resultCount = 8,
+                filtersActive = true,
+            )
+            stateFlow.value = LibraryUiState(filterSheet = seeded)
+            val collector = FilterDraftChipsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(searchQuery = "x")
+
+            // ----- Assert -----
+            stateFlow.value.filterSheet shouldBe seeded
             job.cancel()
         }
 

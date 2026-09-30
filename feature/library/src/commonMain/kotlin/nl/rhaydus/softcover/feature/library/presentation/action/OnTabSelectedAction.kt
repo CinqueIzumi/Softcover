@@ -22,7 +22,7 @@ internal class OnTabSelectedAction(
                 selectionMode = false,
                 selectedBookIds = emptySet(),
                 isBulkMoveMenuExpanded = false,
-                isBulkRemoveDialogShown = false,
+                isBulkRemoveSheetShown = false,
                 isBulkAddToListSheetShown = false,
                 listsBeingMutated = emptySet(),
                 isRearranging = false,

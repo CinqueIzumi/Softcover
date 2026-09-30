@@ -5,12 +5,15 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.filterSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 
 /**
  * Opens or closes the Filter sheet. Opening seeds [LibraryUiState.filterDraft] off the currently
  * selected tab's committed filters so the sheet always starts in sync; closing (scrim, back, or
  * after [OnApplyFiltersAction] commits) clears it, discarding anything the sheet's chips edited.
+ * Opening also seeds [LibraryUiState.filterSheet] off the committed filters, so the footer is right
+ * before `FilterDraftChipsCollector` has produced the first live selection.
  */
 internal class OnFilterSheetExpandedChangeAction(
     private val expanded: Boolean,
@@ -20,12 +23,22 @@ internal class OnFilterSheetExpandedChangeAction(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
         scope.setState { state ->
+            val filters = state.filtersFor(tabId = state.selectedTabId)
+
             state.copy(
                 isFilterSheetExpanded = expanded,
+                filterSheet = if (expanded) {
+                    filterSheetScaffoldFor(
+                        resultCount = state.tabStatsFor(tabId = state.selectedTabId).itemCount,
+                        filtersActive = filters.isEmpty.not(),
+                    )
+                } else {
+                    state.filterSheet
+                },
                 filterDraft = if (expanded) {
                     LibraryFilterDraft(
                         tabId = state.selectedTabId,
-                        filters = state.filtersFor(tabId = state.selectedTabId),
+                        filters = filters,
                     )
                 } else {
                     null

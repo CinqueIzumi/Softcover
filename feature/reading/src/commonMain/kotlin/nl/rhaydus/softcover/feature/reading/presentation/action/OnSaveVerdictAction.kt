@@ -20,13 +20,6 @@ internal data class OnSaveVerdictAction(
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
-        scope.setState {
-            it.copy(
-                verdictPromptBook = null,
-                verdictReview = null,
-            )
-        }
-
         dependencies.saveBookVerdictUseCase(
             book = book,
             rating = rating,

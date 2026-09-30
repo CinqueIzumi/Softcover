@@ -52,8 +52,8 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetEx
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveMenuExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveDialogExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveFromLibraryAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkToggleListMembershipAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
@@ -66,7 +66,7 @@ import nl.rhaydus.softcover.feature.library.presentation.component.LibraryContro
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.BookList
-import nl.rhaydus.softcover.feature.library.presentation.screen.section.BulkRemoveConfirmationDialog
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.BulkRemoveConfirmationSheet
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.EditionList
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.SelectionHeader
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -160,7 +160,7 @@ internal actual fun LibraryScreenLayout(
                         runAction(OnBulkAddToListSheetShownAction(shown = true))
                     },
                     onRemoveClick = {
-                        runAction(OnBulkRemoveDialogExpandedChangeAction(shown = true))
+                        runAction(OnBulkRemoveSheetExpandedChangeAction(shown = true))
                     },
                 )
             } else {
@@ -298,17 +298,16 @@ internal actual fun LibraryScreenLayout(
         )
     }
 
-    if (state.isBulkRemoveDialogShown) {
-        BulkRemoveConfirmationDialog(
-            bookCount = state.selectedBookIds.size,
-            inProgress = state.bulkActionInProgress,
+    if (state.isBulkRemoveSheetShown) {
+        BulkRemoveConfirmationSheet(
+            model = state.bulkRemoveSheet,
             onConfirm = {
                 haptics.commit()
 
                 runAction(OnBulkRemoveFromLibraryAction())
             },
             onDismiss = {
-                runAction(OnBulkRemoveDialogExpandedChangeAction(shown = false))
+                runAction(OnBulkRemoveSheetExpandedChangeAction(shown = false))
             },
         )
     }

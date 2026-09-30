@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S6-4 is committed (`1df38138`): `VerdictSheet` (on `SheetScaffold`, cover as the header
-  `Jacket`), `VerdictBlock` and `SoftcoverDatePickerDialog` take model + event; the shared mapper is
-  `core/uibinding/verdict/`. S11-5 (inline `.dp`) is planned and F29 filed. Mood tile → S7-4; 14 Apollo-alias
-  files wait on F24.
-  `ObserveCurrentDateUseCase` now binds in its own `currentDateModule` (`core/domain/di/`), included by
-  `readingModule` and `bookDetailModule` only — its sole consumers; built and reviewed, uncommitted.
-- **Next:** S6-5 (library sheets, bulk-remove, `ReAuthDialog`) per `steps/s6-sheet-chrome.md` § S6-5 and
-  `family-procedure.md` Phase 2.
+- **State:** S6-5 is built, tested and reviewed, uncommitted: Filter / Arrange / Shelves / bulk-remove and
+  `ReAuthSheet` on `SheetScaffold`; new `SheetFooterButton.dismissesSheet`, and the top action always runs
+  the animated dismiss (Verdict Save / Delete / "Not now" now animate). S11-5 planned, F29 filed. Mood
+  tile → S7-4; 14 Apollo-alias files wait on F24.
+- **Next:** the `!!` sweep (user, 2026-09-30: an absolute no-go, tests included): enable detekt
+  `UnsafeCallOnNullableType` on main and test sources, remove all 82 uses (7 production: `CoverSourceResolver`,
+  `GetContinueSeriesBooksUseCase`, `BookListsCollector`; tests → `shouldNotBeNull()`), and state the rule in
+  `docs/reference/code-style.md`. Then S6-6 per `steps/s6-sheet-chrome.md` § S6-6.
 - **Open questions:** none.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
@@ -36,9 +36,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
   toggle / choice lists); S6-3's sheet header gaps (12/8/8), 56dp jackets, sheet padding (top 8 / bottom 16,
   LoadingSheet 32 → 16), and the progress sheet's tap-to-clear-focus now covering the body only; S6-4's
   verdict cover as a 56dp header jacket (was above the header).
-- **Verification:** S6-4 green — compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`, and
-  the `:core:component` / `:core:uibinding` / book_detail / reading suites.
-- **Uncommitted:** the `currentDateModule` split (4 Kotlin files) and this `## Now` block.
+- **Verification:** S6-5 green under JBR 21 — compile (all touched modules, library androidMain),
+  `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`, and the library / orchestration /
+  book_detail / reading / `:core:component` / `:core:uibinding` suites; reviewer: no blockers, fixes applied.
+- **Uncommitted:** all of S6-5.
 
 ## Local verification
 
@@ -153,7 +154,7 @@ Not components; they stay where they are.
   them; it does not move them.
 - Navigation shells — `orchestration/presentation/`: `App`, `DesktopApp`, `CompactNavShell`,
   `WideNavShell`, `TabRootHost`, `BottomFloatingBar`, `DockedBottomNavigationBar`, `NavigationRailBar`,
-  `EditorialSidebar`, `SidebarItem`, `BookDetailPaneHost`, `ReAuthDialog`.
+  `EditorialSidebar`, `SidebarItem`, `BookDetailPaneHost`.
 - Platform `expect`/`actual` — `BarcodeScanner` (common/android/ios/jvm), `isCameraAvailable`,
   `isCameraPermissionGranted`, `rememberCameraPermissionRequester`, `Theme.{android,ios,jvm}`,
   `TransientNavArg.{android,jvm}`.

@@ -16,7 +16,7 @@ internal class OnExitSelectionModeAction : LibraryAction {
                 selectionMode = false,
                 selectedBookIds = emptySet(),
                 isBulkMoveMenuExpanded = false,
-                isBulkRemoveDialogShown = false,
+                isBulkRemoveSheetShown = false,
                 isBulkAddToListSheetShown = false,
                 listsBeingMutated = emptySet(),
             )

@@ -16,8 +16,6 @@ internal class OnDeleteReviewAction(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(verdictSheetContext = null) }
-
         // Hardcover owns the review, so deleting clears it there (an empty document), offline-replayable;
         // the optimistic local clear is overwritten on the next refresh either way.
         dependencies.updateBookReviewUseCase(

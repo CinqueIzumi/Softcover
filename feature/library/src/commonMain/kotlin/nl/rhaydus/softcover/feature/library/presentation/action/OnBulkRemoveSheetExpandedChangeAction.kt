@@ -6,13 +6,13 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
-internal class OnBulkRemoveDialogExpandedChangeAction(
+internal class OnBulkRemoveSheetExpandedChangeAction(
     private val shown: Boolean,
 ) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        scope.setState { it.copy(isBulkRemoveDialogShown = shown) }
+        scope.setState { it.copy(isBulkRemoveSheetShown = shown) }
     }
 }

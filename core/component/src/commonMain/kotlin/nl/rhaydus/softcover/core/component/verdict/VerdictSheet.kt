@@ -154,11 +154,11 @@ fun VerdictSheet(
 
                 SheetScaffoldEvent.SecondaryClicked -> onEvent(VerdictSheetEvent.DeleteRequested)
 
-                SheetScaffoldEvent.TopActionClicked,
-                SheetScaffoldEvent.Dismissed,
-                -> onEvent(VerdictSheetEvent.Dismissed)
+                SheetScaffoldEvent.Dismissed -> onEvent(VerdictSheetEvent.Dismissed)
 
-                SheetScaffoldEvent.HeaderActionClicked -> Unit
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
             }
         },
         modifier = modifier,

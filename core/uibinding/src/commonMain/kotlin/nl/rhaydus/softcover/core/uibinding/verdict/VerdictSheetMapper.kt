@@ -61,8 +61,18 @@ fun Book.toVerdictSheetUiModel(
             ),
             topAction = topAction,
             footer = SheetFooterUiModel(
-                primary = SheetFooterButton(label = saveLabel),
-                secondary = if (canDelete) SheetFooterButton(label = "Delete review") else null,
+                primary = SheetFooterButton(
+                    label = saveLabel,
+                    dismissesSheet = true,
+                ),
+                secondary = if (canDelete) {
+                    SheetFooterButton(
+                        label = "Delete review",
+                        dismissesSheet = true,
+                    )
+                } else {
+                    null
+                },
                 layout = SheetFooterLayout.Stacked,
             ),
             layout = SheetLayout.Pinned,

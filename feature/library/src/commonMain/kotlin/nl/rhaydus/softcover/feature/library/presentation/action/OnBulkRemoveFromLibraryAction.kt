@@ -19,16 +19,13 @@ internal class OnBulkRemoveFromLibraryAction(
         val books = state.resolveSelectedBooks(explicitBookIds ?: state.selectedBookIds)
 
         if (books.isEmpty()) {
-            scope.setState { it.copy(isBulkRemoveDialogShown = false) }
+            scope.setState { it.copy(isBulkRemoveSheetShown = false) }
 
             return
         }
 
         scope.setState {
-            it.copy(
-                isBulkRemoveDialogShown = false,
-                bulkActionInProgress = true,
-            )
+            it.copy(bulkActionInProgress = true)
         }
 
         var failureCount = 0
@@ -56,7 +53,7 @@ internal class OnBulkRemoveFromLibraryAction(
                 selectedBookIds = emptySet(),
                 bulkActionInProgress = false,
                 isBulkMoveMenuExpanded = false,
-                isBulkRemoveDialogShown = false,
+                isBulkRemoveSheetShown = false,
                 isBulkAddToListSheetShown = false,
                 listsBeingMutated = emptySet(),
             )

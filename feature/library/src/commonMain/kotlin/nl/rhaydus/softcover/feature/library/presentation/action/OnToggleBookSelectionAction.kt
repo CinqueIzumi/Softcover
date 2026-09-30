@@ -27,7 +27,7 @@ internal class OnToggleBookSelectionAction(
                     selectionMode = false,
                     selectedBookIds = emptySet(),
                     isBulkMoveMenuExpanded = false,
-                    isBulkRemoveDialogShown = false,
+                    isBulkRemoveSheetShown = false,
                     isBulkAddToListSheetShown = false,
                     listsBeingMutated = emptySet(),
                 )

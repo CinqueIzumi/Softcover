@@ -53,7 +53,7 @@ class OnSaveVerdictActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets verdictPromptBook to null after execute on success`() = runTest {
+        fun `leaves verdict sheet state untouched on success`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
             stateFlow.value = ReadingScreenUiState(
@@ -84,12 +84,12 @@ class OnSaveVerdictActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.verdictPromptBook shouldBe null
-            stateFlow.value.verdictReview shouldBe null
+            stateFlow.value.verdictPromptBook shouldBe book
+            stateFlow.value.verdictReview shouldBe RichTextUiModel.EMPTY
         }
 
         @Test
-        fun `sets verdictPromptBook to null after execute on failure`() = runTest {
+        fun `leaves verdict sheet state untouched on failure`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
             stateFlow.value = ReadingScreenUiState(
@@ -120,8 +120,8 @@ class OnSaveVerdictActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.verdictPromptBook shouldBe null
-            stateFlow.value.verdictReview shouldBe null
+            stateFlow.value.verdictPromptBook shouldBe book
+            stateFlow.value.verdictReview shouldBe RichTextUiModel.EMPTY
         }
 
         @Test

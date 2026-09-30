@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.filterSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -40,7 +41,19 @@ internal class FilterDraftChipsCollector : LibraryCollector {
                     snapshot.compute()
                 }
 
-                scope.setState { it.copy(filterSheetSelection = selection) }
+                scope.setState { state ->
+                    state.copy(
+                        filterSheetSelection = selection,
+                        filterSheet = if (selection == null) {
+                            state.filterSheet
+                        } else {
+                            filterSheetScaffoldFor(
+                                resultCount = selection.resultCount,
+                                filtersActive = selection.clearAllEnabled,
+                            )
+                        },
+                    )
+                }
             }
     }
 }

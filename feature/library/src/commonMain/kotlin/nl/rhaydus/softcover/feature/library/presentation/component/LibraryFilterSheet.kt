@@ -23,24 +23,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
-import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
-import nl.rhaydus.designsystem.model.ButtonSize
-import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.model.ModalSheetForm
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -52,7 +45,12 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftTag
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterChips
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterSheetSelection
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
+
+private val OwnershipFormatLabel = SectionHeaderUiModel.Label(eyebrow = "Ownership · Format")
+private val ReleaseYearLabel = SectionHeaderUiModel.Label(eyebrow = "Release year")
+private val YearFinishedLabel = SectionHeaderUiModel.Label(eyebrow = "Year finished")
+private val TagsLabel = SectionHeaderUiModel.Label(eyebrow = "Tags")
+private val RatingLabel = SectionHeaderUiModel.Label(eyebrow = "Rating")
 
 /**
  * The Filter sheet (redesign brief).
@@ -75,54 +73,47 @@ internal fun LibraryFilterSheet(
     runAction: (LibraryAction) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
-        val dismiss = LocalModalSheetDismiss.current
+    val chips = state.filterChipsFor(tabId = tabId)
+    val selection = state.filterSheetSelection
 
-        val chips = state.filterChipsFor(tabId = tabId)
-        val selection = state.filterSheetSelection
+    SheetScaffold(
+        model = state.filterSheet,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.PrimaryClicked -> runAction(OnApplyFiltersAction())
 
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier
-                    .weight(weight = 1f, fill = false)
-                    .verticalScroll(state = rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
-            ) {
-                SectionHeader(model = state.filterSheetHeader)
+                SheetScaffoldEvent.SecondaryClicked -> runAction(OnFilterDraftClearAllAction())
 
-                Spacer(modifier = Modifier.height(20.dp))
+                SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
-                if (chips.isEmpty) {
-                    EmptyFacetMessage()
-                } else if (selection != null) {
-                    FacetSections(
-                        chips = chips,
-                        selection = selection,
-                        tagSearch = state.filterDraft?.tagSearch.orEmpty(),
-                        onChipEvent = { event ->
-                            when (event) {
-                                is ChipEvent.Clicked -> runAction(OnFilterDraftChipToggledAction(key = event.key))
-                                is ChipEvent.Dismissed -> Unit
-                                is ChipEvent.SpoilerToggled -> Unit
-                            }
-                        },
-                        onTagSearchChanged = { query -> runAction(OnFilterDraftTagSearchChangedAction(query = query)) },
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
             }
-
-            FilterSheetFooter(
-                filtersActive = selection?.clearAllEnabled ?: state.filtersFor(tabId = tabId).isEmpty.not(),
-                resultCount = selection?.resultCount ?: state.tabStatsFor(tabId = tabId).itemCount,
-                onClearAll = { runAction(OnFilterDraftClearAllAction()) },
-                onShowResults = {
-                    runAction(OnApplyFiltersAction())
-
-                    dismiss()
-                },
-            )
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(weight = 1f, fill = false)
+                .verticalScroll(state = rememberScrollState()),
+        ) {
+            if (chips.isEmpty) {
+                EmptyFacetMessage()
+            } else if (selection != null) {
+                FacetSections(
+                    chips = chips,
+                    selection = selection,
+                    tagSearch = state.filterDraft?.tagSearch.orEmpty(),
+                    onChipEvent = { event ->
+                        when (event) {
+                            is ChipEvent.Clicked -> runAction(OnFilterDraftChipToggledAction(key = event.key))
+                            is ChipEvent.Dismissed -> Unit
+                            is ChipEvent.SpoilerToggled -> Unit
+                        }
+                    },
+                    onTagSearchChanged = { query -> runAction(OnFilterDraftTagSearchChangedAction(query = query)) },
+                )
+            }
         }
     }
 }
@@ -136,7 +127,7 @@ private fun FacetSections(
     onTagSearchChanged: (String) -> Unit,
 ) {
     if (chips.ownershipChips.isEmpty.not() || chips.formatChips.isEmpty.not()) {
-        FacetSection(title = "Ownership · Format") {
+        FacetSection(label = OwnershipFormatLabel) {
             (selection.ownershipChips + selection.formatChips).forEach { chip ->
                 Chip(
                     model = chip,
@@ -149,7 +140,7 @@ private fun FacetSections(
     }
 
     if (chips.releaseYearChips.isEmpty.not()) {
-        FacetSection(title = "Release year") {
+        FacetSection(label = ReleaseYearLabel) {
             selection.releaseYearChips.forEach { chip ->
                 Chip(
                     model = chip,
@@ -162,7 +153,7 @@ private fun FacetSections(
     }
 
     if (chips.readYearChips.isEmpty.not()) {
-        FacetSection(title = "Year finished") {
+        FacetSection(label = YearFinishedLabel) {
             selection.readYearChips.forEach { chip ->
                 Chip(
                     model = chip,
@@ -187,7 +178,7 @@ private fun FacetSections(
     }
 
     if (chips.ratingChips.isEmpty.not()) {
-        FacetSection(title = "Rating") {
+        FacetSection(label = RatingLabel) {
             selection.ratingChips.forEach { chip ->
                 Chip(
                     model = chip,
@@ -214,22 +205,16 @@ private fun TagsFacetSection(
     onTagSearchChanged: (String) -> Unit,
 ) {
     Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = "Tags".uppercase(),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Text(
-                text = "$availableCount available",
-                style = MaterialTheme.editorialTypography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        SectionHeader(
+            model = TagsLabel,
+            trailing = {
+                Text(
+                    text = "$availableCount available",
+                    style = MaterialTheme.editorialTypography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -329,15 +314,11 @@ private fun TagSearchField(
 
 @Composable
 private fun FacetSection(
-    title: String,
+    label: SectionHeaderUiModel,
     chips: @Composable () -> Unit,
 ) {
     Column {
-        Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        SectionHeader(model = label)
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -357,54 +338,6 @@ private fun FacetSection(
                 chips()
             }
         }
-    }
-}
-
-@Composable
-private fun FilterSheetFooter(
-    filtersActive: Boolean,
-    resultCount: Int,
-    onClearAll: () -> Unit,
-    onShowResults: () -> Unit,
-) {
-    Divider(model = DividerUiModel.Horizontal())
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        // Always rendered (never appearing/disappearing) so the primary button below never shifts
-        // sideways when the first filter is applied — only its enabled/dimmed state tracks
-        // [filtersActive]. Inert (no click modifier, no hand cursor) while disabled, so the desktop
-        // pointer never promises a click that would do nothing.
-        val clearAllModifier = if (filtersActive) {
-            Modifier
-                .pointerHandCursor()
-                .pressScaleClickable(onClick = onClearAll)
-        } else {
-            Modifier
-        }
-
-        Text(
-            text = "Clear all",
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = if (filtersActive) 1f else 0.4f),
-            modifier = Modifier
-                .then(clearAllModifier)
-                .padding(all = 4.dp),
-        )
-
-        RhaydusButton(
-            label = "Show ${formatBookCount(count = resultCount)}",
-            style = ButtonStyle.FILLED,
-            // ButtonSize.M on both sheet and panel forms — see LibraryArrangeSheet's footer button.
-            size = ButtonSize.M,
-            onClick = onShowResults,
-            modifier = Modifier.weight(1f),
-        )
     }
 }
 

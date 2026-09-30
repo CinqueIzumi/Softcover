@@ -63,7 +63,7 @@ class OnSaveVerdictActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets verdictSheetContext to null before the use case resolves`() = runTest {
+        fun `leaves verdictSheetContext untouched after a successful save`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
             val review = stubReview()
@@ -92,7 +92,40 @@ class OnSaveVerdictActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.verdictSheetContext shouldBe null
+            stateFlow.value.verdictSheetContext shouldBe VerdictSheetContext.EDIT
+        }
+
+        @Test
+        fun `leaves verdictSheetContext untouched after a failed save`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook()
+            val review = stubReview()
+            dependencies = stubDependencies()
+
+            coEvery {
+                saveBookVerdictUseCase(
+                    book = book,
+                    rating = 4.0,
+                    review = review.toReviewDocument(),
+                    hasSpoilers = false,
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnSaveVerdictAction(
+                book = book,
+                rating = 4.0,
+                review = review,
+                hasSpoilers = false,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.verdictSheetContext shouldBe VerdictSheetContext.EDIT
         }
 
         @Test

@@ -1,0 +1,231 @@
+package nl.rhaydus.softcover.feature.library.presentation.state
+
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
+import nl.rhaydus.softcover.core.component.sheet.SheetLayout
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.feature.library.presentation.collector.shelvesSheetRowsFor
+import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class LibrarySheetScaffoldBuilderTest {
+    @Nested
+    inner class ArrangeSheetScaffoldFor {
+        @Test
+        fun `primary button shows the result count and dismisses the sheet`() {
+            // ----- Act -----
+            val model = arrangeSheetScaffoldFor(resultCount = 7)
+
+            // ----- Assert -----
+            val footer = model.footer.shouldNotBeNull()
+            footer.primary.shouldNotBeNull().label.contains(formatBookCount(count = 7)) shouldBe true
+            footer.primary.shouldNotBeNull().dismissesSheet shouldBe true
+            footer.secondary shouldBe null
+            footer.layout shouldBe SheetFooterLayout.Stacked
+            model.layout shouldBe SheetLayout.Scrolling
+        }
+    }
+
+    @Nested
+    inner class FilterSheetScaffoldFor {
+        @Test
+        fun `Clear all is present but disabled while no filter is active`() {
+            // ----- Act -----
+            val footer = filterSheetScaffoldFor(
+                resultCount = 3,
+                filtersActive = false,
+            ).footer.shouldNotBeNull()
+
+            // ----- Assert -----
+            footer.secondary.shouldNotBeNull().enabled shouldBe false
+            footer.secondary.shouldNotBeNull().dismissesSheet shouldBe false
+        }
+
+        @Test
+        fun `Clear all is enabled once a filter is active`() {
+            // ----- Act -----
+            val footer = filterSheetScaffoldFor(
+                resultCount = 3,
+                filtersActive = true,
+            ).footer.shouldNotBeNull()
+
+            // ----- Assert -----
+            footer.secondary.shouldNotBeNull().enabled shouldBe true
+        }
+
+        @Test
+        fun `primary shows the result count, dismisses the sheet and layout is inline`() {
+            // ----- Act -----
+            val model = filterSheetScaffoldFor(
+                resultCount = 1,
+                filtersActive = true,
+            )
+
+            // ----- Assert -----
+            val footer = model.footer.shouldNotBeNull()
+            footer.primary.shouldNotBeNull().label.contains(formatBookCount(count = 1)) shouldBe true
+            footer.primary.shouldNotBeNull().dismissesSheet shouldBe true
+            footer.layout shouldBe SheetFooterLayout.Inline
+            model.layout shouldBe SheetLayout.Pinned
+        }
+    }
+
+    @Nested
+    inner class ShelvesSheetScaffold {
+        @Test
+        fun `has no footer`() {
+            // ----- Act -----
+            val model = shelvesSheetScaffold()
+
+            // ----- Assert -----
+            model.footer shouldBe null
+        }
+    }
+
+    @Nested
+    inner class BulkRemoveSheetScaffoldFor {
+        @Test
+        fun `idle keeps Remove interactive, Cancel enabled and dismissing, and the sheet dismissible`() {
+            // ----- Act -----
+            val model = bulkRemoveSheetScaffoldFor(
+                bookCount = 3,
+                inProgress = false,
+            )
+
+            // ----- Assert -----
+            val footer = model.footer.shouldNotBeNull()
+            footer.primary.shouldNotBeNull().loading shouldBe false
+            footer.primary.shouldNotBeNull().dismissesSheet shouldBe false
+            footer.secondary.shouldNotBeNull().enabled shouldBe true
+            footer.secondary.shouldNotBeNull().dismissesSheet shouldBe true
+            model.dismissible shouldBe true
+        }
+
+        @Test
+        fun `in progress loads Remove, disables Cancel and blocks dismissal`() {
+            // ----- Act -----
+            val model = bulkRemoveSheetScaffoldFor(
+                bookCount = 3,
+                inProgress = true,
+            )
+
+            // ----- Assert -----
+            val footer = model.footer.shouldNotBeNull()
+            footer.primary.shouldNotBeNull().loading shouldBe true
+            footer.secondary.shouldNotBeNull().enabled shouldBe false
+            model.dismissible shouldBe false
+        }
+
+        @Test
+        fun `headline carries the count and singularises for one book`() {
+            // ----- Act -----
+            val one = bulkRemoveSheetScaffoldFor(
+                bookCount = 1,
+                inProgress = false,
+            )
+            val many = bulkRemoveSheetScaffoldFor(
+                bookCount = 4,
+                inProgress = false,
+            )
+
+            // ----- Assert -----
+            one.header.section.headline shouldBe "Remove 1 book?"
+            many.header.section.headline shouldBe "Remove 4 books?"
+        }
+
+        @Test
+        fun `zero books uses the plural`() {
+            // ----- Act -----
+            val model = bulkRemoveSheetScaffoldFor(
+                bookCount = 0,
+                inProgress = false,
+            )
+
+            // ----- Assert -----
+            model.header.section.headline shouldBe "Remove 0 books?"
+        }
+    }
+
+    @Nested
+    inner class ShelvesSheetRowsFor {
+        private val allTab = LibraryTab.All
+        private val readingTab = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING)
+        private val listTab = LibraryTab.CustomList(
+            listId = 9,
+            listName = "Favourites",
+        )
+
+        @Test
+        fun `maps each visible tab to a row keyed by its id, in order`() {
+            // ----- Act -----
+            val rows = shelvesSheetRowsFor(
+                visibleTabs = listOf(allTab, readingTab, listTab),
+                selectedTabId = allTab.id,
+                tabStatsByTab = emptyMap(),
+            )
+
+            // ----- Assert -----
+            rows.map { it.key } shouldBe listOf(allTab.id, readingTab.id, listTab.id)
+            rows.map { it.label } shouldBe listOf(allTab.label, readingTab.label, listTab.label)
+        }
+
+        @Test
+        fun `only the selected tab's row is selected`() {
+            // ----- Act -----
+            val rows = shelvesSheetRowsFor(
+                visibleTabs = listOf(allTab, readingTab),
+                selectedTabId = readingTab.id,
+                tabStatsByTab = emptyMap(),
+            )
+
+            // ----- Assert -----
+            rows.map { it.selected } shouldBe listOf(false, true)
+        }
+
+        @Test
+        fun `count comes from the tab stats and falls back to zero when absent`() {
+            // ----- Act -----
+            val rows = shelvesSheetRowsFor(
+                visibleTabs = listOf(allTab, readingTab),
+                selectedTabId = allTab.id,
+                tabStatsByTab = mapOf(allTab.id to LibraryTabStats(
+                    itemCount = 12,
+                    totalPages = 300,
+                ),),
+            )
+
+            // ----- Assert -----
+            rows.map { it.count } shouldBe listOf("12", "0")
+        }
+
+        @Test
+        fun `custom lists get a different leading icon from shelves`() {
+            // ----- Act -----
+            val rows = shelvesSheetRowsFor(
+                visibleTabs = listOf(allTab, readingTab, listTab),
+                selectedTabId = allTab.id,
+                tabStatsByTab = emptyMap(),
+            )
+
+            // ----- Assert -----
+            rows[0].leadingIcon shouldBe rows[1].leadingIcon
+            (rows[2].leadingIcon == rows[0].leadingIcon) shouldBe false
+        }
+
+        @Test
+        fun `no visible tabs gives no rows`() {
+            // ----- Act -----
+            val rows = shelvesSheetRowsFor(
+                visibleTabs = emptyList(),
+                selectedTabId = allTab.id,
+                tabStatsByTab = emptyMap(),
+            )
+
+            // ----- Assert -----
+            rows shouldBe emptyList()
+        }
+    }
+}
