@@ -14,9 +14,6 @@ import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
-import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
@@ -156,8 +153,8 @@ class OnIsbnSubmittedActionTest {
             stateFlow.value.isResolving shouldBe false
 
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<BookResolvedEvent>()
-            (event as BookResolvedEvent).book shouldBe book
+            event.shouldBeInstanceOf<ScanEvent.BookResolvedEvent>()
+            (event as ScanEvent.BookResolvedEvent).book shouldBe book
             event.editionId shouldBe editionId
         }
 
@@ -184,8 +181,8 @@ class OnIsbnSubmittedActionTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<BookResolvedEvent>()
-            (event as BookResolvedEvent).editionId shouldBe null
+            event.shouldBeInstanceOf<ScanEvent.BookResolvedEvent>()
+            (event as ScanEvent.BookResolvedEvent).editionId shouldBe null
         }
 
         @Test
@@ -254,7 +251,7 @@ class OnIsbnSubmittedActionTest {
             stateFlow.value.isResolving shouldBe false
 
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<InvalidIsbnEvent>()
+            event.shouldBeInstanceOf<ScanEvent.InvalidIsbnEvent>()
         }
 
         @Test
@@ -278,7 +275,7 @@ class OnIsbnSubmittedActionTest {
             stateFlow.value.isResolving shouldBe false
 
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<ResolutionFailedEvent>()
+            event.shouldBeInstanceOf<ScanEvent.ResolutionFailedEvent>()
         }
 
         @Test

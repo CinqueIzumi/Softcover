@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
@@ -32,7 +30,7 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
                 }
 
                 scope.sendEvent(
-                    event = BookResolvedEvent(
+                    event = ScanEvent.BookResolvedEvent(
                         book = result.book,
                         editionId = result.editionId,
                     ),
@@ -48,7 +46,7 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
                     it.copy(isAddingBook = false)
                 }
 
-                scope.sendEvent(event = AddBookFailedEvent())
+                scope.sendEvent(event = ScanEvent.AddBookFailedEvent())
             }
     }
 }

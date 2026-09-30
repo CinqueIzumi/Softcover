@@ -20,10 +20,7 @@ import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnCon
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction
 import nl.rhaydus.softcover.feature.scan.presentation.component.UnknownIsbnSheet
-import nl.rhaydus.softcover.feature.scan.presentation.event.AddBookFailedEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent
+import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraAvailable
 import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraPermissionGranted
 import nl.rhaydus.softcover.feature.scan.presentation.permission.rememberCameraPermissionRequester
@@ -62,7 +59,7 @@ class BarcodeScannerScreen : Screen {
 
         ObserveAsEvents(flow = screenModel.events) { event ->
             when (event) {
-                is BookResolvedEvent -> {
+                is ScanEvent.BookResolvedEvent -> {
                     val scannedEdition = event.book.editions.firstOrNull { it.id == event.editionId }
 
                     navigator.pop()
@@ -82,9 +79,9 @@ class BarcodeScannerScreen : Screen {
                     )
                 }
 
-                is InvalidIsbnEvent -> SnackBarManager.showSnackbar(title = "That doesn't look like a valid ISBN.")
-                is ResolutionFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't look that up — try again.")
-                is AddBookFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't add it — try again.")
+                is ScanEvent.InvalidIsbnEvent -> SnackBarManager.showSnackbar(title = "That doesn't look like a valid ISBN.")
+                is ScanEvent.ResolutionFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't look that up — try again.")
+                is ScanEvent.AddBookFailedEvent -> SnackBarManager.showSnackbar(title = "Couldn't add it — try again.")
             }
         }
 

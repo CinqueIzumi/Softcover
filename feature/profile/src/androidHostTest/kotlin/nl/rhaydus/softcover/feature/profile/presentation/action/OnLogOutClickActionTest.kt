@@ -12,7 +12,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
-import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -83,7 +82,7 @@ class OnLogOutClickActionTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<LogOutUserEvent>()
+            event.shouldBeInstanceOf<ProfileEvent.LogOutUserEvent>()
         }
 
         @Test

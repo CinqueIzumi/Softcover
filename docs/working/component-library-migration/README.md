@@ -14,12 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S6-6 done, uncommitted: four sheets on `SheetScaffold`; sheet-body values on state with one
-  collector writer each; share / save capture runs on a `BookDetailEvent` the busy-guarding action sends;
-  book_detail events nested in `BookDetailEvent.kt` (`docs/reference/code-style.md` § Events). Mood tile
-  → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** commit S6-6 (ask first); then nest the explore / lists / profile / scan / settings events
-  per § Events as its own commit; then S6-7 (`steps/s6-sheet-chrome.md` § S6-7).
+- **State:** S6-6 committed (`23137dce`). Event variants nested per `docs/reference/code-style.md` § Events
+  in lists / profile / scan (explore and settings had no variant files), committed; tests use the
+  qualified `<Name>Event.<Variant>Event` form. Mood tile → S7-4; 14 Apollo-alias files wait on F24.
+- **Next:** S6-7 (`steps/s6-sheet-chrome.md` § S6-7).
 - **Open questions:** none.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
@@ -39,10 +37,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   unknown-ISBN footer; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now).
 - **Verification:** `styleCheck` and the book_detail, library, scan, settings, core:presentation host
-  suites green under JBR 21; final production + test reviews applied. Run Gradle with
+  suites green under JBR 21 before the S6-6 commit. Run Gradle with
   `JAVA_HOME=$(/usr/libexec/java_home -v 21)` (JDK 26 breaks detekt and the keystore tests).
-- **Uncommitted:** all of S6-6 — book_detail, library, scan, settings, core:presentation (prod + tests),
-  `docs/reference/code-style.md`, this README and `s6-sheet-chrome.md`.
+- **Uncommitted:** nothing.
 
 ## Local verification
 

@@ -10,7 +10,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
-import nl.rhaydus.softcover.feature.profile.presentation.event.LogOutUserEvent
+import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import org.koin.compose.koinInject
@@ -27,7 +27,7 @@ class ProfileScreen : Screen {
 
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
-                is LogOutUserEvent -> sessionAuthenticator.setUserAuthenticated(authenticated = false)
+                is ProfileEvent.LogOutUserEvent -> sessionAuthenticator.setUserAuthenticated(authenticated = false)
             }
         }
 

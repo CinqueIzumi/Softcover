@@ -8,9 +8,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreatedEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreationFailedEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListNameTakenEvent
+import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
 import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListScreenModel
 
 /**
@@ -37,7 +35,7 @@ internal class CreateListScreen(
 
         ObserveAsEvents(flow = screenModel.events) { event ->
             when (event) {
-                is ListCreatedEvent -> {
+                is CreateListEvent.ListCreatedEvent -> {
                     // A caller that opened this sheet mid-task (add-to-list) finishes that task with
                     // the new id and reports the outcome its own way — "Added 5 books to X" says more
                     // than "List X created", and two stacked snackbars for one tap says less. Only the
@@ -54,11 +52,11 @@ internal class CreateListScreen(
                     onDismissRequest()
                 }
 
-                is ListNameTakenEvent -> SnackBarManager.showSnackbar(
+                is CreateListEvent.ListNameTakenEvent -> SnackBarManager.showSnackbar(
                     title = "You already have a list called “${event.name}”. Pick another name.",
                 )
 
-                is ListCreationFailedEvent -> SnackBarManager.showSnackbar(
+                is CreateListEvent.ListCreationFailedEvent -> SnackBarManager.showSnackbar(
                     title = "Could not create list. Try again.",
                 )
             }

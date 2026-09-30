@@ -2,9 +2,6 @@ package nl.rhaydus.softcover.feature.scan.presentation.action
 
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
-import nl.rhaydus.softcover.feature.scan.presentation.event.BookResolvedEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.InvalidIsbnEvent
-import nl.rhaydus.softcover.feature.scan.presentation.event.ResolutionFailedEvent
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
@@ -29,7 +26,7 @@ internal class OnIsbnSubmittedAction(
                         scope.setState { it.copy(isResolving = false) }
 
                         scope.sendEvent(
-                            event = BookResolvedEvent(
+                            event = ScanEvent.BookResolvedEvent(
                                 book = result.book,
                                 editionId = result.editionId,
                             ),
@@ -48,7 +45,7 @@ internal class OnIsbnSubmittedAction(
                     is IsbnLookupResult.InvalidIsbn -> {
                         scope.setState { it.copy(isResolving = false) }
 
-                        scope.sendEvent(event = InvalidIsbnEvent())
+                        scope.sendEvent(event = ScanEvent.InvalidIsbnEvent())
                     }
                 }
             }
@@ -60,7 +57,7 @@ internal class OnIsbnSubmittedAction(
 
                 scope.setState { it.copy(isResolving = false) }
 
-                scope.sendEvent(event = ResolutionFailedEvent())
+                scope.sendEvent(event = ScanEvent.ResolutionFailedEvent())
             }
     }
 }

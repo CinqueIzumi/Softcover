@@ -3,9 +3,6 @@ package nl.rhaydus.softcover.feature.lists.presentation.action
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreatedEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreationFailedEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListNameTakenEvent
 import nl.rhaydus.softcover.feature.lists.presentation.screenmodel.CreateListDependencies
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVariables
@@ -33,7 +30,7 @@ internal class OnSubmitAction : CreateListAction {
             scope.setState { it.copy(isSubmitting = false) }
 
             scope.sendEvent(
-                event = ListCreatedEvent(
+                event = CreateListEvent.ListCreatedEvent(
                     listId = created.id,
                     name = created.name,
                 ),
@@ -47,8 +44,8 @@ internal class OnSubmitAction : CreateListAction {
             scope.setState { it.copy(isSubmitting = false) }
 
             val event: CreateListEvent = when (error) {
-                is ListNameTakenException -> ListNameTakenEvent(name = error.name)
-                else -> ListCreationFailedEvent()
+                is ListNameTakenException -> CreateListEvent.ListNameTakenEvent(name = error.name)
+                else -> CreateListEvent.ListCreationFailedEvent()
             }
 
             scope.sendEvent(event = event)

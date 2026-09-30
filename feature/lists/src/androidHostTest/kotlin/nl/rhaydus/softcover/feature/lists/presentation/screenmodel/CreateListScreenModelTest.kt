@@ -19,9 +19,6 @@ import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedActio
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnPrivacyToggledAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnSubmitAction
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreatedEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListCreationFailedEvent
-import nl.rhaydus.softcover.feature.lists.presentation.event.ListNameTakenEvent
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 import nl.rhaydus.softcover.feature.lists.presentation.state.LocalCreateListVariables
 import nl.rhaydus.toad.ActionScope
@@ -221,7 +218,7 @@ class CreateListScreenModelTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<ListCreatedEvent>()
+            event.shouldBeInstanceOf<CreateListEvent.ListCreatedEvent>()
             event.listId shouldBe 42
             event.name shouldBe "Favourites"
         }
@@ -290,7 +287,7 @@ class CreateListScreenModelTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<ListCreationFailedEvent>()
+            event.shouldBeInstanceOf<CreateListEvent.ListCreationFailedEvent>()
         }
 
         @Test
@@ -313,7 +310,7 @@ class CreateListScreenModelTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<ListNameTakenEvent>()
+            event.shouldBeInstanceOf<CreateListEvent.ListNameTakenEvent>()
             event.name shouldBe "Favourites"
         }
 
