@@ -9,16 +9,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -51,39 +48,24 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.component.StarRatingInput
-import nl.rhaydus.designsystem.model.ButtonSize
-import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.control.RichTextFormattingToolbar
-import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
-import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextMark
 import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
-import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.applyEditToMarks
 import nl.rhaydus.softcover.core.component.richtext.documentToEditorBuffer
 import nl.rhaydus.softcover.core.component.richtext.editorBufferToDocument
 import nl.rhaydus.softcover.core.component.richtext.isRangeMarked
 import nl.rhaydus.softcover.core.component.richtext.toggleMark
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 import kotlin.math.roundToInt
-
-/**
- * The cover slot's width. Owned by the sheet, not the caller: the cover is part of this sheet's
- * anatomy, so the caller supplies the *image*, not its size.
- */
-private val VERDICT_SHEET_COVER_WIDTH = 96.dp
 
 private val VERDICT_CAPTIONS = listOf(
     "A hard finish.",
@@ -100,42 +82,23 @@ private val VERDICT_CAPTIONS = listOf(
 
 /**
  * The combined "Verdict" sheet fusing a half-star rating with an optional written review — the single
- * surface both `feature/book_detail` (reopened from the book page) and `feature/reading` (raised once
- * on a genuine mark-as-read transition) host, each driven by its own TOAD state and saving through the
- * shared `core:book` `SaveBookVerdictUseCase`, the same shared-stateless-component pattern
- * `ChooseListsBottomSheet` / `UpdateProgressBottomSheet` follow. [context] swaps copy only (see the
- * private `verdictCopyFor` below); the anatomy is identical either way.
+ * surface for a book's verdict.
  *
- * The sheet is a fixed dismiss header over a scrolling middle over a pinned action footer, so the
- * primary action is never buried below the fold, regardless of how much review text or how tall the
- * keyboard pushes the content — the same shape `feature/book_detail`'s `EditionBottomSheetSelector`
- * uses for the same reason.
+ * The header and the footer are pinned around a body that scrolls itself, so the primary action is
+ * never buried below the fold, however much review text or how tall the keyboard pushes the content.
  *
- * Rating and review are held as a **local draft** — exactly like the review editor it replaces held its
- * text/marks/spoiler flag — seeded once from [initialRating] / [initialReview] / [initialHasSpoilers].
- * [StarRatingInput] only updates the draft; nothing reaches [onSave] until the caller taps Save, so
- * leaving with just a rating, just a review, or neither is always possible.
- *
- * [cover] is a slot rather than an edition, because resolving a book's cover is the *app's* job: it
- * needs the reader's chosen edition, the book's default, a fallback URL and a locally persisted file,
- * none of which a component may know about (R4). The caller passes the cover surface it already uses
- * everywhere else, and the sheet only decides where it sits and how big it is. `@Composable` slot
- * rather than a resolved URL for the same reason — the sheet takes no position on how an image loads.
+ * Rating and review are held as a **local draft**, seeded once from the model's `initial*` fields.
+ * [StarRatingInput] only updates the draft; nothing reaches [onEvent] until the reader taps Save
+ * ([VerdictSheetEvent.Saved]), so leaving with just a rating, just a review, or neither is always
+ * possible.
  */
 @Composable
 fun VerdictSheet(
-    context: VerdictSheetContext,
-    bookTitle: String,
-    initialRating: Double?,
-    initialReview: RichTextUiModel,
-    initialHasSpoilers: Boolean,
-    canDelete: Boolean,
-    onSave: (rating: Double?, review: RichTextUiModel, hasSpoilers: Boolean) -> Unit,
-    onDelete: () -> Unit,
-    onDismissRequest: () -> Unit,
-    cover: @Composable () -> Unit,
+    model: VerdictSheetUiModel,
+    onEvent: (VerdictSheetEvent) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val initialBuffer = remember { documentToEditorBuffer(document = initialReview) }
+    val initialBuffer = remember { documentToEditorBuffer(document = model.initialReview) }
 
     var textFieldValue by remember {
         mutableStateOf(
@@ -148,9 +111,9 @@ fun VerdictSheet(
 
     var marks by remember { mutableStateOf(initialBuffer.marks) }
 
-    var hasSpoilers by remember { mutableStateOf(initialHasSpoilers) }
+    var hasSpoilers by remember { mutableStateOf(model.initialHasSpoilers) }
 
-    var draftRating by remember { mutableStateOf(initialRating) }
+    var draftRating by remember { mutableStateOf(model.initialRating) }
 
     val spoilerHighlight: Color = MaterialTheme.colorScheme.spoilerEditorHighlight
 
@@ -174,285 +137,184 @@ fun VerdictSheet(
     val selectionStart: Int = selection.min
     val selectionEnd: Int = selection.max
 
-    val copy = verdictCopyFor(
-        context = context,
-        bookTitle = bookTitle,
-    )
+    SheetScaffold(
+        model = model.scaffold,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.PrimaryClicked -> onEvent(
+                    VerdictSheetEvent.Saved(
+                        rating = draftRating,
+                        review = editorBufferToDocument(
+                            text = textFieldValue.text,
+                            marks = marks,
+                        ),
+                        hasSpoilers = hasSpoilers,
+                    ),
+                )
 
-    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+                SheetScaffoldEvent.SecondaryClicked -> onEvent(VerdictSheetEvent.DeleteRequested)
+
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.Dismissed,
+                -> onEvent(VerdictSheetEvent.Dismissed)
+
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
+            }
+        },
+        modifier = modifier,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight()
-                .imePadding(),
+                .verticalScroll(state = rememberScrollState()),
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 24.dp,
-                        end = 24.dp,
-                        top = 8.dp,
-                    ),
-                horizontalArrangement = Arrangement.End,
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = copy.dismissLabel,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .pointerHandCursor()
-                        .pressScaleClickable(onClick = onDismissRequest),
+                StarRatingInput(
+                    rating = draftRating,
+                    onRatingChange = { draftRating = it },
+                    starIcon = drawableIconResource(
+                        icon = SoftcoverIcon.StarFilled,
+                        contentDescription = "",
+                    ),
+                    filledColor = RatingGold,
+                    starSize = 42.dp,
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(state = rememberScrollState())
-                    .padding(horizontal = 24.dp),
-            ) {
-                Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Box(modifier = Modifier.width(VERDICT_SHEET_COVER_WIDTH)) {
-                        cover()
+            VerdictScoreAndCaption(rating = draftRating)
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            Text(
+                text = "In your words",
+                style = MaterialTheme.editorialTypography.eyebrowSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            BasicTextField(
+                value = textFieldValue,
+                onValueChange = { updated ->
+                    if (updated.text != textFieldValue.text) {
+                        marks = applyEditToMarks(
+                            marks = marks,
+                            oldText = textFieldValue.text,
+                            newText = updated.text,
+                        )
                     }
-                }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                SectionHeader(model = copy.header)
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    StarRatingInput(
-                        rating = draftRating,
-                        onRatingChange = { draftRating = it },
-                        starIcon = drawableIconResource(
-                            icon = SoftcoverIcon.StarFilled,
-                            contentDescription = "",
-                        ),
-                        filledColor = RatingGold,
-                        starSize = 42.dp,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                VerdictScoreAndCaption(rating = draftRating)
-
-                Spacer(modifier = Modifier.height(28.dp))
-
-                Text(
-                    text = "In your words",
-                    style = MaterialTheme.editorialTypography.eyebrowSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                BasicTextField(
-                    value = textFieldValue,
-                    onValueChange = { updated ->
-                        if (updated.text != textFieldValue.text) {
-                            marks = applyEditToMarks(
-                                marks = marks,
-                                oldText = textFieldValue.text,
-                                newText = updated.text,
+                    textFieldValue = updated
+                },
+                textStyle = MaterialTheme.editorialTypography.body.copy(
+                    color = onSurfaceColor,
+                    fontStyle = FontStyle.Normal,
+                ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                visualTransformation = visualTransformation,
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { innerTextField ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 120.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                    ) {
+                        if (textFieldValue.text.isEmpty()) {
+                            Text(
+                                text = "What stayed with you? A line is plenty.",
+                                style = MaterialTheme.editorialTypography.body.copy(
+                                    fontStyle = FontStyle.Normal,
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
 
-                        textFieldValue = updated
-                    },
-                    textStyle = MaterialTheme.editorialTypography.body.copy(
-                        color = onSurfaceColor,
-                        fontStyle = FontStyle.Normal,
-                    ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    visualTransformation = visualTransformation,
-                    modifier = Modifier.fillMaxWidth(),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 120.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                        ) {
-                            if (textFieldValue.text.isEmpty()) {
-                                Text(
-                                    text = "What stayed with you? A line is plenty.",
-                                    style = MaterialTheme.editorialTypography.body.copy(
-                                        fontStyle = FontStyle.Normal,
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-
-                            innerTextField()
-                        }
-                    },
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                RichTextFormattingToolbar(
-                    isBold = isRangeMarked(
-                        marks = marks,
-                        start = selectionStart,
-                        end = selectionEnd,
-                        type = RichTextMarkType.BOLD,
-                    ),
-                    isItalic = isRangeMarked(
-                        marks = marks,
-                        start = selectionStart,
-                        end = selectionEnd,
-                        type = RichTextMarkType.ITALIC,
-                    ),
-                    isSpoiler = isRangeMarked(
-                        marks = marks,
-                        start = selectionStart,
-                        end = selectionEnd,
-                        type = RichTextMarkType.SPOILER,
-                    ),
-                    enabled = hasSelection,
-                    onToggle = { type ->
-                        marks = toggleMark(
-                            marks = marks,
-                            start = selectionStart,
-                            end = selectionEnd,
-                            type = type,
-                        )
-                    },
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Select text, then tap B, i or Spoiler",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Contains spoilers",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-
-                        Spacer(modifier = Modifier.height(2.dp))
-
-                        Text(
-                            text = "Readers will need to tap to reveal the whole review.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        innerTextField()
                     }
+                },
+            )
 
-                    Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-                    Switch(
-                        checked = hasSpoilers,
-                        onCheckedChange = { hasSpoilers = it },
+            RichTextFormattingToolbar(
+                isBold = isRangeMarked(
+                    marks = marks,
+                    start = selectionStart,
+                    end = selectionEnd,
+                    type = RichTextMarkType.BOLD,
+                ),
+                isItalic = isRangeMarked(
+                    marks = marks,
+                    start = selectionStart,
+                    end = selectionEnd,
+                    type = RichTextMarkType.ITALIC,
+                ),
+                isSpoiler = isRangeMarked(
+                    marks = marks,
+                    start = selectionStart,
+                    end = selectionEnd,
+                    type = RichTextMarkType.SPOILER,
+                ),
+                enabled = hasSelection,
+                onToggle = { type ->
+                    marks = toggleMark(
+                        marks = marks,
+                        start = selectionStart,
+                        end = selectionEnd,
+                        type = type,
                     )
-                }
+                },
+            )
 
-                Spacer(modifier = Modifier.height(20.dp))
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 24.dp,
-                        end = 24.dp,
-                        top = 12.dp,
-                        bottom = 8.dp,
-                    ),
+            Text(
+                text = "Select text, then tap B, i or Spoiler",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Divider(model = DividerUiModel.Horizontal())
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Contains spoilers",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
 
-                RhaydusButton(
-                    label = copy.saveLabel,
-                    style = ButtonStyle.FILLED,
-                    size = ButtonSize.M,
-                    onClick = {
-                        onSave(
-                            draftRating,
-                            editorBufferToDocument(
-                                text = textFieldValue.text,
-                                marks = marks,
-                            ),
-                            hasSpoilers,
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-
-                if (canDelete) {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    RhaydusButton(
-                        label = "Delete review",
-                        style = ButtonStyle.TEXT,
-                        size = ButtonSize.M,
-                        onClick = onDelete,
-                        modifier = Modifier.fillMaxWidth(),
+                    Text(
+                        text = "Readers will need to tap to reveal the whole review.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Switch(
+                    checked = hasSpoilers,
+                    onCheckedChange = { hasSpoilers = it },
+                )
             }
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
-}
-
-/** The header/dismiss/save copy that swaps per [VerdictSheetContext] (§Copy). */
-private data class VerdictCopy(
-    val header: SectionHeaderUiModel.Section,
-    val dismissLabel: String,
-    val saveLabel: String,
-)
-
-private fun verdictCopyFor(
-    context: VerdictSheetContext,
-    bookTitle: String,
-): VerdictCopy = when (context) {
-    VerdictSheetContext.FINISHED -> VerdictCopy(
-        header = SectionHeaderUiModel.Section(
-            eyebrow = "The last page",
-            headline = "You finished $bookTitle.",
-            description = "A rating and a few words, if you like — both are optional.",
-        ),
-        dismissLabel = "Not now",
-        saveLabel = "Save",
-    )
-
-    VerdictSheetContext.EDIT -> VerdictCopy(
-        header = SectionHeaderUiModel.Section(
-            eyebrow = "Your verdict",
-            headline = "Your take on $bookTitle.",
-        ),
-        dismissLabel = "Cancel",
-        saveLabel = "Save changes",
-    )
 }
 
 /**

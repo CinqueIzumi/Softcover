@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -65,6 +66,12 @@ internal data class ReadingScreenUiState(
 
     val verdictPromptBook: Book? = null,
     val verdictReview: RichTextUiModel? = null,
+
+    /**
+     * The verdict prompt, mapped by `VerdictSheetCollector` (R9) from [verdictPromptBook],
+     * [verdictReview] and [verdictCover]; `null` exactly when [verdictPromptBook] is.
+     */
+    val verdictSheet: VerdictSheetUiModel? = null,
 
     /**
      * Every cover surface on this screen, mapped off the composition by `CoverModelsCollector`

@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingActivi
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingPaceForecastCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.TrendingBooksLoader
+import nl.rhaydus.softcover.feature.reading.presentation.collector.VerdictSheetCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.WantToReadCollector
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import org.koin.dsl.bind
@@ -66,6 +67,7 @@ val readingModule = module {
 
     factory { CurrentlyReadingBooksCollector() } bind ReadingCollector::class
     factory { ProgressSheetCollector() } bind ReadingCollector::class
+    factory { VerdictSheetCollector() } bind ReadingCollector::class
     factory { CoverModelsCollector() } bind ReadingCollector::class
     factory { DeadlineModelsCollector() } bind ReadingCollector::class
     factory { BookDeadlinesCollector() } bind ReadingCollector::class

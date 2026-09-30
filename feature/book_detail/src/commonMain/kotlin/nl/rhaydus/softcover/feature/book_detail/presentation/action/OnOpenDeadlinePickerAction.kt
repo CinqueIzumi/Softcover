@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.coroutines.flow.firstOrNull
+import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -11,9 +13,19 @@ internal class OnOpenDeadlinePickerAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(
-            showDeadlinePicker = true,
-            fabMenuExpanded = false,
-        ) }
+        val initialDate = scope.currentState.deadline?.deadlineDate
+            ?: dependencies.observeCurrentDateUseCase().firstOrNull()
+            ?: return
+
+        scope.setState {
+            it.copy(
+                deadlinePicker = DatePickerUiModel(
+                    initialDate = initialDate,
+                    confirmLabel = "Confirm",
+                    cancelLabel = "Cancel",
+                ),
+                fabMenuExpanded = false,
+            )
+        }
     }
 }

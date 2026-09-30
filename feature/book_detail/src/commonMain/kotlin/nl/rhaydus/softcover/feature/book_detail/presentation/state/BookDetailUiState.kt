@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
@@ -17,7 +18,8 @@ import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
-import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -28,6 +30,7 @@ import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.EditionTrailingUiModel
 import nl.rhaydus.toad.UiState
@@ -92,7 +95,9 @@ internal data class BookDetailUiState(
     /** [deadlineProgress] mapped to a badge by `BookDeadlineCollector` (R9), so badge and progress share one writer and cannot disagree. */
     val deadlineBadge: BadgeUiModel? = null,
     val readingPaceForecast: ReadingPaceForecast? = null,
-    val showDeadlinePicker: Boolean = false,
+
+    /** Non-null exactly while the deadline picker is open; built by `OnOpenDeadlinePickerAction`. */
+    val deadlinePicker: DatePickerUiModel? = null,
 
     /** [Book.effectiveReleaseDate] mapped to an unreleased-release badge by `UnreleasedBadgeCollector` (R9), off [book]. */
     val unreleasedBadge: BadgeUiModel? = null,
@@ -104,8 +109,18 @@ internal data class BookDetailUiState(
     val loadingReviews: Boolean = false,
     val revealedSpoilerReviewIds: Set<Int> = emptySet(),
 
+    /** Which caller opened the verdict sheet — the open flag; `null` while it is closed. */
     val verdictSheetContext: VerdictSheetContext? = null,
     val verdictReview: RichTextUiModel? = null,
+
+    /** The "Your verdict" card, mapped by `VerdictReviewCollector` (R9) off the book's user data. */
+    val verdictBlock: VerdictBlockUiModel? = null,
+
+    /**
+     * The verdict sheet, mapped by `VerdictSheetCollector` (R9) off [book], [verdictReview],
+     * [verdictCover] and [verdictSheetContext]; `null` whenever [verdictSheetContext] is.
+     */
+    val verdictSheet: VerdictSheetUiModel? = null,
 
     val failedMutationBookIds: Set<Int> = emptySet(),
     val failedMutationEditionIds: Set<Int> = emptySet(),

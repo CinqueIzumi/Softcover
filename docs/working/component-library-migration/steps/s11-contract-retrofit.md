@@ -42,8 +42,7 @@ size class, a `CompositionLocal`), is decided in S11-3 through `TopBarSurface`.
 ## S11-2 — R11 holdouts
 
 Components still taking a loose render parameter instead of the model deciding it: `RichText`,
-`StatNumber`, `ClickableText`, `MarkAsReadBurst` and `CoverlessTitleCover`. `VerdictBlock` and
-`VerdictSheet` close in `steps/s6-sheet-chrome.md` S6-4.
+`StatNumber`, `ClickableText`, `MarkAsReadBurst` and `CoverlessTitleCover`.
 
 ## S11-3 — `TopBarSurface`, `ShareCardPalette`, final check
 

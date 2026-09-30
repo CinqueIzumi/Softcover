@@ -18,7 +18,7 @@ internal class OnDeadlinePickedAction(
     ) {
         val book = scope.currentState.book ?: return
         val edition = book.currentEdition ?: run {
-            scope.setState { it.copy(showDeadlinePicker = false) }
+            scope.setState { it.copy(deadlinePicker = null) }
             return
         }
         val isAudiobook = edition.isAudiobook
@@ -39,6 +39,6 @@ internal class OnDeadlinePickedAction(
             unit = unit,
         ).onApiFailure()
 
-        scope.setState { it.copy(showDeadlinePicker = false) }
+        scope.setState { it.copy(deadlinePicker = null) }
     }
 }

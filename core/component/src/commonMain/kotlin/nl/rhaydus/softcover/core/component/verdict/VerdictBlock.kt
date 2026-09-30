@@ -36,26 +36,25 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 private const val VERDICT_BLOCK_REVIEW_COLLAPSED_LINES = 8
 
 /**
- * The book-page "Your verdict" card, replacing the old separate rating row + review card. Read-only —
- * tapping anywhere on the card (or the "Edit" link, once a verdict exists) reports [onEditClick], which
- * the caller wires to open [VerdictSheet] in `EDIT` context; rating and review are only ever changed
- * inside that sheet, never inline on the book page.
+ * The book-page "Your verdict" card. Read-only — tapping anywhere on the card (or the "Edit" link, once
+ * a verdict exists) reports [VerdictBlockEvent.EditRequested], which the caller wires to open
+ * [VerdictSheet]; rating and review are only ever changed inside that sheet, never inline on the book
+ * page.
  *
- * Renders **empty** (outline stars + an invitation) when neither [rating] nor [review] carries content,
- * or **filled** — whichever of a gold star row / score line and a rendered [review] paragraph actually
+ * Renders **empty** (outline stars + an invitation) when neither rating nor review carries content,
+ * or **filled** — whichever of a gold star row / score line and a rendered review paragraph actually
  * has content, separated by a hairline when both are present — followed by a "Tap to edit" hint.
- * [rating] and [review] are independent: a rating-only or review-only verdict still renders the filled
- * anatomy, simply omitting the piece with no content.
  */
 @Composable
 fun VerdictBlock(
-    rating: Double?,
-    review: RichTextUiModel?,
-    hasSpoilers: Boolean,
-    onEditClick: () -> Unit,
+    model: VerdictBlockUiModel,
+    onEvent: (VerdictBlockEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val displayedReview = review?.takeIf { it.isBlank().not() }
+    val rating = model.rating
+    val hasSpoilers = model.hasSpoilers
+    val onEditClick = { onEvent(VerdictBlockEvent.EditRequested) }
+    val displayedReview = model.review?.takeIf { it.isBlank().not() }
     val hasVerdict = rating != null || displayedReview != null
 
     Column(modifier = modifier.fillMaxWidth()) {

@@ -167,7 +167,7 @@ Filed but not yet implemented in the foundation.
   practice on the same thing as the deprecation cleanup: there is no maintained Compose overflow API to
   build it on (`FlowRowOverflow` is deprecated, `ContextualFlowRow` likewise).
 
-### F28 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
+### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)
 - **Home:** `build-logic` convention plugins (alongside `rhaydus.module-graph`, F18)

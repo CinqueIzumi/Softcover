@@ -86,6 +86,8 @@ decided by the feature. When a component seems to need a domain type, give it a 
 same shape (`RichTextUiModel` in place of `ReviewDocument`). R4 governs `:core:component`, not a feature's
 own presentation models: a feature-local model may carry a domain enum as an event payload (`PaletteChoice`
 carries a `ColorPalette`) as long as R9 holds — the render neither maps nor labels it, only forwards it.
+`kotlinx.datetime.LocalDate` is an allowed value type: a plain calendar day carries no domain vocabulary
+(`DatePickerUiModel.initialDate`).
 
 **R5 — Every UI model ships preview fixtures.**
 
@@ -122,10 +124,10 @@ of those. The `UiState` carries the result; a component never receives a domain 
 
 ```kotlin
 // WRONG — the render maps
-VerdictBlock(review = state.book?.userBook?.reviewDocument?.toRichTextUiModel())
+RichText(model = state.book?.userBook?.reviewDocument?.toRichTextUiModel())
 
 // RIGHT — the collector mapped; the render forwards
-VerdictBlock(review = state.verdictReview)
+VerdictBlock(model = state.verdictBlock, onEvent = onEvent)
 ```
 
 Carve-out: reading a **platform** signal in composition is not mapping. `ThemeMode.isDark()` (which resolves
@@ -175,14 +177,14 @@ RichText(model = state.review)          // model.variant decides the face and th
 ```
 
 - **Allowed: a trailing `content` slot** (§ 7.1). It is a composition hole the caller fills with a
-  composable, which a data model cannot hold (`VerdictSheet`'s `cover` slot).
+  composable, which a data model cannot hold.
 - **Allowed: Compose plumbing that cannot live in an immutable value** — `modifier`, or a hoisted mutable
   state object shared with the scaffold (`TopAppBarScrollBehavior`). The test: could it be serialised with
   the rest of the model? A `TextStyle` could, a `ScrollState` could not.
 - **Not yet satisfied by the whole library.** Fixed in the same S11 retrofit as R10. Current holdouts:
   `RichText` (`style`, `color`, `maxLines`, `overflow`, `onClick`, `onTextLayout`), `StatNumber` (`style`,
   `color`, `autoSize`, `maxLines`), `ClickableText` (`style`, `inlineContent`), `MarkAsReadBurst` (`color`,
-  `secondaryColor`), `CoverlessTitleCover` (`title`), and the R1 holdouts `VerdictBlock` / `VerdictSheet`.
+  `secondaryColor`), `CoverlessTitleCover` (`title`).
   Write new components to R11; an existing signature is not licence.
 
 ### 7.3 Reference implementation — `ShareCard`
@@ -238,10 +240,8 @@ Consequences:
 
 - **A data-free UI model may be built at the call site (R10).** When no field derives from data, as with
   `DividerUiModel`, the call site builds it inline with its defaults and any overrides.
-- **`VerdictSheet`, `VerdictBlock` and `RichTextFormattingToolbar`** still take loose parameters and N
-  callbacks; they are fixed with the verdict family's sheet-chrome consolidation. Do not copy their shape.
-  `VerdictSheet`'s `cover` slot stays a slot on purpose (R11).
-- **Neither migrated sheet has a gallery entry**, because a fixture tile cannot render a modal inline. Their
+- **`RichTextFormattingToolbar`** still takes loose parameters and N callbacks. Do not copy its shape.
+- **No migrated sheet or dialog has a gallery entry**, because a fixture tile cannot render a modal inline. Their
   models still ship `previews` (R5), and the components' own `@Preview` functions render from that list. A
   "tap to open" fixture is a gallery feature to design once for all sheets, not per sheet.
 

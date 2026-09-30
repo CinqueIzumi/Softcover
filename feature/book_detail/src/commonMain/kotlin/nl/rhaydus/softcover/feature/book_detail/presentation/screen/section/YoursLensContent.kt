@@ -19,11 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
-import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.core.component.verdict.VerdictBlockEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -169,13 +170,19 @@ internal fun YoursLensContent(
         if (book.status == BookStatus.Read) {
             Spacer(modifier = Modifier.height(28.dp))
 
-            VerdictBlock(
-                rating = book.userBook?.rating?.takeIf { it > 0.0 },
-                review = state.verdictReview,
-                hasSpoilers = book.userBook?.reviewHasSpoilers == true,
-                onEditClick = { runAction(OnOpenVerdictSheetAction(context = VerdictSheetContext.EDIT)) },
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
+            state.verdictBlock?.let { verdictBlock ->
+                VerdictBlock(
+                    model = verdictBlock,
+                    onEvent = { event ->
+                        when (event) {
+                            VerdictBlockEvent.EditRequested -> runAction(
+                                OnOpenVerdictSheetAction(context = VerdictSheetContext.EDIT),
+                            )
+                        }
+                    },
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
         }
 
         if (book.userBook != null) {

@@ -95,6 +95,8 @@ import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
+import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 
 /**
  * The Component Gallery's data: every component paired with its family and its preview fixtures
@@ -507,6 +509,21 @@ object GalleryRegistry {
             },
         ),
         galleryEntry(
+            name = "VerdictBlock",
+            family = GalleryFamily.VERDICT,
+            blurb = "The book page's read-only \"Your verdict\" card: an invitation when empty, otherwise " +
+                "the gold star row and score, the review, and a note when it holds spoilers.",
+            previews = VerdictBlockUiModel,
+            label = ::verdictBlockFixtureLabel,
+            content = { model, modifier ->
+                VerdictBlock(
+                    model = model,
+                    onEvent = {},
+                    modifier = modifier,
+                )
+            },
+        ),
+        galleryEntry(
             name = "ShareCard",
             family = GalleryFamily.SHARE,
             blurb = "The exportable share-card family — book, reading update, stat, quote, year recap, and reading life.",
@@ -727,4 +744,11 @@ private fun shareCardFixtureLabel(model: ShareCardUiModel): String = when (model
     is QuoteShareCardUiModel -> "Quote"
     is YearRecapShareCardUiModel -> "Year recap"
     is ReadingLifeShareCardUiModel -> "Reading life"
+}
+
+private fun verdictBlockFixtureLabel(model: VerdictBlockUiModel): String = when {
+    model.rating == null && model.review == null -> "Empty"
+    model.review == null -> "Rating only"
+    model.rating == null -> "Review only"
+    else -> "Rating and review"
 }

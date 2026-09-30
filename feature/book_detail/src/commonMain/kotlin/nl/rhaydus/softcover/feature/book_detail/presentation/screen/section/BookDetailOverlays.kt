@@ -4,17 +4,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.dialog.DatePickerEvent
 import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
-import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
-import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
-import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnAddUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
@@ -138,31 +136,26 @@ internal fun BookDetailOverlays(
         )
     }
 
-    val verdictContext = state.verdictSheetContext
     val verdictBook = state.book
-    if (verdictContext != null && verdictBook != null) {
+    val verdictSheet = state.verdictSheet
+    if (state.verdictSheetContext != null && verdictBook != null && verdictSheet != null) {
         VerdictSheet(
-            context = verdictContext,
-            bookTitle = verdictBook.title,
-            initialRating = verdictBook.userBook?.rating?.takeIf { it > 0.0 },
-            initialReview = state.verdictReview ?: RichTextUiModel.EMPTY,
-            initialHasSpoilers = verdictBook.userBook?.reviewHasSpoilers == true,
-            canDelete = verdictContext == VerdictSheetContext.EDIT &&
-                state.verdictReview?.isBlank() == false,
-            onSave = { rating, review, hasSpoilers ->
-                runAction(
-                    OnSaveVerdictAction(
-                        book = verdictBook,
-                        rating = rating,
-                        review = review,
-                        hasSpoilers = hasSpoilers,
-                    ),
-                )
-            },
-            onDelete = { runAction(OnDeleteReviewAction(book = verdictBook)) },
-            onDismissRequest = { runAction(OnDismissVerdictSheetAction()) },
-            cover = {
-                state.verdictCover?.let { Cover(model = it) }
+            model = verdictSheet,
+            onEvent = { event ->
+                when (event) {
+                    is VerdictSheetEvent.Saved -> runAction(
+                        OnSaveVerdictAction(
+                            book = verdictBook,
+                            rating = event.rating,
+                            review = event.review,
+                            hasSpoilers = event.hasSpoilers,
+                        ),
+                    )
+
+                    VerdictSheetEvent.DeleteRequested -> runAction(OnDeleteReviewAction(book = verdictBook))
+
+                    VerdictSheetEvent.Dismissed -> runAction(OnDismissVerdictSheetAction())
+                }
             },
         )
     }
@@ -194,11 +187,17 @@ internal fun BookDetailOverlays(
         )
     }
 
-    if (state.showDeadlinePicker) {
+    val deadlinePicker = state.deadlinePicker
+    if (deadlinePicker != null) {
         SoftcoverDatePickerDialog(
-            initialDate = state.deadline?.deadlineDate,
-            onDismiss = { runAction(OnDismissDeadlinePickerAction()) },
-            onConfirm = { runAction(OnDeadlinePickedAction(date = it)) },
+            model = deadlinePicker,
+            onEvent = { event ->
+                when (event) {
+                    is DatePickerEvent.Confirmed -> runAction(OnDeadlinePickedAction(date = event.date))
+
+                    DatePickerEvent.Dismissed -> runAction(OnDismissDeadlinePickerAction())
+                }
+            },
         )
     }
 

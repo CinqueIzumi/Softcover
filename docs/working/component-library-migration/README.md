@@ -14,18 +14,16 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** the S6 row family (`aa1ffef1`) and the S6 sheet-chrome Approved shape (`405ee525`,
-  `steps/s6-sheet-chrome.md` § Approved shape) are committed. S6-3 is built and reviewed: the sheet chrome
-  in `core/component/sheet/`, adopted by ChooseLists, UpdateProgress and LoadingSheet. The
-  `TextEmphasis` shape is open (§ Deferred). Mood tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** S6-4 (`VerdictSheet`, `VerdictBlock`, `SoftcoverDatePickerDialog`), built per
-  `family-procedure.md` Phase 2 from `steps/s6-sheet-chrome.md` § Approved shape.
+- **State:** S6-4 is built, tested and reviewed: `VerdictSheet` (on `SheetScaffold`, cover as the header
+  `Jacket`), `VerdictBlock` and `SoftcoverDatePickerDialog` take model + event; the shared mapper is
+  `core/uibinding/verdict/`. S11-5 (inline `.dp`) is planned and F29 filed. Mood tile → S7-4; 14 Apollo-alias
+  files wait on F24.
+- **Next:** move the `ObserveCurrentDateUseCase` binding out of `dispatcherModule` into its own Koin module
+  in `core/domain/di/` (user-approved), then S6-5 (library sheets, bulk-remove, `ReAuthDialog`) per
+  `family-procedure.md` Phase 2.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
-- **Open questions:** should chip keys get the same typed-key treatment as the sidebar, as a tracked step?
-  That means `ChipUiModel<K>` / `ChipEvent<K>` across ~15 files, plus a contract R1 line saying keys are
-  typed, not raw strings. `ObserveCurrentDateUseCase` (new, `core/domain/util/`) is bound in
-  `dispatcherModule`; confirm or move that home. Confirm on device that the Arrange / Filter sheets no longer
+- **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
   titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
   `FeaturedCard`'s eyebrow gap (10 → 8dp); the whole badge family in the gallery and on device (never
@@ -34,11 +32,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
   (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`;
   S6-C-rows' settings rows (16dp vertical everywhere, 4dp title gap, top rule and press feedback on
   toggle / choice lists); S6-3's sheet header gaps (12/8/8), 56dp jackets, sheet padding (top 8 / bottom 16,
-  LoadingSheet 32 → 16), and the progress sheet's tap-to-clear-focus now covering the body only.
-- **Verification:** S6-3 green — compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`, and
-  the `:core:component` / `:core:uibinding` / onboarding / ChooseLists collector suites.
-- **Uncommitted:** all of S6-3; S11-5 (inline `.dp`) planned; F29 in `foundation-upstream-candidates.md`; the
-  inline-`.dp` rule in `code-style.md`.
+  LoadingSheet 32 → 16), and the progress sheet's tap-to-clear-focus now covering the body only; S6-4's
+  verdict cover as a 56dp header jacket (was above the header).
+- **Verification:** S6-4 green — compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`, and
+  the `:core:component` / `:core:uibinding` / book_detail / reading suites.
+- **Uncommitted:** all of S6-4; F28 duplicate renumbered to F30.
 
 ## Local verification
 

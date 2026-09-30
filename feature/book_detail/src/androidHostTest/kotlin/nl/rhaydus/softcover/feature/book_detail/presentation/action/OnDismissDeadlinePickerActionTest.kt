@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -49,12 +51,22 @@ class OnDismissDeadlinePickerActionTest {
         }
     }
 
+    private val openPicker = DatePickerUiModel(
+        initialDate = LocalDate(
+            2026,
+            6,
+            15,
+        ),
+        confirmLabel = "Confirm",
+        cancelLabel = "Cancel",
+    )
+
     @Nested
     inner class Execute {
         @Test
-        fun `sets showDeadlinePicker to false`() = runTest {
+        fun `clears deadlinePicker`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(showDeadlinePicker = true)
+            stateFlow.value = BookDetailUiState(deadlinePicker = openPicker)
             dependencies = stubDependencies(this)
             val action = OnDismissDeadlinePickerAction()
 
@@ -65,14 +77,14 @@ class OnDismissDeadlinePickerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showDeadlinePicker shouldBe false
+            stateFlow.value.deadlinePicker shouldBe null
         }
 
         @Test
         fun `does not change other state fields`() = runTest {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(
-                showDeadlinePicker = true,
+                deadlinePicker = openPicker,
                 loadingBookDetails = false,
             )
             dependencies = stubDependencies(this)

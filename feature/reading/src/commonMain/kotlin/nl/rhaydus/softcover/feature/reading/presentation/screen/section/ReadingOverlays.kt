@@ -4,12 +4,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import nl.rhaydus.designsystem.haptics.rememberHaptics
-import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
-import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
-import nl.rhaydus.softcover.core.component.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissVerdictPromptAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
@@ -95,7 +93,6 @@ internal fun ReadingOverlays(
     }
 
     val verdictBook = state.verdictPromptBook
-    val verdictCover = state.verdictCover
 
     // A finish reached through the progress sheet (any of page/percentage/time) has no synchronous
     // "finished" moment to burst from, so the celebration rides the same Applied outcome that opens
@@ -111,28 +108,26 @@ internal fun ReadingOverlays(
         }
     }
 
-    if (verdictBook != null && verdictCover != null) {
+    val verdictSheet = state.verdictSheet
+    if (verdictBook != null && verdictSheet != null) {
         VerdictSheet(
-            context = VerdictSheetContext.FINISHED,
-            bookTitle = verdictBook.title,
-            initialRating = verdictBook.userBook?.rating?.takeIf { it > 0.0 },
-            initialReview = state.verdictReview ?: RichTextUiModel.EMPTY,
-            initialHasSpoilers = verdictBook.userBook?.reviewHasSpoilers == true,
-            canDelete = false,
-            onSave = { rating, review, hasSpoilers ->
-                runAction(
-                    OnSaveVerdictAction(
-                        book = verdictBook,
-                        rating = rating,
-                        review = review,
-                        hasSpoilers = hasSpoilers,
-                    ),
-                )
-            },
-            onDelete = {},
-            onDismissRequest = { runAction(OnDismissVerdictPromptAction()) },
-            cover = {
-                Cover(model = verdictCover)
+            model = verdictSheet,
+            onEvent = { event ->
+                when (event) {
+                    is VerdictSheetEvent.Saved -> runAction(
+                        OnSaveVerdictAction(
+                            book = verdictBook,
+                            rating = event.rating,
+                            review = event.review,
+                            hasSpoilers = event.hasSpoilers,
+                        ),
+                    )
+
+                    // Reading never offers Delete, so the sheet cannot raise it.
+                    VerdictSheetEvent.DeleteRequested -> Unit
+
+                    VerdictSheetEvent.Dismissed -> runAction(OnDismissVerdictPromptAction())
+                }
             },
         )
     }

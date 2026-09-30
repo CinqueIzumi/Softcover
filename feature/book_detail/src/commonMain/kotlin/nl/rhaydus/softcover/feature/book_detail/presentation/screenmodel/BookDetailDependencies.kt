@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
+import nl.rhaydus.softcover.core.domain.util.ObserveCurrentDateUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.AddBookToListUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.GetAllUserListsUseCase
 import nl.rhaydus.softcover.core.lists.domain.usecase.RemoveBookFromListUseCase
@@ -45,6 +46,7 @@ internal class BookDetailDependencies(
     val saveBookVerdictUseCase: SaveBookVerdictUseCase,
     val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
+    val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,
     val getAllUserListsUseCase: GetAllUserListsUseCase,
     val addBookToListUseCase: AddBookToListUseCase,

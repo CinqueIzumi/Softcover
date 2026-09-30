@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -111,6 +112,16 @@ class OnDeadlinePickedActionTest {
             } returns userBookRead
         }
     }
+
+    private val openPicker = DatePickerUiModel(
+        initialDate = LocalDate(
+            2026,
+            6,
+            15,
+        ),
+        confirmLabel = "Confirm",
+        cancelLabel = "Cancel",
+    )
 
     @Nested
     inner class Execute {
@@ -254,7 +265,7 @@ class OnDeadlinePickedActionTest {
         }
 
         @Test
-        fun `sets showDeadlinePicker to false after calling use case`() = runTest {
+        fun `clears deadlinePicker after calling use case`() = runTest {
             // ----- Arrange -----
             val book = stubBook(
                 id = 5,
@@ -263,7 +274,7 @@ class OnDeadlinePickedActionTest {
             )
             stateFlow.value = BookDetailUiState(
                 book = book,
-                showDeadlinePicker = true,
+                deadlinePicker = openPicker,
             )
             dependencies = stubDependencies(this)
             val date = LocalDate(
@@ -291,7 +302,7 @@ class OnDeadlinePickedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showDeadlinePicker shouldBe false
+            stateFlow.value.deadlinePicker shouldBe null
         }
 
         @Test
@@ -299,7 +310,7 @@ class OnDeadlinePickedActionTest {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(
                 book = null,
-                showDeadlinePicker = true,
+                deadlinePicker = openPicker,
             )
             dependencies = stubDependencies(this)
             val date = LocalDate(
@@ -316,7 +327,7 @@ class OnDeadlinePickedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showDeadlinePicker shouldBe true
+            stateFlow.value.deadlinePicker shouldBe openPicker
             coVerify(exactly = 0) {
                 setBookDeadlineUseCase(
                     bookId = any(),

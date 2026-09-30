@@ -139,7 +139,7 @@ for S10 or S11. The exception is TagEditor's description, which moves into the h
 
 ## Deferred
 
-- `TextEmphasis(substring, treatment)` is open: `SectionHeader`'s `emphasisedText` does a substring search that the mapper should own. Mapper-built ranges and styled segments were both rejected, so a new shape is needed. Its tests wait on that shape.
+- `TextEmphasis(substring, treatment)` stays as built for now (user, 2026-09-30): `SectionHeader`'s `emphasisedText` keeps its substring search. Revisit in S6-C-sheets.
 - `SheetRow` adopters (S6-5 Shelves, S6-7 Genre) wrap their rows in `Modifier.selectableGroup()`, because `Role.RadioButton` rows need a group. If both need it, fold it into the component.
 
 ## Sub-steps
@@ -147,7 +147,7 @@ for S10 or S11. The exception is TagEditor's description, which moves into the h
 | Sub | Scope | Status |
 |---|---|---|
 | S6-3 | `SheetScaffold`/`SheetHeader`/`SheetRow`/`SheetFooter` design, plus `ChooseListsBottomSheet`, `UpdateProgressBottomSheet`/`TabSwitcher`, `LoadingSheet` | [x] |
-| S6-4 | `VerdictSheet` + `VerdictBlock` (owe R1) and `SoftcoverDatePickerDialog` (owes R1 + R11) | [ ] |
+| S6-4 | `VerdictSheet` + `VerdictBlock` (owe R1) and `SoftcoverDatePickerDialog` (owes R1 + R11) | [x] |
 | S6-5 | The library sheets, the bulk-remove dialog and `ReAuthDialog` | [ ] |
 | S6-6 | The book_detail, lists and scan sheets | [ ] |
 | S6-7 | The explore, reading and profile sheets | [ ] |

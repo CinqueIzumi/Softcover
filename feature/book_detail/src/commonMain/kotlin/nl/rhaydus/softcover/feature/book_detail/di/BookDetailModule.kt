@@ -53,6 +53,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserBooks
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserListsFlowCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UserTagsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictReviewCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.VerdictSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailScreenScreenModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -88,6 +89,7 @@ val bookDetailModule = module {
     factory { TagEditorChipModelsCollector() } bind BookDetailCollector::class
     factory { TagVocabularySyncCollector() } bind BookDetailCollector::class
     factory { VerdictReviewCollector() } bind BookDetailCollector::class
+    factory { VerdictSheetCollector() } bind BookDetailCollector::class
     factory { ShareCardsCollector() } bind BookDetailCollector::class
     factory { ProgressSheetCollector() } bind BookDetailCollector::class
     factory { ChooseListsCollector() } bind BookDetailCollector::class
@@ -176,6 +178,7 @@ val bookDetailModule = module {
             flows = getAll(),
             appDispatchers = get(),
             getDateStyleAsFlowUseCase = get(),
+            observeCurrentDateUseCase = get(),
             setEditionAsOwnedUseCase = get(),
             getAllUserListsUseCase = get(),
             addBookToListUseCase = get(),
