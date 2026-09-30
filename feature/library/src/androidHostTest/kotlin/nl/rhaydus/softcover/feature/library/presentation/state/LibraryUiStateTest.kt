@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
@@ -341,7 +342,7 @@ class LibraryUiStateTest {
             val result = state.displayBooksFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(1, 2)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(1, 2)
         }
 
         @Test
@@ -369,7 +370,7 @@ class LibraryUiStateTest {
             val result = state.displayBooksFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(1)
         }
 
         @Test
@@ -401,7 +402,7 @@ class LibraryUiStateTest {
             val result = state.displayBooksFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(1)
         }
 
         @Test
@@ -429,7 +430,7 @@ class LibraryUiStateTest {
             val result = state.displayBooksFor(readTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(1)
         }
 
         @Test
@@ -456,7 +457,7 @@ class LibraryUiStateTest {
             val result = state.displayBooksFor(readTabId)
 
             // ----- Assert -----
-            result!!.map { it.id }.toSet() shouldBe setOf(1, 2)
+            result.shouldNotBeNull().map { it.id }.toSet() shouldBe setOf(1, 2)
         }
 
         @Test
@@ -494,7 +495,7 @@ class LibraryUiStateTest {
             val result = state.displayBooksFor(readTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(1)
         }
 
         @Test
@@ -527,7 +528,7 @@ class LibraryUiStateTest {
 
             // ----- Assert -----
             // Output mirrors booksByTab input order regardless of sort settings.
-            result!!.map { it.title } shouldBe listOf("Zebra", "Apple", "Mango")
+            result.shouldNotBeNull().map { it.title } shouldBe listOf("Zebra", "Apple", "Mango")
         }
     }
 
@@ -566,7 +567,7 @@ class LibraryUiStateTest {
             val result = state.displayEditionsFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(1)
         }
 
         @Test
@@ -590,7 +591,7 @@ class LibraryUiStateTest {
             val result = state.displayEditionsFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(2, 1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(2, 1)
         }
 
         @Test
@@ -615,7 +616,7 @@ class LibraryUiStateTest {
             val result = state.displayEditionsFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(2, 1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(2, 1)
         }
     }
 
@@ -658,7 +659,7 @@ class LibraryUiStateTest {
             val result = state.displayBooksFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(1)
         }
 
         @Test
@@ -698,7 +699,7 @@ class LibraryUiStateTest {
             val result = state.displayBooksFor(otherTabId)
 
             // ----- Assert -----
-            result!!.size shouldBe 2
+            result.shouldNotBeNull().size shouldBe 2
         }
     }
 
@@ -736,7 +737,7 @@ class LibraryUiStateTest {
             val result = state.displayEditionsFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(1)
         }
 
         @Test
@@ -763,7 +764,7 @@ class LibraryUiStateTest {
             val result = state.displayEditionsFor(otherTabId)
 
             // ----- Assert -----
-            result!!.map { it.id } shouldBe listOf(1)
+            result.shouldNotBeNull().map { it.id } shouldBe listOf(1)
         }
 
         @Test

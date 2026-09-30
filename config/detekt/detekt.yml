@@ -120,6 +120,13 @@ style:
     # requireData() validates several response invariants up-front with descriptive throws.
     max: 4
 
+potential-bugs:
+  UnsafeCallOnNullableType:
+    # Project rule: no `!!` anywhere, tests included. Overrides the shared baseline, which excludes every
+    # test source set. Production excludes null by type; tests unwrap with Kotest `shouldNotBeNull()`.
+    active: true
+    excludes: []
+
 exceptions:
   TooGenericExceptionThrown:
     # docs/reference/architecture.md mandates wrapping Apollo / data errors in RuntimeException with a

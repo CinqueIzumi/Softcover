@@ -55,6 +55,11 @@ today — it is enforced by the guide + review. The un-glommed form is stable un
 candidate — see [`../working/foundation-upstream-candidates.md`](../working/foundation-upstream-candidates.md);
 once that rule lands it will auto-fix and gate the whole codebase.
 
+## Null safety
+
+No `!!`, in production or tests. Production excludes null by type (smart cast, `mapNotNull`, `let`); tests
+unwrap with Kotest `shouldNotBeNull()`. detekt `UnsafeCallOnNullableType` gates every source set.
+
 ## Review-only rules
 
 No tool gates these, so review checks them by hand in every touched file. The reviewer does not run

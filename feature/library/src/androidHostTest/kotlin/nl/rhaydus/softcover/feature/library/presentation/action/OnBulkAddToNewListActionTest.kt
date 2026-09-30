@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -201,14 +202,14 @@ class OnBulkAddToNewListActionTest {
                 addBookToListUseCase(
                     listId = listId,
                     bookId = firstBook.id,
-                    edition = firstBook.defaultEdition!!,
+                    edition = firstBook.defaultEdition.shouldNotBeNull(),
                 )
             }
             coVerify(exactly = 1) {
                 addBookToListUseCase(
                     listId = listId,
                     bookId = secondBook.id,
-                    edition = secondBook.defaultEdition!!,
+                    edition = secondBook.defaultEdition.shouldNotBeNull(),
                 )
             }
         }
@@ -456,7 +457,7 @@ class OnBulkAddToNewListActionTest {
                 addBookToListUseCase(
                     listId = listId,
                     bookId = book.id,
-                    edition = book.defaultEdition!!,
+                    edition = book.defaultEdition.shouldNotBeNull(),
                 )
             }
             stateFlow.value.isBulkAddToListSheetShown shouldBe true

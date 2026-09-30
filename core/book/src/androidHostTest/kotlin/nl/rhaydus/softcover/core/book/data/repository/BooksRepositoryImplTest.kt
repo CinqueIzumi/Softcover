@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.book.data.repository
 
 import app.cash.turbine.test
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -1632,7 +1633,7 @@ class BooksRepositoryImplTest {
 
             // ----- Assert -----
             result shouldBe expectedBook
-            val capturedUserBook = slot.captured.userBook!!
+            val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
             capturedUserBook.status shouldBe BookStatus.Reading
             val capturedJournals = capturedUserBook.journals
             capturedJournals.size shouldBe 2
@@ -3142,7 +3143,7 @@ class BooksRepositoryImplTest {
             )
 
             // ----- Assert -----
-            val capturedJournals = slot.captured.userBook!!.journals
+            val capturedJournals = slot.captured.userBook.shouldNotBeNull().journals
             capturedJournals.size shouldBe 2
             capturedJournals[0] shouldBe existingJournal
             capturedJournals[1].event shouldBe "progress_updated"
@@ -3514,7 +3515,7 @@ class BooksRepositoryImplTest {
             repository.markBookAsRead(book = book)
 
             // ----- Assert -----
-            val capturedUserBook = slot.captured.userBook!!
+            val capturedUserBook = slot.captured.userBook.shouldNotBeNull()
             val capturedJournals = capturedUserBook.journals
             capturedJournals.size shouldBe 2
             capturedJournals[0] shouldBe existingJournal

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.book.domain.usecase
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -109,7 +110,7 @@ class FetchBookByIdUseCaseTest {
             val result = useCase(bookId)
 
             // ----- Assert -----
-            val editions = result.getOrNull()!!.editions
+            val editions = result.getOrNull().shouldNotBeNull().editions
             editions.size shouldBe 2
             editions[0] shouldBe edition1
             editions[1] shouldBe edition2
@@ -186,7 +187,7 @@ class FetchBookByIdUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            result.getOrNull()!!.editions shouldBe canonicalEditions
+            result.getOrNull().shouldNotBeNull().editions shouldBe canonicalEditions
         }
 
         @Test

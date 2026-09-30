@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.book.data.mapper
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -1669,7 +1670,7 @@ class BookMapperTest {
 
             // ----- Assert -----
             result shouldNotBe null
-            result!!.editions shouldBe emptyList()
+            result.shouldNotBeNull().editions shouldBe emptyList()
             result.defaultEdition shouldBe null
         }
 
@@ -4074,7 +4075,7 @@ class BookMapperTest {
 
             // ----- Assert -----
             result shouldNotBe null
-            result!!.editions shouldBe emptyList()
+            result.shouldNotBeNull().editions shouldBe emptyList()
             result.defaultEdition shouldBe null
         }
 

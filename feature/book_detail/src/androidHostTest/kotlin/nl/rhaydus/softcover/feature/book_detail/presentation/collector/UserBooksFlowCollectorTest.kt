@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -177,7 +178,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(listOf(localBook))
 
             // ----- Assert -----
-            stateFlow.value.book!!.userBook shouldBe localUserBook
+            stateFlow.value.book.shouldNotBeNull().userBook shouldBe localUserBook
             job.cancel()
         }
 
@@ -204,7 +205,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(listOf(localBook))
 
             // ----- Assert -----
-            stateFlow.value.book!!.userBookRead shouldBe localUserBookRead
+            stateFlow.value.book.shouldNotBeNull().userBookRead shouldBe localUserBookRead
             job.cancel()
         }
 
@@ -235,7 +236,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(listOf(localBook))
 
             // ----- Assert -----
-            val resultBook = stateFlow.value.book!!
+            val resultBook = stateFlow.value.book.shouldNotBeNull()
             resultBook.title shouldBe "Remote Title"
             resultBook.rating shouldBe 4.5
             resultBook.description shouldBe "Remote description"
@@ -268,7 +269,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(listOf(localBook))
 
             // ----- Assert -----
-            stateFlow.value.book!!.editions.size shouldBe 3
+            stateFlow.value.book.shouldNotBeNull().editions.size shouldBe 3
             job.cancel()
         }
 
@@ -302,7 +303,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(listOf(localBook))
 
             // ----- Assert -----
-            stateFlow.value.book!!.editions.single().owned shouldBe true
+            stateFlow.value.book.shouldNotBeNull().editions.single().owned shouldBe true
             job.cancel()
         }
 
@@ -336,7 +337,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(listOf(localBook))
 
             // ----- Assert -----
-            stateFlow.value.book!!.editions.single().owned shouldBe false
+            stateFlow.value.book.shouldNotBeNull().editions.single().owned shouldBe false
             job.cancel()
         }
 
@@ -372,7 +373,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(listOf(localBook))
 
             // ----- Assert -----
-            stateFlow.value.book!!.editions.single().owned shouldBe false
+            stateFlow.value.book.shouldNotBeNull().editions.single().owned shouldBe false
             job.cancel()
         }
 
@@ -415,7 +416,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(listOf(localBook))
 
             // ----- Assert -----
-            val editions = stateFlow.value.book!!.editions
+            val editions = stateFlow.value.book.shouldNotBeNull().editions
             editions.first { it.id == ownedId }.owned shouldBe true
             editions.first { it.id == unownedId }.owned shouldBe false
             job.cancel()
@@ -491,7 +492,7 @@ class UserBooksFlowCollectorTest {
             userBooksFlow.emit(listOf(localFirstBook, localSecondBook))
 
             // ----- Assert -----
-            stateFlow.value.book!!.userBook shouldBe secondLocalUserBook
+            stateFlow.value.book.shouldNotBeNull().userBook shouldBe secondLocalUserBook
             job.cancel()
         }
 

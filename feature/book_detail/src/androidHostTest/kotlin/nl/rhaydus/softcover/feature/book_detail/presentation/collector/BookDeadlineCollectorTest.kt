@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -183,7 +184,7 @@ class BookDeadlineCollectorTest {
             // ----- Assert -----
             val progress = stateFlow.value.deadlineProgress
             progress shouldNotBe null
-            stateFlow.value.deadlineBadge shouldBe progress!!.toBadgeUiModel()
+            stateFlow.value.deadlineBadge shouldBe progress.shouldNotBeNull().toBadgeUiModel()
             job.cancel()
         }
 
@@ -326,7 +327,7 @@ class BookDeadlineCollectorTest {
             }
 
             deadlineFlow.emit(deadline)
-            val progressBefore = stateFlow.value.deadlineProgress!!.requiredPerDay
+            val progressBefore = stateFlow.value.deadlineProgress.shouldNotBeNull().requiredPerDay
 
             // ----- Act -----
             // Simulate reading 150 pages → 150 remaining / 30 days = 5 p/day
@@ -338,7 +339,7 @@ class BookDeadlineCollectorTest {
             stateFlow.value = stateFlow.value.copy(book = bookAfter)
 
             // ----- Assert -----
-            val progressAfter = stateFlow.value.deadlineProgress!!.requiredPerDay
+            val progressAfter = stateFlow.value.deadlineProgress.shouldNotBeNull().requiredPerDay
             (progressAfter < progressBefore) shouldBe true
             job.cancel()
         }

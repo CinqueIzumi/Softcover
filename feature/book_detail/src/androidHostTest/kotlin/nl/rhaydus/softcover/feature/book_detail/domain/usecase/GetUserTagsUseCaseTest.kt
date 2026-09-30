@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.usecase
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -160,7 +161,7 @@ class GetUserTagsUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            result.getOrNull()!!.isFailure shouldBe true
+            result.getOrNull().shouldNotBeNull().isFailure shouldBe true
         }
     }
 }

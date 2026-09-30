@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.collector
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -135,7 +136,7 @@ class RoadmapDocumentCollectorTest {
         fun `sets lastUpdatedText to the formatted long date when fetchedAtEpochMillis is present`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
-                val expected = Instant.fromEpochMilliseconds(TEST_DOCUMENT.fetchedAtEpochMillis!!)
+                val expected = Instant.fromEpochMilliseconds(TEST_DOCUMENT.fetchedAtEpochMillis.shouldNotBeNull())
                     .toLocalDateTime(TimeZone.currentSystemDefault())
                     .date
                     .formatLongDate()

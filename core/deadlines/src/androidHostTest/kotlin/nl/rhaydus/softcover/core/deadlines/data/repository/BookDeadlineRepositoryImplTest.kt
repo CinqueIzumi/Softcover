@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.deadlines.data.repository
 
 import app.cash.turbine.test
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -60,7 +61,7 @@ class BookDeadlineRepositoryImplTest {
             // ----- Act & Assert -----
             repository.observe(bookId = 42).test {
                 val item = awaitItem()
-                item!!.bookId shouldBe 42
+                item.shouldNotBeNull().bookId shouldBe 42
                 item.deadlineDate shouldBe LocalDate(
                     2026,
                     7,

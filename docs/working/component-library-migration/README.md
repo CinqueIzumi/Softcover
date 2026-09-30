@@ -14,14 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S6-5 is built, tested and reviewed, uncommitted: Filter / Arrange / Shelves / bulk-remove and
-  `ReAuthSheet` on `SheetScaffold`; new `SheetFooterButton.dismissesSheet`, and the top action always runs
-  the animated dismiss (Verdict Save / Delete / "Not now" now animate). S11-5 planned, F29 filed. Mood
+- **State:** S6-5 committed (`00e6948c`). The `!!` sweep is built, reviewed and uncommitted: no `!!` left
+  (production restructured by type, tests on `shouldNotBeNull()`), detekt `UnsafeCallOnNullableType` gates
+  test sources too, rule in `docs/reference/code-style.md` § Null safety. S11-5 planned, F29 filed. Mood
   tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** the `!!` sweep (user, 2026-09-30: an absolute no-go, tests included): enable detekt
-  `UnsafeCallOnNullableType` on main and test sources, remove all 82 uses (7 production: `CoverSourceResolver`,
-  `GetContinueSeriesBooksUseCase`, `BookListsCollector`; tests → `shouldNotBeNull()`), and state the rule in
-  `docs/reference/code-style.md`. Then S6-6 per `steps/s6-sheet-chrome.md` § S6-6.
+- **Next:** commit the `!!` sweep, then S6-6 (`steps/s6-sheet-chrome.md` § S6-6).
 - **Open questions:** none.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
@@ -35,11 +32,15 @@ checkboxes in step with `## Steps` and `## Gates` here.
   S6-C-rows' settings rows (16dp vertical everywhere, 4dp title gap, top rule and press feedback on
   toggle / choice lists); S6-3's sheet header gaps (12/8/8), 56dp jackets, sheet padding (top 8 / bottom 16,
   LoadingSheet 32 → 16), and the progress sheet's tap-to-clear-focus now covering the body only; S6-4's
-  verdict cover as a 56dp header jacket (was above the header).
-- **Verification:** S6-5 green under JBR 21 — compile (all touched modules, library androidMain),
-  `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck`, and the library / orchestration /
-  book_detail / reading / `:core:component` / `:core:uibinding` suites; reviewer: no blockers, fixes applied.
-- **Uncommitted:** all of S6-5.
+  verdict cover as a 56dp header jacket (was above the header); S6-5's Filter footer inset (22 → 24),
+  bulk-remove and re-auth as sheets, and the animated close on Apply / Save / Delete / top action.
+- **Verification:** `!!` sweep green under JBR 21 — `styleCheck`, `checkDocBudgets`, a probe `!!` in a test
+  file failing `detektAndroidHostTest`, and the core (preferences, lists, profile, book, deadlines, domain,
+  uibinding) and feature (settings, library, explore, book_detail) suites; reviewer: no blockers, nits applied.
+  Run Gradle with `JAVA_HOME=$(/usr/libexec/java_home -v 21)`: the shell defaults to JDK 26, which breaks
+  detekt and the `AndroidLegacySecureApiKeyStorageTest` keystore tests.
+- **Uncommitted:** the whole `!!` sweep (3 production files, ~20 test files, `config/detekt/detekt.yml`,
+  `docs/reference/code-style.md`) and this block.
 
 ## Local verification
 

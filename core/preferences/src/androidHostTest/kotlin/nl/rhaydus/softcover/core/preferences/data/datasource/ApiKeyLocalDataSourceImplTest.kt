@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.preferences.data.datasource
 
 import androidx.datastore.core.DataStore
 import app.cash.turbine.test
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -316,7 +317,7 @@ class ApiKeyLocalDataSourceImplTest {
             } coAnswers {
                 val updater = firstArg<suspend (AppSettingsEntity) -> AppSettingsEntity>()
                 capturedResult = updater(originalEntity)
-                capturedResult!!
+                capturedResult.shouldNotBeNull()
             }
 
             // ----- Act -----

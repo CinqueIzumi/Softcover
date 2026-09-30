@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.domain.util
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -103,7 +104,7 @@ class IsbnNormalizerTest {
             val first = IsbnNormalizer.normalize("9780374710781")
 
             // ----- Act -----
-            val second = IsbnNormalizer.normalize(first!!)
+            val second = IsbnNormalizer.normalize(first.shouldNotBeNull())
 
             // ----- Assert -----
             second shouldBe first

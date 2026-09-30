@@ -67,17 +67,18 @@ class GetContinueSeriesBooksUseCase(
 
         return books
             .asSequence()
-            .filter { it.bookSeries != null && it.positionsInSeries.isNotEmpty() }
+            .filter { it.positionsInSeries.isNotEmpty() }
             .filter {
                 it.userBook?.status == BookStatus.Reading ||
                     it.userBook?.status == BookStatus.Read
             }
-            .filter { it.bookSeries!!.id !in seriesIdsWithDnf }
-            .filter { it.bookSeries!!.id !in dismissedSeriesIds }
-            .groupBy { it.bookSeries!!.id }
+            .mapNotNull { book -> book.bookSeries?.let { series -> book to series } }
+            .filter { (_, series) -> series.id !in seriesIdsWithDnf }
+            .filter { (_, series) -> series.id !in dismissedSeriesIds }
+            .groupBy { (_, series) -> series.id }
             .mapNotNull { (seriesId, group) ->
-                val maxRead = group.maxOf { it.positionsInSeries.last() }
-                val series = group.first().bookSeries!!
+                val maxRead = group.maxOf { (book, _) -> book.positionsInSeries.last() }
+                val (_, series) = group.first()
 
                 // The cursor is the furthest point in the series the user has settled: read through,
                 // or explicitly hidden. Hiding a suggestion has to move it, otherwise the next-in-
@@ -95,7 +96,7 @@ class GetContinueSeriesBooksUseCase(
                 // it is what LibraryStats/SortSql already use for the same purpose. A series with no
                 // read book yet (Reading-only, never finished) sorts last via the empty fallback.
                 val mostRecentReadDate = group
-                    .mapNotNull { it.userBook?.lastReadDate }
+                    .mapNotNull { (book, _) -> book.userBook?.lastReadDate }
                     .maxOrNull()
                     .orEmpty()
 

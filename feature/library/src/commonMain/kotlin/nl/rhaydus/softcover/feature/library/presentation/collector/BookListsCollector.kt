@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -27,19 +28,19 @@ internal class BookListsCollector : LibraryCollector {
             // Single pass per list: keep the `ListBook` entries whose edition resolved, then
             // derive both the edition list and the addedAt lookup from that one filtered slice so
             // they cannot drift apart if either guard is later changed.
-            val renderedByTab: Map<String, List<ListBook>> = enabledLists.associate { list ->
+            val renderedByTab: Map<String, List<Pair<ListBook, BookEdition>>> = enabledLists.associate { list ->
                 val tabId = LibraryTab.CustomList(
                     listId = list.id,
                     listName = list.name,
                 ).id
 
-                tabId to list.books.filter { it.edition != null }
+                tabId to list.books.mapNotNull { listBook ->
+                    listBook.edition?.let { edition -> listBook to edition }
+                }
             }
 
             val editionsPerList = renderedByTab.mapValues { (_, rendered) ->
-                rendered.map { listBook ->
-                    val edition = listBook.edition!!
-
+                rendered.map { (listBook, edition) ->
                     if (edition.url == null && edition.localImagePath == null) {
                         edition.copy(url = listBook.book?.coverUrl)
                     } else {
@@ -49,7 +50,7 @@ internal class BookListsCollector : LibraryCollector {
             }
 
             val addedAtPerList: Map<String, Map<Int, String?>> = renderedByTab.mapValues { (_, rendered) ->
-                rendered.associate { it.editionId to it.addedAt }
+                rendered.associate { (listBook, _) -> listBook.editionId to listBook.addedAt }
             }
 
             val booksById = enabledLists

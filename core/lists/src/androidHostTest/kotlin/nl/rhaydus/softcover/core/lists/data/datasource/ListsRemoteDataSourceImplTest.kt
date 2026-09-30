@@ -3,7 +3,9 @@ package nl.rhaydus.softcover.core.lists.data.datasource
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -568,7 +570,7 @@ class ListsRemoteDataSourceImplTest {
                 dataSource.createList(name = "Sci-Fi")
             }
 
-            thrown.message!!.contains(serverError) shouldBe true
+            thrown.message.shouldNotBeNull() shouldContain serverError
         }
 
         @Test

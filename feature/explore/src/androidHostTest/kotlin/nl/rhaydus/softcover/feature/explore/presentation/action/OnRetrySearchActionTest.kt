@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
@@ -94,8 +95,8 @@ class OnRetrySearchActionTest {
             )
 
             // ----- Assert -----
-            stateAtSearchTime!!.isLoading shouldBe true
-            stateAtSearchTime!!.searchError shouldBe null
+            stateAtSearchTime.shouldNotBeNull().isLoading shouldBe true
+            stateAtSearchTime.shouldNotBeNull().searchError shouldBe null
         }
 
         @Test

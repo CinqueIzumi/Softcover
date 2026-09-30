@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.profile.data.datasource
 
 import androidx.datastore.core.DataStore
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -61,7 +62,7 @@ class ProfileLocalDataSourceImplTest {
             ),)
 
             // ----- Assert -----
-            result.profile!!.recentReadingDays shouldBe listOf("2026-06-17", "2026-06-19")
+            result.profile.shouldNotBeNull().recentReadingDays shouldBe listOf("2026-06-17", "2026-06-19")
         }
 
         @Test
@@ -86,7 +87,7 @@ class ProfileLocalDataSourceImplTest {
             ),)
 
             // ----- Assert -----
-            result.profile!!.recentReadingDays shouldBe listOf("2026-06-19")
+            result.profile.shouldNotBeNull().recentReadingDays shouldBe listOf("2026-06-19")
         }
 
         @Test

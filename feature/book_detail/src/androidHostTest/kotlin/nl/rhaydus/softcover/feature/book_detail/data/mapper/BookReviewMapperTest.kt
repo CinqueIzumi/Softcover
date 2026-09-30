@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.data.mapper
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -161,7 +162,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.id shouldBe 99
+            result.shouldNotBeNull().id shouldBe 99
         }
 
         @Test
@@ -174,7 +175,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewDocument shouldBe reviewDocumentFromSlate(slateWithText("Loved every page."))
+            result.shouldNotBeNull().reviewDocument shouldBe reviewDocumentFromSlate(slateWithText("Loved every page."))
         }
 
         @Test
@@ -190,7 +191,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.hasSpoilers shouldBe true
+            result.shouldNotBeNull().hasSpoilers shouldBe true
         }
 
         @Test
@@ -206,7 +207,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.rating shouldBe null
+            result.shouldNotBeNull().rating shouldBe null
         }
 
         @Test
@@ -222,7 +223,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.rating shouldBe 5.0
+            result.shouldNotBeNull().rating shouldBe 5.0
         }
 
         @Test
@@ -238,7 +239,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewedAt shouldBe null
+            result.shouldNotBeNull().reviewedAt shouldBe null
         }
 
         @Test
@@ -254,7 +255,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.likesCount shouldBe 42
+            result.shouldNotBeNull().likesCount shouldBe 42
         }
 
         @Test
@@ -267,7 +268,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewer.id shouldBe 77
+            result.shouldNotBeNull().reviewer.id shouldBe 77
         }
 
         @Test
@@ -280,7 +281,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewer.username shouldBe "bob123"
+            result.shouldNotBeNull().reviewer.username shouldBe "bob123"
         }
 
         @Test
@@ -293,7 +294,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewer.name shouldBe null
+            result.shouldNotBeNull().reviewer.name shouldBe null
         }
 
         @Test
@@ -306,7 +307,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewer.avatarUrl shouldBe null
+            result.shouldNotBeNull().reviewer.avatarUrl shouldBe null
         }
 
         @Test
@@ -319,7 +320,7 @@ class BookReviewMapperTest {
             val result = fragment.toBookReview()
 
             // ----- Assert -----
-            result!!.reviewer.avatarUrl shouldBe "https://cdn.example.com/pic.jpg"
+            result.shouldNotBeNull().reviewer.avatarUrl shouldBe "https://cdn.example.com/pic.jpg"
         }
     }
 }

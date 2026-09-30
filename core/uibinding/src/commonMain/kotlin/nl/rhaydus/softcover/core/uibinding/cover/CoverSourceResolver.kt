@@ -17,22 +17,24 @@ fun resolveCoverSource(
     defaultEdition: BookEdition?,
     fallbackCoverUrl: String?,
 ): CoverSource? {
-    val localEdition = edition?.takeIf { it.existingLocalSource() != null }
-        ?: defaultEdition?.takeIf { it.existingLocalSource() != null }
+    val local = edition?.withLocalSource() ?: defaultEdition?.withLocalSource()
 
-    if (localEdition != null) {
+    if (local != null) {
+        val (localEdition, path) = local
+
         return CoverSource.Local(
-            path = localEdition.existingLocalSource()!!,
+            path = path,
             cacheKey = localEdition.url,
         )
     }
 
-    val urlEdition = edition?.takeIf { it.url != null }
-        ?: defaultEdition?.takeIf { it.url != null }
+    val remote = edition?.withUrl() ?: defaultEdition?.withUrl()
 
-    if (urlEdition != null) {
+    if (remote != null) {
+        val (urlEdition, url) = remote
+
         return CoverSource.Remote(
-            url = urlEdition.url!!,
+            url = url,
             persistEditionId = urlEdition.id,
         )
     }
@@ -45,5 +47,7 @@ fun resolveCoverSource(
     )
 }
 
-private fun BookEdition.existingLocalSource(): String? =
-    localImageSourceOrNull(localImagePath)
+private fun BookEdition.withLocalSource(): Pair<BookEdition, String>? =
+    localImageSourceOrNull(localImagePath)?.let { this to it }
+
+private fun BookEdition.withUrl(): Pair<BookEdition, String>? = url?.let { this to it }
