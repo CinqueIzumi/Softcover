@@ -141,7 +141,20 @@ fun Cover(
                 model = request,
                 contentDescription = "Book cover image",
                 modifier = Modifier.fillMaxSize(),
-                loading = { Box(modifier = Modifier.fillMaxSize().shimmer()) },
+                loading = { state ->
+                    val placeholder = state.painter
+
+                    if (placeholder != null) {
+                        Image(
+                            painter = placeholder,
+                            contentDescription = "Book cover image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit,
+                        )
+                    } else {
+                        Box(modifier = Modifier.fillMaxSize().shimmer())
+                    }
+                },
                 error = {
                     if (coverlessFallback != null) {
                         CoverlessTitleCover(title = coverlessFallback)
@@ -230,10 +243,7 @@ fun rememberCoverImageRequest(model: CoverUiModel): ImageRequest? {
 
         cacheKeyUrl?.let { key ->
             builder.memoryCacheKey(MemoryCache.Key(key))
-
-            if (source is CoverSource.Local) {
-                builder.placeholderMemoryCacheKey(MemoryCache.Key(key))
-            }
+            builder.placeholderMemoryCacheKey(MemoryCache.Key(key))
         }
 
         if (source is CoverSource.Remote && source.persistEditionId != null) {
