@@ -2,10 +2,8 @@ package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -17,9 +15,6 @@ internal fun becauseYouReadGenreSheetScaffold(): SheetScaffoldUiModel =
                 headline = "Pick a genre",
             ),
         ),
-        topAction = null,
-        footer = null,
-        layout = SheetLayout.Scrolling,
     )
 
 internal fun continueSeriesMenuSheetScaffoldFor(book: Book): SheetScaffoldUiModel =
@@ -30,14 +25,11 @@ internal fun continueSeriesMenuSheetScaffoldFor(book: Book): SheetScaffoldUiMode
                 headline = book.title,
             ),
         ),
-        topAction = null,
-        footer = SheetFooterUiModel(
+        footer = SheetFooterUiModel.Stacked(
             primary = null,
             secondary = SheetFooterButton(
                 label = "Cancel",
                 dismissesSheet = true,
             ),
-            layout = SheetFooterLayout.Stacked,
         ),
-        layout = SheetLayout.Scrolling,
     )

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.component.header
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -78,6 +79,72 @@ class SectionHeaderUiModelTest {
 
             // ----- Assert -----
             coveredTones shouldBe expectedTones
+        }
+    }
+
+    @Nested
+    inner class SectionConstructors {
+        @Test
+        fun `string constructor wraps headline and description as single plain segments`() {
+            // ----- Act -----
+            val section = SectionHeaderUiModel.Section(
+                eyebrow = "Lists",
+                headline = "Halfway",
+                description = "Almost there.",
+            )
+
+            // ----- Assert -----
+            section.headline shouldBe persistentListOf(HeaderTextSegment.Plain(text = "Halfway"))
+            section.description shouldBe persistentListOf(HeaderTextSegment.Plain(text = "Almost there."))
+        }
+
+        @Test
+        fun `string constructor leaves absent headline and description null`() {
+            // ----- Act -----
+            val section = SectionHeaderUiModel.Section(eyebrow = "Lists")
+
+            // ----- Assert -----
+            section.headline shouldBe null
+            section.description shouldBe null
+        }
+
+        @Test
+        fun `headlineText joins every segment without emphasis`() {
+            // ----- Arrange -----
+            val section = SectionHeaderUiModel.Section(
+                eyebrow = "Lists",
+                headline = persistentListOf(
+                    HeaderTextSegment.Plain(text = "Shelve "),
+                    HeaderTextSegment.Emphasised(
+                        text = "Piranesi",
+                        treatment = EmphasisTreatment.Accent,
+                    ),
+                ),
+                description = null,
+            )
+
+            // ----- Act & Assert -----
+            section.headlineText shouldBe "Shelve Piranesi"
+        }
+
+        @Test
+        fun `headlineText is null without a headline`() {
+            // ----- Act & Assert -----
+            SectionHeaderUiModel.Section(eyebrow = "Lists").headlineText shouldBe null
+        }
+    }
+
+    @Nested
+    inner class EmphasisFixtures {
+        @Test
+        fun `a Section fixture carries an emphasised headline run`() {
+            // ----- Act -----
+            val hasEmphasis = SectionHeaderUiModel.previews
+                .filterIsInstance<SectionHeaderUiModel.Section>()
+                .any { section -> section.headline.orEmpty().any { it is HeaderTextSegment.Emphasised } }
+
+            // ----- Assert -----
+            hasEmphasis shouldBe true
         }
     }
 }

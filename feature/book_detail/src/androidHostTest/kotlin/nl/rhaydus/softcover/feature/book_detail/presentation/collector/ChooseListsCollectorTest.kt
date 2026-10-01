@@ -75,10 +75,12 @@ class ChooseListsCollectorTest {
             )
 
             val collector = ChooseListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -88,7 +90,7 @@ class ChooseListsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.chooseListsSheet shouldNotBe null
-            stateFlow.value.chooseListsSheet?.scaffold?.header?.section?.headline shouldBe "Shelve ${book.title}"
+            stateFlow.value.chooseListsSheet?.scaffold?.header?.section?.headlineText shouldBe "Shelve ${book.title}"
             job.cancel()
         }
 
@@ -110,10 +112,12 @@ class ChooseListsCollectorTest {
             )
 
             val collector = ChooseListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -139,10 +143,12 @@ class ChooseListsCollectorTest {
             )
 
             val collector = ChooseListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(userLists = listOf(customList))
@@ -164,10 +170,12 @@ class ChooseListsCollectorTest {
             )
 
             val collector = ChooseListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(
                 book = book,

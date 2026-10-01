@@ -31,10 +31,9 @@ internal fun ReAuthSheet(
 
                 SheetScaffoldEvent.SecondaryClicked -> onEvent(ReAuthSheetEvent.LoggedOut)
 
-                SheetScaffoldEvent.TopActionClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                SheetScaffoldEvent.Dismissed,
-                -> Unit
+                SheetScaffoldEvent.Dismissed -> onEvent(ReAuthSheetEvent.Dismissed)
+
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
     ) {

@@ -52,6 +52,25 @@ class OnAddUnknownIsbnDismissedActionTest {
         }
 
         @Test
+        fun `clears the pending close request so the sheet can open again`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ScanUiState(
+                unknownIsbn = "9780451524935",
+                isUnknownIsbnCloseRequested = true,
+            )
+
+            // ----- Act -----
+            OnAddUnknownIsbnDismissedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.unknownIsbn.shouldBeNull()
+            stateFlow.value.isUnknownIsbnCloseRequested shouldBe false
+        }
+
+        @Test
         fun `leaves state unchanged and sends no event while a book is being added`() = runTest {
             // ----- Arrange -----
             val addingState = ScanUiState(

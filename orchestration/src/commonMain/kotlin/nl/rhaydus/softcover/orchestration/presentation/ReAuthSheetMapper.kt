@@ -2,10 +2,8 @@ package nl.rhaydus.softcover.orchestration.presentation
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 
@@ -25,19 +23,14 @@ private fun ReAuthState.toScaffoldUiModel(): SheetScaffoldUiModel = SheetScaffol
                 "Paste a valid token below to continue without losing your local data.",
         ),
     ),
-    topAction = null,
-    footer = SheetFooterUiModel(
+    footer = SheetFooterUiModel.Stacked(
         primary = SheetFooterButton(
             label = "Re-authenticate",
             enabled = apiKey.isNotBlank(),
-            loading = isSubmitting,
         ),
-        secondary = SheetFooterButton(
-            label = "Log out",
-            enabled = isSubmitting.not(),
-        ),
-        layout = SheetFooterLayout.Stacked,
+        secondary = SheetFooterButton(label = "Log out"),
     ),
-    layout = SheetLayout.Scrolling,
     dismissible = false,
+    busy = isSubmitting,
+    closeRequested = closeRequested,
 )

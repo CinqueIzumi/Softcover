@@ -13,6 +13,7 @@ data class SheetRowUiModel<K>(
     val selected: Boolean,
     val leadingIcon: SoftcoverIcon? = null,
     val count: String? = null,
+    val countDescription: String? = null,
 ) {
     companion object : UiModelPreviews<SheetRowUiModel<String>> {
         override val previews: ImmutableList<SheetRowUiModel<String>> = persistentListOf(
@@ -32,6 +33,7 @@ data class SheetRowUiModel<K>(
                 selected = false,
                 leadingIcon = SoftcoverIcon.Bookmark,
                 count = "12",
+                countDescription = "12 books",
             ),
             SheetRowUiModel(
                 key = "selected-icon-and-count",
@@ -39,6 +41,7 @@ data class SheetRowUiModel<K>(
                 selected = true,
                 leadingIcon = SoftcoverIcon.BookmarkCheck,
                 count = "48",
+                countDescription = "48 books",
             ),
         )
     }

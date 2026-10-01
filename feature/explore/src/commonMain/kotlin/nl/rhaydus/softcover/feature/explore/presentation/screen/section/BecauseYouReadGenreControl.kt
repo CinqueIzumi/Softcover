@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.sheet.SheetRowEvent
@@ -105,25 +104,17 @@ private fun BecauseYouReadGenreSheet(
             when (event) {
                 SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.PrimaryClicked,
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
     ) {
-        val dismiss = LocalModalSheetDismiss.current
-
         SheetRowGroup(
             model = genreGroup,
             onEvent = { event ->
                 when (event) {
-                    is SheetRowEvent.Selected -> {
-                        runAction(OnBecauseYouReadGenreSelectedAction(genre = event.key))
-
-                        dismiss()
-                    }
+                    is SheetRowEvent.Selected -> runAction(OnBecauseYouReadGenreSelectedAction(genre = event.key))
                 }
             },
         )

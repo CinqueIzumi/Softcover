@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -81,6 +83,11 @@ fun <K> SheetRow(
                     text = model.count,
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = if (model.countDescription != null) {
+                        Modifier.semantics { contentDescription = model.countDescription }
+                    } else {
+                        Modifier
+                    },
                 )
             }
 

@@ -372,6 +372,7 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.loadingSheet.progress shouldBe 1f
+            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe false
             stateFlow.value.submissionError shouldBe null
         }
 
@@ -395,7 +396,8 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.loadingSheet.isLoading shouldBe false
+            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
+            stateFlow.value.loadingSheet.isLoading shouldBe true
             stateFlow.value.loadingSheet.progress shouldBe 0f
             stateFlow.value.submissionError shouldBe
                 "You're offline. Check your connection and try again."
@@ -449,7 +451,8 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.loadingSheet.isLoading shouldBe false
+            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
+            stateFlow.value.loadingSheet.isLoading shouldBe true
             stateFlow.value.loadingSheet.progress shouldBe 0f
             stateFlow.value.submissionError shouldBe
                 "That API key wasn't accepted. Double-check it and try again."
@@ -512,7 +515,8 @@ class OnApiKeySaveClickActionTest {
 
                 // ----- Assert -----
                 stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-                stateFlow.value.loadingSheet.isLoading shouldBe false
+                stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
+                stateFlow.value.loadingSheet.isLoading shouldBe true
                 stateFlow.value.loadingSheet.progress shouldBe 0f
                 stateFlow.value.submissionError shouldBe
                     "That API key wasn't accepted. Double-check it and try again."
@@ -546,7 +550,8 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.loadingSheet.isLoading shouldBe false
+            stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
+            stateFlow.value.loadingSheet.isLoading shouldBe true
             stateFlow.value.loadingSheet.progress shouldBe 0f
             stateFlow.value.submissionError shouldBe
                 "Something went wrong setting up your account. Please try again."

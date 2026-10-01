@@ -110,7 +110,7 @@ internal class MainActivityViewModel(
 
     /**
      * Re-authenticates with a freshly entered token without wiping local data (the use case only
-     * clears data when the token belongs to a different account). On success the dialog closes; on
+     * clears data when the token belongs to a different account). On success the dialog hides itself; on
      * failure it stays open with an inline error so the user can retry.
      */
     fun reAuthenticate() {
@@ -125,7 +125,7 @@ internal class MainActivityViewModel(
             }
 
             reAuthenticateUseCase(apiKey)
-                .onSuccess { _reAuthState.update { ReAuthState() } }
+                .onSuccess { _reAuthState.update { it.copy(closeRequested = true) } }
                 .onFailure { error ->
                     AppLog.e("Re-authentication failed $error")
 
@@ -137,6 +137,11 @@ internal class MainActivityViewModel(
                     }
                 }
         }
+    }
+
+    /** The re-auth sheet finished hiding after a successful re-authentication. */
+    fun onReAuthDismissed() {
+        _reAuthState.update { ReAuthState() }
     }
 
     /** Escape hatch from the re-auth dialog: full logout back to onboarding. */

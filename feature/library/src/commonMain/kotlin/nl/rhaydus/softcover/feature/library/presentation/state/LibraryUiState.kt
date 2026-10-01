@@ -252,6 +252,9 @@ internal data class LibraryUiState(
     val isBulkMoveMenuExpanded: Boolean = false,
     val isBulkRemoveSheetShown: Boolean = false,
 
+    /** Asks the shown bulk-remove sheet to hide; cleared by its `Dismissed` event or on reopening. */
+    val isBulkRemoveCloseRequested: Boolean = false,
+
     val bulkRemoveSheet: SheetScaffoldUiModel = bulkRemoveSheetScaffoldFor(
         bookCount = 0,
         inProgress = false,

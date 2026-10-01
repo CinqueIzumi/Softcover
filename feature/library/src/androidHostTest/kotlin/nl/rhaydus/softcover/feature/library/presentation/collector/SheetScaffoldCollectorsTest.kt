@@ -253,6 +253,69 @@ class SheetScaffoldCollectorsTest {
                 inProgress = false,
             )
         }
+
+        @Test
+        fun `a close request flags the sheet without changing its content`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector(BulkRemoveSheetCollector())
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1, 2),
+                bulkActionInProgress = true,
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isBulkRemoveCloseRequested = true)
+
+            // ----- Assert -----
+            stateFlow.value.bulkRemoveSheet shouldBe bulkRemoveSheetScaffoldFor(
+                bookCount = 2,
+                inProgress = true,
+            ).copy(closeRequested = true)
+        }
+
+        @Test
+        fun `emptying the selection after a close request keeps the headline frozen`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector(BulkRemoveSheetCollector())
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1, 2, 3),
+                bulkActionInProgress = true,
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                selectedBookIds = emptySet(),
+                bulkActionInProgress = false,
+                isBulkRemoveCloseRequested = true,
+            )
+
+            // ----- Assert -----
+            val sheet = stateFlow.value.bulkRemoveSheet
+            sheet.closeRequested shouldBe true
+            sheet.header.section.headlineText shouldBe "Remove 3 books?"
+        }
+
+        @Test
+        fun `clearing the close request rebuilds the sheet from the current state`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector(BulkRemoveSheetCollector())
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1, 2, 3),
+                isBulkRemoveCloseRequested = true,
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                selectedBookIds = setOf(1),
+                isBulkRemoveCloseRequested = false,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bulkRemoveSheet shouldBe bulkRemoveSheetScaffoldFor(
+                bookCount = 1,
+                inProgress = false,
+            )
+        }
     }
 
     @Nested
@@ -290,6 +353,21 @@ class SheetScaffoldCollectorsTest {
                 tabStatsByTab = tabStatsByTab,
             )
             stateFlow.value.shelvesSheetGroup.rows.map { it.selected } shouldBe listOf(false, true)
+        }
+
+        @Test
+        fun `the group dismisses the sheet itself when a row is selected`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector(ShelvesSheetCollector())
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = listOf(LibraryTab.All),
+                selectedTabId = LibraryTab.All.id,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheetGroup.dismissesSheetOnSelect shouldBe true
         }
     }
 }

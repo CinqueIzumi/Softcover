@@ -2,10 +2,8 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 
 internal fun profileShareSheetScaffold(): SheetScaffoldUiModel =
@@ -17,9 +15,6 @@ internal fun profileShareSheetScaffold(): SheetScaffoldUiModel =
                 description = "A card built from everything you've read this year.",
             ),
         ),
-        topAction = null,
-        footer = null,
-        layout = SheetLayout.Scrolling,
     )
 
 internal fun logOutSheetScaffold(): SheetScaffoldUiModel =
@@ -31,8 +26,7 @@ internal fun logOutSheetScaffold(): SheetScaffoldUiModel =
                 description = "You'll need to sign back in to pick up where you left off.",
             ),
         ),
-        topAction = null,
-        footer = SheetFooterUiModel(
+        footer = SheetFooterUiModel.Stacked(
             primary = SheetFooterButton(
                 label = "Log out",
                 dismissesSheet = true,
@@ -41,7 +35,5 @@ internal fun logOutSheetScaffold(): SheetScaffoldUiModel =
                 label = "Stay",
                 dismissesSheet = true,
             ),
-            layout = SheetFooterLayout.Stacked,
         ),
-        layout = SheetLayout.Scrolling,
     )

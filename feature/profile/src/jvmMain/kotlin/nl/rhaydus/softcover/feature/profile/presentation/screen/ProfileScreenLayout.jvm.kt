@@ -38,6 +38,8 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -51,7 +53,6 @@ import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenreRankingSection
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.LogOutConfirmBottomSheet
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileAvatar
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileShareBottomSheet
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RatingsHistogramSection
@@ -61,16 +62,6 @@ import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ShareEnt
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColumnHistorySection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
-
-private val IDENTITY_COLUMN_WIDTH = 320.dp
-
-// Keeps the stats column from stretching the hero card and tiles to absurd widths on a maximized
-// monitor — past this the content stays left-anchored at an editorial measure.
-private val STATS_CONTENT_MAX_WIDTH = 640.dp
-
-// Below this available width the identity column plus a readable stats column no longer fit side by
-// side, so the layout collapses to a single centered scrolling column (a narrow desktop window).
-private val TWO_COLUMN_MIN_WIDTH = 720.dp
 
 /**
  * Desktop Profile. On a wide surface it is a fixed identity column (cookie-cut avatar, the reader's
@@ -150,7 +141,7 @@ private fun ProfileContent(
                 .weight(1f)
                 .fillMaxWidth(),
         ) {
-            if (maxWidth >= TWO_COLUMN_MIN_WIDTH) {
+            if (maxWidth >= 720.dp) {
                 TwoColumnProfile(
                     state = state,
                     onShareClick = { showShareSheet = true },
@@ -177,10 +168,19 @@ private fun ProfileContent(
     }
 
     if (showLogOutConfirm) {
-        LogOutConfirmBottomSheet(
-            scaffold = state.logOutSheetScaffold,
-            onLogOutClick = { runAction(OnLogOutClickAction()) },
-            onDismissRequest = { showLogOutConfirm = false },
+        SheetScaffold(
+            model = state.logOutSheetScaffold,
+            onEvent = { event ->
+                when (event) {
+                    SheetScaffoldEvent.PrimaryClicked -> runAction(OnLogOutClickAction())
+
+                    SheetScaffoldEvent.Dismissed -> showLogOutConfirm = false
+
+                    SheetScaffoldEvent.SecondaryClicked,
+                    SheetScaffoldEvent.HeaderActionClicked -> Unit
+                }
+            },
+            content = {},
         )
     }
 }
@@ -195,7 +195,7 @@ private fun TwoColumnProfile(
     Row(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .width(IDENTITY_COLUMN_WIDTH)
+                .width(320.dp)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
                 .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 24.dp),
@@ -233,7 +233,7 @@ private fun TwoColumnProfile(
                     state = state,
                     onShareClick = onShareClick,
                     onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
-                    modifier = Modifier.widthIn(max = STATS_CONTENT_MAX_WIDTH),
+                    modifier = Modifier.widthIn(max = 640.dp),
                 )
             }
 
@@ -262,7 +262,7 @@ private fun SingleColumnProfile(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .widthIn(max = STATS_CONTENT_MAX_WIDTH)
+                .widthIn(max = 640.dp)
                 .padding(horizontal = 24.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

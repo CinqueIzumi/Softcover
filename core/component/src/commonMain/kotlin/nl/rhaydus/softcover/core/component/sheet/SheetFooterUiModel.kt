@@ -6,38 +6,46 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 @Immutable
-data class SheetFooterUiModel(
-    val primary: SheetFooterButton?,
-    val secondary: SheetFooterButton?,
-    val layout: SheetFooterLayout,
-) {
+sealed interface SheetFooterUiModel {
+    val primary: SheetFooterButton?
+    val secondary: SheetFooterButton?
+
+    /** Primary full width, secondary beneath it; either may be absent but not both. */
+    data class Stacked(
+        override val primary: SheetFooterButton?,
+        override val secondary: SheetFooterButton?,
+    ) : SheetFooterUiModel {
+        init {
+            require(primary != null || secondary != null) { "A stacked footer needs at least one button" }
+        }
+    }
+
+    /** Secondary on the left, primary filling the rest of the row. */
+    data class Inline(
+        override val primary: SheetFooterButton,
+        override val secondary: SheetFooterButton,
+    ) : SheetFooterUiModel
+
     companion object : UiModelPreviews<SheetFooterUiModel> {
         override val previews: ImmutableList<SheetFooterUiModel> = persistentListOf(
-            SheetFooterUiModel(
+            Stacked(
                 primary = SheetFooterButton(label = "Save"),
                 secondary = SheetFooterButton(label = "Not now"),
-                layout = SheetFooterLayout.Stacked,
             ),
-            SheetFooterUiModel(
-                primary = SheetFooterButton(
-                    label = "Save",
-                    loading = true,
-                ),
+            Stacked(
+                primary = SheetFooterButton(label = "Save"),
                 secondary = null,
-                layout = SheetFooterLayout.Stacked,
             ),
-            SheetFooterUiModel(
+            Inline(
                 primary = SheetFooterButton(label = "Apply filters"),
                 secondary = SheetFooterButton(label = "Clear"),
-                layout = SheetFooterLayout.Inline,
             ),
-            SheetFooterUiModel(
+            Inline(
                 primary = SheetFooterButton(
                     label = "Apply filters",
                     enabled = false,
                 ),
                 secondary = SheetFooterButton(label = "Clear"),
-                layout = SheetFooterLayout.Inline,
             ),
         )
     }

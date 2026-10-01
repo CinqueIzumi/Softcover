@@ -42,9 +42,6 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScr
 import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel
 import org.koin.compose.koinInject
 
-/** Cap a snackbar's width on a wide window so it doesn't stretch across the whole desktop frame. */
-private val SNACKBAR_DESKTOP_MAX_WIDTH = 420.dp
-
 /**
  * The shared application root. Holds the theme, the authenticated/onboarding navigator swap, the
  * snackbar host, and the app-update + user-message wiring — everything platform-neutral. Each
@@ -159,7 +156,7 @@ internal fun App() {
                                 .align(Alignment.BottomEnd)
                                 .navigationBarsPadding()
                                 .padding(16.dp)
-                                .widthIn(max = SNACKBAR_DESKTOP_MAX_WIDTH)
+                                .widthIn(max = 420.dp)
                         } else {
                             Modifier
                                 .align(Alignment.BottomCenter)
@@ -184,6 +181,8 @@ internal fun App() {
                                         ReAuthSheetEvent.Submitted -> viewModel.reAuthenticate()
 
                                         ReAuthSheetEvent.LoggedOut -> viewModel.logOutFromReAuth()
+
+                                        ReAuthSheetEvent.Dismissed -> viewModel.onReAuthDismissed()
                                     }
                                 },
                             )

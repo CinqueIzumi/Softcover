@@ -53,6 +53,7 @@ import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
@@ -141,6 +142,8 @@ internal actual fun OnboardingScreenLayout(
             onEvent = { event ->
                 when (event) {
                     LoadingSheetEvent.LoaderFinished -> onInitializingComplete()
+
+                    LoadingSheetEvent.Dismissed -> runAction(OnLoadingSheetDismissedAction)
                 }
             },
         )

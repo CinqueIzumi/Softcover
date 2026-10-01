@@ -6,4 +6,6 @@ internal sealed interface ReAuthSheetEvent {
     data object Submitted : ReAuthSheetEvent
 
     data object LoggedOut : ReAuthSheetEvent
+
+    data object Dismissed : ReAuthSheetEvent
 }

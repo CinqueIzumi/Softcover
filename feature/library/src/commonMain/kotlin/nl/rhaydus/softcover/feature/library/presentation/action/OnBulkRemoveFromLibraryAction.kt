@@ -19,7 +19,7 @@ internal class OnBulkRemoveFromLibraryAction(
         val books = state.resolveSelectedBooks(explicitBookIds ?: state.selectedBookIds)
 
         if (books.isEmpty()) {
-            scope.setState { it.copy(isBulkRemoveSheetShown = false) }
+            scope.setState { it.copy(isBulkRemoveCloseRequested = true) }
 
             return
         }
@@ -53,7 +53,7 @@ internal class OnBulkRemoveFromLibraryAction(
                 selectedBookIds = emptySet(),
                 bulkActionInProgress = false,
                 isBulkMoveMenuExpanded = false,
-                isBulkRemoveSheetShown = false,
+                isBulkRemoveCloseRequested = true,
                 isBulkAddToListSheetShown = false,
                 listsBeingMutated = emptySet(),
             )

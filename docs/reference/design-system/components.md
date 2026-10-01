@@ -58,7 +58,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 ## Sheets
 
-- **Sheet scaffold** — `core:component/sheet` — chrome, `SheetRow`, `SheetRowGroup`.
+- **Sheet scaffold** — [detail](components/sheet-scaffold.md) — chrome, rows, close.
 - **Loading sheet** — `core:component/sheet` — full-screen blocking wavy-progress wait.
 - **Date picker dialog** — `core:component/dialog` — single-day calendar dialog; owns the UTC-millis conversion.
 - **Update progress sheet** — `core:component/progress` — pages/percentage/time reading-progress editor.
@@ -69,17 +69,17 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 ## Statistics
 
-- **Animated stat number** — `core:component/statistic` — tweens a numeric stat into place.
+- **Animated stat number** — `core:component/statistic` — tweens a stat into place.
 - **Editorial figure / chart** (feature-local) — [detail](components/statistics.md#editorial-figure--chart) — five hand-drawn monochrome charts.
 
 ## Share
 
-- **Share card** — `core:component/share` — one renderer for every share artefact.
+- **Share card** — `core:component/share` — one share renderer; `ScaledShareCardPreview` scales it.
 
 ## Rich text
 
 - **Clickable text** — `core:component/richtext` — prose with a tappable substring resolved to a link event.
-- **Rich text** — `core:component/richtext` — read-only renderer for formatted, spoiler-maskable prose.
+- **Rich text** — `core:component/richtext` — read-only formatted, spoiler-maskable prose.
 - **Rich-text formatting toolbar** — `core:component/control` — bold/italic/spoiler control row inside `VerdictSheet`.
 
 ## Editorial

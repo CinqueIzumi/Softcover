@@ -56,11 +56,9 @@ fun UpdateProgressBottomSheet(
             when (event) {
                 SheetScaffoldEvent.Dismissed -> onEvent(ProgressSheetEvent.Dismissed)
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.PrimaryClicked,
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
         modifier = modifier,
@@ -183,7 +181,7 @@ private fun ProgressBottomSheetContent(
 
 /**
  * The previews render `ProgressSheetUiModel.previews` rather than re-declaring their own values, so
- * the preview set and the Component Gallery's fixture set are one list and cannot drift (R5). The
+ * the preview set and the Component Gallery's fixture set are one list and cannot drift. The
  * fixtures are selected by what they demonstrate rather than by index, so reordering `previews`
  * cannot silently repoint a preview at a different case.
  */

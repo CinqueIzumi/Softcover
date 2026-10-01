@@ -42,10 +42,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.state.streakSheetScaffoldFor
 
-private val DOT_ROW_HEIGHT = 18.dp
-private val DOT = 9.dp
-private val TODAY_DOT = 12.dp
-private val DOT_GAP = 10.dp
 private val sheetDateFormatter = LocalDate.Format {
     dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
     char(' ')
@@ -82,8 +78,8 @@ internal fun StreakStrip(
                     onClick()
                 }
                 .horizontalScroll(rememberScrollState())
-                .height(DOT_ROW_HEIGHT),
-            horizontalArrangement = Arrangement.spacedBy(DOT_GAP),
+                .height(18.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             displayDays.forEach { day ->
@@ -91,7 +87,7 @@ internal fun StreakStrip(
 
                 Box(
                     modifier = Modifier
-                        .size(if (isToday) TODAY_DOT else DOT)
+                        .size(if (isToday) 12.dp else 9.dp)
                         .background(
                             color = if (day.didRead) litColor else trackColor,
                             shape = CircleShape,
@@ -171,11 +167,9 @@ internal fun StreakStripSheet(
             when (event) {
                 SheetScaffoldEvent.Dismissed -> onDismiss()
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.PrimaryClicked,
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
     ) {
@@ -204,7 +198,7 @@ private fun StreakStripSheetRow(
     ) {
         Box(
             modifier = Modifier
-                .size(DOT)
+                .size(9.dp)
                 .background(
                     color = if (day.didRead) litColor else trackColor,
                     shape = CircleShape,

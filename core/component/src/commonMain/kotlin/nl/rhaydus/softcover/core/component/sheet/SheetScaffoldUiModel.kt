@@ -9,13 +9,21 @@ import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
+/**
+ * The chrome around a sheet's feature body. [closeRequested] hides the sheet even when [dismissible] is
+ * false; while [busy] the secondary button is disabled and tapping outside or pressing back does not
+ * dismiss.
+ */
 @Immutable
 data class SheetScaffoldUiModel(
     val header: SheetHeaderUiModel,
-    val topAction: String?,
-    val footer: SheetFooterUiModel?,
-    val layout: SheetLayout,
+    val dismissLabel: String? = null,
+    val footer: SheetFooterUiModel? = null,
+    val layout: SheetLayout = SheetLayout.Scrolling,
     val dismissible: Boolean = true,
+    val busy: Boolean = false,
+    val busyDescription: String = "Loading",
+    val closeRequested: Boolean = false,
 ) {
     companion object : UiModelPreviews<SheetScaffoldUiModel> {
         override val previews: ImmutableList<SheetScaffoldUiModel> = persistentListOf(
@@ -26,9 +34,7 @@ data class SheetScaffoldUiModel(
                         headline = "Piranesi",
                     ),
                 ),
-                topAction = null,
                 footer = SheetFooterUiModel.previews.first(),
-                layout = SheetLayout.Scrolling,
             ),
             SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
@@ -45,9 +51,7 @@ data class SheetScaffoldUiModel(
                         ),
                     ),
                 ),
-                topAction = "Done",
-                footer = null,
-                layout = SheetLayout.Scrolling,
+                dismissLabel = "Done",
             ),
             SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
@@ -65,9 +69,8 @@ data class SheetScaffoldUiModel(
                         }.toImmutableList(),
                     ),
                 ),
-                topAction = null,
-                footer = SheetFooterUiModel.previews.first { it.layout == SheetFooterLayout.Inline },
-                layout = SheetLayout.Pinned,
+                footer = SheetFooterUiModel.previews.filterIsInstance<SheetFooterUiModel.Inline>().first(),
+                layout = SheetLayout.PinnedLazy,
             ),
             SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
@@ -77,8 +80,6 @@ data class SheetScaffoldUiModel(
                     ),
                     trailing = SheetHeaderTrailing.Action(label = "Clear"),
                 ),
-                topAction = null,
-                footer = null,
                 layout = SheetLayout.Pinned,
             ),
             SheetScaffoldUiModel(
@@ -88,10 +89,20 @@ data class SheetScaffoldUiModel(
                         headline = "Pulling your library together.",
                     ),
                 ),
-                topAction = null,
-                footer = null,
-                layout = SheetLayout.Scrolling,
                 dismissible = false,
+            ),
+            SheetScaffoldUiModel(
+                header = SheetHeaderUiModel(
+                    section = SectionHeaderUiModel.Section(
+                        eyebrow = "Signing in",
+                        headline = "Welcome back",
+                    ),
+                ),
+                footer = SheetFooterUiModel.Stacked(
+                    primary = SheetFooterButton(label = "Sign in"),
+                    secondary = SheetFooterButton(label = "Not now"),
+                ),
+                busy = true,
             ),
         )
     }

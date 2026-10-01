@@ -18,7 +18,7 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
                 it.copy(
                     saveApiKeyButtonEnabled = true,
                     loadingSheet = it.loadingSheet.copy(
-                        isLoading = false,
+                        scaffold = it.loadingSheet.scaffold.copy(closeRequested = true),
                         progress = 0f,
                     ),
                     submissionError = mapError(error),

@@ -95,7 +95,7 @@ internal class CoverModelsCollector : ReadingCollector {
                             book.currentEdition.toCoverUiModel(
                                 defaultEdition = book.currentEdition,
                                 coverlessTitle = book.title,
-                                variant = CoverVariant.VerdictSheetJacket,
+                                variant = CoverVariant.SheetHeaderJacket,
                                 fallbackCoverUrl = book.coverUrl,
                             )
                         },

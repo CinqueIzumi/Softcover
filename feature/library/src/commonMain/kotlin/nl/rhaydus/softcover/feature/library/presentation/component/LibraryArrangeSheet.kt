@@ -67,10 +67,8 @@ internal fun LibraryArrangeSheet(
 
                 SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
     ) {

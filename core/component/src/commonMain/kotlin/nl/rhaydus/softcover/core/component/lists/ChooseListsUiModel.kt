@@ -14,8 +14,8 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.EmphasisTreatment
+import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.header.TextEmphasis
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
@@ -43,18 +43,18 @@ data class ChooseListsUiModel(
             header = SheetHeaderUiModel(
                 section = SectionHeaderUiModel.Section(
                     eyebrow = "Lists",
-                    headline = "Shelve $name",
-                    description = description,
-                    headlineEmphasis = TextEmphasis(
-                        substring = name,
-                        treatment = EmphasisTreatment.Accent,
+                    headline = persistentListOf(
+                        HeaderTextSegment.Plain(text = "Shelve "),
+                        HeaderTextSegment.Emphasised(
+                            text = name,
+                            treatment = EmphasisTreatment.Accent,
+                        ),
                     ),
+                    description = persistentListOf(HeaderTextSegment.Plain(text = description)),
                 ),
                 trailing = trailing,
             ),
-            topAction = null,
-            footer = null,
-            layout = SheetLayout.Pinned,
+            layout = SheetLayout.PinnedLazy,
         )
 
         private fun singleBookScaffold(name: String): SheetScaffoldUiModel = fixtureScaffold(
@@ -70,7 +70,7 @@ data class ChooseListsUiModel(
         )
 
         /**
-         * Per R5, one fixture per branch that changes the anatomy: the single-book header (one
+         * One fixture per branch that changes the anatomy: the single-book header (one
          * upright jacket, "tap to file it here" copy) against the bulk header (a rotated stack, and
          * captions that count the selection), plus the empty case, which replaces the whole list
          * with the "No custom lists yet" state.
@@ -132,7 +132,7 @@ data class ChooseListsUiModel(
             ChooseListsUiModel(
                 scaffold = fixtureScaffold(
                     name = "5 books",
-                    description = "A part-filled list adds the rest first — then a second tap takes all three off.",
+                    description = "A part-filled list adds the rest first — then a second tap takes all 5 off.",
                     trailing = SheetHeaderTrailing.JacketStack(
                         covers = listOf("Piranesi", "It", "The Name of the Wind").map { title ->
                             CoverUiModel(

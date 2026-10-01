@@ -5,6 +5,9 @@ enum class SheetLayout {
     /** The whole sheet scrolls as one; the footer comes at the end of the content. */
     Scrolling,
 
-    /** The top action and header stay fixed and the footer sticks; the body owns its own scroll. */
+    /** The dismiss label and header stay fixed and the footer sticks; the scaffold scrolls the body. */
     Pinned,
+
+    /** Like [Pinned], but the body owns its own lazy list, so the scaffold does not scroll it. */
+    PinnedLazy,
 }

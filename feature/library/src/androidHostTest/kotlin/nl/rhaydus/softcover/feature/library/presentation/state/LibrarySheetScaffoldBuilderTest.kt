@@ -2,7 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -24,7 +24,7 @@ class LibrarySheetScaffoldBuilderTest {
             footer.primary.shouldNotBeNull().label.contains(formatBookCount(count = 7)) shouldBe true
             footer.primary.shouldNotBeNull().dismissesSheet shouldBe true
             footer.secondary shouldBe null
-            footer.layout shouldBe SheetFooterLayout.Stacked
+            (footer is SheetFooterUiModel.Stacked) shouldBe true
             model.layout shouldBe SheetLayout.Scrolling
         }
     }
@@ -68,8 +68,37 @@ class LibrarySheetScaffoldBuilderTest {
             val footer = model.footer.shouldNotBeNull()
             footer.primary.shouldNotBeNull().label.contains(formatBookCount(count = 1)) shouldBe true
             footer.primary.shouldNotBeNull().dismissesSheet shouldBe true
-            footer.layout shouldBe SheetFooterLayout.Inline
+            (footer is SheetFooterUiModel.Inline) shouldBe true
             model.layout shouldBe SheetLayout.Pinned
+        }
+    }
+
+    @Nested
+    inner class ShowResultsButton {
+        @Test
+        fun `arrange label singularises for one result`() {
+            // ----- Act -----
+            val label = arrangeSheetScaffoldFor(resultCount = 1).footer.shouldNotBeNull().primary.shouldNotBeNull().label
+
+            // ----- Assert -----
+            label shouldBe "Show 1 title"
+        }
+
+        @Test
+        fun `filter label pluralises for zero and many results`() {
+            // ----- Act -----
+            val none = filterSheetScaffoldFor(
+                resultCount = 0,
+                filtersActive = true,
+            ).footer.shouldNotBeNull().primary.shouldNotBeNull().label
+            val many = filterSheetScaffoldFor(
+                resultCount = 12,
+                filtersActive = true,
+            ).footer.shouldNotBeNull().primary.shouldNotBeNull().label
+
+            // ----- Assert -----
+            none shouldBe "Show 0 titles"
+            many shouldBe "Show 12 titles"
         }
     }
 
@@ -88,7 +117,7 @@ class LibrarySheetScaffoldBuilderTest {
     @Nested
     inner class BulkRemoveSheetScaffoldFor {
         @Test
-        fun `idle keeps Remove interactive, Cancel enabled and dismissing, and the sheet dismissible`() {
+        fun `idle is not busy, Remove stays in the sheet and Cancel dismisses it`() {
             // ----- Act -----
             val model = bulkRemoveSheetScaffoldFor(
                 bookCount = 3,
@@ -97,15 +126,14 @@ class LibrarySheetScaffoldBuilderTest {
 
             // ----- Assert -----
             val footer = model.footer.shouldNotBeNull()
-            footer.primary.shouldNotBeNull().loading shouldBe false
+            model.busy shouldBe false
             footer.primary.shouldNotBeNull().dismissesSheet shouldBe false
-            footer.secondary.shouldNotBeNull().enabled shouldBe true
             footer.secondary.shouldNotBeNull().dismissesSheet shouldBe true
-            model.dismissible shouldBe true
+            model.closeRequested shouldBe false
         }
 
         @Test
-        fun `in progress loads Remove, disables Cancel and blocks dismissal`() {
+        fun `in progress marks the whole sheet busy rather than touching individual buttons`() {
             // ----- Act -----
             val model = bulkRemoveSheetScaffoldFor(
                 bookCount = 3,
@@ -114,9 +142,9 @@ class LibrarySheetScaffoldBuilderTest {
 
             // ----- Assert -----
             val footer = model.footer.shouldNotBeNull()
-            footer.primary.shouldNotBeNull().loading shouldBe true
-            footer.secondary.shouldNotBeNull().enabled shouldBe false
-            model.dismissible shouldBe false
+            model.busy shouldBe true
+            footer.primary.shouldNotBeNull().enabled shouldBe true
+            footer.secondary.shouldNotBeNull().enabled shouldBe true
         }
 
         @Test
@@ -132,8 +160,8 @@ class LibrarySheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            one.header.section.headline shouldBe "Remove 1 book?"
-            many.header.section.headline shouldBe "Remove 4 books?"
+            one.header.section.headlineText shouldBe "Remove 1 book?"
+            many.header.section.headlineText shouldBe "Remove 4 books?"
         }
 
         @Test
@@ -145,7 +173,7 @@ class LibrarySheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            model.header.section.headline shouldBe "Remove 0 books?"
+            model.header.section.headlineText shouldBe "Remove 0 books?"
         }
     }
 
@@ -199,6 +227,28 @@ class LibrarySheetScaffoldBuilderTest {
 
             // ----- Assert -----
             rows.map { it.count } shouldBe listOf("12", "0")
+        }
+
+        @Test
+        fun `count description spells the count out as titles and singularises for one`() {
+            // ----- Act -----
+            val rows = shelvesSheetRowsFor(
+                visibleTabs = listOf(allTab, readingTab, listTab),
+                selectedTabId = allTab.id,
+                tabStatsByTab = mapOf(
+                    allTab.id to LibraryTabStats(
+                        itemCount = 12,
+                        totalPages = 0,
+                    ),
+                    readingTab.id to LibraryTabStats(
+                        itemCount = 1,
+                        totalPages = 0,
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            rows.map { it.countDescription } shouldBe listOf("12 titles", "1 title", "0 titles")
         }
 
         @Test

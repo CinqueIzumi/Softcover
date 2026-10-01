@@ -47,11 +47,9 @@ internal fun ContinueSeriesMenuSheet(
             when (event) {
                 SheetScaffoldEvent.Dismissed -> onDismiss()
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.PrimaryClicked,
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
     ) {

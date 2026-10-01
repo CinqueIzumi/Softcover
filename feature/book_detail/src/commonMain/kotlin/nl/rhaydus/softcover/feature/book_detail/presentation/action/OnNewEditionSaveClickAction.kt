@@ -31,7 +31,6 @@ internal class OnNewEditionSaveClickAction : BookDetailAction {
                 it.copy(
                     previewEdition = edition,
                     scannedEditionId = null,
-                    showEditEditionSheet = false,
                     selectedEditionId = null,
                 )
             }
@@ -57,7 +56,6 @@ internal class OnNewEditionSaveClickAction : BookDetailAction {
         scope.setState {
             it.copy(
                 scannedEditionId = null,
-                showEditEditionSheet = false,
                 selectedEditionId = null,
             )
         }

@@ -13,6 +13,11 @@ internal class OnAddUnknownIsbnDismissedAction : ScanAction {
     ) {
         if (scope.currentState.isAddingBook) return
 
-        scope.setState { it.copy(unknownIsbn = null) }
+        scope.setState {
+            it.copy(
+                unknownIsbn = null,
+                isUnknownIsbnCloseRequested = false,
+            )
+        }
     }
 }

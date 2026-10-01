@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
@@ -15,9 +14,7 @@ import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 
 /**
- * Maps a [Book] onto what the verdict sheet renders. Promoted straight to `:core:uibinding` rather
- * than starting feature-local (R6) because it landed with two consumers already — `book_detail` and
- * `reading` both raise the sheet off their own state.
+ * Maps a [Book] onto what the verdict sheet renders.
  *
  * [review] is the book's review already mapped to rich text. Deletion is offered only when [context]
  * is [VerdictSheetContext.EDIT] and there is a non-blank [review] to delete, so the finished prompt
@@ -32,7 +29,7 @@ fun Book.toVerdictSheetUiModel(
 ): VerdictSheetUiModel {
     val canDelete = context == VerdictSheetContext.EDIT && review?.isBlank() == false
 
-    val (header, topAction, saveLabel) = when (context) {
+    val (header, dismissLabel, saveLabel) = when (context) {
         VerdictSheetContext.FINISHED -> Triple(
             SectionHeaderUiModel.Section(
                 eyebrow = "The last page",
@@ -59,8 +56,8 @@ fun Book.toVerdictSheetUiModel(
                 section = header,
                 trailing = cover?.let { SheetHeaderTrailing.Jacket(cover = it) },
             ),
-            topAction = topAction,
-            footer = SheetFooterUiModel(
+            dismissLabel = dismissLabel,
+            footer = SheetFooterUiModel.Stacked(
                 primary = SheetFooterButton(
                     label = saveLabel,
                     dismissesSheet = true,
@@ -73,7 +70,6 @@ fun Book.toVerdictSheetUiModel(
                 } else {
                     null
                 },
-                layout = SheetFooterLayout.Stacked,
             ),
             layout = SheetLayout.Pinned,
         ),

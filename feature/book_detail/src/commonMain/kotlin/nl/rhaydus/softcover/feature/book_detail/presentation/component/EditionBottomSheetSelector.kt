@@ -43,6 +43,8 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
@@ -80,10 +82,8 @@ internal fun EditionBottomSheetSelector(
 
                 SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
     ) {
@@ -134,11 +134,7 @@ private fun ColumnScope.EditionBottomSheetContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "${editions.size} EDITIONS",
-            style = MaterialTheme.editorialTypography.eyebrowSmall.copy(letterSpacing = 1.6.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        SectionHeader(model = SectionHeaderUiModel.Label(eyebrow = "${editions.size} EDITIONS"))
 
         Spacer(modifier = Modifier.height(10.dp))
 

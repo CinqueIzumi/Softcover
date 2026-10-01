@@ -37,6 +37,8 @@ import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
 import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sidebar.Sidebar
 import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
@@ -66,7 +68,6 @@ import nl.rhaydus.softcover.feature.library.presentation.component.LibraryContro
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.BookList
-import nl.rhaydus.softcover.feature.library.presentation.screen.section.BulkRemoveConfirmationSheet
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.EditionList
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.SelectionHeader
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -302,16 +303,23 @@ internal actual fun LibraryScreenLayout(
     }
 
     if (state.isBulkRemoveSheetShown) {
-        BulkRemoveConfirmationSheet(
+        SheetScaffold(
             model = state.bulkRemoveSheet,
-            onConfirm = {
-                haptics.commit()
+            onEvent = { event ->
+                when (event) {
+                    SheetScaffoldEvent.PrimaryClicked -> {
+                        haptics.commit()
 
-                runAction(OnBulkRemoveFromLibraryAction())
+                        runAction(OnBulkRemoveFromLibraryAction())
+                    }
+
+                    SheetScaffoldEvent.Dismissed -> runAction(OnBulkRemoveSheetExpandedChangeAction(shown = false))
+
+                    SheetScaffoldEvent.SecondaryClicked,
+                    SheetScaffoldEvent.HeaderActionClicked -> Unit
+                }
             },
-            onDismiss = {
-                runAction(OnBulkRemoveSheetExpandedChangeAction(shown = false))
-            },
+            content = {},
         )
     }
 

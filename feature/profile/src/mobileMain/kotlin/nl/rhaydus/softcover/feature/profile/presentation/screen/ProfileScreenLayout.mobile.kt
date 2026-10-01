@@ -34,6 +34,8 @@ import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
@@ -51,7 +53,6 @@ import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenreRankingSection
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.LogOutConfirmBottomSheet
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileAvatar
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ProfileShareBottomSheet
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RatingsHistogramSection
@@ -218,10 +219,19 @@ internal actual fun ProfileScreenLayout(
     }
 
     if (showLogOutConfirm) {
-        LogOutConfirmBottomSheet(
-            scaffold = state.logOutSheetScaffold,
-            onLogOutClick = { runAction(OnLogOutClickAction()) },
-            onDismissRequest = { showLogOutConfirm = false },
+        SheetScaffold(
+            model = state.logOutSheetScaffold,
+            onEvent = { event ->
+                when (event) {
+                    SheetScaffoldEvent.PrimaryClicked -> runAction(OnLogOutClickAction())
+
+                    SheetScaffoldEvent.Dismissed -> showLogOutConfirm = false
+
+                    SheetScaffoldEvent.SecondaryClicked,
+                    SheetScaffoldEvent.HeaderActionClicked -> Unit
+                }
+            },
+            content = {},
         )
     }
 }

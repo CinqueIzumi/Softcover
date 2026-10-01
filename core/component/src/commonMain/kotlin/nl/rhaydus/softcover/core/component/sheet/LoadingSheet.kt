@@ -15,20 +15,39 @@ import kotlin.time.Duration.Companion.seconds
  * A blocking, undismissable sheet that reports the progress of a long-running setup step — used by
  * onboarding's initial library pull. [LoadingSheetUiModel.isLoading] governs whether it shows at all;
  * while showing it cannot be tapped or backed out of, since there is nothing sensible to return to
- * mid-sync. Prefer inline shimmer on cards when the wait is short or the surface can stay interactive.
+ * mid-sync. The host closes it by setting [SheetScaffoldUiModel.closeRequested] and clears
+ * [LoadingSheetUiModel.isLoading] on [LoadingSheetEvent.Dismissed]. Prefer inline shimmer on cards when
+ * the wait is short or the surface can stay interactive.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingSheet(
     model: LoadingSheetUiModel,
     onEvent: (LoadingSheetEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (model.isLoading.not()) return
+    if (model.isLoading) {
+        LoadingSheetContent(
+            model = model,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+    }
+}
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun LoadingSheetContent(
+    model: LoadingSheetUiModel,
+    onEvent: (LoadingSheetEvent) -> Unit,
+    modifier: Modifier,
+) {
     SheetScaffold(
         model = model.scaffold,
-        onEvent = {},
+        onEvent = { event ->
+            if (event == SheetScaffoldEvent.Dismissed) {
+                onEvent(LoadingSheetEvent.Dismissed)
+            }
+        },
         modifier = modifier,
     ) {
         if (model.progress != null) {

@@ -167,6 +167,19 @@ Filed but not yet implemented in the foundation.
   practice on the same thing as the deprecation cleanup: there is no maintained Compose overflow API to
   build it on (`FlowRowOverflow` is deprecated, `ContextualFlowRow` likewise).
 
+### F31 — `AdaptiveModalSheet` cannot be made non-dismissible by swipe
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.component.AdaptiveModalSheet`)
+- **Status:** **Open.** The bottom-sheet form builds `rememberModalBottomSheetState(skipPartiallyExpanded =
+  true)` with no `confirmValueChange` and passes no `sheetGesturesEnabled`, so a drag-down hides the sheet
+  and fires `onDismissRequest` even when `dismissOnTapOutside` and `dismissOnBackPress` are both false.
+- **Impact in the app:** Softcover's re-auth sheet and `LoadingSheet` are meant to be non-dismissible; a
+  swipe closes them, and the re-auth sheet's `Dismissed` resets the re-auth state.
+- **What to build:** a `dismissible`-style gate that also refuses the `Hidden` target in
+  `confirmValueChange` (and leaves programmatic `LocalModalSheetDismiss` working), or a `dismissOnSwipe`
+  flag beside the existing two.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)

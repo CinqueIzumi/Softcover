@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.component
 
 import androidx.compose.runtime.Composable
-import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.softcover.core.component.sheet.SheetRowEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroup
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
@@ -29,24 +28,16 @@ internal fun LibraryShelvesSheet(
 
                 SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.PrimaryClicked,
-                SheetScaffoldEvent.SecondaryClicked,
-                -> Unit
+                SheetScaffoldEvent.SecondaryClicked -> Unit
             }
         },
     ) {
-        val dismiss = LocalModalSheetDismiss.current
-
         SheetRowGroup(
             model = state.shelvesSheetGroup,
             onEvent = { event ->
                 when (event) {
-                    is SheetRowEvent.Selected -> {
-                        runAction(OnTabSelectedAction(tabId = event.key))
-
-                        dismiss()
-                    }
+                    is SheetRowEvent.Selected -> runAction(OnTabSelectedAction(tabId = event.key))
                 }
             },
         )

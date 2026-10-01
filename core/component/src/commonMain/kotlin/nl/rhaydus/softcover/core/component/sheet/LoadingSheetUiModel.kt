@@ -25,9 +25,6 @@ data class LoadingSheetUiModel(
     companion object : UiModelPreviews<LoadingSheetUiModel> {
         private fun fixtureScaffold(header: SectionHeaderUiModel.Section): SheetScaffoldUiModel = SheetScaffoldUiModel(
             header = SheetHeaderUiModel(section = header),
-            topAction = null,
-            footer = null,
-            layout = SheetLayout.Scrolling,
             dismissible = false,
         )
 

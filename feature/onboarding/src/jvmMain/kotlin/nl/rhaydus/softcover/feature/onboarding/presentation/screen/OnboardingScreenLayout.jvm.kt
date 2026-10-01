@@ -28,12 +28,9 @@ import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
-
-// Keeps the onboarding panel at a readable editorial measure rather than stretching the intro copy and
-// the key field across a maximized window.
-private val PANEL_MAX_WIDTH = 520.dp
 
 /**
  * Desktop onboarding. The mobile three-page swipe flow collapses into one centered, scrolling
@@ -73,7 +70,7 @@ internal actual fun OnboardingScreenLayout(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Column(
-                    modifier = Modifier.widthIn(max = PANEL_MAX_WIDTH),
+                    modifier = Modifier.widthIn(max = 520.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
@@ -138,6 +135,8 @@ internal actual fun OnboardingScreenLayout(
             onEvent = { event ->
                 when (event) {
                     LoadingSheetEvent.LoaderFinished -> onInitializingComplete()
+
+                    LoadingSheetEvent.Dismissed -> runAction(OnLoadingSheetDismissedAction)
                 }
             },
         )

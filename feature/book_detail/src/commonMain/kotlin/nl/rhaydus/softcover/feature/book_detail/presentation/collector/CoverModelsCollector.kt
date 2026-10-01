@@ -14,7 +14,7 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Maps every cover the book page renders — hero, blurred backdrop, full-screen viewer, verdict
- * sheet, edition sheet and tag editor — off the composition (R9), so no composable ever resolves an
+ * sheet, edition sheet and tag editor — off the composition, so no composable ever resolves an
  * edition into a cover.
  *
  * A collector rather than a write-site patch because [BookDetailUiState.book] is written by
@@ -91,7 +91,7 @@ internal class CoverModelsCollector : BookDetailCollector {
                         verdictCover = edition.toCoverUiModel(
                             defaultEdition = edition,
                             coverlessTitle = title,
-                            variant = CoverVariant.VerdictSheetJacket,
+                            variant = CoverVariant.SheetHeaderJacket,
                             fallbackCoverUrl = fallbackCoverUrl,
                         ),
                         editionSheetHeaderCover = edition.toCoverUiModel(

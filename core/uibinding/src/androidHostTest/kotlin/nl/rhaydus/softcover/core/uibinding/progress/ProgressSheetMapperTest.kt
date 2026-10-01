@@ -261,7 +261,7 @@ class ProgressSheetMapperTest {
 
             // ----- Assert -----
             scaffold.header.section.eyebrow shouldBe "Reading progress"
-            scaffold.header.section.headline shouldBe "The Starless Sea"
+            scaffold.header.section.headlineText shouldBe "The Starless Sea"
             scaffold.layout shouldBe SheetLayout.Scrolling
         }
     }
@@ -277,7 +277,7 @@ class ProgressSheetMapperTest {
             val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
 
             // ----- Assert -----
-            result.scaffold.header.section.headline shouldBe "The Starless Sea"
+            result.scaffold.header.section.headlineText shouldBe "The Starless Sea"
         }
 
         @Test

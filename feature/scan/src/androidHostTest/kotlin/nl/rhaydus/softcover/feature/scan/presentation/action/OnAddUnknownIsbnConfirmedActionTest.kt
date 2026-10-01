@@ -175,7 +175,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
         }
 
         @Test
-        fun `clears unknownIsbn and isAddingBook and sends BookResolvedEvent on success`() = runTest {
+        fun `requests the sheet to close, clears isAddingBook and sends BookResolvedEvent on success`() = runTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             val editionId = 7
@@ -198,7 +198,8 @@ class OnAddUnknownIsbnConfirmedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.unknownIsbn shouldBe null
+            stateFlow.value.isUnknownIsbnCloseRequested shouldBe true
+            stateFlow.value.unknownIsbn shouldBe "9780451524935"
             stateFlow.value.isAddingBook shouldBe false
 
             val event = eventChannel.tryReceive().getOrNull()
@@ -279,6 +280,53 @@ class OnAddUnknownIsbnConfirmedActionTest {
 
             // ----- Assert -----
             stateFlow.value.unknownIsbn shouldBe "9780451524935"
+        }
+
+        @Test
+        fun `does not request the sheet to close when use case fails`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                addBookByIsbnUseCase(isbn = "9780451524935")
+            } returns Result.failure(RuntimeException("network error"))
+
+            val action = OnAddUnknownIsbnConfirmedAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isUnknownIsbnCloseRequested shouldBe false
+        }
+
+        @Test
+        fun `does not request a close while still adding`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
+            val dependencies = stubDependencies(this)
+            var closeRequestedDuringCall: Boolean? = null
+
+            coEvery {
+                addBookByIsbnUseCase(isbn = "9780451524935")
+            } coAnswers {
+                closeRequestedDuringCall = stateFlow.value.isUnknownIsbnCloseRequested
+
+                Result.failure(RuntimeException("network error"))
+            }
+
+            // ----- Act -----
+            OnAddUnknownIsbnConfirmedAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            closeRequestedDuringCall shouldBe false
         }
     }
 }

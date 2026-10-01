@@ -18,10 +18,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -51,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.control.RichTextFormattingToolbar
+import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichTextMark
 import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
 import nl.rhaydus.softcover.core.component.richtext.applyEditToMarks
@@ -156,18 +155,12 @@ fun VerdictSheet(
 
                 SheetScaffoldEvent.Dismissed -> onEvent(VerdictSheetEvent.Dismissed)
 
-                SheetScaffoldEvent.TopActionClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
         modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(state = rememberScrollState()),
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center,
@@ -190,11 +183,7 @@ fun VerdictSheet(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            Text(
-                text = "In your words",
-                style = MaterialTheme.editorialTypography.eyebrowSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            SectionHeader(model = model.reviewLabel)
 
             Spacer(modifier = Modifier.height(10.dp))
 

@@ -40,7 +40,7 @@ class ReadingSheetScaffoldBuilderTest {
             val result = streakSheetScaffoldFor(activity = activity)
 
             // ----- Assert -----
-            result.header.section.headline shouldBe "No reading logged yet"
+            result.header.section.headlineText shouldBe "No reading logged yet"
         }
 
         @Test
@@ -52,7 +52,7 @@ class ReadingSheetScaffoldBuilderTest {
             val result = streakSheetScaffoldFor(activity = activity)
 
             // ----- Assert -----
-            result.header.section.headline shouldBe "No reading logged yet"
+            result.header.section.headlineText shouldBe "No reading logged yet"
             result.header.section.eyebrow shouldBe "Last 0 days"
         }
 
@@ -69,7 +69,7 @@ class ReadingSheetScaffoldBuilderTest {
             val result = streakSheetScaffoldFor(activity = activity)
 
             // ----- Assert -----
-            result.header.section.headline shouldBe "You read on 1 of the last 3 days"
+            result.header.section.headlineText shouldBe "You read on 1 of the last 3 days"
         }
 
         @Test
@@ -87,7 +87,7 @@ class ReadingSheetScaffoldBuilderTest {
             val result = streakSheetScaffoldFor(activity = activity)
 
             // ----- Assert -----
-            result.header.section.headline shouldBe "You read on 3 of the last 5 days"
+            result.header.section.headlineText shouldBe "You read on 3 of the last 5 days"
         }
 
         @Test

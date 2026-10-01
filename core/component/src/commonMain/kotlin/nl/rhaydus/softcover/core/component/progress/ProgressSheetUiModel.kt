@@ -6,7 +6,6 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 
 /**
@@ -45,14 +44,11 @@ data class ProgressSheetUiModel(
                         headline = bookTitle,
                     ),
                 ),
-                topAction = null,
-                footer = null,
-                layout = SheetLayout.Scrolling,
             ),
         )
 
         /**
-         * Per R5, one fixture per branch that changes the sheet's anatomy — not per string. The two
+         * One fixture per branch that changes the sheet's anatomy — not per string. The two
          * "no total" fixtures are the interesting ones: with no page count or runtime to divide by,
          * the sheet drops the Percentage tab entirely and hides the suffix line and the progress
          * indicator, so they exercise a different layout rather than different copy.

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,9 +22,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
@@ -34,13 +30,13 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.share.CapturableShareCard
 import nl.rhaydus.designsystem.share.SaveOutcome
 import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.ShareOutcome
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ScaledShareCardPreview
 import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
@@ -48,7 +44,6 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import kotlin.math.roundToInt
 
 @Composable
 internal fun ProfileShareBottomSheet(
@@ -69,11 +64,9 @@ internal fun ProfileShareBottomSheet(
             when (event) {
                 SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.PrimaryClicked,
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
     ) {
@@ -81,10 +74,13 @@ internal fun ProfileShareBottomSheet(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            ReadingLifeSharePreview(
-                content = content,
+            ScaledShareCardPreview(
                 capture = capture,
-            )
+                maxWidth = 240.dp,
+                maxHeight = 420.dp,
+            ) {
+                ShareCard(content = content)
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -175,53 +171,6 @@ internal fun ProfileShareBottomSheet(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-@Composable
-private fun ReadingLifeSharePreview(
-    content: ReadingLifeShareCardUiModel,
-    capture: ShareCardCapture,
-) {
-    val maxPreviewWidth = 240.dp
-    val maxPreviewHeight = 420.dp
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-        contentAlignment = Alignment.Center,
-    ) {
-        CapturableShareCard(
-            capture = capture,
-            modifier = Modifier.layout { measurable, _ ->
-                val placeable = measurable.measure(constraints = Constraints())
-
-                val widthScale = maxPreviewWidth.toPx() / placeable.width
-                val heightScale = maxPreviewHeight.toPx() / placeable.height
-                val scale = minOf(
-                    widthScale,
-                    heightScale,
-                    1f,
-                )
-
-                val scaledWidth = (placeable.width * scale).roundToInt()
-                val scaledHeight = (placeable.height * scale).roundToInt()
-
-                layout(width = scaledWidth, height = scaledHeight) {
-                    placeable.placeWithLayer(
-                        x = -(placeable.width - scaledWidth) / 2,
-                        y = -(placeable.height - scaledHeight) / 2,
-                    ) {
-                        scaleX = scale
-                        scaleY = scale
-                        transformOrigin = TransformOrigin.Center
-                    }
-                }
-            },
-        ) {
-            ShareCard(content = content)
         }
     }
 }

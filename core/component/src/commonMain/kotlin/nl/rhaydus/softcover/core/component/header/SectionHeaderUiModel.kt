@@ -13,6 +13,9 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 @Immutable
 sealed interface SectionHeaderUiModel {
     /**
+     * [headline] and [description] are segment runs so a builder can emphasise an interpolated span;
+     * the secondary constructor takes plain strings for the common case of no emphasis.
+     *
      * @property pulseKey Bumped to replay the bar's widen-and-settle pulse; `0` plays nothing, so a
      * header that never needs the pulse can leave it at the default.
      * @property tone Colours the bar and eyebrow only; the headline and description stay onSurface /
@@ -20,13 +23,28 @@ sealed interface SectionHeaderUiModel {
      */
     data class Section(
         val eyebrow: String,
-        val headline: String? = null,
-        val description: String? = null,
-        val headlineEmphasis: TextEmphasis? = null,
-        val descriptionEmphasis: TextEmphasis? = null,
+        val headline: ImmutableList<HeaderTextSegment>?,
+        val description: ImmutableList<HeaderTextSegment>?,
         val pulseKey: Int = 0,
         val tone: SectionHeaderTone = SectionHeaderTone.Accent,
-    ) : SectionHeaderUiModel
+    ) : SectionHeaderUiModel {
+        /** [headline] with its emphasis dropped, for surfaces that need the words and not the styling. */
+        val headlineText: String? get() = headline?.joinToString(separator = "") { it.text }
+
+        constructor(
+            eyebrow: String,
+            headline: String? = null,
+            description: String? = null,
+            pulseKey: Int = 0,
+            tone: SectionHeaderTone = SectionHeaderTone.Accent,
+        ) : this(
+            eyebrow = eyebrow,
+            headline = headline?.toPlainSegments(),
+            description = description?.toPlainSegments(),
+            pulseKey = pulseKey,
+            tone = tone,
+        )
+    }
 
     data class Inline(
         val eyebrow: String,
@@ -49,11 +67,14 @@ sealed interface SectionHeaderUiModel {
             Section(eyebrow = "Currently reading"),
             Section(
                 eyebrow = "Lists",
-                headline = "Shelve Piranesi",
-                headlineEmphasis = TextEmphasis(
-                    substring = "Piranesi",
-                    treatment = EmphasisTreatment.Accent,
+                headline = persistentListOf(
+                    HeaderTextSegment.Plain(text = "Shelve "),
+                    HeaderTextSegment.Emphasised(
+                        text = "Piranesi",
+                        treatment = EmphasisTreatment.Accent,
+                    ),
                 ),
+                description = null,
             ),
             Section(
                 eyebrow = "Couldn't sync — tap to retry",
@@ -72,3 +93,6 @@ sealed interface SectionHeaderUiModel {
         )
     }
 }
+
+private fun String.toPlainSegments(): ImmutableList<HeaderTextSegment> =
+    persistentListOf(HeaderTextSegment.Plain(text = this))

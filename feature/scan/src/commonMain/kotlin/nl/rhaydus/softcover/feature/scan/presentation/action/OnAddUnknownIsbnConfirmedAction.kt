@@ -24,7 +24,7 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
             .onSuccess { result ->
                 scope.setState {
                     it.copy(
-                        unknownIsbn = null,
+                        isUnknownIsbnCloseRequested = true,
                         isAddingBook = false,
                     )
                 }

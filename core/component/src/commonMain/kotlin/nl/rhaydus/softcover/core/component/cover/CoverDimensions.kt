@@ -12,8 +12,8 @@ import androidx.compose.ui.unit.dp
  *
  * Several variants land on the same tuple (seven share `0.dp` / `4.dp` / `Color.Unspecified` / `null`)
  * and are kept as separate entries on purpose, not collapsed to one shared constant: the whole point
- * of a per-variant table (`component-contract.md` § 7.2 R2) is that tuning one surface's cover
- * treatment must never silently move another's.
+ * of a per-variant table is that tuning one surface's cover treatment must never silently move
+ * another's.
  *
  * The audit also surfaced drift that is **today's behaviour, preserved deliberately** rather than
  * fixed here: [HiddenSeriesStack] sits at 3dp of corner radius while every other unelevated row-style
@@ -111,17 +111,6 @@ internal data class CoverDimensions(
                 maxDecodePx = null,
             )
 
-            CoverVariant.VerdictSheetJacket -> CoverDimensions(
-                elevation = 6.dp,
-                cornerRadius = 16.dp,
-                shadowColor = BlackAlpha35,
-                maxDecodePx = null,
-            )
-
-            // 16dp, the same radius `VerdictSheetJacket` uses — and deliberately its own entry rather
-            // than a shared constant. The two happen to agree today; tuning the sheet's jacket must
-            // not drag the book page's hero along with it. (Carried over from the
-            // `HERO_COVER_CORNER_RADIUS` this replaced, whose comment said exactly that.)
             CoverVariant.BookDetailHero -> CoverDimensions(
                 elevation = 0.dp,
                 cornerRadius = 16.dp,

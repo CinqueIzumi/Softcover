@@ -217,11 +217,12 @@ class OnBulkRemoveFromLibraryActionTest {
             // ----- Assert -----
             val during = stateDuringRemoval.shouldNotBeNull()
             during.isBulkRemoveSheetShown shouldBe true
+            during.isBulkRemoveCloseRequested shouldBe false
             during.bulkActionInProgress shouldBe true
         }
 
         @Test
-        fun `closes the bulk remove sheet and clears progress when the removal succeeds`() = runTest {
+        fun `requests the bulk remove sheet to close and clears progress when the removal succeeds`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
@@ -243,12 +244,13 @@ class OnBulkRemoveFromLibraryActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isBulkRemoveSheetShown shouldBe false
+            stateFlow.value.isBulkRemoveCloseRequested shouldBe true
+            stateFlow.value.isBulkRemoveSheetShown shouldBe true
             stateFlow.value.bulkActionInProgress shouldBe false
         }
 
         @Test
-        fun `closes the bulk remove sheet and clears progress when the removal fails`() = runTest {
+        fun `requests the bulk remove sheet to close and clears progress when the removal fails`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
@@ -273,12 +275,13 @@ class OnBulkRemoveFromLibraryActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isBulkRemoveSheetShown shouldBe false
+            stateFlow.value.isBulkRemoveCloseRequested shouldBe true
+            stateFlow.value.isBulkRemoveSheetShown shouldBe true
             stateFlow.value.bulkActionInProgress shouldBe false
         }
 
         @Test
-        fun `no books resolved — closes the sheet without starting progress`() = runTest {
+        fun `no books resolved — requests the close without starting progress`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 selectedBookIds = emptySet(),
@@ -294,7 +297,8 @@ class OnBulkRemoveFromLibraryActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isBulkRemoveSheetShown shouldBe false
+            stateFlow.value.isBulkRemoveCloseRequested shouldBe true
+            stateFlow.value.isBulkRemoveSheetShown shouldBe true
             stateFlow.value.bulkActionInProgress shouldBe false
         }
     }

@@ -1,6 +1,10 @@
 package nl.rhaydus.softcover.core.uibinding.lists
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipLeading
 import nl.rhaydus.softcover.core.component.chip.ChipSize
@@ -8,6 +12,8 @@ import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.header.EmphasisTreatment
+import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
@@ -41,10 +47,12 @@ class ChooseListsMapperTest {
         id = id,
         name = "List $id",
         slug = "list-$id",
-        books = bookIds.map { listBook(
-            bookId = it,
-            listId = id,
-        ) },
+        books = bookIds.map {
+            listBook(
+                bookId = it,
+                listId = id,
+            )
+        },
     )
 
     @Nested
@@ -68,7 +76,13 @@ class ChooseListsMapperTest {
 
             // ----- Assert -----
             val header = result.scaffold.header
-            header.section.headline shouldBe "Shelve Piranesi"
+            header.section.headline shouldBe persistentListOf(
+                HeaderTextSegment.Plain(text = "Shelve "),
+                HeaderTextSegment.Emphasised(
+                    text = "Piranesi",
+                    treatment = EmphasisTreatment.Accent,
+                ),
+            )
             header.trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
         }
 
@@ -83,9 +97,9 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.scaffold.layout shouldBe SheetLayout.Pinned
+            result.scaffold.layout shouldBe SheetLayout.PinnedLazy
             result.scaffold.footer shouldBe null
-            result.scaffold.topAction shouldBe null
+            result.scaffold.dismissLabel shouldBe null
         }
 
         @Test
@@ -568,7 +582,7 @@ class ChooseListsMapperTest {
             val trailing = result.scaffold.header.trailing as SheetHeaderTrailing.Jacket
             trailing.cover shouldBe CoverUiModel(
                 source = null,
-                coverlessTitle = "1 books",
+                coverlessTitle = "1 book",
                 variant = CoverVariant.ChooseListsStackJacket,
             )
         }
@@ -601,8 +615,145 @@ class ChooseListsMapperTest {
 
             // ----- Assert -----
             val section = result.scaffold.header.section
-            section.headline shouldBe "Shelve 3 books"
-            result.scaffold.layout shouldBe SheetLayout.Pinned
+            section.headline shouldBe persistentListOf(
+                HeaderTextSegment.Plain(text = "Shelve "),
+                HeaderTextSegment.Emphasised(
+                    text = "3 books",
+                    treatment = EmphasisTreatment.Accent,
+                ),
+            )
+            result.scaffold.layout shouldBe SheetLayout.PinnedLazy
+        }
+    }
+
+    @Nested
+    inner class BulkCopy {
+        private fun descriptionOf(count: Int): String {
+            val result = emptyList<BookList>().toBulkChooseListsUiModel(
+                bookIds = (1..count).toSet(),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            return result.scaffold.header.section.description
+                .shouldNotBeNull()
+                .joinToString(separator = "") { it.text }
+        }
+
+        @Test
+        fun `a single selected book is named as 1 book and taken off as it`() {
+            // ----- Act -----
+            val result = emptyList<BookList>().toBulkChooseListsUiModel(
+                bookIds = setOf(7),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.scaffold.header.section.headlineText shouldBe "Shelve 1 book"
+            descriptionOf(count = 1) shouldContain "takes it off"
+        }
+
+        private fun chipLabelOf(
+            selectedCount: Int,
+            onListCount: Int,
+        ): String {
+            val lists = listOf(bookList(
+                id = 1,
+                bookIds = (1..onListCount).toList(),
+            ),)
+
+            return lists.toBulkChooseListsUiModel(
+                bookIds = (1..selectedCount).toSet(),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            ).rows.single().membershipChip.label
+        }
+
+        @Test
+        fun `a single selected book on the list gets the singular On the list chip`() {
+            // ----- Act -----
+            val label = chipLabelOf(
+                selectedCount = 1,
+                onListCount = 1,
+            )
+
+            // ----- Assert -----
+            label shouldBe "On the list"
+        }
+
+        @Test
+        fun `a single selected book off the list gets the singular Add chip`() {
+            // ----- Act -----
+            val label = chipLabelOf(
+                selectedCount = 1,
+                onListCount = 0,
+            )
+
+            // ----- Assert -----
+            label shouldBe "Add"
+        }
+
+        @Test
+        fun `two selected books all on the list get On all 2`() {
+            // ----- Act -----
+            val label = chipLabelOf(
+                selectedCount = 2,
+                onListCount = 2,
+            )
+
+            // ----- Assert -----
+            label shouldBe "On all 2"
+        }
+
+        @Test
+        fun `two selected books none on the list get Add all 2`() {
+            // ----- Act -----
+            val label = chipLabelOf(
+                selectedCount = 2,
+                onListCount = 0,
+            )
+
+            // ----- Assert -----
+            label shouldBe "Add all 2"
+        }
+
+        @Test
+        fun `a selection of 5 books takes all 5 off, never all three`() {
+            // ----- Act -----
+            val description = descriptionOf(count = 5)
+
+            // ----- Assert -----
+            description shouldContain "takes all 5 off"
+            description shouldNotContain "three"
+        }
+
+        @Test
+        fun `a selection of 2 books is named in the plural`() {
+            // ----- Act -----
+            val result = emptyList<BookList>().toBulkChooseListsUiModel(
+                bookIds = setOf(1, 2),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.scaffold.header.section.headlineText shouldBe "Shelve 2 books"
+        }
+
+        @Test
+        fun `only the counted books span of the headline is emphasised`() {
+            // ----- Act -----
+            val result = emptyList<BookList>().toBulkChooseListsUiModel(
+                bookIds = setOf(1, 2),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.scaffold.header.section.headline.shouldNotBeNull()
+                .filterIsInstance<HeaderTextSegment.Emphasised>()
+                .map { it.text } shouldBe listOf("2 books")
         }
     }
 

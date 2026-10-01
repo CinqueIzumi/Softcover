@@ -8,6 +8,9 @@ internal data class ScanUiState(
     val isResolving: Boolean = false,
     val unknownIsbn: String? = null,
     val isAddingBook: Boolean = false,
+
+    /** Asks the shown unknown-ISBN sheet to hide; cleared by its `Dismissed` event. */
+    val isUnknownIsbnCloseRequested: Boolean = false,
     val unknownIsbnSheet: SheetScaffoldUiModel = unknownIsbnSheetScaffoldFor(isAdding = false),
     val manualEntryHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "By ISBN",

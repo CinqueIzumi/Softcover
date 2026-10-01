@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.onboarding.presentation.state
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.toad.UiState
 
@@ -20,9 +19,6 @@ internal data class OnboardingUiState(
                     description = "Depending on its size, this might take a moment.",
                 ),
             ),
-            topAction = null,
-            footer = null,
-            layout = SheetLayout.Scrolling,
             dismissible = false,
         ),
         progress = null,

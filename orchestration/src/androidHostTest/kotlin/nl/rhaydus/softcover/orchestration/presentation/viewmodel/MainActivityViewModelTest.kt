@@ -100,7 +100,7 @@ class MainActivityViewModelTest {
         }
 
         @Test
-        fun `resets the state on success`() {
+        fun `requests the sheet to close on success without clearing the state yet`() {
             // ----- Arrange -----
             coEvery {
                 reAuthenticateUseCase("abc")
@@ -111,7 +111,9 @@ class MainActivityViewModelTest {
             viewModel.reAuthenticate()
 
             // ----- Assert -----
-            viewModel.reAuthState.value shouldBe ReAuthState()
+            viewModel.reAuthState.value.closeRequested shouldBe true
+            viewModel.reAuthState.value.apiKey shouldBe "abc"
+            viewModel.reAuthSheet.value.scaffold.closeRequested shouldBe true
         }
 
         @Test
@@ -130,6 +132,26 @@ class MainActivityViewModelTest {
             state.apiKey shouldBe "abc"
             state.isSubmitting shouldBe false
             (state.errorMessage != null) shouldBe true
+            state.closeRequested shouldBe false
+        }
+    }
+
+    @Nested
+    inner class OnReAuthDismissed {
+        @Test
+        fun `resets the whole state once the sheet finished hiding`() {
+            // ----- Arrange -----
+            coEvery {
+                reAuthenticateUseCase("abc")
+            } returns Result.success(Unit)
+            viewModel.onReAuthApiKeyChanged("abc")
+            viewModel.reAuthenticate()
+
+            // ----- Act -----
+            viewModel.onReAuthDismissed()
+
+            // ----- Assert -----
+            viewModel.reAuthState.value shouldBe ReAuthState()
         }
     }
 }

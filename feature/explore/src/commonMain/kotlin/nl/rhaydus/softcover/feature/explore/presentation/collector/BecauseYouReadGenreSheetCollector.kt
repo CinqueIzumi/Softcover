@@ -27,7 +27,14 @@ internal class BecauseYouReadGenreSheetCollector : ExploreCollector {
                     options = options,
                 )
 
-                scope.setState { it.copy(becauseYouReadGenreGroup = SheetRowGroupUiModel(rows = rows)) }
+                scope.setState {
+                    it.copy(
+                        becauseYouReadGenreGroup = SheetRowGroupUiModel(
+                            rows = rows,
+                            dismissesSheetOnSelect = true,
+                        ),
+                    )
+                }
             }
     }
 }

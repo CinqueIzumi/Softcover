@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.uibinding.lists
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipLeading
@@ -11,8 +12,8 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.EmphasisTreatment
+import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.header.TextEmphasis
 import nl.rhaydus.softcover.core.component.lists.ChooseListsRowUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.lists.ListMembership
@@ -23,17 +24,11 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 
-/** How many covers the bulk header's rotated stack can show. */
-private const val MAX_STACKED_COVERS: Int = 3
-
 /**
  * Maps the reader's custom lists onto the choose-lists sheet for a **single** book.
  *
  * The receiver is exactly the lists to offer, in the order to offer them — filtering (e.g. dropping
  * the built-in "Owned" list) is the host's call, not the mapping's.
- *
- * Promoted straight to `:core:uibinding` rather than starting feature-local (R6): it landed with two
- * consumers, `book_detail` here and `library`'s bulk selection below.
  */
 fun List<BookList>.toChooseListsUiModel(
     bookId: Int,
@@ -58,16 +53,18 @@ fun List<BookList>.toChooseListsUiModel(
  * row's membership is tri-state across [bookIds] and the captions count the selection.
  *
  * [covers] are the selected books that actually resolved a cover, for the header stack, capped at
- * three. **An empty list is a legitimate value** — the header then draws one upright coverless
- * jacket, so padding it up to one here would tilt that placeholder as though it were a stack.
+ * [SheetHeaderTrailing.JacketStack.MAX_COVERS]. **An empty list is a legitimate value** — the header
+ * then draws one upright coverless jacket, so padding it up to one here would tilt that placeholder as
+ * though it were a stack.
  */
 fun List<BookList>.toBulkChooseListsUiModel(
     bookIds: Set<Int>,
     covers: List<CoverUiModel>,
     listsBeingMutated: Set<Int>,
 ): ChooseListsUiModel {
-    val name = "${bookIds.size} books"
-    val stackCovers = covers.take(MAX_STACKED_COVERS)
+    val name = if (bookIds.size == 1) "1 book" else "${bookIds.size} books"
+    val takesOff = if (bookIds.size == 1) "it" else "all ${bookIds.size}"
+    val stackCovers = covers.take(SheetHeaderTrailing.JacketStack.MAX_COVERS)
 
     return ChooseListsUiModel(
         rows = rowsFor(
@@ -77,7 +74,7 @@ fun List<BookList>.toBulkChooseListsUiModel(
         ),
         scaffold = chooseListsScaffold(
             name = name,
-            description = "A part-filled list adds the rest first — then a second tap takes all three off.",
+            description = "A part-filled list adds the rest first — then a second tap takes $takesOff off.",
             trailing = if (stackCovers.isEmpty()) {
                 SheetHeaderTrailing.Jacket(
                     cover = CoverUiModel(
@@ -101,18 +98,18 @@ private fun chooseListsScaffold(
     header = SheetHeaderUiModel(
         section = SectionHeaderUiModel.Section(
             eyebrow = "Lists",
-            headline = "Shelve $name",
-            description = description,
-            headlineEmphasis = TextEmphasis(
-                substring = name,
-                treatment = EmphasisTreatment.Accent,
+            headline = persistentListOf(
+                HeaderTextSegment.Plain(text = "Shelve "),
+                HeaderTextSegment.Emphasised(
+                    text = name,
+                    treatment = EmphasisTreatment.Accent,
+                ),
             ),
+            description = persistentListOf(HeaderTextSegment.Plain(text = description)),
         ),
         trailing = trailing,
     ),
-    topAction = null,
-    footer = null,
-    layout = SheetLayout.Pinned,
+    layout = SheetLayout.PinnedLazy,
 )
 
 private fun List<BookList>.rowsFor(
@@ -205,18 +202,19 @@ private fun captionFor(
 }
 
 /**
- * The trailing control's label: `ALL` → "On the list" (single) or "On all {totalCount}" (bulk);
- * `PARTIAL` → "Add the other {totalCount - matchingCount}"; `NONE` → "Add" (single) or "Add all
- * {totalCount}" (bulk). `PARTIAL` only ever arises in bulk (a single book is either on a list or
- * not), so its label needs no single-book form.
+ * The trailing control's label. `PARTIAL` only ever arises across two or more books (one book is either
+ * on a list or not), so its label needs no singular form.
  */
 private fun membershipChipLabelFor(
     membership: ListMembership,
     matchingCount: Int,
     totalCount: Int,
     isBulk: Boolean,
-): String = when (membership) {
-    ListMembership.ALL -> if (isBulk) "On all $totalCount" else "On the list"
-    ListMembership.PARTIAL -> "Add the other ${totalCount - matchingCount}"
-    ListMembership.NONE -> if (isBulk) "Add all $totalCount" else "Add"
+): String {
+    val isPlural = isBulk && totalCount > 1
+    return when (membership) {
+        ListMembership.ALL -> if (isPlural) "On all $totalCount" else "On the list"
+        ListMembership.PARTIAL -> "Add the other ${totalCount - matchingCount}"
+        ListMembership.NONE -> if (isPlural) "Add all $totalCount" else "Add"
+    }
 }

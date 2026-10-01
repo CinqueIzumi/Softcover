@@ -89,7 +89,7 @@ class OnNewEditionSaveClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `closes the edit edition sheet immediately`() = runTest {
+        fun `leaves closing the edit edition sheet to its own animated dismiss`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
@@ -118,7 +118,7 @@ class OnNewEditionSaveClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe false
+            stateFlow.value.showEditEditionSheet shouldBe true
         }
 
         @Test
@@ -350,7 +350,7 @@ class OnNewEditionSaveClickActionTest {
         }
 
         @Test
-        fun `sets previewEdition and closes sheet when userBook is null`() = runTest {
+        fun `sets previewEdition and leaves the sheet to its animated dismiss when userBook is null`() = runTest {
             // ----- Arrange -----
             val book = stubBook(userBook = null)
             val edition = stubEdition(id = 77)
@@ -372,7 +372,7 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.previewEdition shouldBe edition
-            stateFlow.value.showEditEditionSheet shouldBe false
+            stateFlow.value.showEditEditionSheet shouldBe true
             coVerify(exactly = 0) {
                 updateBookEditionUseCase(
                     any(),
@@ -475,7 +475,7 @@ class OnNewEditionSaveClickActionTest {
         }
 
         @Test
-        fun `closes the edit edition sheet even when use case fails`() = runTest {
+        fun `still leaves the edit edition sheet to its animated dismiss when use case fails`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
             val book = stubBook(userBook = userBook)
@@ -504,7 +504,7 @@ class OnNewEditionSaveClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe false
+            stateFlow.value.showEditEditionSheet shouldBe true
         }
 
         @Test

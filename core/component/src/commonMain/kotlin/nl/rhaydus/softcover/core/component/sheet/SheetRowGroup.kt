@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 
 @Composable
 fun <K> SheetRowGroup(
@@ -11,11 +12,19 @@ fun <K> SheetRowGroup(
     onEvent: (SheetRowEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val dismissSheet = LocalModalSheetDismiss.current
+
     Column(modifier = modifier.selectableGroup()) {
         model.rows.forEach { row ->
             SheetRow(
                 model = row,
-                onEvent = onEvent,
+                onEvent = { event ->
+                    onEvent(event)
+
+                    if (model.dismissesSheetOnSelect) {
+                        dismissSheet()
+                    }
+                },
             )
         }
     }

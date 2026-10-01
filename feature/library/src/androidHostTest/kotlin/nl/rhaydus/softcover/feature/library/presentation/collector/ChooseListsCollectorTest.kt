@@ -95,7 +95,7 @@ class ChooseListsCollectorTest {
                 // ----- Assert -----
                 stateFlow.value.chooseListsSheet shouldNotBe null
                 val header = stateFlow.value.chooseListsSheet?.scaffold?.header
-                header?.section?.headline shouldBe "Shelve 2 books"
+                header?.section?.headlineText shouldBe "Shelve 2 books"
                 (header?.trailing as SheetHeaderTrailing.JacketStack).covers.size shouldBe 2
                 job.cancel()
             }

@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.reading.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 
@@ -22,8 +21,5 @@ internal fun streakSheetScaffoldFor(activity: List<ReadingDayActivity>): SheetSc
                 headline = headline,
             ),
         ),
-        topAction = null,
-        footer = null,
-        layout = SheetLayout.Scrolling,
     )
 }

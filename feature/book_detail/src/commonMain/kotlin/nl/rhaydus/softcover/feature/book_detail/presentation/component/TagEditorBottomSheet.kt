@@ -3,8 +3,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -71,22 +69,13 @@ internal fun TagEditorBottomSheet(
             when (event) {
                 SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.PrimaryClicked,
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
     ) {
-        Column(
-            modifier = Modifier
-                .weight(
-                    weight = 1f,
-                    fill = false,
-                )
-                .verticalScroll(state = rememberScrollState()),
-        ) {
+        Column {
             TagEditorAddBlock(
                 selectedCategory = selectedCategory,
                 categoryChips = categoryChips,

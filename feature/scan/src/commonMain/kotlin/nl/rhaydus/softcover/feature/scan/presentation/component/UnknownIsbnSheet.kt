@@ -36,9 +36,7 @@ internal fun UnknownIsbnSheet(
                 SheetScaffoldEvent.Dismissed -> onDismiss()
 
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.TopActionClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
         content = {

@@ -2,10 +2,10 @@ package nl.rhaydus.softcover.core.component.lists
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -39,6 +41,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -55,11 +58,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 /**
  * The editorial "index of shelves" (redesign brief): a shared surface for adding/removing one or more
  * books to the user's custom lists, consumed by both `book_detail` and the library **bulk-select**
- * pattern. The header names the act ("Shelve {book}" / "Shelve {n} books") with the book's own jacket at top; the
- * list rows read like a ruled index — italic chapter-style names, a leading bookmark that fills when
- * the list already holds the selection, and a reversible trailing control (a removable
- * `primaryContainer` "On the list ×" chip, a quiet outline "+ Add", or — in bulk, for a part-filled
- * list — a filled "+ Add the other N"). Every toggle is instant/optimistic; there is no save button.
+ * pattern. The header names the act ("Shelve {book}" / "Shelve {n} books") with the book's jacket (or a
+ * stack of the selection's) as the header's trailing slot; the list rows read like a ruled index —
+ * italic chapter-style names, a leading bookmark that fills when the list already holds the selection,
+ * and a reversible trailing control (a removable `primaryContainer` "On the list ×" chip, a quiet
+ * outline "+ Add", or — in bulk, for a part-filled list — a filled "+ Add the other N"). Every toggle
+ * is instant/optimistic; there is no save button.
  *
  * The sheet is a dumb renderer: the caller owns the `AddBookToListUseCase` / `RemoveBookFromListUseCase`
  * writes behind [ChooseListsEvent.MembershipToggled] and decides whether to stay open for consecutive
@@ -77,11 +81,9 @@ fun ChooseListsBottomSheet(
             when (event) {
                 SheetScaffoldEvent.Dismissed -> onEvent(ChooseListsEvent.Dismissed)
 
-                SheetScaffoldEvent.TopActionClicked,
                 SheetScaffoldEvent.PrimaryClicked,
                 SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked,
-                -> Unit
+                SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
         modifier = modifier,
@@ -96,7 +98,6 @@ fun ChooseListsBottomSheet(
                         weight = 1f,
                         fill = false,
                     ),
-                contentPadding = PaddingValues(bottom = 4.dp),
             ) {
                 items(items = model.rows, key = { it.listId }) { row ->
                     ChooseListsRow(
@@ -149,6 +150,8 @@ private fun ChooseListsRow(
     row: ChooseListsRowUiModel,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+
     Column {
         Divider(model = DividerUiModel.Horizontal())
 
@@ -157,7 +160,17 @@ private fun ChooseListsRow(
                 .fillMaxWidth()
                 .conditional(
                     condition = row.isPending.not(),
-                    ifTrue = { Modifier.pointerHandCursor().pressScaleClickable(onClick = onClick) },
+                    ifTrue = {
+                        Modifier
+                            .pointerHandCursor()
+                            .pressScale(interactionSource)
+                            .triStateToggleable(
+                                state = row.membership.toToggleableState(),
+                                interactionSource = interactionSource,
+                                indication = null,
+                                onClick = onClick,
+                            )
+                    },
                 )
                 .padding(vertical = 17.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -194,6 +207,12 @@ private fun ChooseListsRow(
             }
         }
     }
+}
+
+private fun ListMembership.toToggleableState(): ToggleableState = when (this) {
+    ListMembership.ALL -> ToggleableState.On
+    ListMembership.PARTIAL -> ToggleableState.Indeterminate
+    ListMembership.NONE -> ToggleableState.Off
 }
 
 @Composable
@@ -277,10 +296,16 @@ private fun NewListRow(
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = "+",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
+            val icon = drawableIconResource(
+                icon = SoftcoverIcon.Add,
+                contentDescription = "",
+            )
+
+            Icon(
+                painter = icon.getIconPainter(),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
             )
         }
 

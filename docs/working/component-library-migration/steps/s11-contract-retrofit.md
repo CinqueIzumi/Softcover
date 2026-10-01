@@ -32,6 +32,11 @@ the `UiState`, assembled by the collector.
 2. **Sweep.** Run the gate; its findings are the work list. Fix every one, split into feature-sized
    briefs.
 3. **Done** when the gate is green on the whole repo with no suppressions and no baseline entries.
+4. **Sheet bodies the gate may miss** (derived values, domain types, loose params — not model
+   constructors): UpdateProgress tab derivation; Edition (`BookEdition`, labels, the count label, loose
+   params); ShareBook `displayedContent`; TagEditor (domain types, `TagCategory.fromName`); Genre label
+   and local `sheetVisible`; ContinueSeries `DismissedSeriesBook` and copy; Filter `filterChipsFor`;
+   Streak day labels and `today`; ProfileShare `isBusy` / "Saving…"; UnknownIsbn loose `isbn`.
 
 S11 settles the three R10 edges `component-contract.md` names. Two stay open on purpose, as recorded
 exceptions rather than holdouts: a component resolving its own copy from `composeResources`

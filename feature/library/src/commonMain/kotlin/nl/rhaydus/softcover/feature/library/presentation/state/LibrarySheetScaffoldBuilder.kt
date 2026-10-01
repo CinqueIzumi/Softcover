@@ -2,13 +2,17 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
+
+private fun showResultsButton(resultCount: Int): SheetFooterButton = SheetFooterButton(
+    label = "Show ${formatBookCount(count = resultCount)}",
+    dismissesSheet = true,
+)
 
 internal fun arrangeSheetScaffoldFor(resultCount: Int): SheetScaffoldUiModel =
     SheetScaffoldUiModel(
@@ -18,16 +22,10 @@ internal fun arrangeSheetScaffoldFor(resultCount: Int): SheetScaffoldUiModel =
                 headline = "Arrange this shelf.",
             ),
         ),
-        topAction = null,
-        footer = SheetFooterUiModel(
-            primary = SheetFooterButton(
-                label = "Show ${formatBookCount(count = resultCount)}",
-                dismissesSheet = true,
-            ),
+        footer = SheetFooterUiModel.Stacked(
+            primary = showResultsButton(resultCount = resultCount),
             secondary = null,
-            layout = SheetFooterLayout.Stacked,
         ),
-        layout = SheetLayout.Scrolling,
     )
 
 /**
@@ -46,17 +44,12 @@ internal fun filterSheetScaffoldFor(
                 description = "Combine facets to find the corner of your library you're after.",
             ),
         ),
-        topAction = null,
-        footer = SheetFooterUiModel(
-            primary = SheetFooterButton(
-                label = "Show ${formatBookCount(count = resultCount)}",
-                dismissesSheet = true,
-            ),
+        footer = SheetFooterUiModel.Inline(
+            primary = showResultsButton(resultCount = resultCount),
             secondary = SheetFooterButton(
                 label = "Clear all",
                 enabled = filtersActive,
             ),
-            layout = SheetFooterLayout.Inline,
         ),
         layout = SheetLayout.Pinned,
     )
@@ -70,9 +63,6 @@ internal fun shelvesSheetScaffold(): SheetScaffoldUiModel =
             ),
             trailing = SheetHeaderTrailing.Action(label = "Manage"),
         ),
-        topAction = null,
-        footer = null,
-        layout = SheetLayout.Scrolling,
     )
 
 internal fun bulkRemoveSheetScaffoldFor(
@@ -90,20 +80,13 @@ internal fun bulkRemoveSheetScaffoldFor(
                     "You can always add them again later.",
             ),
         ),
-        topAction = null,
-        footer = SheetFooterUiModel(
-            primary = SheetFooterButton(
-                label = "Remove",
-                loading = inProgress,
-            ),
+        footer = SheetFooterUiModel.Stacked(
+            primary = SheetFooterButton(label = "Remove"),
             secondary = SheetFooterButton(
                 label = "Cancel",
-                enabled = inProgress.not(),
                 dismissesSheet = true,
             ),
-            layout = SheetFooterLayout.Stacked,
         ),
-        layout = SheetLayout.Scrolling,
-        dismissible = inProgress.not(),
+        busy = inProgress,
     )
 }

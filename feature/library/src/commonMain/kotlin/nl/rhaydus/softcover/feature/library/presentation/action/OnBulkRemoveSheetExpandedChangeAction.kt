@@ -13,6 +13,11 @@ internal class OnBulkRemoveSheetExpandedChangeAction(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        scope.setState { it.copy(isBulkRemoveSheetShown = shown) }
+        scope.setState {
+            it.copy(
+                isBulkRemoveSheetShown = shown,
+                isBulkRemoveCloseRequested = false,
+            )
+        }
     }
 }

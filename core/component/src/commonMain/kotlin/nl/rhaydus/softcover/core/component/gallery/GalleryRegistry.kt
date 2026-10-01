@@ -48,6 +48,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
@@ -72,7 +73,6 @@ import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.StatShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.YearRecapShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetFooter
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
@@ -455,7 +455,7 @@ object GalleryRegistry {
         galleryEntry(
             name = "SheetScaffold",
             family = GalleryFamily.SHEET,
-            blurb = "The chrome every modal sheet shares — top action, editorial header with an optional " +
+            blurb = "The chrome every modal sheet shares — dismiss label, editorial header with an optional " +
                 "trailing jacket, jacket stack or action, and a footer. Scrolling lets the whole sheet " +
                 "scroll; Pinned fixes the header and footer around a body that scrolls itself. Shown " +
                 "inline, without the modal container.",
@@ -465,7 +465,7 @@ object GalleryRegistry {
                 SheetScaffoldContent(
                     model = model,
                     onEvent = {},
-                    modifier = if (model.layout == SheetLayout.Pinned) {
+                    modifier = if (model.layout != SheetLayout.Scrolling) {
                         modifier.height(420.dp)
                     } else {
                         modifier
@@ -592,7 +592,8 @@ private fun badgeFixtureLabel(model: BadgeUiModel): String = when {
 /** Names what a [SectionHeaderUiModel] fixture demonstrates, derived from its register. */
 private fun sectionHeaderFixtureLabel(model: SectionHeaderUiModel): String = when (model) {
     is SectionHeaderUiModel.Section -> when {
-        model.headlineEmphasis != null || model.descriptionEmphasis != null -> "Section, with emphasis"
+        (model.headline.orEmpty() + model.description.orEmpty())
+            .any { it is HeaderTextSegment.Emphasised } -> "Section, with emphasis"
         model.headline != null -> "Section, with headline"
         else -> "Section, eyebrow only"
     }
@@ -711,16 +712,18 @@ private const val COVERLESS_LONG_TITLE_LABEL_FLOOR = 30
 
 private fun sheetScaffoldFixtureLabel(model: SheetScaffoldUiModel): String = when {
     model.dismissible.not() -> "Not dismissible"
-    model.topAction != null -> "Scrolling, top action and jacket"
+    model.busy -> "Busy"
+    model.dismissLabel != null -> "Scrolling, dismiss label and jacket"
     model.layout == SheetLayout.Scrolling -> "Scrolling, footer"
     model.header.trailing is SheetHeaderTrailing.Action -> "Pinned, header action"
     else -> "Pinned, jacket stack and inline footer"
 }
 
 private fun sheetFooterFixtureLabel(model: SheetFooterUiModel): String = when {
-    model.primary?.loading == true -> "Stacked, loading"
     model.primary?.enabled == false -> "Inline, primary disabled"
-    else -> if (model.layout == SheetFooterLayout.Stacked) "Stacked" else "Inline"
+    model is SheetFooterUiModel.Stacked && model.secondary == null -> "Stacked, primary only"
+    model is SheetFooterUiModel.Stacked -> "Stacked"
+    else -> "Inline"
 }
 
 private fun sheetRowFixtureLabel(model: SheetRowUiModel<String>): String = when {

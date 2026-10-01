@@ -40,5 +40,23 @@ class SheetScaffoldUiModelTest {
             // ----- Assert -----
             dismissibleValues shouldBe setOf(true, false)
         }
+
+        @Test
+        fun `fixtures cover an idle and a busy sheet`() {
+            // ----- Act -----
+            val busyValues = SheetScaffoldUiModel.previews.map { it.busy }.toSet()
+
+            // ----- Assert -----
+            busyValues shouldBe setOf(true, false)
+        }
+
+        @Test
+        fun `fixtures cover a sheet with and without a footer`() {
+            // ----- Act -----
+            val footerPresence = SheetScaffoldUiModel.previews.map { it.footer != null }.toSet()
+
+            // ----- Assert -----
+            footerPresence shouldBe setOf(true, false)
+        }
     }
 }

@@ -7,6 +7,8 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
@@ -28,8 +30,24 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.section.description.shouldNotBeNull() shouldContain "Dune"
-            result.header.section.descriptionEmphasis.shouldNotBeNull().substring shouldBe "Dune"
+            result.header.section.description.shouldNotBeNull().filterIsInstance<HeaderTextSegment.Emphasised>()
+                .single().text shouldBe "Dune"
+        }
+
+        @Test
+        fun `wraps the title in plain segments so the description reads as one sentence`() {
+            // ----- Act -----
+            val segments = tagEditorSheetScaffoldFor(
+                bookTitle = "Dune",
+                cover = null,
+            ).header.section.description.shouldNotBeNull()
+
+            // ----- Assert -----
+            segments.size shouldBe 3
+            (segments.first() is HeaderTextSegment.Plain) shouldBe true
+            (segments[1] is HeaderTextSegment.Emphasised) shouldBe true
+            (segments.last() is HeaderTextSegment.Plain) shouldBe true
+            segments.joinToString(separator = "") { it.text }.contains("on Dune.") shouldBe true
         }
 
         @Test
@@ -80,6 +98,21 @@ class BookDetailSheetScaffoldBuilderTest {
 
     @Nested
     inner class EditionSheetScaffoldFor {
+        @Test
+        fun `the primary dismisses the sheet itself so the save click does not have to`() {
+            // ----- Act -----
+            val result = editionSheetScaffoldFor(
+                bookTitle = "Dune",
+                currentEdition = buildEdition(id = 1),
+                selectedEdition = buildEdition(id = 2),
+                cover = null,
+                isLoading = false,
+            )
+
+            // ----- Assert -----
+            result.footer.shouldNotBeNull().primary.shouldNotBeNull().dismissesSheet shouldBe true
+        }
+
         @Test
         fun `enables the primary when the selection differs from the current edition`() {
             // ----- Arrange -----
@@ -164,9 +197,9 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.section.description shouldContain "Dune"
-            result.header.section.description shouldContain "Frank Herbert"
-            result.header.section.description shouldContain "Brian Herbert"
+            result.header.section.descriptionText() shouldContain "Dune"
+            result.header.section.descriptionText() shouldContain "Frank Herbert"
+            result.header.section.descriptionText() shouldContain "Brian Herbert"
         }
 
         @Test
@@ -185,7 +218,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.section.description shouldBe "Dune"
+            result.header.section.descriptionText() shouldBe "Dune"
         }
 
         @Test
@@ -212,7 +245,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.header.section.description shouldBe "Dune"
+            result.header.section.descriptionText() shouldBe "Dune"
         }
 
         @Test
@@ -364,3 +397,5 @@ class BookDetailSheetScaffoldBuilderTest {
         }
     }
 }
+
+private fun SectionHeaderUiModel.Section.descriptionText(): String? = description?.joinToString(separator = "") { it.text }

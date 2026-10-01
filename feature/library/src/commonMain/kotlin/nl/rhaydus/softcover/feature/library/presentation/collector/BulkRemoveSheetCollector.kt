@@ -16,16 +16,28 @@ internal class BulkRemoveSheetCollector : LibraryCollector {
         dependencies: LibraryDependencies,
     ) {
         scope.state
-            .map { state -> state.selectedBookIds.size to state.bulkActionInProgress }
+            .map { state ->
+                Triple(
+                    state.selectedBookIds.size,
+                    state.bulkActionInProgress,
+                    state.isBulkRemoveCloseRequested,
+                )
+            }
             .distinctUntilChanged()
-            .collectLatest { (bookCount, inProgress) ->
+            .collectLatest { (bookCount, inProgress, closeRequested) ->
                 scope.setState {
-                    it.copy(
-                        bulkRemoveSheet = bulkRemoveSheetScaffoldFor(
+                    // Keep the content frozen while the sheet hides, so the emptied selection does not
+                    // rewrite the headline mid-animation.
+                    val sheet = if (closeRequested) {
+                        it.bulkRemoveSheet.copy(closeRequested = true)
+                    } else {
+                        bulkRemoveSheetScaffoldFor(
                             bookCount = bookCount,
                             inProgress = inProgress,
-                        ),
-                    )
+                        )
+                    }
+
+                    it.copy(bulkRemoveSheet = sheet)
                 }
             }
     }

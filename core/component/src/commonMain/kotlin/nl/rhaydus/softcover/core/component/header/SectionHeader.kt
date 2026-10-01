@@ -34,6 +34,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
@@ -148,19 +149,20 @@ private fun SectionHeaderRegion(
                 colorScheme = MaterialTheme.colorScheme,
             ),
             pulse = pulse,
+            isHeading = model.headline == null,
         )
 
         if (model.headline != null) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = emphasisedText(
-                    text = model.headline,
-                    emphasis = model.headlineEmphasis,
+                text = headerAnnotatedString(
+                    segments = model.headline,
                     colorScheme = MaterialTheme.colorScheme,
                 ),
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.semantics { heading() },
             )
         }
 
@@ -168,9 +170,8 @@ private fun SectionHeaderRegion(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = emphasisedText(
-                    text = model.description,
-                    emphasis = model.descriptionEmphasis,
+                text = headerAnnotatedString(
+                    segments = model.description,
                     colorScheme = MaterialTheme.colorScheme,
                 ),
                 style = MaterialTheme.editorialTypography.body,
@@ -180,26 +181,21 @@ private fun SectionHeaderRegion(
     }
 }
 
-internal fun emphasisedText(
-    text: String,
-    emphasis: TextEmphasis?,
+internal fun headerAnnotatedString(
+    segments: List<HeaderTextSegment>,
     colorScheme: ColorScheme,
-): AnnotatedString {
-    val start = emphasis?.substring?.takeIf { it.isNotEmpty() }?.let { text.lastIndexOf(it) } ?: -1
-
-    if (emphasis == null || start < 0) return AnnotatedString(text)
-
-    val spanStyle = when (emphasis.treatment) {
-        EmphasisTreatment.Accent -> SpanStyle(color = colorScheme.primary)
-    }
-
-    return buildAnnotatedString {
-        append(text)
-        addStyle(
-            style = spanStyle,
-            start = start,
-            end = start + emphasis.substring.length,
-        )
+): AnnotatedString = buildAnnotatedString {
+    segments.forEach { segment ->
+        when (segment) {
+            is HeaderTextSegment.Plain -> append(segment.text)
+            is HeaderTextSegment.Emphasised -> withStyle(
+                when (segment.treatment) {
+                    EmphasisTreatment.Accent -> SpanStyle(color = colorScheme.primary)
+                },
+            ) {
+                append(segment.text)
+            }
+        }
     }
 }
 
@@ -263,9 +259,12 @@ private fun SectionHeaderEyebrowRow(
     color: Color,
     modifier: Modifier = Modifier,
     pulse: Animatable<Float, AnimationVector1D>? = null,
+    isHeading: Boolean = true,
 ) {
     Row(
-        modifier = modifier.semantics(mergeDescendants = true) { heading() },
+        modifier = modifier.then(
+            if (isHeading) Modifier.semantics(mergeDescendants = true) { heading() } else Modifier,
+        ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val bar = style.bar

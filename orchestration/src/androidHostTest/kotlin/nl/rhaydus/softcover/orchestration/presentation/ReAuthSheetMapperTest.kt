@@ -45,7 +45,7 @@ class ReAuthSheetMapperTest {
         }
 
         @Test
-        fun `submitting shows loading and disables field and secondary`() {
+        fun `submitting marks the sheet busy and disables the field`() {
             // ----- Arrange -----
             val state = ReAuthState(
                 apiKey = "token",
@@ -56,13 +56,12 @@ class ReAuthSheetMapperTest {
             val result = state.toSheetUiModel()
 
             // ----- Assert -----
-            result.scaffold.footer?.primary?.loading shouldBe true
+            result.scaffold.busy shouldBe true
             result.fieldEnabled shouldBe false
-            result.scaffold.footer?.secondary?.enabled shouldBe false
         }
 
         @Test
-        fun `idle shows no loading and enables field and secondary`() {
+        fun `idle is not busy and enables the field`() {
             // ----- Arrange -----
             val state = ReAuthState(
                 apiKey = "token",
@@ -73,9 +72,8 @@ class ReAuthSheetMapperTest {
             val result = state.toSheetUiModel()
 
             // ----- Assert -----
-            result.scaffold.footer?.primary?.loading shouldBe false
+            result.scaffold.busy shouldBe false
             result.fieldEnabled shouldBe true
-            result.scaffold.footer?.secondary?.enabled shouldBe true
         }
 
         @Test
@@ -104,6 +102,43 @@ class ReAuthSheetMapperTest {
 
             // ----- Assert -----
             result.errorMessage shouldBe null
+        }
+
+        @Test
+        fun `a close request on the state is carried onto the scaffold`() {
+            // ----- Arrange -----
+            val state = ReAuthState(closeRequested = true)
+
+            // ----- Act -----
+            val result = state.toSheetUiModel()
+
+            // ----- Assert -----
+            result.scaffold.closeRequested shouldBe true
+        }
+
+        @Test
+        fun `no close is requested by default`() {
+            // ----- Act -----
+            val result = ReAuthState().toSheetUiModel()
+
+            // ----- Assert -----
+            result.scaffold.closeRequested shouldBe false
+        }
+
+        @Test
+        fun `model leaves the secondary enabled while submitting and relies on busy for the scaffold to disable it`() {
+            // ----- Arrange -----
+            val state = ReAuthState(
+                apiKey = "token",
+                isSubmitting = true,
+            )
+
+            // ----- Act -----
+            val result = state.toSheetUiModel()
+
+            // ----- Assert -----
+            result.scaffold.footer?.secondary?.enabled shouldBe true
+            result.scaffold.footer?.secondary?.dismissesSheet shouldBe false
         }
 
         @Test

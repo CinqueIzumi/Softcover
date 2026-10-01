@@ -9,7 +9,6 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
@@ -30,11 +29,12 @@ data class VerdictSheetUiModel(
     val initialRating: Double?,
     val initialReview: RichTextUiModel,
     val initialHasSpoilers: Boolean,
+    val reviewLabel: SectionHeaderUiModel.Label = SectionHeaderUiModel.Label(eyebrow = "In your words"),
 ) {
     companion object : UiModelPreviews<VerdictSheetUiModel> {
         private fun fixtureScaffold(
             header: SectionHeaderUiModel.Section,
-            topAction: String,
+            dismissLabel: String,
             saveLabel: String,
             canDelete: Boolean,
         ): SheetScaffoldUiModel = SheetScaffoldUiModel(
@@ -42,11 +42,10 @@ data class VerdictSheetUiModel(
                 section = header,
                 trailing = SheetHeaderTrailing.Jacket(cover = fixtureCover),
             ),
-            topAction = topAction,
-            footer = SheetFooterUiModel(
+            dismissLabel = dismissLabel,
+            footer = SheetFooterUiModel.Stacked(
                 primary = SheetFooterButton(label = saveLabel),
                 secondary = if (canDelete) SheetFooterButton(label = "Delete review") else null,
-                layout = SheetFooterLayout.Stacked,
             ),
             layout = SheetLayout.Pinned,
         )
@@ -54,7 +53,7 @@ data class VerdictSheetUiModel(
         private val fixtureCover = CoverUiModel(
             source = null,
             coverlessTitle = "Piranesi",
-            variant = CoverVariant.VerdictSheetJacket,
+            variant = CoverVariant.SheetHeaderJacket,
         )
 
         /** One fixture per anatomy: the empty finished prompt, and an edit with a verdict and a Delete action. */
@@ -66,7 +65,7 @@ data class VerdictSheetUiModel(
                         headline = "You finished Piranesi.",
                         description = "A rating and a few words, if you like — both are optional.",
                     ),
-                    topAction = "Not now",
+                    dismissLabel = "Not now",
                     saveLabel = "Save",
                     canDelete = false,
                 ),
@@ -80,7 +79,7 @@ data class VerdictSheetUiModel(
                         eyebrow = "Your verdict",
                         headline = "Your take on Piranesi.",
                     ),
-                    topAction = "Cancel",
+                    dismissLabel = "Cancel",
                     saveLabel = "Save changes",
                     canDelete = true,
                 ),

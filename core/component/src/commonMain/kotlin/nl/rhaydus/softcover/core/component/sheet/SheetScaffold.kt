@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.component.sheet
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,22 +17,24 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
-import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
@@ -46,15 +47,19 @@ fun SheetScaffold(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    var dismissStarted by remember { mutableStateOf(false) }
+    val outsideDismissAllowed = model.dismissible && model.busy.not() && dismissStarted.not()
+
     AdaptiveModalSheet(
         onDismissRequest = { onEvent(SheetScaffoldEvent.Dismissed) },
         modifier = modifier,
-        dismissOnTapOutside = model.dismissible,
-        dismissOnBackPress = model.dismissible,
+        dismissOnTapOutside = outsideDismissAllowed,
+        dismissOnBackPress = outsideDismissAllowed,
     ) {
         SheetScaffoldContent(
             model = model,
             onEvent = onEvent,
+            onDismissStarted = { dismissStarted = true },
             content = content,
         )
     }
@@ -66,103 +71,134 @@ internal fun SheetScaffoldContent(
     model: SheetScaffoldUiModel,
     onEvent: (SheetScaffoldEvent) -> Unit,
     modifier: Modifier = Modifier,
+    onDismissStarted: () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val padding = Modifier
-        .padding(horizontal = 24.dp)
-        .padding(top = 8.dp, bottom = 16.dp)
+    val chrome = rememberSheetChrome(model = model)
+    val currentOnDismissStarted by rememberUpdatedState(onDismissStarted)
 
-    when (model.layout) {
-        SheetLayout.Scrolling -> Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .verticalScroll(state = rememberScrollState())
-                .imePadding()
-                .then(padding),
-        ) {
-            SheetTop(
-                model = model,
-                onEvent = onEvent,
-            )
-
-            content()
-
-            if (model.footer != null) {
-                Spacer(modifier = Modifier.height(24.dp))
-
-                SheetFooter(
-                    model = model.footer,
-                    onEvent = onEvent,
-                )
-            }
+    LaunchedEffect(chrome.dismissal.started) {
+        if (chrome.dismissal.started) {
+            currentOnDismissStarted()
         }
+    }
 
-        SheetLayout.Pinned -> Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .imePadding()
-                .then(padding),
-        ) {
-            SheetTop(
-                model = model,
-                onEvent = onEvent,
+    LaunchedEffect(model.closeRequested) {
+        if (model.closeRequested) {
+            chrome.dismissal.start()
+        }
+    }
+
+    val spec = model.layout.spec()
+    val scrollState = rememberScrollState()
+    val paneTitle = model.header.section.headlineText ?: model.header.section.eyebrow
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .imePadding()
+            .then(if (spec.wholeSheetScrolls) Modifier.verticalScroll(state = scrollState) else Modifier)
+            .padding(horizontal = 24.dp)
+            .padding(
+                top = 8.dp,
+                bottom = 16.dp,
             )
+            .semantics { this.paneTitle = paneTitle },
+    ) {
+        SheetTop(
+            model = model,
+            chrome = chrome,
+            onEvent = onEvent,
+        )
 
+        if (spec.bodyWrapped) {
             Column(
-                modifier = Modifier.weight(
-                    weight = 1f,
-                    fill = false,
-                ),
+                modifier = Modifier
+                    .weight(
+                        weight = 1f,
+                        fill = false,
+                    )
+                    .then(if (spec.bodyScrolls) Modifier.verticalScroll(state = scrollState) else Modifier),
                 content = content,
             )
+        } else {
+            content()
+        }
 
-            if (model.footer != null) {
+        if (model.footer != null) {
+            if (spec.footerSeparated) {
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Divider(model = DividerUiModel.Horizontal())
 
                 Spacer(modifier = Modifier.height(12.dp))
-
-                SheetFooter(
-                    model = model.footer,
-                    onEvent = onEvent,
-                )
+            } else {
+                Spacer(modifier = Modifier.height(24.dp))
             }
+
+            SheetFooter(
+                model = model.footer,
+                onEvent = onEvent,
+                chrome = chrome,
+            )
         }
     }
+}
+
+/** Where a [SheetLayout] places the scroll and the footer divider. */
+private data class SheetLayoutSpec(
+    val wholeSheetScrolls: Boolean,
+    val bodyWrapped: Boolean,
+    val bodyScrolls: Boolean,
+    val footerSeparated: Boolean,
+)
+
+private fun SheetLayout.spec(): SheetLayoutSpec = when (this) {
+    SheetLayout.Scrolling -> SheetLayoutSpec(
+        wholeSheetScrolls = true,
+        bodyWrapped = false,
+        bodyScrolls = false,
+        footerSeparated = false,
+    )
+
+    SheetLayout.Pinned -> SheetLayoutSpec(
+        wholeSheetScrolls = false,
+        bodyWrapped = true,
+        bodyScrolls = true,
+        footerSeparated = true,
+    )
+
+    SheetLayout.PinnedLazy -> SheetLayoutSpec(
+        wholeSheetScrolls = false,
+        bodyWrapped = true,
+        bodyScrolls = false,
+        footerSeparated = true,
+    )
 }
 
 @Composable
 private fun SheetTop(
     model: SheetScaffoldUiModel,
+    chrome: SheetChrome,
     onEvent: (SheetScaffoldEvent) -> Unit,
 ) {
-    val dismissSheet = LocalModalSheetDismiss.current
-
-    if (model.topAction != null) {
+    if (model.dismissLabel != null) {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.CenterEnd,
         ) {
-            Text(
-                text = model.topAction,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .pointerHandCursor()
-                    .clickable(
-                        role = Role.Button,
-                        onClick = {
-                            onEvent(SheetScaffoldEvent.TopActionClicked)
-
-                            dismissSheet()
-                        },
-                    )
-                    .minimumInteractiveComponentSize(),
+            RhaydusButton(
+                label = model.dismissLabel,
+                style = ButtonStyle.TEXT,
+                onClick = chrome::dismiss,
+                enabled = chrome.canDismiss && chrome.unlocked,
             )
         }
     }
 
     SheetHeader(
         model = model.header,
+        chrome = chrome,
         onEvent = onEvent,
     )
 
@@ -172,6 +208,7 @@ private fun SheetTop(
 @Composable
 private fun SheetHeader(
     model: SheetHeaderUiModel,
+    chrome: SheetChrome,
     onEvent: (SheetScaffoldEvent) -> Unit,
 ) {
     val trailing = model.trailing
@@ -182,10 +219,11 @@ private fun SheetHeader(
             null
         } else {
             {
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 SheetHeaderTrailingContent(
                     trailing = trailing,
+                    chrome = chrome,
                     onEvent = onEvent,
                 )
             }
@@ -196,6 +234,7 @@ private fun SheetHeader(
 @Composable
 private fun RowScope.SheetHeaderTrailingContent(
     trailing: SheetHeaderTrailing,
+    chrome: SheetChrome,
     onEvent: (SheetScaffoldEvent) -> Unit,
 ) {
     when (trailing) {
@@ -210,14 +249,15 @@ private fun RowScope.SheetHeaderTrailingContent(
             label = trailing.label,
             style = ButtonStyle.TEXT,
             onClick = { onEvent(SheetScaffoldEvent.HeaderActionClicked) },
+            enabled = chrome.unlocked,
         )
     }
 }
 
+private val JACKET_STACK_ROTATIONS: List<Float> = listOf(-8f, 4f, 0f)
+
 @Composable
 private fun JacketStack(trailing: SheetHeaderTrailing.JacketStack) {
-    val rotations = listOf(-8f, 4f, 0f)
-
     Box(
         modifier = Modifier.size(
             width = 84.dp,
@@ -225,12 +265,12 @@ private fun JacketStack(trailing: SheetHeaderTrailing.JacketStack) {
         ),
         contentAlignment = Alignment.Center,
     ) {
-        trailing.covers.take(rotations.size).forEachIndexed { index, cover ->
+        trailing.covers.forEachIndexed { index, cover ->
             Cover(
                 model = cover,
                 modifier = Modifier
                     .width(56.dp)
-                    .rotate(rotations[index]),
+                    .rotate(JACKET_STACK_ROTATIONS[index]),
             )
         }
     }
@@ -242,54 +282,85 @@ internal fun SheetFooter(
     model: SheetFooterUiModel,
     onEvent: (SheetScaffoldEvent) -> Unit,
     modifier: Modifier = Modifier,
+    chrome: SheetChrome = rememberSheetChrome(),
 ) {
-    when (model.layout) {
-        SheetFooterLayout.Stacked -> Column(
+    when (model) {
+        is SheetFooterUiModel.Stacked -> Column(
             modifier = modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             if (model.primary != null) {
-                SheetFooterButtonView(
+                PrimaryFooterButton(
                     button = model.primary,
-                    style = ButtonStyle.FILLED,
-                    onClick = { onEvent(SheetScaffoldEvent.PrimaryClicked) },
+                    chrome = chrome,
+                    onEvent = onEvent,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
 
             if (model.secondary != null) {
-                SheetFooterButtonView(
+                SecondaryFooterButton(
                     button = model.secondary,
-                    style = ButtonStyle.TEXT,
-                    onClick = { onEvent(SheetScaffoldEvent.SecondaryClicked) },
+                    chrome = chrome,
+                    onEvent = onEvent,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
 
-        SheetFooterLayout.Inline -> Row(
+        is SheetFooterUiModel.Inline -> Row(
             modifier = modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (model.secondary != null) {
-                SheetFooterButtonView(
-                    button = model.secondary,
-                    style = ButtonStyle.TEXT,
-                    onClick = { onEvent(SheetScaffoldEvent.SecondaryClicked) },
-                )
-            }
+            SecondaryFooterButton(
+                button = model.secondary,
+                chrome = chrome,
+                onEvent = onEvent,
+            )
 
-            if (model.primary != null) {
-                SheetFooterButtonView(
-                    button = model.primary,
-                    style = ButtonStyle.FILLED,
-                    onClick = { onEvent(SheetScaffoldEvent.PrimaryClicked) },
-                    modifier = Modifier.weight(1f),
-                )
-            }
+            PrimaryFooterButton(
+                button = model.primary,
+                chrome = chrome,
+                onEvent = onEvent,
+                modifier = Modifier.weight(1f),
+            )
         }
     }
+}
+
+@Composable
+private fun PrimaryFooterButton(
+    button: SheetFooterButton,
+    chrome: SheetChrome,
+    onEvent: (SheetScaffoldEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SheetFooterButtonView(
+        button = button,
+        style = ButtonStyle.FILLED,
+        chrome = chrome,
+        loading = chrome.busy,
+        onClick = { onEvent(SheetScaffoldEvent.PrimaryClicked) },
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun SecondaryFooterButton(
+    button: SheetFooterButton,
+    chrome: SheetChrome,
+    onEvent: (SheetScaffoldEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SheetFooterButtonView(
+        button = button,
+        style = ButtonStyle.TEXT,
+        chrome = chrome,
+        loading = false,
+        onClick = { onEvent(SheetScaffoldEvent.SecondaryClicked) },
+        modifier = modifier,
+    )
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -297,13 +368,19 @@ internal fun SheetFooter(
 private fun SheetFooterButtonView(
     button: SheetFooterButton,
     style: ButtonStyle,
+    chrome: SheetChrome,
+    loading: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val dismissSheet = LocalModalSheetDismiss.current
-
     Box(
-        modifier = modifier,
+        modifier = modifier.then(
+            if (loading) {
+                Modifier.semantics { stateDescription = chrome.busyDescription }
+            } else {
+                Modifier
+            },
+        ),
         contentAlignment = Alignment.CenterEnd,
     ) {
         RhaydusButton(
@@ -313,15 +390,15 @@ private fun SheetFooterButtonView(
                 onClick()
 
                 if (button.dismissesSheet) {
-                    dismissSheet()
+                    chrome.dismiss()
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = button.enabled && button.loading.not(),
+            enabled = button.enabled && chrome.busy.not() && chrome.unlocked,
             size = ButtonSize.M,
         )
 
-        if (button.loading) {
+        if (loading) {
             CircularWavyProgressIndicator(
                 modifier = Modifier
                     .padding(end = 16.dp)

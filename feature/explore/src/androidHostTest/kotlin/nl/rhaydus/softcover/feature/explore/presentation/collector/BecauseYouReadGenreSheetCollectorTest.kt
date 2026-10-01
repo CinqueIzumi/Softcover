@@ -128,6 +128,26 @@ class BecauseYouReadGenreSheetCollectorTest {
         }
 
         @Test
+        fun `the group dismisses the sheet itself on selection, also after a rewrite`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = BecauseYouReadGenreSheetCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(becauseYouReadGenreOptions = listOf("Horror"))
+
+                // ----- Assert -----
+                stateFlow.value.becauseYouReadGenreGroup.dismissesSheetOnSelect shouldBe true
+                job.cancel()
+            }
+
+        @Test
         fun `rewrites the rows when the genre changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(

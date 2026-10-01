@@ -18,7 +18,7 @@ class UnknownIsbnSheetScaffoldBuilderTest {
             val result = unknownIsbnSheetScaffoldFor(isAdding = isAdding)
 
             // ----- Assert -----
-            result.footer.shouldNotBeNull().primary.shouldNotBeNull().loading shouldBe true
+            result.busy shouldBe true
         }
 
         @Test
@@ -30,7 +30,7 @@ class UnknownIsbnSheetScaffoldBuilderTest {
             val result = unknownIsbnSheetScaffoldFor(isAdding = isAdding)
 
             // ----- Assert -----
-            result.footer.shouldNotBeNull().primary.shouldNotBeNull().loading shouldBe false
+            result.busy shouldBe false
         }
 
         @Test
@@ -50,51 +50,35 @@ class UnknownIsbnSheetScaffoldBuilderTest {
         }
 
         @Test
-        fun `is not dismissible when adding`() {
-            // ----- Arrange -----
-            val isAdding = true
-
+        fun `Cancel dismisses the sheet and Add does not, in both states`() {
             // ----- Act -----
-            val result = unknownIsbnSheetScaffoldFor(isAdding = isAdding)
+            val adding = unknownIsbnSheetScaffoldFor(isAdding = true).footer.shouldNotBeNull()
+            val idle = unknownIsbnSheetScaffoldFor(isAdding = false).footer.shouldNotBeNull()
 
             // ----- Assert -----
-            result.dismissible shouldBe false
+            adding.secondary.shouldNotBeNull().dismissesSheet shouldBe true
+            idle.secondary.shouldNotBeNull().dismissesSheet shouldBe true
+            adding.primary.shouldNotBeNull().dismissesSheet shouldBe false
+            idle.primary.shouldNotBeNull().dismissesSheet shouldBe false
         }
 
         @Test
-        fun `is dismissible when idle`() {
-            // ----- Arrange -----
-            val isAdding = false
-
+        fun `no close is requested by the builder`() {
             // ----- Act -----
-            val result = unknownIsbnSheetScaffoldFor(isAdding = isAdding)
+            val result = unknownIsbnSheetScaffoldFor(isAdding = false)
 
             // ----- Assert -----
-            result.dismissible shouldBe true
+            result.closeRequested shouldBe false
         }
 
         @Test
-        fun `secondary is disabled when adding`() {
-            // ----- Arrange -----
-            val isAdding = true
-
+        fun `buttons are left interactive while adding because busy covers them`() {
             // ----- Act -----
-            val result = unknownIsbnSheetScaffoldFor(isAdding = isAdding)
+            val footer = unknownIsbnSheetScaffoldFor(isAdding = true).footer.shouldNotBeNull()
 
             // ----- Assert -----
-            result.footer.shouldNotBeNull().secondary.shouldNotBeNull().enabled shouldBe false
-        }
-
-        @Test
-        fun `secondary is enabled when idle`() {
-            // ----- Arrange -----
-            val isAdding = false
-
-            // ----- Act -----
-            val result = unknownIsbnSheetScaffoldFor(isAdding = isAdding)
-
-            // ----- Assert -----
-            result.footer.shouldNotBeNull().secondary.shouldNotBeNull().enabled shouldBe true
+            footer.primary.shouldNotBeNull().enabled shouldBe true
+            footer.secondary.shouldNotBeNull().enabled shouldBe true
         }
     }
 }

@@ -87,5 +87,38 @@ class UnknownIsbnSheetCollectorTest {
             val sheet = stateFlow.value.unknownIsbnSheet
             sheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
         }
+
+        @Test
+        fun `a close request flags the sheet and keeps the adding footer instead of flashing idle`() =
+            runTest(testDispatcher) {
+                // ----- Arrange -----
+                launchCollector()
+                stateFlow.update { it.copy(isAddingBook = true) }
+
+                // ----- Act -----
+                stateFlow.update {
+                    it.copy(
+                        isAddingBook = false,
+                        isUnknownIsbnCloseRequested = true,
+                    )
+                }
+
+                // ----- Assert -----
+                stateFlow.value.unknownIsbnSheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = true)
+                    .copy(closeRequested = true)
+            }
+
+        @Test
+        fun `clearing the close request rebuilds the scaffold from the current state`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector()
+            stateFlow.update { it.copy(isUnknownIsbnCloseRequested = true) }
+
+            // ----- Act -----
+            stateFlow.update { it.copy(isUnknownIsbnCloseRequested = false) }
+
+            // ----- Assert -----
+            stateFlow.value.unknownIsbnSheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
+        }
     }
 }

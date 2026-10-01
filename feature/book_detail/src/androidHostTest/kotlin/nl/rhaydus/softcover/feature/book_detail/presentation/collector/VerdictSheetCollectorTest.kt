@@ -54,7 +54,7 @@ class VerdictSheetCollectorTest {
     private fun buildCover() = CoverUiModel(
         source = null,
         coverlessTitle = "Piranesi",
-        variant = CoverVariant.VerdictSheetJacket,
+        variant = CoverVariant.SheetHeaderJacket,
     )
 
     @Nested
@@ -63,10 +63,12 @@ class VerdictSheetCollectorTest {
         fun `verdictSheet is null when the context is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -83,10 +85,12 @@ class VerdictSheetCollectorTest {
         fun `verdictSheet is null when the context is set but the book is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -106,10 +110,12 @@ class VerdictSheetCollectorTest {
             val cover = buildCover()
             val review = RichTextUiModel.previews.first()
             val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -132,10 +138,12 @@ class VerdictSheetCollectorTest {
         fun `verdictSheet closes when the context is cleared`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
                 verdictSheetContext = VerdictSheetContext.FINISHED,
@@ -155,10 +163,12 @@ class VerdictSheetCollectorTest {
             // ----- Arrange -----
             val book = stubBook()
             val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             stateFlow.value = stateFlow.value.copy(
                 book = book,
                 verdictSheetContext = VerdictSheetContext.FINISHED,
@@ -182,10 +192,12 @@ class VerdictSheetCollectorTest {
             val book = stubBook()
             val cover = buildCover()
             val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             stateFlow.value = stateFlow.value.copy(
                 book = book,
                 verdictSheetContext = VerdictSheetContext.FINISHED,

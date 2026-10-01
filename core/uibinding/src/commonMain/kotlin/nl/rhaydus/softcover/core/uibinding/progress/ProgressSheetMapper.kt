@@ -5,15 +5,12 @@ import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import kotlin.math.roundToInt
 
 /**
- * Maps a [Book] onto what the progress sheet renders. Promoted straight to `:core:uibinding` rather
- * than starting feature-local (R6) because it landed with two consumers already — `book_detail` and
- * `reading` both host the sheet off their own state.
+ * Maps a [Book] onto what the progress sheet renders.
  *
  * [selectedTab] is the reader's stored last-used unit, which the sheet may still override: a stored
  * `PAGE` on an audiobook is not a valid tab, and the sheet falls back to the medium's primary unit
@@ -51,9 +48,6 @@ fun Book.toProgressSheetUiModel(selectedTab: ProgressSheetTab): ProgressSheetUiM
                     headline = title,
                 ),
             ),
-            topAction = null,
-            footer = null,
-            layout = SheetLayout.Scrolling,
         ),
     )
 }

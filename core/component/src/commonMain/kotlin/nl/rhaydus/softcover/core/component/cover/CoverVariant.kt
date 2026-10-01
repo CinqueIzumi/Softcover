@@ -4,7 +4,7 @@ package nl.rhaydus.softcover.core.component.cover
  * Every surface that renders a book cover, one `data object` per surface. [Cover] does not branch on
  * this directly — it reads treatment (elevation, corner radius, shadow tint, decode cap) from
  * [CoverDimensions.forVariant], keyed off the variant, following the `ShareCardDimensions.forContent`
- * pattern (`component-contract.md` § 7.2 R2).
+ * pattern.
  *
  * Two variants — [ReadingHeroBackdrop] and [FullScreenViewer] — are never passed to [Cover] itself;
  * both surfaces render through [rememberCoverImageRequest] directly because their anatomy (a
@@ -35,8 +35,6 @@ sealed interface CoverVariant {
     data object ReadingTrendingTile : CoverVariant
 
     data object ReadingHeroBackdrop : CoverVariant
-
-    data object VerdictSheetJacket : CoverVariant
 
     data object BookDetailHero : CoverVariant
 

@@ -18,7 +18,7 @@ class VerdictSheetMapperTest {
     private val cover = CoverUiModel(
         source = null,
         coverlessTitle = book.title,
-        variant = CoverVariant.VerdictSheetJacket,
+        variant = CoverVariant.SheetHeaderJacket,
     )
 
     @Nested
@@ -33,9 +33,9 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.scaffold.header.section.headline shouldBe "You finished ${book.title}."
+            result.scaffold.header.section.headlineText shouldBe "You finished ${book.title}."
             result.scaffold.header.section.description.shouldNotBeNull()
-            result.scaffold.topAction shouldBe "Not now"
+            result.scaffold.dismissLabel shouldBe "Not now"
             result.scaffold.footer?.primary?.label shouldBe "Save"
         }
 
@@ -49,9 +49,9 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.scaffold.header.section.headline shouldBe "Your take on ${book.title}."
+            result.scaffold.header.section.headlineText shouldBe "Your take on ${book.title}."
             result.scaffold.header.section.description.shouldBeNull()
-            result.scaffold.topAction shouldBe "Cancel"
+            result.scaffold.dismissLabel shouldBe "Cancel"
             result.scaffold.footer?.primary?.label shouldBe "Save changes"
         }
     }
