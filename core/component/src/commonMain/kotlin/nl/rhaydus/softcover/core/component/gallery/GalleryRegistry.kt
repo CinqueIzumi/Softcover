@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -468,7 +469,7 @@ object GalleryRegistry {
                     modifier = if (model.layout != SheetLayout.Scrolling) {
                         modifier.height(420.dp)
                     } else {
-                        modifier
+                        modifier.heightIn(max = 420.dp)
                     },
                 ) {
                     Text(
