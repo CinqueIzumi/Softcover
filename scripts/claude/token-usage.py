@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import os
 import statistics
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -8,7 +9,9 @@ from pathlib import Path
 
 
 def project_transcript_dir(cwd: Path) -> Path:
-    return Path.home() / ".claude" / "projects" / str(cwd.resolve()).replace("/", "-")
+    config_dir = os.environ.get("CLAUDE_CONFIG_DIR")
+    config_root = Path(config_dir).expanduser() if config_dir else Path.home() / ".claude"
+    return config_root / "projects" / str(cwd.resolve()).replace("/", "-")
 
 
 def read_entries(path: Path):
@@ -117,7 +120,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Summarise Claude Code token usage for this project's sessions and subagent runs.",
     )
-    parser.add_argument("--dir", type=Path, help="transcript directory (default: derived from the current directory)")
+    parser.add_argument("--dir", type=Path, help="transcript directory (default: derived from $CLAUDE_CONFIG_DIR, or ~/.claude, and the current directory)")
     parser.add_argument("--since", help="only sessions started on or after this date (YYYY-MM-DD)")
     parser.add_argument("--min-turns", type=int, default=1, help="skip sessions with fewer main turns")
     parser.add_argument("--top", type=int, default=10, help="how many most-read files to list")

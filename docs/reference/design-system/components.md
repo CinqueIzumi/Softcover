@@ -15,7 +15,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Navigation rail** — [detail](components/navigation.md#navigation-rail) — medium-width tab chrome.
 - **Editorial sidebar** — [detail](components/navigation.md#editorial-sidebar) — expanded-width tab chrome.
 - **Session peek bar** — [detail](components/navigation.md#session-peek-bar) — live-timer bar for a session.
-- **Settings menu row** — [detail](components/navigation.md#settings-menu-row) — hairline-separated row anatomy shared by the Settings menu and About.
+- **Settings rows** — [detail](components/navigation.md#settings-rows) — one row anatomy for Settings menu, toggle, choice and About rows.
 
 ## Buttons & controls
 

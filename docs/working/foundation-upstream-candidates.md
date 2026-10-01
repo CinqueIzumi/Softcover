@@ -36,6 +36,9 @@ resolving. `foundation.local=true` remains available as an inner-loop switch (`i
 2. **Wire the foundation's own `detektCheck` into its `check`** — it is registered but attached to
    nothing, so the foundation does not gate on the config it ships.
 
+Agent, hook and session-loop changes to port into the `rhaydus-kotlin` plugin are tracked separately in
+[`foundation-token-hygiene.md`](foundation-token-hygiene.md).
+
 ---
 
 # Open candidates

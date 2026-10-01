@@ -9,8 +9,8 @@ each row, release, re-run `rhaydus-adopt` in Softcover, then delete the local co
 cache reads, i.e. re-sending context that was already there. Cost per session ≈ turns × context, and
 sessions ran 150–600 turns at a mean context of 180K–420K. Plugin agents cost 13–15M tokens per run (about
 100 turns) against 1.9M for the tightly briefed test-writer, and each started at ~48K tokens. The large
-single-section docs and 2,000+-line screen files made every turn heavier. The full baseline is in
-`docs/working/token-hygiene/README.md`.
+single-section docs and 2,000+-line screen files made every turn heavier. The baseline and the
+re-measurement are in [Evidence](#evidence).
 
 ## Tracker
 
@@ -56,4 +56,29 @@ The exact text of the local override in `CLAUDE.md`, proposed as the `rhaydus-ad
 
 ## Evidence
 
-Filled in by Step 09: the before/after table.
+Measured with `scripts/claude/token-usage.py` over the sessions started on or after 2026-09-25, the day the
+tooling merged: 87 sessions (75 of at least 10 turns) and 333 subagent runs. **Before** is the 2026-09-20
+baseline (12 sessions / 109 runs). Mean context is the mean context size per turn.
+
+| Metric | Before | After | Target | Met |
+|---|---|---|---|---|
+| Main conversation: turns per working session | 156–604 | 11–96 (mean 46) | ≤150 | yes |
+| Main conversation: mean context per turn | 182K–424K | 48K–132K (mean 90K) | ≤150K | yes |
+| Main conversation: final context | 280K–710K | 54K–209K, no compactions | — | — |
+| Implementer cost / turns per run (logic / ui before) | 14.6M / 14.7M, 105 / 101 | 5.6M, 56 (median 3.4M, 47) | ≤5M, ≤40 | yes since 2026-09-30, see below |
+| Reviewer cost / turns per run | 13.5M, 99 | 1.6M, 23 | ≤5M, ≤40 | yes |
+| Test-writer cost / turns per run | 1.9M | 1.4M, 23 | — | — |
+| Subagent starting context (custom agents vs Explore) | ~48K vs ~11K | 18–19K vs 14K (general-purpose 31K) | ≤35K | yes |
+| Presentation / `:core:component` files over 600 lines | 13 | 0, gated by `checkPresentationFileSize` | 0 | yes |
+
+- **Implementer: oversized briefs drove the cost.** It is a long tail. The 12 costliest runs (14–40M,
+  110–235 turns, ending at 160–315K context) each did a whole migration sub-step, building a component and
+  moving every call site in one run. Runs started before 2026-09-30 13:49 (99) averaged 6.7M and 65 turns.
+  Runs since then, one sub-step per session with smaller briefs (27), average 1.4M and 19 turns (max 6.9M).
+  That meets the target, so no further change is needed.
+- **`/write-docs` skill: not needed.** `doc-guard.sh` denied 53 writes in 22 transcripts (46 budget, 6
+  history-line, 1 `## Now`), and reviewers raised no 🟡 doc-hygiene findings, so the hook plus
+  `.claude/rules/docs.md` are enough. About half the budget denials hit `components.md`, whose 8 KB budget
+  left no room for new index lines; it is re-pinned at 10 KB until the migration's final doc pass.
+- **Transcript location.** `token-usage.py` reads transcripts from `$CLAUDE_CONFIG_DIR/projects`, falling
+  back to `~/.claude/projects`; the upstream port (FU-11) keeps that.

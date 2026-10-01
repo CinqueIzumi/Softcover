@@ -14,11 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S6 done. S6-C-sheets built, uncommitted: one scaffold layout path (`Scrolling` / `Pinned` /
-  `PinnedLazy`), sealed footer, `dismissLabel`, `closeRequested` + `busy` + dismiss latch, header text
-  segments, `ScaledShareCardPreview`. Sheet-body R10 items → `steps/s11-contract-retrofit.md` S11-1 § 4.
-  Swipe bypassing `dismissible` is foundation F31. Mood tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** commit S6-C-sheets, then token-hygiene Step 09 (now unblocked), then S7 (`steps/s7-bookcard.md`).
+- **State:** S5 and S6 done; S6-C-sheets committed (`71c929af`). Sheet-body R10 items →
+  `steps/s11-contract-retrofit.md` S11-1 § 4. Swipe bypassing `dismissible` is foundation F31. Mood tile →
+  S7-4; 14 Apollo-alias files wait on F24.
+- **Next:** S7 Phase 1 (`steps/s7-bookcard.md`).
 - **Open questions:** none.
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
@@ -39,7 +38,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes.
 - **Verification:** all touched host suites and gates green under JBR 21; review findings fixed. Run
   Gradle with `JAVA_HOME=$(/usr/libexec/java_home -v 21)` (JDK 26 breaks detekt and the keystore tests).
-- **Uncommitted:** all of S6-C-sheets.
+- **Uncommitted:** this `## Now` block refresh, and the token-hygiene close-out (plan deleted, its
+  foundation doc moved to `docs/working/foundation-token-hygiene.md` with the Evidence table filled in),
+  `token-usage.py` reading `$CLAUDE_CONFIG_DIR`, and `components.md` re-pinned at 10 KB (S12-2 re-pins it).
 
 ## Local verification
 

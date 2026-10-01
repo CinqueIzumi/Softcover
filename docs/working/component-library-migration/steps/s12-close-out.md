@@ -25,6 +25,8 @@ the measured post-migration value; a rise fails the build. Wire into `check`.
   step's Standard acceptance; this pass is the final sweep, not the first one.
 - Restore `foundations.md`'s pinned budget in `docs/doc-budgets.txt` from the token-hygiene-gate value
   back to the generic `docs/reference/**/*.md 30KB`.
+- Re-pin `components.md`'s budget in `docs/doc-budgets.txt` from 10KB (headroom for the S7–S9 index
+  lines) to its post-rewrite size rounded up to the next KB.
 - Trim the `(where that file exists)` parenthetical in `CLAUDE.md`'s routing table — every component
   now has a contract, so the qualifier no longer applies.
 
