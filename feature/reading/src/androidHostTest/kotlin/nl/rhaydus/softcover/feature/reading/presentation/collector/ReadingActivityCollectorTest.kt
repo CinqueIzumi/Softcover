@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEven
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
+import nl.rhaydus.softcover.feature.reading.presentation.state.streakSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -103,10 +104,12 @@ class ReadingActivityCollectorTest {
             } returns Result.success(Unit)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(true)
@@ -121,10 +124,12 @@ class ReadingActivityCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(false)
@@ -140,10 +145,12 @@ class ReadingActivityCollectorTest {
             stateFlow.value = ReadingScreenUiState(recentReadingActivity = listOf(stubActivity()))
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(false)
@@ -162,10 +169,12 @@ class ReadingActivityCollectorTest {
             val activity = listOf(stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(true)
@@ -184,10 +193,12 @@ class ReadingActivityCollectorTest {
             } returns Result.success(Unit)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(true)
@@ -208,10 +219,12 @@ class ReadingActivityCollectorTest {
                 val secondList = listOf(stubActivity(), stubActivity(), stubActivity())
                 val dependencies = buildDependencies(this)
                 val collector = ReadingActivityCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 streakEnabledFlow.emit(true)
@@ -232,10 +245,12 @@ class ReadingActivityCollectorTest {
             val activity = listOf(stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             streakEnabledFlow.emit(true)
             activityFlow.emit(activity)
 
@@ -257,10 +272,12 @@ class ReadingActivityCollectorTest {
             val activity = listOf(stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(true)
@@ -280,10 +297,12 @@ class ReadingActivityCollectorTest {
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             streakEnabledFlow.emit(true)
@@ -303,10 +322,12 @@ class ReadingActivityCollectorTest {
             val activity = listOf(stubActivity(), stubActivity())
             val dependencies = buildDependencies(this)
             val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             streakEnabledFlow.emit(true)
             activityFlow.emit(activity)
             job.cancel()
@@ -317,112 +338,52 @@ class ReadingActivityCollectorTest {
         }
 
         @Test
-        fun `sets streakStripHeader to the no-reading headline when no days in the activity were read`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                coEvery {
-                    refreshReadingActivityUseCase()
-                } returns Result.success(Unit)
-                val activity = listOf(stubActivity(didRead = false), stubActivity(didRead = false))
-                val dependencies = buildDependencies(this)
-                val collector = ReadingActivityCollector()
-                val job = launch { collector.onLaunch(
+        fun `sets streakSheet to the scaffold built for the emitted activity`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshReadingActivityUseCase()
+            } returns Result.success(Unit)
+            val activity = listOf(
+                stubActivity(didRead = true),
+                stubActivity(didRead = false),
+                stubActivity(didRead = true),
+            )
+            val dependencies = buildDependencies(this)
+            val collector = ReadingActivityCollector()
+            val job = launch {
+                collector.onLaunch(
                     scope = scope,
                     dependencies = dependencies,
-                ) }
-
-                // ----- Act -----
-                streakEnabledFlow.emit(true)
-                activityFlow.emit(activity)
-
-                // ----- Assert -----
-                stateFlow.value.streakStripHeader shouldBe SectionHeaderUiModel.Section(
-                    eyebrow = "Last 2 days",
-                    headline = "No reading logged yet",
                 )
-                job.cancel()
             }
 
-        @Test
-        fun `sets streakStripHeader to the singular headline when exactly one day was read`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            coEvery {
-                refreshReadingActivityUseCase()
-            } returns Result.success(Unit)
-            val activity = listOf(
-                stubActivity(didRead = true),
-                stubActivity(didRead = false),
-                stubActivity(didRead = false),
-            )
-            val dependencies = buildDependencies(this)
-            val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
             // ----- Act -----
             streakEnabledFlow.emit(true)
             activityFlow.emit(activity)
 
             // ----- Assert -----
-            stateFlow.value.streakStripHeader shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "Last 3 days",
-                headline = "You read on 1 of the last 3 days",
-            )
+            stateFlow.value.streakSheet shouldBe streakSheetScaffoldFor(activity = activity)
             job.cancel()
         }
 
         @Test
-        fun `sets streakStripHeader to the plural headline when multiple days were read`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            coEvery {
-                refreshReadingActivityUseCase()
-            } returns Result.success(Unit)
-            val activity = listOf(
-                stubActivity(didRead = true),
-                stubActivity(didRead = true),
-                stubActivity(didRead = true),
-                stubActivity(didRead = false),
-                stubActivity(didRead = false),
-                stubActivity(didRead = false),
-                stubActivity(didRead = false),
-            )
-            val dependencies = buildDependencies(this)
-            val collector = ReadingActivityCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            streakEnabledFlow.emit(true)
-            activityFlow.emit(activity)
-
-            // ----- Assert -----
-            stateFlow.value.streakStripHeader shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "Last 7 days",
-                headline = "You read on 3 of the last 7 days",
-            )
-            job.cancel()
-        }
-
-        @Test
-        fun `sets streakStripHeader eyebrow to the empty-activity form when streak tracking is disabled`() =
+        fun `sets streakSheet header eyebrow to the empty-activity form when streak tracking is disabled`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val dependencies = buildDependencies(this)
                 val collector = ReadingActivityCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 streakEnabledFlow.emit(false)
 
                 // ----- Assert -----
-                stateFlow.value.streakStripHeader shouldBe SectionHeaderUiModel.Section(
+                stateFlow.value.streakSheet.header.section shouldBe SectionHeaderUiModel.Section(
                     eyebrow = "Last 0 days",
                     headline = "No reading logged yet",
                 )
@@ -430,7 +391,7 @@ class ReadingActivityCollectorTest {
             }
 
         @Test
-        fun `resets streakStripHeader to the empty-activity form when toggled from true to false`() =
+        fun `resets streakSheet header to the empty-activity form when toggled from true to false`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 coEvery {
@@ -439,10 +400,12 @@ class ReadingActivityCollectorTest {
                 val activity = listOf(stubActivity(didRead = true), stubActivity(didRead = false))
                 val dependencies = buildDependencies(this)
                 val collector = ReadingActivityCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
                 streakEnabledFlow.emit(true)
                 activityFlow.emit(activity)
 
@@ -450,7 +413,7 @@ class ReadingActivityCollectorTest {
                 streakEnabledFlow.emit(false)
 
                 // ----- Assert -----
-                stateFlow.value.streakStripHeader shouldBe SectionHeaderUiModel.Section(
+                stateFlow.value.streakSheet.header.section shouldBe SectionHeaderUiModel.Section(
                     eyebrow = "Last 0 days",
                     headline = "No reading logged yet",
                 )

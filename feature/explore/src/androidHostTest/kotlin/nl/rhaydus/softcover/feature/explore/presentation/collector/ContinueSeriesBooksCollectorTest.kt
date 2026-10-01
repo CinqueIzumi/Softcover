@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetContinueSeriesBooksUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
-import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -96,10 +95,12 @@ class ContinueSeriesBooksCollectorTest {
             // ----- Arrange -----
             val book = stubBook(id = 1)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(book))
@@ -120,10 +121,12 @@ class ContinueSeriesBooksCollectorTest {
                 throw RuntimeException("use case error")
             }
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             allUserBooksFlow.emit(emptyList())
@@ -140,10 +143,12 @@ class ContinueSeriesBooksCollectorTest {
             val fetchedBook = stubBook(id = 5)
             val userBook = stubBook(id = 5)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(fetchedBook))
@@ -160,10 +165,12 @@ class ContinueSeriesBooksCollectorTest {
             val fetchedBook = stubBook(id = 10)
             val userBook = stubBook(id = 99)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(fetchedBook))
@@ -184,10 +191,12 @@ class ContinueSeriesBooksCollectorTest {
             )
             val book = stubBook(id = 2)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(book))
@@ -212,10 +221,12 @@ class ContinueSeriesBooksCollectorTest {
                 throw RuntimeException("error")
             }
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             allUserBooksFlow.emit(emptyList())
@@ -243,30 +254,28 @@ class ContinueSeriesBooksCollectorTest {
                 title = "Elantris",
             )
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(firstBook, secondBook))
             allUserBooksFlow.emit(emptyList())
 
             // ----- Assert -----
-            stateFlow.value.continueSeriesEntries shouldBe listOf(
-                ContinueSeriesEntryUiModel(
-                    book = firstBook,
-                    menuHeader = SectionHeaderUiModel.Section(
-                        eyebrow = "Mistborn Era",
-                        headline = "Mistborn",
-                    ),
+            val entries = stateFlow.value.continueSeriesEntries
+            entries.map { it.book } shouldBe listOf(firstBook, secondBook)
+            entries.map { it.menuSheet.header.section } shouldBe listOf(
+                SectionHeaderUiModel.Section(
+                    eyebrow = "Mistborn Era",
+                    headline = "Mistborn",
                 ),
-                ContinueSeriesEntryUiModel(
-                    book = secondBook,
-                    menuHeader = SectionHeaderUiModel.Section(
-                        eyebrow = "Up next",
-                        headline = "Elantris",
-                    ),
+                SectionHeaderUiModel.Section(
+                    eyebrow = "Up next",
+                    headline = "Elantris",
                 ),
             )
             job.cancel()
@@ -278,10 +287,12 @@ class ContinueSeriesBooksCollectorTest {
             val firstBook = stubBook(id = 1)
             val secondBook = stubBook(id = 2)
             val collector = ContinueSeriesBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             continueSeriesBooksFlow.emit(listOf(firstBook, secondBook))
             allUserBooksFlow.emit(emptyList())
             stateFlow.value.continueSeriesEntries.size shouldBe 2

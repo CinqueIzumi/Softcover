@@ -37,6 +37,7 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBookDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouReadCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouReadGenreSheetCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedBooksCollector
@@ -125,6 +126,8 @@ val exploreModule = module {
     factory { FeaturedUpcomingReleaseCollector() } bind ExploreCollector::class
 
     factory { BecauseYouReadCollector() } bind ExploreCollector::class
+
+    factory { BecauseYouReadGenreSheetCollector() } bind ExploreCollector::class
 
     factory { MoodTagsCollector() } bind ExploreCollector::class
 

@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -30,7 +31,7 @@ internal class ShelvesSheetCollector : LibraryCollector {
             }
             .distinctUntilChanged()
             .collectLatest { rows ->
-                scope.setState { it.copy(shelvesSheetRows = rows) }
+                scope.setState { it.copy(shelvesSheetGroup = SheetRowGroupUiModel(rows = rows)) }
             }
     }
 }

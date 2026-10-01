@@ -284,12 +284,12 @@ class SheetScaffoldCollectorsTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.shelvesSheetRows shouldBe shelvesSheetRowsFor(
+            stateFlow.value.shelvesSheetGroup.rows shouldBe shelvesSheetRowsFor(
                 visibleTabs = tabs,
                 selectedTabId = LibraryTab.CustomList.idFor(listId = 2),
                 tabStatsByTab = tabStatsByTab,
             )
-            stateFlow.value.shelvesSheetRows.map { it.selected } shouldBe listOf(false, true)
+            stateFlow.value.shelvesSheetGroup.rows.map { it.selected } shouldBe listOf(false, true)
         }
     }
 }

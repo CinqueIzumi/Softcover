@@ -4,28 +4,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
-import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -44,17 +37,31 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnDismissContinu
 @Composable
 internal fun ContinueSeriesMenuSheet(
     book: Book,
-    header: SectionHeaderUiModel,
+    model: SheetScaffoldUiModel,
     runAction: (ExploreAction) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AdaptiveModalSheet(onDismissRequest = onDismiss) {
+    SheetScaffold(
+        model = model,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.Dismissed -> onDismiss()
+
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.PrimaryClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
+            }
+        },
+    ) {
         val dismiss = LocalModalSheetDismiss.current
 
-        ContinueSeriesDismissSheet(
-            book = book,
-            header = header,
-            onDismissBookClick = {
+        DismissSheetOption(
+            icon = SoftcoverIcon.VisibilityOff,
+            label = "Hide this book",
+            description = "Just this title stops showing up here",
+            onClick = {
                 runAction(
                     OnDismissContinueSeriesBookAction(
                         book = DismissedSeriesBook(
@@ -73,53 +80,6 @@ internal fun ContinueSeriesMenuSheet(
 
                 dismiss()
             },
-            onDismissSeriesClick = {
-                val series = book.bookSeries ?: return@ContinueSeriesDismissSheet
-
-                runAction(
-                    OnDismissContinueSeriesAction(
-                        seriesId = series.id,
-                        seriesName = series.name,
-                        coverUrl = book.coverUrl,
-                        authorText = book.authorString.takeIf { it.isNotBlank() },
-                        bookCount = series.amountOfBooks,
-                    ),
-                )
-
-                dismiss()
-            },
-            onCancelClick = dismiss,
-        )
-    }
-}
-
-@Composable
-private fun ContinueSeriesDismissSheet(
-    book: Book,
-    header: SectionHeaderUiModel,
-    onDismissBookClick: () -> Unit,
-    onDismissSeriesClick: () -> Unit,
-    onCancelClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(state = rememberScrollState())
-            .imePadding()
-            .padding(bottom = 24.dp),
-    ) {
-        SectionHeader(
-            model = header,
-            modifier = Modifier.padding(horizontal = 24.dp),
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        DismissSheetOption(
-            icon = SoftcoverIcon.VisibilityOff,
-            label = "Hide this book",
-            description = "Just this title stops showing up here",
-            onClick = onDismissBookClick,
         )
 
         book.bookSeries?.let { series ->
@@ -127,23 +87,21 @@ private fun ContinueSeriesDismissSheet(
                 icon = SoftcoverIcon.LibraryBooks,
                 label = "Hide everything from ${series.name}",
                 description = "Hide every book in this series from Up next",
-                onClick = onDismissSeriesClick,
+                onClick = {
+                    runAction(
+                        OnDismissContinueSeriesAction(
+                            seriesId = series.id,
+                            seriesName = series.name,
+                            coverUrl = book.coverUrl,
+                            authorText = book.authorString.takeIf { it.isNotBlank() },
+                            bookCount = series.amountOfBooks,
+                        ),
+                    )
+
+                    dismiss()
+                },
             )
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-            text = "Cancel",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .pointerHandCursor()
-                .noRippleClickable(onClick = onCancelClick)
-                .padding(vertical = 12.dp),
-        )
     }
 }
 
@@ -159,10 +117,7 @@ private fun DismissSheetOption(
             .fillMaxWidth()
             .pointerHandCursor()
             .clickable(onClick = onClick)
-            .padding(
-                horizontal = 14.dp,
-                vertical = 12.dp,
-            ),
+            .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {

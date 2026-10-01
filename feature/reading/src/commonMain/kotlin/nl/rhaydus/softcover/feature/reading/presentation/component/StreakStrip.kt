@@ -10,13 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,15 +31,16 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.feature.reading.presentation.state.streakSheetScaffoldFor
 
 private val DOT_ROW_HEIGHT = 18.dp
 private val DOT = 9.dp
@@ -161,36 +160,25 @@ internal fun currentStreakLength(activity: List<ReadingDayActivity>): Int {
 @Composable
 internal fun StreakStripSheet(
     activity: List<ReadingDayActivity>,
-    header: SectionHeaderUiModel,
+    scaffold: SheetScaffoldUiModel,
     onDismiss: () -> Unit,
-) {
-    AdaptiveModalSheet(onDismissRequest = onDismiss) {
-        StreakStripSheetContent(
-            activity = activity,
-            header = header,
-        )
-    }
-}
-
-@Composable
-private fun StreakStripSheetContent(
-    activity: List<ReadingDayActivity>,
-    header: SectionHeaderUiModel,
 ) {
     val today = activity.lastOrNull()?.date
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp)
-            .padding(top = 8.dp, bottom = 24.dp)
-            .navigationBarsPadding(),
+    SheetScaffold(
+        model = scaffold,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.Dismissed -> onDismiss()
+
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.PrimaryClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
+            }
+        },
     ) {
-        SectionHeader(model = header)
-
-        Spacer(modifier = Modifier.height(24.dp))
-
         activity.asReversed().forEach { day ->
             StreakStripSheetRow(
                 day = day,
@@ -298,14 +286,14 @@ private fun StreakStripPreview() {
 @Composable
 private fun StreakStripSheetPreview() {
     SoftcoverTheme {
-        StreakStripSheetContent(
-            activity = previewActivity(
-                litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20),
-            ),
-            header = SectionHeaderUiModel.Section(
-                eyebrow = "Last 21 days",
-                headline = "You read on 16 of the last 21 days",
-            ),
+        val activity = previewActivity(
+            litOffsets = setOf(0, 1, 2, 3, 5, 6, 7, 8, 9, 12, 13, 16, 17, 18, 19, 20),
+        )
+
+        StreakStripSheet(
+            activity = activity,
+            scaffold = streakSheetScaffoldFor(activity = activity),
+            onDismiss = {},
         )
     }
 }

@@ -1,15 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,17 +12,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
-import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetRowEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetRowGroup
+import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -51,7 +43,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouRead
 internal fun BecauseYouReadGenreControl(
     genre: String,
     options: List<String>,
-    header: SectionHeaderUiModel,
+    sheet: SheetScaffoldUiModel,
+    genreGroup: SheetRowGroupUiModel<String?>,
     runAction: (ExploreAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -91,117 +84,48 @@ internal fun BecauseYouReadGenreControl(
 
     if (sheetVisible) {
         BecauseYouReadGenreSheet(
-            genre = genre,
-            options = options,
-            header = header,
+            sheet = sheet,
+            genreGroup = genreGroup,
             runAction = runAction,
             onDismissRequest = { sheetVisible = false },
         )
     }
 }
 
-/**
- * The genre-picker sheet body: a [SectionHeader] over a vertical list of hairline-divided rows, one
- * for "Auto (most-read)"
- * (the null-genre default, checked whenever [genre] doesn't match any switchable [options] entry)
- * and one per [options] entry — laid out exactly like `LibraryShelvesSheet`'s shelf rows
- * ([BecauseYouReadGenreSheetRow] mirrors `ShelvesSheetRow`'s italic label + active check, minus the
- * trailing item count a genre has none of). Selecting a row dispatches
- * `OnBecauseYouReadGenreSelectedAction` and dismisses.
- */
 @Composable
 private fun BecauseYouReadGenreSheet(
-    genre: String,
-    options: List<String>,
-    header: SectionHeaderUiModel,
+    sheet: SheetScaffoldUiModel,
+    genreGroup: SheetRowGroupUiModel<String?>,
     runAction: (ExploreAction) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+    SheetScaffold(
+        model = sheet,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.Dismissed -> onDismissRequest()
+
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.PrimaryClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
+            }
+        },
+    ) {
         val dismiss = LocalModalSheetDismiss.current
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(state = rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 8.dp),
-        ) {
-            SectionHeader(model = header)
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            BecauseYouReadGenreSheetRow(
-                label = "Auto (most-read)",
-                active = options.none { it == genre },
-                onClick = {
-                    runAction(OnBecauseYouReadGenreSelectedAction(genre = null))
-
-                    dismiss()
-                },
-            )
-
-            options.forEach { option ->
-                BecauseYouReadGenreSheetRow(
-                    label = option,
-                    active = option == genre,
-                    onClick = {
-                        runAction(OnBecauseYouReadGenreSelectedAction(genre = option))
+        SheetRowGroup(
+            model = genreGroup,
+            onEvent = { event ->
+                when (event) {
+                    is SheetRowEvent.Selected -> {
+                        runAction(OnBecauseYouReadGenreSelectedAction(genre = event.key))
 
                         dismiss()
-                    },
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-/**
- * One genre-sheet row: hairline divider, `titleLarge` italic label (promoted to `primary` when
- * [active]), and a trailing `primary` check glyph when active — `ShelvesSheetRow`'s row anatomy,
- * minus the leading shelf-type glyph and trailing item count neither applies to a genre.
- */
-@Composable
-private fun BecauseYouReadGenreSheetRow(
-    label: String,
-    active: Boolean,
-    onClick: () -> Unit,
-) {
-    Column {
-        Divider(model = DividerUiModel.Horizontal())
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .pointerHandCursor()
-                .pressScaleClickable(onClick = onClick)
-                .padding(vertical = 13.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic),
-                color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-
-            if (active) {
-                val checkIcon = drawableIconResource(
-                    icon = SoftcoverIcon.Check,
-                    contentDescription = "Current genre",
-                )
-
-                Icon(
-                    painter = checkIcon.getIconPainter(),
-                    contentDescription = checkIcon.contentDescription,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-        }
+                    }
+                }
+            },
+        )
     }
 }

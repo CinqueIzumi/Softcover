@@ -135,7 +135,7 @@ internal fun ReadingOverlays(
     if (showStreakSheet) {
         StreakStripSheet(
             activity = state.recentReadingActivity,
-            header = state.streakStripHeader,
+            scaffold = state.streakSheet,
             onDismiss = onDismissStreakSheet,
         )
     }

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
@@ -7,6 +9,8 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.component.state.SkeletonVariant
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
@@ -113,10 +117,9 @@ internal data class ExploreScreenUiState(
     val becauseYouReadHeaderSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreSectionHeader),
     val becauseYouReadSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreRail),
     val becauseYouReadGenreOptions: List<String> = emptyList(),
-    val becauseYouReadGenrePickerHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Genre",
-        headline = "Pick a genre",
-    ),
+    val becauseYouReadGenreSheet: SheetScaffoldUiModel = becauseYouReadGenreSheetScaffold(),
+    /** A `null` key is the "Auto (most-read)" row. */
+    val becauseYouReadGenreGroup: SheetRowGroupUiModel<String?> = SheetRowGroupUiModel(rows = persistentListOf()),
     val becauseYouReadBooks: List<Book> = emptyList(),
     val loadingBecauseYouReadBooks: Boolean = true,
     // Browse-by-mood grid + the active mood filter, when a mood tile/chip drove the current

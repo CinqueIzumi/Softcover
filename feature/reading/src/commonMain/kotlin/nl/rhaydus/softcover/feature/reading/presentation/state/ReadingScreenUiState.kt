@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -57,10 +58,7 @@ internal data class ReadingScreenUiState(
     val recentReadingActivity: List<ReadingDayActivity> = emptyList(),
     val streakEnabled: Boolean = true,
 
-    val streakStripHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
-        eyebrow = "Last 0 days",
-        headline = "No reading logged yet",
-    ),
+    val streakSheet: SheetScaffoldUiModel = streakSheetScaffoldFor(activity = emptyList()),
 
     val featuredBookPace: ReadingPaceForecast? = null,
 

@@ -109,7 +109,7 @@ internal fun DesktopUpNextSection(
     sheetEntry?.let { item ->
         ContinueSeriesMenuSheet(
             book = item.book,
-            header = item.menuHeader,
+            model = item.menuSheet,
             runAction = runAction,
             onDismiss = { sheetEntry = null },
         )

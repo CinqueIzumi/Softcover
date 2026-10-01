@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
@@ -17,7 +18,6 @@ internal data class ProfileUiState(
     val hideUntaggedAuthors: Boolean = false,
     val isLoading: Boolean = true,
 
-    val shareYourYearHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Share your year"),
     val readingAtlasHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Reading atlas"),
     val theReaderHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "The reader"),
     val authorRepresentationHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
@@ -38,6 +38,8 @@ internal data class ProfileUiState(
     ),
     val ratingsHistogramHeader: SectionHeaderUiModel = RatingBand.NEW_READER.toRatingsHistogramHeader(),
     val ratingsHistogramCaption: String = RatingBand.NEW_READER.toRatingsHistogramCaption(),
+    val shareSheetScaffold: SheetScaffoldUiModel = profileShareSheetScaffold(),
+    val logOutSheetScaffold: SheetScaffoldUiModel = logOutSheetScaffold(),
 ) : UiState {
     private val allAuthorDemographics: AuthorDemographics
         get() = readingLife?.authorDemographics ?: AuthorDemographics()

@@ -212,13 +212,14 @@ internal actual fun ProfileScreenLayout(
     if (showShareSheet && shareContent != null) {
         ProfileShareBottomSheet(
             content = shareContent,
-            header = state.shareYourYearHeader,
+            scaffold = state.shareSheetScaffold,
             onDismissRequest = { showShareSheet = false },
         )
     }
 
     if (showLogOutConfirm) {
         LogOutConfirmBottomSheet(
+            scaffold = state.logOutSheetScaffold,
             onLogOutClick = { runAction(OnLogOutClickAction()) },
             onDismissRequest = { showLogOutConfirm = false },
         )

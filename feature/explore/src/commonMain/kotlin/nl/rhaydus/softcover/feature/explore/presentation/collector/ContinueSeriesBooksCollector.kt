@@ -6,12 +6,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
+import nl.rhaydus.softcover.feature.explore.presentation.state.continueSeriesMenuSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 
 internal class ContinueSeriesBooksCollector : ExploreCollector {
@@ -42,10 +42,7 @@ internal class ContinueSeriesBooksCollector : ExploreCollector {
             val entries = books.map { book ->
                 ContinueSeriesEntryUiModel(
                     book = book,
-                    menuHeader = SectionHeaderUiModel.Section(
-                        eyebrow = book.bookSeries?.name ?: "Up next",
-                        headline = book.title,
-                    ),
+                    menuSheet = continueSeriesMenuSheetScaffoldFor(book = book),
                 )
             }
 

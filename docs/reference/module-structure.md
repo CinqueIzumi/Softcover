@@ -134,6 +134,7 @@ component/
 + sheet/       LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent
 +              SheetScaffold(+UiModel, +Event, +Layout)  SheetHeaderUiModel/Trailing
 +              SheetFooterUiModel/Button/Layout  SheetRow(+UiModel, +Event)
++              SheetRowGroup(+UiModel), which owns selectableGroup() for the radio rows
 + sidebar/     Sidebar  SidebarUiModel  SidebarSectionUiModel  SidebarRowUiModel/Variant  SidebarEvent
 + state/       EmptyState  EmptyStateUiModel  Skeleton  SkeletonUiModel/Variant
 +              · ErrorState

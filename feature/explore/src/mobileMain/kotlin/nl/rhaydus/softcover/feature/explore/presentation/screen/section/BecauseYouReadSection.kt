@@ -19,6 +19,8 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.Skeleton
 import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -36,7 +38,8 @@ internal fun BecauseYouReadSection(
     header: SectionHeaderUiModel?,
     headerSkeleton: SkeletonUiModel,
     genreOptions: List<String>,
-    genrePickerHeader: SectionHeaderUiModel,
+    genreSheet: SheetScaffoldUiModel,
+    genreGroup: SheetRowGroupUiModel<String?>,
     books: List<Book>,
     covers: Map<Int, CoverUiModel>,
     unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
@@ -83,7 +86,8 @@ internal fun BecauseYouReadSection(
                 BecauseYouReadGenreControl(
                     genre = genre,
                     options = genreOptions,
-                    header = genrePickerHeader,
+                    sheet = genreSheet,
+                    genreGroup = genreGroup,
                     runAction = runAction,
                 )
             }

@@ -8,12 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -28,12 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import nl.rhaydus.common.AppLog
-import nl.rhaydus.designsystem.component.AdaptiveModalSheet
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
@@ -45,25 +40,20 @@ import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.ShareOutcome
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import kotlin.math.roundToInt
 
-/**
- * The reading-life share sheet: the canonical mini header, a scaled preview of the exportable
- * [ReadingLifeShareCardUiModel] card, and Save/Share actions. The save/share/[ShareOutcome] handling is
- * copied from `feature/book_detail`'s `ShareBookBottomSheet`.
- */
 @Composable
 internal fun ProfileShareBottomSheet(
     content: ReadingLifeShareCardUiModel,
-    header: SectionHeaderUiModel,
+    scaffold: SheetScaffoldUiModel,
     onDismissRequest: () -> Unit,
 ) {
     val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
@@ -73,27 +63,24 @@ internal fun ProfileShareBottomSheet(
     var isSaving by remember { mutableStateOf(false) }
     val isBusy = isSharing || isSaving
 
-    AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+    SheetScaffold(
+        model = scaffold,
+        onEvent = { event ->
+            when (event) {
+                SheetScaffoldEvent.Dismissed -> onDismissRequest()
+
+                SheetScaffoldEvent.TopActionClicked,
+                SheetScaffoldEvent.PrimaryClicked,
+                SheetScaffoldEvent.SecondaryClicked,
+                SheetScaffoldEvent.HeaderActionClicked,
+                -> Unit
+            }
+        },
+    ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(state = rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            SectionHeader(model = header)
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = "A card built from everything you've read this year.",
-                style = MaterialTheme.editorialTypography.body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
             ReadingLifeSharePreview(
                 content = content,
                 capture = capture,

@@ -14,7 +14,7 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -129,7 +129,7 @@ internal data class LibraryUiState(
 
     val shelvesSheet: SheetScaffoldUiModel = shelvesSheetScaffold(),
 
-    val shelvesSheetRows: ImmutableList<SheetRowUiModel<String>> = persistentListOf(),
+    val shelvesSheetGroup: SheetRowGroupUiModel<String> = SheetRowGroupUiModel(rows = persistentListOf()),
 
     val filtersByTab: Map<String, LibraryFilters> = emptyMap(),
     val isFilterSheetExpanded: Boolean = false,

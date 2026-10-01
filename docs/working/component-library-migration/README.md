@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S6-6 committed (`23137dce`). Event variants nested per `docs/reference/code-style.md` § Events
-  in lists / profile / scan (explore and settings had no variant files), committed; tests use the
-  qualified `<Name>Event.<Variant>Event` form. Mood tile → S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** S6-7 (`steps/s6-sheet-chrome.md` § S6-7).
+- **State:** S6-7 done, uncommitted: the explore, reading and profile sheets are on `SheetScaffold`;
+  `SheetRowGroup(+UiModel)` owns `selectableGroup()` for Genre and Shelves. Mood tile → S7-4; 14
+  Apollo-alias files wait on F24.
+- **Next:** commit S6-7, then S6-C-sheets (`steps/s6-sheet-chrome.md` § Sub-steps).
 - **Open questions:** none.
 - **Due when:** Step 09 in `docs/working/token-hygiene/README.md` — every S5 and S6 sub-step is ticked,
   convergence passes included (`steps/s5-*.md`, `steps/s6-*.md`)
@@ -34,12 +34,13 @@ checkboxes in step with `## Steps` and `## Gates` here.
   verdict cover as a 56dp header jacket (was above the header); S6-5's Filter footer inset (22 → 24),
   bulk-remove and re-auth as sheets, and the animated close on Apply / Save / Delete / top action; S6-6's
   tag editor and edition jackets (56dp), the edition footer divider, ShareBook's eyebrow bar, and the
-  unknown-ISBN footer; that the Arrange sheet's "Show titles" row does not pop in a frame after open
+  unknown-ISBN footer; S6-7's streak sheet insets, log-out no longer centred, and the genre /
+  Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now).
-- **Verification:** `styleCheck` and the book_detail, library, scan, settings, core:presentation host
-  suites green under JBR 21 before the S6-6 commit. Run Gradle with
+- **Verification:** `styleCheck` and the explore, library, reading, profile, core:component host suites
+  green under JBR 21 after the last S6-7 edit; final review clean. Run Gradle with
   `JAVA_HOME=$(/usr/libexec/java_home -v 21)` (JDK 26 breaks detekt and the keystore tests).
-- **Uncommitted:** nothing.
+- **Uncommitted:** S6-7 (every working change).
 
 ## Local verification
 

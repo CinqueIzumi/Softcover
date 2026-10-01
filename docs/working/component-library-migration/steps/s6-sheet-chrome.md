@@ -141,7 +141,6 @@ for S10 or S11. The exception is TagEditor's description, which moves into the h
 ## Deferred
 
 - `TextEmphasis(substring, treatment)` stays as built for now (user, 2026-09-30): `SectionHeader`'s `emphasisedText` keeps its substring search. Revisit in S6-C-sheets.
-- `SheetRow` adopters (S6-5 Shelves, S6-7 Genre) wrap their rows in `Modifier.selectableGroup()`, because `Role.RadioButton` rows need a group. If both need it, fold it into the component.
 - S6-C-sheets: no design-system section file covers `SheetScaffold` or `SheetFooterButton.dismissesSheet` yet — add one. Bulk-remove closes without animation when the removal finishes (state-driven close).
 
 ## Sub-steps
@@ -152,7 +151,7 @@ for S10 or S11. The exception is TagEditor's description, which moves into the h
 | S6-4 | `VerdictSheet` + `VerdictBlock` (owe R1) and `SoftcoverDatePickerDialog` (owes R1 + R11) | [x] |
 | S6-5 | The library sheets, the bulk-remove dialog and `ReAuthDialog` | [x] |
 | S6-6 | The book_detail, lists and scan sheets | [x] |
-| S6-7 | The explore, reading and profile sheets | [ ] |
+| S6-7 | The explore, reading and profile sheets | [x] |
 | S6-C-sheets | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S6-3 — chrome design + first movers
