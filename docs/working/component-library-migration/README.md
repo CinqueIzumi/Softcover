@@ -14,9 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1 built and reviewed, uncommitted: converged `BookCard` (step file § Approved shape).
-  Sheet-body R10 items → S11-1 § 4. F31 swipe; F24 Apollo aliases.
-- **Next:** user checks `BookCard` in the Component Gallery → tick S7-1, ask to commit → S7-2.
+- **State:** S7-1 committed (`c6095d57`), gallery check pending. Sheet-body R10 items → S11-1 § 4.
+  F31 swipe; F24 Apollo aliases.
+- **Next:** fix the book-detail entry regression (`steps/s12-close-out.md` § S12-4: choppy, content
+  flash, skeletons off, cover no longer animates — bisect S4/S6). Then gallery check → S7-2.
 - **Open questions:** move `BookmarkToggle` onto foundation `RhaydusIconToggleButton`? (left hand-rolled)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
@@ -37,9 +38,7 @@ checkboxes in step with `## Steps` and `## Gates` here.
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes.
 - **Verification:** `:core:component` compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`,
   `styleCheck` green under JBR 21 (`JAVA_HOME=$(/usr/libexec/java_home -v 21)`; JDK 26 breaks detekt).
-- **Uncommitted:** `bookcard/` (19 files), `GalleryRegistry.kt` (+ Scrolling sheet fixture bounded with
-  `heightIn(max = 420.dp)` — fixed a gallery-open crash), `component-contract.md` (shared-element
-  key stays on `CoverUiModel`; R2/R6 examples), `components.md`, the S7 step file, this block.
+- **Uncommitted:** none.
 
 ## Local verification
 
@@ -89,7 +88,7 @@ every sub-step's Verify.
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
 | S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-5 | [ ] |
-| S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-4 | [ ] |
+| S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |
 
 ## Decisions
 
@@ -141,6 +140,7 @@ failure.
       with no doc update as a blocker.
 - [ ] **G6 — `./gradlew check` green**, including `styleCheck` (type-resolved detekt across every
       module) and `ktlintCheck`.
+- [ ] **G7 — Human walkthrough** of every screen on device, `main` as baseline (S12-4).
 
 **Open:** `:app:projectHealth` is unreachable on this machine (the pre-existing `JdkImageTransform`
 failure); CI on a working toolchain covers it. `checkComponentBudget` (G4) is not written yet — the

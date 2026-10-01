@@ -10,7 +10,8 @@
 | S12-1 | G4 `checkComponentBudget` | [ ] |
 | S12-2 | The `docs/reference/design-system/` rewrite, the `foundations.md` budget restore, the `CLAUDE.md` parenthetical | [ ] |
 | S12-3 | The open decisions (cover radius, `"tnum"`), the fixture-size measurement, the gallery completeness pass | [ ] |
-| S12-4 | G6 (`check` green) and deleting this directory | [ ] |
+| S12-4 | G7 — human walkthrough of every screen on device | [ ] |
+| S12-5 | G6 (`check` green) and deleting this directory | [ ] |
 
 ## S12-1 — G4
 
@@ -40,7 +41,29 @@ the measured post-migration value; a rise fails the build. Wire into `check`.
 - The § 7.0 rich-text remaining row (`RichTextFormattingToolbar` owing R1) is closed by
   `steps/s8-controls.md` S8-4, not repeated here — confirm it landed before ticking this sub-step.
 
-## S12-4 — final gate and directory deletion
+## S12-4 — G7, human walkthrough
+
+**Delegation:** the user, on a real Android device and on desktop. Not delegable to an agent; no
+gate or gallery check stands in for it. Walk every screen and every navigation path, comparing against
+`main`, and log each regression as a fix item here before S12-5:
+
+- **Navigation and transitions:** every tab, every route into book detail (library, explore rails,
+  search, reading, profile, lists), and back. The cover's shared-element animation lands on its detail
+  spot; no content flash, jump or choppy frame on enter or exit.
+- **Loading:** skeletons match the layout that replaces them (count, size, position); no layout shift
+  when data lands; no empty frame before a skeleton.
+- **Animations:** press feedback, sheet open / animated close, mark-as-read, progress, list reorder,
+  selection mode, error shake.
+- **Every sheet and dialog:** opens with content on the first frame, scrolls, dismisses by tap, swipe and
+  back.
+- **States:** empty, error, offline and loading on every screen; long titles, missing covers, no data.
+- **Layouts:** compact, medium and expanded widths; light and dark; each palette; larger font scale.
+- **The accepted visual shifts** listed under `README.md` § Now → Visual checks.
+
+Open regressions found so far: book detail entry is choppy — content flashes, skeletons no longer match,
+and the cover no longer animates to its detail position.
+
+## S12-5 — final gate and directory deletion
 
 - `scripts/gradle-quiet.sh check` green, including `styleCheck` and `ktlintCheck` (G6).
 - Delete this directory in the same PR, per the lifecycle note in `README.md`.
