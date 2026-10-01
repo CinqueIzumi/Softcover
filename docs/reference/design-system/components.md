@@ -37,6 +37,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 - **Cover** — `core:component/cover` — the app's only book-cover renderer; variant-driven, never blank.
 - **Coverless title cover** — `core:component/cover` — the monogram/title jacket `Cover` falls back to.
+- **Book card** — `core:component/bookcard` — the one book/series card (cover-only, stacked or row) for every list, rail and grid surface.
 - **Rhaydus shimmer image** — [detail](components/covers.md#rhaydus-shimmer-image) — the loader for every non-cover image.
 
 ## States & feedback

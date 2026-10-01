@@ -58,11 +58,9 @@ sealed interface ProgressSheetEvent {
 
 ```kotlin
 data class BookCardUiModel(
-    val key: BookCardKey,                 // identity + shared-element transition key
-    val content: BookCardContent,         // cover, title, subtitle, badges — always present
-    val variant: BookCardVariant,         // sealed: Grid | CoverOnly | Row(density) |
-                                          //         Rail | Featured(backdrop) | Tile
-    val decorations: BookCardDecorations,  // progress?, selection?, trailing?
+    val key: BookCardKey,                 // identity
+    val variant: BookCardVariant,         // sealed: CoverOnly | Stacked | Row(size); each carries its own text
+    val decorations: BookCardDecorations,  // progress?, coverBadge?, selection?, press behaviour
 )
 ```
 
@@ -107,12 +105,12 @@ state). A fixture that differs only in string content is noise.
 **R6 — Mapper placement: feature-local first, promoted on the second consumer.** A
 `Book -> BookCardUiModel` mapper starts in the consuming feature's `presentation/mapper/` and moves to
 `:core:uibinding` when a second feature needs the **identical** mapping. Two features mapping differently
-onto the same UI model (`explore` → `Rail`, `library` → `Grid`) keep two mappers, permanently.
+onto the same UI model (`explore` → `Stacked`, `library` → `Row`) keep two mappers, permanently.
 
 **R7 — Shared-element keys travel in the model.** `bookCoverTransitionKey(editionId, bookId, surface)` stays
-in `:core:designsystem` (`transition/SharedElementScopes.kt`) as a token. The resolved key string is a field
-on the model's key (`BookCardKey`), computed by the mapper. A component never computes a transition key; it
-does not know which surface it is on.
+in `:core:designsystem` as a token. The mapper resolves the key string once and stores it on the model of
+the component that runs the transition (`CoverUiModel.sharedTransitionKey`, which `BookCard` carries in its
+content). A component never computes a transition key; it does not know which surface it is on.
 
 **R8 — The suffix is `*UiModel`.** Not `*Content` (already the name of a composable in every feature),
 `*Model` or `*State`. The event type is `*Event`, the identity type `*Key`, the variant type `*Variant`.

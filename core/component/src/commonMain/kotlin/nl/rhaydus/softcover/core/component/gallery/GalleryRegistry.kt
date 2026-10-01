@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.component.gallery
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
@@ -23,6 +24,10 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.callout.Banner
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
@@ -439,6 +444,28 @@ object GalleryRegistry {
             },
         ),
         galleryEntry(
+            name = "BookCard",
+            family = GalleryFamily.BOOKCARD,
+            blurb = "The one book or series card: a bare cover, a cover over its text, or a row in three sizes — " +
+                "every library, explore, reading, profile and edition surface.",
+            previews = BookCardUiModel,
+            label = ::bookCardFixtureLabel,
+            content = { model, modifier ->
+                val sizeModifier = if (model.variant is BookCardVariant.Row) {
+                    Modifier.fillMaxWidth()
+                } else {
+                    Modifier.width(140.dp)
+                }
+
+                Box(modifier = modifier.then(sizeModifier)) {
+                    BookCard(
+                        model = model,
+                        onEvent = {},
+                    )
+                }
+            },
+        ),
+        galleryEntry(
             name = "Sidebar",
             family = GalleryFamily.ROW,
             blurb = "A desktop source list: sections of rows, each with an optional leading icon, " +
@@ -755,4 +782,28 @@ private fun verdictBlockFixtureLabel(model: VerdictBlockUiModel): String = when 
     model.review == null -> "Rating only"
     model.rating == null -> "Review only"
     else -> "Rating and review"
+}
+
+/** Names a [BookCardUiModel] fixture by its layout and the decorations that change its anatomy. */
+private fun bookCardFixtureLabel(model: BookCardUiModel): String {
+    val layout = when (val variant = model.variant) {
+        is BookCardVariant.CoverOnly -> "Cover only"
+        is BookCardVariant.Stacked -> "Stacked"
+        is BookCardVariant.Row -> "Row ${variant.size.name}"
+    }
+
+    val row = model.variant as? BookCardVariant.Row
+    val decorations = model.decorations
+    val details = listOfNotNull(
+        "selected".takeIf { decorations.selection?.selected == true },
+        "unselected".takeIf { decorations.selection?.selected == false },
+        "progress".takeIf { decorations.progress != null },
+        "cover badge".takeIf { decorations.coverBadge != null },
+        "deadline".takeIf { row?.deadline != null },
+        "series stack".takeIf { row?.lead is BookCardLead.SeriesStack },
+        "coverless".takeIf { row != null && row.lead == null },
+        row?.trailing?.let { it::class.simpleName },
+    )
+
+    return (listOf(layout) + details).joinToString(separator = ", ")
 }

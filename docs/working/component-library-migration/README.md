@@ -14,11 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S5 and S6 done; S6-C-sheets committed (`71c929af`). Sheet-body R10 items →
-  `steps/s11-contract-retrofit.md` S11-1 § 4. Swipe bypassing `dismissible` is foundation F31. Mood tile →
-  S7-4; 14 Apollo-alias files wait on F24.
-- **Next:** S7 Phase 1 (`steps/s7-bookcard.md`).
-- **Open questions:** none.
+- **State:** S7-1 built and reviewed, uncommitted: converged `BookCard` (step file § Approved shape).
+  Sheet-body R10 items → S11-1 § 4. F31 swipe; F24 Apollo aliases.
+- **Next:** user checks `BookCard` in the Component Gallery → tick S7-1, ask to commit → S7-2.
+- **Open questions:** move `BookmarkToggle` onto foundation `RhaydusIconToggleButton`? (left hand-rolled)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
   titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
@@ -36,11 +35,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes.
-- **Verification:** all touched host suites and gates green under JBR 21; review findings fixed. Run
-  Gradle with `JAVA_HOME=$(/usr/libexec/java_home -v 21)` (JDK 26 breaks detekt and the keystore tests).
-- **Uncommitted:** this `## Now` block refresh, and the token-hygiene close-out (plan deleted, its
-  foundation doc moved to `docs/working/foundation-token-hygiene.md` with the Evidence table filled in),
-  `token-usage.py` reading `$CLAUDE_CONFIG_DIR`, and `components.md` re-pinned at 10 KB (S12-2 re-pins it).
+- **Verification:** `:core:component` compile, `checkModuleGraph`, `projectHealth`, `ktlintCheck`,
+  `styleCheck` green under JBR 21 (`JAVA_HOME=$(/usr/libexec/java_home -v 21)`; JDK 26 breaks detekt).
+- **Uncommitted:** `bookcard/` (19 files), `GalleryRegistry.kt` (+ Scrolling sheet fixture bounded with
+  `heightIn(max = 420.dp)` — fixed a gallery-open crash), `component-contract.md` (shared-element
+  key stays on `CoverUiModel`; R2/R6 examples), `components.md`, the S7 step file, this block.
 
 ## Local verification
 
