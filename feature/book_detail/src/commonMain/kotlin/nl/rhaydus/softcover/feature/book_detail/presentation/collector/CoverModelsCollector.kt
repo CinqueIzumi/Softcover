@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -27,64 +26,20 @@ internal class CoverModelsCollector : BookDetailCollector {
         dependencies: BookDetailDependencies,
     ) {
         scope.state
-            .map {
-                CoverModelsSnapshot(
-                    book = it.book,
-                    displayedEdition = it.displayedEdition,
-                    editions = it.editions,
-                    initialCover = it.initialCover,
-                    loadingBookDetails = it.loadingBookDetails,
-                    bookId = it.bookId,
-                    transitionSurface = it.transitionSurface,
-                )
-            }
+            .map { it.toCoverModelsSnapshot() }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 val edition = snapshot.displayedEdition
                 val fallbackEdition = snapshot.book?.defaultEdition ?: snapshot.initialCover?.defaultEdition
                 val fallbackCoverUrl = snapshot.book?.coverUrl ?: snapshot.initialCover?.fallbackCoverUrl
                 val title = snapshot.book?.title
-
-                // Preserved verbatim from the hero's old call site: the cover only reports "loading"
-                // while nothing at all has resolved, so a book whose edition is already known paints
-                // immediately instead of shimmering.
-                val coverHasContent = edition != null || fallbackEdition != null || fallbackCoverUrl != null
-                val coverIsLoading = snapshot.loadingBookDetails &&
-                    snapshot.book == null &&
-                    coverHasContent.not()
-
-                val heroTransitionKey = bookCoverTransitionKey(
-                    editionId = edition?.id,
-                    bookId = snapshot.bookId,
-                    surface = snapshot.transitionSurface,
-                )
+                val covers = snapshot.toCoverModels()
 
                 scope.setState {
                     it.copy(
-                        heroCover = edition.toCoverUiModel(
-                            defaultEdition = fallbackEdition,
-                            coverlessTitle = title,
-                            variant = CoverVariant.BookDetailHero,
-                            fallbackCoverUrl = fallbackCoverUrl,
-                            isLoading = coverIsLoading,
-                            sharedTransitionKey = heroTransitionKey,
-                        ),
-                        // No coverlessTitle on purpose: this is the blurred decorative layer behind
-                        // the hero, not a cover the user reads, so a typographic jacket here would
-                        // only be blurred noise. The readable cover is the hero above.
-                        heroBackdropCover = edition.toCoverUiModel(
-                            defaultEdition = fallbackEdition,
-                            coverlessTitle = null,
-                            variant = CoverVariant.BookDetailBackdrop,
-                            fallbackCoverUrl = fallbackCoverUrl,
-                            isLoading = coverIsLoading,
-                        ),
-                        fullScreenCover = edition.toCoverUiModel(
-                            defaultEdition = fallbackEdition,
-                            coverlessTitle = title,
-                            variant = CoverVariant.FullScreenViewer,
-                            fallbackCoverUrl = fallbackCoverUrl,
-                        ),
+                        heroCover = covers.hero,
+                        heroBackdropCover = covers.backdrop,
+                        fullScreenCover = covers.fullScreen,
                         // The verdict sheet passes the displayed edition as both the edition and the
                         // default, exactly as its old call site did — it deliberately does not fall
                         // back to the book's default edition.

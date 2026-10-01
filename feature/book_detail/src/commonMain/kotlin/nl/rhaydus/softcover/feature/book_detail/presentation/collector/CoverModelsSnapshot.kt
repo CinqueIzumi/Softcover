@@ -1,8 +1,12 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 /**
  * The inputs every cover on the book page resolves from. [displayedEdition] is read off the state's
@@ -18,3 +22,74 @@ internal data class CoverModelsSnapshot(
     val bookId: Int?,
     val transitionSurface: String?,
 )
+
+internal fun BookDetailUiState.toCoverModelsSnapshot(): CoverModelsSnapshot = CoverModelsSnapshot(
+    book = book,
+    displayedEdition = displayedEdition,
+    editions = editions,
+    initialCover = initialCover,
+    loadingBookDetails = loadingBookDetails,
+    bookId = bookId,
+    transitionSurface = transitionSurface,
+)
+
+internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
+    val edition = displayedEdition
+    val fallbackEdition = book?.defaultEdition ?: initialCover?.defaultEdition
+    val fallbackCoverUrl = book?.coverUrl ?: initialCover?.fallbackCoverUrl
+
+    // The cover only reports "loading" while nothing at all has resolved, so a book whose edition
+    // is already known paints immediately instead of shimmering.
+    val coverHasContent = edition != null || fallbackEdition != null || fallbackCoverUrl != null
+    val coverIsLoading = loadingBookDetails && book == null && coverHasContent.not()
+
+    val hero = edition.toCoverUiModel(
+        defaultEdition = fallbackEdition,
+        coverlessTitle = book?.title,
+        variant = CoverVariant.BookDetailHero,
+        fallbackCoverUrl = fallbackCoverUrl,
+        isLoading = coverIsLoading,
+        sharedTransitionKey = bookCoverTransitionKey(
+            editionId = edition?.id,
+            bookId = bookId,
+            surface = transitionSurface,
+        ),
+    )
+
+    // No coverlessTitle on purpose: this is the blurred decorative layer behind the hero, not a
+    // cover the user reads, so a typographic jacket here would only be blurred noise.
+    val backdrop = edition.toCoverUiModel(
+        defaultEdition = fallbackEdition,
+        coverlessTitle = null,
+        variant = CoverVariant.BookDetailBackdrop,
+        fallbackCoverUrl = fallbackCoverUrl,
+        isLoading = coverIsLoading,
+    )
+
+    val fullScreen = edition.toCoverUiModel(
+        defaultEdition = fallbackEdition,
+        coverlessTitle = book?.title,
+        variant = CoverVariant.FullScreenViewer,
+        fallbackCoverUrl = fallbackCoverUrl,
+    )
+
+    return CoverModels(
+        hero = hero,
+        backdrop = backdrop,
+        fullScreen = fullScreen,
+    )
+}
+
+/**
+ * Seeds the initial state with the covers that resolve from the navigation arguments, so the first
+ * frame already draws them. [CoverModelsCollector] stays the only writer once the screen model runs.
+ */
+internal fun BookDetailUiState.withCoverModels(): BookDetailUiState {
+    val covers = toCoverModelsSnapshot().toCoverModels()
+
+    return copy(
+        heroCover = covers.hero,
+        heroBackdropCover = covers.backdrop,
+        fullScreenCover = covers.fullScreen,
+    )
+}

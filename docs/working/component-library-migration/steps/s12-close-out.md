@@ -60,8 +60,12 @@ gate or gallery check stands in for it. Walk every screen and every navigation p
 - **Layouts:** compact, medium and expanded widths; light and dark; each palette; larger font scale.
 - **The accepted visual shifts** listed under `README.md` § Now → Visual checks.
 
-Open regressions found so far: book detail entry is choppy — content flashes, skeletons no longer match,
-and the cover no longer animates to its detail position.
+Regressions found so far:
+
+- [x] Book detail entry choppy — content flash, skeletons mismatched, cover not animating. Fixed in code:
+  the screen model seeds the hero / backdrop / full-screen covers into the initial state
+  (`withCoverModels()`), and `AppDispatchers.main` is `Main.immediate` so collector-derived state lands in
+  the same frame. Device confirmation pending, plus a smoke pass of every screen for the dispatcher change.
 
 ## S12-5 — final gate and directory deletion
 

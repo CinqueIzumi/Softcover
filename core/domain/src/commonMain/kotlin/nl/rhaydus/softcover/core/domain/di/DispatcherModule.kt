@@ -11,7 +11,9 @@ import org.koin.dsl.module
 val dispatcherModule = module {
     single {
         AppDispatchers(
-            main = Dispatchers.Main,
+            // Immediate so a collector's derived UI state lands in the same frame as the state it
+            // derives from; a posted dispatch draws one frame without it and shifts the layout.
+            main = Dispatchers.Main.immediate,
             io = Dispatchers.IO,
             default = Dispatchers.Default,
         )

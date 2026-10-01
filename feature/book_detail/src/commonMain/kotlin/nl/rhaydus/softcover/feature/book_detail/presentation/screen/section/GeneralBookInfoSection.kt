@@ -87,15 +87,13 @@ internal fun GeneralBookInfoSection(
                 ifTrue = { Modifier.grayscale() },
             ),
     ) {
-        if (backdropCover != null) {
-            Cover(
-                model = backdropCover,
-                modifier = Modifier
-                    .matchParentSize()
-                    .blur(8.dp)
-                    .scale(1.8f),
-            )
-        }
+        Cover(
+            model = backdropCover,
+            modifier = Modifier
+                .matchParentSize()
+                .blur(8.dp)
+                .scale(1.8f),
+        )
 
         Box(
             modifier = Modifier
@@ -130,12 +128,10 @@ internal fun GeneralBookInfoSection(
                     Modifier
                 },
             ) {
-                if (heroCover != null) {
-                    Cover(
-                        model = heroCover,
-                        modifier = Modifier.height(imageHeight * 0.8f),
-                    )
-                }
+                Cover(
+                    model = heroCover,
+                    modifier = Modifier.height(imageHeight * 0.8f),
+                )
 
                 val navScope = LocalNavAnimatedVisibilityScope.current
 

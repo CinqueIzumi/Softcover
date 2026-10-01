@@ -37,6 +37,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAc
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.withCoverModels
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -84,7 +85,7 @@ internal class BookDetailScreenScreenModel(
         transitionSurface = transitionSurface,
         initialCover = initialCover,
         scannedEditionId = initialCover?.scannedEditionId,
-    ),
+    ).withCoverModels(),
     initialLocalVariables = BookDetailLocalVariables(),
     initializers = flows,
 ) {

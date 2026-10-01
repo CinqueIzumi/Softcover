@@ -14,10 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1 committed (`c6095d57`), gallery check pending. Sheet-body R10 items → S11-1 § 4.
-  F31 swipe; F24 Apollo aliases.
-- **Next:** fix the book-detail entry regression (`steps/s12-close-out.md` § S12-4: choppy, content
-  flash, skeletons off, cover no longer animates — bisect S4/S6). Then gallery check → S7-2.
+- **State:** S7-1 committed (`c6095d57`), gallery check pending. Book-detail entry regression fixed in code
+  (S12-4 fix item), device check pending. Sheet-body R10 items → S11-1 § 4. F31 swipe; F24 Apollo aliases.
+- **Next:** on device, confirm book detail entry (cover animates, no flash, no layout jump after
+  skeletons) and smoke-test every other screen for the `Main.immediate` dispatcher change. Then gallery
+  check → S7-2.
 - **Open questions:** move `BookmarkToggle` onto foundation `RhaydusIconToggleButton`? (left hand-rolled)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
