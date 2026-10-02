@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +26,7 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -69,7 +69,7 @@ internal fun EmptyCurrentlyReadingScreen(
         if (showAdaptive) Spacer(modifier = Modifier.height(40.dp))
         val quoteAlpha = if (LocalDarkTheme.current) 0.15f else 0.3f
 
-        Text(
+        SoftcoverText(
             text = "“",
             style = MaterialTheme.editorialTypography.quoteGlyph.copy(
                 fontSize = 140.sp,
@@ -82,7 +82,7 @@ internal fun EmptyCurrentlyReadingScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
+        SoftcoverText(
             text = "An open page awaits",
             style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
@@ -91,7 +91,7 @@ internal fun EmptyCurrentlyReadingScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text(
+        SoftcoverText(
             text = "Nothing is currently between your fingers. Find a title worth losing an evening to.",
             style = MaterialTheme.editorialTypography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -124,7 +124,7 @@ internal fun EmptyCurrentlyReadingScreen(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Text(
+                SoftcoverText(
                     text = "Find a book",
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.SemiBold,

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -65,7 +65,7 @@ internal fun FeaturedBackdropMeta(
         }
 
         if (topLineText != null) {
-            Text(
+            SoftcoverText(
                 text = topLineText,
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                     letterSpacing = 1.3.sp,
@@ -80,7 +80,7 @@ internal fun FeaturedBackdropMeta(
             Spacer(modifier = Modifier.height(6.dp))
         }
 
-        Text(
+        SoftcoverText(
             text = book.title,
             style = MaterialTheme.editorialTypography.headlineSmall.copy(
                 lineHeight = 27.sp,
@@ -94,7 +94,7 @@ internal fun FeaturedBackdropMeta(
         book.currentEdition?.authorString?.takeIf { it.isNotBlank() }?.let { authors ->
             Spacer(modifier = Modifier.height(9.dp))
 
-            Text(
+            SoftcoverText(
                 text = "By $authors".uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                     letterSpacing = 1.2.sp,
@@ -131,7 +131,7 @@ internal fun FeaturedBackdropMeta(
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
+                        SoftcoverText(
                             text = "Your pace".uppercase(),
                             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                                 letterSpacing = 1.4.sp,
@@ -153,7 +153,7 @@ internal fun FeaturedBackdropMeta(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = paceLineText(forecast),
                         style = MaterialTheme.editorialTypography.bodySmall.copy(shadow = overlayShadow),
                         color = foreground.copy(alpha = 0.95f),

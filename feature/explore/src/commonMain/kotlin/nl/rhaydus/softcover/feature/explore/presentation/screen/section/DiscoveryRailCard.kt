@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,7 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -58,7 +58,7 @@ private fun DiscoveryRailCard(
             )
         }
 
-        Text(
+        SoftcoverText(
             text = book.title,
             style = MaterialTheme.editorialTypography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
@@ -107,7 +107,7 @@ internal fun TrendingCard(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            Text(
+            SoftcoverText(
                 text = formatDecimalNumber(
                     book.rating,
                     fractionDigits = 1,
@@ -135,7 +135,7 @@ internal fun BecauseYouReadCard(
         onClick = onClick,
         modifier = modifier,
     ) {
-        Text(
+        SoftcoverText(
             text = book.authorString,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

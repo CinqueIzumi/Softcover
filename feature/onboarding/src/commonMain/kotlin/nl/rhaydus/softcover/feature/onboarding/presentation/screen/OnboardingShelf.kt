@@ -20,7 +20,6 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,6 +45,7 @@ import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -207,7 +207,7 @@ private fun PasteFromClipboardRow(onClick: () -> Unit) {
         )
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(
+            SoftcoverText(
                 text = "Paste from clipboard",
                 style = MaterialTheme.editorialTypography.titleSmall.copy(
                     fontSize = 14.5.sp,
@@ -216,7 +216,7 @@ private fun PasteFromClipboardRow(onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
 
-            Text(
+            SoftcoverText(
                 text = "The quick way in",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
@@ -255,7 +255,7 @@ private fun KeyField(
             // Matches the placeholder register EditorialSearchField uses (plain Material bodyLarge,
             // onSurfaceVariant) — this is key entry, not search, so there is no leading glyph or clear
             // button, just the tonal pill and the primary caret.
-            Text(
+            SoftcoverText(
                 text = "Enter your key",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -345,7 +345,7 @@ private fun WhereToFindItExplainer() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
+        SoftcoverText(
             text = "Where to find it".uppercase(),
             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                 fontSize = 10.5.sp,
@@ -386,7 +386,7 @@ private fun ExplainerStepRow(
     sub: String,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-        Text(
+        SoftcoverText(
             text = number,
             style = MaterialTheme.editorialTypography.headlineSmall.copy(
                 fontSize = 17.sp,
@@ -400,7 +400,7 @@ private fun ExplainerStepRow(
         )
 
         Column(modifier = Modifier.alignByBaseline()) {
-            Text(
+            SoftcoverText(
                 text = label,
                 style = MaterialTheme.editorialTypography.titleSmall.copy(
                     fontSize = 13.5.sp,
@@ -411,7 +411,7 @@ private fun ExplainerStepRow(
 
             Spacer(modifier = Modifier.height(1.dp))
 
-            Text(
+            SoftcoverText(
                 text = sub,
                 style = MaterialTheme.editorialTypography.bodySmall.copy(
                     fontSize = 12.5.sp,
@@ -477,7 +477,7 @@ internal fun PrimaryActionFooterRow(
         if (trailingLabel != null) {
             Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
+            SoftcoverText(
                 text = trailingLabel.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                     fontSize = 11.sp,

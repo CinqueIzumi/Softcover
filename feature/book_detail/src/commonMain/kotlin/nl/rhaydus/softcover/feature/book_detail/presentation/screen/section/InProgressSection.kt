@@ -22,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +36,7 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -92,7 +92,7 @@ internal fun InProgressSection(
 
                     Spacer(modifier = Modifier.width(6.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = "Update",
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.SemiBold,
@@ -104,7 +104,7 @@ internal fun InProgressSection(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        Text(
+        SoftcoverText(
             text = "${progress.roundToInt()}%",
             style = MaterialTheme.editorialTypography.statHero,
             color = MaterialTheme.colorScheme.onSurface,
@@ -148,13 +148,13 @@ internal fun InProgressSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
+            SoftcoverText(
                 text = summaryLeft,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Text(
+            SoftcoverText(
                 text = summaryRight,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -194,7 +194,7 @@ internal fun InProgressSection(
                 Column {
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = "Finish in ${forecast.forecastReadingDays} reading days",
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -280,7 +280,7 @@ private fun DeadlineRow(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Text(
+                SoftcoverText(
                     text = "Finish by ${dateStyle.formatter.format(progress.deadline)}",
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleSmall,
@@ -292,7 +292,7 @@ private fun DeadlineRow(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            Text(
+            SoftcoverText(
                 text = buildGoalText(progress = progress),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

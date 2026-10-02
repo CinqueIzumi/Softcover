@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val LIST_DOT_INLINE_CONTENT_ID = "library-tabs-list-dot"
@@ -63,7 +63,7 @@ private fun LibraryTabsGroupSubhead() {
         append(" marks a list.")
     }
 
-    Text(
+    SoftcoverText(
         text = annotatedText,
         style = MaterialTheme.editorialTypography.body.copy(
             fontSize = 15.sp,

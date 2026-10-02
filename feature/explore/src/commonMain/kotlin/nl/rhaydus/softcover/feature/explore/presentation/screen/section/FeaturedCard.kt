@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +29,7 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -92,7 +92,7 @@ internal fun FeaturedCard(
             // because this card is exclusively the *unreleased* hero: a book that isn't out yet
             // can only be on a shelf in anticipation, so the total and the wording agree here in a
             // way they would not on a released book's card.
-            Text(
+            SoftcoverText(
                 text = "${formatGroupedNumber(book.usersCount)} readers waiting",
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
@@ -111,7 +111,7 @@ internal fun FeaturedCard(
             )
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
+                SoftcoverText(
                     text = book.title,
                     style = MaterialTheme.editorialTypography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -119,7 +119,7 @@ internal fun FeaturedCard(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Text(
+                SoftcoverText(
                     text = "By ${book.authorString}".uppercase(),
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -128,7 +128,7 @@ internal fun FeaturedCard(
                 if (book.headline.isNotBlank()) {
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = book.headline,
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

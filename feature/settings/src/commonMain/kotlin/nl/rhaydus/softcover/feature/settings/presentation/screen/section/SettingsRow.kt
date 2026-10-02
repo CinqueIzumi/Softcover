@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -88,7 +88,7 @@ internal fun SettingsRow(
 
         Column(modifier = Modifier.weight(1f)) {
             val titleText: @Composable () -> Unit = {
-                Text(
+                SoftcoverText(
                     text = title,
                     style = MaterialTheme.editorialTypography.titleMedium,
                     color = titleColor,
@@ -106,7 +106,7 @@ internal fun SettingsRow(
             if (secondary != null) {
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Text(
+                SoftcoverText(
                     text = secondary,
                     style = secondaryStyle,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

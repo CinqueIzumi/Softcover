@@ -30,7 +30,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -51,6 +50,7 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
@@ -191,7 +191,7 @@ private fun OnboardingTopBar(
                 },
                 label = "OnboardingTopBarEyebrow",
             ) { label ->
-                Text(
+                SoftcoverText(
                     text = label.uppercase(),
                     style = MaterialTheme.editorialTypography.eyebrow,
                     color = MaterialTheme.colorScheme.primary,
@@ -223,7 +223,7 @@ private fun FolioIndicator(activePage: Int) {
         }
     }
 
-    Text(
+    SoftcoverText(
         text = folioText,
         style = MaterialTheme.editorialTypography.eyebrow.copy(
             letterSpacing = 2.sp,
@@ -241,7 +241,7 @@ private fun FirstIntroScreen(
         // The single decorative flourish for this page: a low-alpha primary quote glyph bleeding off
         // the top-left edge. Static (not `quoteGlyphSway()` — that sway is scoped to empty-state
         // glyphs), so it is marked decorative and dropped from the semantics tree.
-        Text(
+        SoftcoverText(
             text = "“",
             style = MaterialTheme.editorialTypography.quoteGlyph.copy(fontSize = 340.sp),
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
@@ -261,7 +261,7 @@ private fun FirstIntroScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text(
+                SoftcoverText(
                     text = "Book\nsmart.",
                     style = MaterialTheme.editorialTypography.display.copy(
                         fontSize = 76.sp,
@@ -273,7 +273,7 @@ private fun FirstIntroScreen(
 
                 Spacer(modifier = Modifier.height(26.dp))
 
-                Text(
+                SoftcoverText(
                     text = "Track every book you read, share the ones worth sharing — or " +
                         "don't — and find your next life-changing read.",
                     style = MaterialTheme.editorialTypography.bodyLarge.copy(
@@ -313,7 +313,7 @@ private fun SecondIntroScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(
+            SoftcoverText(
                 text = "Powered by Hardcover.",
                 style = MaterialTheme.editorialTypography.display.copy(
                     fontSize = 54.sp,
@@ -329,7 +329,7 @@ private fun SecondIntroScreen(
 
             Spacer(modifier = Modifier.height(34.dp))
 
-            Text(
+            SoftcoverText(
                 text = "To sync your reading, Softcover connects to your Hardcover account — " +
                     "the open book database your library actually lives in.",
                 style = MaterialTheme.editorialTypography.bodyLarge.copy(
@@ -362,7 +362,7 @@ private fun SecondIntroScreen(
 @Composable
 private fun WavyConnector() {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
+        SoftcoverText(
             text = "SOFTCOVER",
             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                 letterSpacing = 1.8.sp,
@@ -378,7 +378,7 @@ private fun WavyConnector() {
                 .height(14.dp),
         )
 
-        Text(
+        SoftcoverText(
             text = "HARDCOVER",
             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                 letterSpacing = 1.8.sp,
@@ -468,7 +468,7 @@ private fun ThirdIntroScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
+            SoftcoverText(
                 text = "Add your\nkey.",
                 style = MaterialTheme.editorialTypography.display.copy(
                     fontSize = 46.sp,
@@ -480,7 +480,7 @@ private fun ThirdIntroScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Text(
+            SoftcoverText(
                 text = "One key, once. It only syncs your reading progress — never your password.",
                 style = MaterialTheme.editorialTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

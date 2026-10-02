@@ -14,13 +14,13 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 
@@ -92,7 +92,7 @@ internal fun AppUpdateSection(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Text(
+                SoftcoverText(
                     text = eyebrow.uppercase(),
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.primary,
@@ -101,7 +101,7 @@ internal fun AppUpdateSection(
 
             Spacer(modifier = Modifier.height(9.dp))
 
-            Text(
+            SoftcoverText(
                 text = headline,
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -109,7 +109,7 @@ internal fun AppUpdateSection(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            SoftcoverText(
                 text = body,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -159,7 +159,7 @@ private fun UpdatePillButton(
             modifier = Modifier.padding(horizontal = 22.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
+            SoftcoverText(
                 text = label,
                 style = MaterialTheme.editorialTypography.titleSmall,
             )

@@ -19,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +35,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
@@ -262,7 +262,7 @@ private fun ProfileHeader(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
+        SoftcoverText(
             text = name,
             style = MaterialTheme.editorialTypography.display,
             color = MaterialTheme.colorScheme.primary,
@@ -287,7 +287,7 @@ private fun ProfileHeader(
                         .background(MaterialTheme.colorScheme.outline),
                 )
 
-                Text(
+                SoftcoverText(
                     text = "•",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.outline,
@@ -304,7 +304,7 @@ private fun ProfileHeader(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
+            SoftcoverText(
                 text = "“$bio”",
                 style = MaterialTheme.editorialTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

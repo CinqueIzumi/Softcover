@@ -2,10 +2,10 @@ package nl.rhaydus.softcover.orchestration.presentation
 
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 /**
  * The medium-width navigation chrome: a vertical rail that replaces the bottom bar between 600 and
@@ -30,7 +30,7 @@ internal fun NavigationRailBar(modifier: Modifier = Modifier) {
                         painter = iconPainter,
                     )
                 },
-                label = { Text(text = item.tab.options.title) },
+                label = { SoftcoverText(text = item.tab.options.title) },
             )
         }
     }

@@ -7,13 +7,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import nl.rhaydus.designsystem.component.DesktopTooltip
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -66,7 +66,7 @@ internal fun BookOverflowMenu(
             onDismissRequest = dismiss,
         ) {
             DropdownMenuItem(
-                text = { Text(text = "Share") },
+                text = { SoftcoverText(text = "Share") },
                 leadingIcon = {
                     val shareIcon = drawableIconResource(
                         icon = SoftcoverIcon.Share,
@@ -86,7 +86,7 @@ internal fun BookOverflowMenu(
 
             if (isOnline) {
                 DropdownMenuItem(
-                    text = { Text(text = "Choose lists") },
+                    text = { SoftcoverText(text = "Choose lists") },
                     leadingIcon = {
                         val chooseListsIcon = drawableIconResource(
                             icon = SoftcoverIcon.BookmarkAdd,
@@ -111,7 +111,7 @@ internal fun BookOverflowMenu(
             // is nothing to switch between.
             if (isOnline && book.editions.isNotEmpty()) {
                 DropdownMenuItem(
-                    text = { Text(text = "Change edition") },
+                    text = { SoftcoverText(text = "Change edition") },
                     leadingIcon = {
                         val changeEditionIcon = drawableIconResource(
                             icon = SoftcoverIcon.LibraryBooks,
@@ -144,7 +144,7 @@ internal fun BookOverflowMenu(
                     )
 
                     DropdownMenuItem(
-                        text = { Text(text = ownedLabel) },
+                        text = { SoftcoverText(text = ownedLabel) },
                         leadingIcon = {
                             Icon(
                                 painter = ownedToggleIcon.getIconPainter(),
@@ -168,7 +168,7 @@ internal fun BookOverflowMenu(
 
             if (state.deadline == null) {
                 DropdownMenuItem(
-                    text = { Text(text = "Set deadline") },
+                    text = { SoftcoverText(text = "Set deadline") },
                     leadingIcon = {
                         val setDeadlineIcon = drawableIconResource(
                             icon = SoftcoverIcon.DateRange,
@@ -187,7 +187,7 @@ internal fun BookOverflowMenu(
                 )
             } else {
                 DropdownMenuItem(
-                    text = { Text(text = "Edit deadline") },
+                    text = { SoftcoverText(text = "Edit deadline") },
                     leadingIcon = {
                         val editDeadlineIcon = drawableIconResource(
                             icon = SoftcoverIcon.DateRange,
@@ -206,7 +206,7 @@ internal fun BookOverflowMenu(
                 )
 
                 DropdownMenuItem(
-                    text = { Text(text = "Clear deadline") },
+                    text = { SoftcoverText(text = "Clear deadline") },
                     leadingIcon = {
                         val clearDeadlineIcon = drawableIconResource(
                             icon = SoftcoverIcon.Delete,
@@ -227,7 +227,7 @@ internal fun BookOverflowMenu(
 
             if (isOnline) {
                 DropdownMenuItem(
-                    text = { Text(text = "Remove") },
+                    text = { SoftcoverText(text = "Remove") },
                     leadingIcon = {
                         val removeIcon = drawableIconResource(
                             icon = SoftcoverIcon.Delete,

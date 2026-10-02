@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +26,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
@@ -73,7 +73,7 @@ internal actual fun OnboardingScreenLayout(
                     modifier = Modifier.widthIn(max = 520.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(
+                    SoftcoverText(
                         text = "Welcome".uppercase(),
                         style = MaterialTheme.editorialTypography.eyebrow,
                         color = MaterialTheme.colorScheme.primary,
@@ -83,7 +83,7 @@ internal actual fun OnboardingScreenLayout(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = "Book smart.",
                         style = MaterialTheme.editorialTypography.display,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -93,7 +93,7 @@ internal actual fun OnboardingScreenLayout(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = "Track every book you read, share the ones worth sharing — or " +
                             "don't — and find your next life-changing read.",
                         style = MaterialTheme.editorialTypography.bodyLarge.copy(

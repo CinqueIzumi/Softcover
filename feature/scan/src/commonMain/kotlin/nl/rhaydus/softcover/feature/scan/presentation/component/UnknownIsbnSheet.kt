@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -51,7 +51,7 @@ internal fun UnknownIsbnSheet(
                         .padding(vertical = 20.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
+                    SoftcoverText(
                         text = isbn,
                         // Wider tracking so the digit string reads as a scannable code, not prose.
                         style = MaterialTheme.editorialTypography.titleLarge.copy(letterSpacing = 2.sp),

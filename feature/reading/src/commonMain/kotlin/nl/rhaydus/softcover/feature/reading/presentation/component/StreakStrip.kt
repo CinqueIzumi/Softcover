@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -37,6 +36,7 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
@@ -116,7 +116,7 @@ internal fun StreakStrip(
         ) {
             // A static, direction-only caption: it never pins to a specific dot, so it stays
             // accurate however far the user scrolls into the past.
-            Text(
+            SoftcoverText(
                 text = "Most recent first".uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -125,7 +125,7 @@ internal fun StreakStrip(
             val streakLength = remember(activity) { currentStreakLength(activity) }
 
             if (streakLength > 0) {
-                Text(
+                SoftcoverText(
                     text = "$streakLength ${if (streakLength == 1) "day" else "days"} running",
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
@@ -207,7 +207,7 @@ private fun StreakStripSheetRow(
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Text(
+        SoftcoverText(
             text = sheetDayLabel(
                 date = day.date,
                 today = today,
@@ -222,7 +222,7 @@ private fun StreakStripSheetRow(
         )
 
         if (day.didRead) {
-            Text(
+            SoftcoverText(
                 text = "Read".uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,

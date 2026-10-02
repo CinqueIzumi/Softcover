@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +25,7 @@ import nl.rhaydus.softcover.core.component.gallery.GalleryFixture
 import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -58,7 +58,7 @@ internal fun ComponentGalleryContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
+        SoftcoverText(
             text = "Every component in the library, rendered from its own preview fixtures — in any " +
                 "brightness, and any spine colour.",
             style = MaterialTheme.editorialTypography.body,
@@ -124,7 +124,7 @@ private fun GalleryOverrideControls(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text(
+        SoftcoverText(
             text = "A highlighted chip is the override in effect — tap it again to hand the gallery " +
                 "back to the app's own current setting.",
             style = MaterialTheme.editorialTypography.bodySmall,
@@ -158,7 +158,7 @@ private fun GalleryFamilyFilterRow(
  */
 @Composable
 private fun GalleryControlLabel(text: String) {
-    Text(
+    SoftcoverText(
         text = text.uppercase(),
         style = MaterialTheme.editorialTypography.eyebrowSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -272,7 +272,7 @@ private fun GalleryFamilySection(
 @Composable
 private fun GalleryEntrySection(entry: GalleryEntry) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
+        SoftcoverText(
             text = entry.name,
             style = MaterialTheme.editorialTypography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
@@ -280,7 +280,7 @@ private fun GalleryEntrySection(entry: GalleryEntry) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
+        SoftcoverText(
             text = entry.blurb,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -305,7 +305,7 @@ private fun GalleryEntrySection(entry: GalleryEntry) {
 @Composable
 private fun GalleryFixtureFrame(fixture: GalleryFixture) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
+        SoftcoverText(
             text = fixture.label.uppercase(),
             style = MaterialTheme.editorialTypography.eyebrowSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -344,7 +344,7 @@ private fun GalleryEmptyState() {
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
+        SoftcoverText(
             text = "“",
             style = MaterialTheme.editorialTypography.quoteGlyph,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
@@ -353,7 +353,7 @@ private fun GalleryEmptyState() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
+        SoftcoverText(
             text = "The shelf is being built",
             style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
@@ -362,7 +362,7 @@ private fun GalleryEmptyState() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text(
+        SoftcoverText(
             text = "Every component the app renders is moving into this library, one migration " +
                 "stage at a time. A family's fixtures appear here the moment its stage lands — " +
                 "rendered in whichever brightness and spine colour you've chosen above.",

@@ -4,10 +4,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.DateStyleSection
@@ -39,7 +39,7 @@ internal fun AppearanceSettingsContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        Text(
+        SoftcoverText(
             text = "How Softcover looks in your hands, and how it reads dates back to you.",
             style = MaterialTheme.editorialTypography.body,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

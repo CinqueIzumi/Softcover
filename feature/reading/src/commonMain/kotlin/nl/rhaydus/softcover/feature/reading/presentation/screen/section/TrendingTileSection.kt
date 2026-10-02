@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +21,7 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -63,13 +63,13 @@ internal fun TrendingTileSection(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text(
+                    SoftcoverText(
                         text = "Trending".uppercase(),
                         style = MaterialTheme.editorialTypography.eyebrowSmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
 
-                    Text(
+                    SoftcoverText(
                         text = book.title,
                         style = MaterialTheme.editorialTypography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -80,7 +80,7 @@ internal fun TrendingTileSection(
                     val author = book.authors.firstOrNull()?.name.orEmpty()
 
                     if (author.isNotBlank()) {
-                        Text(
+                        SoftcoverText(
                             text = "By $author",
                             style = MaterialTheme.editorialTypography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

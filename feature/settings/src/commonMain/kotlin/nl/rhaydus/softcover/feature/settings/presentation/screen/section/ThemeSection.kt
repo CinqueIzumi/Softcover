@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTile
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTileEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnThemeModeSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -63,7 +63,7 @@ internal fun ThemeSection(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        Text(
+        SoftcoverText(
             text = "System follows your device's own light and dark setting.",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

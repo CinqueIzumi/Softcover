@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +26,7 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -77,7 +77,7 @@ internal fun SearchResultRow(
             val category = book.seriesText
 
             if (category != null) {
-                Text(
+                SoftcoverText(
                     text = category.uppercase(),
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.primary,
@@ -88,7 +88,7 @@ internal fun SearchResultRow(
                 Spacer(modifier = Modifier.height(4.dp))
             }
 
-            Text(
+            SoftcoverText(
                 text = book.title,
                 style = MaterialTheme.editorialTypography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -96,7 +96,7 @@ internal fun SearchResultRow(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
+            SoftcoverText(
                 text = "By ${book.authorString}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -110,14 +110,14 @@ internal fun SearchResultRow(
                     "${formatGroupedNumber(book.usersCount)} readers",
                 )
 
-                Text(
+                SoftcoverText(
                     text = metaParts.joinToString(separator = " · "),
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 if (book.rating != 0.0) {
-                    Text(
+                    SoftcoverText(
                         text = " · ",
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -137,7 +137,7 @@ internal fun SearchResultRow(
 
                     Spacer(modifier = Modifier.width(4.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = formatDecimalNumber(
                             book.rating,
                             fractionDigits = 1,

@@ -21,7 +21,6 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +50,7 @@ import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -154,7 +154,7 @@ private fun ColumnScope.EditionBottomSheetContent(
                     .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
+                SoftcoverText(
                     text = "No editions match your search",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.editorialTypography.body,
@@ -242,7 +242,7 @@ private fun EditionItem(
 
                     Spacer(modifier = Modifier.width(6.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = edition.formatLabel(),
                         style = MaterialTheme.typography.titleSmall.copy(
                             fontWeight = FontWeight.SemiBold,
@@ -268,7 +268,7 @@ private fun EditionItem(
                 if (meta.isNotBlank()) {
                     Spacer(modifier = Modifier.height(5.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = meta,
                         style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -278,7 +278,7 @@ private fun EditionItem(
                 edition.isbnWhisper()?.let { isbn ->
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = isbn,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -303,7 +303,7 @@ private fun EditionItem(
 
                         Spacer(modifier = Modifier.width(5.dp))
 
-                        Text(
+                        SoftcoverText(
                             text = "You own this edition",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.primary,

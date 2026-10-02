@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -41,6 +40,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import nl.rhaydus.common.AppLog
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -161,7 +161,7 @@ actual fun BarcodeScanner(
                 .padding(horizontal = 24.dp, vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
+            SoftcoverText(
                 text = "SCANNING",
                 style = MaterialTheme.editorialTypography.eyebrow,
                 color = Color.White.copy(alpha = 0.8f),
@@ -169,7 +169,7 @@ actual fun BarcodeScanner(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            SoftcoverText(
                 text = "Center a book's barcode",
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = Color.White,

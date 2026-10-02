@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +24,7 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverForeground
@@ -65,7 +65,7 @@ internal fun SeriesCard(
         }
 
         book.bookSeries?.let { series ->
-            Text(
+            SoftcoverText(
                 text = series.name,
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
@@ -74,7 +74,7 @@ internal fun SeriesCard(
             )
         }
 
-        Text(
+        SoftcoverText(
             text = book.title,
             style = MaterialTheme.editorialTypography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
@@ -83,7 +83,7 @@ internal fun SeriesCard(
             overflow = TextOverflow.Ellipsis,
         )
 
-        Text(
+        SoftcoverText(
             text = book.positionInSeriesDisplay?.let { "Book #$it" }.orEmpty(),
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -133,7 +133,7 @@ internal fun UnreleasedSeriesCard(
         }
 
         book.bookSeries?.let { series ->
-            Text(
+            SoftcoverText(
                 text = series.name,
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
@@ -142,7 +142,7 @@ internal fun UnreleasedSeriesCard(
             )
         }
 
-        Text(
+        SoftcoverText(
             text = book.title,
             style = MaterialTheme.editorialTypography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
@@ -151,7 +151,7 @@ internal fun UnreleasedSeriesCard(
             overflow = TextOverflow.Ellipsis,
         )
 
-        Text(
+        SoftcoverText(
             text = book.positionInSeriesDisplay?.let { "Book #$it" }.orEmpty(),
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

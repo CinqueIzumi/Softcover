@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,6 +19,7 @@ import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileEvent
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnColorPaletteSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -92,7 +92,7 @@ internal fun SpineColourSection(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        Text(
+        SoftcoverText(
             text = if (state.useDynamicColorChecked) {
                 "Dynamic colour is painting the app — pick a spine colour to take it back."
             } else {

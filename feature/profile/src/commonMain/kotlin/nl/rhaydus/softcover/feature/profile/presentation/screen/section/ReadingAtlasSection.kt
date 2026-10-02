@@ -16,7 +16,6 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +30,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 
@@ -130,7 +130,7 @@ private fun HeroStatCard(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 24.dp),
         ) {
-            Text(
+            SoftcoverText(
                 text = eyebrow.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrow,
                 color = demotedContent,
@@ -154,7 +154,7 @@ private fun HeroStatCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Text(
+            SoftcoverText(
                 text = caption,
                 style = MaterialTheme.editorialTypography.body,
                 color = demotedContent,
@@ -188,7 +188,7 @@ private fun StatTile(
                 .padding(horizontal = 18.dp, vertical = 18.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
+            SoftcoverText(
                 text = eyebrow.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
@@ -202,7 +202,7 @@ private fun StatTile(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Text(
+            SoftcoverText(
                 text = caption,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -236,7 +236,7 @@ private fun SmallStatTile(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 14.dp),
         ) {
-            Text(
+            SoftcoverText(
                 text = eyebrow.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
@@ -253,7 +253,7 @@ private fun SmallStatTile(
 
                 Spacer(modifier = Modifier.width(6.dp))
 
-                Text(
+                SoftcoverText(
                     text = trailing,
                     style = MaterialTheme.editorialTypography.body,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

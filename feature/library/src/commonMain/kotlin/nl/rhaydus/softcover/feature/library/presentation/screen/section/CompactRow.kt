@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +21,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -57,7 +57,7 @@ internal fun CompactRow(
             }
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
+                SoftcoverText(
                     text = title,
                     style = MaterialTheme.editorialTypography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -68,7 +68,7 @@ internal fun CompactRow(
                 if (authorName.isNotBlank()) {
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = "By $authorName",
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

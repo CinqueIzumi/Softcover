@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +28,7 @@ import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -55,7 +55,7 @@ internal fun RecentlyLovedSection(
         Spacer(modifier = Modifier.height(20.dp))
 
         if (books.isEmpty() && isLoading.not()) {
-            Text(
+            SoftcoverText(
                 text = "Your next favorite is still ahead of you.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -114,7 +114,7 @@ private fun LovedBookCard(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
+        SoftcoverText(
             text = book?.title.orEmpty(),
             style = MaterialTheme.editorialTypography.bodyLarge.copy(
                 fontWeight = FontWeight.SemiBold,
@@ -128,7 +128,7 @@ private fun LovedBookCard(
 
         Spacer(modifier = Modifier.height(2.dp))
 
-        Text(
+        SoftcoverText(
             text = book?.author.orEmpty(),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -142,7 +142,7 @@ private fun LovedBookCard(
             // Rating and month stack on their own lines — a shared row ("4.5★ · May 2026") can overflow
             // this card's narrow width once it sits three-up, so the two meta facts get one line each.
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
+                SoftcoverText(
                     text = formatDecimalNumber(
                         value = book.ratingStars,
                         fractionDigits = 1,
@@ -168,7 +168,7 @@ private fun LovedBookCard(
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            Text(
+            SoftcoverText(
                 text = book.monthLabel,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

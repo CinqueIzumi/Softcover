@@ -18,7 +18,6 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +47,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
@@ -180,7 +180,7 @@ object MotionDebugScreen : Screen {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(modifier = Modifier.padding(end = 12.dp)) {
-                    Text(
+                    SoftcoverText(
                         text = label.uppercase(),
                         style = MaterialTheme.editorialTypography.eyebrowSmall,
                         color = MaterialTheme.colorScheme.primary,
@@ -188,7 +188,7 @@ object MotionDebugScreen : Screen {
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = description,
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -267,7 +267,7 @@ object MotionDebugScreen : Screen {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
+                SoftcoverText(
                     text = "Tap to shake",
                     style = MaterialTheme.editorialTypography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -352,7 +352,7 @@ object MotionDebugScreen : Screen {
                         vertical = 20.dp,
                     ),
             ) {
-                Text(
+                SoftcoverText(
                     text = "Auto-advancing every 2s — confirms `LinearWavyProgressIndicator` tween smoothness.",
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

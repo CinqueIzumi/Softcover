@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -50,6 +49,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -250,7 +250,7 @@ internal fun GeneralBookInfoSection(
                 } else {
                     Column {
                         seriesText?.takeIf { it.isNotBlank() }?.let { series ->
-                            Text(
+                            SoftcoverText(
                                 text = series,
                                 color = Color.White.copy(alpha = textSecondaryAlpha),
                                 style = MaterialTheme.typography.labelSmall.copy(
@@ -263,7 +263,7 @@ internal fun GeneralBookInfoSection(
                             Spacer(modifier = Modifier.height(2.dp))
                         }
 
-                        Text(
+                        SoftcoverText(
                             text = title.orEmpty(),
                             color = Color.White,
                             style = MaterialTheme.typography.titleLarge.copy(
@@ -293,7 +293,7 @@ internal fun GeneralBookInfoSection(
                             }
                         }
 
-                        Text(
+                        SoftcoverText(
                             text = bylineText,
                             color = Color.White.copy(alpha = textSecondaryAlpha),
                             style = MaterialTheme.editorialTypography.bodySmall.copy(
@@ -332,13 +332,13 @@ internal fun GeneralBookInfoSection(
                                         modifier = Modifier.weight(1f),
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
-                                        Text(
+                                        SoftcoverText(
                                             text = "Rating",
                                             style = labelSmall,
                                         )
 
                                         Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(
+                                            SoftcoverText(
                                                 text = formatDecimalNumber(
                                                     value = rating,
                                                     fractionDigits = 1,
@@ -368,7 +368,7 @@ internal fun GeneralBookInfoSection(
                                         modifier = Modifier.weight(1f),
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
-                                        Text(
+                                        SoftcoverText(
                                             text = "Length",
                                             style = labelSmall,
                                         )
@@ -380,7 +380,7 @@ internal fun GeneralBookInfoSection(
                                                 "${edition?.pages ?: ""}"
                                             }
 
-                                            Text(
+                                            SoftcoverText(
                                                 text = lengthText,
                                                 style = bodySmall,
                                                 modifier = Modifier.alignByBaseline(),
@@ -389,7 +389,7 @@ internal fun GeneralBookInfoSection(
                                             if (isAudiobook.not()) {
                                                 Spacer(modifier = Modifier.width(4.dp))
 
-                                                Text(
+                                                SoftcoverText(
                                                     text = "pgs",
                                                     style = labelSmall,
                                                     modifier = Modifier.alignByBaseline(),

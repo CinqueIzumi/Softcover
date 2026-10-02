@@ -197,6 +197,28 @@ Filed but not yet implemented in the foundation.
   the measured bounds, content hidden, semantics cleared while masked), release, and switch Softcover's
   call sites to it. Then delete the local copy.
 
+### F33 — detekt type resolution cannot read Kotlin 2.3 metadata
+
+- **Type:** bug (gate silently inert)
+- **Home:** `nl.rhaydus:detekt-rules` + the detekt version in the shared catalog
+- **Status:** **Open.** detekt 1.23.8 embeds the Kotlin 2.0 compiler, which reads library metadata only up
+  to 2.1; Softcover builds on Kotlin 2.3.21. A `--debug` run logs 410 "incompatible version of Kotlin"
+  errors (stdlib, Compose, every repo module), so calls into them stay unresolved and every type-resolved
+  rule skips them silently: a probe's `println` and `material3.Text` went unflagged by `ForbiddenMethodCall`
+  while `!!` on a builtin `String?` was caught. `rhaydus:UnguardedFlowTerminalRead` is very likely inert too.
+- **What to build:** move to detekt 2 (`dev.detekt`, Kotlin 2.x compiler), port `detekt-rules` to its API,
+  then probe each type-resolved rule on a known violation.
+
+### F34 — Import ban with a per-file allowlist (text-leaf gate)
+
+- **Type:** gate
+- **Home:** `nl.rhaydus:ktlint-rules` or `nl.rhaydus:detekt-rules` (must not need type resolution, see F33)
+- **Status:** **Open — blocks Softcover's text-leaf gate.** Softcover routes every text through one leaf
+  (`SoftcoverText`) and needs `androidx.compose.material3.Text` banned everywhere except that leaf's file.
+  detekt's `ForbiddenImport` allows one instance per config and is already scoped to the leaf modules.
+- **What to build:** a configurable rule taking `(import, allowed file globs, reason)` entries, with a
+  fully-qualified-call check alongside the import check; release, then enable it in Softcover.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)

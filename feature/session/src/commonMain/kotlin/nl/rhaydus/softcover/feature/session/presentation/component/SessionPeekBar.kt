@@ -15,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +36,7 @@ import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -136,7 +136,7 @@ private fun SessionPeekBarContent(
                 )
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    SoftcoverText(
                         text = active.book.title,
                         style = MaterialTheme.editorialTypography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -144,7 +144,7 @@ private fun SessionPeekBarContent(
                         overflow = TextOverflow.Ellipsis,
                     )
 
-                    Text(
+                    SoftcoverText(
                         text = if (active.session.isPaused) {
                             "Paused · ${formatSessionElapsed(elapsed = elapsed)}"
                         } else {

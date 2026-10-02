@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,6 +37,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -81,7 +81,7 @@ internal fun HiddenSuggestionsContent(
         if (state.isEmpty) {
             HiddenSuggestionsEmptyState()
         } else {
-            Text(
+            SoftcoverText(
                 text = "Books and series you’ve muted stay out of your " +
                     "“Up next in your series” suggestions. Restore any of them here.",
                 style = MaterialTheme.editorialTypography.body,
@@ -186,7 +186,7 @@ private fun HiddenSeriesSection(
 private fun HiddenSuggestionsGroupHeader(model: HiddenGroupHeaderUiModel) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = model.header) {
-            Text(
+            SoftcoverText(
                 text = model.count,
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontFeatureSettings = "tnum"),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -195,7 +195,7 @@ private fun HiddenSuggestionsGroupHeader(model: HiddenGroupHeaderUiModel) {
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        Text(
+        SoftcoverText(
             text = model.subline,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -260,7 +260,7 @@ private fun HiddenBookRow(
                 Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    SoftcoverText(
                         text = book.title ?: "Hidden book",
                         style = MaterialTheme.editorialTypography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -273,7 +273,7 @@ private fun HiddenBookRow(
                     // Always rendered (even with an empty string when neither fact is known) so the
                     // row reserves the same height as every other row — an empty Text still occupies
                     // one eyebrowSmall line, per the style's own line height.
-                    Text(
+                    SoftcoverText(
                         text = byline?.uppercase().orEmpty(),
                         style = MaterialTheme.editorialTypography.eyebrowSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -331,7 +331,7 @@ private fun HiddenSeriesRow(
                 Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    SoftcoverText(
                         text = series.seriesName ?: "Hidden series",
                         style = MaterialTheme.editorialTypography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -341,7 +341,7 @@ private fun HiddenSeriesRow(
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = seriesCaption(
                             authorText = series.authorText,
                             bookCount = series.bookCount,
@@ -452,7 +452,7 @@ private fun RestoreAffordance() {
 
         Spacer(modifier = Modifier.width(6.dp))
 
-        Text(
+        SoftcoverText(
             text = "Restore",
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.primary,
@@ -475,7 +475,7 @@ private fun HiddenSuggestionsEmptyState() {
             .padding(top = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
+        SoftcoverText(
             text = "“",
             style = MaterialTheme.editorialTypography.quoteGlyph,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
@@ -484,7 +484,7 @@ private fun HiddenSuggestionsEmptyState() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
+        SoftcoverText(
             text = "Nothing hidden",
             style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
@@ -493,7 +493,7 @@ private fun HiddenSuggestionsEmptyState() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text(
+        SoftcoverText(
             text = "Books and series you mute from “Up next in your series” land here, " +
                 "so you can bring any of them back whenever you like.",
             style = MaterialTheme.editorialTypography.bodyLarge,

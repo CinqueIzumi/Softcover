@@ -8,12 +8,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -41,8 +41,8 @@ internal fun ReAuthSheet(
             OutlinedTextField(
                 value = model.apiKey,
                 onValueChange = { onEvent(ReAuthSheetEvent.ApiKeyChanged(it)) },
-                label = { Text(text = "API token") },
-                placeholder = { Text(text = "Paste your Hardcover API token") },
+                label = { SoftcoverText(text = "API token") },
+                placeholder = { SoftcoverText(text = "Paste your Hardcover API token") },
                 enabled = model.fieldEnabled,
                 singleLine = true,
                 shape = RoundedCornerShape(8.dp),
@@ -56,7 +56,7 @@ internal fun ReAuthSheet(
             if (model.errorMessage != null) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
+                SoftcoverText(
                     text = model.errorMessage,
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.error,

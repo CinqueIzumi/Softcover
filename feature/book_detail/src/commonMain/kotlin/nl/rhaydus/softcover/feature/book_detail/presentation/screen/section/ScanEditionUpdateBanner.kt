@@ -15,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -53,7 +53,7 @@ internal fun ScanEditionUpdateBanner(
             verticalAlignment = Alignment.Top,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
+                SoftcoverText(
                     text = "ALREADY ON YOUR SHELVES",
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.primary,
@@ -61,7 +61,7 @@ internal fun ScanEditionUpdateBanner(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                Text(
+                SoftcoverText(
                     text = "You've added a different edition of this book. Update it to the one you scanned?",
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -75,7 +75,7 @@ internal fun ScanEditionUpdateBanner(
 
                         Spacer(modifier = Modifier.width(10.dp))
 
-                        Text(
+                        SoftcoverText(
                             text = "Updating edition…",
                             style = MaterialTheme.editorialTypography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

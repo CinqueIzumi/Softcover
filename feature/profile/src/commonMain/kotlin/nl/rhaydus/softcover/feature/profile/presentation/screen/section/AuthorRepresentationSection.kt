@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +27,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -90,7 +90,7 @@ internal fun AuthorRepresentationSection(
         }
 
         if (hasContent.not() && isLoading.not()) {
-            Text(
+            SoftcoverText(
                 text = emptyAuthorDemographicsCaption(hideUntaggedAuthors = hideUntaggedAuthors),
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -111,7 +111,7 @@ internal fun AuthorRepresentationSection(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Text(
+                SoftcoverText(
                     text = genderCaption(
                         knownGenderCount = authorDemographics.knownGenderCount,
                         unknownGenderCount = authorDemographics.unknownGenderCount,
@@ -128,7 +128,7 @@ internal fun AuthorRepresentationSection(
                     Spacer(modifier = Modifier.height(28.dp))
                 }
 
-                Text(
+                SoftcoverText(
                     text = demographicScopeCaption(hideUntaggedAuthors = hideUntaggedAuthors),
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -170,7 +170,7 @@ private fun HideUntaggedAuthorsToggle(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(
+            SoftcoverText(
                 text = "Hide untagged authors",
                 style = MaterialTheme.editorialTypography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -178,7 +178,7 @@ private fun HideUntaggedAuthorsToggle(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
+            SoftcoverText(
                 text = "Read each bar over the authors it has data for.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -259,14 +259,14 @@ private fun GenderLegend(
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                Text(
+                SoftcoverText(
                     text = slice.gender.toDisplayLabel(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f),
                 )
 
-                Text(
+                SoftcoverText(
                     text = "${(slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -359,7 +359,7 @@ private fun DemographicBreakdownBlock(
     isLoading: Boolean,
 ) {
     Column {
-        Text(
+        SoftcoverText(
             text = label.uppercase(),
             style = MaterialTheme.editorialTypography.eyebrowSmall,
             color = MaterialTheme.colorScheme.primary,
@@ -385,7 +385,7 @@ private fun DemographicBreakdownBlock(
             Spacer(modifier = Modifier.height(10.dp))
         }
 
-        Text(
+        SoftcoverText(
             text = demographicCaption(
                 breakdown = breakdown,
                 hideUntaggedAuthors = hideUntaggedAuthors,
@@ -515,14 +515,14 @@ private fun DemographicLegendRow(
 
         Spacer(modifier = Modifier.width(10.dp))
 
-        Text(
+        SoftcoverText(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f),
         )
 
-        Text(
+        SoftcoverText(
             text = "$percentage%",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

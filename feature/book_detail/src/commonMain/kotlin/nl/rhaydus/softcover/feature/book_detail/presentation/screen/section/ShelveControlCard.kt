@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +44,7 @@ import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -346,7 +346,7 @@ private fun ShelveRow(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Text(
+            SoftcoverText(
                 text = label,
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.labelLarge.copy(
@@ -355,7 +355,7 @@ private fun ShelveRow(
             )
 
             if (selected && trailingStatus != null) {
-                Text(
+                SoftcoverText(
                     text = trailingStatus,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontFeatureSettings = "tnum",

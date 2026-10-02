@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +29,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -62,7 +62,7 @@ internal fun RatingsHistogramSection(
         Spacer(modifier = Modifier.height(20.dp))
 
         if (ratings.totalRatings == 0 && isLoading.not()) {
-            Text(
+            SoftcoverText(
                 text = "Rate a few books you've finished and this fills in.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -82,7 +82,7 @@ internal fun RatingsHistogramSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
+            SoftcoverText(
                 text = caption,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -111,7 +111,7 @@ private fun RatingsAverageRow(
                 modifier = Modifier.shimmer(isLoading = isLoading),
             )
 
-            Text(
+            SoftcoverText(
                 text = "/5",
                 style = MaterialTheme.editorialTypography.headlineSmall.copy(fontSize = 19.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -141,7 +141,7 @@ private fun RatingsAverageRow(
 
         Spacer(modifier = Modifier.width(20.dp))
 
-        Text(
+        SoftcoverText(
             text = "AVERAGE ACROSS ${ratings.totalRatings} BOOKS",
             style = MaterialTheme.editorialTypography.eyebrowSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -200,7 +200,7 @@ private fun RatingsHistogramChart(
                     contentAlignment = Alignment.TopCenter,
                 ) {
                     if (isWholeStep) {
-                        Text(
+                        SoftcoverText(
                             text = "${(index / 2) + 1}★",
                             style = MaterialTheme.editorialTypography.eyebrowSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

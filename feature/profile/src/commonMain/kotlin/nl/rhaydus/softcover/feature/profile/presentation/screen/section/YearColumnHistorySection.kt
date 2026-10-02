@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +32,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
@@ -83,7 +83,7 @@ internal fun YearColumnHistorySection(
         Spacer(modifier = Modifier.height(20.dp))
 
         if (data.isEmpty() && isLoading.not()) {
-            Text(
+            SoftcoverText(
                 text = "Your reading years will chart themselves in as books finish.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -100,7 +100,7 @@ internal fun YearColumnHistorySection(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Text(
+            SoftcoverText(
                 text = yearHistoryCaption(
                     data = data,
                     metric = selectedMetric,
@@ -133,7 +133,7 @@ private fun YearMetricToggle(
                 ),
                 modifier = Modifier.weight(1f),
                 label = {
-                    Text(
+                    SoftcoverText(
                         text = metric.label,
                         style = MaterialTheme.typography.labelLarge,
                     )
@@ -183,7 +183,7 @@ private fun YearColumnChart(
                     contentAlignment = Alignment.BottomCenter,
                 ) {
                     if (hasCount) {
-                        Text(
+                        SoftcoverText(
                             text = formatCompactCount(yearCount.count),
                             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                                 fontWeight = if (isPeak) FontWeight.Bold else FontWeight.SemiBold,
@@ -227,7 +227,7 @@ private fun YearColumnChart(
                     modifier = Modifier.height(YEAR_COLUMN_YEAR_LABEL_HEIGHT),
                     contentAlignment = Alignment.TopCenter,
                 ) {
-                    Text(
+                    SoftcoverText(
                         text = "'${(yearCount.year % 100).toString().padStart(
                             2,
                             '0',

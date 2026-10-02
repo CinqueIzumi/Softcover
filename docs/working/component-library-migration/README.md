@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1 done (box in `steps/s7-bookcard.md` unticked). SL-2 done: all of `:core:component` renders
-  text through `SoftcoverText`. SL is app-wide, interleaves with S7 / S9, ends deleting `Skeleton`.
-- **Next:** SL-3 — `softcover-implementer` per module group swaps the features' `material3.Text` to
-  `SoftcoverText`, then the detekt gate; [steps/sl-lean-loading.md](steps/sl-lean-loading.md).
+- **State:** S7-1 done (box in `steps/s7-bookcard.md` unticked). SL-3 swap done: only `SoftcoverText.kt`
+  imports `material3.Text`. Its gate (SL-3b) waits on foundation F34; detekt type resolution is inert (F33).
+- **Next:** `softcover-reviewer` on the uncommitted SL-3 swap (91 files, pure rename, checked by word diff),
+  then SL-4; [steps/sl-lean-loading.md](steps/sl-lean-loading.md).
 - **Open questions:** `BookmarkToggle` → foundation toggle? (No SL entry on issue #275, by the user's call.)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
@@ -36,9 +36,8 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes.
-- **Verification:** SL-2's full Verify (JDK 21) passed after the review fixes. ktlint does not gate import
-  order, so keep implementer briefs explicit about it.
-- **Uncommitted:** SL-2 code and these tracker updates.
+- **Verification:** SL-3: per-module compile + detekt + ktlint passed; repo-wide `styleCheck` not yet run.
+- **Uncommitted:** SL-3 swap, F33 / F34 in the upstream candidates, tracker updates.
 
 ## Local verification
 

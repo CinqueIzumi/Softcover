@@ -6,13 +6,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRow
@@ -45,7 +45,7 @@ internal fun AboutContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        Text(
+        SoftcoverText(
             text = "Softcover is an independent, open-source Hardcover.app client for Android, iOS " +
                 "and desktop, built with Kotlin Multiplatform.",
             style = MaterialTheme.editorialTypography.body,
@@ -110,7 +110,7 @@ private fun CreditsSection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
+        SoftcoverText(
             text = "This project is an independent, open-source application and is not affiliated " +
                 "with, endorsed by, or sponsored by Hardcover.app.",
             style = MaterialTheme.editorialTypography.bodySmall,

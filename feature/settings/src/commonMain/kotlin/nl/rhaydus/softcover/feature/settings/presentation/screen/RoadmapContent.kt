@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +35,7 @@ import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
@@ -141,7 +141,7 @@ private fun RoadmapDocumentBody(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         if (document.source == RoadmapSource.BUNDLED) {
-            Text(
+            SoftcoverText(
                 text = "Showing the roadmap that shipped with this build — reconnect to see what's " +
                     "changed since.",
                 style = MaterialTheme.editorialTypography.bodySmall,
@@ -172,7 +172,7 @@ private fun RoadmapDocumentBody(
 
 @Composable
 private fun RoadmapLastUpdatedFooter(text: String) {
-    Text(
+    SoftcoverText(
         text = "Last updated $text.",
         style = MaterialTheme.editorialTypography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -197,7 +197,7 @@ private fun RoadmapUnitContent(
     when (unit) {
         is RoadmapRenderUnit.Heading -> SectionHeader(model = unit.header)
 
-        is RoadmapRenderUnit.PlainHeading -> Text(
+        is RoadmapRenderUnit.PlainHeading -> SoftcoverText(
             text = unit.text,
             style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,

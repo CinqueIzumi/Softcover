@@ -21,7 +21,6 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +31,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private val SIDEBAR_WIDTH = 240.dp
@@ -63,7 +63,7 @@ internal fun EditorialSidebar(modifier: Modifier = Modifier) {
                     vertical = 24.dp,
                 ),
         ) {
-            Text(
+            SoftcoverText(
                 text = "Softcover",
                 style = MaterialTheme.editorialTypography.pageTitle,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -145,7 +145,7 @@ private fun SidebarItem(
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Text(
+        SoftcoverText(
             text = item.tab.options.title,
             style = MaterialTheme.editorialTypography.titleMedium,
             color = contentColor,

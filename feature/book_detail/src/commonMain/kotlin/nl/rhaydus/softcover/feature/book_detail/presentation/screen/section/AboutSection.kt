@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,6 +19,7 @@ import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.isBlank
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -49,7 +49,7 @@ internal fun AboutSection(state: BookDetailUiState) {
             } else {
                 Column {
                     if (headline.isNotBlank()) {
-                        Text(
+                        SoftcoverText(
                             text = headline,
                             style = MaterialTheme.editorialTypography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -72,7 +72,7 @@ internal fun AboutSection(state: BookDetailUiState) {
                             dropCapFontFamily = displayFontFamily(),
                         )
                     } else if (headline.isBlank()) {
-                        Text(
+                        SoftcoverText(
                             text = "No description for this book yet.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

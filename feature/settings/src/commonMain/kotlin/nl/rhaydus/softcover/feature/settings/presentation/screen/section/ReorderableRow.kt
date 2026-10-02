@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,6 +29,7 @@ import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -182,7 +182,7 @@ private fun RowLabel(
             Spacer(modifier = Modifier.width(7.dp))
         }
 
-        Text(
+        SoftcoverText(
             text = entry.label,
             style = MaterialTheme.editorialTypography.titleSmall.copy(fontSize = 15.sp),
             color = textColor,
@@ -195,7 +195,7 @@ private fun RowCountLine(
     entry: LibraryTabEntry,
     hidden: Boolean,
 ) {
-    Text(
+    SoftcoverText(
         text = if (hidden) "Hidden from tabs" else "${entry.count} titles",
         style = MaterialTheme.editorialTypography.bodySmall.copy(
             fontSize = 12.5.sp,

@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +37,7 @@ import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichText
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -76,7 +76,7 @@ internal fun ReviewsSection(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
+        SoftcoverText(
             text = "What readers think",
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
@@ -139,7 +139,7 @@ internal fun ReviewsSection(
 
                                 Spacer(modifier = Modifier.width(4.dp))
 
-                                Text(
+                                SoftcoverText(
                                     text = "${
                                         formatDecimalNumber(
                                             value = book.rating,
@@ -172,7 +172,7 @@ private fun ReviewCard(
         Box(modifier = Modifier.fillMaxWidth()) {
             val quoteAlpha = if (isSystemInDarkTheme()) 0.22f else 0.32f
 
-            Text(
+            SoftcoverText(
                 text = "“",
                 style = MaterialTheme.editorialTypography.quoteGlyph.copy(
                     fontSize = 92.sp,
@@ -196,7 +196,7 @@ private fun ReviewCard(
                 // transient, held by the caller per review id.
                 if (review.hasSpoilers && isSpoilerRevealed.not()) {
                     TextButton(onClick = onRevealSpoilerClick) {
-                        Text(text = "Show spoiler")
+                        SoftcoverText(text = "Show spoiler")
                     }
                 } else {
                     var expanded by rememberSaveable(review.id) { mutableStateOf(false) }
@@ -220,7 +220,7 @@ private fun ReviewCard(
                             onClick = { expanded = expanded.not() },
                             contentPadding = PaddingValues(horizontal = 0.dp),
                         ) {
-                            Text(text = if (expanded) "Show less" else "Show more")
+                            SoftcoverText(text = if (expanded) "Show less" else "Show more")
                         }
                     }
                 }
@@ -241,7 +241,7 @@ private fun ReviewCard(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
+                            SoftcoverText(
                                 text = review.reviewerName.uppercase(),
                                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                                 color = MaterialTheme.colorScheme.primary,
@@ -250,7 +250,7 @@ private fun ReviewCard(
                             review.reviewedMonthYear?.let { monthYear ->
                                 Spacer(modifier = Modifier.width(6.dp))
 
-                                Text(
+                                SoftcoverText(
                                     text = monthYear,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -285,7 +285,7 @@ private fun ReviewCard(
 
                                 Spacer(modifier = Modifier.width(4.dp))
 
-                                Text(
+                                SoftcoverText(
                                     text = formatDecimalNumber(
                                         value = rating,
                                         fractionDigits = 1,

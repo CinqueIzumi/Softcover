@@ -17,7 +17,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +32,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -197,7 +197,7 @@ private fun TagsFacetSection(
         SectionHeader(
             model = header,
             trailing = {
-                Text(
+                SoftcoverText(
                     text = availableLabel,
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -280,7 +280,7 @@ private fun TagSearchField(
 
         Box(modifier = Modifier.weight(1f)) {
             if (query.isEmpty()) {
-                Text(
+                SoftcoverText(
                     text = "Search your tags",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -345,7 +345,7 @@ private fun EmptyFacetMessage() {
                     vertical = 18.dp,
                 ),
         ) {
-            Text(
+            SoftcoverText(
                 text = "Nothing to filter yet",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -353,7 +353,7 @@ private fun EmptyFacetMessage() {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
+            SoftcoverText(
                 text = "This shelf is too sparse for filters to matter — add a few books first.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

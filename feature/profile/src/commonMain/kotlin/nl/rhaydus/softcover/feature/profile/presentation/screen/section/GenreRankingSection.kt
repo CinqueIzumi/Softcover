@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,7 @@ import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
@@ -63,7 +63,7 @@ internal fun GenreRankingSection(
         Spacer(modifier = Modifier.height(20.dp))
 
         if (genres.slices.isEmpty() && isLoading.not()) {
-            Text(
+            SoftcoverText(
                 text = "Once a few books settle onto your shelves, this fills in.",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -76,7 +76,7 @@ internal fun GenreRankingSection(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Text(
+            SoftcoverText(
                 text = genreScopeCaption(taggedBookCount = genres.taggedBookCount),
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -151,7 +151,7 @@ private fun GenreRankedBar(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
+            SoftcoverText(
                 text = slice.name,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -162,7 +162,7 @@ private fun GenreRankedBar(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Text(
+            SoftcoverText(
                 text = "${(slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

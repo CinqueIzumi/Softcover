@@ -12,12 +12,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -124,7 +124,7 @@ private fun StatusCallout(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Text(
+                SoftcoverText(
                     text = eyebrow.uppercase(),
                     style = MaterialTheme.editorialTypography.eyebrow,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -133,7 +133,7 @@ private fun StatusCallout(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            SoftcoverText(
                 text = body,
                 style = MaterialTheme.editorialTypography.body,
                 color = MaterialTheme.colorScheme.onSurface,

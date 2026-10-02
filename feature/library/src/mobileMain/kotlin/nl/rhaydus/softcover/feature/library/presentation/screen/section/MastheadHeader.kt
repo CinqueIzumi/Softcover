@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
@@ -26,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -100,7 +100,7 @@ internal fun MastheadHeader(
                         .padding(end = 16.dp),
                     verticalAlignment = Alignment.Top,
                 ) {
-                    Text(
+                    SoftcoverText(
                         text = title,
                         style = MaterialTheme.editorialTypography.pageTitle,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -131,7 +131,7 @@ internal fun MastheadHeader(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                Text(
+                SoftcoverText(
                     text = subtitle,
                     style = MaterialTheme.editorialTypography.body,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

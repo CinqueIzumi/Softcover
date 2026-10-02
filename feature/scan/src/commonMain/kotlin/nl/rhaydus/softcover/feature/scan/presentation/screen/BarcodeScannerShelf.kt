@@ -12,7 +12,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +31,7 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 /**
  * The manual ISBN-entry form, shared by the mobile scanner (reached via "Enter ISBN manually") and the
@@ -86,7 +86,7 @@ internal fun ManualEntryContent(
             value = isbn,
             onValueChange = { isbn = it },
             shape = RoundedCornerShape(8.dp),
-            placeholder = { Text(text = "e.g. 9780374710781") },
+            placeholder = { SoftcoverText(text = "e.g. 9780374710781") },
             enabled = busy.not(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(

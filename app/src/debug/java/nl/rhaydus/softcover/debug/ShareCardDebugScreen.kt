@@ -14,7 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +48,7 @@ import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.StatShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.YearRecapShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
@@ -230,7 +230,7 @@ object ShareCardDebugScreen : Screen {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
+            SoftcoverText(
                 text = label.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrow,
                 color = MaterialTheme.colorScheme.primary,

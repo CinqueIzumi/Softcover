@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +40,7 @@ import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardVariant
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetBodyUiModel
@@ -224,7 +224,7 @@ private fun ShareCardVariantToggle(
                     count = variants.size,
                 ),
                 label = {
-                    Text(
+                    SoftcoverText(
                         text = variant.label,
                         style = MaterialTheme.typography.labelLarge,
                     )

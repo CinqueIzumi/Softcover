@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -135,7 +135,7 @@ internal fun GridBookCell(
 
         Spacer(modifier = Modifier.height(9.dp))
 
-        Text(
+        SoftcoverText(
             text = title,
             style = MaterialTheme.editorialTypography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
@@ -147,7 +147,7 @@ internal fun GridBookCell(
         if (authorName.isNotBlank()) {
             Spacer(modifier = Modifier.height(2.dp))
 
-            Text(
+            SoftcoverText(
                 text = authorName,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -14,7 +14,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +25,7 @@ import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -88,7 +88,7 @@ internal fun LargeRow(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     seriesText?.takeIf { it.isNotBlank() }?.let { series ->
-                        Text(
+                        SoftcoverText(
                             text = series.uppercase(),
                             style = MaterialTheme.editorialTypography.eyebrowSmall,
                             color = MaterialTheme.colorScheme.primary,
@@ -97,7 +97,7 @@ internal fun LargeRow(
                         )
                     }
 
-                    Text(
+                    SoftcoverText(
                         text = title,
                         style = MaterialTheme.editorialTypography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -106,7 +106,7 @@ internal fun LargeRow(
                     )
 
                     if (authorName.isNotBlank()) {
-                        Text(
+                        SoftcoverText(
                             text = "By $authorName".uppercase(),
                             style = MaterialTheme.editorialTypography.eyebrowSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -127,7 +127,7 @@ internal fun LargeRow(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(
+                            SoftcoverText(
                                 text = statsLabel,
                                 style = MaterialTheme.editorialTypography.bodySmall.copy(fontFeatureSettings = "tnum"),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -170,7 +170,7 @@ internal fun LargeRow(
                                     .height(8.dp),
                             )
 
-                            Text(
+                            SoftcoverText(
                                 text = "${(progressFraction * 100f).roundToInt()}%",
                                 style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,

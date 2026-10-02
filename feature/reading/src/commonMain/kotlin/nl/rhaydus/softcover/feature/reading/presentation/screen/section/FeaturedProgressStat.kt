@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import kotlin.math.roundToInt
@@ -42,7 +42,7 @@ internal fun FeaturedProgressStat(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
     ) {
-        Text(
+        SoftcoverText(
             text = pageCountLabel(
                 book = book,
                 foreground = foreground,
@@ -51,7 +51,7 @@ internal fun FeaturedProgressStat(
             color = foreground,
         )
 
-        Text(
+        SoftcoverText(
             text = "${(book.userBookRead?.progress ?: 0f).roundToInt()}%",
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = foreground,

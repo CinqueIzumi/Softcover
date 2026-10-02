@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +34,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.Skeleton
 import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkCosyBackground
@@ -188,7 +188,7 @@ private fun MoodTile(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top,
         ) {
-            Text(
+            SoftcoverText(
                 text = "MOOD",
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = eyebrowColor,
@@ -215,7 +215,7 @@ private fun MoodTile(
             // returns these lowercase and unbroken by spaces, so there is no word boundary to wrap
             // on until the glyphs themselves shrink to fit. `Hyphens.None` + `LineBreak.Heading`
             // mirror the same mid-word-break guard `CoverlessTitleCover` uses.
-            Text(
+            SoftcoverText(
                 text = mood.label.toTitleCaseWords(),
                 style = MaterialTheme.editorialTypography.headlineSmall.copy(
                     fontSize = MOOD_TILE_TITLE_FONT_SIZE,
@@ -228,7 +228,7 @@ private fun MoodTile(
                 overflow = TextOverflow.Ellipsis,
             )
 
-            Text(
+            SoftcoverText(
                 text = "${formatGroupedNumber(mood.bookCount)} books",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = sublineColor,

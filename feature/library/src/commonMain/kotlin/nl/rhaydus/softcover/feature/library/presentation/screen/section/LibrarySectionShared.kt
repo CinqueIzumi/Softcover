@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
@@ -187,7 +187,7 @@ internal fun EmptyListScreen(tab: LibraryContentTab) {
     ) {
         val quoteAlpha = if (LocalDarkTheme.current) 0.12f else 0.25f
 
-        Text(
+        SoftcoverText(
             text = "“",
             style = MaterialTheme.editorialTypography.quoteGlyph,
             color = MaterialTheme.colorScheme.primary.copy(alpha = quoteAlpha),
@@ -198,7 +198,7 @@ internal fun EmptyListScreen(tab: LibraryContentTab) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
+        SoftcoverText(
             text = headline,
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
@@ -207,7 +207,7 @@ internal fun EmptyListScreen(tab: LibraryContentTab) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
+        SoftcoverText(
             text = body,
             style = MaterialTheme.typography.bodyMedium.copy(
                 lineHeight = 22.sp,

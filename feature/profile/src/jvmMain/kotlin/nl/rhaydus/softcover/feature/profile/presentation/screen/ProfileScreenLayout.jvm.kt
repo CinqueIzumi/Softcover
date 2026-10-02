@@ -19,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +39,7 @@ import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -404,7 +404,7 @@ private fun ReaderIdentity(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
+        SoftcoverText(
             text = data?.name.orEmpty(),
             style = MaterialTheme.editorialTypography.display,
             color = MaterialTheme.colorScheme.primary,
@@ -419,7 +419,7 @@ private fun ReaderIdentity(
         if (bio.isNotBlank()) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
+            SoftcoverText(
                 text = "“$bio”",
                 style = MaterialTheme.editorialTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

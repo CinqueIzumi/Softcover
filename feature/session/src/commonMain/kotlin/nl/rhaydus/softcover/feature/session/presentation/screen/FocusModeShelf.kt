@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +35,7 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -80,7 +80,7 @@ internal fun FocusReadingPanel(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier,
     ) {
-        Text(
+        SoftcoverText(
             text = "NOW READING",
             style = MaterialTheme.editorialTypography.eyebrow,
             color = MaterialTheme.colorScheme.primary,
@@ -97,7 +97,7 @@ internal fun FocusReadingPanel(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
+        SoftcoverText(
             text = active.book.title,
             style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
@@ -109,7 +109,7 @@ internal fun FocusReadingPanel(
         active.book.authors.firstOrNull()?.let { author ->
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
+            SoftcoverText(
                 text = "By ${author.name}",
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -119,7 +119,7 @@ internal fun FocusReadingPanel(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        Text(
+        SoftcoverText(
             text = if (isPaused) "PAUSED" else "READING TIME",
             style = MaterialTheme.editorialTypography.eyebrow,
             color = if (isPaused) {
@@ -131,7 +131,7 @@ internal fun FocusReadingPanel(
 
         Spacer(modifier = Modifier.height(2.dp))
 
-        Text(
+        SoftcoverText(
             text = formatSessionElapsed(elapsed = elapsed),
             style = MaterialTheme.editorialTypography.statHero,
             color = if (isPaused) {

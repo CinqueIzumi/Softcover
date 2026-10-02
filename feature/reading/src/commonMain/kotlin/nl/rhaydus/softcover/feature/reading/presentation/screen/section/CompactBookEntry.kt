@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,6 +42,7 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -120,7 +120,7 @@ internal fun CompactBookEntry(
 
                     Column(modifier = Modifier.weight(1f)) {
                         if (mutationFailed) {
-                            Text(
+                            SoftcoverText(
                                 text = "Couldn't save — tap to retry".uppercase(),
                                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                                 color = MaterialTheme.colorScheme.error,
@@ -131,7 +131,7 @@ internal fun CompactBookEntry(
                             Spacer(modifier = Modifier.height(2.dp))
                         } else {
                             book.seriesText?.takeIf { it.isNotBlank() }?.let { series ->
-                                Text(
+                                SoftcoverText(
                                     text = series.uppercase(),
                                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                                     color = MaterialTheme.colorScheme.primary,
@@ -143,7 +143,7 @@ internal fun CompactBookEntry(
                             }
                         }
 
-                        Text(
+                        SoftcoverText(
                             text = book.title,
                             style = MaterialTheme.editorialTypography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -155,7 +155,7 @@ internal fun CompactBookEntry(
                             ?.let { authors ->
                                 Spacer(modifier = Modifier.height(2.dp))
 
-                                Text(
+                                SoftcoverText(
                                     text = "By $authors",
                                     style = MaterialTheme.editorialTypography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -213,7 +213,7 @@ internal fun ProgressBlock(
                 .height(6.dp),
         )
 
-        Text(
+        SoftcoverText(
             text = "${(percentage ?: 0f).roundToInt()}%",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

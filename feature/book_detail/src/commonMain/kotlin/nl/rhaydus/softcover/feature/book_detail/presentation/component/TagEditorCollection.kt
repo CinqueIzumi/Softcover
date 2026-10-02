@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
@@ -33,6 +32,7 @@ import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditorChipGroup
@@ -75,7 +75,7 @@ private fun TagGroupSection(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
+            SoftcoverText(
                 text = group.category.label.uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -90,7 +90,7 @@ private fun TagGroupSection(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Text(
+            SoftcoverText(
                 text = group.chips.size.toString(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontFeatureSettings = "tnum"),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -169,7 +169,7 @@ private fun TagEditorEmptyState(modifier: Modifier = Modifier) {
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
+        SoftcoverText(
             text = "“",
             style = MaterialTheme.editorialTypography.quoteGlyph,
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
@@ -178,7 +178,7 @@ private fun TagEditorEmptyState(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        Text(
+        SoftcoverText(
             text = "Nothing here yet.",
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
@@ -186,7 +186,7 @@ private fun TagEditorEmptyState(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
+        SoftcoverText(
             text = "Name the first thing this book is to you.",
             style = MaterialTheme.editorialTypography.body,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

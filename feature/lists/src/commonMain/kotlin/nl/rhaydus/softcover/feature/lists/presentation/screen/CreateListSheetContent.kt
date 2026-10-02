@@ -21,7 +21,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,6 +55,7 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
@@ -116,7 +116,7 @@ internal fun CreateListSheetContent(
     ) {
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
+        SoftcoverText(
             text = "A NEW LIST",
             style = MaterialTheme.editorialTypography.eyebrow.copy(letterSpacing = 3.sp),
             color = MaterialTheme.colorScheme.primary,
@@ -232,7 +232,7 @@ private fun NameHeroField(
                     }
 
                     if (name.isEmpty()) {
-                        Text(
+                        SoftcoverText(
                             text = HERO_PLACEHOLDER,
                             style = fittedStyle,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.32f),
@@ -302,7 +302,7 @@ private fun PrivacyProseToggle(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.selectableGroup(),
     ) {
-        Text(
+        SoftcoverText(
             text = "This shelf is ",
             style = MaterialTheme.editorialTypography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
@@ -314,7 +314,7 @@ private fun PrivacyProseToggle(
             onSelect = onToggle,
         )
 
-        Text(
+        SoftcoverText(
             text = " / ",
             style = MaterialTheme.editorialTypography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
@@ -326,7 +326,7 @@ private fun PrivacyProseToggle(
             onSelect = onToggle,
         )
 
-        Text(
+        SoftcoverText(
             text = ".",
             style = MaterialTheme.editorialTypography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
@@ -369,7 +369,7 @@ private fun PrivacyWord(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(IntrinsicSize.Min),
         ) {
-            Text(
+            SoftcoverText(
                 text = word,
                 style = MaterialTheme.editorialTypography.bodyLarge.copy(
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
