@@ -14,9 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1 done (its box in `steps/s7-bookcard.md` still unticked); SL-1 done (`SkeletonText`). SL is
-  app-wide and ends with the `Skeleton` family deleted; its sub-steps interleave with S7 and S9.
-- **Next:** SL-2 — seed `title`, `seriesText`, `rating` on `BookInitialCover` and its call sites, per
+- **State:** S7-1 done (its box in `steps/s7-bookcard.md` still unticked). SL-1 done: `SkeletonText` reshaped
+  into `SoftcoverText` (no model, `style` as the one styling channel, built-in loading; R11 exception and R12 in
+  the contract). SL is app-wide and ends with the `Skeleton` family deleted; it interleaves with S7 and S9.
+- **Next:** SL-2 — swap `:core:component`'s `material3.Text` calls to `SoftcoverText`, per
   [steps/sl-lean-loading.md](steps/sl-lean-loading.md).
 - **Open questions:** `BookmarkToggle` → foundation toggle? Issue #275's Stages list has no SL entry yet.
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
@@ -36,7 +37,7 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes.
-- **Verification:** SL-1: `:core:component:compileKotlinJvm` and `styleCheck` (JDK 21) passed; reviewed clean.
+- **Verification:** SL-1: `:core:component:compileKotlinJvm` and `styleCheck` (JDK 21) passed; review fixes applied.
 - **Uncommitted:** none.
 
 ## Local verification
@@ -82,7 +83,7 @@ every sub-step's Verify.
 | S6 | — (rows) | S6-1, S6-2 (audit only), S6-C-rows | [x] |
 | S6 | — (sheet chrome) | S6-3–S6-7, S6-C-sheets | [x] |
 | S7 | [steps/s7-bookcard.md](steps/s7-bookcard.md) | S7-1–S7-7 | [ ] |
-| SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-11, app-wide; SL-1–SL-5 before S7-2 | [ ] |
+| SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-13, app-wide; SL-1–SL-7 before S7-2 | [ ] |
 | S8 | [steps/s8-screen-states.md](steps/s8-screen-states.md) | S8-1–S8-3 | [ ] |
 | S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-5 | [ ] |
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
@@ -94,7 +95,7 @@ every sub-step's Verify.
 
 - Test posture: no Compose UI tests; unit tests follow `.claude/rules/tests.md`; the Component Gallery is the visual-acceptance surface.
 - A `:core:uibinding` → `:core:<data>` edge is pre-approved when a mapper needs one; write it when the edge exists.
-- Loading: each component takes `isLoading`, masks its own leaves (`skeletonMask`, `SkeletonText`).
+- Loading follows `component-contract.md` R12; SL retrofits the existing surfaces.
 - A step spanning several sessions splits into sub-steps, one session each, in the step file's `## Sub-steps`.
 
 ## Baseline

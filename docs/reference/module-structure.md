@@ -138,10 +138,10 @@ component/
 + sidebar/     Sidebar  SidebarUiModel  SidebarSectionUiModel  SidebarRowUiModel/Variant  SidebarEvent
 + state/       EmptyState  EmptyStateUiModel  Skeleton  SkeletonUiModel/Variant
 +              SkeletonMask (Modifier.skeletonMask)
-+              SkeletonText
 +              · ErrorState
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
 +              · StatTile  · Chart  · Legend
++ text/        SoftcoverText
 + topbar/      TopBar  TopBarUiModel/Event/Navigation/Surface
 +              SearchTopBar(+UiModel, +Event)   · BackBar
 + verdict/     VerdictBlock  VerdictBlockUiModel/Event

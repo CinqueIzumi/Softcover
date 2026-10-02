@@ -13,6 +13,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -91,11 +97,11 @@ import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.state.Skeleton
-import nl.rhaydus.softcover.core.component.state.SkeletonText
 import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBar
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
@@ -353,28 +359,27 @@ object GalleryRegistry {
             },
         ),
         GalleryEntry(
-            name = "SkeletonText",
-            family = GalleryFamily.STATE,
-            blurb = "A Text that keeps its real size while loading: it masks a stand-in until the " +
-                "value lands, so the slot never jumps.",
+            name = "SoftcoverText",
+            family = GalleryFamily.RICHTEXT,
+            blurb = "The app's text leaf: one style channel, and it masks a stand-in in the real " +
+                "style while loading or while the text is null, so the slot never jumps.",
             fixtures = persistentListOf(
                 GalleryFixture(
-                    label = "Loading",
+                    label = "Plain",
                     render = { modifier ->
-                        SkeletonText(
+                        SoftcoverText(
                             text = "The Left Hand of Darkness",
-                            isLoading = true,
                             standIn = "A book title stand-in",
                             modifier = modifier,
                         )
                     },
                 ),
                 GalleryFixture(
-                    label = "Loaded",
+                    label = "Loading",
                     render = { modifier ->
-                        SkeletonText(
+                        SoftcoverText(
                             text = "The Left Hand of Darkness",
-                            isLoading = false,
+                            isLoading = true,
                             standIn = "A book title stand-in",
                             modifier = modifier,
                         )
@@ -383,9 +388,8 @@ object GalleryRegistry {
                 GalleryFixture(
                     label = "Text null, not loading",
                     render = { modifier ->
-                        SkeletonText(
-                            text = null,
-                            isLoading = false,
+                        SoftcoverText(
+                            text = null as String?,
                             standIn = "A book title stand-in",
                             modifier = modifier,
                         )
@@ -394,12 +398,27 @@ object GalleryRegistry {
                 GalleryFixture(
                     label = "Two lines, loading",
                     render = { modifier ->
-                        SkeletonText(
-                            text = null,
+                        SoftcoverText(
+                            text = null as String?,
                             isLoading = true,
                             standIn = "A two line stand-in\nfor a longer description",
                             maxLines = 2,
                             modifier = modifier.width(140.dp),
+                        )
+                    },
+                ),
+                GalleryFixture(
+                    label = "Mixed spans",
+                    render = { modifier ->
+                        SoftcoverText(
+                            text = buildAnnotatedString {
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("Bold ") }
+                                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("italic ") }
+                                withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
+                                    append("underline")
+                                }
+                            },
+                            modifier = modifier,
                         )
                     },
                 ),

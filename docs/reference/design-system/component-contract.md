@@ -5,10 +5,10 @@
 Every component in `:core:component` is driven by a **UI model**. This contract fixes what a component's
 signature looks like, what its model may hold, and where the domain → UI mapping lives.
 
-It is normative. A component that does not satisfy R1–R11 does not belong in `:core:component`; two of the
-rules are build gates (§ 7.4), and the standing exceptions are in § 7.4a. R10 and R11 are not yet satisfied
-by the whole library; both say what that means for new code. Why the rules exist is in § 7.7, which is
-optional reading.
+It is normative. A component that does not satisfy R1–R12 does not belong in `:core:component`; two of the
+rules are build gates (§ 7.4), and the standing exceptions are in § 7.4a. R10, R11 and R12 are not yet
+satisfied by the whole app; each says what that means for new code. Why the rules exist is in § 7.7, which
+is optional reading.
 
 > **Read `share/` before writing a new component.** `ShareCard` is the reference implementation (§ 7.3).
 
@@ -185,6 +185,19 @@ RichText(model = state.review)          // model.variant decides the face and th
   `secondaryColor`), `CoverlessTitleCover` (`title`).
   Write new components to R11; an existing signature is not licence.
 
+**R12 — Loading is the component's own state, never a separate skeleton.** A component that renders data
+the screen may not have yet takes `isLoading` (on the model, or as a parameter on a data-free primitive)
+and keeps its real layout while loading. Unknown text renders through `SoftcoverText` with a stand-in;
+other unknown leaves sit under `Modifier.skeletonMask(isLoading)` at their real size. A list of unknown
+length renders a fixed count of its real items, each loading, with the count written at the call site.
+No per-surface skeleton composable, no skeleton variant, no `SkeletonCrossfade` from a skeleton layout to
+the real one (`Cover`'s crossfade from its own masked slot to the image is the real layout). A model's
+`previews` include a loading fixture; a data-free primitive's gallery fixtures do.
+
+- **Not yet satisfied by the whole app.** Holdouts: `Skeleton` and its variants, and the feature sections
+  that swap to it or to hand-sized `.shimmer` blocks (book detail, explore, roadmap, profile). Write new
+  components to R12; an existing skeleton swap is not licence.
+
 ### 7.3 Reference implementation — `ShareCard`
 
 `core/component/share/` is the contract's worked example. Read it before writing a new component.
@@ -238,6 +251,10 @@ Consequences:
 
 - **A data-free UI model may be built at the call site (R10).** When no field derives from data, as with
   `DividerUiModel`, the call site builds it inline with its defaults and any overrides.
+- **`SoftcoverText` takes `style` and `color` (R11) and has no model.** It is the text leaf other components
+  style, so it is a data-free primitive like `Text`: the caller passes its own model's string inline. Styling
+  goes through `style` alone; `Text`'s loose font parameters are not exposed. The exemption covers this
+  primitive only; a component that renders data still carries its treatment on its model.
 - **`RichTextFormattingToolbar`** still takes loose parameters and N callbacks. Do not copy its shape.
 - **No migrated sheet or dialog has a gallery entry**, because a fixture tile cannot render a modal inline. Their
   models still ship `previews` (R5), and the components' own `@Preview` functions render from that list. A

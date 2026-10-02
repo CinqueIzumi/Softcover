@@ -11,9 +11,10 @@ Everywhere else, cite symbols (`fun Name(`), never line numbers.
 1. Re-verify the sub-step's inventory by symbol: `git grep -n "fun <Name>("` for every row, main
    source sets only, tests excluded.
 2. Read the family's `docs/reference/design-system/components/<family>.md` entries and
-   `component-contract.md` § 7 (R1–R11). Never copy the rules into the step file or the brief.
+   `component-contract.md` § 7 (R1–R12). Never copy the rules into the step file or the brief.
 3. Propose to the user:
-   - the UI model / variant / event shape;
+   - the UI model / variant / event shape, including how it loads (R12): which leaves mask and their
+     stand-ins, and the loading count of any list;
    - which call sites fold into the one component, which stay feature-local, and why;
    - the target package under `:core:component`;
    - any mapper, and whether it starts feature-local or promotes straight to `:core:uibinding` (R6:
@@ -83,6 +84,7 @@ Then:
 - The reviewer has no blockers.
 - Each new component has fixtures (`UiModelPreviews`) and a `GalleryRegistry` entry.
 - R10 and R11 hold for the new code — no model built in composition, no loose render parameter.
+- R12 holds: any loading branch the sub-step touches renders the real layout masked, with a loading fixture.
 - The migrated `[detail]` entries in `components/<family>.md` are converted to KDoc on the UI model
   (through the `document-code` skill) and deleted, with the `components.md` index line repointed.
 - The family's section files have moved into `:core:component` where they are components.
