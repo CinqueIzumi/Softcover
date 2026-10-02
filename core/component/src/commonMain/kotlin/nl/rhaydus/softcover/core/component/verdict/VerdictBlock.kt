@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +27,7 @@ import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.isBlank
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -63,14 +63,14 @@ fun VerdictBlock(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
+            SoftcoverText(
                 text = "Your verdict".uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             if (hasVerdict) {
-                Text(
+                SoftcoverText(
                     text = "Edit",
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.primary,
@@ -110,7 +110,7 @@ fun VerdictBlock(
 
                             Spacer(modifier = Modifier.width(12.dp))
 
-                            Text(
+                            SoftcoverText(
                                 text = verdictScoreLineFor(score = verdictScoreOf(rating = rating)).uppercase(),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.SemiBold,
@@ -145,7 +145,7 @@ fun VerdictBlock(
                         if (hasSpoilers) {
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            Text(
+                            SoftcoverText(
                                 text = "Marked as containing spoilers",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -155,7 +155,7 @@ fun VerdictBlock(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = "Tap to edit".uppercase(),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.SemiBold,
@@ -179,7 +179,7 @@ fun VerdictBlock(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = "Rate it and say a few words…",
                         style = MaterialTheme.editorialTypography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -187,7 +187,7 @@ fun VerdictBlock(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = "Out of ten, your ten — spoilers optional.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

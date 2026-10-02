@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +17,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -46,7 +46,7 @@ internal fun BookCardTextBlock(
                 BookCardEyebrow.Tone.Error -> MaterialTheme.colorScheme.error
             }
 
-            Text(
+            SoftcoverText(
                 text = eyebrow.text,
                 style = typography.eyebrowSmall,
                 color = eyebrowColor,
@@ -63,7 +63,7 @@ internal fun BookCardTextBlock(
         )
 
         if (byline != null) {
-            Text(
+            SoftcoverText(
                 text = byline,
                 style = typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -97,7 +97,7 @@ private fun TitleRow(
     val titleIcon = content.titleIcon
 
     val title = @Composable { modifier: Modifier ->
-        Text(
+        SoftcoverText(
             text = content.title,
             style = titleStyle,
             color = MaterialTheme.colorScheme.onSurface,
@@ -145,7 +145,7 @@ private fun SupportingLine(line: BookCardLine) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         line.parts.forEachIndexed { index, part ->
             if (index > 0) {
-                Text(
+                SoftcoverText(
                     text = " · ",
                     style = style,
                     color = color,
@@ -153,7 +153,7 @@ private fun SupportingLine(line: BookCardLine) {
             }
 
             when (part) {
-                is BookCardLinePart.Text -> Text(
+                is BookCardLinePart.Text -> SoftcoverText(
                     text = part.text,
                     style = style,
                     color = color,
@@ -197,7 +197,7 @@ private fun RatingLabel(
             modifier = Modifier.size(12.dp),
         )
 
-        Text(
+        SoftcoverText(
             text = label,
             style = style,
             color = color,

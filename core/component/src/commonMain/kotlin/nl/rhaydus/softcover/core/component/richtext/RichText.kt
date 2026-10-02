@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.core.component.richtext
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +19,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
 
@@ -87,7 +87,7 @@ fun RichText(
         Modifier
     }
 
-    Text(
+    SoftcoverText(
         text = annotated,
         style = style,
         color = color,

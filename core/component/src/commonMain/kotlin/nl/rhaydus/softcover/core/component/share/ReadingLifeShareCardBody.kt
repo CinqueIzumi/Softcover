@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,6 +40,7 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -52,7 +52,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
+        SoftcoverText(
             text = "SOFTCOVER",
             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(letterSpacing = 3.sp),
             color = LocalContentColor.current,
@@ -60,7 +60,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
+        SoftcoverText(
             text = "A reading life",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = LocalContentColor.current.copy(alpha = 0.7f),
@@ -75,7 +75,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
+        SoftcoverText(
             text = "THE READER",
             style = MaterialTheme.editorialTypography.eyebrowSmall,
             color = LocalContentColor.current.copy(alpha = 0.75f),
@@ -83,7 +83,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(2.dp))
 
-        Text(
+        SoftcoverText(
             text = content.readerName,
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = LocalContentColor.current,
@@ -95,7 +95,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
+        SoftcoverText(
             text = "TOTAL PAGES READ",
             style = MaterialTheme.editorialTypography.eyebrow,
             color = LocalContentColor.current.copy(alpha = 0.85f),
@@ -104,7 +104,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        Text(
+        SoftcoverText(
             text = formatGroupedNumber(content.totalPagesRead),
             style = MaterialTheme.editorialTypography.statHero.copy(
                 fontSize = 58.sp,
@@ -116,7 +116,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
+        SoftcoverText(
             text = "across ${content.totalBooksRead} books",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = LocalContentColor.current.copy(alpha = 0.78f),
@@ -138,7 +138,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        Text(
+        SoftcoverText(
             text = "THE READING YEAR",
             style = MaterialTheme.editorialTypography.eyebrow,
             color = LocalContentColor.current.copy(alpha = 0.85f),
@@ -147,7 +147,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(2.dp))
 
-        Text(
+        SoftcoverText(
             text = "pages, month by month",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = LocalContentColor.current.copy(alpha = 0.75f),
@@ -234,7 +234,7 @@ private fun MiniScallopPortrait(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            Text(
+            SoftcoverText(
                 text = readingLifeInitials(readerName = readerName),
                 style = MaterialTheme.editorialTypography.titleSmall,
                 color = rimColor,
@@ -338,13 +338,13 @@ private fun ReadingLifeRidgeline(monthlyPages: List<Int>) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
+            SoftcoverText(
                 text = "JAN",
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontSize = 8.sp),
                 color = LocalContentColor.current.copy(alpha = 0.65f),
             )
 
-            Text(
+            SoftcoverText(
                 text = "DEC",
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontSize = 8.sp),
                 color = LocalContentColor.current.copy(alpha = 0.65f),
@@ -356,7 +356,7 @@ private fun ReadingLifeRidgeline(monthlyPages: List<Int>) {
 @Composable
 private fun ReadingLifeGenreRanking(genres: List<ReadingLifeGenre>) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
+        SoftcoverText(
             text = "WHAT YOU READ MOST",
             style = MaterialTheme.editorialTypography.eyebrow,
             color = LocalContentColor.current.copy(alpha = 0.85f),
@@ -397,7 +397,7 @@ private fun ReadingLifeGenreRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Bottom,
     ) {
-        Text(
+        SoftcoverText(
             text = genre.name,
             style = nameStyle,
             color = LocalContentColor.current.copy(alpha = contentAlpha),
@@ -408,7 +408,7 @@ private fun ReadingLifeGenreRow(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        Text(
+        SoftcoverText(
             text = "${genre.percentage}%",
             style = nameStyle,
             color = LocalContentColor.current.copy(alpha = contentAlpha),
@@ -427,7 +427,7 @@ private fun ReadingLifeFooterStat(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
+        SoftcoverText(
             text = value,
             style = MaterialTheme.editorialTypography.headlineSmall.copy(
                 fontSize = 22.sp,
@@ -445,7 +445,7 @@ private fun ReadingLifeFooterStat(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
+        SoftcoverText(
             text = label.uppercase(),
             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontSize = 9.sp),
             color = LocalContentColor.current.copy(alpha = 0.75f),

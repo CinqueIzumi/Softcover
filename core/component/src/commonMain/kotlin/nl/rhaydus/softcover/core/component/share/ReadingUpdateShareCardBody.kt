@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +33,7 @@ import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -52,7 +52,7 @@ internal fun ReadingUpdateShareCardBody(content: ReadingUpdateShareCardUiModel) 
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
+        SoftcoverText(
             text = eyebrow,
             style = MaterialTheme.editorialTypography.eyebrow,
             color = MaterialTheme.colorScheme.primary,
@@ -76,7 +76,7 @@ internal fun ReadingUpdateShareCardBody(content: ReadingUpdateShareCardUiModel) 
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
+        SoftcoverText(
             text = content.title,
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = LocalContentColor.current,
@@ -89,7 +89,7 @@ internal fun ReadingUpdateShareCardBody(content: ReadingUpdateShareCardUiModel) 
         if (content.author.isNotBlank()) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            SoftcoverText(
                 text = "BY ${content.author.uppercase()}",
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
@@ -169,7 +169,7 @@ internal fun ReadingUpdateShareCardBody(content: ReadingUpdateShareCardUiModel) 
                 if (content.progressLabel != null) {
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = content.progressLabel,
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -204,7 +204,7 @@ private fun ReadingUpdateReaderIdentity(
             Spacer(modifier = Modifier.width(10.dp))
         }
 
-        Text(
+        SoftcoverText(
             text = username,
             style = MaterialTheme.editorialTypography.eyebrowSmall,
             color = LocalContentColor.current,

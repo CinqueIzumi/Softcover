@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.component.text
 
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ fun SoftcoverText(
     minLines: Int = 1,
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
+    autoSize: TextAutoSize? = null,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
 ) {
     val isMasked = isLoading || text == null
@@ -48,6 +51,8 @@ fun SoftcoverText(
         minLines = minLines,
         overflow = overflow,
         softWrap = softWrap,
+        autoSize = autoSize,
+        inlineContent = emptyMap(),
         onTextLayout = onTextLayout,
     )
 }
@@ -66,6 +71,8 @@ fun SoftcoverText(
     minLines: Int = 1,
     overflow: TextOverflow = TextOverflow.Clip,
     softWrap: Boolean = true,
+    autoSize: TextAutoSize? = null,
+    inlineContent: Map<String, InlineTextContent> = emptyMap(),
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
 ) {
     val isMasked = isLoading || text == null
@@ -82,6 +89,8 @@ fun SoftcoverText(
         minLines = minLines,
         overflow = overflow,
         softWrap = softWrap,
+        autoSize = autoSize,
+        inlineContent = inlineContent,
         onTextLayout = onTextLayout,
     )
 }
@@ -98,6 +107,8 @@ private fun SoftcoverTextLayout(
     minLines: Int,
     overflow: TextOverflow,
     softWrap: Boolean,
+    autoSize: TextAutoSize?,
+    inlineContent: Map<String, InlineTextContent>,
     onTextLayout: ((TextLayoutResult) -> Unit)?,
 ) {
     Text(
@@ -110,6 +121,8 @@ private fun SoftcoverTextLayout(
         minLines = minLines,
         overflow = overflow,
         softWrap = softWrap,
+        autoSize = autoSize,
+        inlineContent = inlineContent,
         onTextLayout = onTextLayout ?: {},
     )
 }

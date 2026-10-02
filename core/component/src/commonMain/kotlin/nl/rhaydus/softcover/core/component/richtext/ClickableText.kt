@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.component.richtext
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,20 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 /**
- * A [Text] that resolves `url` string annotations in [ClickableTextUiModel.text] to taps and reports
+ * A [SoftcoverText] that resolves `url` string annotations in [ClickableTextUiModel.text] to taps and reports
  * them as [ClickableTextEvent.LinkClicked], so a screen never wires its own `pointerInput` /
  * `detectTapGestures` for an inline link.
  *
- * [inlineContent] is forwarded to the underlying [Text] unchanged — pass it to glue a small glyph
- * (e.g. an external-link icon) directly onto a run of text via
- * [androidx.compose.foundation.text.appendInlineContent] at the call site. It stays a parameter
- * rather than a model field because its values are composable slots, not data.
- *
- * Like `RichText`, it takes the `Text`-shaped render parameters after the model: which face prose is
- * set in belongs to the surface rather than to the words. [style] is an R11 holdout on the contract
- * retrofit — it belongs on [model], not on this signature.
+ * [inlineContent] stays a parameter rather than a model field because its values are composable slots, not data.
+ * [style] is an R11 holdout — it belongs on [model], not on this signature.
  */
 @Composable
 fun ClickableText(
@@ -39,7 +33,7 @@ fun ClickableText(
         mutableStateOf<TextLayoutResult?>(null)
     }
 
-    Text(
+    SoftcoverText(
         text = model.text,
         style = style,
         inlineContent = inlineContent,

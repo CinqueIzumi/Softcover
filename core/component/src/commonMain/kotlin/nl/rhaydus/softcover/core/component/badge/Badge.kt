@@ -8,12 +8,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 /**
@@ -59,7 +59,7 @@ fun Badge(
                 Spacer(modifier = Modifier.width(BadgeDimensions.iconGap))
             }
 
-            Text(
+            SoftcoverText(
                 text = model.label,
                 style = style,
                 maxLines = 1,

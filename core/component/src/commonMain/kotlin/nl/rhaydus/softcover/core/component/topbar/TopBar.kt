@@ -10,7 +10,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -19,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
@@ -66,13 +66,13 @@ fun TopBar(
     TopAppBar(
         modifier = modifier,
         title = {
-            Text(
+            SoftcoverText(
                 text = model.title,
                 autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.titleLarge.fontSize),
                 maxLines = 2,
             )
         },
-        subtitle = { model.subtitle?.let { subtitle -> Text(text = subtitle) } },
+        subtitle = { model.subtitle?.let { subtitle -> SoftcoverText(text = subtitle) } },
         scrollBehavior = scrollBehavior,
         titleHorizontalAlignment = Alignment.CenterHorizontally,
         colors = TopAppBarDefaults.topAppBarColors().copy(containerColor = containerColor),

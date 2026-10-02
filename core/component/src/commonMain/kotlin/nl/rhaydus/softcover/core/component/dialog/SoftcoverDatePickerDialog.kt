@@ -3,11 +3,11 @@ package nl.rhaydus.softcover.core.component.dialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 /**
  * The shared calendar dialog for picking a single day — the deadline picker on Book Detail is a
@@ -43,12 +43,12 @@ fun SoftcoverDatePickerDialog(
                     }
                 },
             ) {
-                Text(text = model.confirmLabel)
+                SoftcoverText(text = model.confirmLabel)
             }
         },
         dismissButton = {
             TextButton(onClick = { onEvent(DatePickerEvent.Dismissed) }) {
-                Text(text = model.cancelLabel)
+                SoftcoverText(text = model.cancelLabel)
             }
         },
     ) {

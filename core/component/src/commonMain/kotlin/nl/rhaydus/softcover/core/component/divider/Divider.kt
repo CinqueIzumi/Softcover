@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private val DIVIDER_THICKNESS = 1.dp
@@ -98,7 +98,7 @@ private fun DividerCenterContent(center: DividerCenter) {
  */
 @Composable
 private fun QuoteMarkGlyph() {
-    Text(
+    SoftcoverText(
         text = "“",
         style = MaterialTheme.editorialTypography.quoteGlyph.copy(
             fontSize = 40.sp,
@@ -113,7 +113,7 @@ private fun QuoteMarkGlyph() {
 
 @Composable
 private fun DividerLabel(text: String) {
-    Text(
+    SoftcoverText(
         text = text.uppercase(),
         style = MaterialTheme.editorialTypography.eyebrowSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,

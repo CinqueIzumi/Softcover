@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +58,7 @@ import nl.rhaydus.softcover.core.component.richtext.isRangeMarked
 import nl.rhaydus.softcover.core.component.richtext.toggleMark
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
@@ -217,7 +217,7 @@ fun VerdictSheet(
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                     ) {
                         if (textFieldValue.text.isEmpty()) {
-                            Text(
+                            SoftcoverText(
                                 text = "What stayed with you? A line is plenty.",
                                 style = MaterialTheme.editorialTypography.body.copy(
                                     fontStyle = FontStyle.Normal,
@@ -265,7 +265,7 @@ fun VerdictSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            SoftcoverText(
                 text = "Select text, then tap B, i or Spoiler",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -278,7 +278,7 @@ fun VerdictSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    SoftcoverText(
                         text = "Contains spoilers",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -286,7 +286,7 @@ fun VerdictSheet(
 
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    Text(
+                    SoftcoverText(
                         text = "Readers will need to tap to reveal the whole review.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -340,7 +340,7 @@ private fun VerdictScoreAndCaption(
             label = "VerdictScoreCaption",
         ) { animatedScore ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
+                SoftcoverText(
                     text = verdictScoreLineFor(score = animatedScore).uppercase(),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.SemiBold,
@@ -352,7 +352,7 @@ private fun VerdictScoreAndCaption(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                Text(
+                SoftcoverText(
                     text = verdictCaptionFor(score = animatedScore),
                     style = MaterialTheme.editorialTypography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,

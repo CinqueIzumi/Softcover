@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -14,6 +13,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 /**
  * Inline formatting controls for the review editor: three pill toggles that apply bold, italic, or the
@@ -93,7 +93,7 @@ private fun FormatChip(
         color = containerColor,
         contentColor = contentColor,
     ) {
-        Text(
+        SoftcoverText(
             text = label,
             style = MaterialTheme.typography.labelLarge.copy(
                 fontWeight = fontWeight,

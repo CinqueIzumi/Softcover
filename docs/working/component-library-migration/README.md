@@ -14,12 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1 done (its box in `steps/s7-bookcard.md` still unticked). SL-1 done: `SkeletonText` reshaped
-  into `SoftcoverText` (no model, `style` as the one styling channel, built-in loading; R11 exception and R12 in
-  the contract). SL is app-wide and ends with the `Skeleton` family deleted; it interleaves with S7 and S9.
-- **Next:** SL-2 — swap `:core:component`'s `material3.Text` calls to `SoftcoverText`, per
-  [steps/sl-lean-loading.md](steps/sl-lean-loading.md).
-- **Open questions:** `BookmarkToggle` → foundation toggle? Issue #275's Stages list has no SL entry yet.
+- **State:** S7-1 done (box in `steps/s7-bookcard.md` unticked). SL-2 done: all of `:core:component` renders
+  text through `SoftcoverText`. SL is app-wide, interleaves with S7 / S9, ends deleting `Skeleton`.
+- **Next:** SL-3 — `softcover-implementer` per module group swaps the features' `material3.Text` to
+  `SoftcoverText`, then the detekt gate; [steps/sl-lean-loading.md](steps/sl-lean-loading.md).
+- **Open questions:** `BookmarkToggle` → foundation toggle? (No SL entry on issue #275, by the user's call.)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
   titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
@@ -37,8 +36,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes.
-- **Verification:** SL-1: `:core:component:compileKotlinJvm` and `styleCheck` (JDK 21) passed; review fixes applied.
-- **Uncommitted:** none.
+- **Verification:** SL-2's full Verify (JDK 21) passed after the review fixes. ktlint does not gate import
+  order, so keep implementer briefs explicit about it.
+- **Uncommitted:** SL-2 code and these tracker updates.
 
 ## Local verification
 

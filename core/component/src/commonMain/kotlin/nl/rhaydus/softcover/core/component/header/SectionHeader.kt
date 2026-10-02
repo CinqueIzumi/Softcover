@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -38,6 +37,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import kotlin.math.abs
 
@@ -155,7 +155,7 @@ private fun SectionHeaderRegion(
         if (model.headline != null) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            SoftcoverText(
                 text = headerAnnotatedString(
                     segments = model.headline,
                     colorScheme = MaterialTheme.colorScheme,
@@ -169,7 +169,7 @@ private fun SectionHeaderRegion(
         if (model.description != null) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            SoftcoverText(
                 text = headerAnnotatedString(
                     segments = model.description,
                     colorScheme = MaterialTheme.colorScheme,
@@ -301,7 +301,7 @@ internal fun SectionHeaderEyebrowText(
     color: Color,
     modifier: Modifier = Modifier,
 ) {
-    Text(
+    SoftcoverText(
         text = eyebrow.uppercase(),
         style = style,
         color = color,

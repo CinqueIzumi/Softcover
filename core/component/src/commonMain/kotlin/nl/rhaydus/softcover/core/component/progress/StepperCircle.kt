@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +15,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 /**
  * A −/+ stepper flanking a hero number field: a 44dp circle, `surfaceContainerHigh` fill, primary
@@ -52,7 +52,7 @@ internal fun StepperCircle(
         onClick = onClick,
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
+            SoftcoverText(
                 text = symbol,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
             )

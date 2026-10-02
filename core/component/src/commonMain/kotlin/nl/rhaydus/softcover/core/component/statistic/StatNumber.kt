@@ -6,7 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 private const val TABULAR_NUMS = "tnum"
 private const val PULSE_DURATION_MS = 220
@@ -148,7 +148,7 @@ private fun StatPulseText(
             )
         },
     ) {
-        Text(
+        SoftcoverText(
             text = text,
             color = color,
             style = style.copy(fontFeatureSettings = TABULAR_NUMS),

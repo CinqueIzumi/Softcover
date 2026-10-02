@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +18,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -80,7 +80,7 @@ internal fun WhenReadEditor(
 
             Spacer(modifier = Modifier.width(18.dp))
 
-            Text(
+            SoftcoverText(
                 text = dayLabel,
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -118,7 +118,7 @@ internal fun WhenReadEditor(
 
             Spacer(modifier = Modifier.width(14.dp))
 
-            Text(
+            SoftcoverText(
                 text = "$hh:$mm",
                 style = timeStyle,
                 color = MaterialTheme.colorScheme.onSurface,

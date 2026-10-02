@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import kotlin.math.roundToInt
@@ -31,7 +31,7 @@ internal fun BookShareCardBody(content: BookShareCardUiModel) {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
+        SoftcoverText(
             text = "FROM THE SHELF",
             style = MaterialTheme.editorialTypography.eyebrow,
             color = MaterialTheme.colorScheme.primary,
@@ -55,7 +55,7 @@ internal fun BookShareCardBody(content: BookShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
+        SoftcoverText(
             text = content.title,
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = LocalContentColor.current,
@@ -68,7 +68,7 @@ internal fun BookShareCardBody(content: BookShareCardUiModel) {
         if (content.author.isNotBlank()) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
+            SoftcoverText(
                 text = "BY ${content.author.uppercase()}",
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
@@ -84,7 +84,7 @@ internal fun BookShareCardBody(content: BookShareCardUiModel) {
         if (statsLine != null) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
+            SoftcoverText(
                 text = statsLine,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -95,7 +95,7 @@ internal fun BookShareCardBody(content: BookShareCardUiModel) {
         if (content.description != null && content.description.isNotBlank()) {
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
+            SoftcoverText(
                 text = content.description,
                 style = MaterialTheme.editorialTypography.body,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -107,7 +107,7 @@ internal fun BookShareCardBody(content: BookShareCardUiModel) {
         if (content.quote != null) {
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
+            SoftcoverText(
                 text = "“${content.quote}”",
                 style = MaterialTheme.editorialTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,

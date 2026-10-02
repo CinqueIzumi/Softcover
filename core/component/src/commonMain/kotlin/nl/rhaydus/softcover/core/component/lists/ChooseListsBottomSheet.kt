@@ -21,7 +21,6 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -51,6 +50,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -127,7 +127,7 @@ fun ChooseListsBottomSheet(
 @Composable
 private fun ChooseListsEmptyState(modifier: Modifier = Modifier) {
     Column(modifier = modifier.padding(vertical = 20.dp)) {
-        Text(
+        SoftcoverText(
             text = "No custom lists yet",
             style = MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic),
             color = MaterialTheme.colorScheme.onSurface,
@@ -135,7 +135,7 @@ private fun ChooseListsEmptyState(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
+        SoftcoverText(
             text = "Create your first list below.",
             style = MaterialTheme.editorialTypography.body,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -179,7 +179,7 @@ private fun ChooseListsRow(
             BookmarkGlyph(membership = row.membership)
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
+                SoftcoverText(
                     text = row.name,
                     style = MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic),
                     color = MaterialTheme.colorScheme.onSurface,
@@ -189,7 +189,7 @@ private fun ChooseListsRow(
 
                 Spacer(modifier = Modifier.height(3.dp))
 
-                Text(
+                SoftcoverText(
                     text = row.caption,
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = if (row.membership == ListMembership.PARTIAL) {
@@ -309,7 +309,7 @@ private fun NewListRow(
             )
         }
 
-        Text(
+        SoftcoverText(
             text = "Create a new list",
             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.primary,

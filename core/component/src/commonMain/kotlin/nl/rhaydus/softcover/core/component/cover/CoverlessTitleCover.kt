@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverInk
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -87,7 +87,7 @@ fun CoverlessTitleCover(
         )
 
         if (metrics.showFullTitle && trimmedTitle.isNotEmpty()) {
-            Text(
+            SoftcoverText(
                 text = trimmedTitle,
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 autoSize = TextAutoSize.StepBased(
@@ -102,7 +102,7 @@ fun CoverlessTitleCover(
                 modifier = Modifier.padding(horizontal = metrics.borderInset + 4.dp),
             )
         } else if (initial.isNotEmpty()) {
-            Text(
+            SoftcoverText(
                 text = initial,
                 style = MaterialTheme.editorialTypography.headlineMedium.copy(
                     fontSize = metrics.initialFontSize,

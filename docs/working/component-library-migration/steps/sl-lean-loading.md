@@ -14,7 +14,7 @@ deleted.
 | Sub | Scope | Runs after | Status |
 |---|---|---|---|
 | SL-1 | `SoftcoverText` in `:core:component/text` (replaces `SkeletonText`), with fixtures and a gallery entry | — | [x] |
-| SL-2 | Swap every `material3.Text` in `:core:component` to `SoftcoverText`, folding loose font arguments into `style` | SL-1 | [ ] |
+| SL-2 | Swap every `material3.Text` in `:core:component` to `SoftcoverText`, folding loose font arguments into `style` | SL-1 | [x] |
 | SL-3 | The same swap in the feature modules, then a detekt gate forbidding `material3.Text` outside `SoftcoverText` | SL-2 | [ ] |
 | SL-4 | Seed `title`, `seriesText`, `rating` on `BookInitialCover` and its call sites | SL-1 | [ ] |
 | SL-5 | Book detail's hero title block renders its real layout and masks unknown leaves | SL-4 | [ ] |
@@ -37,6 +37,8 @@ next one whose prerequisites are done.
   textAlign, maxLines, minLines, overflow, softWrap, onTextLayout)`: no model, no loose font parameters
   (bold, italic, spacing and the like go through `style`). While loading, or while `text` is null, it lays out
   `standIn` under `skeletonMask`, so the slot keeps its size.
+- SL-2 adds `autoSize: TextAutoSize? = null` to both overloads and `inlineContent` to the `AnnotatedString`
+  overload only — layout features, not font arguments — so no `material3.Text` caller is left out.
 - Non-text leaves (a cover, a bar, a chart body, a toggle) mask with `Modifier.skeletonMask(isLoading)` over
   their real composable, laid out at their real size.
 - **Lists of unknown length:** while loading, a list renders a fixed count of its real items, each with
