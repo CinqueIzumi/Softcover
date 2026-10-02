@@ -11,6 +11,10 @@ data class BookInitialCover(
     val fallbackCoverUrl: String?,
     val userBook: UserBook? = null,
     val userBookRead: UserBookRead? = null,
+    val title: String? = null,
+    /** Null when unknown; blank when the book has no series, unlike `Book.seriesText`, which is null then. */
+    val seriesText: String? = null,
+    val rating: Double? = null,
     /**
      * When set (e.g. opening detail from a barcode scan), the screen shows this specific edition —
      * winning over both the book's default edition and any on-shelf edition — and, if the book is
@@ -25,12 +29,16 @@ data class BookInitialCover(
             fallbackCoverUrl = book.coverUrl,
             userBook = book.userBook,
             userBookRead = book.userBookRead,
+            title = book.title,
+            seriesText = book.seriesText.orEmpty(),
+            rating = book.rating,
         )
 
         fun fromEdition(edition: BookEdition): BookInitialCover = BookInitialCover(
             currentEdition = edition,
             defaultEdition = null,
             fallbackCoverUrl = null,
+            title = edition.title,
         )
     }
 }

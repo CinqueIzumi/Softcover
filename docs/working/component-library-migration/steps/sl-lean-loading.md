@@ -17,7 +17,7 @@ deleted.
 | SL-2 | Swap every `material3.Text` in `:core:component` to `SoftcoverText`, folding loose font arguments into `style` | SL-1 | [x] |
 | SL-3 | The same swap in the feature modules, `:app` and `:orchestration` | SL-2 | [x] |
 | SL-3b | Enable the foundation import ban on `material3.Text` outside `SoftcoverText.kt` | foundation F34 | [ ] |
-| SL-4 | Seed `title`, `seriesText`, `rating` on `BookInitialCover` and its call sites | SL-1 | [ ] |
+| SL-4 | Seed `title`, `seriesText`, `rating` on `BookInitialCover` and its call sites | SL-1 | [x] |
 | SL-5 | Book detail's hero title block renders its real layout and masks unknown leaves | SL-4 | [ ] |
 | SL-6 | `ShelveControlCard` renders its real rows while loading; the 42dp bars go | SL-1 | [ ] |
 | SL-7 | `AboutSection`, `ReviewsSection` and `BookOverflowMenu` | SL-1 | [ ] |

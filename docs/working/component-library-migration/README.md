@@ -14,10 +14,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1 done (box in `steps/s7-bookcard.md` unticked). SL-3 swap done: only `SoftcoverText.kt`
-  imports `material3.Text`. Its gate (SL-3b) waits on foundation F34; detekt type resolution is inert (F33).
-- **Next:** `softcover-reviewer` on the uncommitted SL-3 swap (91 files, pure rename, checked by word diff),
-  then SL-4; [steps/sl-lean-loading.md](steps/sl-lean-loading.md).
+- **State:** S7-1 done (box in `steps/s7-bookcard.md` unticked). SL-3 and SL-4 done. SL-3b (import ban)
+  waits on foundation F34; detekt type resolution is inert (F33).
+- **Next:** SL-5 (shape approved; Phase 2); [steps/sl-lean-loading.md](steps/sl-lean-loading.md).
 - **Open questions:** `BookmarkToggle` → foundation toggle? (No SL entry on issue #275, by the user's call.)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
@@ -36,8 +35,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes.
-- **Verification:** SL-3: per-module compile + detekt + ktlint passed; repo-wide `styleCheck` not yet run.
-- **Uncommitted:** SL-3 swap, F33 / F34 in the upstream candidates, tracker updates.
+- **Verification:** SL-3: `styleCheck` passed; reviewer nit (unused import in `ProfileShareBottomSheet.kt`)
+  fixed. SL-4: `styleCheck`, module graph, `projectHealth`, `BookInitialCoverTest` passed; reviewer: no blockers.
+- **Uncommitted:** the SL-3 import fix, SL-4 (`BookInitialCover.kt` + `BookInitialCoverTest.kt`), trackers.
 
 ## Local verification
 
