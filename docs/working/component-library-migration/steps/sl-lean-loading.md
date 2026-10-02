@@ -19,7 +19,7 @@ deleted.
 | SL-3b | Enable the foundation import ban on `material3.Text` outside `SoftcoverText.kt` | foundation F34 | [ ] |
 | SL-4 | Seed `title`, `seriesText`, `rating` on `BookInitialCover` and its call sites | SL-1 | [x] |
 | SL-5 | Book detail's hero title block renders its real layout and masks unknown leaves | SL-4 | [x] |
-| SL-6 | `ShelveControlCard` renders its real rows while loading; the 42dp bars go | SL-1 | [ ] |
+| SL-6 | `ShelveControlCard` renders its real rows while loading; the 42dp bars go | SL-1 | [x] |
 | SL-7 | `AboutSection`, `ReviewsSection` and `BookOverflowMenu` | SL-1 | [ ] |
 | SL-8 | Roadmap: `RoadmapContent` renders stand-in entries in the real entry layout; `RoadmapUiState.skeleton` goes | SL-1 | [ ] |
 | SL-9 | `BookCard` and `MoodTile` take `isLoading` and mask their own leaves, with loading fixtures | S7-4 | [ ] |

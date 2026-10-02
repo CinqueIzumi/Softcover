@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,12 +39,11 @@ import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.modifier.shakeOnError
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -58,16 +58,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAs
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import kotlin.math.roundToInt
 
-/**
- * The "Shelve this book" control (design-system.md §5 shelve-rows). A `surfaceContainerLow` card of
- * three VERTICAL rows — Want to read / Reading / Read — replacing the earlier horizontal chip strip.
- * The active row fills `primary`/`onPrimary` and shows a live trailing status; the section opener is
- * the inline 20×1 bar + `eyebrowSmall` contract (never the full section bar). All prior behavior is
- * preserved: optimistic writes, [Modifier.shakeOnError] + "Couldn't save — tap to retry", and the
- * [MarkAsReadBurst] + commit haptic celebration on Read. Every row — Reading included — is enabled
- * even for a not-yet-shelved book: tapping Reading creates the user book directly on Currently
- * Reading in one step (no add-to-Want-to-Read-first).
- */
+/** Book detail's shelve control, specified in `docs/reference/design-system/patterns/book-detail.md` § Shelve control. */
 @Composable
 internal fun ShelveControlCard(
     state: BookDetailUiState,
@@ -75,133 +66,102 @@ internal fun ShelveControlCard(
     dateStyle: DateStyle,
     celebrationKey: Int,
 ) {
-    SkeletonCrossfade(
-        isLoading = state.loadingBookDetails && state.book == null,
-        label = "ShelveControlCard",
-    ) { loading ->
-        if (loading) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+    val book = state.book
+    val isLoading = state.loadingBookDetails && book == null
+
+    if (book == null && isLoading.not()) return
+
+    val status = book?.status
+    val mutationFailed = book != null && book.id in state.failedMutationBookIds
+    val haptics = rememberHaptics()
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            SectionHeader(model = state.shelveControlHeader)
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                shape = RoundedCornerShape(15.dp),
             ) {
-                SectionHeader(model = state.shelveControlHeader)
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Mirrors the loaded card's own anatomy — the same outer Surface plus three
-                // 42dp row-shaped bars at the same 5dp padding / 2dp gap / 11dp corner radius —
-                // rather than one oversized blob, so the shimmer resolves into the real rows at
-                // an identical height instead of visibly shrinking.
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = RoundedCornerShape(15.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(5.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                    ) {
-                        repeat(3) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(42.dp)
-                                    .clip(RoundedCornerShape(11.dp))
-                                    .shimmer(isLoading = true),
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            val book = state.book
-
-            if (book != null) {
-                val status = book.status
-
-                val mutationFailed = book.id in state.failedMutationBookIds
-
-                val haptics = rememberHaptics()
-
-                Box(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                        .padding(5.dp)
+                        .shakeOnError(
+                            trigger = mutationFailed,
+                            onShakeEnd = {
+                                book?.let { runAction(OnClearMutationFailureAction(bookId = it.id)) }
+                            },
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        SectionHeader(model = state.shelveControlHeader)
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            shape = RoundedCornerShape(15.dp),
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(5.dp)
-                                    .shakeOnError(
-                                        trigger = mutationFailed,
-                                        onShakeEnd = {
-                                            runAction(OnClearMutationFailureAction(bookId = book.id))
-                                        },
-                                    ),
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
-                                ShelveRow(
-                                    label = "Want to read",
-                                    iconRes = drawableIconResource(
-                                        icon = SoftcoverIcon.BookmarkAdd,
-                                        contentDescription = "",
-                                    ),
-                                    selected = status == BookStatus.WantToRead,
-                                    onClick = {
-                                        haptics.select()
-                                        runAction(OnMarkBookAsWantToReadClickAction(book = book))
-                                    },
+                    // Fresh row state on landing, so the shelved row does not play its selection wipe.
+                    key(isLoading) {
+                        ShelveRow(
+                            label = "Want to read",
+                            iconRes = drawableIconResource(
+                                icon = SoftcoverIcon.BookmarkAdd,
+                                contentDescription = "",
+                            ),
+                            selected = status == BookStatus.WantToRead,
+                            isLoading = isLoading,
+                            onClick = {
+                                book?.let {
+                                    haptics.select()
+                                    runAction(OnMarkBookAsWantToReadClickAction(book = it))
+                                }
+                            },
+                        )
+    
+                        ShelveRow(
+                            label = "Reading",
+                            iconRes = drawableIconResource(
+                                icon = SoftcoverIcon.Reading,
+                                contentDescription = "",
+                            ),
+                            selected = status == BookStatus.Reading,
+                            isLoading = isLoading,
+                            onClick = {
+                                book?.let {
+                                    haptics.select()
+                                    runAction(OnMarkBookAsReadingClickAction(book = it))
+                                }
+                            },
+                            trailingStatus = book?.let { readingTrailingStatus(book = it) },
+                        )
+    
+                        ShelveRow(
+                            label = "Read",
+                            iconRes = drawableIconResource(
+                                icon = SoftcoverIcon.BookmarkCheck,
+                                contentDescription = "",
+                            ),
+                            selected = status == BookStatus.Read,
+                            isLoading = isLoading,
+                            onClick = { book?.let { runAction(OnMarkBookAsReadClickAction(book = it)) } },
+                            celebrationKey = celebrationKey,
+                            trailingStatus = book?.let {
+                                readStatusDateTrailing(
+                                    book = it,
+                                    dateStyle = dateStyle,
                                 )
-
-                                ShelveRow(
-                                    label = "Reading",
-                                    iconRes = drawableIconResource(
-                                        icon = SoftcoverIcon.Reading,
-                                        contentDescription = "",
-                                    ),
-                                    selected = status == BookStatus.Reading,
-                                    onClick = {
-                                        haptics.select()
-                                        runAction(OnMarkBookAsReadingClickAction(book = book))
-                                    },
-                                    trailingStatus = readingTrailingStatus(book = book),
-                                )
-
-                                ShelveRow(
-                                    label = "Read",
-                                    iconRes = drawableIconResource(
-                                        icon = SoftcoverIcon.BookmarkCheck,
-                                        contentDescription = "",
-                                    ),
-                                    selected = status == BookStatus.Read,
-                                    onClick = { runAction(OnMarkBookAsReadClickAction(book = book)) },
-                                    celebrationKey = celebrationKey,
-                                    trailingStatus = readStatusDateTrailing(
-                                        book = book,
-                                        dateStyle = dateStyle,
-                                    ),
-                                )
-                            }
-                        }
+                            },
+                        )
                     }
-
-                    MarkAsReadBurst(
-                        model = remember(celebrationKey) { MarkAsReadBurstUiModel(triggerKey = celebrationKey) },
-                        modifier = Modifier.matchParentSize(),
-                    )
                 }
             }
         }
+
+        MarkAsReadBurst(
+            model = remember(celebrationKey) { MarkAsReadBurstUiModel(triggerKey = celebrationKey) },
+            modifier = Modifier.matchParentSize(),
+        )
     }
 }
 
@@ -236,6 +196,7 @@ private fun ShelveRow(
     label: String,
     iconRes: RhaydusIconResource,
     selected: Boolean,
+    isLoading: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingStatus: String? = null,
@@ -310,6 +271,10 @@ private fun ShelveRow(
             .fillMaxWidth()
             .alpha(if (enabled) 1f else 0.4f)
             .clip(RoundedCornerShape(11.dp))
+            .skeletonMask(
+                visible = isLoading,
+                shape = RoundedCornerShape(11.dp),
+            )
             .drawBehind {
                 drawRect(color = fromContainer)
                 clipRect(right = size.width * wipeProgress) {
@@ -320,7 +285,7 @@ private fun ShelveRow(
         contentColor = contentColor,
         shape = RoundedCornerShape(11.dp),
         onClick = onClick,
-        enabled = enabled && selected.not(),
+        enabled = enabled && isLoading.not() && selected.not(),
     ) {
         Row(
             modifier = Modifier

@@ -14,9 +14,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1 done (box in `steps/s7-bookcard.md` unticked). SL-3 to SL-5 done. SL-3b (import ban)
+- **State:** S7-1 done (box in `steps/s7-bookcard.md` unticked). SL-3 to SL-6 done. SL-3b (import ban)
   waits on foundation F34; detekt type resolution is inert (F33).
-- **Next:** SL-6 (shape approved; Phase 2); [steps/sl-lean-loading.md](steps/sl-lean-loading.md).
+- **Next:** SL-7 (shape approved; Phase 2); [steps/sl-lean-loading.md](steps/sl-lean-loading.md).
 - **Open questions:** `BookmarkToggle` → foundation toggle? (No SL entry on issue #275, by the user's call.)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
@@ -36,8 +36,8 @@ checkboxes in step with `## Steps` and `## Gates` here.
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes; SL-5's hero
   title block while loading (accepted: an unrated / seriesless book collapses that row on landing).
-- **Verification:** SL-5: compile, `styleCheck`, `BookDetailUiStateTest` passed; reviewer: no blockers.
-- **Uncommitted:** SL-5 (four `feature/book_detail` files + `BookDetailUiStateTest.kt`), trackers.
+- **Verification:** SL-6: compile, `styleCheck` passed; reviewer's landing-wipe should-fix fixed (`key`).
+- **Uncommitted:** SL-6 (`ShelveControlCard.kt`, `patterns/book-detail.md`), trackers.
 
 ## Local verification
 
