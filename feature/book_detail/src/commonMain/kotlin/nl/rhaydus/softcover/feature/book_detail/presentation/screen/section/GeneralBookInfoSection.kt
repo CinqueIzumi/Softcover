@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -40,8 +39,6 @@ import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.designsystem.modifier.shimmer
-import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -49,6 +46,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -59,8 +57,6 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 
 @Composable
 internal fun GeneralBookInfoSection(
-    // Still the domain edition: the byline, format and length metadata below read it. Only the
-    // cover resolution moved out, into `CoverModelsCollector`.
     edition: BookEdition?,
     heroCover: CoverUiModel?,
     backdropCover: CoverUiModel?,
@@ -176,226 +172,171 @@ internal fun GeneralBookInfoSection(
                 shadow = secondaryShadow,
             )
 
-            SkeletonCrossfade(
-                isLoading = isLoading,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                label = "BookDetailTitleBlock",
-            ) { loading ->
-                if (loading) {
-                    Column {
-                        Box(
-                            modifier = Modifier
-                                .height(12.dp)
-                                .width(120.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmer(isLoading = true),
-                        )
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                val seriesUnknown = isLoading && seriesText == null
 
-                        Spacer(modifier = Modifier.height(6.dp))
+                if (seriesUnknown || seriesText.isNullOrBlank().not()) {
+                    SoftcoverText(
+                        text = seriesText,
+                        standIn = "#1 of 3 in Series name",
+                        color = Color.White.copy(alpha = textSecondaryAlpha),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.6.sp,
+                            shadow = secondaryShadow,
+                        ),
+                    )
 
-                        Box(
-                            modifier = Modifier
-                                .height(22.dp)
-                                .fillMaxWidth(0.85f)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmer(isLoading = true),
-                        )
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                val titleUnknown = isLoading && title == null
 
-                        Box(
-                            modifier = Modifier
-                                .height(12.dp)
-                                .width(140.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmer(isLoading = true),
-                        )
+                SoftcoverText(
+                    text = if (titleUnknown) null else title.orEmpty(),
+                    standIn = "A short book title",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        shadow = Shadow(
+                            color = Color.Black.copy(alpha = 0.75f),
+                            offset = Offset(
+                                x = 0f,
+                                y = 1f,
+                            ),
+                            blurRadius = 8f,
+                        ),
+                    ),
+                )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-                        Divider(model = divider)
+                val editionUnknown = isLoading && edition == null
+                val authorName = edition?.authorString.orEmpty()
+                val showReleased = releaseYear != null && releaseYear > 0 && unreleasedBadge == null
+                val bylineText = if (editionUnknown) {
+                    null
+                } else {
+                    buildString {
+                        append("By ")
+                        append(authorName)
 
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            repeat(2) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .height(10.dp)
-                                            .width(48.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .shimmer(isLoading = true),
-                                    )
-
-                                    Spacer(modifier = Modifier.height(6.dp))
-
-                                    Box(
-                                        modifier = Modifier
-                                            .height(12.dp)
-                                            .width(36.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .shimmer(isLoading = true),
-                                    )
-                                }
-                            }
+                        if (showReleased) {
+                            append(" · ")
+                            append(releaseYear)
                         }
                     }
+                }
+
+                SoftcoverText(
+                    text = bylineText,
+                    standIn = "By Author Name · 2024",
+                    color = Color.White.copy(alpha = textSecondaryAlpha),
+                    style = MaterialTheme.editorialTypography.bodySmall.copy(
+                        shadow = secondaryShadow,
+                    ),
+                )
+
+                if (unreleasedBadge != null) {
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Badge(model = unreleasedBadge)
+                }
+
+                val isAudiobook = edition?.isAudiobook == true
+
+                val ratingUnknown = isLoading && rating == null
+                val showRating = ratingUnknown || (rating ?: 0.0) > 0.0
+                val showLength = editionUnknown || if (isAudiobook) {
+                    (edition.audioSeconds ?: 0) > 0
                 } else {
-                    Column {
-                        seriesText?.takeIf { it.isNotBlank() }?.let { series ->
-                            SoftcoverText(
-                                text = series,
-                                color = Color.White.copy(alpha = textSecondaryAlpha),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.6.sp,
-                                    shadow = secondaryShadow,
-                                ),
-                            )
+                    (edition?.pages ?: 0) > 0
+                }
 
-                            Spacer(modifier = Modifier.height(2.dp))
-                        }
+                if (showRating || showLength) {
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                        SoftcoverText(
-                            text = title.orEmpty(),
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                shadow = Shadow(
-                                    color = Color.Black.copy(alpha = 0.75f),
-                                    offset = Offset(
-                                        x = 0f,
-                                        y = 1f,
-                                    ),
-                                    blurRadius = 8f,
-                                ),
-                            ),
-                        )
+                    Divider(model = divider)
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                        val authorName = edition?.authorString.orEmpty()
-                        val showReleased = releaseYear != null && releaseYear > 0 && unreleasedBadge == null
-                        val bylineText = buildString {
-                            append("By ")
-                            append(authorName)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        if (showRating) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                SoftcoverText(
+                                    text = "Rating",
+                                    style = labelSmall,
+                                )
 
-                            if (showReleased) {
-                                append(" · ")
-                                append(releaseYear)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    SoftcoverText(
+                                        text = rating?.let {
+                                            formatDecimalNumber(
+                                                value = it,
+                                                fractionDigits = 1,
+                                            )
+                                        },
+                                        standIn = "4.2",
+                                        style = bodySmall,
+                                    )
+
+                                    Spacer(modifier = Modifier.width(4.dp))
+
+                                    val ratingStarIcon = drawableIconResource(
+                                        icon = SoftcoverIcon.StarFilled,
+                                        contentDescription = "",
+                                    )
+
+                                    Icon(
+                                        painter = ratingStarIcon.getIconPainter(),
+                                        contentDescription = ratingStarIcon.contentDescription,
+                                        tint = RatingGold,
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .skeletonMask(visible = ratingUnknown),
+                                    )
+                                }
                             }
                         }
 
-                        SoftcoverText(
-                            text = bylineText,
-                            color = Color.White.copy(alpha = textSecondaryAlpha),
-                            style = MaterialTheme.editorialTypography.bodySmall.copy(
-                                shadow = secondaryShadow,
-                            ),
-                        )
-
-                        if (unreleasedBadge != null) {
-                            Spacer(modifier = Modifier.height(6.dp))
-
-                            Badge(model = unreleasedBadge)
-                        }
-
-                        val isAudiobook = edition?.isAudiobook == true
-
-                        val showRating = rating != null && rating > 0.0
-                        val showLength = if (isAudiobook) {
-                            (edition.audioSeconds ?: 0) > 0
-                        } else {
-                            (edition?.pages ?: 0) > 0
-                        }
-
-                        if (showRating || showLength) {
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Divider(model = divider)
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        if (showLength) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                if (showRating) {
-                                    Column(
-                                        modifier = Modifier.weight(1f),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ) {
-                                        SoftcoverText(
-                                            text = "Rating",
-                                            style = labelSmall,
-                                        )
+                                SoftcoverText(
+                                    text = "Length",
+                                    style = labelSmall,
+                                )
 
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            SoftcoverText(
-                                                text = formatDecimalNumber(
-                                                    value = rating,
-                                                    fractionDigits = 1,
-                                                ),
-                                                style = bodySmall,
-                                            )
-
-                                            Spacer(modifier = Modifier.width(4.dp))
-
-                                            val ratingStarIcon = drawableIconResource(
-                                                icon = SoftcoverIcon.StarFilled,
-                                                contentDescription = "",
-                                            )
-
-                                            Icon(
-                                                painter = ratingStarIcon.getIconPainter(),
-                                                contentDescription = ratingStarIcon.contentDescription,
-                                                tint = RatingGold,
-                                                modifier = Modifier.size(16.dp),
-                                            )
-                                        }
+                                Row {
+                                    val lengthText = when {
+                                        editionUnknown -> null
+                                        isAudiobook -> secondsToHm(seconds = edition.audioSeconds ?: 0)
+                                        else -> "${edition?.pages ?: ""}"
                                     }
-                                }
 
-                                if (showLength) {
-                                    Column(
-                                        modifier = Modifier.weight(1f),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ) {
+                                    SoftcoverText(
+                                        text = lengthText,
+                                        standIn = "320",
+                                        style = bodySmall,
+                                        modifier = Modifier.alignByBaseline(),
+                                    )
+
+                                    if (editionUnknown.not() && isAudiobook.not()) {
+                                        Spacer(modifier = Modifier.width(4.dp))
+
                                         SoftcoverText(
-                                            text = "Length",
+                                            text = "pgs",
                                             style = labelSmall,
+                                            modifier = Modifier.alignByBaseline(),
                                         )
-
-                                        Row {
-                                            val lengthText = if (isAudiobook) {
-                                                secondsToHm(seconds = edition.audioSeconds ?: 0)
-                                            } else {
-                                                "${edition?.pages ?: ""}"
-                                            }
-
-                                            SoftcoverText(
-                                                text = lengthText,
-                                                style = bodySmall,
-                                                modifier = Modifier.alignByBaseline(),
-                                            )
-
-                                            if (isAudiobook.not()) {
-                                                Spacer(modifier = Modifier.width(4.dp))
-
-                                                SoftcoverText(
-                                                    text = "pgs",
-                                                    style = labelSmall,
-                                                    modifier = Modifier.alignByBaseline(),
-                                                )
-                                            }
-                                        }
                                     }
                                 }
                             }

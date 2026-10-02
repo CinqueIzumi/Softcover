@@ -255,6 +255,16 @@ internal data class BookDetailUiState(
             }
         }
 
+    val heroTitle: String?
+        get() = book?.title ?: initialCover?.title
+
+    /** Null while unknown; blank when the book has no series. */
+    val heroSeriesText: String?
+        get() = book?.let { it.seriesText.orEmpty() } ?: initialCover?.seriesText
+
+    val heroRating: Double?
+        get() = book?.rating ?: initialCover?.rating
+
     /**
      * Whether to offer updating the on-shelf edition to the scanned one — shown only when the book
      * is already on a shelf with a *different* edition than the one scanned, and not yet dismissed.

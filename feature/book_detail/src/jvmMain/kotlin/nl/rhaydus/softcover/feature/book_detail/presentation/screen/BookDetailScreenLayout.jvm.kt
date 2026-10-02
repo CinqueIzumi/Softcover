@@ -376,9 +376,9 @@ private fun BookHero(
             backdropCover = state.heroBackdropCover,
             isLoading = state.loadingBookDetails && state.book == null,
             isExpired = state.deadlineProgress?.isExpired == true,
-            rating = state.book?.rating,
-            title = state.book?.title,
-            seriesText = state.book?.seriesText,
+            rating = state.heroRating,
+            title = state.heroTitle,
+            seriesText = state.heroSeriesText,
             releaseYear = state.displayedEdition?.releaseYear.takeIf { it != -1 }
                 ?: state.book?.releaseYear,
             unreleasedBadge = state.unreleasedBadge,
