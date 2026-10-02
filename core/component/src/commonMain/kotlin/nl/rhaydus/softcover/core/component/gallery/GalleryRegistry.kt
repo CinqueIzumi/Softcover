@@ -91,6 +91,7 @@ import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.state.SkeletonText
 import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
@@ -350,6 +351,59 @@ object GalleryRegistry {
                     modifier = modifier.width(140.dp),
                 )
             },
+        ),
+        GalleryEntry(
+            name = "SkeletonText",
+            family = GalleryFamily.STATE,
+            blurb = "A Text that keeps its real size while loading: it masks a stand-in until the " +
+                "value lands, so the slot never jumps.",
+            fixtures = persistentListOf(
+                GalleryFixture(
+                    label = "Loading",
+                    render = { modifier ->
+                        SkeletonText(
+                            text = "The Left Hand of Darkness",
+                            isLoading = true,
+                            standIn = "A book title stand-in",
+                            modifier = modifier,
+                        )
+                    },
+                ),
+                GalleryFixture(
+                    label = "Loaded",
+                    render = { modifier ->
+                        SkeletonText(
+                            text = "The Left Hand of Darkness",
+                            isLoading = false,
+                            standIn = "A book title stand-in",
+                            modifier = modifier,
+                        )
+                    },
+                ),
+                GalleryFixture(
+                    label = "Text null, not loading",
+                    render = { modifier ->
+                        SkeletonText(
+                            text = null,
+                            isLoading = false,
+                            standIn = "A book title stand-in",
+                            modifier = modifier,
+                        )
+                    },
+                ),
+                GalleryFixture(
+                    label = "Two lines, loading",
+                    render = { modifier ->
+                        SkeletonText(
+                            text = null,
+                            isLoading = true,
+                            standIn = "A two line stand-in\nfor a longer description",
+                            maxLines = 2,
+                            modifier = modifier.width(140.dp),
+                        )
+                    },
+                ),
+            ),
         ),
         galleryEntry(
             name = "StatNumber",

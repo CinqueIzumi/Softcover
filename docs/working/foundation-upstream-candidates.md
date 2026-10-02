@@ -183,6 +183,20 @@ Filed but not yet implemented in the foundation.
   `confirmValueChange` (and leaves programmatic `LocalModalSheetDismiss` working), or a `dismissOnSwipe`
   flag beside the existing two.
 
+### F32 — A skeleton mask modifier that shimmers over real content
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core` (`modifier/`, beside `shimmer`)
+- **Status:** **Open — built locally first.** `designsystem-core` ships `shimmer` and `SkeletonCrossfade`,
+  which only support a separate hand-sized skeleton layout swapped for the real one. That layout drifts
+  from the real one and the screen jumps when data lands (Softcover's book detail: the shelve card's 42dp
+  bars against taller real rows). Softcover now has a local mask in `:core:component`: it draws the
+  shimmer over a leaf's real bounds and hides the content, so a screen renders its normal layout from a
+  placeholder model while loading.
+- **What to build:** move the local mask into `designsystem-core` unchanged in behaviour (shimmer over
+  the measured bounds, content hidden, semantics cleared while masked), release, and switch Softcover's
+  call sites to it. Then delete the local copy.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)

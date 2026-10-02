@@ -137,6 +137,8 @@ component/
 +              SheetRowGroup(+UiModel), which owns selectableGroup() for the radio rows
 + sidebar/     Sidebar  SidebarUiModel  SidebarSectionUiModel  SidebarRowUiModel/Variant  SidebarEvent
 + state/       EmptyState  EmptyStateUiModel  Skeleton  SkeletonUiModel/Variant
++              SkeletonMask (Modifier.skeletonMask)
++              SkeletonText
 +              · ErrorState
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
 +              · StatTile  · Chart  · Legend

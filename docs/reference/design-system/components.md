@@ -46,6 +46,8 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Banner** — `core:component/callout` — full-width slide-in chrome for a screen-level condition.
 - **Empty state** — `core:component/state` — centred headline-and-body placeholder.
 - **Skeleton** — `core:component/state` — per-surface shimmer placeholder matching its loaded footprint.
+- **SkeletonMask** — `core:component/state` — `Modifier.skeletonMask(visible, shape)`: hides a leaf's content and draws the foundation shimmer over its measured bounds, so a component keeps its real layout while loading.
+- **SkeletonText** — `core:component/state` — `SkeletonText(text, isLoading, standIn, …)`: a `Text` that lays out `standIn` under `skeletonMask` while loading or while `text` is null, so the slot keeps its real size.
 - **Divider** — `core:component/divider` — hairline rule, bare, centred, or vertical.
 - **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — exception to the wavy-progress rule.
 - **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.
