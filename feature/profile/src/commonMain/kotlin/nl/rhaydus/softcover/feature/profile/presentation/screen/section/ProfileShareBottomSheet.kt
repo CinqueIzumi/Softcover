@@ -41,7 +41,6 @@ import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
