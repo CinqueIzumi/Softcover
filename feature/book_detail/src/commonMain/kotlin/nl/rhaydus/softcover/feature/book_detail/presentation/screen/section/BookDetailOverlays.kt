@@ -182,10 +182,7 @@ internal fun BookDetailOverlays(
     if (state.showEditEditionSheet && editionSheet != null) {
         EditionBottomSheetSelector(
             model = editionSheet,
-            editionCovers = state.editionCovers,
-            editionTrailingMarks = state.editionTrailingMarks,
-            selectedEditionId = state.selectedEditionId,
-            editions = state.filteredEditions,
+            editionCards = state.editionCards,
             isLoading = state.loadingEditions,
             searchQuery = state.editionSearchQuery,
             onSearchQueryChange = {

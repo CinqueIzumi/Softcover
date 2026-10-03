@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -254,27 +255,31 @@ private fun RowScope.SheetHeaderTrailingContent(
     }
 }
 
-private val JACKET_STACK_ROTATIONS: List<Float> = listOf(-8f, 4f, 0f)
-
 @Composable
 private fun JacketStack(trailing: SheetHeaderTrailing.JacketStack) {
     Box(
         modifier = Modifier.size(
-            width = 84.dp,
-            height = 84.dp,
+            width = 120.dp,
+            height = 96.dp,
         ),
         contentAlignment = Alignment.Center,
     ) {
-        trailing.covers.forEachIndexed { index, cover ->
+        trailing.covers.indices.reversed().forEach { index ->
+            val side = JACKET_FAN[index]
+
             Cover(
-                model = cover,
+                model = trailing.covers[index],
                 modifier = Modifier
-                    .width(56.dp)
-                    .rotate(JACKET_STACK_ROTATIONS[index]),
+                    .offset(x = 26.dp * side)
+                    .width(52.dp)
+                    .rotate(10f * side),
             )
         }
     }
 }
+
+/** Fan side per jacket index: the first upright in front, then one behind on each side. */
+private val JACKET_FAN = listOf(0, -1, 1)
 
 /** Internal so the gallery can show the footer on its own. */
 @Composable

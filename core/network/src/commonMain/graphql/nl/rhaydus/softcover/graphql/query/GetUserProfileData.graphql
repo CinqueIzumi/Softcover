@@ -21,7 +21,7 @@ query GetUserProfileData {
         }
 
         # The last few highly-rated finished books, newest first - a small targeted list, not a
-        # full pull. Cover/title/author only; no series/description/tags (those belong to the full
+        # full pull. Id/cover/title/author only; no series/description/tags (those belong to the full
         # book-detail fragments, not this small preview list).
         recently_loved: user_books(
             where: { status_id: { _eq: 3 }, rating: { _gte: 4.0 } }
@@ -32,6 +32,7 @@ query GetUserProfileData {
             rating
             last_read_date
             book {
+                id
                 title
                 image {
                     url

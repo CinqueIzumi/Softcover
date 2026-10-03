@@ -34,6 +34,8 @@ sealed interface CoverVariant {
 
     data object ReadingTrendingTile : CoverVariant
 
+    data object ProfileLovedBook : CoverVariant
+
     data object ReadingHeroBackdrop : CoverVariant
 
     data object BookDetailHero : CoverVariant

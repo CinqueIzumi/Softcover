@@ -793,6 +793,7 @@ class ProfileRemoteDataSourceImplTest {
             // ----- Assert -----
             result.recentlyLoved shouldBe listOf(
                 LovedBook(
+                    bookId = 1,
                     coverUrl = "cover1.jpg",
                     title = "Dune",
                     author = "Frank Herbert, Someone Else",
@@ -826,6 +827,7 @@ class ProfileRemoteDataSourceImplTest {
             // ----- Assert -----
             result.recentlyLoved shouldBe listOf(
                 LovedBook(
+                    bookId = 1,
                     coverUrl = "",
                     title = "",
                     author = "",

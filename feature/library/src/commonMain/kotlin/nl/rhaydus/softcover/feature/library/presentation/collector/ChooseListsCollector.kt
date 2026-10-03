@@ -17,10 +17,7 @@ private const val STACKED_COVER_COUNT: Int = 3
 
 /**
  * Maps the bulk selection and the reader's custom lists to the choose-lists sheet off the
- * composition (R9), and resolves the header stack's covers in the same pass.
- *
- * Both fields are written in one `setState` so the model's jacket count and the editions the render
- * indexes into can never describe different selections.
+ * composition (R9).
  */
 internal class ChooseListsCollector : LibraryCollector {
     override suspend fun onLaunch(
@@ -33,9 +30,7 @@ internal class ChooseListsCollector : LibraryCollector {
                     selectedBookIds = state.selectedBookIds,
                     customLists = state.customLists,
                     listsBeingMutated = state.listsBeingMutated,
-                    jacketEditions = state.resolveSelectedBooks()
-                        .take(STACKED_COVER_COUNT)
-                        .mapNotNull { it.currentEdition },
+                    jacketBooks = state.resolveSelectedBooks().take(STACKED_COVER_COUNT),
                 )
             }
             .distinctUntilChanged()
@@ -46,12 +41,8 @@ internal class ChooseListsCollector : LibraryCollector {
                 val model = if (snapshot.selectedBookIds.isEmpty()) {
                     null
                 } else {
-                    val covers = snapshot.jacketEditions.map { edition ->
-                        edition.toCoverUiModel(
-                            defaultEdition = edition,
-                            coverlessTitle = edition.title ?: "${snapshot.selectedBookIds.size} books",
-                            variant = CoverVariant.ChooseListsStackJacket,
-                        )
+                    val covers = snapshot.jacketBooks.map { book ->
+                        book.toCoverUiModel(variant = CoverVariant.ChooseListsStackJacket)
                     }
 
                     snapshot.customLists

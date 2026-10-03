@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
@@ -78,6 +79,7 @@ internal actual fun ProfileScreenLayout(
     state: ProfileUiState,
     runAction: (ProfileAction) -> Unit,
     onNavigateUp: () -> Unit,
+    onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
     var showShareSheet by remember { mutableStateOf(false) }
     var showLogOutConfirm by remember { mutableStateOf(false) }
@@ -194,9 +196,11 @@ internal actual fun ProfileScreenLayout(
             Spacer(modifier = Modifier.height(40.dp))
 
             RecentlyLovedSection(
-                books = state.readingLife?.recentlyLoved.orEmpty(),
+                cards = state.recentlyLovedCards,
+                hasRecentlyLoved = state.hasRecentlyLoved,
                 isLoading = readingLifeLoading,
                 header = state.recentlyLovedHeader,
+                onEvent = onBookCardEvent,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 
@@ -323,6 +327,7 @@ private fun ProfileScreenLightPreview() {
             state = ProfileScreenPreviewState,
             runAction = {},
             onNavigateUp = {},
+            onBookCardEvent = {},
         )
     }
 }
@@ -335,6 +340,7 @@ private fun ProfileScreenDarkPreview() {
             state = ProfileScreenPreviewState,
             runAction = {},
             onNavigateUp = {},
+            onBookCardEvent = {},
         )
     }
 }

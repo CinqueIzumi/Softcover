@@ -68,6 +68,7 @@ class ObserveReadingLifeUseCaseTest {
         ratings = ratings,
         recentlyLoved = listOf(
             LovedBook(
+                bookId = 1,
                 coverUrl = "cover.jpg",
                 title = "Dune",
                 author = "Frank Herbert",

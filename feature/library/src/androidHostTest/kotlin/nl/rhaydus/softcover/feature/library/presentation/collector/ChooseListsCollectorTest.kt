@@ -77,10 +77,12 @@ class ChooseListsCollectorTest {
                 val book1 = bookWithId(id = 1)
                 val book2 = bookWithId(id = 2)
                 val collector = ChooseListsCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
@@ -105,10 +107,12 @@ class ChooseListsCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val collector = ChooseListsCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
@@ -129,10 +133,12 @@ class ChooseListsCollectorTest {
             // ----- Arrange -----
             val books = (1..5).map { id -> bookWithId(id = id) }
             val collector = ChooseListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -147,6 +153,36 @@ class ChooseListsCollectorTest {
         }
 
         @Test
+        fun `a selected book with no edition still yields a jacket`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val withEdition = bookWithId(id = 1)
+            val withoutEdition = PreviewData.baseBook.copy(
+                id = 2,
+                editions = emptyList(),
+                defaultEdition = null,
+                coverUrl = "https://example.com/cover.jpg",
+            )
+            val collector = ChooseListsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                booksByTab = mapOf("all" to listOf(withEdition, withoutEdition)),
+                selectedBookIds = setOf(1, 2),
+            )
+
+            // ----- Assert -----
+            val trailing = stateFlow.value.chooseListsSheet?.scaffold?.header?.trailing
+            (trailing as SheetHeaderTrailing.JacketStack).covers.size shouldBe 2
+            job.cancel()
+        }
+
+        @Test
         fun `the built-in Owned list is excluded from the sheet's rows`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = bookWithId(id = 1)
@@ -156,10 +192,12 @@ class ChooseListsCollectorTest {
                 name = "Winter reading",
             )
             val collector = ChooseListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(

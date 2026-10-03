@@ -54,16 +54,6 @@ internal class CoverModelsCollector : BookDetailCollector {
                             coverlessTitle = title,
                             variant = CoverVariant.SheetHeaderJacket,
                         ),
-                        // Mapped from every known edition rather than the state's derived
-                        // `filteredEditions`, which re-filters on each read: the map would otherwise
-                        // have to be rebuilt on every keystroke in the edition search field.
-                        editionCovers = snapshot.editions.associate { edition ->
-                            edition.id to edition.toCoverUiModel(
-                                defaultEdition = fallbackEdition,
-                                coverlessTitle = edition.title,
-                                variant = CoverVariant.EditionListRow,
-                            )
-                        },
                         tagEditorCover = edition.toCoverUiModel(
                             defaultEdition = fallbackEdition,
                             coverlessTitle = title,

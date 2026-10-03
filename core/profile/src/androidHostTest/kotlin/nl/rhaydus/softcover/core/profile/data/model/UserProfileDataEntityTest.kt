@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.profile.data.model
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
@@ -86,6 +87,7 @@ class UserProfileDataEntityTest {
         ),
         recentlyLoved = listOf(
             LovedBook(
+                bookId = 1,
                 coverUrl = "cover.jpg",
                 title = "Dune",
                 author = "Frank Herbert",
@@ -516,6 +518,111 @@ class UserProfileDataEntityTest {
                     14,
                 ),
             )
+        }
+    }
+
+    @Nested
+    inner class LovedBookCache {
+        private fun lovedBookEntity(bookId: Int?): LovedBookEntity = LovedBookEntity(
+            bookId = bookId,
+            coverUrl = "cover.jpg",
+            title = "Dune",
+            author = "Frank Herbert",
+            ratingStars = 4.5,
+            monthLabel = "May 2026",
+        )
+
+        @Test
+        fun `LovedBookEntity toModel returns null when bookId is null`() {
+            // ----- Arrange -----
+            val entity = lovedBookEntity(bookId = null)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `LovedBookEntity toModel maps every field when bookId is present`() {
+            // ----- Arrange -----
+            val entity = lovedBookEntity(bookId = 9)
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result shouldBe LovedBook(
+                bookId = 9,
+                coverUrl = "cover.jpg",
+                title = "Dune",
+                author = "Frank Herbert",
+                ratingStars = 4.5,
+                monthLabel = "May 2026",
+            )
+        }
+
+        @Test
+        fun `a cached recentlyLoved entry without a bookId is dropped while the others map through`() {
+            // ----- Arrange -----
+            val entity = minimalModel().toEntity().copy(
+                recentlyLoved = listOf(
+                    lovedBookEntity(bookId = 1),
+                    lovedBookEntity(bookId = null),
+                    lovedBookEntity(bookId = 3),
+                ),
+            )
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.recentlyLoved.map { it.bookId } shouldBe listOf(1, 3)
+        }
+
+        @Test
+        fun `a cached recentlyLoved list holding only id-less entries maps to an empty list`() {
+            // ----- Arrange -----
+            val entity = minimalModel().toEntity().copy(
+                recentlyLoved = listOf(lovedBookEntity(bookId = null)),
+            )
+
+            // ----- Act -----
+            val result = entity.toModel()
+
+            // ----- Assert -----
+            result.recentlyLoved shouldBe emptyList()
+        }
+
+        @Test
+        fun `legacy JSON with a loved book lacking the bookId field still decodes and is dropped on toModel`() {
+            // ----- Arrange -----
+            val legacyJson = """
+                {
+                  "profileImageUrl": "https://example.com/avatar.png",
+                  "name": "Jane Doe",
+                  "bio": "Avid reader",
+                  "booksRead": 42,
+                  "totalPagesRead": 12000,
+                  "averageRating": 4.2,
+                  "readingStreak": 5,
+                  "recentlyLoved": [
+                    { "coverUrl": "cover.jpg", "title": "Dune", "author": "Frank Herbert", "ratingStars": 4.5, "monthLabel": "May 2026" }
+                  ]
+                }
+            """.trimIndent()
+            val lenientJson = Json { ignoreUnknownKeys = true }
+
+            // ----- Act -----
+            val entity = lenientJson.decodeFromString(
+                UserProfileDataEntity.serializer(),
+                legacyJson,
+            )
+
+            // ----- Assert -----
+            entity.recentlyLoved.single().bookId.shouldBeNull()
+            entity.toModel().recentlyLoved shouldBe emptyList()
         }
     }
 

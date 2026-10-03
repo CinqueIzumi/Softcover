@@ -34,6 +34,7 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -79,6 +80,7 @@ internal actual fun ProfileScreenLayout(
     state: ProfileUiState,
     runAction: (ProfileAction) -> Unit,
     onNavigateUp: () -> Unit,
+    onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -88,6 +90,7 @@ internal actual fun ProfileScreenLayout(
             state = state,
             runAction = runAction,
             onNavigateUp = onNavigateUp,
+            onBookCardEvent = onBookCardEvent,
         )
     }
 }
@@ -97,6 +100,7 @@ private fun ProfileContent(
     state: ProfileUiState,
     runAction: (ProfileAction) -> Unit,
     onNavigateUp: () -> Unit,
+    onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
     var showShareSheet by remember { mutableStateOf(false) }
     var showLogOutConfirm by remember { mutableStateOf(false) }
@@ -147,6 +151,7 @@ private fun ProfileContent(
                     onShareClick = { showShareSheet = true },
                     onLogOutClick = { showLogOutConfirm = true },
                     onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
+                    onBookCardEvent = onBookCardEvent,
                 )
             } else {
                 SingleColumnProfile(
@@ -154,6 +159,7 @@ private fun ProfileContent(
                     onShareClick = { showShareSheet = true },
                     onLogOutClick = { showLogOutConfirm = true },
                     onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
+                    onBookCardEvent = onBookCardEvent,
                 )
             }
         }
@@ -191,6 +197,7 @@ private fun TwoColumnProfile(
     onShareClick: () -> Unit,
     onLogOutClick: () -> Unit,
     onHideUntaggedAuthorsChange: (Boolean) -> Unit,
+    onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -233,6 +240,7 @@ private fun TwoColumnProfile(
                     state = state,
                     onShareClick = onShareClick,
                     onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
+                    onBookCardEvent = onBookCardEvent,
                     modifier = Modifier.widthIn(max = 640.dp),
                 )
             }
@@ -254,6 +262,7 @@ private fun SingleColumnProfile(
     onShareClick: () -> Unit,
     onLogOutClick: () -> Unit,
     onHideUntaggedAuthorsChange: (Boolean) -> Unit,
+    onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
@@ -277,6 +286,7 @@ private fun SingleColumnProfile(
                 state = state,
                 onShareClick = onShareClick,
                 onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
+                onBookCardEvent = onBookCardEvent,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -309,6 +319,7 @@ private fun ReadingLifeContent(
     state: ProfileUiState,
     onShareClick: () -> Unit,
     onHideUntaggedAuthorsChange: (Boolean) -> Unit,
+    onBookCardEvent: (BookCardEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // ReadingAtlasSection reads state.isLoading directly (it is driven by userProfileData alone),
@@ -370,9 +381,11 @@ private fun ReadingLifeContent(
         Spacer(modifier = Modifier.height(40.dp))
 
         RecentlyLovedSection(
-            books = state.readingLife?.recentlyLoved.orEmpty(),
+            cards = state.recentlyLovedCards,
+            hasRecentlyLoved = state.hasRecentlyLoved,
             isLoading = readingLifeLoading,
             header = state.recentlyLovedHeader,
+            onEvent = onBookCardEvent,
         )
     }
 }
@@ -440,6 +453,7 @@ private fun ProfileScreenDesktopLightPreview() {
             state = ProfileScreenDesktopPreviewState,
             runAction = {},
             onNavigateUp = {},
+            onBookCardEvent = {},
         )
     }
 }
@@ -452,6 +466,7 @@ private fun ProfileScreenDesktopDarkPreview() {
             state = ProfileScreenDesktopPreviewState,
             runAction = {},
             onNavigateUp = {},
+            onBookCardEvent = {},
         )
     }
 }

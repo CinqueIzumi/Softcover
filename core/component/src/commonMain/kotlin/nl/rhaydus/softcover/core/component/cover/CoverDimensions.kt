@@ -104,6 +104,13 @@ internal data class CoverDimensions(
                 maxDecodePx = null,
             )
 
+            CoverVariant.ProfileLovedBook -> CoverDimensions(
+                elevation = 6.dp,
+                cornerRadius = 4.dp,
+                shadowColor = Color.Unspecified,
+                maxDecodePx = null,
+            )
+
             CoverVariant.ReadingHeroBackdrop -> CoverDimensions(
                 elevation = 0.dp,
                 cornerRadius = 4.dp,

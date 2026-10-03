@@ -1,12 +1,11 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -33,7 +32,6 @@ import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
-import nl.rhaydus.softcover.feature.book_detail.presentation.model.EditionTrailingUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class BookDetailUiState(
@@ -152,11 +150,8 @@ internal data class BookDetailUiState(
     val verdictCover: CoverUiModel? = null,
     val editionSheetHeaderCover: CoverUiModel? = null,
 
-    /** Keyed by [BookEdition.id]. Mapped from [editions], never from the derived `filteredEditions`. */
-    val editionCovers: Map<Int, CoverUiModel> = emptyMap(),
-
-    /** Keyed by [BookEdition.id], mapped from [editions] by `EditionSelectionCollector` (R9). See [EditionTrailingUiModel]. */
-    val editionTrailingMarks: ImmutableMap<Int, EditionTrailingUiModel> = persistentMapOf(),
+    /** Ordered like `filteredEditions`, mapped by `EditionCardsCollector` (R9). */
+    val editionCards: ImmutableList<BookCardUiModel> = persistentListOf(),
     val tagEditorCover: CoverUiModel? = null,
 
     val tagEditorSheet: SheetScaffoldUiModel? = null,
@@ -294,24 +289,5 @@ internal data class BookDetailUiState(
     fun isEditionOwned(edition: BookEdition?): Boolean = edition != null && edition.id in ownedEditionIds
 
     val filteredEditions: List<BookEdition>
-        get() {
-            val query = editionSearchQuery.trim()
-
-            if (query.isEmpty()) return editions
-
-            return editions.filter { edition ->
-                edition.isbn10?.contains(
-                    other = query,
-                    ignoreCase = true,
-                ) == true ||
-                    edition.isbn13?.contains(
-                        other = query,
-                        ignoreCase = true,
-                    ) == true ||
-                    edition.publisher?.contains(
-                        other = query,
-                        ignoreCase = true,
-                    ) == true
-            }
-        }
+        get() = editions.filterByEditionSearch(editionSearchQuery)
 }

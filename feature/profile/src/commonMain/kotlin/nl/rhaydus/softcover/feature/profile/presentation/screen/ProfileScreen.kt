@@ -2,12 +2,21 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.util.ObserveAsEvents
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
+import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
@@ -35,6 +44,10 @@ class ProfileScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             onNavigateUp = navigator::pop,
+            onBookCardEvent = rememberRecentlyLovedEventHandler(
+                state = state,
+                navigator = navigator,
+            ),
         )
     }
 }
@@ -50,4 +63,57 @@ internal expect fun ProfileScreenLayout(
     state: ProfileUiState,
     runAction: (ProfileAction) -> Unit,
     onNavigateUp: () -> Unit,
+    onBookCardEvent: (BookCardEvent) -> Unit,
 )
+
+/**
+ * Opens book detail for a tapped "Recently loved" card and warms the detail on finger-down. A loved
+ * book has no full `Book`, so the destination is seeded from the card's id and cover URL alone.
+ */
+@Composable
+private fun rememberRecentlyLovedEventHandler(
+    state: ProfileUiState,
+    navigator: Navigator,
+): (BookCardEvent) -> Unit {
+    val appNavigator = koinInject<AppNavigator>()
+    val prefetcher = rememberBookDetailPrefetcher()
+
+    val currentState by rememberUpdatedState(state)
+    val currentNavigator by rememberUpdatedState(navigator)
+
+    return remember(appNavigator, prefetcher) {
+        { event ->
+            val key = event.key
+
+            if (key is BookCardKey.Book) {
+                when (event) {
+                    is BookCardEvent.Clicked -> currentState.readingLife
+                        ?.recentlyLoved
+                        .orEmpty()
+                        .firstOrNull { it.bookId == key.bookId }
+                        ?.let { loved ->
+                            val destination = ScreenDestination.BookDetail(
+                                id = loved.bookId,
+                                initialCover = BookInitialCover(
+                                    currentEdition = null,
+                                    defaultEdition = null,
+                                    fallbackCoverUrl = loved.coverUrl.takeIf { it.isNotBlank() },
+                                    title = loved.title,
+                                ),
+                            )
+
+                            currentNavigator.push(item = appNavigator.screen(destination))
+                        }
+
+                    is BookCardEvent.PressStarted -> prefetcher.prefetch(key.bookId)
+
+                    is BookCardEvent.LongClicked,
+                    is BookCardEvent.TrailingClicked,
+                    is BookCardEvent.MenuClicked,
+                    is BookCardEvent.ShakeEnded,
+                        -> Unit
+                }
+            }
+        }
+    }
+}

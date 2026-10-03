@@ -188,6 +188,7 @@ private fun previewRatings(): RatingsDistribution = RatingsDistribution(
 
 private fun previewRecentlyLoved(): List<LovedBook> = listOf(
     LovedBook(
+        bookId = 1,
         coverUrl = "",
         title = "The Bee Sting",
         author = "Paul Murray",
@@ -195,6 +196,7 @@ private fun previewRecentlyLoved(): List<LovedBook> = listOf(
         monthLabel = "Jun 2026",
     ),
     LovedBook(
+        bookId = 2,
         coverUrl = "",
         title = "Cloud Cuckoo Land",
         author = "Anthony Doerr",
@@ -202,6 +204,7 @@ private fun previewRecentlyLoved(): List<LovedBook> = listOf(
         monthLabel = "May 2026",
     ),
     LovedBook(
+        bookId = 3,
         coverUrl = "",
         title = "Sea of Tranquility",
         author = "Emily St John Mandel",

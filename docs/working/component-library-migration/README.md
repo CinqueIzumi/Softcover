@@ -14,10 +14,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1–S7-6, SL-9–SL-11 done. SL-3b waits on F34; detekt type
-  resolution inert (F33).
-- **Next:** S7-7; `steps/s7-bookcard.md` § Sub-steps.
-- **Open questions:** `BookmarkToggle` → foundation toggle? (No SL entry on issue #275, by the user's call.)
+- **State:** S7-1–S7-7, SL-9–SL-11 done. SL-3b waits on F34; F33 open.
+- **Next:** S7-C convergence pass; `steps/s7-bookcard.md` § S7-C.
+- **Open questions:** `BookmarkToggle` → foundation toggle? #275's PF line says "No UI changes" but PF-7 swaps copy — reword?
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
   titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
@@ -35,9 +34,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes; SL-5's hero
-  title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid; S7-4's rails; S7-5's rows; SL-10b's stand-ins; desktop chip gap (24dp); S7-6's rows, tiles; SL-11's loading layouts.
-- **Verification:** SL-11: compile, `styleCheck`, tests passed (JBR 21); reviewer ✅.
-- **Uncommitted:** SL-11.
+  title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid; S7-4's rails; S7-5's rows; SL-10b's stand-ins; desktop chip gap (24dp); S7-6's rows, tiles; SL-11's loading layouts; S7-7.
+- **Verification:** S7-7: styleCheck, tests ✅ (JDK 21); review ✅; on device ✅.
+- **Uncommitted:** none.
 
 ## Local verification
 

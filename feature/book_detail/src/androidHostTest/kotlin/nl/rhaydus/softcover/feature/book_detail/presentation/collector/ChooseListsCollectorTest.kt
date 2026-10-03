@@ -3,12 +3,15 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.cover.CoverSource
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
@@ -91,6 +94,51 @@ class ChooseListsCollectorTest {
             // ----- Assert -----
             stateFlow.value.chooseListsSheet shouldNotBe null
             stateFlow.value.chooseListsSheet?.scaffold?.header?.section?.headlineText shouldBe "Shelve ${book.title}"
+            job.cancel()
+        }
+
+        @Test
+        fun `a book with no editions takes its cover from the default edition`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val defaultEdition = PreviewData.baseEdition.copy(
+                id = 42,
+                url = "https://example.com/default.jpg",
+                localImagePath = null,
+            )
+            val book = PreviewData.baseBook.copy(
+                editions = emptyList(),
+                defaultEdition = defaultEdition,
+                coverUrl = "https://example.com/fallback.jpg",
+                userBook = null,
+            )
+            val collector = ChooseListsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                book = book,
+                userLists = listOf(
+                    buildList(
+                        id = 2,
+                        name = "Winter reading",
+                        slug = "winter-reading",
+                        bookId = book.id,
+                    ),
+                ),
+            )
+
+            // ----- Assert -----
+            val trailing = stateFlow.value.chooseListsSheet?.scaffold?.header?.trailing
+                .shouldBeInstanceOf<SheetHeaderTrailing.Jacket>()
+            trailing.cover.source shouldBe CoverSource.Remote(
+                url = "https://example.com/default.jpg",
+                persistEditionId = 42,
+            )
             job.cancel()
         }
 

@@ -10,15 +10,12 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.model.EditionTrailingUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -27,22 +24,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-private val TRACKING_BADGE = BadgeUiModel(
-    label = "TRACKING NOW",
-    tone = BadgeTone.Neutral,
-    size = BadgeSize.Regular,
-)
-
 private val OWNED_BADGE = BadgeUiModel(
     label = "Owned",
     tone = BadgeTone.Scrim,
     size = BadgeSize.Regular,
     icon = SoftcoverIcon.Check,
-)
-
-private val SELECTED_MARK = SelectionMarkUiModel(
-    selected = true,
-    backdrop = SelectionMarkBackdrop.Surface,
 )
 
 class EditionSelectionCollectorTest {
@@ -100,87 +86,6 @@ class EditionSelectionCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `marks the current edition Selected when the sheet just opened`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val current = buildEdition(id = 1)
-            val other = buildEdition(id = 2)
-            stateFlow.value = BookDetailUiState(
-                editions = listOf(current, other),
-                previewEdition = current,
-                selectedEditionId = current.id,
-            )
-            val collector = EditionSelectionCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.editionTrailingMarks shouldBe mapOf(
-                1 to EditionTrailingUiModel.Selected(mark = SELECTED_MARK),
-            )
-            job.cancel()
-        }
-
-        @Test
-        fun `marks another selected edition Selected and the current edition Tracking`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val current = buildEdition(id = 1)
-            val other = buildEdition(id = 2)
-            stateFlow.value = BookDetailUiState(
-                editions = listOf(current, other),
-                previewEdition = current,
-                selectedEditionId = other.id,
-            )
-            val collector = EditionSelectionCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.editionTrailingMarks shouldBe mapOf(
-                2 to EditionTrailingUiModel.Selected(mark = SELECTED_MARK),
-                1 to EditionTrailingUiModel.Tracking(badge = TRACKING_BADGE),
-            )
-            job.cancel()
-        }
-
-        @Test
-        fun `an edition that is neither selected nor current has no trailing mark`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val current = buildEdition(id = 1)
-            val selected = buildEdition(id = 2)
-            val untouched = buildEdition(id = 3)
-            stateFlow.value = BookDetailUiState(
-                editions = listOf(current, selected, untouched),
-                previewEdition = current,
-                selectedEditionId = selected.id,
-            )
-            val collector = EditionSelectionCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.editionTrailingMarks.containsKey(untouched.id) shouldBe false
-            job.cancel()
-        }
-
-        @Test
         fun `sets ownedCoverBadge when the displayed edition is owned`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val displayed = buildEdition(id = 1)
@@ -224,36 +129,6 @@ class EditionSelectionCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.ownedCoverBadge shouldBe null
-            job.cancel()
-        }
-
-        @Test
-        fun `re-emits trailing marks when selectedEditionId changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val current = buildEdition(id = 1)
-            val other = buildEdition(id = 2)
-            stateFlow.value = BookDetailUiState(
-                editions = listOf(current, other),
-                previewEdition = current,
-                selectedEditionId = current.id,
-            )
-            val collector = EditionSelectionCollector()
-
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(selectedEditionId = other.id)
-
-            // ----- Assert -----
-            stateFlow.value.editionTrailingMarks shouldBe mapOf(
-                2 to EditionTrailingUiModel.Selected(mark = SELECTED_MARK),
-                1 to EditionTrailingUiModel.Tracking(badge = TRACKING_BADGE),
-            )
             job.cancel()
         }
     }

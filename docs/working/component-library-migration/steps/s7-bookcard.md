@@ -19,7 +19,7 @@ After S7-1, the user checks the `BookCard` variants in the Component Gallery bef
 | S7-4 | Explore rails, featured, series and mood tile | [x] |
 | S7-5 | Explore search and hidden suggestions | [x] |
 | S7-6 | Reading | [x] |
-| S7-7 | Profile, book_detail's `EditionItem` and `StackedJackets`, plus the final shared-element and skippability verification | [ ] |
+| S7-7 | Profile, book_detail's `EditionItem` and `StackedJackets`, plus the final shared-element and skippability verification | [x] |
 | S7-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## Variant mapping (current paths)
@@ -100,6 +100,9 @@ Coverless-monogram (`CoverlessTitleCover`, `MonogramCoverMetrics`) — also done
   gaps 8/8 → 9/2 (series 8/8/8 → 9/2/2), Trending star 14 → 12dp with tabular editorial `bodySmall`, an
   unrated / unnumbered book drops the line instead of reserving it.
 - S7-6: "Also reading" (`CompactBookEntry`, both layouts) → `Row(Standard)`: series eyebrow (Error tone "Couldn't save — tap to retry" on a failed save), "By X" byline, progress `Value(fraction, "NN%")`, trailing `SetProgress` → progress sheet, row `deadline` + `coverBadge`, `shakeOnError` → `OnClearMutationFailureAction`, press `Tap` with prefetch. `PickUpNextTile` → `Column` (96dp, title only, no progress slot, no menu). A reading `BookCardModelsCollector` + feature-local mapper writes `alsoReadingCards` / `pickUpNextCards`, folding `bookCovers`, `pickUpNextCovers`, `deadlineSummaries`; `deadlineCoverOverlays` and the featured / trending / verdict covers stay. One handler per list resolves the `Book` by key. Accepted shifts: row padding and gaps, 54 → 56dp lead, left-aligned tile title, the tile's tinted cover box dropped. `TrendingTileSection`, the featured hero and `FeaturedCover` stay as they are.
+- S7-7: `StackedJackets` already left in S6 (the sheet's `JacketStack`). All of S7-7 runs in one session.
+- S7-7 Profile: `LovedBookCard` → `Column` (cover `ProfileLovedBook`, "By X" byline, lines "★ 4.5" then the month, no menu, no progress slot); `LovedBook` gains `bookId`; press `Tap` with prefetch → book detail as Reading does; loading = 3 masked stand-ins. Accepted shifts: title → titleSmall, author → "By X", star first.
+- S7-7 edition sheet: `EditionItem` → `Row(Standard)`: title = format label, `titleIcon` = format glyph, lines = meta then ISBN; no bordered card; `selection` on the picked row only (others undimmed); owned → `coverBadge` "Owned"; "Tracking now" stays a trailing `Badge`; `EditionTrailingUiModel` goes.
 - Mappers feature-local per feature; the "year · N readers · ★ rating" line goes to `:core:uibinding` at once; a `BookCardModelsCollector` per feature, one map per surface.
 
 ## S7-C — candidates found on the way

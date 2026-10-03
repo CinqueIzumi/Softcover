@@ -1,5 +1,8 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
@@ -15,6 +18,7 @@ internal data class ProfileUiState(
     val userProfileData: UserProfileData? = null,
     val readingLife: ReadingLife? = null,
     val readingLifeShareCard: ReadingLifeShareCardUiModel? = null,
+    val recentlyLovedCards: ImmutableList<BookCardUiModel> = persistentListOf(),
     val hideUntaggedAuthors: Boolean = false,
     val isLoading: Boolean = true,
 
@@ -43,6 +47,13 @@ internal data class ProfileUiState(
 ) : UiState {
     private val allAuthorDemographics: AuthorDemographics
         get() = readingLife?.authorDemographics ?: AuthorDemographics()
+
+    /**
+     * Whether the reader has any loved reads to show. Read from [readingLife] rather than the mapped
+     * [recentlyLovedCards], which land a frame later and would flash the empty copy.
+     */
+    val hasRecentlyLoved: Boolean
+        get() = readingLife?.recentlyLoved.orEmpty().isNotEmpty()
 
     /**
      * The author breakdown as the section should render it: every author by default, or - once

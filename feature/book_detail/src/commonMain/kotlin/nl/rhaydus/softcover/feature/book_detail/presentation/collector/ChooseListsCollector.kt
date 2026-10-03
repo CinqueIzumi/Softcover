@@ -26,29 +26,22 @@ internal class ChooseListsCollector : BookDetailCollector {
         scope.state
             .map {
                 ChooseListsSnapshot(
-                    bookId = it.book?.id,
-                    bookTitle = it.book?.title,
-                    currentEdition = it.book?.currentEdition,
+                    book = it.book,
                     userLists = it.userLists,
                     listsBeingMutated = it.listsBeingMutated,
                 )
             }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
-                val bookId = snapshot.bookId
-                val bookTitle = snapshot.bookTitle
+                val book = snapshot.book
 
-                val model = if (bookId != null && bookTitle != null) {
+                val model = if (book != null) {
                     snapshot.userLists
                         .filter { it.isOwned.not() }
                         .toChooseListsUiModel(
-                            bookId = bookId,
-                            bookTitle = bookTitle,
-                            cover = snapshot.currentEdition.toCoverUiModel(
-                                defaultEdition = snapshot.currentEdition,
-                                coverlessTitle = bookTitle,
-                                variant = CoverVariant.ChooseListsSingleJacket,
-                            ),
+                            bookId = book.id,
+                            bookTitle = book.title,
+                            cover = book.toCoverUiModel(variant = CoverVariant.ChooseListsSingleJacket),
                             listsBeingMutated = snapshot.listsBeingMutated,
                         )
                 } else {
