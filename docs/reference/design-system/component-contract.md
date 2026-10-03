@@ -208,9 +208,9 @@ No per-surface skeleton composable, no skeleton variant, no `SkeletonCrossfade` 
 the real one (`Cover`'s crossfade from its own masked slot to the image is the real layout). A model's
 `previews` include a loading fixture; a data-free primitive's gallery fixtures do.
 
-- **Not yet satisfied by the whole app.** Holdouts: `Skeleton` and its variants, and the feature sections
-  that swap to it or to hand-sized `.shimmer` blocks (book detail, explore, roadmap, profile). Write new
-  components to R12; an existing skeleton swap is not licence.
+- **Not yet satisfied by the whole app.** The only holdout is profile: its sections and both layouts
+  still use hand-sized `.shimmer` blocks. Write new components to R12; an existing skeleton swap is not
+  licence.
 
 ### 7.3 Reference implementation — `ShareCard`
 

@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SL-14 done, uncommitted: book detail's grey flash was the `skeletonMask` shimmer on shelve rows / About / Reviews showing ~130ms while a re-open is served from Apollo's memory cache. `skeletonMask` now runs `skeletonRevealPhase` on the frame clock (blank 250ms, shimmer held ≥300ms, `SKELETON_GRACE_MILLIS` / `SKELETON_MINIMUM_VISIBLE_MILLIS`); `Cover`'s loading boxes go through it (`CoverShimmer`); `ShelveControlCard` drops `key(isLoading)` for `wasLoading` (no wipe / tween on landing). Stand-in cards and `Cover`'s loading slot leave composition on load, so they get the grace but not the 300ms hold (accepted). SL-3b waits on F34; F33 open.
-- **Next:** SL-13 (delete the `Skeleton` family; its prerequisites SL-8 and SL-10 are done).
+- **State:** SL-13 done, uncommitted: `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry and `SkeletonUiModelTest` are deleted; `module-structure.md`, `components.md`, `component-contract.md` § 7.2 (profile is the only holdout) and `foundations.md` (footprint bullet now points at § 7.2) are rewritten. SL's open sub-steps are blocked: SL-3b on F34, SL-12 on S9-3. F33 open.
+- **Next:** S8-4 in `steps/s8-controls.md` — `Toggle` + `SegmentedControl` design and their call sites.
 - **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `Color.LightGray` / `White`, not theme roles, so network-latency shimmers are a light-grey block on the dark theme — foundation upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
 - **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** SL-14: `styleCheck` (JDK 21), `SkeletonRevealPhaseTest` 13/13, emulator recordings (re-open: no shimmer; cold open: shimmer after the grace, lands correctly), 2 reviews (final clean) ✅.
-- **Uncommitted:** `SkeletonMask.kt`, `SkeletonRevealPhase.kt` (new), `Cover.kt`, `ShelveControlCard.kt`, `SkeletonRevealPhaseTest.kt` (new), `components.md` SkeletonMask line, this block, the SL-14 tick.
+- **Verification:** SL-13: `:core:component:compileKotlinJvm`, `styleCheck` (JDK 21), `:core:component:testAndroidHostTest`, 1 review (one fused doc line, fixed) ✅.
+- **Uncommitted:** the three deleted `state/Skeleton*.kt`, `SkeletonUiModelTest.kt`, `GalleryChromeEntries.kt`, the four reference docs above, the SL-13 tick, this block.
 
 ## Local verification
 

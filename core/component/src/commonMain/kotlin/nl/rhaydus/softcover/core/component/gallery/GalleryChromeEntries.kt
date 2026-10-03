@@ -36,8 +36,6 @@ import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
-import nl.rhaydus.softcover.core.component.state.Skeleton
-import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
@@ -158,20 +156,6 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
             EmptyState(
                 model = model,
                 modifier = modifier,
-            )
-        },
-    ),
-    galleryEntry(
-        name = "Skeleton",
-        family = GalleryFamily.STATE,
-        blurb = "The shimmering loading placeholder a screen renders in place of content it " +
-            "does not have yet, one per surface it mirrors.",
-        previews = SkeletonUiModel,
-        label = { model -> model.variant.name },
-        content = { model, modifier ->
-            Skeleton(
-                model = model,
-                modifier = modifier.width(140.dp),
             )
         },
     ),

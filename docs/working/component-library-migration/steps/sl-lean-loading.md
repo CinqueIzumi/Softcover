@@ -27,7 +27,7 @@ deleted.
 | SL-10b | Explore search and hidden suggestions, the same; the remaining `*Skeleton` state fields go | SL-10a, S7-5 | [x] |
 | SL-11 | Library and Reading: audit how they show loading; convert any loading branch to the shape below | S7-6 | [x] |
 | SL-12 | Profile: sections and both layouts move from `.shimmer` blocks to masked real leaves | S9-3 | [ ] |
-| SL-13 | Delete `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry, `SkeletonUiModelTest` and doc lines | SL-8, SL-10 | [ ] |
+| SL-13 | Delete `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry, `SkeletonUiModelTest` and doc lines | SL-8, SL-10 | [x] |
 | SL-14 | Delayed reveal: `skeletonMask` and `Cover`'s loading shimmer wait out a grace period and hold a minimum once shown | SL-11 | [x] |
 
 SL-1 to SL-7 run before S7-2. A sub-step whose "Runs after" is open waits; the tracker's `## Now` picks the

@@ -46,7 +46,6 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error.
 - **Banner** — `core:component/callout` — full-width slide-in strip for a screen-level condition or a card-fused nudge; tone picks the colour (`Warning`, `Highlight`), variant the voice (`Status` centred Material text, `Editorial` start-aligned italic); one 16×10 dp padding, 48 dp dismiss target.
 - **Empty state** — `core:component/state` — placeholder for content a surface has nothing to draw; `EmptyStateVariant.Centered(button?)` (swaying quote glyph, editorial headline, optional filled button) or `Inline` (start-aligned italic title and body); title is a heading, caller pads it as full pane (`fillMaxSize().padding(24.dp)`) or in flow (`fillMaxWidth().padding(top = 40.dp)`).
-- **Skeleton** — `core:component/state` — per-surface shimmer placeholder matching its loaded footprint.
 - **SkeletonMask** — `core:component/state` — `Modifier.skeletonMask(visible, shape)`: hides a leaf's content and, after a short grace period, draws the foundation shimmer over its measured bounds, so a component keeps its real layout while loading.
 - **Divider** — `core:component/divider` — hairline rule, bare, centred, or vertical.
 - **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — exception to the wavy-progress rule.
