@@ -69,8 +69,8 @@ class ExploreBookCardMapperTest {
         userBookRead = null,
     )
 
-    private fun BookCardUiModel.stacked(): BookCardVariant.Stacked =
-        variant.shouldBeInstanceOf<BookCardVariant.Stacked>()
+    private fun BookCardUiModel.stacked(): BookCardVariant.Column =
+        variant.shouldBeInstanceOf<BookCardVariant.Column>()
 
     @Nested
     inner class ToTrendingCard {

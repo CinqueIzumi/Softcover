@@ -45,10 +45,10 @@ class LibraryBookCardFitsTest {
         }
 
         @Test
-        fun `a stacked card fits only the titled grids`() {
+        fun `a column card fits only the titled grids`() {
             // ----- Arrange -----
             val model = card(
-                variant = BookCardVariant.Stacked(
+                variant = BookCardVariant.Column(
                     cover = null,
                     text = mockk<BookCardContent>(relaxed = true),
                 ),

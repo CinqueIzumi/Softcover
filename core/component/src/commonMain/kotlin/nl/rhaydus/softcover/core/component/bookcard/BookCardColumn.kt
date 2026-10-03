@@ -52,9 +52,9 @@ internal fun BookCardCoverOnlyLayout(
 }
 
 @Composable
-internal fun BookCardStackedLayout(
+internal fun BookCardColumnLayout(
     model: BookCardUiModel,
-    variant: BookCardVariant.Stacked,
+    variant: BookCardVariant.Column,
     onEvent: (BookCardEvent) -> Unit,
     modifier: Modifier,
     isLoading: Boolean,

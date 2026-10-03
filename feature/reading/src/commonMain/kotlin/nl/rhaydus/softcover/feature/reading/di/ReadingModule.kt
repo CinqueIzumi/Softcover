@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.personal.di.personalModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
+import nl.rhaydus.softcover.feature.reading.presentation.collector.BookCardModelsCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.CurrentlyReadingBooksCollector
@@ -72,6 +73,7 @@ val readingModule = module {
     factory { VerdictSheetCollector() } bind ReadingCollector::class
     factory { CoverModelsCollector() } bind ReadingCollector::class
     factory { DeadlineModelsCollector() } bind ReadingCollector::class
+    factory { BookCardModelsCollector() } bind ReadingCollector::class
     factory { BookDeadlinesCollector() } bind ReadingCollector::class
     factory { DateStyleCollector() } bind ReadingCollector::class
     factory { PlanTodayDismissalsCollector() } bind ReadingCollector::class

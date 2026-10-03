@@ -130,7 +130,7 @@ private fun standInCard(
     menuLabel: String?,
 ) = BookCardUiModel(
     key = BookCardKey.Book(bookId = bookId),
-    variant = BookCardVariant.Stacked(
+    variant = BookCardVariant.Column(
         cover = CoverUiModel(
             source = null,
             coverlessTitle = null,

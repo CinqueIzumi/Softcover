@@ -22,7 +22,7 @@ import nl.rhaydus.softcover.core.uibinding.book.bookStatsLine
 internal fun Book.toTrendingCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
-): BookCardUiModel = toStackedCard(
+): BookCardUiModel = toColumnCard(
     cover = cover,
     coverBadge = coverBadge,
     text = BookCardContent(
@@ -51,7 +51,7 @@ internal fun Book.toTrendingCard(
 internal fun Book.toBecauseYouReadCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
-): BookCardUiModel = toStackedCard(
+): BookCardUiModel = toColumnCard(
     cover = cover,
     coverBadge = coverBadge,
     text = BookCardContent(
@@ -65,7 +65,7 @@ internal fun Book.toBecauseYouReadCard(
 internal fun Book.toUpNextCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
-): BookCardUiModel = toStackedCard(
+): BookCardUiModel = toColumnCard(
     cover = cover,
     coverBadge = coverBadge,
     text = BookCardContent(
@@ -108,14 +108,14 @@ internal fun Book.toSearchResultCard(cover: CoverUiModel): BookCardUiModel {
     )
 }
 
-private fun Book.toStackedCard(
+private fun Book.toColumnCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
     text: BookCardContent,
     menuLabel: String?,
 ): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = id),
-    variant = BookCardVariant.Stacked(
+    variant = BookCardVariant.Column(
         cover = cover,
         text = text,
         menuLabel = menuLabel,

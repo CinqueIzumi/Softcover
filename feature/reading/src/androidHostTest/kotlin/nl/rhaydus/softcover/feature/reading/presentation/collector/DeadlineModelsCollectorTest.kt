@@ -119,7 +119,7 @@ class DeadlineModelsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `produces progress, cover overlay, and summary entries for a book with a tracked deadline`() =
+        fun `produces a cover overlay and featured summary for a book with a tracked deadline`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val edition = stubEdition(pages = 100)
@@ -150,9 +150,7 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.deadlineCoverOverlays.keys shouldBe setOf(1)
-                stateFlow.value.deadlineSummaries.keys shouldBe setOf(1)
-                stateFlow.value.deadlineSummaries.getValue(1).paceText shouldBe "10 pages/day"
-                stateFlow.value.deadlineSummaries.getValue(1).tone shouldBe DeadlineSummaryTone.OnSurface
+                stateFlow.value.featuredDeadlineSummary?.paceText shouldBe "10 pages/day"
                 job.cancel()
             }
 
@@ -180,7 +178,6 @@ class DeadlineModelsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.deadlineCoverOverlays shouldBe emptyMap()
-            stateFlow.value.deadlineSummaries shouldBe emptyMap()
             stateFlow.value.featuredDeadlineSummary shouldBe null
             job.cancel()
         }
@@ -246,7 +243,7 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlineSummaries.getValue(1).paceText shouldBe "1h 0m/day"
+            stateFlow.value.featuredDeadlineSummary?.paceText shouldBe "1h 0m/day"
             job.cancel()
         }
 
@@ -279,12 +276,12 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.deadlineSummaries.getValue(1).paceText shouldBe "5 pages/day"
+            stateFlow.value.featuredDeadlineSummary?.paceText shouldBe "5 pages/day"
             job.cancel()
         }
 
         @Test
-        fun `featuredDeadlineSummary uses the hero tone while deadlineSummaries keeps OnSurface for the same book`() =
+        fun `featuredDeadlineSummary uses the hero tone`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val edition = stubEdition(pages = 100)
@@ -315,7 +312,6 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.featuredDeadlineSummary?.tone shouldBe DeadlineSummaryTone.OnHeroBackdrop
-                stateFlow.value.deadlineSummaries.getValue(1).tone shouldBe DeadlineSummaryTone.OnSurface
                 job.cancel()
             }
 
@@ -356,7 +352,7 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.featuredDeadlineSummary shouldBe null
-                stateFlow.value.deadlineSummaries.keys shouldBe setOf(2)
+                stateFlow.value.deadlineCoverOverlays.keys shouldBe setOf(2)
                 job.cancel()
             }
 

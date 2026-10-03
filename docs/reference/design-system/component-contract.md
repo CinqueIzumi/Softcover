@@ -59,7 +59,7 @@ sealed interface ProgressSheetEvent {
 ```kotlin
 data class BookCardUiModel(
     val key: BookCardKey,                 // identity
-    val variant: BookCardVariant,         // sealed: CoverOnly | Stacked | Row(size); each carries its own text
+    val variant: BookCardVariant,         // sealed: CoverOnly | Column | Row(size); each carries its own text
     val decorations: BookCardDecorations,  // progress? (Reserved | Value), coverBadge?, selection?, press behaviour
 )
 ```
@@ -105,7 +105,7 @@ state). A fixture that differs only in string content is noise.
 **R6 — Mapper placement: feature-local first, promoted on the second consumer.** A
 `Book -> BookCardUiModel` mapper starts in the consuming feature's `presentation/mapper/` and moves to
 `:core:uibinding` when a second feature needs the **identical** mapping. Two features mapping differently
-onto the same UI model (`explore` → `Stacked`, `library` → `Row`) keep two mappers, permanently.
+onto the same UI model (`explore` → `Column`, `library` → `Row`) keep two mappers, permanently.
 
 **R7 — Shared-element keys travel in the model.** `bookCoverTransitionKey(editionId, bookId, surface)` stays
 in `:core:designsystem` as a token. The mapper resolves the key string once and stores it on the model of

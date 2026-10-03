@@ -85,8 +85,8 @@ class BookCardModelsCollectorTest {
         userBookRead = null,
     )
 
-    private fun stackedOf(card: BookCardUiModel) =
-        card.variant.shouldBeInstanceOf<BookCardVariant.Stacked>()
+    private fun columnOf(card: BookCardUiModel) =
+        card.variant.shouldBeInstanceOf<BookCardVariant.Column>()
 
     @Nested
     inner class OnLaunch {
@@ -125,8 +125,8 @@ class BookCardModelsCollectorTest {
             stateFlow.value.becauseYouReadCards.keys shouldBe setOf(2)
             stateFlow.value.upNextCards.keys shouldBe setOf(3)
             stateFlow.value.trendingCards.getValue(1).key shouldBe BookCardKey.Book(bookId = 1)
-            stackedOf(stateFlow.value.becauseYouReadCards.getValue(2)).text.byline shouldBe "By Ann"
-            stackedOf(stateFlow.value.upNextCards.getValue(3)).menuLabel shouldBe "More options"
+            columnOf(stateFlow.value.becauseYouReadCards.getValue(2)).text.byline shouldBe "By Ann"
+            columnOf(stateFlow.value.upNextCards.getValue(3)).menuLabel shouldBe "More options"
             job.cancel()
         }
 
@@ -150,9 +150,9 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stackedOf(stateFlow.value.trendingCards.getValue(1)).cover shouldBe trendingCover
-            stackedOf(stateFlow.value.becauseYouReadCards.getValue(1)).cover shouldBe becauseCover
-            stackedOf(stateFlow.value.upNextCards.getValue(1)).cover shouldBe upNextCover
+            columnOf(stateFlow.value.trendingCards.getValue(1)).cover shouldBe trendingCover
+            columnOf(stateFlow.value.becauseYouReadCards.getValue(1)).cover shouldBe becauseCover
+            columnOf(stateFlow.value.upNextCards.getValue(1)).cover shouldBe upNextCover
             job.cancel()
         }
 
@@ -168,7 +168,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(trendingBooks = listOf(book(id = 1)))
 
             // ----- Assert -----
-            stackedOf(stateFlow.value.trendingCards.getValue(1)).cover.shouldBeNull()
+            columnOf(stateFlow.value.trendingCards.getValue(1)).cover.shouldBeNull()
             job.cancel()
         }
 
@@ -208,7 +208,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(trendingCovers = mapOf(1 to trendingCover))
 
             // ----- Assert -----
-            stackedOf(stateFlow.value.trendingCards.getValue(1)).cover.shouldNotBeNull() shouldBe trendingCover
+            columnOf(stateFlow.value.trendingCards.getValue(1)).cover.shouldNotBeNull() shouldBe trendingCover
             job.cancel()
         }
 

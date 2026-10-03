@@ -1,0 +1,91 @@
+package nl.rhaydus.softcover.feature.reading.presentation.mapper
+
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
+import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
+import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.DateStyle
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
+import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
+import kotlin.math.roundToInt
+
+/** An "Also reading" row; a failed save replaces the series eyebrow and shakes the row. */
+internal fun Book.toAlsoReadingCard(
+    deadlineProgress: DeadlineProgress?,
+    coverBadge: CoverOverlayUiModel?,
+    dateStyle: DateStyle,
+    mutationFailed: Boolean,
+): BookCardUiModel {
+    val progress = userBookRead?.progress ?: 0f
+
+    val eyebrow = if (mutationFailed) {
+        BookCardEyebrow(
+            text = "Couldn't save — tap to retry".uppercase(),
+            tone = BookCardEyebrow.Tone.Error,
+        )
+    } else {
+        seriesText
+            ?.takeIf { it.isNotBlank() }
+            ?.let { BookCardEyebrow(text = it.uppercase()) }
+    }
+
+    return BookCardUiModel(
+        key = BookCardKey.Book(bookId = id),
+        variant = BookCardVariant.Row(
+            size = BookCardVariant.Row.Size.Standard,
+            lead = BookCardLead.Cover(model = toTransitionCover(variant = CoverVariant.ReadingRowThumb)),
+            text = BookCardContent(
+                title = title,
+                eyebrow = eyebrow,
+                byline = currentEdition?.authorString
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { "By $it" },
+            ),
+            trailing = BookCardTrailing.SetProgress(label = "Set progress"),
+            deadline = deadlineProgress?.toDeadlineSummaryUiModel(
+                dateStyle = dateStyle,
+                tone = DeadlineSummaryTone.OnSurface,
+            ),
+        ),
+        decorations = BookCardDecorations(
+            progress = BookCardProgress.Value(
+                fraction = (progress / 100f).coerceIn(
+                    minimumValue = 0f,
+                    maximumValue = 1f,
+                ),
+                label = "${progress.roundToInt()}%",
+            ),
+            coverBadge = coverBadge,
+            shakeOnError = mutationFailed,
+        ),
+    )
+}
+
+/** A "Pick up next" tile: cover and title only, no progress. */
+internal fun Book.toPickUpNextCard(): BookCardUiModel = BookCardUiModel(
+    key = BookCardKey.Book(bookId = id),
+    variant = BookCardVariant.Column(
+        cover = toTransitionCover(variant = CoverVariant.ReadingPickUpNextTile),
+        text = BookCardContent(title = title),
+        menuLabel = null,
+    ),
+)
+
+private fun Book.toTransitionCover(variant: CoverVariant) = toCoverUiModel(
+    variant = variant,
+    sharedTransitionKey = bookCoverTransitionKey(
+        editionId = currentEdition?.id,
+        bookId = id,
+    ),
+)

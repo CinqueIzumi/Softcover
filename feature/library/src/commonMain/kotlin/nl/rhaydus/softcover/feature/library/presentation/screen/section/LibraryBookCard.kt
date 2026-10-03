@@ -55,7 +55,7 @@ internal fun BookCardUiModel.fits(layout: LibraryGridLayout): Boolean =
             layout == LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY ||
                 layout == LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY
 
-        is BookCardVariant.Stacked ->
+        is BookCardVariant.Column ->
             layout == LibraryGridLayout.GRID_TWO_COLUMNS ||
                 layout == LibraryGridLayout.GRID_THREE_COLUMNS
 

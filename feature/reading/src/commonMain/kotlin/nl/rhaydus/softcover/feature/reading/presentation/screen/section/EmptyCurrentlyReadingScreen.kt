@@ -22,8 +22,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -42,7 +45,7 @@ internal fun EmptyCurrentlyReadingScreen(
     trendingHeader: SectionHeaderUiModel,
     wantToReadBooks: List<Book> = emptyList(),
     trendingBooks: List<Book> = emptyList(),
-    pickUpNextCovers: Map<Int, CoverUiModel> = emptyMap(),
+    pickUpNextCards: ImmutableList<BookCardUiModel> = persistentListOf(),
     trendingTileCover: CoverUiModel? = null,
     streakEnabled: Boolean = false,
     recentReadingActivity: List<ReadingDayActivity> = emptyList(),
@@ -50,12 +53,13 @@ internal fun EmptyCurrentlyReadingScreen(
     onBookClick: (Book) -> Unit = {},
     onNavigateToSearch: () -> Unit,
 ) {
-    // Mirrors CoverModelsCollector's own wantToReadBooks.take(3) / firstOrNull() — kept in step
-    // here, not derived from the cover maps, so a change to this screen's tile count must update
-    // both places.
-    val pickUpNext = wantToReadBooks.take(3)
+    // Mirrors CoverModelsCollector's own trendingBooks.firstOrNull(): the tile's cover is mapped there.
     val trendingTile = trendingBooks.firstOrNull()
-    val showAdaptive = pickUpNext.isNotEmpty() || trendingTile != null
+    val showAdaptive = pickUpNextCards.isNotEmpty() || trendingTile != null
+    val onPickUpNextEvent = rememberReadingCardEventHandler(
+        books = wantToReadBooks,
+        onBookClick = onBookClick,
+    )
 
     Column(
         modifier = Modifier
@@ -145,14 +149,13 @@ internal fun EmptyCurrentlyReadingScreen(
             )
         }
 
-        if (pickUpNext.isNotEmpty()) {
+        if (pickUpNextCards.isNotEmpty()) {
             Spacer(modifier = Modifier.height(40.dp))
 
             PickUpNextSection(
-                books = pickUpNext,
-                covers = pickUpNextCovers,
+                cards = pickUpNextCards,
                 header = pickUpNextHeader,
-                onBookClick = onBookClick,
+                onEvent = onPickUpNextEvent,
             )
         } else if (trendingTile != null) {
             Spacer(modifier = Modifier.height(40.dp))

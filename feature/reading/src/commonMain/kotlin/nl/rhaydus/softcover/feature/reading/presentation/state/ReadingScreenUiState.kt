@@ -1,6 +1,11 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
@@ -72,22 +77,23 @@ internal data class ReadingScreenUiState(
     val verdictSheet: VerdictSheetUiModel? = null,
 
     /**
-     * Every cover surface on this screen, mapped off the composition by `CoverModelsCollector`
-     * (R9) from [books], [wantToReadBooks], [trendingBooks] and [verdictPromptBook] — never by the
-     * render.
+     * The cover surfaces outside the book cards, mapped off the composition by
+     * `CoverModelsCollector` (R9) from [books], [trendingBooks] and [verdictPromptBook] — never by
+     * the render.
      */
     val featuredBackdropCover: CoverUiModel? = null,
     val featuredCover: CoverUiModel? = null,
-    val bookCovers: Map<Int, CoverUiModel> = emptyMap(),
-
-    /**
-     * Mirrors [nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen]'s
-     * own `wantToReadBooks.take(3)` — kept in step here because that render decision is duplicated,
-     * not derived from this map, so a change to the empty screen's tile count must update both.
-     */
-    val pickUpNextCovers: Map<Int, CoverUiModel> = emptyMap(),
     val trendingTileCover: CoverUiModel? = null,
     val verdictCover: CoverUiModel? = null,
+
+    /**
+     * The "Also reading" rows keyed by book id (every book but the featured first), and the empty
+     * screen's "Pick up next" tiles in display order, mapped off the composition by
+     * `BookCardModelsCollector` (R9) from [books], [wantToReadBooks], [deadlines], [dateStyle],
+     * [deadlineCoverOverlays] and [failedMutationBookIds] — never by the render.
+     */
+    val alsoReadingCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
+    val pickUpNextCards: ImmutableList<BookCardUiModel> = persistentListOf(),
 
     /**
      * Each book's deadline cover overlay badge, mapped off the composition by
@@ -96,19 +102,10 @@ internal data class ReadingScreenUiState(
     val deadlineCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
 
     /**
-     * Each book's deadline summary line for surfaces painted [nl.rhaydus.softcover.core.component
-     * .deadline.DeadlineSummaryTone.OnSurface], mapped off the composition by `DeadlineModelsCollector`
-     * (R9) — never by the render.
-     */
-    val deadlineSummaries: Map<Int, DeadlineSummaryUiModel> = emptyMap(),
-
-    /**
      * The featured book's ([books] `.firstOrNull()`) deadline summary line, in the
      * [nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone.OnHeroBackdrop] ink for the
-     * blurred-cover hero backdrop — the same book as [deadlineSummaries] would key on, but a
-     * different UI model, because that surface takes a different ink. Kept as its own field rather
-     * than a second map for the same reason [featuredCover] / [featuredBackdropCover] /
-     * [featuredBookPace] are their own fields rather than keyed off [books].
+     * blurred-cover hero backdrop, where the book cards' summaries take
+     * [nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone.OnSurface].
      */
     val featuredDeadlineSummary: DeadlineSummaryUiModel? = null,
 

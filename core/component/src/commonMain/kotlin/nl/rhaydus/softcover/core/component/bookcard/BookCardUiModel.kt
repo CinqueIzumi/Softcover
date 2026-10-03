@@ -73,7 +73,7 @@ data class BookCardUiModel(
             ),
             BookCardUiModel(
                 key = BookCardKey.Book(bookId = 4),
-                variant = BookCardVariant.Stacked(
+                variant = BookCardVariant.Column(
                     cover = cover(title = "The Name of the Wind"),
                     text = BookCardContent(
                         title = "The Name of the Wind",
@@ -95,7 +95,7 @@ data class BookCardUiModel(
             ),
             BookCardUiModel(
                 key = BookCardKey.Book(bookId = 5),
-                variant = BookCardVariant.Stacked(
+                variant = BookCardVariant.Column(
                     cover = null,
                     text = BookCardContent(
                         title = "Piranesi",

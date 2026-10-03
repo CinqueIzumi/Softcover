@@ -19,11 +19,14 @@ import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
@@ -58,6 +61,13 @@ internal fun ReadingBooksColumn(
     val prefetcher = if (isInspection) null else rememberBookDetailPrefetcher()
 
     CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
+        val onCardEvent = rememberReadingCardEventHandler(
+            books = rest,
+            onBookClick = onBookClick,
+            onTrailingClick = { runAction(OnShowProgressSheetClickAction(book = it)) },
+            onShakeEnd = { runAction(OnClearMutationFailureAction(bookId = it)) },
+        )
+
         LazyColumn(
             state = listState,
             modifier = modifier.fillMaxSize(),
@@ -98,25 +108,22 @@ internal fun ReadingBooksColumn(
                 }
 
                 itemsIndexed(rest, key = { _, book -> book.id }) { index, book ->
-                    CompactBookEntry(
-                        modifier = Modifier.mutationAnimated(
-                            scope = this,
-                            animator = animator,
-                            itemKey = book.id,
-                        )
-                            .staggeredEntry(
-                                coordinator = entry,
-                                index = index,
+                    state.alsoReadingCards[book.id]?.let { card ->
+                        BookCard(
+                            model = card,
+                            onEvent = onCardEvent,
+                            modifier = Modifier.mutationAnimated(
+                                scope = this,
+                                animator = animator,
+                                itemKey = book.id,
                             )
-                            .then(controller.slideModifier(book.id)),
-                        book = book,
-                        cover = state.bookCovers[book.id],
-                        deadlineCoverOverlay = state.deadlineCoverOverlays[book.id],
-                        deadlineSummary = state.deadlineSummaries[book.id],
-                        mutationFailed = book.id in state.failedMutationBookIds,
-                        runAction = runAction,
-                        onBookClick = onBookClick,
-                    )
+                                .staggeredEntry(
+                                    coordinator = entry,
+                                    index = index,
+                                )
+                                .then(controller.slideModifier(book.id)),
+                        )
+                    }
                 }
             }
         }

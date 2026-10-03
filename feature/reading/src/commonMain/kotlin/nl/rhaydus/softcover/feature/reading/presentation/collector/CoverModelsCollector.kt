@@ -12,19 +12,12 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
 
-private const val PICK_UP_NEXT_TILE_COUNT = 3
-
 /**
  * Maps every cover surface on the Reading screen off the composition (R9): the featured hero and its
- * blurred backdrop, each "also reading" row thumb, the empty-state pick-up-next tiles, the empty-state
- * trending tile, and the verdict sheet jacket.
+ * blurred backdrop, the empty-state trending tile, and the verdict sheet jacket.
  *
- * One collector for all six fields rather than a patch at each write site — [ReadingScreenUiState.books]
- * alone is written by `CurrentlyReadingBooksCollector` plus several actions, [ReadingScreenUiState
- * .wantToReadBooks] by `WantToReadCollector`, [ReadingScreenUiState.trendingBooks] by
- * `TrendingBooksLoader`, and [ReadingScreenUiState.verdictPromptBook] by the reading actions. A
- * derived field patched into each of those writers instead would be one forgotten `copy` from a stale
- * cover.
+ * One collector rather than a patch at each write site: its inputs have several writers each, and a derived
+ * field patched into every writer is one forgotten `copy` from a stale cover.
  */
 internal class CoverModelsCollector : ReadingCollector {
     override suspend fun onLaunch(
@@ -35,10 +28,6 @@ internal class CoverModelsCollector : ReadingCollector {
             .map {
                 CoverModelsSnapshot(
                     featuredBook = it.books.firstOrNull(),
-                    books = it.books,
-                    // Mirrors EmptyCurrentlyReadingScreen's own wantToReadBooks.take(3) / firstOrNull()
-                    // — a render decision pulled forward here so it lives in one place, not two.
-                    pickUpNextBooks = it.wantToReadBooks.take(PICK_UP_NEXT_TILE_COUNT),
                     trendingBook = it.trendingBooks.firstOrNull(),
                     verdictBook = it.verdictPromptBook,
                 )
@@ -53,24 +42,6 @@ internal class CoverModelsCollector : ReadingCollector {
                         featuredCover = snapshot.featuredBook?.let { book ->
                             book.toCoverUiModel(
                                 variant = CoverVariant.ReadingFeaturedHero,
-                                sharedTransitionKey = bookCoverTransitionKey(
-                                    editionId = book.currentEdition?.id,
-                                    bookId = book.id,
-                                ),
-                            )
-                        },
-                        bookCovers = snapshot.books.associate { book ->
-                            book.id to book.toCoverUiModel(
-                                variant = CoverVariant.ReadingRowThumb,
-                                sharedTransitionKey = bookCoverTransitionKey(
-                                    editionId = book.currentEdition?.id,
-                                    bookId = book.id,
-                                ),
-                            )
-                        },
-                        pickUpNextCovers = snapshot.pickUpNextBooks.associate { book ->
-                            book.id to book.toCoverUiModel(
-                                variant = CoverVariant.ReadingPickUpNextTile,
                                 sharedTransitionKey = bookCoverTransitionKey(
                                     editionId = book.currentEdition?.id,
                                     bookId = book.id,

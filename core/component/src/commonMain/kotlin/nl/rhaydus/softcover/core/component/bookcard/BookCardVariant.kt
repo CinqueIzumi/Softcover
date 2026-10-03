@@ -13,7 +13,7 @@ sealed interface BookCardVariant {
      * @property menuLabel The overflow button's content description; non-null draws the button over the
      * cover's top-end corner, and a tap emits [BookCardEvent.MenuClicked].
      */
-    data class Stacked(
+    data class Column(
         val cover: CoverUiModel?,
         val text: BookCardContent,
         val menuLabel: String? = null,

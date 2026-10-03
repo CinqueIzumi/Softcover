@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
@@ -44,6 +45,7 @@ import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.toPickUpNextCard
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingMasthead
@@ -122,7 +124,7 @@ internal actual fun ReadingScreenLayout(
                         else -> EmptyCurrentlyReadingScreen(
                             wantToReadBooks = state.wantToReadBooks,
                             trendingBooks = state.trendingBooks,
-                            pickUpNextCovers = state.pickUpNextCovers,
+                            pickUpNextCards = state.pickUpNextCards,
                             trendingTileCover = state.trendingTileCover,
                             pickUpNextHeader = state.pickUpNextHeader,
                             trendingHeader = state.trendingHeader,
@@ -274,9 +276,7 @@ private fun ReadingScreenEmptyPreview() {
 private val previewEmptyWithPickUpNextState = ReadingScreenUiState(
     isLoading = false,
     wantToReadBooks = previewBooks.take(3),
-    pickUpNextCovers = previewBooks.take(3).associate {
-        it.id to it.toCoverUiModel(variant = CoverVariant.ReadingPickUpNextTile)
-    },
+    pickUpNextCards = previewBooks.take(3).map { it.toPickUpNextCard() }.toImmutableList(),
 )
 
 private val previewEmptyWithTrendingState = ReadingScreenUiState(

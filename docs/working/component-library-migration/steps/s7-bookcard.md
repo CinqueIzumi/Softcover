@@ -18,7 +18,7 @@ After S7-1, the user checks the `BookCard` variants in the Component Gallery bef
 | S7-3 | The library rows and dispatchers | [x] |
 | S7-4 | Explore rails, featured, series and mood tile | [x] |
 | S7-5 | Explore search and hidden suggestions | [x] |
-| S7-6 | Reading | [ ] |
+| S7-6 | Reading | [x] |
 | S7-7 | Profile, book_detail's `EditionItem` and `StackedJackets`, plus the final shared-element and skippability verification | [ ] |
 | S7-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
@@ -73,11 +73,11 @@ Coverless-monogram (`CoverlessTitleCover`, `MonogramCoverMetrics`) — also done
 
 - Package `:core:component` `bookcard/`; `BookCard(model, onEvent, modifier, accessory: (@Composable () -> Unit)? = null)` — `accessory` is library's drag handle only; the row gap before it is drawn only when present.
 - `BookCardUiModel(key, variant, decorations)`; `BookCardKey` sealed: `Book(bookId)` | `Edition(editionId)` | `Series(seriesId)`.
-- Converged (no per-surface tables, no surface enums): `CoverOnly(cover)` | `Stacked(cover, text, menuLabel: String?)` | `Row(size: Compact|Standard|Large, lead, text, trailing, deadline)`; the caller sizes the cover.
-- Row sizes: Compact 40dp lead, titleMedium 1 line; Standard 56dp lead, titleMedium 2 lines; Large 74dp lead, titleLarge 2 lines. Stacked: titleSmall, 2 lines always.
+- Converged (no per-surface tables, no surface enums): `CoverOnly(cover)` | `Column(cover, text, menuLabel: String?)` | `Row(size: Compact|Standard|Large, lead, text, trailing, deadline)`; the caller sizes the cover.
+- Row sizes: Compact 40dp lead, titleMedium 1 line; Standard 56dp lead, titleMedium 2 lines; Large 74dp lead, titleLarge 2 lines. Column: titleSmall, 2 lines always.
 - One text rule: eyebrow `eyebrowSmall` primary (red on Error tone); byline "By X" bodySmall; supporting lines bodySmall tabular; rating star first.
-- One row rule: top divider on every row; hover highlight on every clickable row; progress = wavy bar filling the width, optional "NN%" beside it; on CoverOnly / Stacked under the cover. `decorations.progress`: null = no slot, `Reserved` = empty slot kept, `Value(fraction, label: String?)`.
-- S7-2: library grid → `Stacked` (byline "By X"), cover-only → `CoverOnly`; progress `Reserved`/`Value(label = null)` on every cell; `BookCardModelsCollector` writes `bookCardsByTab` / `editionCardsByTab` off the existing cover / selection / overlay maps (folded in S7-3); press `None` while that tab rearranges (one shared rule with `BookList`), `Tap` in selection, else `TapAndLongPress`; one hoisted handler per list; `SelectableCover` stays for `LargeRow` until S7-3.
+- One row rule: top divider on every row; hover highlight on every clickable row; progress = wavy bar filling the width, optional "NN%" beside it; on CoverOnly / Column under the cover. `decorations.progress`: null = no slot, `Reserved` = empty slot kept, `Value(fraction, label: String?)`.
+- S7-2: library grid → `Column` (byline "By X"), cover-only → `CoverOnly`; progress `Reserved`/`Value(label = null)` on every cell; `BookCardModelsCollector` writes `bookCardsByTab` / `editionCardsByTab` off the existing cover / selection / overlay maps (folded in S7-3); press `None` while that tab rearranges (one shared rule with `BookList`), `Tap` in selection, else `TapAndLongPress`; one hoisted handler per list; `SelectableCover` stays for `LargeRow` until S7-3.
 - `BookCardContent(eyebrow, title, titleIcon: SoftcoverIcon?, byline, supportingLines)` (titleIcon = edition format glyph); lead `Cover` | `SeriesStack` (row-only), null = coverless row; a line is parts `Text` | `Rating` joined " · ".
 - `BookCardDecorations(progress, coverBadge, selection, pressBehaviour: Tap|TapAndLongPress|None, shakeOnError)`; no `emphasized` — edition sheet drops its bordered card (selected → cover ring, owned → badge); trailing `Badge` | `Restore` | `Bookmark(saved)` | `SetProgress`.
 - Selection everywhere: dim + ring on the cover, TopEnd mark; a coverless row leads with the mark.
@@ -85,7 +85,7 @@ Coverless-monogram (`CoverlessTitleCover`, `MonogramCoverMetrics`) — also done
 - Stacking is a card-level lead, not a `CoverVariant`; the sheet's rotated `JacketStack` stays in `SheetScaffold`.
 - `SelectableCover` folds into `BookCard` (dim, ring at the cover's own `CoverDimensions` radius, TopEnd mark; coverless rows lead with the mark). `CoverOverlay` stays its own component, carried as `decorations.coverBadge`.
 - Transition key stays on `CoverUiModel.sharedTransitionKey` (contract reworded).
-- `CoverOnly` ← `CoverOnlyCell`. `Stacked` ← `GridBookCell`, `TrendingCard`, `BecauseYouReadCard`, `SeriesCard`, `UnreleasedSeriesCard`, `PickUpNextTile`, `LovedBookCard`. `Row` ← `CompactRow`, `LargeRow`, `SearchResultRow`, `CompactBookEntry`, `HiddenBookRow`, `HiddenSeriesRow`, `EditionItem`.
+- `CoverOnly` ← `CoverOnlyCell`. `Column` ← `GridBookCell`, `TrendingCard`, `BecauseYouReadCard`, `SeriesCard`, `UnreleasedSeriesCard`, `PickUpNextTile`, `LovedBookCard`. `Row` ← `CompactRow`, `LargeRow`, `SearchResultRow`, `CompactBookEntry`, `HiddenBookRow`, `HiddenSeriesRow`, `EditionItem`.
 - Out of `BookCard`: explore `FeaturedCard` and reading's featured hero stay feature compositions; `MoodTile` becomes its own component (S7-4), `MoodTileDimensions` leaves `bookcard/`.
 - `LovedBookCard` moves onto `Cover` with a new `ProfileLovedBook` cover variant, and gains `Tap` → book detail (S7-7 wires the navigation).
 - S7-5: `SearchResultRow`'s stats line moves onto `:core:uibinding`'s `bookStatsLine` (grouped readers, 1-decimal rating — the format the user picked in S7-3).
@@ -94,12 +94,18 @@ Coverless-monogram (`CoverlessTitleCover`, `MonogramCoverMetrics`) — also done
   italic `bodySmall`, a missing byline drops the line). Accepted shifts: no ripple and the default hover
   on hidden rows, the divider inside the press area, top dividers on search rows (desktop grid spacing
   kept), and no detail prefetch on a bookmark tap.
-- S7-4 (user, after the diff): `Stacked` reserves 2 title lines everywhere (library grid included);
+- S7-4 (user, after the diff): `Column` reserves 2 title lines everywhere (library grid included);
   `BookCardMenuButton` keeps its 48dp target but draws the 26dp circle 6dp in from the cover corner;
   Because-you-read's author is the "By X" byline. Accepted shifts: rail title `titleMedium` → `titleSmall`,
   gaps 8/8 → 9/2 (series 8/8/8 → 9/2/2), Trending star 14 → 12dp with tabular editorial `bodySmall`, an
   unrated / unnumbered book drops the line instead of reserving it.
+- S7-6: "Also reading" (`CompactBookEntry`, both layouts) → `Row(Standard)`: series eyebrow (Error tone "Couldn't save — tap to retry" on a failed save), "By X" byline, progress `Value(fraction, "NN%")`, trailing `SetProgress` → progress sheet, row `deadline` + `coverBadge`, `shakeOnError` → `OnClearMutationFailureAction`, press `Tap` with prefetch. `PickUpNextTile` → `Column` (96dp, title only, no progress slot, no menu). A reading `BookCardModelsCollector` + feature-local mapper writes `alsoReadingCards` / `pickUpNextCards`, folding `bookCovers`, `pickUpNextCovers`, `deadlineSummaries`; `deadlineCoverOverlays` and the featured / trending / verdict covers stay. One handler per list resolves the `Book` by key. Accepted shifts: row padding and gaps, 54 → 56dp lead, left-aligned tile title, the tile's tinted cover box dropped. `TrendingTileSection`, the featured hero and `FeaturedCover` stay as they are.
 - Mappers feature-local per feature; the "year · N readers · ★ rating" line goes to `:core:uibinding` at once; a `BookCardModelsCollector` per feature, one map per surface.
+
+## S7-C — candidates found on the way
+
+- Five near-identical key-routing card handlers (library `BookList` / `EditionList`, explore rail / search, reading) — a shared `:core:component` helper.
+- List items that look a card up by id render nothing until the collector has run (library, reading) — a possible missed insert animation.
 
 ## S7 — non-symbol tasks
 

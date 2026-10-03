@@ -925,7 +925,7 @@ private fun verdictBlockFixtureLabel(model: VerdictBlockUiModel): String = when 
 private fun bookCardFixtureLabel(model: BookCardUiModel): String {
     val layout = when (val variant = model.variant) {
         is BookCardVariant.CoverOnly -> "Cover only"
-        is BookCardVariant.Stacked -> "Stacked"
+        is BookCardVariant.Column -> "Column"
         is BookCardVariant.Row -> "Row ${variant.size.name}"
     }
 

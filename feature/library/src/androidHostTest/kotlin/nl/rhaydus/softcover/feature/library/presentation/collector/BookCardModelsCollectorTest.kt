@@ -250,7 +250,7 @@ class BookCardModelsCollectorTest {
     @Nested
     inner class Layouts {
         @Test
-        fun `grid two and three columns map to the stacked variant`() = runTest(testDispatcher) {
+        fun `grid two and three columns map to the column variant`() = runTest(testDispatcher) {
             val layouts = listOf(
                 LibraryGridLayout.GRID_TWO_COLUMNS,
                 LibraryGridLayout.GRID_THREE_COLUMNS,
@@ -269,7 +269,7 @@ class BookCardModelsCollectorTest {
 
                 // ----- Assert -----
                 val card = stateFlow.value.bookCardsByTab.getValue("all").getValue(1)
-                card.variant.shouldBeInstanceOf<BookCardVariant.Stacked>()
+                card.variant.shouldBeInstanceOf<BookCardVariant.Column>()
                 card.key shouldBe BookCardKey.Book(bookId = 1)
                 job.cancel()
             }
@@ -336,7 +336,7 @@ class BookCardModelsCollectorTest {
             val job = launchCollector()
             stateFlow.value = bookState(books = listOf(stubBook(id = 1)))
             stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
-                .shouldBeInstanceOf<BookCardVariant.Stacked>()
+                .shouldBeInstanceOf<BookCardVariant.Column>()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(gridLayout = LibraryGridLayout.LIST_COMPACT)
@@ -622,7 +622,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             val variant = stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
-                .shouldBeInstanceOf<BookCardVariant.Stacked>()
+                .shouldBeInstanceOf<BookCardVariant.Column>()
             variant.text.title shouldBe "Piranesi"
             variant.text.byline shouldBe "By Susanna Clarke"
             job.cancel()
@@ -638,7 +638,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             val variant = stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
-                .shouldBeInstanceOf<BookCardVariant.Stacked>()
+                .shouldBeInstanceOf<BookCardVariant.Column>()
             variant.text.byline.shouldBeNull()
             job.cancel()
         }
@@ -660,7 +660,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             val variant = stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
-                .shouldBeInstanceOf<BookCardVariant.Stacked>()
+                .shouldBeInstanceOf<BookCardVariant.Column>()
             variant.text.byline.shouldBeNull()
             job.cancel()
         }
@@ -690,11 +690,11 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             val cards = stateFlow.value.editionCardsByTab.getValue(listTab.id)
-            val withAuthor = cards.getValue(7).variant.shouldBeInstanceOf<BookCardVariant.Stacked>()
+            val withAuthor = cards.getValue(7).variant.shouldBeInstanceOf<BookCardVariant.Column>()
             withAuthor.text.title shouldBe "Audio"
             withAuthor.text.byline shouldBe "By Ann"
             cards.getValue(7).key shouldBe BookCardKey.Edition(editionId = 7)
-            val without = cards.getValue(8).variant.shouldBeInstanceOf<BookCardVariant.Stacked>()
+            val without = cards.getValue(8).variant.shouldBeInstanceOf<BookCardVariant.Column>()
             without.text.title shouldBe ""
             without.text.byline.shouldBeNull()
             job.cancel()
@@ -1627,11 +1627,11 @@ class BookCardModelsCollectorTest {
             onList.getValue(1).variant.shouldBeInstanceOf<BookCardVariant.Row>()
             val after = stateFlow.value.bookCardsByTab.getValue("all")
             after shouldNotBeSameInstanceAs before
-            after.getValue(1).variant.shouldBeInstanceOf<BookCardVariant.Stacked>()
+            after.getValue(1).variant.shouldBeInstanceOf<BookCardVariant.Column>()
             job.cancel()
         }
         @Test
-        fun `switching between stacked and cover-only grids does not serve stale variants`() =
+        fun `switching between column and cover-only grids does not serve stale variants`() =
             runTest(testDispatcher) {
                 // ----- Arrange -----
                 val books = listOf(stubBook(id = 1))

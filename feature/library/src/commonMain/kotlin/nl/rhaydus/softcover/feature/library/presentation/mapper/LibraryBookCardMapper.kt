@@ -26,7 +26,7 @@ import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
 import kotlin.math.roundToInt
 
 /**
- * The book's card for [layout]: stacked or cover-only on the grids, a compact or large row on the
+ * The book's card for [layout]: column or cover-only on the grids, a compact or large row on the
  * lists. [selection] is `null` outside selection mode.
  */
 internal fun Book.toBookCard(
@@ -56,7 +56,7 @@ internal fun Book.toBookCard(
         LibraryGridLayout.GRID_TWO_COLUMNS,
         LibraryGridLayout.GRID_THREE_COLUMNS,
             -> {
-            variant = BookCardVariant.Stacked(
+            variant = BookCardVariant.Column(
                 cover = toShelfBookCover(),
                 text = BookCardContent(
                     title = title,
@@ -141,7 +141,7 @@ internal fun BookEdition.toEditionCard(
 
         LibraryGridLayout.GRID_TWO_COLUMNS,
         LibraryGridLayout.GRID_THREE_COLUMNS,
-            -> BookCardVariant.Stacked(
+            -> BookCardVariant.Column(
             cover = toShelfEditionCover(),
             text = text,
         )
