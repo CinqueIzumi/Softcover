@@ -54,10 +54,12 @@ class PreviousQueriesCollectorTest {
         fun `updates previousSearchQueries when flow emits a list`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PreviousQueriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             queriesFlow.emit(listOf("kotlin", "android"))
@@ -71,10 +73,12 @@ class PreviousQueriesCollectorTest {
         fun `updates previousSearchQueries to empty list when flow emits empty list`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PreviousQueriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             queriesFlow.emit(emptyList())
@@ -88,10 +92,12 @@ class PreviousQueriesCollectorTest {
         fun `updates to the latest list when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PreviousQueriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             queriesFlow.emit(listOf("first"))
@@ -106,10 +112,12 @@ class PreviousQueriesCollectorTest {
         fun `does not change previousSearchQueries before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PreviousQueriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.previousSearchQueries shouldBe emptyList()
@@ -120,10 +128,12 @@ class PreviousQueriesCollectorTest {
         fun `retains the last emitted list after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PreviousQueriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             queriesFlow.emit(listOf("dune", "foundation"))
             job.cancel()
 
@@ -140,10 +150,12 @@ class PreviousQueriesCollectorTest {
                 previousSearchQueries = emptyList(),
             )
             val collector = PreviousQueriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             queriesFlow.emit(listOf("new query"))

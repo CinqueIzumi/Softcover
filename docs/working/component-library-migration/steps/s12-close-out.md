@@ -38,6 +38,7 @@ the measured post-migration value; a rise fails the build. Wire into `check`.
 - Decide the `"tnum"` token (~17 call sites today; one `:core:designsystem` token instead).
 - Measure the fixture size in the release binary.
 - Run the gallery completeness pass: every `:core:component` family has a `GalleryEntry`.
+- Check the Compose compiler metrics report: `BookCardUiModel` and its parts are stable.
 - The § 7.0 rich-text remaining row (`RichTextFormattingToolbar` owing R1) is closed by
   `steps/s8-controls.md` S8-4, not repeated here — confirm it landed before ticking this sub-step.
 

@@ -7,25 +7,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
-import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockBookAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockSeriesAction
@@ -49,33 +48,35 @@ internal fun HiddenSuggestionsContent(
     runAction: (HiddenSuggestionsAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val currentState by rememberUpdatedState(state)
-    val currentRunAction by rememberUpdatedState(runAction)
-    val onEvent = remember {
-        { event: BookCardEvent ->
-            if (event is BookCardEvent.Clicked) {
-                when (val key = event.key) {
-                    is BookCardKey.Book -> currentState.hiddenBooks
-                        .firstOrNull { it.bookId == key.bookId }
-                        ?.let { currentRunAction(OnUnblockBookAction(book = it)) }
-
-                    is BookCardKey.Series -> currentState.hiddenSeries
-                        .firstOrNull { it.seriesId == key.seriesId }
-                        ?.let {
-                            currentRunAction(
-                                OnUnblockSeriesAction(
-                                    seriesId = it.seriesId,
-                                    seriesName = it.seriesName,
-                                    coverUrl = it.coverUrl,
-                                    authorText = it.authorText,
-                                    bookCount = it.bookCount,
-                                ),
-                            )
-                        }
-
-                    is BookCardKey.Edition -> Unit
-                }
+    val unblockActions = remember(state.hiddenBooks, state.hiddenSeries) {
+        buildMap<BookCardKey, HiddenSuggestionsAction> {
+            state.hiddenBooks.forEach { book ->
+                put(
+                    BookCardKey.Book(book.bookId),
+                    OnUnblockBookAction(book = book),
+                )
             }
+
+            state.hiddenSeries.forEach { series ->
+                put(
+                    BookCardKey.Series(series.seriesId),
+                    OnUnblockSeriesAction(
+                        seriesId = series.seriesId,
+                        seriesName = series.seriesName,
+                        coverUrl = series.coverUrl,
+                        authorText = series.authorText,
+                        bookCount = series.bookCount,
+                    ),
+                )
+            }
+        }
+    }
+
+    val onEvent = rememberBookCardEventHandler(
+        resolve = unblockActions::get,
+    ) { event, action ->
+        if (event is BookCardEvent.Clicked) {
+            runAction(action)
         }
     }
 
@@ -95,7 +96,6 @@ internal fun HiddenSuggestionsContent(
             if (state.hiddenBooksLoaded.not() || state.hiddenBooks.isNotEmpty()) {
                 HiddenBooksSection(
                     header = state.hiddenBooksGroupHeader,
-                    books = state.hiddenBooks,
                     cards = state.hiddenBookCards,
                     isLoading = state.hiddenBooksLoaded.not(),
                     onEvent = onEvent,
@@ -107,7 +107,6 @@ internal fun HiddenSuggestionsContent(
             if (state.hiddenSeriesLoaded.not() || state.hiddenSeries.isNotEmpty()) {
                 HiddenSeriesSection(
                     header = state.hiddenSeriesGroupHeader,
-                    series = state.hiddenSeries,
                     cards = state.hiddenSeriesCards,
                     isLoading = state.hiddenSeriesLoaded.not(),
                     onEvent = onEvent,
@@ -122,8 +121,7 @@ internal fun HiddenSuggestionsContent(
 @Composable
 private fun HiddenBooksSection(
     header: HiddenGroupHeaderUiModel,
-    books: List<DismissedSeriesBook>,
-    cards: ImmutableMap<Int, BookCardUiModel>,
+    cards: ImmutableList<BookCardUiModel>?,
     isLoading: Boolean,
     onEvent: (BookCardEvent) -> Unit,
 ) {
@@ -135,17 +133,16 @@ private fun HiddenBooksSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (isLoading) {
+        if (cards == null) {
             repeat(2) {
                 BookCard(
                     model = HIDDEN_BOOK_STAND_IN_CARD,
                     onEvent = {},
-                    isLoading = true,
                 )
             }
         } else {
-            books.forEach { book ->
-                cards[book.bookId]?.let { card ->
+            cards.forEach { card ->
+                key(card.key.lazyKey) {
                     BookCard(
                         model = card,
                         onEvent = onEvent,
@@ -159,8 +156,7 @@ private fun HiddenBooksSection(
 @Composable
 private fun HiddenSeriesSection(
     header: HiddenGroupHeaderUiModel,
-    series: List<DismissedSeries>,
-    cards: ImmutableMap<Int, BookCardUiModel>,
+    cards: ImmutableList<BookCardUiModel>?,
     isLoading: Boolean,
     onEvent: (BookCardEvent) -> Unit,
 ) {
@@ -172,17 +168,16 @@ private fun HiddenSeriesSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (isLoading) {
+        if (cards == null) {
             repeat(2) {
                 BookCard(
                     model = HIDDEN_SERIES_STAND_IN_CARD,
                     onEvent = {},
-                    isLoading = true,
                 )
             }
         } else {
-            series.forEach { entry ->
-                cards[entry.seriesId]?.let { card ->
+            cards.forEach { card ->
+                key(card.key.lazyKey) {
                     BookCard(
                         model = card,
                         onEvent = onEvent,

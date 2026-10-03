@@ -6,5 +6,8 @@ import androidx.compose.runtime.Immutable
 sealed interface BookCardLinePart {
     data class Text(val text: String) : BookCardLinePart
 
-    data class Rating(val label: String) : BookCardLinePart
+    data class Rating(
+        val label: String,
+        val contentDescription: String,
+    ) : BookCardLinePart
 }

@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -129,7 +131,8 @@ private fun TitleRow(
     }
 
     val lineHeight = if (titleStyle.lineHeight.isSpecified) titleStyle.lineHeight else titleStyle.fontSize
-    val iconSize = with(LocalDensity.current) { lineHeight.toDp() } * 0.85f
+    val lineHeightDp = with(LocalDensity.current) { lineHeight.toDp() }
+    val iconSize = lineHeightDp * 0.85f
 
     val icon = drawableIconResource(
         icon = titleIcon,
@@ -138,13 +141,14 @@ private fun TitleRow(
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
     ) {
         Icon(
             painter = icon.getIconPainter(),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
+                .padding(top = (lineHeightDp - iconSize) / 2)
                 .size(iconSize)
                 .skeletonMask(visible = isLoading),
         )
@@ -168,6 +172,9 @@ private fun SupportingLine(
                     text = " · ",
                     style = style,
                     color = color,
+                    modifier = Modifier
+                        .skeletonMask(visible = isLoading)
+                        .clearAndSetSemantics {},
                 )
             }
 
@@ -188,6 +195,7 @@ private fun SupportingLine(
 
                 is BookCardLinePart.Rating -> RatingLabel(
                     label = part.label,
+                    contentDescription = part.contentDescription,
                     style = style,
                     color = color,
                     isLoading = isLoading,
@@ -200,6 +208,7 @@ private fun SupportingLine(
 @Composable
 private fun RatingLabel(
     label: String,
+    contentDescription: String,
     style: TextStyle,
     color: Color,
     isLoading: Boolean,
@@ -212,6 +221,7 @@ private fun RatingLabel(
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clearAndSetSemantics { this.contentDescription = contentDescription },
     ) {
         Icon(
             painter = icon.getIconPainter(),

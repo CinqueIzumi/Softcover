@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -45,14 +44,14 @@ internal class BookCardModelsCollector : ReadingCollector {
             .collectLatest { snapshot ->
                 scope.setState {
                     it.copy(
-                        alsoReadingCards = snapshot.alsoReadingBooks.associate { book ->
-                            book.id to book.toAlsoReadingCard(
+                        alsoReadingCards = snapshot.alsoReadingBooks.takeIf { it.isNotEmpty() }?.map { book ->
+                            book.toAlsoReadingCard(
                                 deadlineProgress = book.toDeadlineProgress(snapshot.deadlines[book.id]),
                                 coverBadge = snapshot.deadlineCoverOverlays[book.id],
                                 dateStyle = snapshot.dateStyle,
                                 mutationFailed = book.id in snapshot.failedMutationBookIds,
                             )
-                        }.toImmutableMap(),
+                        }?.toImmutableList(),
                         pickUpNextCards = snapshot.pickUpNextBooks
                             ?.map(Book::toPickUpNextCard)
                             ?.toImmutableList(),

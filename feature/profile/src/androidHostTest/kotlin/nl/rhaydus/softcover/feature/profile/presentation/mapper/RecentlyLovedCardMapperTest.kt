@@ -61,8 +61,15 @@ class RecentlyLovedCardMapperTest {
 
             // ----- Assert -----
             lines.map { it.parts } shouldBe listOf(
-                listOf(BookCardLinePart.Rating(label = "4.5")),
-                listOf(BookCardLinePart.Text(text = "May 2026")),
+                listOf(
+                    BookCardLinePart.Rating(
+                        label = "4.5",
+                        contentDescription = "Rated 4.5 out of 5",
+                    ),
+                ),
+                listOf(
+                    BookCardLinePart.Text(text = "May 2026"),
+                ),
             )
         }
 
@@ -75,7 +82,12 @@ class RecentlyLovedCardMapperTest {
             val lines = book.toRecentlyLovedCard().column().text.supportingLines
 
             // ----- Assert -----
-            lines.first().parts shouldBe listOf(BookCardLinePart.Rating(label = "4.0"))
+            lines.first().parts shouldBe listOf(
+                BookCardLinePart.Rating(
+                    label = "4.0",
+                    contentDescription = "Rated 4.0 out of 5",
+                ),
+            )
         }
 
         @Test
@@ -87,7 +99,12 @@ class RecentlyLovedCardMapperTest {
             val lines = book.toRecentlyLovedCard().column().text.supportingLines
 
             // ----- Assert -----
-            lines.first().parts shouldBe listOf(BookCardLinePart.Rating(label = "4.3"))
+            lines.first().parts shouldBe listOf(
+                BookCardLinePart.Rating(
+                    label = "4.3",
+                    contentDescription = "Rated 4.3 out of 5",
+                ),
+            )
         }
 
         @Test
@@ -136,7 +153,7 @@ class RecentlyLovedCardMapperTest {
             val book = lovedBook(coverUrl = "https://example.com/dune.jpg")
 
             // ----- Act -----
-            val source = book.toRecentlyLovedCard().column().cover.shouldNotBeNull().source
+            val source = book.toRecentlyLovedCard().column().cover.shouldNotBeNull().model.source
 
             // ----- Assert -----
             source.shouldNotBeNull().shouldBeInstanceOf<CoverSource.Remote>().url shouldBe "https://example.com/dune.jpg"
@@ -151,7 +168,7 @@ class RecentlyLovedCardMapperTest {
             )
 
             // ----- Act -----
-            val cover = book.toRecentlyLovedCard().column().cover.shouldNotBeNull()
+            val cover = book.toRecentlyLovedCard().column().cover.shouldNotBeNull().model
 
             // ----- Assert -----
             cover.source.shouldBeNull()

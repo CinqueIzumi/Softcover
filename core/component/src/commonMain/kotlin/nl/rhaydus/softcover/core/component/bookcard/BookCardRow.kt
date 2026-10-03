@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +17,6 @@ import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
-import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.EditorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -32,6 +30,7 @@ internal fun BookCardRowLayout(
     content: (@Composable () -> Unit)?,
 ) {
     val selection = model.decorations.selection
+    val mark = selection?.renderedMark
     val lead = variant.lead
     val trailing = variant.trailing
     val deadline = variant.deadline
@@ -63,14 +62,14 @@ internal fun BookCardRowLayout(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (lead !is BookCardLead.Cover && selection != null) {
-                    SelectionMark(model = selection)
+                if (lead !is BookCardLead.Cover && mark != null) {
+                    SelectionMark(model = mark)
                 }
 
                 when (lead) {
-                    is BookCardLead.Cover -> BookCardCover(
-                        cover = lead.model,
-                        decorations = model.decorations,
+                    is BookCardLead.Cover -> BookCardCoverLayout(
+                        cover = lead.cover,
+                        selection = selection,
                         isLoading = isLoading,
                         modifier = Modifier.width(metrics.leadWidth),
                     )
@@ -102,10 +101,8 @@ internal fun BookCardRowLayout(
                     )
                 }
 
-                if (content != null) {
-                    Box(modifier = Modifier.skeletonMask(visible = isLoading)) {
-                        content()
-                    }
+                if (content != null && isLoading.not()) {
+                    content()
                 }
             }
 

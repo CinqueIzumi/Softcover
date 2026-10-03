@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
@@ -32,6 +34,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
@@ -45,7 +48,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.screen.section.FEATURED
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBookCard
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
-import nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberReadingCardEventHandler
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 /** The reading screen celebrates at full-screen scale, so its burst is bigger and slower. */
@@ -171,12 +173,24 @@ private fun DesktopReadingContent(
 
     Box(modifier = modifier) {
         CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
-            val onCardEvent = rememberReadingCardEventHandler(
-                books = rest,
-                onBookClick = onBookClick,
-                onTrailingClick = { runAction(OnShowProgressSheetClickAction(book = it)) },
-                onShakeEnd = { runAction(OnClearMutationFailureAction(bookId = it)) },
-            )
+            val booksByKey = remember(rest) { rest.associateBy { BookCardKey.Book(it.id) } }
+
+            val onCardEvent = rememberPrefetchingBookCardEventHandler(
+                resolve = booksByKey::get,
+            ) { event, book ->
+                when (event) {
+                    is BookCardEvent.Clicked -> onBookClick(book)
+
+                    is BookCardEvent.TrailingClicked -> runAction(OnShowProgressSheetClickAction(book = book))
+
+                    is BookCardEvent.ShakeEnded -> runAction(OnClearMutationFailureAction(bookId = book.id))
+
+                    is BookCardEvent.LongClicked,
+                    is BookCardEvent.PressStarted,
+                    is BookCardEvent.MenuClicked,
+                        -> Unit
+                }
+            }
 
             Column(
                 modifier = Modifier
@@ -212,21 +226,23 @@ private fun DesktopReadingContent(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                if (isLoading) {
+                val alsoReadingCards = state.alsoReadingCards
+
+                if (alsoReadingCards == null) {
                     repeat(ALSO_READING_STAND_IN_COUNT) {
                         BookCard(
                             model = ALSO_READING_STAND_IN_CARD,
                             onEvent = {},
-                            isLoading = true,
                         )
                     }
                 } else {
-                    rest.forEach { book ->
+                    alsoReadingCards.forEach { card ->
+                        val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@forEach
+
                         BookCard(
-                            model = state.alsoReadingCards[book.id] ?: ALSO_READING_STAND_IN_CARD,
+                            model = card,
                             onEvent = onCardEvent,
-                            isLoading = book.id !in state.alsoReadingCards,
-                            modifier = controller.slideModifier(book.id),
+                            modifier = controller.slideModifier(bookId),
                         )
                     }
                 }

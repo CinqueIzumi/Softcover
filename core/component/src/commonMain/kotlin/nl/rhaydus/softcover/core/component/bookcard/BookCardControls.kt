@@ -17,7 +17,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,6 +42,7 @@ internal fun BookCardTrailingControl(
     Box(modifier = Modifier.skeletonMask(visible = isLoading)) {
         TrailingControlContent(
             trailing = trailing,
+            enabled = isLoading.not(),
             onClick = onClick,
         )
     }
@@ -48,6 +51,7 @@ internal fun BookCardTrailingControl(
 @Composable
 private fun TrailingControlContent(
     trailing: BookCardTrailing,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     when (trailing) {
@@ -58,11 +62,13 @@ private fun TrailingControlContent(
         is BookCardTrailing.Bookmark -> BookmarkToggle(
             saved = trailing.saved,
             contentDescription = trailing.contentDescription,
+            enabled = enabled,
             onClick = onClick,
         )
 
         is BookCardTrailing.SetProgress -> SetProgressChip(
             label = trailing.label,
+            enabled = enabled,
             onClick = onClick,
         )
     }
@@ -142,13 +148,17 @@ private fun RestoreLabel(label: String) {
 private fun BookmarkToggle(
     saved: Boolean,
     contentDescription: String,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     Surface(
-        onClick = onClick,
+        checked = saved,
+        onCheckedChange = { onClick() },
+        enabled = enabled,
         modifier = Modifier
             .size(44.dp)
-            .pointerHandCursor(),
+            .pointerHandCursor()
+            .semantics { role = Role.Switch },
         shape = RoundedCornerShape(12.dp),
         color = if (saved) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = if (saved) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
@@ -173,6 +183,7 @@ private fun BookmarkToggle(
 @Composable
 private fun SetProgressChip(
     label: String,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     val icon = drawableIconResource(
@@ -183,6 +194,7 @@ private fun SetProgressChip(
     DesktopTooltip(text = label) {
         Surface(
             onClick = onClick,
+            enabled = enabled,
             modifier = Modifier
                 .height(38.dp)
                 .pointerHandCursor()

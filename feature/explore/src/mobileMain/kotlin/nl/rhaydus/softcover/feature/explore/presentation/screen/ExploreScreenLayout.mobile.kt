@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
@@ -161,8 +161,8 @@ private fun List<Book>.toPreviewCoverModels(
     )
 }
 
-private fun List<Book>.toPreviewTrendingCards(): ImmutableMap<Int, BookCardUiModel> = associate { book ->
-    book.id to book.toTrendingCard(
+private fun List<Book>.toPreviewTrendingCards(): ImmutableList<BookCardUiModel> = map { book ->
+    book.toTrendingCard(
         cover = book.toCoverUiModel(
             variant = CoverVariant.ExploreRail,
             sharedTransitionKey = bookCoverTransitionKey(
@@ -173,7 +173,7 @@ private fun List<Book>.toPreviewTrendingCards(): ImmutableMap<Int, BookCardUiMod
         ),
         coverBadge = null,
     )
-}.toImmutableMap()
+}.toImmutableList()
 
 private val previewSearchFocusMoodTags = listOf(
     MoodTag(
@@ -402,9 +402,9 @@ private fun ActiveExploreScreenPreview() {
                 searchText = "Last to leave",
                 queriedBooks = queriedBooks,
                 queriedBookCovers = queriedBookCovers,
-                queriedBookCards = queriedBooks.associate { book ->
-                    book.id to book.toSearchResultCard(cover = queriedBookCovers.getValue(book.id))
-                }.toImmutableMap(),
+                queriedBookCards = queriedBooks.map { book ->
+                    book.toSearchResultCard(cover = queriedBookCovers.getValue(book.id))
+                }.toImmutableList(),
             ),
         )
     }

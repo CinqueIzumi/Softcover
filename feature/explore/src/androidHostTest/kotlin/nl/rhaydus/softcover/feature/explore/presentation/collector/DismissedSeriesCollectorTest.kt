@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -70,18 +71,19 @@ class DismissedSeriesCollectorTest {
             // ----- Arrange -----
             val series = stubDismissedSeries(seriesId = 1)
             val collector = DismissedSeriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             dismissedSeriesFlow.emit(listOf(series))
 
             // ----- Assert -----
             stateFlow.value.hiddenSeries shouldBe listOf(series)
-            stateFlow.value.hiddenSeriesCards.keys shouldBe setOf(1)
-            stateFlow.value.hiddenSeriesCards.getValue(1).key shouldBe BookCardKey.Series(seriesId = 1)
+            stateFlow.value.hiddenSeriesCards.shouldNotBeNull().map { it.key } shouldBe listOf(BookCardKey.Series(seriesId = 1))
             stateFlow.value.hiddenSeriesLoaded shouldBe true
             job.cancel()
         }
@@ -90,10 +92,12 @@ class DismissedSeriesCollectorTest {
         fun `leaves hiddenBooksLoaded false when only series are emitted`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DismissedSeriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             dismissedSeriesFlow.emit(emptyList())
@@ -113,10 +117,12 @@ class DismissedSeriesCollectorTest {
                 stubDismissedSeries(seriesId = 3),
             )
             val collector = DismissedSeriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             dismissedSeriesFlow.emit(series)
@@ -130,10 +136,12 @@ class DismissedSeriesCollectorTest {
         fun `sets the group header count to zero for an empty emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DismissedSeriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             dismissedSeriesFlow.emit(emptyList())
@@ -147,10 +155,12 @@ class DismissedSeriesCollectorTest {
         fun `updates the count again on a later emission without touching the header text`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DismissedSeriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             dismissedSeriesFlow.emit(listOf(stubDismissedSeries(seriesId = 1), stubDismissedSeries(seriesId = 2)))
             stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "2"
 
@@ -171,10 +181,12 @@ class DismissedSeriesCollectorTest {
                 hiddenBooksGroupHeader = HiddenSuggestionsUiState().hiddenBooksGroupHeader.copy(count = "9"),
             )
             val collector = DismissedSeriesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             dismissedSeriesFlow.emit(listOf(stubDismissedSeries(seriesId = 1)))

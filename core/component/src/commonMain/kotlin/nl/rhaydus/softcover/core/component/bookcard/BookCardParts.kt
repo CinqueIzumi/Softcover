@@ -24,6 +24,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
@@ -36,31 +39,34 @@ import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 @Composable
-internal fun BookCardCover(
-    cover: CoverUiModel?,
-    decorations: BookCardDecorations,
+internal fun BookCardCoverLayout(
+    cover: BookCardCover?,
+    selection: BookCardSelection?,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val selection = decorations.selection
     val selected = selection?.selected == true
+    val mark = selection?.renderedMark
 
-    val shape = if (cover == null) {
+    val coverModel = cover?.model
+    val badge = cover?.badge
+
+    val shape = if (coverModel == null) {
         RectangleShape
     } else {
-        RoundedCornerShape(CoverDimensions.forVariant(variant = cover.variant).cornerRadius)
+        RoundedCornerShape(CoverDimensions.forVariant(variant = coverModel.variant).cornerRadius)
     }
 
     Box(modifier = modifier) {
         Box(
             modifier = Modifier.graphicsLayer {
-                alpha = if (selection != null && selected.not()) 0.55f else 1f
+                alpha = if (selection?.dimsUnselected == true) 0.55f else 1f
             },
         ) {
-            CoverOverlay(model = decorations.coverBadge) {
+            CoverOverlay(model = badge) {
                 Cover(
-                    model = rememberMaskedCover(
-                        cover = cover,
+                    model = maskedCover(
+                        cover = coverModel,
                         isLoading = isLoading,
                     ),
                     modifier = Modifier.fillMaxWidth(),
@@ -84,9 +90,9 @@ internal fun BookCardCover(
             )
         }
 
-        if (selection != null) {
+        if (mark != null) {
             SelectionMark(
-                model = selection,
+                model = mark,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp),
@@ -111,6 +117,7 @@ internal fun BookCardSeriesStack(
             shape = plateShape,
             offset = 12.dp,
             alpha = 0.4f,
+            isLoading = isLoading,
         )
 
         SeriesStackPlate(
@@ -118,32 +125,30 @@ internal fun BookCardSeriesStack(
             shape = plateShape,
             offset = 6.dp,
             alpha = 0.7f,
+            isLoading = isLoading,
         )
 
         Cover(
-            model = rememberMaskedCover(
-                        cover = front,
-                        isLoading = isLoading,
-                    ),
+            model = maskedCover(
+                cover = front,
+                isLoading = isLoading,
+            ),
             modifier = Modifier.width(frontWidth),
         )
     }
 }
 
-@Composable
-private fun rememberMaskedCover(
+internal fun maskedCover(
     cover: CoverUiModel?,
     isLoading: Boolean,
-): CoverUiModel? = remember(cover, isLoading) {
-    when {
-        isLoading.not() -> cover
-        cover == null -> null
-        else -> cover.copy(
-            source = null,
-            isLoading = true,
-            sharedTransitionKey = null,
-        )
-    }
+): CoverUiModel? = when {
+    isLoading.not() -> cover
+    cover == null -> null
+    else -> cover.copy(
+        source = null,
+        isLoading = true,
+        sharedTransitionKey = null,
+    )
 }
 
 @Composable
@@ -152,6 +157,7 @@ private fun SeriesStackPlate(
     shape: Shape,
     offset: Dp,
     alpha: Float,
+    isLoading: Boolean,
 ) {
     Box(
         modifier = Modifier
@@ -159,7 +165,8 @@ private fun SeriesStackPlate(
             .width(width)
             .aspectRatio(2f / 3f)
             .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = alpha)),
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = alpha))
+            .skeletonMask(visible = isLoading),
     )
 }
 
@@ -207,13 +214,36 @@ internal fun BookCardProgressBar(
                 )
 
                 if (label != null) {
-                    SoftcoverText(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    ProgressLabel(label = label)
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ProgressLabel(label: String) {
+    val style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum")
+    val color = MaterialTheme.colorScheme.onSurfaceVariant
+    val density = LocalDensity.current
+    val measurer = rememberTextMeasurer()
+
+    val reservedWidth = remember(style, density) {
+        with(density) {
+            measurer.measure(
+                text = "100%",
+                style = style,
+            ).size.width.toDp()
+        }
+    }
+
+    SoftcoverText(
+        text = label,
+        style = style,
+        textAlign = TextAlign.End,
+        color = color,
+        maxLines = 1,
+        softWrap = false,
+        modifier = Modifier.width(reservedWidth),
+    )
 }

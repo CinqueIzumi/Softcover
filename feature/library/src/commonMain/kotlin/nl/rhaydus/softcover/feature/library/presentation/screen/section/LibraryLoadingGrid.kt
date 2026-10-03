@@ -40,7 +40,6 @@ internal fun LibraryLoadingGrid(
             BookCard(
                 model = layout.standInCard(),
                 onEvent = {},
-                isLoading = true,
             )
         }
     }

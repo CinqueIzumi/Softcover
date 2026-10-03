@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
@@ -16,9 +17,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverT
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
+import nl.rhaydus.softcover.core.uibinding.book.byline
+import nl.rhaydus.softcover.core.uibinding.book.percentLabel
+import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
-import kotlin.math.roundToInt
 
 /** An "Also reading" row; a failed save replaces the series eyebrow and shakes the row. */
 internal fun Book.toAlsoReadingCard(
@@ -29,28 +32,34 @@ internal fun Book.toAlsoReadingCard(
 ): BookCardUiModel {
     val progress = userBookRead?.progress ?: 0f
 
+    val fraction = (progress / 100f).coerceIn(
+        minimumValue = 0f,
+        maximumValue = 1f,
+    )
+
     val eyebrow = if (mutationFailed) {
         BookCardEyebrow(
             text = "Couldn't save — tap to retry".uppercase(),
             tone = BookCardEyebrow.Tone.Error,
         )
     } else {
-        seriesText
-            ?.takeIf { it.isNotBlank() }
-            ?.let { BookCardEyebrow(text = it.uppercase()) }
+        seriesEyebrow(seriesText = seriesText)
     }
 
     return BookCardUiModel(
         key = BookCardKey.Book(bookId = id),
         variant = BookCardVariant.Row(
             size = BookCardVariant.Row.Size.Standard,
-            lead = BookCardLead.Cover(model = toTransitionCover(variant = CoverVariant.ReadingRowThumb)),
+            lead = BookCardLead.Cover(
+                cover = BookCardCover(
+                    model = toTransitionCover(variant = CoverVariant.ReadingRowThumb),
+                    badge = coverBadge,
+                ),
+            ),
             text = BookCardContent(
                 title = title,
                 eyebrow = eyebrow,
-                byline = currentEdition?.authorString
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let { "By $it" },
+                byline = byline(author = authorString),
             ),
             trailing = BookCardTrailing.SetProgress(label = "Set progress"),
             deadline = deadlineProgress?.toDeadlineSummaryUiModel(
@@ -60,13 +69,9 @@ internal fun Book.toAlsoReadingCard(
         ),
         decorations = BookCardDecorations(
             progress = BookCardProgress.Value(
-                fraction = (progress / 100f).coerceIn(
-                    minimumValue = 0f,
-                    maximumValue = 1f,
-                ),
-                label = "${progress.roundToInt()}%",
+                fraction = fraction,
+                label = percentLabel(fraction = fraction),
             ),
-            coverBadge = coverBadge,
             shakeOnError = mutationFailed,
         ),
     )
@@ -76,7 +81,7 @@ internal fun Book.toAlsoReadingCard(
 internal fun Book.toPickUpNextCard(): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = id),
     variant = BookCardVariant.Column(
-        cover = toTransitionCover(variant = CoverVariant.ReadingPickUpNextTile),
+        cover = BookCardCover(model = toTransitionCover(variant = CoverVariant.ReadingPickUpNextTile)),
         text = BookCardContent(title = title),
         menuLabel = null,
     ),

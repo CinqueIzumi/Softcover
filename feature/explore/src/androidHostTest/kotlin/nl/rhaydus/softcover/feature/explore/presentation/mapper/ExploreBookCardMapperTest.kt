@@ -6,11 +6,11 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
-import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
@@ -76,28 +76,36 @@ class ExploreBookCardMapperTest {
     inner class ToTrendingCard {
         @Test
         fun `keys the card by book id and passes cover, title and badge through`() {
-            // ----- Act -----
-            val card = book(
+            // ----- Arrange -----
+            val input = book(
                 id = 7,
                 title = "Piranesi",
-            ).toTrendingCard(
+            )
+
+            // ----- Act -----
+            val card = input.toTrendingCard(
                 cover = cover,
                 coverBadge = overlay,
             )
 
             // ----- Assert -----
             card.key shouldBe BookCardKey.Book(bookId = 7)
-            card.stacked().cover shouldBe cover
+            card.stacked().cover shouldBe BookCardCover(
+                model = cover,
+                badge = overlay,
+            )
             card.stacked().text.title shouldBe "Piranesi"
-            card.decorations.coverBadge shouldBe overlay
             card.decorations.pressBehaviour shouldBe BookCardDecorations.Press.Tap
             card.decorations.progress.shouldBeNull()
         }
 
         @Test
         fun `renders a one-decimal rating line for a rated book`() {
+            // ----- Arrange -----
+            val input = book(rating = 4.46)
+
             // ----- Act -----
-            val card = book(rating = 4.46).toTrendingCard(
+            val card = input.toTrendingCard(
                 cover = cover,
                 coverBadge = null,
             )
@@ -106,10 +114,10 @@ class ExploreBookCardMapperTest {
             card.stacked().text.supportingLines shouldBe persistentListOf(
                 BookCardLine(
                     parts = persistentListOf(
-                        BookCardLinePart.Rating(label = formatDecimalNumber(
-                            4.46,
-                            fractionDigits = 1,
-                        ),),
+                        BookCardLinePart.Rating(
+                            label = "4.5",
+                            contentDescription = "Rated 4.5 out of 5",
+                        ),
                     ),
                 ),
             )
@@ -117,8 +125,11 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `omits the rating line when the rating is zero`() {
+            // ----- Arrange -----
+            val input = book(rating = 0.0)
+
             // ----- Act -----
-            val card = book(rating = 0.0).toTrendingCard(
+            val card = input.toTrendingCard(
                 cover = cover,
                 coverBadge = null,
             )
@@ -129,8 +140,11 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `has no byline, eyebrow or overflow menu and tolerates a missing cover and badge`() {
+            // ----- Arrange -----
+            val input = book(rating = 3.0)
+
             // ----- Act -----
-            val card = book(rating = 3.0).toTrendingCard(
+            val card = input.toTrendingCard(
                 cover = null,
                 coverBadge = null,
             )
@@ -140,7 +154,6 @@ class ExploreBookCardMapperTest {
             card.stacked().text.byline.shouldBeNull()
             card.stacked().text.eyebrow.shouldBeNull()
             card.stacked().menuLabel.shouldBeNull()
-            card.decorations.coverBadge.shouldBeNull()
         }
     }
 
@@ -148,8 +161,8 @@ class ExploreBookCardMapperTest {
     inner class ToBecauseYouReadCard {
         @Test
         fun `prefixes the author string with By as the byline`() {
-            // ----- Act -----
-            val card = book(
+            // ----- Arrange -----
+            val input = book(
                 authors = listOf(
                     Author(
                         id = 1,
@@ -160,22 +173,30 @@ class ExploreBookCardMapperTest {
                         name = "Neil Gaiman",
                     ),
                 ),
-            ).toBecauseYouReadCard(
+            )
+
+            // ----- Act -----
+            val card = input.toBecauseYouReadCard(
                 cover = cover,
                 coverBadge = overlay,
             )
 
             // ----- Assert -----
             card.stacked().text.byline shouldBe "By Susanna Clarke, Neil Gaiman"
-            card.stacked().cover shouldBe cover
-            card.decorations.coverBadge shouldBe overlay
+            card.stacked().cover shouldBe BookCardCover(
+                model = cover,
+                badge = overlay,
+            )
             card.key shouldBe BookCardKey.Book(bookId = 7)
         }
 
         @Test
         fun `omits the byline when there is no author`() {
+            // ----- Arrange -----
+            val input = book(authors = emptyList())
+
             // ----- Act -----
-            val card = book(authors = emptyList()).toBecauseYouReadCard(
+            val card = input.toBecauseYouReadCard(
                 cover = null,
                 coverBadge = null,
             )
@@ -197,17 +218,20 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `uses the series name as eyebrow and a Book number line`() {
-            // ----- Act -----
-            val card = book(
+            // ----- Arrange -----
+            val input = book(
                 bookSeries = series,
                 positionsInSeries = listOf(2.0),
-            ).toUpNextCard(
+            )
+
+            // ----- Act -----
+            val card = input.toUpNextCard(
                 cover = cover,
                 coverBadge = null,
             )
 
             // ----- Assert -----
-            card.stacked().text.eyebrow.shouldNotBeNull().text shouldBe "Earthsea"
+            card.stacked().text.eyebrow.shouldNotBeNull().text shouldBe "EARTHSEA"
             card.stacked().text.supportingLines shouldBe persistentListOf(
                 BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = "Book #2"))),
             )
@@ -215,25 +239,30 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `omits the Book number line when there is no position`() {
-            // ----- Act -----
-            val card = book(
+            // ----- Arrange -----
+            val input = book(
                 bookSeries = series,
                 positionsInSeries = emptyList(),
             )
-                .toUpNextCard(
+
+            // ----- Act -----
+            val card = input.toUpNextCard(
                     cover = cover,
                     coverBadge = null,
                 )
 
             // ----- Assert -----
-            card.stacked().text.eyebrow.shouldNotBeNull().text shouldBe "Earthsea"
+            card.stacked().text.eyebrow.shouldNotBeNull().text shouldBe "EARTHSEA"
             card.stacked().text.supportingLines shouldBe persistentListOf()
         }
 
         @Test
         fun `omits the eyebrow when the book has no series`() {
+            // ----- Arrange -----
+            val input = book(bookSeries = null)
+
             // ----- Act -----
-            val card = book(bookSeries = null).toUpNextCard(
+            val card = input.toUpNextCard(
                 cover = cover,
                 coverBadge = null,
             )
@@ -244,15 +273,18 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `labels the overflow menu and tracks the overlay as cover badge with a tap and no progress`() {
+            // ----- Arrange -----
+            val input = book()
+
             // ----- Act -----
-            val card = book().toUpNextCard(
+            val card = input.toUpNextCard(
                 cover = cover,
                 coverBadge = overlay,
             )
 
             // ----- Assert -----
             card.stacked().menuLabel shouldBe "More options"
-            card.decorations.coverBadge shouldBe overlay
+            card.stacked().cover.shouldNotBeNull().badge shouldBe overlay
             card.decorations.pressBehaviour shouldBe BookCardDecorations.Press.Tap
             card.decorations.progress.shouldBeNull()
         }
@@ -265,19 +297,25 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `builds a standard row keyed by book id with the cover as lead`() {
+            // ----- Arrange -----
+            val input = book(id = 42)
+
             // ----- Act -----
-            val card = book(id = 42).toSearchResultCard(cover = cover)
+            val card = input.toSearchResultCard(cover = cover)
 
             // ----- Assert -----
             card.key shouldBe BookCardKey.Book(bookId = 42)
             card.row().size shouldBe BookCardVariant.Row.Size.Standard
-            card.row().lead shouldBe BookCardLead.Cover(model = cover)
+            card.row().lead shouldBe BookCardLead.Cover(cover = BookCardCover(model = cover))
         }
 
         @Test
         fun `offers to add a book that is not in the library`() {
+            // ----- Arrange -----
+            val input = book(userBook = null)
+
             // ----- Act -----
-            val card = book(userBook = null).toSearchResultCard(cover = cover)
+            val card = input.toSearchResultCard(cover = cover)
 
             // ----- Assert -----
             card.row().trailing shouldBe BookCardTrailing.Bookmark(
@@ -288,7 +326,7 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `offers to remove a book that is in the library`() {
-            // ----- Act -----
+            // ----- Arrange -----
             val savedBook = UserBook(
                 id = 1,
                 status = BookStatus.WantToRead,
@@ -304,7 +342,10 @@ class ExploreBookCardMapperTest {
                 updatedAt = null,
                 journals = emptyList(),
             )
-            val card = book(userBook = savedBook).toSearchResultCard(cover = cover)
+            val input = book(userBook = savedBook)
+
+            // ----- Act -----
+            val card = input.toSearchResultCard(cover = cover)
 
             // ----- Assert -----
             card.row().trailing shouldBe BookCardTrailing.Bookmark(
@@ -315,31 +356,42 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `uses the series text as eyebrow only when the book is in a series`() {
-            // ----- Act -----
-            val inSeries = book(
+            // ----- Arrange -----
+            val inSeriesInput = book(
                 bookSeries = BookSeries(
                     id = 1,
                     name = "Earthsea",
                     amountOfBooks = 3,
                 ),
                 positionsInSeries = listOf(2.0),
-            ).toSearchResultCard(cover = cover)
-            val standalone = book(bookSeries = null).toSearchResultCard(cover = cover)
+            )
+            val standaloneInput = book(bookSeries = null)
+
+            // ----- Act -----
+            val inSeries = inSeriesInput.toSearchResultCard(cover = cover)
+            val standalone = standaloneInput.toSearchResultCard(cover = cover)
 
             // ----- Assert -----
-            inSeries.row().text.eyebrow.shouldNotBeNull().text shouldBe "#2 of 3 in Earthsea"
+            inSeries.row().text.eyebrow.shouldNotBeNull().text shouldBe "#2 OF 3 IN EARTHSEA"
             standalone.row().text.eyebrow.shouldBeNull()
         }
 
         @Test
         fun `prefixes the byline with By and drops it when the author is blank`() {
+            // ----- Arrange -----
+            val withAuthorInput = book(
+                authors = listOf(
+                    Author(
+                        id = 1,
+                        name = "Ann",
+                    ),
+                ),
+            )
+            val withoutAuthorInput = book(authors = emptyList())
+
             // ----- Act -----
-            val withAuthor = book(authors = listOf(Author(
-                id = 1,
-                name = "Ann",
-            ),),)
-                .toSearchResultCard(cover = cover)
-            val withoutAuthor = book(authors = emptyList()).toSearchResultCard(cover = cover)
+            val withAuthor = withAuthorInput.toSearchResultCard(cover = cover)
+            val withoutAuthor = withoutAuthorInput.toSearchResultCard(cover = cover)
 
             // ----- Assert -----
             withAuthor.row().text.byline shouldBe "By Ann"
@@ -348,12 +400,15 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `shows the stats line with year readers and rating`() {
-            // ----- Act -----
-            val card = book(
+            // ----- Arrange -----
+            val input = book(
                 releaseYear = 2021,
                 usersCount = 12,
                 rating = 4.5,
-            ).toSearchResultCard(cover = cover)
+            )
+
+            // ----- Act -----
+            val card = input.toSearchResultCard(cover = cover)
 
             // ----- Assert -----
             card.row().text.supportingLines shouldBe persistentListOf(
@@ -361,10 +416,10 @@ class ExploreBookCardMapperTest {
                     parts = persistentListOf(
                         BookCardLinePart.Text(text = "2021"),
                         BookCardLinePart.Text(text = "12 readers"),
-                        BookCardLinePart.Rating(label = formatDecimalNumber(
-                                4.5,
-                                fractionDigits = 1,
-                            ),),
+                        BookCardLinePart.Rating(
+                            label = "4.5",
+                            contentDescription = "Rated 4.5 out of 5",
+                        ),
                     ),
                 ),
             )
@@ -372,12 +427,15 @@ class ExploreBookCardMapperTest {
 
         @Test
         fun `leaves the year and rating out of the stats line when unknown`() {
-            // ----- Act -----
-            val card = book(
+            // ----- Arrange -----
+            val input = book(
                 releaseYear = -1,
                 usersCount = 5,
                 rating = 0.0,
-            ).toSearchResultCard(cover = cover)
+            )
+
+            // ----- Act -----
+            val card = input.toSearchResultCard(cover = cover)
 
             // ----- Assert -----
             card.row().text.supportingLines shouldBe persistentListOf(

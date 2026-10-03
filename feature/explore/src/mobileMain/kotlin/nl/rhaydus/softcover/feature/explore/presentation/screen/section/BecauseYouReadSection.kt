@@ -10,19 +10,23 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
-import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
 
@@ -38,7 +42,7 @@ internal fun BecauseYouReadSection(
     genreSheet: SheetScaffoldUiModel,
     genreGroup: SheetRowGroupUiModel<String?>,
     books: List<Book>,
-    cards: ImmutableMap<Int, BookCardUiModel>,
+    cards: ImmutableList<BookCardUiModel>?,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -47,17 +51,21 @@ internal fun BecauseYouReadSection(
     // header and rail footprint reserved.
     if (isLoading.not() && (genre == null || books.isEmpty())) return
 
-    // Hoisted above the crossfade - see TrendingSection's comment for why.
+    // Stamped on mount - see TrendingSection's comment for why.
     val entry = rememberStaggeredEntryCoordinator(key = "explore:because_you_read")
 
-    val onCardEvent = rememberRailCardEventHandler(
-        books = books,
-        surface = SURFACE_BECAUSE_YOU_READ,
-        onBookClick = onBookClick,
-    )
+    val booksByKey = remember(books) { books.associateBy { BookCardKey.Book(it.id) } }
 
-    // The cards are derived off the books, so they land a frame after them.
-    val cardsReady = books.all { it.id in cards }
+    val onCardEvent = rememberPrefetchingBookCardEventHandler(
+        resolve = booksByKey::get,
+    ) { event, book ->
+        if (event is BookCardEvent.Clicked) {
+            onBookClick(
+                book,
+                SURFACE_BECAUSE_YOU_READ,
+            )
+        }
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
@@ -76,41 +84,33 @@ internal fun BecauseYouReadSection(
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 
-        SkeletonCrossfade(
-            isLoading = isLoading || cardsReady.not(),
-            label = "BecauseYouReadRail",
-        ) { loading ->
-            if (loading) {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    items(3) {
-                        BookCard(
-                            model = BECAUSE_YOU_READ_STAND_IN_CARD,
-                            onEvent = {},
-                            isLoading = true,
-                            modifier = Modifier.width(BECAUSE_YOU_READ_CARD_WIDTH),
-                        )
-                    }
+        if (cards == null) {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(3) {
+                    BookCard(
+                        model = BECAUSE_YOU_READ_STAND_IN_CARD,
+                        onEvent = {},
+                        modifier = Modifier.width(BECAUSE_YOU_READ_CARD_WIDTH),
+                    )
                 }
-            } else {
-                LazyRow(
-                    state = becauseYouReadListState,
-                    contentPadding = PaddingValues(horizontal = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
-                        cards[book.id]?.let { card ->
-                            BookCard(
-                                model = card,
-                                onEvent = onCardEvent,
-                                modifier = Modifier
-                                    .width(BECAUSE_YOU_READ_CARD_WIDTH)
-                                    .staggeredEntry(coordinator = entry, index = index),
-                            )
-                        }
-                    }
+            }
+        } else {
+            LazyRow(
+                state = becauseYouReadListState,
+                contentPadding = PaddingValues(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                itemsIndexed(cards, key = { _, card -> card.key.lazyKey }) { index, card ->
+                    BookCard(
+                        model = card,
+                        onEvent = onCardEvent,
+                        modifier = Modifier
+                            .width(BECAUSE_YOU_READ_CARD_WIDTH)
+                            .staggeredEntry(coordinator = entry, index = index),
+                    )
                 }
             }
         }

@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
@@ -51,6 +52,9 @@ class HiddenSuggestionsBookCardMapperTest {
         bookCount = bookCount,
     )
 
+    private fun BookCardUiModel.captionParts(): List<String> = row().text.supportingLines.single().parts
+        .map { it.shouldBeInstanceOf<BookCardLinePart.Text>().text }
+
     private fun BookCardUiModel.caption(): String {
         val line = row().text.supportingLines.single()
 
@@ -61,30 +65,28 @@ class HiddenSuggestionsBookCardMapperTest {
     inner class ToHiddenBookCard {
         @Test
         fun `builds a compact row keyed by book id with a cover lead and a Restore trailing`() {
+            // ----- Arrange -----
+            val input = hiddenBook(bookId = 5)
+
             // ----- Act -----
-            val card = hiddenBook(bookId = 5).toHiddenBookCard(cover = cover)
+            val card = input.toHiddenBookCard(cover = cover)
 
             // ----- Assert -----
             card.key shouldBe BookCardKey.Book(bookId = 5)
             card.row().size shouldBe BookCardVariant.Row.Size.Compact
-            card.row().lead shouldBe BookCardLead.Cover(model = cover)
+            card.row().lead shouldBe BookCardLead.Cover(cover = BookCardCover(model = cover))
             card.row().trailing shouldBe BookCardTrailing.Restore(label = "Restore")
         }
 
         @Test
-        fun `has no lead when there is no cover`() {
-            // ----- Act -----
-            val card = hiddenBook().toHiddenBookCard(cover = null)
-
-            // ----- Assert -----
-            card.row().lead.shouldBeNull()
-        }
-
-        @Test
         fun `uses the title and falls back to Hidden book when it is missing`() {
+            // ----- Arrange -----
+            val titledInput = hiddenBook(title = "Piranesi")
+            val untitledInput = hiddenBook(title = null)
+
             // ----- Act -----
-            val titled = hiddenBook(title = "Piranesi").toHiddenBookCard(cover = cover)
-            val untitled = hiddenBook(title = null).toHiddenBookCard(cover = cover)
+            val titled = titledInput.toHiddenBookCard(cover = cover)
+            val untitled = untitledInput.toHiddenBookCard(cover = cover)
 
             // ----- Assert -----
             titled.row().text.title shouldBe "Piranesi"
@@ -93,8 +95,11 @@ class HiddenSuggestionsBookCardMapperTest {
 
         @Test
         fun `prefixes a non-blank author with By`() {
+            // ----- Arrange -----
+            val input = hiddenBook(authorText = "Susanna Clarke")
+
             // ----- Act -----
-            val card = hiddenBook(authorText = "Susanna Clarke").toHiddenBookCard(cover = cover)
+            val card = input.toHiddenBookCard(cover = cover)
 
             // ----- Assert -----
             card.row().text.byline shouldBe "By Susanna Clarke"
@@ -102,9 +107,13 @@ class HiddenSuggestionsBookCardMapperTest {
 
         @Test
         fun `drops the byline for a null or blank author`() {
+            // ----- Arrange -----
+            val missingInput = hiddenBook(authorText = null)
+            val blankInput = hiddenBook(authorText = "  ")
+
             // ----- Act -----
-            val missing = hiddenBook(authorText = null).toHiddenBookCard(cover = cover)
-            val blank = hiddenBook(authorText = "  ").toHiddenBookCard(cover = cover)
+            val missing = missingInput.toHiddenBookCard(cover = cover)
+            val blank = blankInput.toHiddenBookCard(cover = cover)
 
             // ----- Assert -----
             missing.row().text.byline.shouldBeNull()
@@ -116,8 +125,11 @@ class HiddenSuggestionsBookCardMapperTest {
     inner class ToHiddenSeriesCard {
         @Test
         fun `builds a compact row keyed by series id with a series stack lead and a Restore trailing`() {
+            // ----- Arrange -----
+            val input = hiddenSeries(seriesId = 8)
+
             // ----- Act -----
-            val card = hiddenSeries(seriesId = 8).toHiddenSeriesCard(cover = cover)
+            val card = input.toHiddenSeriesCard(cover = cover)
 
             // ----- Assert -----
             card.key shouldBe BookCardKey.Series(seriesId = 8)
@@ -128,8 +140,11 @@ class HiddenSuggestionsBookCardMapperTest {
 
         @Test
         fun `keeps the series stack lead when there is no cover`() {
+            // ----- Arrange -----
+            val input = hiddenSeries()
+
             // ----- Act -----
-            val card = hiddenSeries().toHiddenSeriesCard(cover = null)
+            val card = input.toHiddenSeriesCard(cover = null)
 
             // ----- Assert -----
             card.row().lead shouldBe BookCardLead.SeriesStack(front = null)
@@ -137,9 +152,13 @@ class HiddenSuggestionsBookCardMapperTest {
 
         @Test
         fun `uses the series name and falls back to Hidden series when it is missing`() {
+            // ----- Arrange -----
+            val namedInput = hiddenSeries(seriesName = "Earthsea")
+            val unnamedInput = hiddenSeries(seriesName = null)
+
             // ----- Act -----
-            val named = hiddenSeries(seriesName = "Earthsea").toHiddenSeriesCard(cover = cover)
-            val unnamed = hiddenSeries(seriesName = null).toHiddenSeriesCard(cover = cover)
+            val named = namedInput.toHiddenSeriesCard(cover = cover)
+            val unnamed = unnamedInput.toHiddenSeriesCard(cover = cover)
 
             // ----- Assert -----
             named.row().text.title shouldBe "Earthsea"
@@ -147,36 +166,45 @@ class HiddenSuggestionsBookCardMapperTest {
         }
 
         @Test
-        fun `joins the author and the book count in the caption`() {
-            // ----- Act -----
-            val card = hiddenSeries(
+        fun `emits the author and the book count as separate parts`() {
+            // ----- Arrange -----
+            val input = hiddenSeries(
                 authorText = "Le Guin",
                 bookCount = 3,
-            ).toHiddenSeriesCard(cover = cover)
+            )
+
+            // ----- Act -----
+            val card = input.toHiddenSeriesCard(cover = cover)
 
             // ----- Assert -----
-            card.caption() shouldBe "Le Guin · 3 books"
+            card.captionParts() shouldBe listOf("Le Guin", "3 books")
         }
 
         @Test
         fun `singularises the book count of one`() {
-            // ----- Act -----
-            val card = hiddenSeries(
+            // ----- Arrange -----
+            val input = hiddenSeries(
                 authorText = "Le Guin",
                 bookCount = 1,
-            ).toHiddenSeriesCard(cover = cover)
+            )
+
+            // ----- Act -----
+            val card = input.toHiddenSeriesCard(cover = cover)
 
             // ----- Assert -----
-            card.caption() shouldBe "Le Guin · 1 book"
+            card.captionParts() shouldBe listOf("Le Guin", "1 book")
         }
 
         @Test
         fun `shows only the author when the count is missing`() {
-            // ----- Act -----
-            val card = hiddenSeries(
+            // ----- Arrange -----
+            val input = hiddenSeries(
                 authorText = "Le Guin",
                 bookCount = null,
-            ).toHiddenSeriesCard(cover = cover)
+            )
+
+            // ----- Act -----
+            val card = input.toHiddenSeriesCard(cover = cover)
 
             // ----- Assert -----
             card.caption() shouldBe "Le Guin"
@@ -184,11 +212,14 @@ class HiddenSuggestionsBookCardMapperTest {
 
         @Test
         fun `shows only the count when the author is missing`() {
-            // ----- Act -----
-            val card = hiddenSeries(
+            // ----- Arrange -----
+            val input = hiddenSeries(
                 authorText = null,
                 bookCount = 4,
-            ).toHiddenSeriesCard(cover = cover)
+            )
+
+            // ----- Act -----
+            val card = input.toHiddenSeriesCard(cover = cover)
 
             // ----- Assert -----
             card.caption() shouldBe "4 books"
@@ -196,15 +227,19 @@ class HiddenSuggestionsBookCardMapperTest {
 
         @Test
         fun `treats a blank author as missing`() {
-            // ----- Act -----
-            val withCount = hiddenSeries(
+            // ----- Arrange -----
+            val withCountInput = hiddenSeries(
                 authorText = " ",
                 bookCount = 2,
-            ).toHiddenSeriesCard(cover = cover)
-            val withoutCount = hiddenSeries(
+            )
+            val withoutCountInput = hiddenSeries(
                 authorText = " ",
                 bookCount = null,
-            ).toHiddenSeriesCard(cover = cover)
+            )
+
+            // ----- Act -----
+            val withCount = withCountInput.toHiddenSeriesCard(cover = cover)
+            val withoutCount = withoutCountInput.toHiddenSeriesCard(cover = cover)
 
             // ----- Assert -----
             withCount.caption() shouldBe "2 books"
@@ -213,11 +248,14 @@ class HiddenSuggestionsBookCardMapperTest {
 
         @Test
         fun `falls back to Series when neither author nor count is known`() {
-            // ----- Act -----
-            val card = hiddenSeries(
+            // ----- Arrange -----
+            val input = hiddenSeries(
                 authorText = null,
                 bookCount = null,
-            ).toHiddenSeriesCard(cover = cover)
+            )
+
+            // ----- Act -----
+            val card = input.toHiddenSeriesCard(cover = cover)
 
             // ----- Assert -----
             card.caption() shouldBe "Series"

@@ -1,19 +1,18 @@
 package nl.rhaydus.softcover.feature.library.presentation.mapper
 
 import kotlinx.collections.immutable.persistentListOf
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
-import nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
-import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -21,9 +20,11 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.uibinding.book.bookStatsLine
+import nl.rhaydus.softcover.core.uibinding.book.byline
+import nl.rhaydus.softcover.core.uibinding.book.percentLabel
+import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
 import nl.rhaydus.softcover.core.uibinding.deadline.toBadgeUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
-import kotlin.math.roundToInt
 
 /**
  * The book's card for [layout]: column or cover-only on the grids, a compact or large row on the
@@ -45,9 +46,13 @@ internal fun Book.toBookCard(
         LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
         LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
             -> {
-            variant = BookCardVariant.CoverOnly(cover = toShelfBookCover())
+            variant = BookCardVariant.CoverOnly(
+                cover = BookCardCover(
+                    model = toShelfBookCover(),
+                    badge = deadlineProgress?.toCountdownCoverOverlayUiModel(),
+                ),
+            )
             decorations = gridDecorations(
-                coverBadge = deadlineProgress?.toCountdownCoverOverlayUiModel(),
                 selection = selection,
                 press = press,
             )
@@ -57,14 +62,16 @@ internal fun Book.toBookCard(
         LibraryGridLayout.GRID_THREE_COLUMNS,
             -> {
             variant = BookCardVariant.Column(
-                cover = toShelfBookCover(),
+                cover = BookCardCover(
+                    model = toShelfBookCover(),
+                    badge = deadlineProgress?.toCountdownCoverOverlayUiModel(),
+                ),
                 text = BookCardContent(
                     title = title,
-                    byline = authors.firstAuthorByline(),
+                    byline = byline(author = authorString),
                 ),
             )
             decorations = gridDecorations(
-                coverBadge = deadlineProgress?.toCountdownCoverOverlayUiModel(),
                 selection = selection,
                 press = press,
             )
@@ -76,12 +83,12 @@ internal fun Book.toBookCard(
                 lead = null,
                 text = BookCardContent(
                     title = title,
-                    byline = authors.firstAuthorByline(),
+                    byline = byline(author = authorString),
                 ),
                 trailing = deadlineProgress?.toBadgeUiModel()?.let { BookCardTrailing.Badge(model = it) },
             )
             decorations = BookCardDecorations(
-                selection = selection,
+                selection = selection?.let { BookCardSelection.Multiple(mark = it) },
                 pressBehaviour = press,
             )
         }
@@ -89,15 +96,11 @@ internal fun Book.toBookCard(
         LibraryGridLayout.LIST_LARGE -> {
             variant = BookCardVariant.Row(
                 size = BookCardVariant.Row.Size.Large,
-                lead = BookCardLead.Cover(model = toShelfBookCover()),
+                lead = BookCardLead.Cover(cover = BookCardCover(model = toShelfBookCover())),
                 text = BookCardContent(
                     title = title,
-                    eyebrow = seriesText
-                        ?.takeIf { it.isNotBlank() }
-                        ?.let { BookCardEyebrow(text = it.uppercase()) },
-                    byline = currentEdition?.authorString
-                        ?.takeIf { it.isNotBlank() }
-                        ?.let { "By $it" },
+                    eyebrow = seriesEyebrow(seriesText = seriesText),
+                    byline = byline(author = authorString),
                     supportingLines = bookStatsLine(
                         releaseYear = releaseYear,
                         usersCount = usersCount,
@@ -111,7 +114,7 @@ internal fun Book.toBookCard(
             )
             decorations = BookCardDecorations(
                 progress = labelledProgress(),
-                selection = selection,
+                selection = selection?.let { BookCardSelection.Multiple(mark = it) },
                 pressBehaviour = press,
             )
         }
@@ -131,18 +134,18 @@ internal fun BookEdition.toEditionCard(
 ): BookCardUiModel {
     val text = BookCardContent(
         title = title.orEmpty(),
-        byline = authors.firstAuthorByline(),
+        byline = byline(author = authorString),
     )
 
     val variant = when (layout) {
         LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
         LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-            -> BookCardVariant.CoverOnly(cover = toShelfEditionCover())
+            -> BookCardVariant.CoverOnly(cover = BookCardCover(model = toShelfEditionCover()))
 
         LibraryGridLayout.GRID_TWO_COLUMNS,
         LibraryGridLayout.GRID_THREE_COLUMNS,
             -> BookCardVariant.Column(
-            cover = toShelfEditionCover(),
+            cover = BookCardCover(model = toShelfEditionCover()),
             text = text,
         )
 
@@ -154,7 +157,7 @@ internal fun BookEdition.toEditionCard(
 
         LibraryGridLayout.LIST_LARGE -> BookCardVariant.Row(
             size = BookCardVariant.Row.Size.Large,
-            lead = BookCardLead.Cover(model = toShelfEditionCover()),
+            lead = BookCardLead.Cover(cover = BookCardCover(model = toShelfEditionCover())),
             text = text,
         )
     }
@@ -172,7 +175,6 @@ internal fun BookEdition.toEditionCard(
 }
 
 private fun Book.gridDecorations(
-    coverBadge: CoverOverlayUiModel?,
     selection: SelectionMarkUiModel?,
     press: BookCardDecorations.Press,
 ): BookCardDecorations {
@@ -187,8 +189,7 @@ private fun Book.gridDecorations(
         } else {
             BookCardProgress.Reserved
         },
-        coverBadge = coverBadge,
-        selection = selection,
+        selection = selection?.let { BookCardSelection.Multiple(mark = it) },
         pressBehaviour = press,
     )
 }
@@ -202,11 +203,6 @@ private fun Book.labelledProgress(): BookCardProgress.Value? {
 
     return BookCardProgress.Value(
         fraction = fraction,
-        label = "${(fraction * 100).roundToInt()}%",
+        label = percentLabel(fraction = fraction),
     )
 }
-
-private fun List<Author>.firstAuthorByline(): String? = firstOrNull()
-    ?.name
-    ?.takeIf { it.isNotBlank() }
-    ?.let { "By $it" }

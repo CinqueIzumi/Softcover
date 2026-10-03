@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.common.toHoursMinutesSeconds
@@ -9,26 +10,23 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 
 /**
- * An edition-picker row. Only the picked edition carries a selection mark, so the other rows are not
- * dimmed; the tracked edition trails a badge and an owned one badges its cover.
- *
  * @param fallbackEdition Supplies the cover for an edition with no cover of its own.
  */
 internal fun BookEdition.toEditionCard(
@@ -40,10 +38,13 @@ internal fun BookEdition.toEditionCard(
     variant = BookCardVariant.Row(
         size = BookCardVariant.Row.Size.Standard,
         lead = BookCardLead.Cover(
-            model = toCoverUiModel(
-                defaultEdition = fallbackEdition,
-                coverlessTitle = title,
-                variant = CoverVariant.EditionListRow,
+            cover = BookCardCover(
+                model = toCoverUiModel(
+                    defaultEdition = fallbackEdition,
+                    coverlessTitle = title,
+                    variant = CoverVariant.EditionListRow,
+                ),
+                badge = OWNED_COVER_BADGE.takeIf { owned },
             ),
         ),
         text = BookCardContent(
@@ -54,10 +55,7 @@ internal fun BookEdition.toEditionCard(
         trailing = TRACKING_TRAILING.takeIf { tracked },
         deadline = null,
     ),
-    decorations = BookCardDecorations(
-        coverBadge = OWNED_COVER_BADGE.takeIf { owned },
-        selection = SELECTED_MARK.takeIf { selected },
-    ),
+    decorations = BookCardDecorations(selection = BookCardSelection.Single(selected = selected)),
 )
 
 private val TRACKING_TRAILING = BookCardTrailing.Badge(
@@ -74,15 +72,10 @@ private val OWNED_COVER_BADGE = CoverOverlayUiModel(
     grayscale = false,
 )
 
-private val SELECTED_MARK = SelectionMarkUiModel(
-    selected = true,
-    backdrop = SelectionMarkBackdrop.Image,
-)
-
 private fun BookEdition.supportingLines() = buildList {
     metaLine()
-        .takeIf { it.isNotBlank() }
-        ?.let { add(BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = it)))) }
+        .takeIf { it.isNotEmpty() }
+        ?.let { add(BookCardLine(parts = it)) }
 
     isbnWhisper()
         ?.let { add(BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = it)))) }
@@ -99,10 +92,10 @@ private fun BookEdition.formatLabel(): String =
     format.takeIf { it.isNotBlank() } ?: readingFormat?.label ?: "Edition"
 
 /**
- * Publisher · release year · pages, with pages swapped for a duration ("{h}h {m}m") on an audiobook.
+ * Publisher, release year and pages as separate parts, with pages swapped for a duration ("{h}h {m}m") on an audiobook.
  * Unknown parts are dropped rather than shown as a placeholder.
  */
-private fun BookEdition.metaLine(): String {
+private fun BookEdition.metaLine(): ImmutableList<BookCardLinePart> {
     val parts = buildList {
         publisher?.takeIf { it.isNotBlank() }?.let(::add)
         releaseYear.takeIf { it != -1 }?.let { add(it.toString()) }
@@ -117,7 +110,7 @@ private fun BookEdition.metaLine(): String {
         }
     }
 
-    return parts.joinToString(" · ")
+    return parts.map { BookCardLinePart.Text(text = it) }.toImmutableList()
 }
 
 private fun BookEdition.isbnWhisper(): String? {

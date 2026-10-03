@@ -53,10 +53,12 @@ class MoodTilesCollectorTest {
         @Test
         fun `sets moodTiles in tag order with index-driven inks`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val job = launch { MoodTilesCollector().onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                MoodTilesCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(moodTags = listOf(cosy, dark))
@@ -72,10 +74,12 @@ class MoodTilesCollectorTest {
         fun `empties moodTiles when moodTags becomes empty`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(moodTags = listOf(cosy))
-            val job = launch { MoodTilesCollector().onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                MoodTilesCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(moodTags = emptyList())
@@ -89,10 +93,12 @@ class MoodTilesCollectorTest {
         fun `unrelated state change does not recompute the tiles`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(moodTags = listOf(cosy))
-            val job = launch { MoodTilesCollector().onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                MoodTilesCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             val tilesAfterFirstEmit = stateFlow.value.moodTiles
 
             // ----- Act -----

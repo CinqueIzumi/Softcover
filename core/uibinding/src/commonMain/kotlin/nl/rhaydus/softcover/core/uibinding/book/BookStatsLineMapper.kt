@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.uibinding.book
 
 import kotlinx.collections.immutable.toImmutableList
-import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
@@ -19,14 +18,7 @@ fun bookStatsLine(
     val parts = listOfNotNull(
         releaseYear?.takeIf { it != -1 }?.let { BookCardLinePart.Text(text = it.toString()) },
         usersCount?.let { BookCardLinePart.Text(text = "${formatGroupedNumber(it)} readers") },
-        rating?.takeIf { it != 0.0 }?.let {
-            BookCardLinePart.Rating(
-                label = formatDecimalNumber(
-                    it,
-                    fractionDigits = 1,
-                ),
-            )
-        },
+        rating?.takeIf { it != 0.0 }?.let { ratingPart(rating = it) },
     )
 
     return if (parts.isEmpty()) null else BookCardLine(parts = parts.toImmutableList())

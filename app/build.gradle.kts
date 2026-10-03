@@ -124,7 +124,6 @@ dependencies {
     debugImplementation(libs.compose.material3.expressive)
     debugImplementation(libs.voyager.navigator)
     debugImplementation(libs.voyager.koin)
-    debugImplementation(libs.rhaydus.designsystemEditorial)
     debugImplementation(libs.rhaydus.toad)
 
     // Unit tests for the debug-only TOAD ScreenModel above (app/src/testDebug). Mirrors the JUnit5 +

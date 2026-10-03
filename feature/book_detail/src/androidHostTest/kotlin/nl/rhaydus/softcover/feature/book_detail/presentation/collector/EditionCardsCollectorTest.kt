@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -118,8 +119,8 @@ class EditionCardsCollectorTest {
 
             // ----- Assert -----
             val cards = stateFlow.value.editionCards
-            cards[0].decorations.selection shouldBe null
-            cards[1].decorations.selection.shouldNotBeNull().selected shouldBe true
+            cards[0].decorations.selection shouldBe BookCardSelection.Single(selected = false)
+            cards[1].decorations.selection shouldBe BookCardSelection.Single(selected = true)
             job.cancel()
         }
 

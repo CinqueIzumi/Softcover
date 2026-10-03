@@ -14,6 +14,8 @@ internal data class BookCardModelsSnapshot(
     val visibleTabs: List<LibraryTab>,
     val booksByTab: Map<String, List<Book>>,
     val editionsByTab: Map<String, List<BookEdition>>,
+    val displayBooksByTab: Map<String, List<Book>>,
+    val displayEditionsByTab: Map<String, List<BookEdition>>,
     val gridLayout: LibraryGridLayout,
     val deadlines: Map<Int, BookDeadline>,
     val dateStyle: DateStyle,

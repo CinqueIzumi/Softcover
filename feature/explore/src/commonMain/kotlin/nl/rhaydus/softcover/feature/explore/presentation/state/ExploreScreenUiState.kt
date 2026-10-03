@@ -1,9 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
@@ -49,11 +47,12 @@ internal data class ExploreScreenUiState(
     // reproducing today's ExploreShelf.kt:202,236 behaviour.
     val unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
     val featuredReleaseBadge: BadgeUiModel? = null,
-    // Keyed by book id.
-    val trendingCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
-    val becauseYouReadCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
-    val upNextCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
-    val queriedBookCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
+    // `null` until the surface has loaded.
+    val trendingCards: ImmutableList<BookCardUiModel>? = null,
+    val becauseYouReadCards: ImmutableList<BookCardUiModel>? = null,
+    val upNextCards: ImmutableList<BookCardUiModel>? = null,
+    // `null` while a search runs or its first result's cover is pending.
+    val queriedBookCards: ImmutableList<BookCardUiModel>? = null,
     // Search paging (explore-3a feedback item 7). The Typesense `search` endpoint returns no
     // total hit count, so `queriedBooksHasMore` is a "maybe more" signal derived from whether the
     // last fetched page came back full, not an authoritative total. `loadingMoreQueriedBooks` is

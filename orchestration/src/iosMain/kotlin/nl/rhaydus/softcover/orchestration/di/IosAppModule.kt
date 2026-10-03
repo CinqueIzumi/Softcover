@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.orchestration.di
 
 import androidx.compose.runtime.Composable
+import cafe.adriel.voyager.core.screen.Screen
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.notification.NotificationAccentColor
 import nl.rhaydus.softcover.core.notification.NotificationAppearance
@@ -33,7 +34,7 @@ internal val iosAppModule = module {
     single<DebugRoutesContent> {
         object : DebugRoutesContent {
             @Composable
-            override fun Render() = Unit
+            override fun Render(host: Screen) = Unit
         }
     }
 }

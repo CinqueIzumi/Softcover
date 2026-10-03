@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -9,6 +10,7 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -21,12 +23,14 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
+import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
@@ -48,6 +52,7 @@ import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTabCards
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
@@ -83,11 +88,25 @@ class BookCardModelsCollectorTest {
         }
     }
 
+    private fun ImmutableList<BookCardUiModel>.cardWithId(id: Int): BookCardUiModel = first {
+        when (val key = it.key) {
+            is BookCardKey.Book -> key.bookId == id
+            is BookCardKey.Edition -> key.editionId == id
+            is BookCardKey.Series -> key.seriesId == id
+        }
+    }
+
     private fun TestScope.launchCollector(): Job = launch {
         BookCardModelsCollector().onLaunch(
             scope = scope,
             dependencies = dependencies,
         )
+    }
+
+    private fun BookCardUiModel.coverBadge(): CoverOverlayUiModel? = when (val shape = variant) {
+        is BookCardVariant.CoverOnly -> shape.cover?.badge
+        is BookCardVariant.Column -> shape.cover?.badge
+        is BookCardVariant.Row -> (shape.lead as? BookCardLead.Cover)?.cover?.badge
     }
 
     private fun stubBook(
@@ -139,6 +158,10 @@ class BookCardModelsCollectorTest {
         every {
             book.currentEdition
         } returns edition
+
+        every {
+            book.authorString
+        } returns (edition?.authorString?.takeIf { it.isNotBlank() } ?: authors.joinToString(", ") { it.name })
 
         every {
             book.userBookRead
@@ -211,6 +234,10 @@ class BookCardModelsCollectorTest {
         every {
             edition.authors
         } returns authors
+
+        every {
+            edition.authorString
+        } returns authors.joinToString(", ") { it.name }
     }
 
     private fun stubList(
@@ -248,6 +275,130 @@ class BookCardModelsCollectorTest {
     )
 
     @Nested
+    inner class Ordering {
+        @Test
+        fun `book cards follow the display order`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+            val first = stubBook(id = 1)
+            val second = stubBook(id = 2)
+            val third = stubBook(id = 3)
+
+            // ----- Act -----
+            stateFlow.value = bookState(books = listOf(first, second, third)).copy(
+                displayBooksByTab = mapOf("all" to listOf(third, first)),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bookCardsByTab.getValue("all").cards.map { it.key } shouldBe
+                listOf(BookCardKey.Book(bookId = 3), BookCardKey.Book(bookId = 1))
+            job.cancel()
+        }
+
+        @Test
+        fun `book cards fall back to the raw list order without display books`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = bookState(
+                books = listOf(stubBook(id = 2), stubBook(id = 1)),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bookCardsByTab.getValue("all").cards.map { it.key } shouldBe
+                listOf(BookCardKey.Book(bookId = 2), BookCardKey.Book(bookId = 1))
+            job.cancel()
+        }
+
+        @Test
+        fun `an empty display list yields no cards rather than the raw list`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = bookState(books = listOf(stubBook(id = 1))).copy(
+                displayBooksByTab = mapOf("all" to emptyList()),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bookCardsByTab.getValue("all").cards.shouldBeEmpty()
+            job.cancel()
+        }
+
+        @Test
+        fun `edition cards follow the display order`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+            val first = stubEdition(id = 7)
+            val second = stubEdition(id = 8)
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = listOf(listTab),
+                editionsByTab = mapOf(listTab.id to listOf(first, second)),
+                displayEditionsByTab = mapOf(listTab.id to listOf(second, first)),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionCardsByTab.getValue(listTab.id).cards.map { it.key } shouldBe
+                listOf(BookCardKey.Edition(editionId = 8), BookCardKey.Edition(editionId = 7))
+            job.cancel()
+        }
+
+        @Test
+        fun `edition cards fall back to the raw list order without display editions`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = listOf(listTab),
+                editionsByTab = mapOf(listTab.id to listOf(stubEdition(id = 9), stubEdition(id = 7))),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionCardsByTab.getValue(listTab.id).cards.map { it.key } shouldBe
+                listOf(BookCardKey.Edition(editionId = 9), BookCardKey.Edition(editionId = 7))
+            job.cancel()
+        }
+
+        @Test
+        fun `each tab records the layout its cards were built for`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+            stateFlow.value = bookState(
+                books = listOf(stubBook(id = 1)),
+                layout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(gridLayout = LibraryGridLayout.LIST_COMPACT)
+
+            // ----- Assert -----
+            stateFlow.value.bookCardsByTab.getValue("all").layout shouldBe LibraryGridLayout.LIST_COMPACT
+            job.cancel()
+        }
+
+        @Test
+        fun `edition tabs record the layout their cards were built for`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = listOf(listTab),
+                editionsByTab = mapOf(listTab.id to listOf(stubEdition(id = 7))),
+                gridLayout = LibraryGridLayout.LIST_LARGE,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.editionCardsByTab.getValue(listTab.id).layout shouldBe LibraryGridLayout.LIST_LARGE
+            job.cancel()
+        }
+    }
+
+    @Nested
     inner class Layouts {
         @Test
         fun `grid two and three columns map to the column variant`() = runTest(testDispatcher) {
@@ -268,7 +419,7 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                val card = stateFlow.value.bookCardsByTab.getValue("all").getValue(1)
+                val card = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1)
                 card.variant.shouldBeInstanceOf<BookCardVariant.Column>()
                 card.key shouldBe BookCardKey.Book(bookId = 1)
                 job.cancel()
@@ -294,7 +445,7 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                val card = stateFlow.value.bookCardsByTab.getValue("all").getValue(1)
+                val card = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1)
                 card.variant.shouldBeInstanceOf<BookCardVariant.CoverOnly>()
                 job.cancel()
             }
@@ -322,9 +473,9 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                val book = stateFlow.value.bookCardsByTab.getValue("all").getValue(1)
+                val book = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1)
                 book.variant.shouldBeInstanceOf<BookCardVariant.Row>().size shouldBe size
-                val edition = stateFlow.value.editionCardsByTab.getValue(listTab.id).getValue(9)
+                val edition = stateFlow.value.editionCardsByTab.getValue(listTab.id).cards.cardWithId(9)
                 edition.variant.shouldBeInstanceOf<BookCardVariant.Row>().size shouldBe size
                 job.cancel()
             }
@@ -335,14 +486,14 @@ class BookCardModelsCollectorTest {
             // ----- Arrange -----
             val job = launchCollector()
             stateFlow.value = bookState(books = listOf(stubBook(id = 1)))
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).variant
                 .shouldBeInstanceOf<BookCardVariant.Column>()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(gridLayout = LibraryGridLayout.LIST_COMPACT)
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).variant
                 .shouldBeInstanceOf<BookCardVariant.Row>()
             job.cancel()
         }
@@ -367,7 +518,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            val progress = stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.progress
+            val progress = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.progress
             progress shouldBe BookCardProgress.Value(
                 fraction = 0.5f,
                 label = null,
@@ -392,7 +543,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.progress shouldBe
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.progress shouldBe
                 BookCardProgress.Reserved
             job.cancel()
         }
@@ -414,7 +565,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.progress shouldBe
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.progress shouldBe
                 BookCardProgress.Reserved
             job.cancel()
         }
@@ -431,7 +582,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.editionCardsByTab.getValue(listTab.id).getValue(7).decorations.progress shouldBe
+            stateFlow.value.editionCardsByTab.getValue(listTab.id).cards.cardWithId(7).decorations.progress shouldBe
                 BookCardProgress.Reserved
             job.cancel()
         }
@@ -453,7 +604,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue(readTab.id).getValue(1).decorations.pressBehaviour shouldBe
+            stateFlow.value.bookCardsByTab.getValue(readTab.id).cards.cardWithId(1).decorations.pressBehaviour shouldBe
                 BookCardDecorations.Press.None
             job.cancel()
         }
@@ -473,7 +624,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue(readTab.id).getValue(1).decorations.pressBehaviour shouldBe
+            stateFlow.value.bookCardsByTab.getValue(readTab.id).cards.cardWithId(1).decorations.pressBehaviour shouldBe
                 BookCardDecorations.Press.Tap
             job.cancel()
         }
@@ -487,7 +638,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = bookState(books = listOf(stubBook(id = 1)))
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.pressBehaviour shouldBe
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.pressBehaviour shouldBe
                 BookCardDecorations.Press.TapAndLongPress
             job.cancel()
         }
@@ -505,7 +656,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.pressBehaviour shouldBe
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.pressBehaviour shouldBe
                 BookCardDecorations.Press.TapAndLongPress
             job.cancel()
         }
@@ -548,7 +699,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.editionCardsByTab.getValue(listTab.id).getValue(7).decorations.pressBehaviour shouldBe
+            stateFlow.value.editionCardsByTab.getValue(listTab.id).cards.cardWithId(7).decorations.pressBehaviour shouldBe
                 BookCardDecorations.Press.None
             job.cancel()
         }
@@ -573,7 +724,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.editionCardsByTab.getValue(listTab.id).getValue(7).decorations.pressBehaviour shouldBe
+            stateFlow.value.editionCardsByTab.getValue(listTab.id).cards.cardWithId(7).decorations.pressBehaviour shouldBe
                 BookCardDecorations.Press.Tap
             job.cancel()
         }
@@ -596,7 +747,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.editionCardsByTab.getValue(listTab.id).getValue(7).decorations.pressBehaviour shouldBe
+            stateFlow.value.editionCardsByTab.getValue(listTab.id).cards.cardWithId(7).decorations.pressBehaviour shouldBe
                 BookCardDecorations.Press.Tap
             job.cancel()
         }
@@ -605,7 +756,7 @@ class BookCardModelsCollectorTest {
     @Nested
     inner class Byline {
         @Test
-        fun `uses the first author prefixed with By`() = runTest(testDispatcher) {
+        fun `lists every author prefixed with By`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val job = launchCollector()
 
@@ -621,10 +772,10 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            val variant = stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
+            val variant = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).variant
                 .shouldBeInstanceOf<BookCardVariant.Column>()
             variant.text.title shouldBe "Piranesi"
-            variant.text.byline shouldBe "By Susanna Clarke"
+            variant.text.byline shouldBe "By Susanna Clarke, Someone Else"
             job.cancel()
         }
 
@@ -637,7 +788,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = bookState(books = listOf(stubBook(id = 1)))
 
             // ----- Assert -----
-            val variant = stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
+            val variant = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).variant
                 .shouldBeInstanceOf<BookCardVariant.Column>()
             variant.text.byline.shouldBeNull()
             job.cancel()
@@ -659,14 +810,14 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            val variant = stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
+            val variant = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).variant
                 .shouldBeInstanceOf<BookCardVariant.Column>()
             variant.text.byline.shouldBeNull()
             job.cancel()
         }
 
         @Test
-        fun `edition cards use the edition title, empty when null, and its first author`() = runTest(testDispatcher) {
+        fun `edition cards use the edition title, empty when null, and its authors`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val job = launchCollector()
 
@@ -689,12 +840,12 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            val cards = stateFlow.value.editionCardsByTab.getValue(listTab.id)
-            val withAuthor = cards.getValue(7).variant.shouldBeInstanceOf<BookCardVariant.Column>()
+            val cards = stateFlow.value.editionCardsByTab.getValue(listTab.id).cards
+            val withAuthor = cards.cardWithId(7).variant.shouldBeInstanceOf<BookCardVariant.Column>()
             withAuthor.text.title shouldBe "Audio"
             withAuthor.text.byline shouldBe "By Ann"
-            cards.getValue(7).key shouldBe BookCardKey.Edition(editionId = 7)
-            val without = cards.getValue(8).variant.shouldBeInstanceOf<BookCardVariant.Column>()
+            cards.cardWithId(7).key shouldBe BookCardKey.Edition(editionId = 7)
+            val without = cards.cardWithId(8).variant.shouldBeInstanceOf<BookCardVariant.Column>()
             without.text.title shouldBe ""
             without.text.byline.shouldBeNull()
             job.cancel()
@@ -718,7 +869,7 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.selection.shouldBeNull()
+                stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.selection.shouldBeNull()
                 job.cancel()
             }
         }
@@ -736,10 +887,12 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.selection shouldBe
-                SelectionMarkUiModel(
-                    selected = false,
-                    backdrop = SelectionMarkBackdrop.Surface,
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.selection shouldBe
+                BookCardSelection.Multiple(
+                    mark = SelectionMarkUiModel(
+                        selected = false,
+                        backdrop = SelectionMarkBackdrop.Surface,
+                    ),
                 )
             job.cancel()
         }
@@ -759,8 +912,8 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.selection
-                    .shouldNotBeNull().backdrop shouldBe SelectionMarkBackdrop.Image
+                stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.selection
+                    .shouldBeInstanceOf<BookCardSelection.Multiple>().mark.backdrop shouldBe SelectionMarkBackdrop.Image
                 job.cancel()
             }
         }
@@ -777,9 +930,9 @@ class BookCardModelsCollectorTest {
             ).copy(selectedBookIds = setOf(2))
 
             // ----- Assert -----
-            val cards = stateFlow.value.bookCardsByTab.getValue("all")
-            cards.getValue(1).decorations.selection.shouldNotBeNull().selected shouldBe false
-            cards.getValue(2).decorations.selection.shouldNotBeNull().selected shouldBe true
+            val cards = stateFlow.value.bookCardsByTab.getValue("all").cards
+            cards.cardWithId(1).decorations.selection.shouldBeInstanceOf<BookCardSelection.Multiple>().selected shouldBe false
+            cards.cardWithId(2).decorations.selection.shouldBeInstanceOf<BookCardSelection.Multiple>().selected shouldBe true
             job.cancel()
         }
     }
@@ -791,11 +944,11 @@ class BookCardModelsCollectorTest {
             layout = LibraryGridLayout.LIST_COMPACT,
         )
 
-        private fun LibraryUiState.row(): BookCardVariant.Row = bookCardsByTab.getValue("all").getValue(1).variant
+        private fun LibraryUiState.row(): BookCardVariant.Row = bookCardsByTab.getValue("all").cards.cardWithId(1).variant
             .shouldBeInstanceOf<BookCardVariant.Row>()
 
         @Test
-        fun `is coverless with the title and a first author byline`() = runTest(testDispatcher) {
+        fun `is coverless with the title and an all-authors byline`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val job = launchCollector()
 
@@ -812,7 +965,7 @@ class BookCardModelsCollectorTest {
             val row = stateFlow.value.row()
             row.lead.shouldBeNull()
             row.text.title shouldBe "Dune"
-            row.text.byline shouldBe "By Frank Herbert"
+            row.text.byline shouldBe "By Frank Herbert, Someone Else"
             job.cancel()
         }
 
@@ -832,9 +985,9 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            val card = stateFlow.value.bookCardsByTab.getValue("all").getValue(1)
+            val card = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1)
             card.decorations.progress.shouldBeNull()
-            card.decorations.coverBadge.shouldBeNull()
+            card.coverBadge().shouldBeNull()
             val row = card.variant.shouldBeInstanceOf<BookCardVariant.Row>()
             row.text.eyebrow.shouldBeNull()
             row.text.supportingLines shouldBe emptyList()
@@ -915,7 +1068,7 @@ class BookCardModelsCollectorTest {
             layout = LibraryGridLayout.LIST_LARGE,
         )
 
-        private fun LibraryUiState.card(): BookCardUiModel = bookCardsByTab.getValue("all").getValue(1)
+        private fun LibraryUiState.card(): BookCardUiModel = bookCardsByTab.getValue("all").cards.cardWithId(1)
 
         private fun LibraryUiState.row(): BookCardVariant.Row = card().variant
             .shouldBeInstanceOf<BookCardVariant.Row>()
@@ -936,7 +1089,7 @@ class BookCardModelsCollectorTest {
             // ----- Assert -----
             val row = stateFlow.value.row()
             val lead = row.lead.shouldBeInstanceOf<BookCardLead.Cover>()
-            lead.model.coverlessTitle shouldBe "Dune"
+            lead.cover.model.coverlessTitle shouldBe "Dune"
             row.trailing.shouldBeNull()
             job.cancel()
         }
@@ -977,7 +1130,7 @@ class BookCardModelsCollectorTest {
         }
 
         @Test
-        fun `the byline is the current edition's author string`() = runTest(testDispatcher) {
+        fun `the byline is the current edition's author string, falling back to the book authors`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val job = launchCollector()
 
@@ -992,6 +1145,25 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.row().text.byline shouldBe "By Frank Herbert, Brian Herbert"
+            job.cancel()
+        }
+
+        @Test
+        fun `the byline falls back to the book authors without a current edition author string`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = largeState(
+                stubBook(
+                    id = 1,
+                    authors = listOf(author("Ann"), author("Bob")),
+                    edition = stubCurrentEdition(authorString = ""),
+                ),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.row().text.byline shouldBe "By Ann, Bob"
             job.cancel()
         }
 
@@ -1035,7 +1207,10 @@ class BookCardModelsCollectorTest {
                     parts = persistentListOf(
                         BookCardLinePart.Text(text = "1965"),
                         BookCardLinePart.Text(text = "12 readers"),
-                        BookCardLinePart.Rating(label = "4.2"),
+                        BookCardLinePart.Rating(
+                            label = "4.2",
+                            contentDescription = "Rated 4.2 out of 5",
+                        ),
                     ),
                 ),
             )
@@ -1117,7 +1292,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.row().deadline.shouldNotBeNull().paceText shouldBe "10 pages/day"
-            stateFlow.value.card().decorations.coverBadge.shouldBeNull()
+            stateFlow.value.card().coverBadge().shouldBeNull()
             job.cancel()
         }
 
@@ -1232,7 +1407,7 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.coverBadge.shouldNotBeNull()
+                stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).coverBadge().shouldNotBeNull()
                 job.cancel()
             }
         }
@@ -1246,7 +1421,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = bookState(books = listOf(stubBook(id = 1)))
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.coverBadge.shouldBeNull()
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).coverBadge().shouldBeNull()
             job.cancel()
         }
     }
@@ -1262,10 +1437,10 @@ class BookCardModelsCollectorTest {
             gridLayout = layout,
         )
 
-        private fun LibraryUiState.card(): BookCardUiModel = editionCardsByTab.getValue(listTab.id).getValue(7)
+        private fun LibraryUiState.card(): BookCardUiModel = editionCardsByTab.getValue(listTab.id).cards.cardWithId(7)
 
         @Test
-        fun `the compact row is coverless with the title and first author byline`() = runTest(testDispatcher) {
+        fun `the compact row is coverless with the title and author byline`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val job = launchCollector()
 
@@ -1305,7 +1480,7 @@ class BookCardModelsCollectorTest {
             // ----- Assert -----
             val row = stateFlow.value.card().variant.shouldBeInstanceOf<BookCardVariant.Row>()
             row.size shouldBe BookCardVariant.Row.Size.Large
-            row.lead.shouldBeInstanceOf<BookCardLead.Cover>().model.coverlessTitle shouldBe "Dune (Deluxe)"
+            row.lead.shouldBeInstanceOf<BookCardLead.Cover>().cover.model.coverlessTitle shouldBe "Dune (Deluxe)"
             job.cancel()
         }
 
@@ -1369,7 +1544,7 @@ class BookCardModelsCollectorTest {
                 sortMode = LibrarySortMode.MANUAL,
             )
 
-            val press = stateFlow.value.bookCardsByTab.getValue(readTab.id).getValue(1).decorations.pressBehaviour
+            val press = stateFlow.value.bookCardsByTab.getValue(readTab.id).cards.cardWithId(1).decorations.pressBehaviour
             job.cancel()
             return press
         }
@@ -1377,11 +1552,16 @@ class BookCardModelsCollectorTest {
         @Test
         fun `a compact row supports tap and long press outside selection and rearranging`() =
             runTest(testDispatcher) {
+                // ----- Arrange -----
+                val layout = LibraryGridLayout.LIST_COMPACT
+                val selectionMode = false
+                val isRearranging = false
+
                 // ----- Act -----
                 val press = pressOf(
-                    layout = LibraryGridLayout.LIST_COMPACT,
-                    selectionMode = false,
-                    isRearranging = false,
+                    layout = layout,
+                    selectionMode = selectionMode,
+                    isRearranging = isRearranging,
                 )
 
                 // ----- Assert -----
@@ -1390,11 +1570,16 @@ class BookCardModelsCollectorTest {
 
         @Test
         fun `a large row is tap only in selection mode`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val layout = LibraryGridLayout.LIST_LARGE
+            val selectionMode = true
+            val isRearranging = false
+
             // ----- Act -----
             val press = pressOf(
-                layout = LibraryGridLayout.LIST_LARGE,
-                selectionMode = true,
-                isRearranging = false,
+                layout = layout,
+                selectionMode = selectionMode,
+                isRearranging = isRearranging,
             )
 
             // ----- Assert -----
@@ -1403,15 +1588,75 @@ class BookCardModelsCollectorTest {
 
         @Test
         fun `a large row is inert while its tab is rearranging`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val layout = LibraryGridLayout.LIST_LARGE
+            val selectionMode = false
+            val isRearranging = true
+
             // ----- Act -----
             val press = pressOf(
-                layout = LibraryGridLayout.LIST_LARGE,
-                selectionMode = false,
-                isRearranging = true,
+                layout = layout,
+                selectionMode = selectionMode,
+                isRearranging = isRearranging,
             )
 
             // ----- Assert -----
             press shouldBe BookCardDecorations.Press.None
+        }
+    }
+
+    @Nested
+    inner class Payloads {
+        @Test
+        fun `book payloads resolve each card key to its book`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+            val first = stubBook(id = 1)
+            val second = stubBook(id = 2)
+
+            // ----- Act -----
+            stateFlow.value = bookState(books = listOf(first, second))
+
+            // ----- Assert -----
+            val tabCards = stateFlow.value.bookCardsByTab.getValue("all")
+            tabCards.payloads.size shouldBe 2
+            tabCards.payloads.getValue(tabCards.cards.cardWithId(1).key) shouldBeSameInstanceAs first
+            tabCards.payloads.getValue(tabCards.cards.cardWithId(2).key) shouldBeSameInstanceAs second
+            job.cancel()
+        }
+
+        @Test
+        fun `edition payloads resolve each card key to its edition`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+            val edition = stubEdition(id = 7)
+
+            // ----- Act -----
+            stateFlow.value = LibraryUiState(
+                visibleTabs = listOf(listTab),
+                editionsByTab = mapOf(listTab.id to listOf(edition)),
+                gridLayout = LibraryGridLayout.LIST_COMPACT,
+            )
+
+            // ----- Assert -----
+            val tabCards = stateFlow.value.editionCardsByTab.getValue(listTab.id)
+            tabCards.payloads.getValue(tabCards.cards.cardWithId(7).key) shouldBeSameInstanceAs edition
+            job.cancel()
+        }
+
+        @Test
+        fun `an empty tab has no payloads`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = bookState(books = listOf(stubBook(id = 1))).copy(
+                displayBooksByTab = mapOf("all" to emptyList()),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.bookCardsByTab.getValue("all").payloads.isEmpty() shouldBe true
+            job.cancel()
         }
     }
 
@@ -1479,7 +1724,8 @@ class BookCardModelsCollectorTest {
             val after = stateFlow.value.bookCardsByTab
             after.getValue(tabA.id) shouldBeSameInstanceAs before.getValue(tabA.id)
             after.getValue(tabB.id) shouldNotBeSameInstanceAs before.getValue(tabB.id)
-            after.getValue(tabB.id).getValue(2).decorations.selection.shouldNotBeNull().selected shouldBe true
+            after.getValue(tabB.id).cards.cardWithId(2).decorations.selection
+                .shouldBeInstanceOf<BookCardSelection.Multiple>().selected shouldBe true
             job.cancel()
         }
 
@@ -1494,13 +1740,13 @@ class BookCardModelsCollectorTest {
                 ),),
                 layout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.coverBadge.shouldBeNull()
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).coverBadge().shouldBeNull()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(deadlines = mapOf(1 to deadlineFor(1)))
 
             // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue("all").getValue(1).decorations.coverBadge.shouldNotBeNull()
+            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).coverBadge().shouldNotBeNull()
             job.cancel()
         }
 
@@ -1525,16 +1771,16 @@ class BookCardModelsCollectorTest {
                 ),
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
             )
-            val beforeA = stateFlow.value.bookCardsByTab.getValue(tabA.id).getValue(1).deadlineDateText()
-            val beforeB = stateFlow.value.bookCardsByTab.getValue(tabB.id).getValue(2).deadlineDateText()
+            val beforeA = stateFlow.value.bookCardsByTab.getValue(tabA.id).cards.cardWithId(1).deadlineDateText()
+            val beforeB = stateFlow.value.bookCardsByTab.getValue(tabB.id).cards.cardWithId(2).deadlineDateText()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(dateStyle = DateStyle.YEAR_MONTH_DAY)
 
             // ----- Assert -----
             val after = stateFlow.value.bookCardsByTab
-            after.getValue(tabA.id).getValue(1).deadlineDateText() shouldNotBe beforeA
-            after.getValue(tabB.id).getValue(2).deadlineDateText() shouldNotBe beforeB
+            after.getValue(tabA.id).cards.cardWithId(1).deadlineDateText() shouldNotBe beforeA
+            after.getValue(tabB.id).cards.cardWithId(2).deadlineDateText() shouldNotBe beforeB
             job.cancel()
         }
 
@@ -1556,7 +1802,7 @@ class BookCardModelsCollectorTest {
             val after = stateFlow.value.bookCardsByTab
             after.getValue(tabA.id) shouldNotBeSameInstanceAs before.getValue(tabA.id)
             after.getValue(tabB.id) shouldNotBeSameInstanceAs before.getValue(tabB.id)
-            after.getValue(tabA.id).getValue(1).variant.shouldBeInstanceOf<BookCardVariant.Row>().size shouldBe
+            after.getValue(tabA.id).cards.cardWithId(1).variant.shouldBeInstanceOf<BookCardVariant.Row>().size shouldBe
                 BookCardVariant.Row.Size.Large
             job.cancel()
         }
@@ -1624,10 +1870,10 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            onList.getValue(1).variant.shouldBeInstanceOf<BookCardVariant.Row>()
+            onList.cards.cardWithId(1).variant.shouldBeInstanceOf<BookCardVariant.Row>()
             val after = stateFlow.value.bookCardsByTab.getValue("all")
             after shouldNotBeSameInstanceAs before
-            after.getValue(1).variant.shouldBeInstanceOf<BookCardVariant.Column>()
+            after.cards.cardWithId(1).variant.shouldBeInstanceOf<BookCardVariant.Column>()
             job.cancel()
         }
         @Test
@@ -1648,7 +1894,7 @@ class BookCardModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.bookCardsByTab.getValue("all").getValue(1).variant
+                stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).variant
                     .shouldBeInstanceOf<BookCardVariant.CoverOnly>()
                 job.cancel()
             }

@@ -14,9 +14,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1–S7-7, SL-9–SL-11 done. SL-3b waits on F34; F33 open.
-- **Next:** S7-C convergence pass; `steps/s7-bookcard.md` § S7-C.
-- **Open questions:** `BookmarkToggle` → foundation toggle? #275's PF line says "No UI changes" but PF-7 swaps copy — reword?
+- **State:** S7 closed, SL-9–SL-11 done; SL-14 drafted. SL-3b waits on F34; F33 open.
+- **Next:** S8-1 (`steps/s8-screen-states.md`).
+- **Open questions:** `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)?
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
   titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
@@ -34,9 +34,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes; SL-5's hero
-  title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid; S7-4's rails; S7-5's rows; SL-10b's stand-ins; desktop chip gap (24dp); S7-6's rows, tiles; SL-11's loading layouts; S7-7.
-- **Verification:** S7-7: styleCheck, tests ✅ (JDK 21); review ✅; on device ✅.
-- **Uncommitted:** none.
+  title block while loading; S7-2/4/5/6/7 cards; SL-10b/11 loading; desktop chip gap (24dp); C2 bars; C3 eyebrows, bylines; C5 uncrossfaded swap.
+- **Verification:** S7-C5: `check buildHealth styleCheck` (JDK 21), review ✅.
+- **Uncommitted:** S7-C1–C5 + tests, SL-14, docs, gallery split, iOS / dep fixes.
 
 ## Local verification
 
@@ -80,7 +80,7 @@ every sub-step's Verify.
 | S5 | — (test prune) | S5-T | [x] |
 | S6 | — (rows) | S6-1, S6-2 (audit only), S6-C-rows | [x] |
 | S6 | — (sheet chrome) | S6-3–S6-7, S6-C-sheets | [x] |
-| S7 | [steps/s7-bookcard.md](steps/s7-bookcard.md) | S7-1–S7-7 | [ ] |
+| S7 | — (book cards) | S7-1–S7-7, S7-C1–C5 | [x] |
 | SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-13, app-wide; SL-1–SL-7 before S7-2 | [ ] |
 | S8 | [steps/s8-screen-states.md](steps/s8-screen-states.md) | S8-1–S8-3 | [ ] |
 | S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-5 | [ ] |
@@ -168,7 +168,7 @@ Not components; they stay where they are.
 
 ## Risks
 
-Cross-cutting only; S7's own risks live in `steps/s7-bookcard.md`.
+Cross-cutting only.
 
 | Risk | Where | Mitigation |
 |---|---|---|

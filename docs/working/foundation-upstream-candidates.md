@@ -194,8 +194,9 @@ Filed but not yet implemented in the foundation.
   shimmer over a leaf's real bounds and hides the content, so a screen renders its normal layout from a
   placeholder model while loading.
 - **What to build:** move the local mask into `designsystem-core` unchanged in behaviour (shimmer over
-  the measured bounds, content hidden, semantics cleared while masked), release, and switch Softcover's
-  call sites to it. Then delete the local copy.
+  the measured bounds, content hidden, semantics cleared while masked, a 150ms grace period before the
+  shimmer and a 300ms minimum once shown), release, and switch Softcover's call sites to it. Then delete
+  the local copy.
 
 ### F33 — detekt type resolution cannot read Kotlin 2.3 metadata
 

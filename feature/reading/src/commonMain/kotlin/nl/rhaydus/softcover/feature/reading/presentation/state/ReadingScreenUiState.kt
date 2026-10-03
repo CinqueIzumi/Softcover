@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -87,12 +85,13 @@ internal data class ReadingScreenUiState(
     val verdictCover: CoverUiModel? = null,
 
     /**
-     * The "Also reading" rows keyed by book id (every book but the featured first), and the empty
+     * The "Also reading" rows in display order (every book but the featured first; `null` until the
+     * collector has built them for the current [books], and while there are none), and the empty
      * screen's "Pick up next" tiles in display order (`null` until [wantToReadBooks] loads), mapped off
      * the composition by `BookCardModelsCollector` (R9) from [books], [wantToReadBooks], [deadlines],
      * [dateStyle], [deadlineCoverOverlays] and [failedMutationBookIds] — never by the render.
      */
-    val alsoReadingCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
+    val alsoReadingCards: ImmutableList<BookCardUiModel>? = null,
     val pickUpNextCards: ImmutableList<BookCardUiModel>? = null,
 
     /**

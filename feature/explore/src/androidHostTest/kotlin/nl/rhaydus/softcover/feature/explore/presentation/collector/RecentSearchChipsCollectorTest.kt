@@ -40,10 +40,12 @@ class RecentSearchChipsCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val collector = RecentSearchChipsCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 stateFlow.value = ExploreScreenUiState(previousSearchQueries = listOf("kotlin", "android"))
@@ -64,10 +66,12 @@ class RecentSearchChipsCollectorTest {
                 // ----- Arrange -----
                 stateFlow.value = ExploreScreenUiState(previousSearchQueries = listOf("kotlin"))
                 val collector = RecentSearchChipsCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(previousSearchQueries = emptyList())
@@ -86,10 +90,12 @@ class RecentSearchChipsCollectorTest {
                 isLoading = true,
             )
             val collector = RecentSearchChipsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(previousSearchQueries = listOf("dune"))
@@ -106,10 +112,12 @@ class RecentSearchChipsCollectorTest {
                 // ----- Arrange -----
                 stateFlow.value = ExploreScreenUiState(previousSearchQueries = listOf("kotlin"))
                 val collector = RecentSearchChipsCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
                 val chipSetAfterFirstEmit = stateFlow.value.recentSearchChips
 
                 // ----- Act -----

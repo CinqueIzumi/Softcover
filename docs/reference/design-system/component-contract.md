@@ -47,6 +47,13 @@ sealed interface ProgressSheetEvent {
 }
 ```
 
+- **One hoisted handler per list.** `BookCard` events carry a `BookCardKey`. A surface builds one handler
+  with `rememberBookCardEventHandler(resolve, onEvent)`, where `resolve` maps a key to the payload it was
+  built from and `onEvent` receives the event plus that payload. An event whose key `resolve` does not know
+  is dropped. A list that mutates should resolve from a payload map built in the same pass as its cards, not
+  from a live list that can move ahead of them. `rememberPrefetchingBookCardEventHandler`
+  (`:core:presentation`) adds the book-detail prefetch on press. A lazy-list key comes from
+  `BookCardKey.lazyKey` (`"book:12"`, `"edition:3"`, `"series:7"`): Bundle-saveable and unique across kinds.
 - **Screen state the component renders belongs on the model**, not in a second parameter (the progress
   sheet's selected tab is `ProgressSheetUiModel.selectedTab`). Its stored home stays in the feature's
   `UiState`, and the model field is derived from it in one collector, so there is one writer.
@@ -60,7 +67,8 @@ sealed interface ProgressSheetEvent {
 data class BookCardUiModel(
     val key: BookCardKey,                 // identity
     val variant: BookCardVariant,         // sealed: CoverOnly | Column | Row(size); each carries its own text
-    val decorations: BookCardDecorations,  // progress? (Reserved | Value), coverBadge?, selection?, press behaviour
+    val decorations: BookCardDecorations,  // progress? (Reserved | Value), selection? (Multiple | Single), press behaviour
+    val isLoading: Boolean,               // R12
 )
 ```
 

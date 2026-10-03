@@ -119,12 +119,16 @@ class MastheadCollectorTest {
 
         @Test
         fun `default ExploreScreenUiState matches the collector's idle output`() {
-            // ----- Arrange / Act -----
+            // ----- Arrange -----
+            val expectedMasthead = idleMasthead
+            val expectedRefresh = idleRefresh
+
+            // ----- Act -----
             val defaultState = ExploreScreenUiState()
 
             // ----- Assert -----
-            defaultState.masthead shouldBe idleMasthead
-            defaultState.mastheadRefresh shouldBe idleRefresh
+            defaultState.masthead shouldBe expectedMasthead
+            defaultState.mastheadRefresh shouldBe expectedRefresh
         }
     }
 }

@@ -10,13 +10,56 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
 internal fun BookCardCoverOnlyLayout(
     model: BookCardUiModel,
     variant: BookCardVariant.CoverOnly,
+    onEvent: (BookCardEvent) -> Unit,
+    modifier: Modifier,
+    isLoading: Boolean,
+    content: (@Composable () -> Unit)?,
+) {
+    BookCardCoverScaffold(
+        model = model,
+        cover = variant.cover,
+        menuLabel = null,
+        text = null,
+        onEvent = onEvent,
+        modifier = modifier,
+        isLoading = isLoading,
+        content = content,
+    )
+}
+
+@Composable
+internal fun BookCardColumnLayout(
+    model: BookCardUiModel,
+    variant: BookCardVariant.Column,
+    onEvent: (BookCardEvent) -> Unit,
+    modifier: Modifier,
+    isLoading: Boolean,
+    content: (@Composable () -> Unit)?,
+) {
+    BookCardCoverScaffold(
+        model = model,
+        cover = variant.cover,
+        menuLabel = variant.menuLabel,
+        text = variant.text,
+        onEvent = onEvent,
+        modifier = modifier,
+        isLoading = isLoading,
+        content = content,
+    )
+}
+
+@Composable
+private fun BookCardCoverScaffold(
+    model: BookCardUiModel,
+    cover: BookCardCover?,
+    menuLabel: String?,
+    text: BookCardContent?,
     onEvent: (BookCardEvent) -> Unit,
     modifier: Modifier,
     isLoading: Boolean,
@@ -33,46 +76,10 @@ internal fun BookCardCoverOnlyLayout(
         ),
     ) {
         CoverWithCorner(
-            cover = variant.cover,
-            decorations = model.decorations,
-            menu = null,
+            cover = cover,
+            selection = model.decorations.selection,
             isLoading = isLoading,
-            content = content,
-        )
-
-        if (progress != null) {
-            BookCardProgressBar(
-                progress = progress,
-                modifier = Modifier.padding(top = 9.dp),
-                barHeight = 8.dp,
-                isLoading = isLoading,
-            )
-        }
-    }
-}
-
-@Composable
-internal fun BookCardColumnLayout(
-    model: BookCardUiModel,
-    variant: BookCardVariant.Column,
-    onEvent: (BookCardEvent) -> Unit,
-    modifier: Modifier,
-    isLoading: Boolean,
-    content: (@Composable () -> Unit)?,
-) {
-    Column(
-        modifier = modifier.bookCardInteraction(
-            model = model,
-            onEvent = onEvent,
-            hoverHighlight = false,
-            isLoading = isLoading,
-        ),
-    ) {
-        CoverWithCorner(
-            cover = variant.cover,
-            decorations = model.decorations,
-            isLoading = isLoading,
-            menu = variant.menuLabel?.let { label ->
+            menu = menuLabel?.let { label ->
                 CoverMenu(
                     label = label,
                     onClick = { onEvent(BookCardEvent.MenuClicked(key = model.key)) },
@@ -81,8 +88,6 @@ internal fun BookCardColumnLayout(
             content = content,
         )
 
-        val progress = model.decorations.progress
-
         if (progress != null) {
             BookCardProgressBar(
                 progress = progress,
@@ -92,16 +97,18 @@ internal fun BookCardColumnLayout(
             )
         }
 
-        BookCardTextBlock(
-            content = variant.text,
-            titleStyle = MaterialTheme.editorialTypography.titleSmall,
-            titleMinLines = 2,
-            titleMaxLines = 2,
-            isLoading = isLoading,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 9.dp),
-        )
+        if (text != null) {
+            BookCardTextBlock(
+                content = text,
+                titleStyle = MaterialTheme.editorialTypography.titleSmall,
+                titleMinLines = 2,
+                titleMaxLines = 2,
+                isLoading = isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 9.dp),
+            )
+        }
     }
 }
 
@@ -112,16 +119,16 @@ private class CoverMenu(
 
 @Composable
 private fun CoverWithCorner(
-    cover: CoverUiModel?,
-    decorations: BookCardDecorations,
+    cover: BookCardCover?,
+    selection: BookCardSelection?,
     menu: CoverMenu?,
     isLoading: Boolean,
     content: (@Composable () -> Unit)?,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        BookCardCover(
+        BookCardCoverLayout(
             cover = cover,
-            decorations = decorations,
+            selection = selection,
             isLoading = isLoading,
             modifier = Modifier.fillMaxWidth(),
         )

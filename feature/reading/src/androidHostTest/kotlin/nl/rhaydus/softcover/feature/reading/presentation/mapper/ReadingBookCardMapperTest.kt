@@ -12,8 +12,10 @@ import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
@@ -113,6 +115,9 @@ class ReadingBookCardMapperTest {
 
     private fun BookCardUiModel.row(): BookCardVariant.Row =
         variant.shouldBeInstanceOf<BookCardVariant.Row>()
+
+    private fun BookCardUiModel.coverPairing(): BookCardCover =
+        row().lead.shouldBeInstanceOf<BookCardLead.Cover>().cover
 
     private fun progressValue(card: BookCardUiModel): BookCardProgress.Value =
         card.decorations.progress.shouldBeInstanceOf<BookCardProgress.Value>()
@@ -342,6 +347,20 @@ class ReadingBookCardMapperTest {
         }
 
         @Test
+        fun `caps the percentage label at one hundred when progress exceeds one hundred`() {
+            // ----- Arrange -----
+            val book = book(userBookRead = read(progress = 150f))
+
+            // ----- Act -----
+            val card = alsoReading(book = book)
+
+            // ----- Assert -----
+            val progress = progressValue(card)
+            progress.fraction shouldBe 1f
+            progress.label shouldBe "100%"
+        }
+
+        @Test
         fun `clamps the fraction to zero when progress is negative`() {
             // ----- Arrange -----
             val book = book(userBookRead = read(progress = -5f))
@@ -366,8 +385,8 @@ class ReadingBookCardMapperTest {
             val without = alsoReading(book = book)
 
             // ----- Assert -----
-            withBadge.decorations.coverBadge shouldBe overlay
-            without.decorations.coverBadge.shouldBeNull()
+            withBadge.coverPairing().badge shouldBe overlay
+            without.coverPairing().badge.shouldBeNull()
         }
 
         @Test

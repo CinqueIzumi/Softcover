@@ -6,7 +6,6 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
@@ -211,11 +210,11 @@ internal data class LibraryUiState(
     val selectionMode: Boolean = false,
     val selectedBookIds: Set<Int> = emptySet(),
 
-    /** Card models per tab id, then [Book.id], mapped by `BookCardModelsCollector` (R9). */
-    val bookCardsByTab: ImmutableMap<String, ImmutableMap<Int, BookCardUiModel>> = persistentMapOf(),
+    /** Book cards per tab id in the order the tab shows them, mapped by `BookCardModelsCollector` (R9). */
+    val bookCardsByTab: ImmutableMap<String, LibraryTabCards<Book>> = persistentMapOf(),
 
-    /** Card models per custom-list tab id, then [BookEdition.id]; same shape as [bookCardsByTab]. */
-    val editionCardsByTab: ImmutableMap<String, ImmutableMap<Int, BookCardUiModel>> = persistentMapOf(),
+    /** Edition cards per custom-list tab id in the order the tab shows them; same shape as [bookCardsByTab]. */
+    val editionCardsByTab: ImmutableMap<String, LibraryTabCards<BookEdition>> = persistentMapOf(),
 
     /**
      * Rearrange mode. A transient editing state entered from the drag-handle icon-button in the

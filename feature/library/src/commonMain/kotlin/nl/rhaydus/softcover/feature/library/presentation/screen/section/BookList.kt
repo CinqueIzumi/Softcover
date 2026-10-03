@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
@@ -23,14 +22,16 @@ import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.platformModifierClick
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
-import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfAction
@@ -69,13 +70,33 @@ internal fun BookList(
         return
     }
 
-    // Books arrive pre-sorted from the DAO via SQL ORDER BY; DisplayListsCollector applies the
-    // search + Read-tab year filter off the main thread. Fall back to the raw (already sorted)
-    // list for the one frame between the raw books landing and the collector producing the
-    // filtered list, so the grid never flashes empty on first load.
-    val visibleBooks = state.displayBooksFor(tabId = tab.id) ?: rawBooks
+    val tabCards = state.bookCardsByTab[tab.id]
 
-    val visibleBookIds = remember(visibleBooks) { visibleBooks.map { it.id } }
+    if (tabCards == null) {
+        LibraryLoadingGrid(
+            layout = state.gridLayout,
+            gridState = gridState,
+            columnsOverride = columnsOverride,
+        )
+
+        return
+    }
+
+    val cards = tabCards.cards
+
+    // Books arrive pre-sorted from the DAO via SQL ORDER BY; DisplayListsCollector applies the
+    // search + Read-tab year filter off the main thread, and BookCardModelsCollector builds the
+    // cards from that result. The cards carry the order and their own books, so a card's event or
+    // menu resolves to the book it was built from even while the live lists are ahead of the cards.
+    val booksByKey = tabCards.payloads
+
+    val visibleKeys = remember(cards) { cards.map { it.key.lazyKey } }
+
+    val bookIdByLazyKey = remember(cards) {
+        cards.mapNotNull { card ->
+            (card.key as? BookCardKey.Book)?.let { card.key.lazyKey to it.bookId }
+        }.toMap()
+    }
 
     val sortMode = state.sortModeFor(tabId = tab.id)
     val selectionMode = state.selectionMode
@@ -100,7 +121,7 @@ internal fun BookList(
 
     val isRearranging = reorderStatus != null
 
-    val animator = rememberLazyItemMutationAnimator(keys = visibleBookIds)
+    val animator = rememberLazyItemMutationAnimator(keys = visibleKeys)
 
     val entry = rememberStaggeredEntryCoordinator(key = "library:books:${tab.id}")
 
@@ -109,51 +130,37 @@ internal fun BookList(
         sortMode = sortMode,
         sortDirection = state.sortDirectionFor(tabId = tab.id),
         filters = state.filtersFor(tabId = tab.id),
-        visibleItemsKey = visibleBookIds.firstOrNull() ?: 0,
+        visibleItemsKey = visibleKeys.firstOrNull()?.let(bookIdByLazyKey::get) ?: 0,
         gridState = gridState,
     )
 
     val haptics = LocalHaptics.current
 
-    val booksById = remember(visibleBooks) { visibleBooks.associateBy { it.id } }
-
-    val prefetcher = LocalBookDetailPrefetcher.current
-    val currentBooksById by rememberUpdatedState(booksById)
-    val currentSelectionMode by rememberUpdatedState(selectionMode)
-    val currentOnBookClick by rememberUpdatedState(onBookClick)
-    val currentRunAction by rememberUpdatedState(runAction)
-
     // One handler for the whole grid; the cards route their events here by key.
-    val onCardEvent: (BookCardEvent) -> Unit = remember(haptics, prefetcher) {
-        { event ->
-            val key = event.key
+    val onCardEvent = rememberPrefetchingBookCardEventHandler(
+        resolve = booksByKey::get,
+        prefetchEnabled = selectionMode.not(),
+    ) { event, book ->
+        when (event) {
+            is BookCardEvent.Clicked -> if (selectionMode) {
+                haptics.select()
 
-            if (key is BookCardKey.Book) {
-                when (event) {
-                    is BookCardEvent.Clicked -> if (currentSelectionMode) {
-                        haptics.select()
-
-                        currentRunAction(OnToggleBookSelectionAction(bookId = key.bookId))
-                    } else {
-                        currentBooksById[key.bookId]?.let { currentOnBookClick(it) }
-                    }
-
-                    is BookCardEvent.LongClicked -> {
-                        haptics.threshold()
-
-                        currentRunAction(OnEnterSelectionModeAction(bookId = key.bookId))
-                    }
-
-                    is BookCardEvent.PressStarted -> if (currentSelectionMode.not()) {
-                        prefetcher?.prefetch(key.bookId)
-                    }
-
-                    is BookCardEvent.TrailingClicked,
-                    is BookCardEvent.MenuClicked,
-                    is BookCardEvent.ShakeEnded,
-                        -> Unit
-                }
+                runAction(OnToggleBookSelectionAction(bookId = book.id))
+            } else {
+                onBookClick(book)
             }
+
+            is BookCardEvent.LongClicked -> {
+                haptics.threshold()
+
+                runAction(OnEnterSelectionModeAction(bookId = book.id))
+            }
+
+            is BookCardEvent.PressStarted,
+            is BookCardEvent.TrailingClicked,
+            is BookCardEvent.MenuClicked,
+            is BookCardEvent.ShakeEnded,
+                -> Unit
         }
     }
 
@@ -161,12 +168,12 @@ internal fun BookList(
     // lock-step with the canonical (DB-sorted) list so the first frame is already correct and
     // toggling rearrange never blanks the grid; it re-syncs whenever the canonical list changes
     // (e.g. a book shelved or unshelved from elsewhere).
-    val orderedIds = remember { visibleBookIds.toMutableStateList() }
+    val orderedKeys = remember { visibleKeys.toMutableStateList() }
 
-    LaunchedEffect(visibleBookIds) {
-        if (orderedIds.toList() != visibleBookIds) {
-            orderedIds.clear()
-            orderedIds.addAll(visibleBookIds)
+    LaunchedEffect(visibleKeys) {
+        if (orderedKeys.toList() != visibleKeys) {
+            orderedKeys.clear()
+            orderedKeys.addAll(visibleKeys)
         }
     }
 
@@ -180,14 +187,14 @@ internal fun BookList(
     // callback only fires while a handle is attached (rearrange mode), so on the All tab and
     // non-MANUAL sorts it is inert.
     val reorderableState = rememberReorderableLazyGridState(lazyGridState = gridState) { from, to ->
-        val fromIndex = orderedIds.indexOf(from.key as Int)
-        val toIndex = orderedIds.indexOf(to.key as Int)
+        val fromIndex = orderedKeys.indexOf(from.key as String)
+        val toIndex = orderedKeys.indexOf(to.key as String)
 
         if (fromIndex == -1 || toIndex == -1) return@rememberReorderableLazyGridState
 
-        orderedIds.add(
+        orderedKeys.add(
             toIndex,
-            orderedIds.removeAt(fromIndex),
+            orderedKeys.removeAt(fromIndex),
         )
 
         maxTouchedIndex.intValue = maxOf(
@@ -201,23 +208,27 @@ internal fun BookList(
     // rearranging do we render the live shadow the drag mutates. At the toggle the two are equal
     // (same ids, same order), so swapping the source keeps every key stable — the grid node and
     // every cover persist, no remount.
-    val renderIds = if (isRearranging) orderedIds else visibleBookIds
+    val renderKeys = if (isRearranging) orderedKeys else visibleKeys
+
+    val cardsByLazyKey = remember(cards) { cards.associateBy { it.key.lazyKey } }
+
+    val renderCards = if (isRearranging) orderedKeys.mapNotNull { cardsByLazyKey[it] } else cards
 
     LayoutGrid(
-        layout = state.gridLayout,
+        layout = tabCards.layout,
         gridState = gridState,
         columnsOverride = columnsOverride,
     ) {
         itemsIndexed(
-            renderIds,
-            key = { _, id -> id },
+            renderCards,
+            key = { _, card -> card.key.lazyKey },
             contentType = { _, _ -> "book" },
-        ) { index, id ->
+        ) { index, card ->
             val gridItemScope = this
 
-            val book = booksById[id] ?: return@itemsIndexed
+            val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@itemsIndexed
 
-            ReorderableItem(state = reorderableState, key = id) {
+            ReorderableItem(state = reorderableState, key = card.key.lazyKey) {
                 // Built unconditionally so the per-item composable structure is identical in and
                 // out of rearrange mode — only the drag-handle slot is swapped below (a parameter
                 // value, not a composable call), so the cover is never remounted (no flash).
@@ -232,30 +243,31 @@ internal fun BookList(
 
                         val touchedDepth = maxTouchedIndex.intValue
 
-                        if (reorderStatus != null && touchedDepth >= 0 && touchedDepth < orderedIds.size) {
+                        if (reorderStatus != null && touchedDepth >= 0 && touchedDepth < orderedKeys.size) {
                             runAction(
                                 OnReorderShelfBooksAction(
                                     status = reorderStatus,
-                                    prefixOrderedBookIds = orderedIds
-                                        .take(touchedDepth + 1),
+                                    prefixOrderedBookIds = orderedKeys
+                                        .take(touchedDepth + 1)
+                                        .mapNotNull(bookIdByLazyKey::get),
                                 ),
                             )
                         }
                     },
                 )
 
-                val isSelected = selectionMode && book.id in state.selectedBookIds
+                val isSelected = selectionMode && bookId in state.selectedBookIds
 
                 // Desktop selection affordances, inert on touch: Ctrl/Cmd-click toggles this cover's
                 // selection (entering selection mode if needed), Shift-click range-selects the
                 // visible span up to the anchor. Suppressed in rearrange mode (drag-only).
                 val onCtrlClick = {
-                    selectionAnchorId = book.id
+                    selectionAnchorId = bookId
 
                     if (selectionMode) {
-                        runAction(OnToggleBookSelectionAction(bookId = book.id))
+                        runAction(OnToggleBookSelectionAction(bookId = bookId))
                     } else {
-                        runAction(OnEnterSelectionModeAction(bookId = book.id))
+                        runAction(OnEnterSelectionModeAction(bookId = bookId))
                     }
                 }
 
@@ -263,16 +275,16 @@ internal fun BookList(
                     val anchor = selectionAnchorId
 
                     if (anchor == null) {
-                        selectionAnchorId = book.id
+                        selectionAnchorId = bookId
 
-                        runAction(OnEnterSelectionModeAction(bookId = book.id))
+                        runAction(OnEnterSelectionModeAction(bookId = bookId))
                     } else {
                         runAction(
                             OnSelectBookRangeAction(
                                 bookIds = idRangeBetween(
-                                    ids = renderIds,
+                                    ids = renderKeys.mapNotNull(bookIdByLazyKey::get),
                                     anchorId = anchor,
-                                    targetId = book.id,
+                                    targetId = bookId,
                                 ),
                             ),
                         )
@@ -285,18 +297,18 @@ internal fun BookList(
                     emptyList()
                 } else {
                     libraryBookContextMenu(
-                        book = book,
+                        isRead = booksByKey[card.key]?.status == BookStatus.Read,
                         selectionMode = selectionMode,
                         isSelected = isSelected,
-                        onOpen = { onBookClick(book) },
+                        onOpen = { booksByKey[card.key]?.let(onBookClick) },
                         onSelect = onCtrlClick,
                         onToggleSelection = {
-                            runAction(OnToggleBookSelectionAction(bookId = book.id))
+                            runAction(OnToggleBookSelectionAction(bookId = bookId))
                         },
                         onMarkAsRead = {
                             // In selection mode the menu acts on the whole selection (null →
                             // current selection); otherwise on just the right-clicked book.
-                            val targetIds = if (selectionMode) null else setOf(book.id)
+                            val targetIds = if (selectionMode) null else setOf(bookId)
 
                             runAction(
                                 OnBulkMoveShelfAction(
@@ -311,13 +323,13 @@ internal fun BookList(
                             // has no suspension point before its setState), so the sheet opens with
                             // this book already selected.
                             if (selectionMode.not()) {
-                                runAction(OnEnterSelectionModeAction(bookId = book.id))
+                                runAction(OnEnterSelectionModeAction(bookId = bookId))
                             }
 
                             runAction(OnBulkAddToListSheetShownAction(shown = true))
                         },
                         onRemove = {
-                            val targetIds = if (selectionMode) null else setOf(book.id)
+                            val targetIds = if (selectionMode) null else setOf(bookId)
 
                             runAction(OnBulkRemoveFromLibraryAction(explicitBookIds = targetIds))
                         },
@@ -327,7 +339,7 @@ internal fun BookList(
                 val baseModifier = Modifier.mutationAnimated(
                     scope = gridItemScope,
                     animator = animator,
-                    itemKey = book.id,
+                    itemKey = card.key.lazyKey,
                 )
                     .staggeredEntry(
                         coordinator = entry,
@@ -344,11 +356,8 @@ internal fun BookList(
                 }
 
                 DesktopContextMenu(items = contextMenuItems) {
-                    val card = state.bookCardsByTab[tab.id]?.get(book.id)
-
-                    LibraryBookCard(
-                        card = card,
-                        layout = state.gridLayout,
+                    BookCard(
+                        model = card,
                         onEvent = onCardEvent,
                         modifier = entryModifier,
                         content = if (isRearranging) {
@@ -370,7 +379,7 @@ internal fun BookList(
  * list, Remove). Empty on touch (the caller passes an empty list outside desktop / in rearrange mode).
  */
 private fun libraryBookContextMenu(
-    book: Book,
+    isRead: Boolean,
     selectionMode: Boolean,
     isSelected: Boolean,
     onOpen: () -> Unit,
@@ -399,7 +408,7 @@ private fun libraryBookContextMenu(
         ),)
     }
 
-    if (book.status != BookStatus.Read) {
+    if (isRead.not()) {
         add(DesktopContextMenuItem(
             label = "Mark as read",
             onClick = onMarkAsRead,

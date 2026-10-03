@@ -20,17 +20,23 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnLoadMoreSearchResultsAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SEARCH_RESULTS_LOAD_MORE_THRESHOLD
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
@@ -79,64 +85,77 @@ internal fun DesktopSearchResults(
                 .weight(1f)
                 .fillMaxWidth(),
         ) {
-            val onSearchResultEvent = rememberSearchResultEventHandler(
-                books = state.queriedBooks,
-                onBookClick = onBookClick,
-                runAction = runAction,
-            )
+            val booksByKey = remember(state.queriedBooks) {
+                state.queriedBooks.associateBy { BookCardKey.Book(it.id) }
+            }
 
-            // Cards land a frame after their books; only the first row is checked so a load-more page does
-            // not swap the list back to stand-ins while its cards catch up.
-            val cardsReady = state.queriedBooks.firstOrNull()?.let { it.id in state.queriedBookCards } ?: true
+            val onSearchResultEvent = rememberPrefetchingBookCardEventHandler(
+                resolve = booksByKey::get,
+            ) { event, book ->
+                when (event) {
+                    is BookCardEvent.Clicked -> onBookClick(
+                        book,
+                        null,
+                    )
 
-            SkeletonCrossfade(
-                isLoading = state.isLoading || cardsReady.not(),
-                label = "SearchResults",
-            ) { loading ->
-                if (loading) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 380.dp),
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-                        horizontalArrangement = Arrangement.spacedBy(24.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        items(6) {
-                            BookCard(
-                                model = SEARCH_RESULT_STAND_IN_CARD,
-                                onEvent = {},
-                                isLoading = true,
-                            )
-                        }
+                    is BookCardEvent.TrailingClicked -> runAction(
+                        if (book.userBook != null) {
+                            OnRemoveBookFromLibraryClickAction(book = book)
+                        } else {
+                            OnAddBookToLibraryClickAction(book = book)
+                        },
+                    )
+
+                    is BookCardEvent.LongClicked,
+                    is BookCardEvent.PressStarted,
+                    is BookCardEvent.MenuClicked,
+                    is BookCardEvent.ShakeEnded,
+                        -> Unit
+                }
+            }
+
+            val cards = state.queriedBookCards
+
+            if (cards == null) {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 380.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    items(6) {
+                        BookCard(
+                            model = SEARCH_RESULT_STAND_IN_CARD,
+                            onEvent = {},
+                        )
                     }
-                } else {
-                    LazyVerticalGrid(
-                        state = searchResultsGridState,
-                        columns = GridCells.Adaptive(minSize = 380.dp),
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-                        horizontalArrangement = Arrangement.spacedBy(24.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        items(state.queriedBooks, key = { it.id }) { book ->
-                            state.queriedBookCards[book.id]?.let { card ->
-                                BookCard(
-                                    model = card,
-                                    onEvent = onSearchResultEvent,
-                                )
-                            }
-                        }
+                }
+            } else {
+                LazyVerticalGrid(
+                    state = searchResultsGridState,
+                    columns = GridCells.Adaptive(minSize = 380.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    items(cards, key = { it.key.lazyKey }) { card ->
+                        BookCard(
+                            model = card,
+                            onEvent = onSearchResultEvent,
+                        )
+                    }
 
-                        if (state.loadingMoreQueriedBooks) {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 24.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    CircularWavyProgressIndicator()
-                                }
+                    if (state.loadingMoreQueriedBooks) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 24.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularWavyProgressIndicator()
                             }
                         }
                     }

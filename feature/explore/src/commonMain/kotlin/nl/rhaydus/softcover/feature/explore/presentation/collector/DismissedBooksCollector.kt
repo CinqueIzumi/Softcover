@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
-import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -22,9 +22,9 @@ internal class DismissedBooksCollector : HiddenSuggestionsCollector {
             scope.setState {
                 it.copy(
                     hiddenBooks = books,
-                    hiddenBookCards = books.associate { book ->
-                        book.bookId to book.toHiddenBookCard(cover = book.toCoverUiModel())
-                    }.toImmutableMap(),
+                    hiddenBookCards = books.map { book ->
+                        book.toHiddenBookCard(cover = book.toCoverUiModel())
+                    }.toImmutableList(),
                     hiddenBooksGroupHeader = it.hiddenBooksGroupHeader.copy(count = books.size.toString()),
                     hiddenBooksLoaded = true,
                 )

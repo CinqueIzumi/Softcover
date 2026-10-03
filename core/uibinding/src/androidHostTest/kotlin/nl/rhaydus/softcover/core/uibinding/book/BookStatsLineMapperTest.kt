@@ -14,11 +14,16 @@ class BookStatsLineMapperTest {
     inner class Year {
         @Test
         fun `a release year becomes a text part`() {
+            // ----- Arrange -----
+            val releaseYear: Int? = 1965
+            val usersCount: Int? = null
+            val rating: Double? = null
+
             // ----- Act -----
             val line = bookStatsLine(
-                releaseYear = 1965,
-                usersCount = null,
-                rating = null,
+                releaseYear = releaseYear,
+                usersCount = usersCount,
+                rating = rating,
             )
 
             // ----- Assert -----
@@ -27,15 +32,20 @@ class BookStatsLineMapperTest {
 
         @Test
         fun `a null or -1 year is omitted`() {
-            listOf(null, -1).forEach { year ->
-                // ----- Act -----
-                val line = bookStatsLine(
+            // ----- Arrange -----
+            val years = listOf(null, -1)
+
+            // ----- Act -----
+            val lines = years.map { year ->
+                bookStatsLine(
                     releaseYear = year,
                     usersCount = 5,
                     rating = null,
                 )
+            }
 
-                // ----- Assert -----
+            // ----- Assert -----
+            lines.forEach { line ->
                 line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Text(text = "5 readers"))
             }
         }
@@ -45,11 +55,16 @@ class BookStatsLineMapperTest {
     inner class Readers {
         @Test
         fun `a reader count becomes a readers text part`() {
+            // ----- Arrange -----
+            val releaseYear: Int? = null
+            val usersCount: Int? = 12
+            val rating: Double? = null
+
             // ----- Act -----
             val line = bookStatsLine(
-                releaseYear = null,
-                usersCount = 12,
-                rating = null,
+                releaseYear = releaseYear,
+                usersCount = usersCount,
+                rating = rating,
             )
 
             // ----- Assert -----
@@ -58,11 +73,16 @@ class BookStatsLineMapperTest {
 
         @Test
         fun `a zero reader count is kept`() {
+            // ----- Arrange -----
+            val releaseYear: Int? = null
+            val usersCount: Int? = 0
+            val rating: Double? = null
+
             // ----- Act -----
             val line = bookStatsLine(
-                releaseYear = null,
-                usersCount = 0,
-                rating = null,
+                releaseYear = releaseYear,
+                usersCount = usersCount,
+                rating = rating,
             )
 
             // ----- Assert -----
@@ -71,11 +91,16 @@ class BookStatsLineMapperTest {
 
         @Test
         fun `a large count is grouped`() {
+            // ----- Arrange -----
+            val releaseYear: Int? = null
+            val usersCount: Int? = 1_234_567
+            val rating: Double? = null
+
             // ----- Act -----
             val line = bookStatsLine(
-                releaseYear = null,
-                usersCount = 1_234_567,
-                rating = null,
+                releaseYear = releaseYear,
+                usersCount = usersCount,
+                rating = rating,
             )
 
             // ----- Assert -----
@@ -90,28 +115,41 @@ class BookStatsLineMapperTest {
     inner class Rating {
         @Test
         fun `a rating shows one decimal`() {
+            // ----- Arrange -----
+            val releaseYear: Int? = null
+            val usersCount: Int? = null
+            val rating: Double? = 4.26
+
             // ----- Act -----
             val line = bookStatsLine(
-                releaseYear = null,
-                usersCount = null,
-                rating = 4.26,
+                releaseYear = releaseYear,
+                usersCount = usersCount,
+                rating = rating,
             )
 
             // ----- Assert -----
-            line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Rating(label = "4.3"))
+            line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Rating(
+                label = "4.3",
+                contentDescription = "Rated 4.3 out of 5",
+            ),)
         }
 
         @Test
         fun `a null or 0 rating is omitted`() {
-            listOf(null, 0.0).forEach { rating ->
-                // ----- Act -----
-                val line = bookStatsLine(
+            // ----- Arrange -----
+            val ratings = listOf(null, 0.0)
+
+            // ----- Act -----
+            val lines = ratings.map { rating ->
+                bookStatsLine(
                     releaseYear = 2000,
                     usersCount = null,
                     rating = rating,
                 )
+            }
 
-                // ----- Assert -----
+            // ----- Assert -----
+            lines.forEach { line ->
                 line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Text(text = "2000"))
             }
         }
@@ -121,11 +159,16 @@ class BookStatsLineMapperTest {
     inner class Composition {
         @Test
         fun `parts keep the year, readers, rating order`() {
+            // ----- Arrange -----
+            val releaseYear: Int? = 1965
+            val usersCount: Int? = 12
+            val rating: Double? = 4.2
+
             // ----- Act -----
             val line = bookStatsLine(
-                releaseYear = 1965,
-                usersCount = 12,
-                rating = 4.2,
+                releaseYear = releaseYear,
+                usersCount = usersCount,
+                rating = rating,
             )
 
             // ----- Assert -----
@@ -133,33 +176,39 @@ class BookStatsLineMapperTest {
             parts shouldHaveSize 3
             parts[0] shouldBe BookCardLinePart.Text(text = "1965")
             parts[1] shouldBe BookCardLinePart.Text(text = "12 readers")
-            parts[2] shouldBe BookCardLinePart.Rating(label = "4.2")
+            parts[2] shouldBe BookCardLinePart.Rating(
+                label = "4.2",
+                contentDescription = "Rated 4.2 out of 5",
+            )
         }
 
         @Test
         fun `no parts yields no line`() {
-            listOf(
-                Triple(
+            // ----- Arrange -----
+            val inputs = listOf(
+                Triple<Int?, Int?, Double?>(
                     null,
                     null,
                     null,
                 ),
-                Triple(
+                Triple<Int?, Int?, Double?>(
                     -1,
                     null,
                     0.0,
                 ),
-            ).forEach { (year, readers, rating) ->
-                // ----- Act -----
-                val line = bookStatsLine(
+            )
+
+            // ----- Act -----
+            val lines = inputs.map { (year, readers, rating) ->
+                bookStatsLine(
                     releaseYear = year,
                     usersCount = readers,
                     rating = rating,
                 )
-
-                // ----- Assert -----
-                line.shouldBeNull()
             }
+
+            // ----- Assert -----
+            lines.forEach { line -> line.shouldBeNull() }
         }
     }
 }

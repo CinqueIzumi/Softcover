@@ -14,6 +14,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
@@ -26,27 +27,31 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.core.uibinding.book.ratingPart
 import nl.rhaydus.softcover.feature.profile.presentation.collector.RECENTLY_LOVED_CARD_COUNT
 
 private val RECENTLY_LOVED_STAND_IN_CARD = BookCardUiModel(
     key = BookCardKey.Book(bookId = -1),
     variant = BookCardVariant.Column(
-        cover = CoverUiModel(
-            source = null,
-            coverlessTitle = null,
-            variant = CoverVariant.ProfileLovedBook,
-            isLoading = true,
+        cover = BookCardCover(
+            model = CoverUiModel(
+                source = null,
+                coverlessTitle = null,
+                variant = CoverVariant.ProfileLovedBook,
+                isLoading = true,
+            ),
         ),
         text = BookCardContent(
             title = "The Name of the Wind",
             byline = "By Patrick Rothfuss",
             supportingLines = persistentListOf(
-                BookCardLine(parts = persistentListOf(BookCardLinePart.Rating(label = "4.5"))),
+                BookCardLine(parts = persistentListOf(ratingPart(rating = 4.5))),
                 BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = "May 2026"))),
             ),
         ),
         menuLabel = null,
     ),
+    isLoading = true,
 )
 
 /**
@@ -84,7 +89,6 @@ internal fun RecentlyLovedSection(
                         BookCard(
                             model = RECENTLY_LOVED_STAND_IN_CARD,
                             onEvent = onEvent,
-                            isLoading = true,
                             modifier = Modifier.weight(1f),
                         )
                     }

@@ -5,9 +5,12 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
@@ -31,8 +34,15 @@ class EditionBookCardMapperTest {
 
     private fun BookCardUiModel.row(): BookCardVariant.Row = variant.shouldBeInstanceOf<BookCardVariant.Row>()
 
+    private fun BookCardUiModel.coverPairing(): BookCardCover =
+        row().lead.shouldBeInstanceOf<BookCardLead.Cover>().cover
+
     private fun BookCardUiModel.lines(): List<String> = row().text.supportingLines.map { line ->
         line.parts.single().shouldBeInstanceOf<BookCardLinePart.Text>().text
+    }
+
+    private fun BookCardUiModel.linePartTexts(): List<List<String>> = row().text.supportingLines.map { line ->
+        line.parts.map { it.shouldBeInstanceOf<BookCardLinePart.Text>().text }
     }
 
     @Nested
@@ -117,7 +127,7 @@ class EditionBookCardMapperTest {
         }
 
         @Test
-        fun `joins publisher year and pages into the meta line`() {
+        fun `splits publisher year and pages into separate parts of one meta line`() {
             // ----- Arrange -----
             val edition = buildEdition(id = 1).copy(
                 publisher = "Tor",
@@ -126,10 +136,10 @@ class EditionBookCardMapperTest {
             )
 
             // ----- Act -----
-            val lines = edition.card().lines()
+            val lines = edition.card().linePartTexts()
 
             // ----- Assert -----
-            lines shouldBe listOf("Tor · 2019 · 320 pp")
+            lines shouldBe listOf(listOf("Tor", "2019", "320 pp"))
         }
 
         @Test
@@ -160,10 +170,10 @@ class EditionBookCardMapperTest {
             )
 
             // ----- Act -----
-            val lines = edition.card().lines()
+            val lines = edition.card().linePartTexts()
 
             // ----- Assert -----
-            lines shouldBe listOf("Audible · 2021 · 3h 25m")
+            lines shouldBe listOf(listOf("Audible", "2021", "3h 25m"))
         }
 
         @Test
@@ -231,7 +241,7 @@ class EditionBookCardMapperTest {
         }
 
         @Test
-        fun `sets the selection mark only when selected`() {
+        fun `marks every row as a single selection and selects only the picked one`() {
             // ----- Arrange -----
             val edition = buildEdition(id = 1)
 
@@ -240,8 +250,8 @@ class EditionBookCardMapperTest {
             val unselected = edition.card(selected = false)
 
             // ----- Assert -----
-            selected.decorations.selection.shouldNotBeNull().selected shouldBe true
-            unselected.decorations.selection.shouldBeNull()
+            selected.decorations.selection shouldBe BookCardSelection.Single(selected = true)
+            unselected.decorations.selection shouldBe BookCardSelection.Single(selected = false)
         }
 
         @Test
@@ -255,8 +265,8 @@ class EditionBookCardMapperTest {
             val notOwnedCard = notOwned.card()
 
             // ----- Assert -----
-            ownedCard.decorations.coverBadge.shouldNotBeNull()
-            notOwnedCard.decorations.coverBadge.shouldBeNull()
+            ownedCard.coverPairing().badge.shouldNotBeNull()
+            notOwnedCard.coverPairing().badge.shouldBeNull()
         }
 
         @Test

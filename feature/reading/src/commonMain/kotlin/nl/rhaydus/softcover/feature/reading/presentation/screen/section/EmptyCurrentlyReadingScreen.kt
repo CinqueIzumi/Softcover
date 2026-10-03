@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +27,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -37,6 +40,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 
 @Composable
@@ -56,10 +60,15 @@ internal fun EmptyCurrentlyReadingScreen(
     // Mirrors CoverModelsCollector's own trendingBooks.firstOrNull(): the tile's cover is mapped there.
     val trendingTile = trendingBooks.firstOrNull()
     val showAdaptive = pickUpNextCards == null || pickUpNextCards.isNotEmpty() || trendingTile != null
-    val onPickUpNextEvent = rememberReadingCardEventHandler(
-        books = wantToReadBooks,
-        onBookClick = onBookClick,
-    )
+    val booksByKey = remember(wantToReadBooks) {
+        wantToReadBooks.associateBy { BookCardKey.Book(it.id) }
+    }
+
+    val onPickUpNextEvent = rememberPrefetchingBookCardEventHandler(
+        resolve = booksByKey::get,
+    ) { event, book ->
+        if (event is BookCardEvent.Clicked) onBookClick(book)
+    }
 
     Column(
         modifier = Modifier

@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
@@ -61,18 +62,18 @@ internal fun EditionBottomSheetSelector(
             }
         },
     ) {
+        val onCardEvent = rememberBookCardEventHandler(
+            resolve = { key -> key as? BookCardKey.Edition },
+        ) { event, edition ->
+            if (event is BookCardEvent.Clicked) onEditionSelected(edition.editionId)
+        }
+
         EditionBottomSheetContent(
             editionCards = editionCards,
             isLoading = isLoading,
             searchQuery = searchQuery,
             onSearchQueryChange = onSearchQueryChange,
-            onEvent = { event ->
-                val key = event.key
-
-                if (event is BookCardEvent.Clicked && key is BookCardKey.Edition) {
-                    onEditionSelected(key.editionId)
-                }
-            },
+            onEvent = onCardEvent,
         )
     }
 }

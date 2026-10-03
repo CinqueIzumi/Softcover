@@ -46,7 +46,6 @@ internal fun PickUpNextSection(
                     BookCard(
                         model = PICK_UP_NEXT_STAND_IN_CARD,
                         onEvent = onEvent,
-                        isLoading = true,
                         modifier = Modifier.width(96.dp),
                     )
                 }

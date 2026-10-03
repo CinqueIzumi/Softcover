@@ -47,10 +47,12 @@ class MoodChipsCollectorTest {
         fun `sets moodChips with chips and payloads from moodTags`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = MoodChipsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = ExploreScreenUiState(moodTags = listOf(cozy))
@@ -67,10 +69,12 @@ class MoodChipsCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(moodTags = listOf(cozy))
             val collector = MoodChipsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(moodTags = emptyList())
@@ -89,10 +93,12 @@ class MoodChipsCollectorTest {
                 loadingTrendingBooks = false,
             )
             val collector = MoodChipsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(moodTags = listOf(cozy))
@@ -109,10 +115,12 @@ class MoodChipsCollectorTest {
                 // ----- Arrange -----
                 stateFlow.value = ExploreScreenUiState(moodTags = listOf(cozy))
                 val collector = MoodChipsCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
                 val chipSetAfterFirstEmit = stateFlow.value.moodChips
 
                 // ----- Act -----

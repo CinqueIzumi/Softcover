@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -16,7 +17,9 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
+import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
@@ -40,15 +43,19 @@ class ProfileScreen : Screen {
             }
         }
 
-        ProfileScreenLayout(
-            state = state,
-            runAction = screenModel::runAction,
-            onNavigateUp = navigator::pop,
-            onBookCardEvent = rememberRecentlyLovedEventHandler(
+        val prefetcher = rememberBookDetailPrefetcher()
+
+        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
+            ProfileScreenLayout(
                 state = state,
-                navigator = navigator,
-            ),
-        )
+                runAction = screenModel::runAction,
+                onNavigateUp = navigator::pop,
+                onBookCardEvent = rememberRecentlyLovedEventHandler(
+                    state = state,
+                    navigator = navigator,
+                ),
+            )
+        }
     }
 }
 
@@ -76,44 +83,29 @@ private fun rememberRecentlyLovedEventHandler(
     navigator: Navigator,
 ): (BookCardEvent) -> Unit {
     val appNavigator = koinInject<AppNavigator>()
-    val prefetcher = rememberBookDetailPrefetcher()
-
-    val currentState by rememberUpdatedState(state)
     val currentNavigator by rememberUpdatedState(navigator)
 
-    return remember(appNavigator, prefetcher) {
-        { event ->
-            val key = event.key
+    val lovedByKey = remember(state.readingLife?.recentlyLoved) {
+        state.readingLife?.recentlyLoved
+            .orEmpty()
+            .associateBy { BookCardKey.Book(it.bookId) }
+    }
 
-            if (key is BookCardKey.Book) {
-                when (event) {
-                    is BookCardEvent.Clicked -> currentState.readingLife
-                        ?.recentlyLoved
-                        .orEmpty()
-                        .firstOrNull { it.bookId == key.bookId }
-                        ?.let { loved ->
-                            val destination = ScreenDestination.BookDetail(
-                                id = loved.bookId,
-                                initialCover = BookInitialCover(
-                                    currentEdition = null,
-                                    defaultEdition = null,
-                                    fallbackCoverUrl = loved.coverUrl.takeIf { it.isNotBlank() },
-                                    title = loved.title,
-                                ),
-                            )
+    return rememberPrefetchingBookCardEventHandler(
+        resolve = lovedByKey::get,
+    ) { event, loved ->
+        if (event is BookCardEvent.Clicked) {
+            val destination = ScreenDestination.BookDetail(
+                id = loved.bookId,
+                initialCover = BookInitialCover(
+                    currentEdition = null,
+                    defaultEdition = null,
+                    fallbackCoverUrl = loved.coverUrl.takeIf { it.isNotBlank() },
+                    title = loved.title,
+                ),
+            )
 
-                            currentNavigator.push(item = appNavigator.screen(destination))
-                        }
-
-                    is BookCardEvent.PressStarted -> prefetcher.prefetch(key.bookId)
-
-                    is BookCardEvent.LongClicked,
-                    is BookCardEvent.TrailingClicked,
-                    is BookCardEvent.MenuClicked,
-                    is BookCardEvent.ShakeEnded,
-                        -> Unit
-                }
-            }
+            currentNavigator.push(item = appNavigator.screen(destination))
         }
     }
 }

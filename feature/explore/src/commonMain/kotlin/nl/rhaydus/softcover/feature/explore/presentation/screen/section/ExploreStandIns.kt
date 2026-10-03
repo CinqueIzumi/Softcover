@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
@@ -13,6 +14,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.uibinding.book.ratingPart
 
 internal val BECAUSE_YOU_READ_HEADER_STAND_IN = SectionHeaderUiModel.Section(
     eyebrow = "Because you read",
@@ -25,7 +27,7 @@ internal val TRENDING_STAND_IN_CARD = standInCard(
     text = BookCardContent(
         title = "The Name of the Wind",
         supportingLines = persistentListOf(
-            BookCardLine(parts = persistentListOf(BookCardLinePart.Rating(label = "4.5"))),
+            BookCardLine(parts = persistentListOf(ratingPart(rating = 4.5))),
         ),
     ),
     menuLabel = null,
@@ -59,11 +61,13 @@ internal val SEARCH_RESULT_STAND_IN_CARD = BookCardUiModel(
     variant = BookCardVariant.Row(
         size = BookCardVariant.Row.Size.Standard,
         lead = BookCardLead.Cover(
-            model = CoverUiModel(
-                source = null,
-                coverlessTitle = null,
-                variant = CoverVariant.ExploreSearchRow,
-                isLoading = true,
+            cover = BookCardCover(
+                model = CoverUiModel(
+                    source = null,
+                    coverlessTitle = null,
+                    variant = CoverVariant.ExploreSearchRow,
+                    isLoading = true,
+                ),
             ),
         ),
         text = BookCardContent(
@@ -79,6 +83,7 @@ internal val SEARCH_RESULT_STAND_IN_CARD = BookCardUiModel(
             contentDescription = "",
         ),
     ),
+    isLoading = true,
 )
 
 internal val HIDDEN_BOOK_STAND_IN_CARD = BookCardUiModel(
@@ -86,11 +91,13 @@ internal val HIDDEN_BOOK_STAND_IN_CARD = BookCardUiModel(
     variant = BookCardVariant.Row(
         size = BookCardVariant.Row.Size.Compact,
         lead = BookCardLead.Cover(
-            model = CoverUiModel(
-                source = null,
-                coverlessTitle = null,
-                variant = CoverVariant.HiddenBookRow,
-                isLoading = true,
+            cover = BookCardCover(
+                model = CoverUiModel(
+                    source = null,
+                    coverlessTitle = null,
+                    variant = CoverVariant.HiddenBookRow,
+                    isLoading = true,
+                ),
             ),
         ),
         text = BookCardContent(
@@ -99,6 +106,7 @@ internal val HIDDEN_BOOK_STAND_IN_CARD = BookCardUiModel(
         ),
         trailing = BookCardTrailing.Restore(label = "Restore"),
     ),
+    isLoading = true,
 )
 
 internal val HIDDEN_SERIES_STAND_IN_CARD = BookCardUiModel(
@@ -121,6 +129,7 @@ internal val HIDDEN_SERIES_STAND_IN_CARD = BookCardUiModel(
         ),
         trailing = BookCardTrailing.Restore(label = "Restore"),
     ),
+    isLoading = true,
 )
 
 private fun standInCard(
@@ -131,13 +140,16 @@ private fun standInCard(
 ) = BookCardUiModel(
     key = BookCardKey.Book(bookId = bookId),
     variant = BookCardVariant.Column(
-        cover = CoverUiModel(
-            source = null,
-            coverlessTitle = null,
-            variant = coverVariant,
-            isLoading = true,
+        cover = BookCardCover(
+            model = CoverUiModel(
+                source = null,
+                coverlessTitle = null,
+                variant = coverVariant,
+                isLoading = true,
+            ),
         ),
         text = text,
         menuLabel = menuLabel,
     ),
+    isLoading = true,
 )

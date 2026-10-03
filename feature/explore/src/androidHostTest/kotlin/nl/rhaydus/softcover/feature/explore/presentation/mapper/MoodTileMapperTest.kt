@@ -23,11 +23,14 @@ class MoodTileMapperTest {
     inner class ToMoodTile {
         @Test
         fun `keys by tag id and title-cases the label`() {
-            // ----- Act -----
-            val tile = tag(
+            // ----- Arrange -----
+            val input = tag(
                 id = 5,
                 label = "cosy mystery",
-            ).toMoodTile(index = 0)
+            )
+
+            // ----- Act -----
+            val tile = input.toMoodTile(index = 0)
 
             // ----- Assert -----
             tile.key shouldBe 5
@@ -36,17 +39,25 @@ class MoodTileMapperTest {
 
         @Test
         fun `formats the book count with grouping`() {
+            // ----- Arrange -----
+            val bookCount = 1234567
+            val input = tag(bookCount = bookCount)
+
             // ----- Act -----
-            val tile = tag(bookCount = 1234567).toMoodTile(index = 0)
+            val tile = input.toMoodTile(index = 0)
 
             // ----- Assert -----
-            tile.countLabel shouldBe "${formatGroupedNumber(1234567)} books"
+            tile.countLabel shouldBe "${formatGroupedNumber(bookCount)} books"
         }
 
         @Test
         fun `cycles the ink Cosy, Dread, Neutral, HeartWrench by index`() {
+            // ----- Arrange -----
+            val input = tag()
+            val indices = 0..3
+
             // ----- Act -----
-            val inks = (0..3).map { tag().toMoodTile(index = it).ink }
+            val inks = indices.map { index -> input.toMoodTile(index = index).ink }
 
             // ----- Assert -----
             inks shouldBe listOf(
@@ -59,8 +70,12 @@ class MoodTileMapperTest {
 
         @Test
         fun `repeats the ink cycle from the fifth tile onward`() {
+            // ----- Arrange -----
+            val input = tag()
+            val indices = 4..7
+
             // ----- Act -----
-            val inks = (4..7).map { tag().toMoodTile(index = it).ink }
+            val inks = indices.map { index -> input.toMoodTile(index = index).ink }
 
             // ----- Assert -----
             inks shouldBe listOf(

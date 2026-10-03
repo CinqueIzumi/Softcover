@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen.section
 
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
@@ -25,11 +26,13 @@ internal val ALSO_READING_STAND_IN_CARD = BookCardUiModel(
     variant = BookCardVariant.Row(
         size = BookCardVariant.Row.Size.Standard,
         lead = BookCardLead.Cover(
-            model = CoverUiModel(
-                source = null,
-                coverlessTitle = null,
-                variant = CoverVariant.ReadingRowThumb,
-                isLoading = true,
+            cover = BookCardCover(
+                model = CoverUiModel(
+                    source = null,
+                    coverlessTitle = null,
+                    variant = CoverVariant.ReadingRowThumb,
+                    isLoading = true,
+                ),
             ),
         ),
         text = BookCardContent(
@@ -45,20 +48,24 @@ internal val ALSO_READING_STAND_IN_CARD = BookCardUiModel(
             label = "50%",
         ),
     ),
+    isLoading = true,
 )
 
 internal val PICK_UP_NEXT_STAND_IN_CARD = BookCardUiModel(
     key = BookCardKey.Book(bookId = -2),
     variant = BookCardVariant.Column(
-        cover = CoverUiModel(
-            source = null,
-            coverlessTitle = null,
-            variant = CoverVariant.ReadingPickUpNextTile,
-            isLoading = true,
+        cover = BookCardCover(
+            model = CoverUiModel(
+                source = null,
+                coverlessTitle = null,
+                variant = CoverVariant.ReadingPickUpNextTile,
+                isLoading = true,
+            ),
         ),
         text = BookCardContent(title = "The Name of the Wind"),
         menuLabel = null,
     ),
+    isLoading = true,
 )
 
 private val FEATURED_STAND_IN_EDITION = BookEdition(

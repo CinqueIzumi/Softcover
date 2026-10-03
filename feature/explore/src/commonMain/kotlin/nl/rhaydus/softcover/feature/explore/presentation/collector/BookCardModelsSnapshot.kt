@@ -15,4 +15,8 @@ internal data class BookCardModelsSnapshot(
     val continueSeriesCovers: Map<Int, CoverUiModel>,
     val queriedBookCovers: Map<Int, CoverUiModel>,
     val unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
+    val loadingTrendingBooks: Boolean,
+    val loadingBecauseYouReadBooks: Boolean,
+    val loadingContinueSeriesBooks: Boolean,
+    val isLoading: Boolean,
 )

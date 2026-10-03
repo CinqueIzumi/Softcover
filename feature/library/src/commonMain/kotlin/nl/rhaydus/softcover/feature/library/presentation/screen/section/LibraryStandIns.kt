@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
@@ -43,12 +44,14 @@ private val COLUMN_STAND_IN_CARD = BookCardUiModel(
         ),
     ),
     decorations = GRID_STAND_IN_DECORATIONS,
+    isLoading = true,
 )
 
 private val COVER_ONLY_STAND_IN_CARD = BookCardUiModel(
     key = BookCardKey.Book(bookId = -2),
     variant = BookCardVariant.CoverOnly(cover = standInCover()),
     decorations = GRID_STAND_IN_DECORATIONS,
+    isLoading = true,
 )
 
 private val COMPACT_ROW_STAND_IN_CARD = BookCardUiModel(
@@ -62,13 +65,14 @@ private val COMPACT_ROW_STAND_IN_CARD = BookCardUiModel(
         ),
     ),
     decorations = STAND_IN_DECORATIONS,
+    isLoading = true,
 )
 
 private val LARGE_ROW_STAND_IN_CARD = BookCardUiModel(
     key = BookCardKey.Book(bookId = -4),
     variant = BookCardVariant.Row(
         size = BookCardVariant.Row.Size.Large,
-        lead = BookCardLead.Cover(model = standInCover()),
+        lead = BookCardLead.Cover(cover = standInCover()),
         text = BookCardContent(
             title = "The Name of the Wind",
             eyebrow = BookCardEyebrow(text = "THE KINGKILLER CHRONICLE"),
@@ -79,11 +83,14 @@ private val LARGE_ROW_STAND_IN_CARD = BookCardUiModel(
         ),
     ),
     decorations = STAND_IN_DECORATIONS,
+    isLoading = true,
 )
 
-private fun standInCover() = CoverUiModel(
-    source = null,
-    coverlessTitle = null,
-    variant = CoverVariant.LibraryShelfItem,
-    isLoading = true,
+private fun standInCover() = BookCardCover(
+    model = CoverUiModel(
+        source = null,
+        coverlessTitle = null,
+        variant = CoverVariant.LibraryShelfItem,
+        isLoading = true,
+    ),
 )

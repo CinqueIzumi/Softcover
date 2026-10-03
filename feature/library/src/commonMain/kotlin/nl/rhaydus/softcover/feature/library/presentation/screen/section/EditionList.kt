@@ -5,10 +5,8 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import sh.calvin.reorderable.ReorderableItem
@@ -18,8 +16,11 @@ import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
@@ -56,13 +57,34 @@ internal fun EditionList(
         return
     }
 
-    // Custom-list editions still sort in memory — the dataset is small (dozens, not
-    // thousands) so the sort is cheap and the SQL-sort refactor is books-only. Fall back to the
-    // raw (already source-ordered) list for the one frame between the raw editions landing and
-    // DisplayListsCollector producing the searched/sorted list, so the grid never flashes empty.
-    val visibleEditions = state.displayEditionsFor(tabId = tab.id) ?: rawEditions
+    val tabCards = state.editionCardsByTab[tab.id]
 
-    val visibleEditionIds = remember(visibleEditions) { visibleEditions.map { it.id } }
+    if (tabCards == null) {
+        LibraryLoadingGrid(
+            layout = state.gridLayout,
+            gridState = gridState,
+            columnsOverride = columnsOverride,
+        )
+
+        return
+    }
+
+    val cards = tabCards.cards
+
+    // Custom-list editions still sort in memory — the dataset is small (dozens, not
+    // thousands) so the sort is cheap and the SQL-sort refactor is books-only.
+    // BookCardModelsCollector builds the cards from the searched/sorted list. The cards carry the
+    // order and their own editions, so a card's event resolves to the edition it was built from
+    // even while the live lists are ahead of the cards.
+    val editionsByKey = tabCards.payloads
+
+    val visibleKeys = remember(cards) { cards.map { it.key.lazyKey } }
+
+    val editionIdByLazyKey = remember(cards) {
+        cards.mapNotNull { card ->
+            (card.key as? BookCardKey.Edition)?.let { card.key.lazyKey to it.editionId }
+        }.toMap()
+    }
 
     val sortMode = state.sortModeFor(tabId = tab.id)
 
@@ -78,7 +100,7 @@ internal fun EditionList(
         isRearranging = state.isRearranging,
     )
 
-    val animator = rememberLazyItemMutationAnimator(keys = visibleEditionIds)
+    val animator = rememberLazyItemMutationAnimator(keys = visibleKeys)
 
     val entry = rememberStaggeredEntryCoordinator(key = "library:editions:${tab.id}")
 
@@ -87,7 +109,7 @@ internal fun EditionList(
         sortMode = sortMode,
         sortDirection = state.sortDirectionFor(tabId = tab.id),
         filters = state.filtersFor(tabId = tab.id),
-        visibleItemsKey = visibleEditionIds.firstOrNull() ?: 0,
+        visibleItemsKey = visibleKeys.firstOrNull()?.let(editionIdByLazyKey::get) ?: 0,
         gridState = gridState,
     )
 
@@ -96,41 +118,31 @@ internal fun EditionList(
     // Live shadow the reorder library mutates during a drag. Eagerly seeded and kept in
     // lock-step with the canonical list so the first frame is already correct — an empty seed
     // synced in only via the LaunchedEffect would blank the grid for a frame.
-    val orderedIds = remember { visibleEditionIds.toMutableStateList() }
+    val orderedKeys = remember { visibleKeys.toMutableStateList() }
 
-    LaunchedEffect(visibleEditionIds) {
-        if (orderedIds.toList() != visibleEditionIds) {
-            orderedIds.clear()
-            orderedIds.addAll(visibleEditionIds)
+    LaunchedEffect(visibleKeys) {
+        if (orderedKeys.toList() != visibleKeys) {
+            orderedKeys.clear()
+            orderedKeys.addAll(visibleKeys)
         }
     }
 
-    val editionsById = remember(visibleEditions) { visibleEditions.associateBy { it.id } }
-
     val prefetcher = LocalBookDetailPrefetcher.current
-    val currentEditionsById by rememberUpdatedState(editionsById)
-    val currentOnEditionClick by rememberUpdatedState(onEditionClick)
 
     // One handler for the whole grid; the cards route their events here by key.
-    val onCardEvent: (BookCardEvent) -> Unit = remember(prefetcher) {
-        { event ->
-            val key = event.key
+    val onCardEvent = rememberBookCardEventHandler(
+        resolve = editionsByKey::get,
+    ) { event, edition ->
+        when (event) {
+            is BookCardEvent.Clicked -> onEditionClick(edition)
 
-            if (key is BookCardKey.Edition) {
-                val edition = currentEditionsById[key.editionId]
+            is BookCardEvent.PressStarted -> prefetcher?.prefetch(edition.bookId)
 
-                when (event) {
-                    is BookCardEvent.Clicked -> edition?.let { currentOnEditionClick(it) }
-
-                    is BookCardEvent.PressStarted -> edition?.let { prefetcher?.prefetch(it.bookId) }
-
-                    is BookCardEvent.LongClicked,
-                    is BookCardEvent.TrailingClicked,
-                    is BookCardEvent.MenuClicked,
-                    is BookCardEvent.ShakeEnded,
-                        -> Unit
-                }
-            }
+            is BookCardEvent.LongClicked,
+            is BookCardEvent.TrailingClicked,
+            is BookCardEvent.MenuClicked,
+            is BookCardEvent.ShakeEnded,
+                -> Unit
         }
     }
 
@@ -157,14 +169,14 @@ internal fun EditionList(
     // contiguous `[minTouched, maxTouched]` range, and we mirror that so two clients editing the
     // same list stay consistent.
     val reorderableState = rememberReorderableLazyGridState(lazyGridState = gridState) { from, to ->
-        val fromIndex = orderedIds.indexOf(from.key as Int)
-        val toIndex = orderedIds.indexOf(to.key as Int)
+        val fromIndex = orderedKeys.indexOf(from.key as String)
+        val toIndex = orderedKeys.indexOf(to.key as String)
 
         if (fromIndex == -1 || toIndex == -1) return@rememberReorderableLazyGridState
 
-        orderedIds.add(
+        orderedKeys.add(
             toIndex,
-            orderedIds.removeAt(fromIndex),
+            orderedKeys.removeAt(fromIndex),
         )
 
         val current = minTouchedIndex.intValue
@@ -189,26 +201,26 @@ internal fun EditionList(
         )
     }
 
-    // Display mode renders the canonical list directly; only while rearranging do we render the
+    // Display mode renders the canonical cards directly; only while rearranging do we render the
     // live shadow the drag mutates. At the toggle the two are equal, so the source swap keeps
     // every key stable — the grid node and every cover persist, no remount (no flash).
-    val renderIds = if (isRearranging) orderedIds else visibleEditionIds
+    val cardsByLazyKey = remember(cards) { cards.associateBy { it.key.lazyKey } }
+
+    val renderCards = if (isRearranging) orderedKeys.mapNotNull { cardsByLazyKey[it] } else cards
 
     LayoutGrid(
-        layout = state.gridLayout,
+        layout = tabCards.layout,
         gridState = gridState,
         columnsOverride = columnsOverride,
     ) {
         itemsIndexed(
-            renderIds,
-            key = { _, id -> id },
+            renderCards,
+            key = { _, card -> card.key.lazyKey },
             contentType = { _, _ -> "edition" },
-        ) { index, id ->
+        ) { index, card ->
             val gridItemScope = this
 
-            val edition = editionsById[id] ?: return@itemsIndexed
-
-            ReorderableItem(state = reorderableState, key = id) {
+            ReorderableItem(state = reorderableState, key = card.key.lazyKey) {
                 // Built unconditionally so the per-item composable structure is identical whether
                 // or not rearranging — only the drag-handle slot is toggled below, so the cover is
                 // never remounted (no flash).
@@ -225,16 +237,16 @@ internal fun EditionList(
                         val min = minTouchedIndex.intValue
                         val max = maxTouchedIndex.intValue
 
-                        if (isRearranging.not() || min < 0 || max < 0 || max >= orderedIds.size) {
+                        if (isRearranging.not() || min < 0 || max < 0 || max >= orderedKeys.size) {
                             return@draggableHandle
                         }
 
-                        val orderedListBookIds = orderedIds
+                        val orderedListBookIds = orderedKeys
                             .subList(
                                 min,
                                 max + 1,
                             )
-                            .mapNotNull { editionId -> listBookIdByEditionId[editionId] }
+                            .mapNotNull { key -> editionIdByLazyKey[key]?.let(listBookIdByEditionId::get) }
 
                         if (orderedListBookIds.size != max - min + 1) {
                             // A list_books row was missing for one of the dragged
@@ -252,21 +264,18 @@ internal fun EditionList(
                     },
                 )
 
-                val card = state.editionCardsByTab[tab.id]?.get(edition.id)
-
                 val entryModifier = Modifier.mutationAnimated(
                     scope = gridItemScope,
                     animator = animator,
-                    itemKey = edition.id,
+                    itemKey = card.key.lazyKey,
                 )
                     .staggeredEntry(
                         coordinator = entry,
                         index = index,
                     )
 
-                LibraryBookCard(
-                    card = card,
-                    layout = state.gridLayout,
+                BookCard(
+                    model = card,
                     onEvent = onCardEvent,
                     modifier = entryModifier,
                     content = if (isRearranging) {

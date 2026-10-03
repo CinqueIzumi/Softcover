@@ -351,10 +351,12 @@ class ExploreRepositoryImplTest {
                 genre = fantasyGenre,
                 limit = limit,
             )
-            val horrorFailure = runCatching { repository.fetchBooksByGenre(
-                genre = horrorGenre,
-                limit = limit,
-            ) }
+            val horrorFailure = runCatching {
+                repository.fetchBooksByGenre(
+                    genre = horrorGenre,
+                    limit = limit,
+                )
+            }
             val fantasyResult = repository.fetchBooksByGenre(
                 genre = fantasyGenre,
                 limit = limit,

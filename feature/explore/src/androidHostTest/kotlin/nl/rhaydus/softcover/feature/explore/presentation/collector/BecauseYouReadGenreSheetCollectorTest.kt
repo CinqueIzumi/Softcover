@@ -37,10 +37,14 @@ class BecauseYouReadGenreSheetCollectorTest {
     inner class BecauseYouReadGenreRowsFor {
         @Test
         fun `selects only Auto when the genre is null`() {
+            // ----- Arrange -----
+            val genre: String? = null
+            val options: List<String> = listOf("Romance", "Horror")
+
             // ----- Act -----
             val rows = becauseYouReadGenreRowsFor(
-                genre = null,
-                options = listOf("Romance", "Horror"),
+                genre = genre,
+                options = options,
             )
 
             // ----- Assert -----
@@ -49,10 +53,14 @@ class BecauseYouReadGenreSheetCollectorTest {
 
         @Test
         fun `selects only Auto when the genre matches no option`() {
+            // ----- Arrange -----
+            val genre: String? = "Fantasy"
+            val options: List<String> = listOf("Romance", "Horror")
+
             // ----- Act -----
             val rows = becauseYouReadGenreRowsFor(
-                genre = "Fantasy",
-                options = listOf("Romance", "Horror"),
+                genre = genre,
+                options = options,
             )
 
             // ----- Assert -----
@@ -61,10 +69,14 @@ class BecauseYouReadGenreSheetCollectorTest {
 
         @Test
         fun `selects only the matching option when the genre matches`() {
+            // ----- Arrange -----
+            val genre: String? = "Horror"
+            val options: List<String> = listOf("Romance", "Horror")
+
             // ----- Act -----
             val rows = becauseYouReadGenreRowsFor(
-                genre = "Horror",
-                options = listOf("Romance", "Horror"),
+                genre = genre,
+                options = options,
             )
 
             // ----- Assert -----
@@ -73,10 +85,14 @@ class BecauseYouReadGenreSheetCollectorTest {
 
         @Test
         fun `puts the null-keyed Auto row first followed by the options in order`() {
+            // ----- Arrange -----
+            val genre: String? = null
+            val options: List<String> = listOf("Romance", "Horror")
+
             // ----- Act -----
             val rows = becauseYouReadGenreRowsFor(
-                genre = null,
-                options = listOf("Romance", "Horror"),
+                genre = genre,
+                options = options,
             )
 
             // ----- Assert -----
@@ -86,10 +102,14 @@ class BecauseYouReadGenreSheetCollectorTest {
 
         @Test
         fun `returns only the Auto row, selected, when there are no options`() {
+            // ----- Arrange -----
+            val genre: String? = "Romance"
+            val options: List<String> = emptyList()
+
             // ----- Act -----
             val rows = becauseYouReadGenreRowsFor(
-                genre = "Romance",
-                options = emptyList(),
+                genre = genre,
+                options = options,
             )
 
             // ----- Assert -----
