@@ -3,8 +3,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
-import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
-import nl.rhaydus.softcover.core.component.state.SkeletonVariant
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
 import nl.rhaydus.softcover.feature.settings.presentation.model.RoadmapRenderUnit
 import nl.rhaydus.toad.UiState
@@ -20,7 +18,6 @@ internal data class RoadmapUiState(
         title = "Roadmap",
         subtitle = "What we're building next, and roughly when.",
     ),
-    val skeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.RoadmapEntry),
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val roadmapError: String? = null,

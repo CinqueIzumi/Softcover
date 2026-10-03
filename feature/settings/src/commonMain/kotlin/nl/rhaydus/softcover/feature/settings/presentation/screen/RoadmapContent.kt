@@ -27,14 +27,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.InlineErrorState
-import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
-import nl.rhaydus.softcover.core.component.state.Skeleton
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
@@ -48,6 +48,19 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 
 private val LIST_ITEM_RESTLINE_INDENT = 20.sp
 private const val URL_ANNOTATION_TAG = "url"
+private val STAND_IN_HEADING = RoadmapRenderUnit.Heading(
+    header = SectionHeaderUiModel.Section(
+        eyebrow = "0.0.0",
+        headline = "Roadmap entry title",
+    ),
+)
+private val STAND_IN_LIST = RoadmapRenderUnit.ListGroup(
+    items = List(3) {
+        RoadmapBlock.BulletListItem(
+            spans = listOf(RoadmapSpan(text = "A roadmap item describing what is coming next")),
+        )
+    },
+)
 // region Roadmap content
 /**
  * The Roadmap screen body, shared by the mobile [RoadmapScreen] page, the desktop standalone
@@ -55,9 +68,7 @@ private const val URL_ANNOTATION_TAG = "url"
  * public roadmap ([RoadmapDocument]) as an editorial spread rather than raw markdown, from
  * [RoadmapUiState.renderUnits]: headings shaped `## 3.2.0: Title` split into an eyebrow + headline
  * through [SectionHeader], consecutive bullet/ordered items grouped into one hanging-indent list per
- * run, a hairline [Divider] for
- * `---`, and the file's blockquote as a quiet accent-bar aside. [SkeletonCrossfade] carries the
- * ~150ms handoff from [RoadmapUiState.isLoading]'s skeleton to the loaded body; a
+ * run, a hairline [Divider] for `---`, and the file's blockquote as a quiet accent-bar aside. A
  * [RoadmapUiState.roadmapError] renders *above* a document that is already on screen (a
  * stale-but-readable roadmap beats a blank error page) and stands alone only when no document has
  * loaded yet.
@@ -69,17 +80,38 @@ internal fun RoadmapContent(
     openUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    SkeletonCrossfade(
-        isLoading = state.isLoading,
-        modifier = modifier.fillMaxWidth(),
-    ) { loading ->
-        if (loading) {
-            Skeleton(model = state.skeleton)
-        } else {
-            RoadmapLoadedBody(
-                state = state,
-                runAction = runAction,
-                openUrl = openUrl,
+    if (state.isLoading) {
+        RoadmapLoadingBody(modifier = modifier.fillMaxWidth())
+    } else {
+        RoadmapLoadedBody(
+            state = state,
+            runAction = runAction,
+            openUrl = openUrl,
+            modifier = modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun RoadmapLoadingBody(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        repeat(3) { entry ->
+            if (entry > 0) {
+                Spacer(modifier = Modifier.height(STAND_IN_HEADING.leadingSpacing()))
+            }
+
+            RoadmapUnitContent(
+                unit = STAND_IN_HEADING,
+                openUrl = {},
+                isLoading = true,
+            )
+
+            Spacer(modifier = Modifier.height(STAND_IN_LIST.leadingSpacing()))
+
+            RoadmapUnitContent(
+                unit = STAND_IN_LIST,
+                openUrl = {},
+                isLoading = true,
             )
         }
     }
@@ -90,10 +122,11 @@ private fun RoadmapLoadedBody(
     state: RoadmapUiState,
     runAction: (RoadmapAction) -> Unit,
     openUrl: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val document = state.document
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier) {
         if (document != null) {
             if (state.roadmapError != null) {
                 RoadmapErrorBanner(
@@ -193,9 +226,13 @@ private fun RoadmapRenderUnit.leadingSpacing() = when (this) {
 private fun RoadmapUnitContent(
     unit: RoadmapRenderUnit,
     openUrl: (String) -> Unit,
+    isLoading: Boolean = false,
 ) {
     when (unit) {
-        is RoadmapRenderUnit.Heading -> SectionHeader(model = unit.header)
+        is RoadmapRenderUnit.Heading -> SectionHeader(
+            model = unit.header,
+            modifier = Modifier.skeletonMask(visible = isLoading),
+        )
 
         is RoadmapRenderUnit.PlainHeading -> SoftcoverText(
             text = unit.text,
@@ -206,6 +243,7 @@ private fun RoadmapUnitContent(
         is RoadmapRenderUnit.ListGroup -> RoadmapList(
             items = unit.items,
             openUrl = openUrl,
+            isLoading = isLoading,
         )
 
         is RoadmapRenderUnit.Paragraph -> RoadmapParagraph(
@@ -242,6 +280,7 @@ private fun RoadmapParagraph(
 private fun RoadmapList(
     items: List<RoadmapBlock>,
     openUrl: (String) -> Unit,
+    isLoading: Boolean = false,
 ) {
     Column {
         items.forEachIndexed { index, item ->
@@ -269,6 +308,7 @@ private fun RoadmapList(
                         is ClickableTextEvent.LinkClicked -> openUrl(event.url)
                     }
                 },
+                modifier = Modifier.skeletonMask(visible = isLoading),
                 style = MaterialTheme.editorialTypography.review.copy(color = MaterialTheme.colorScheme.onSurface),
             )
         }

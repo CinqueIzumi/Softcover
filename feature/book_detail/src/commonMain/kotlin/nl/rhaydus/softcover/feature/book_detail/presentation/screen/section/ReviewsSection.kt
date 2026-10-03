@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,10 +32,9 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
-import nl.rhaydus.designsystem.modifier.shimmer
-import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichText
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -50,6 +48,10 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 
 private const val REVIEW_COLLAPSED_LINES = 8
 
+private const val LOADING_BODY_STAND_IN =
+    "A few sentences of what a reader made of the book sit here while the reviews load, " +
+        "enough to fill about four lines of the card."
+
 /**
  * "Voices" (The Book lens): section-opener bar + eyebrow, the "What readers think" italic headline,
  * the community review cards, and a footer summary line (`★ avg across N ratings`).
@@ -59,12 +61,6 @@ internal fun ReviewsSection(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
-    // Reviews fetch on their own timer, separate from and typically slower than the book itself
-    // (`loadingReviews`), so this stayed entirely absent through both phases before — the "second
-    // pop" once the rest of the lens had already settled. It now shows a skeleton matching the real
-    // card anatomy (same `surfaceContainerLow` shimmer, same header) for the whole `isLoading` span,
-    // the same crossfade idiom `AboutSection` / `ShelveControlCard` already use, and only collapses
-    // to nothing once loading is truly finished and the book turns out to have no reviews.
     val isLoading = state.loadingBookDetails || state.loadingReviews
 
     if (isLoading.not() && state.reviews.isEmpty()) return
@@ -85,72 +81,67 @@ internal fun ReviewsSection(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        SkeletonCrossfade(
-            isLoading = isLoading,
-            label = "ReviewsSection",
-        ) { loading ->
-            if (loading) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    repeat(2) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .shimmer(isLoading = true),
-                        )
+        Column {
+            if (isLoading) {
+                repeat(2) { index ->
+                    if (index > 0) {
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
+
+                    ReviewCard(
+                        review = null,
+                        isSpoilerRevealed = false,
+                        onRevealSpoilerClick = {},
+                    )
                 }
             } else {
-                Column {
-                    state.reviews.forEachIndexed { index, review ->
-                        if (index > 0) {
-                            Spacer(modifier = Modifier.height(12.dp))
-                        }
-
-                        ReviewCard(
-                            review = review,
-                            isSpoilerRevealed = review.id in state.revealedSpoilerReviewIds,
-                            onRevealSpoilerClick = {
-                                runAction(OnRevealReviewSpoilerAction(reviewId = review.id))
-                            },
-                        )
+                state.reviews.forEachIndexed { index, review ->
+                    if (index > 0) {
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
 
-                    state.book?.let { book ->
-                        if (book.ratingsCount > 0) {
-                            Spacer(modifier = Modifier.height(16.dp))
+                    ReviewCard(
+                        review = review,
+                        isSpoilerRevealed = review.id in state.revealedSpoilerReviewIds,
+                        onRevealSpoilerClick = {
+                            runAction(OnRevealReviewSpoilerAction(reviewId = review.id))
+                        },
+                    )
+                }
+            }
 
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                val footerStarIcon = drawableIconResource(
-                                    icon = SoftcoverIcon.StarFilled,
-                                    contentDescription = "",
+            state.book?.let { book ->
+                if (book.ratingsCount > 0) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        val footerStarIcon = drawableIconResource(
+                            icon = SoftcoverIcon.StarFilled,
+                            contentDescription = "",
+                        )
+
+                        Icon(
+                            painter = footerStarIcon.getIconPainter(),
+                            contentDescription = footerStarIcon.contentDescription,
+                            tint = RatingGold,
+                            modifier = Modifier.size(14.dp),
+                        )
+
+                        Spacer(modifier = Modifier.width(4.dp))
+
+                        SoftcoverText(
+                            text = "${
+                                formatDecimalNumber(
+                                    value = book.rating,
+                                    fractionDigits = 1,
                                 )
-
-                                Icon(
-                                    painter = footerStarIcon.getIconPainter(),
-                                    contentDescription = footerStarIcon.contentDescription,
-                                    tint = RatingGold,
-                                    modifier = Modifier.size(14.dp),
-                                )
-
-                                Spacer(modifier = Modifier.width(4.dp))
-
-                                SoftcoverText(
-                                    text = "${
-                                        formatDecimalNumber(
-                                            value = book.rating,
-                                            fractionDigits = 1,
-                                        )
-                                    } across ${formatGroupedNumber(book.ratingsCount)} ratings",
-                                    style = MaterialTheme.editorialTypography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
+                            } across ${formatGroupedNumber(book.ratingsCount)} ratings",
+                            style = MaterialTheme.editorialTypography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -160,10 +151,16 @@ internal fun ReviewsSection(
 
 @Composable
 private fun ReviewCard(
-    review: BookReviewUiModel,
+    review: BookReviewUiModel?,
     isSpoilerRevealed: Boolean,
     onRevealSpoilerClick: () -> Unit,
 ) {
+    val isLoading = review == null
+    val avatarUrl = review?.reviewerAvatarUrl
+    val reviewerName = review?.reviewerName?.uppercase()
+    val monthYear = review?.reviewedMonthYear
+    val rating = review?.rating
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -194,7 +191,14 @@ private fun ReviewCard(
                 // spoilers withholds its body entirely behind a quiet "Show spoiler" text button —
                 // never rendered underneath, unlike an inline-span reveal. Reveal state is
                 // transient, held by the caller per review id.
-                if (review.hasSpoilers && isSpoilerRevealed.not()) {
+                if (review == null) {
+                    SoftcoverText(
+                        text = null as String?,
+                        standIn = LOADING_BODY_STAND_IN,
+                        style = MaterialTheme.editorialTypography.review,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                } else if (review.hasSpoilers && isSpoilerRevealed.not()) {
                     TextButton(onClick = onRevealSpoilerClick) {
                         SoftcoverText(text = "Show spoiler")
                     }
@@ -229,11 +233,15 @@ private fun ReviewCard(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RhaydusShimmerImage(
-                        model = review.reviewerAvatarUrl,
+                        model = avatarUrl,
                         contentDescription = "Reviewer avatar",
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(RoundedCornerShape(18.dp)),
+                            .clip(RoundedCornerShape(18.dp))
+                            .skeletonMask(
+                                visible = isLoading,
+                                shape = RoundedCornerShape(18.dp),
+                            ),
                         contentScale = ContentScale.Crop,
                     )
 
@@ -242,16 +250,18 @@ private fun ReviewCard(
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             SoftcoverText(
-                                text = review.reviewerName.uppercase(),
+                                text = reviewerName,
+                                standIn = "REVIEWER NAME",
                                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                                 color = MaterialTheme.colorScheme.primary,
                             )
 
-                            review.reviewedMonthYear?.let { monthYear ->
+                            if (isLoading || monthYear != null) {
                                 Spacer(modifier = Modifier.width(6.dp))
 
                                 SoftcoverText(
                                     text = monthYear,
+                                    standIn = "January 2025",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -259,10 +269,14 @@ private fun ReviewCard(
                         }
                     }
 
-                    review.rating?.let { rating ->
+                    if (isLoading || rating != null) {
                         Surface(
                             color = MaterialTheme.colorScheme.tertiaryContainer,
                             shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.skeletonMask(
+                                visible = isLoading,
+                                shape = RoundedCornerShape(10.dp),
+                            ),
                         ) {
                             Row(
                                 modifier = Modifier.padding(
@@ -286,10 +300,13 @@ private fun ReviewCard(
                                 Spacer(modifier = Modifier.width(4.dp))
 
                                 SoftcoverText(
-                                    text = formatDecimalNumber(
-                                        value = rating,
-                                        fractionDigits = 1,
-                                    ),
+                                    text = rating?.let {
+                                        formatDecimalNumber(
+                                            value = it,
+                                            fractionDigits = 1,
+                                        )
+                                    },
+                                    standIn = "4.0",
                                     style = MaterialTheme.typography.labelMedium.copy(
                                         fontFamily = displayFontFamily(),
                                     ),
