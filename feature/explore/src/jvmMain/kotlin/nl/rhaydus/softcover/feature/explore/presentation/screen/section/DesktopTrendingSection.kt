@@ -10,13 +10,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.state.Skeleton
-import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
 
@@ -24,14 +23,21 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
 @Composable
 internal fun DesktopTrendingSection(
     books: List<Book>,
-    covers: Map<Int, CoverUiModel>,
-    unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
+    cards: ImmutableMap<Int, BookCardUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
-    skeleton: SkeletonUiModel,
     onBookClick: (Book, String?) -> Unit,
 ) {
     if (isLoading.not() && books.isEmpty()) return
+
+    val onCardEvent = rememberRailCardEventHandler(
+        books = books,
+        surface = SURFACE_TRENDING,
+        onBookClick = onBookClick,
+    )
+
+    // The cards are derived off the books, so they land a frame after them.
+    val cardsReady = books.all { it.id in cards }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
@@ -40,7 +46,7 @@ internal fun DesktopTrendingSection(
         )
 
         SkeletonCrossfade(
-            isLoading = isLoading,
+            isLoading = isLoading || cardsReady.not(),
             label = "DesktopTrendingRail",
         ) { loading ->
             FlowRow(
@@ -51,28 +57,23 @@ internal fun DesktopTrendingSection(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 if (loading) {
-                    repeat(DESKTOP_DISCOVERY_SKELETON_COUNT) {
-                        Skeleton(
-                            model = skeleton,
+                    repeat(8) {
+                        BookCard(
+                            model = TRENDING_STAND_IN_CARD,
+                            onEvent = {},
+                            isLoading = true,
                             modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
                         )
                     }
                 } else {
                     books.forEach { book ->
-                        val cover = covers[book.id]
-
-                        TrendingCard(
-                            modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
-                            book = book,
-                            cover = cover,
-                            unreleasedCoverOverlay = unreleasedCoverOverlays[book.id],
-                            onClick = {
-                                onBookClick(
-                                    book,
-                                    SURFACE_TRENDING,
-                                )
-                            },
-                        )
+                        cards[book.id]?.let { card ->
+                            BookCard(
+                                model = card,
+                                onEvent = onCardEvent,
+                                modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
+                            )
+                        }
                     }
                 }
             }

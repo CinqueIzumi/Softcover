@@ -67,6 +67,8 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.mood.MoodTile
+import nl.rhaydus.softcover.core.component.mood.MoodTileUiModel
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
@@ -537,6 +539,68 @@ object GalleryRegistry {
                     )
                 }
             },
+        ),
+        galleryEntry(
+            name = "MoodTile",
+            family = GalleryFamily.MOOD,
+            blurb = "A tappable mood tile in one of four inks, opening a mood-filtered search.",
+            previews = MoodTileUiModel,
+            label = { model -> "${model.ink.name} ink" },
+            content = { model, modifier ->
+                MoodTile(
+                    model = model,
+                    onEvent = {},
+                    modifier = modifier.width(160.dp),
+                )
+            },
+        ),
+        GalleryEntry(
+            name = "BookCard (loading)",
+            family = GalleryFamily.BOOKCARD,
+            blurb = "The card laid out from a stand-in model with every leaf masked and no press, so the slot " +
+                "keeps the size the real card fills.",
+            fixtures = BookCardUiModel.previews
+                .filter { it.variant !is BookCardVariant.CoverOnly }
+                .take(3)
+                .map { model ->
+                    GalleryFixture(
+                        label = bookCardFixtureLabel(model),
+                        render = { modifier ->
+                            val sizeModifier = if (model.variant is BookCardVariant.Row) {
+                                Modifier.fillMaxWidth()
+                            } else {
+                                Modifier.width(140.dp)
+                            }
+
+                            Box(modifier = modifier.then(sizeModifier)) {
+                                BookCard(
+                                    model = model,
+                                    onEvent = {},
+                                    isLoading = true,
+                                )
+                            }
+                        },
+                    )
+                }
+                .toImmutableList(),
+        ),
+        GalleryEntry(
+            name = "MoodTile (loading)",
+            family = GalleryFamily.MOOD,
+            blurb = "The tile at its real size with its text and icon masked and no press.",
+            fixtures = persistentListOf(
+                GalleryFixture(
+                    label = "Loading",
+                    render = { modifier ->
+                        MoodTile(
+                            model = MoodTileUiModel.previews.first(),
+                            onEvent = {},
+                            isLoading = true,
+                            modifier = modifier.width(160.dp),
+                        )
+                    },
+                ),
+            ),
         ),
         galleryEntry(
             name = "Sidebar",

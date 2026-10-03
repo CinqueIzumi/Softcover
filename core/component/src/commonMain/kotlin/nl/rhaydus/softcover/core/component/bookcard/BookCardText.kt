@@ -17,6 +17,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -29,6 +30,7 @@ internal fun BookCardTextBlock(
     titleStyle: TextStyle,
     titleMinLines: Int,
     titleMaxLines: Int,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
     progress: BookCardProgress? = null,
 ) {
@@ -48,6 +50,8 @@ internal fun BookCardTextBlock(
 
             SoftcoverText(
                 text = eyebrow.text,
+                isLoading = isLoading,
+                standIn = eyebrow.text,
                 style = typography.eyebrowSmall,
                 color = eyebrowColor,
                 maxLines = 1,
@@ -60,11 +64,14 @@ internal fun BookCardTextBlock(
             titleStyle = titleStyle,
             minLines = titleMinLines,
             maxLines = titleMaxLines,
+            isLoading = isLoading,
         )
 
         if (byline != null) {
             SoftcoverText(
                 text = byline,
+                isLoading = isLoading,
+                standIn = byline,
                 style = typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -73,7 +80,10 @@ internal fun BookCardTextBlock(
         }
 
         content.supportingLines.forEach { line ->
-            SupportingLine(line = line)
+            SupportingLine(
+                line = line,
+                isLoading = isLoading,
+            )
         }
 
         if (progress != null) {
@@ -82,6 +92,7 @@ internal fun BookCardTextBlock(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
+                isLoading = isLoading,
             )
         }
     }
@@ -93,12 +104,15 @@ private fun TitleRow(
     titleStyle: TextStyle,
     minLines: Int,
     maxLines: Int,
+    isLoading: Boolean,
 ) {
     val titleIcon = content.titleIcon
 
     val title = @Composable { modifier: Modifier ->
         SoftcoverText(
             text = content.title,
+            isLoading = isLoading,
+            standIn = content.title,
             style = titleStyle,
             color = MaterialTheme.colorScheme.onSurface,
             minLines = minLines,
@@ -130,7 +144,9 @@ private fun TitleRow(
             painter = icon.getIconPainter(),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(iconSize),
+            modifier = Modifier
+                .size(iconSize)
+                .skeletonMask(visible = isLoading),
         )
 
         title(Modifier.weight(1f))
@@ -138,7 +154,10 @@ private fun TitleRow(
 }
 
 @Composable
-private fun SupportingLine(line: BookCardLine) {
+private fun SupportingLine(
+    line: BookCardLine,
+    isLoading: Boolean,
+) {
     val style = MaterialTheme.editorialTypography.bodySmall.copy(fontFeatureSettings = "tnum")
     val color = MaterialTheme.colorScheme.onSurfaceVariant
 
@@ -155,6 +174,8 @@ private fun SupportingLine(line: BookCardLine) {
             when (part) {
                 is BookCardLinePart.Text -> SoftcoverText(
                     text = part.text,
+                    isLoading = isLoading,
+                    standIn = part.text,
                     style = style,
                     color = color,
                     maxLines = 1,
@@ -169,6 +190,7 @@ private fun SupportingLine(line: BookCardLine) {
                     label = part.label,
                     style = style,
                     color = color,
+                    isLoading = isLoading,
                 )
             }
         }
@@ -180,6 +202,7 @@ private fun RatingLabel(
     label: String,
     style: TextStyle,
     color: Color,
+    isLoading: Boolean,
 ) {
     val icon = drawableIconResource(
         icon = SoftcoverIcon.StarFilled,
@@ -194,11 +217,15 @@ private fun RatingLabel(
             painter = icon.getIconPainter(),
             contentDescription = null,
             tint = RatingGold,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier
+                .size(12.dp)
+                .skeletonMask(visible = isLoading),
         )
 
         SoftcoverText(
             text = label,
+            isLoading = isLoading,
+            standIn = label,
             style = style,
             color = color,
             maxLines = 1,

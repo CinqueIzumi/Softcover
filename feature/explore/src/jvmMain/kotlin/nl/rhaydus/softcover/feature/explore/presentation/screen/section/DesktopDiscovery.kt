@@ -39,7 +39,6 @@ internal fun DesktopDiscovery(
                 cover = state.featuredCover,
                 releaseBadge = state.featuredReleaseBadge,
                 header = state.featuredHeader,
-                skeleton = state.featuredSkeleton,
                 isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -47,11 +46,9 @@ internal fun DesktopDiscovery(
 
             DesktopUpNextSection(
                 entries = state.continueSeriesEntries,
-                covers = state.continueSeriesCovers,
-                unreleasedCoverOverlays = state.unreleasedCoverOverlays,
+                cards = state.upNextCards,
                 isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
                 header = state.upNextHeader,
-                skeleton = state.seriesSkeleton,
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
@@ -59,34 +56,29 @@ internal fun DesktopDiscovery(
             DesktopBecauseYouReadSection(
                 genre = state.becauseYouReadGenre,
                 header = state.becauseYouReadHeader,
-                headerSkeleton = state.becauseYouReadHeaderSkeleton,
                 genreOptions = state.becauseYouReadGenreOptions,
                 genreSheet = state.becauseYouReadGenreSheet,
                 genreGroup = state.becauseYouReadGenreGroup,
                 books = state.becauseYouReadBooks,
-                covers = state.becauseYouReadCovers,
-                unreleasedCoverOverlays = state.unreleasedCoverOverlays,
+                cards = state.becauseYouReadCards,
                 isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
-                skeleton = state.becauseYouReadSkeleton,
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
 
             DesktopTrendingSection(
                 books = state.trendingBooks,
-                covers = state.trendingCovers,
-                unreleasedCoverOverlays = state.unreleasedCoverOverlays,
+                cards = state.trendingCards,
                 isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
                 header = state.trendingHeader,
-                skeleton = state.trendingSkeleton,
                 onBookClick = onBookClick,
             )
 
             MoodGrid(
                 moods = state.moodTags,
+                tiles = state.moodTiles,
                 isLoading = state.loadingMoodTags && state.moodTags.isEmpty(),
                 header = state.moodGridHeader,
-                skeleton = state.moodTileSkeleton,
                 runAction = runAction,
             )
 

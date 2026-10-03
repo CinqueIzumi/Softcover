@@ -12,20 +12,18 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.component.state.Skeleton
-import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
-import nl.rhaydus.softcover.feature.explore.presentation.screen.BECAUSE_YOU_READ_SKELETON_COUNT
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
 
 private val becauseYouReadListState = LazyListState()
@@ -36,65 +34,50 @@ private val BECAUSE_YOU_READ_CARD_WIDTH = 118.dp
 internal fun BecauseYouReadSection(
     genre: String?,
     header: SectionHeaderUiModel?,
-    headerSkeleton: SkeletonUiModel,
     genreOptions: List<String>,
     genreSheet: SheetScaffoldUiModel,
     genreGroup: SheetRowGroupUiModel<String?>,
     books: List<Book>,
-    covers: Map<Int, CoverUiModel>,
-    unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
+    cards: ImmutableMap<Int, BookCardUiModel>,
     isLoading: Boolean,
-    skeleton: SkeletonUiModel,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
-    // Terminal empty: the fetch is done and this reader has no genre to recommend from (or,
-    // defensively, no books despite a resolved genre) - nothing to show, so the section collapses
-    // with no reserved space. Any other state - still loading, regardless of whether genre/books
-    // happen to have arrived yet - keeps the header+rail's full footprint reserved below, which is
-    // what fixes the section popping into the feed at full height once the genre resolves: it used
-    // to gate on `if (genre == null) return` unconditionally, hiding the whole section - header
-    // included - for the entire loading window, not just the genuinely-empty terminal state.
+    // Collapses only once the fetch is done and there is nothing to show; any loading state keeps the
+    // header and rail footprint reserved.
     if (isLoading.not() && (genre == null || books.isEmpty())) return
 
     // Hoisted above the crossfade - see TrendingSection's comment for why.
     val entry = rememberStaggeredEntryCoordinator(key = "explore:because_you_read")
 
+    val onCardEvent = rememberRailCardEventHandler(
+        books = books,
+        surface = SURFACE_BECAUSE_YOU_READ,
+        onBookClick = onBookClick,
+    )
+
+    // The cards are derived off the books, so they land a frame after them.
+    val cardsReady = books.all { it.id in cards }
+
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        SkeletonCrossfade(
+        SectionHeader(
+            model = header ?: BECAUSE_YOU_READ_HEADER_STAND_IN,
             isLoading = isLoading,
             modifier = Modifier.padding(horizontal = 24.dp),
-            label = "BecauseYouReadHeader",
-        ) { loading ->
-            if (loading) {
-                Skeleton(model = headerSkeleton)
-            } else if (header != null) {
-                SectionHeader(model = header)
-            }
-        }
+        )
 
-        // Crossfaded too, not just gated on `genre != null` directly: genre and `isLoading` flip
-        // together (see the guard above), so an ungated appearance would hard-pop this control in
-        // alongside the header/rail's smooth 150ms fade — a small but visible inconsistency next
-        // to the very transition this file's crossfade work exists to smooth out.
-        SkeletonCrossfade(
+        BecauseYouReadGenreControl(
+            genre = genre ?: "Fantasy",
+            options = genreOptions,
+            sheet = genreSheet,
+            genreGroup = genreGroup,
+            runAction = runAction,
             isLoading = isLoading,
             modifier = Modifier.padding(horizontal = 24.dp),
-            label = "BecauseYouReadGenreControl",
-        ) { loading ->
-            if (loading.not() && genre != null) {
-                BecauseYouReadGenreControl(
-                    genre = genre,
-                    options = genreOptions,
-                    sheet = genreSheet,
-                    genreGroup = genreGroup,
-                    runAction = runAction,
-                )
-            }
-        }
+        )
 
         SkeletonCrossfade(
-            isLoading = isLoading,
+            isLoading = isLoading || cardsReady.not(),
             label = "BecauseYouReadRail",
         ) { loading ->
             if (loading) {
@@ -102,9 +85,11 @@ internal fun BecauseYouReadSection(
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    items(BECAUSE_YOU_READ_SKELETON_COUNT) {
-                        Skeleton(
-                            model = skeleton,
+                    items(3) {
+                        BookCard(
+                            model = BECAUSE_YOU_READ_STAND_IN_CARD,
+                            onEvent = {},
+                            isLoading = true,
                             modifier = Modifier.width(BECAUSE_YOU_READ_CARD_WIDTH),
                         )
                     }
@@ -116,22 +101,15 @@ internal fun BecauseYouReadSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
-                        val cover = covers[book.id]
-
-                        BecauseYouReadCard(
-                            modifier = Modifier
-                                .width(BECAUSE_YOU_READ_CARD_WIDTH)
-                                .staggeredEntry(coordinator = entry, index = index),
-                            book = book,
-                            cover = cover,
-                            unreleasedCoverOverlay = unreleasedCoverOverlays[book.id],
-                            onClick = {
-                                onBookClick(
-                                    book,
-                                    SURFACE_BECAUSE_YOU_READ,
-                                )
-                            },
-                        )
+                        cards[book.id]?.let { card ->
+                            BookCard(
+                                model = card,
+                                onEvent = onCardEvent,
+                                modifier = Modifier
+                                    .width(BECAUSE_YOU_READ_CARD_WIDTH)
+                                    .staggeredEntry(coordinator = entry, index = index),
+                            )
+                        }
                     }
                 }
             }

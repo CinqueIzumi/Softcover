@@ -1,9 +1,5 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen
 
-internal const val TRENDING_SKELETON_COUNT = 4
-internal const val CONTINUE_SERIES_SKELETON_COUNT = 4
-internal const val BECAUSE_YOU_READ_SKELETON_COUNT = 4
-
 // How many items from the end of the search-results list/grid trigger the next page (explore-3a
 // feedback item 7) — shared between the mobile LazyColumn and the desktop LazyVerticalGrid so the
 // two platforms feel the same distance from the edge before they fetch.

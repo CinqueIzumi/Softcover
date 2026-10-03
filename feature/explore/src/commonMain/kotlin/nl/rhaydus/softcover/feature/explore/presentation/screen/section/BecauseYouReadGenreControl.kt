@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -29,14 +30,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouReadGenreSelectedAction
 
 /**
- * The "because you read {genre}" picker (explore-3a feedback item 10, rebuilt a second time per
- * follow-up feedback): a **bottom sheet** mirroring Library's own
- * [nl.rhaydus.softcover.feature.library.presentation.component.LibraryShelvesSheet] — not the
- * anchored `DropdownMenu` this control used before. The anchor stays the same compact
- * `eyebrowSmall` label naming the resolved [genre] with a trailing `primary` chevron
- * (`"Genre · {genre}"`, uppercase, the same sheet-opening-label register Library's own sort
- * control uses); tapping it opens [BecauseYouReadGenreSheet]. Hidden when the reader has no genre
- * options to switch between (nothing to pick from).
+ * The "because you read {genre}" picker: a compact `"Genre · {genre}"` label with a trailing chevron that
+ * opens [BecauseYouReadGenreSheet]. Hidden when the reader has no genre options to switch between.
  */
 @Composable
 internal fun BecauseYouReadGenreControl(
@@ -46,19 +41,29 @@ internal fun BecauseYouReadGenreControl(
     genreGroup: SheetRowGroupUiModel<String?>,
     runAction: (ExploreAction) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
-    if (options.isEmpty()) return
+    if (isLoading.not() && options.isEmpty()) return
 
     var sheetVisible by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier
-            .pointerHandCursor()
-            .pressScaleClickable(onClick = { sheetVisible = true }),
+            .then(
+                if (isLoading) {
+                    Modifier
+                } else {
+                    Modifier
+                        .pointerHandCursor()
+                        .pressScaleClickable(onClick = { sheetVisible = true })
+                },
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SoftcoverText(
             text = "Genre · $genre".uppercase(),
+            isLoading = isLoading,
+            standIn = "Genre · $genre".uppercase(),
             style = MaterialTheme.editorialTypography.eyebrowSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
@@ -77,7 +82,9 @@ internal fun BecauseYouReadGenreControl(
             painter = chevronIcon.getIconPainter(),
             contentDescription = chevronIcon.contentDescription,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier
+                .size(16.dp)
+                .skeletonMask(visible = isLoading),
         )
     }
 

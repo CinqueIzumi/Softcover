@@ -22,8 +22,9 @@ deleted.
 | SL-6 | `ShelveControlCard` renders its real rows while loading; the 42dp bars go | SL-1 | [x] |
 | SL-7 | `AboutSection`, `ReviewsSection` and `BookOverflowMenu` | SL-1 | [x] |
 | SL-8 | Roadmap: `RoadmapContent` renders stand-in entries in the real entry layout; `RoadmapUiState.skeleton` goes | SL-1 | [x] |
-| SL-9 | `BookCard` and `MoodTile` take `isLoading` and mask their own leaves, with loading fixtures | S7-4 | [ ] |
-| SL-10 | Explore sections, mobile and desktop, render loading `BookCard` / `MoodTile` lists; the `*Skeleton` state fields go | SL-9, S7-5 | [ ] |
+| SL-9 | `BookCard` and `MoodTile` take `isLoading` and mask their own leaves, with loading fixtures | S7-4 | [x] |
+| SL-10a | Explore feed (featured, trending, up next, because-you-read, mood), mobile and desktop, render their real layout while loading; their `*Skeleton` state fields go | SL-9 | [x] |
+| SL-10b | Explore search and hidden suggestions, the same; the remaining `*Skeleton` state fields go | SL-10a, S7-5 | [ ] |
 | SL-11 | Library and Reading: audit how they show loading; convert any loading branch to the shape below | S7-6 | [ ] |
 | SL-12 | Profile: sections and both layouts move from `.shimmer` blocks to masked real leaves | S9-3 | [ ] |
 | SL-13 | Delete `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry, `SkeletonUiModelTest` and doc lines | SL-8, SL-10 | [ ] |

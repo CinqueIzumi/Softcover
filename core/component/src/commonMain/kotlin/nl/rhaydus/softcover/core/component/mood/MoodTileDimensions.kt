@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.core.component.bookcard
+package nl.rhaydus.softcover.core.component.mood
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp

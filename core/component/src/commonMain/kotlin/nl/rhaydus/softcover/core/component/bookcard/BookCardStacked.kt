@@ -19,6 +19,7 @@ internal fun BookCardCoverOnlyLayout(
     variant: BookCardVariant.CoverOnly,
     onEvent: (BookCardEvent) -> Unit,
     modifier: Modifier,
+    isLoading: Boolean,
     content: (@Composable () -> Unit)?,
 ) {
     val progress = model.decorations.progress
@@ -28,12 +29,14 @@ internal fun BookCardCoverOnlyLayout(
             model = model,
             onEvent = onEvent,
             hoverHighlight = false,
+            isLoading = isLoading,
         ),
     ) {
         CoverWithCorner(
             cover = variant.cover,
             decorations = model.decorations,
             menu = null,
+            isLoading = isLoading,
             content = content,
         )
 
@@ -42,6 +45,7 @@ internal fun BookCardCoverOnlyLayout(
                 progress = progress,
                 modifier = Modifier.padding(top = 9.dp),
                 barHeight = 8.dp,
+                isLoading = isLoading,
             )
         }
     }
@@ -53,6 +57,7 @@ internal fun BookCardStackedLayout(
     variant: BookCardVariant.Stacked,
     onEvent: (BookCardEvent) -> Unit,
     modifier: Modifier,
+    isLoading: Boolean,
     content: (@Composable () -> Unit)?,
 ) {
     Column(
@@ -60,11 +65,13 @@ internal fun BookCardStackedLayout(
             model = model,
             onEvent = onEvent,
             hoverHighlight = false,
+            isLoading = isLoading,
         ),
     ) {
         CoverWithCorner(
             cover = variant.cover,
             decorations = model.decorations,
+            isLoading = isLoading,
             menu = variant.menuLabel?.let { label ->
                 CoverMenu(
                     label = label,
@@ -81,14 +88,16 @@ internal fun BookCardStackedLayout(
                 progress = progress,
                 modifier = Modifier.padding(top = 9.dp),
                 barHeight = 8.dp,
+                isLoading = isLoading,
             )
         }
 
         BookCardTextBlock(
             content = variant.text,
             titleStyle = MaterialTheme.editorialTypography.titleSmall,
-            titleMinLines = 1,
+            titleMinLines = 2,
             titleMaxLines = 2,
+            isLoading = isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 9.dp),
@@ -106,16 +115,18 @@ private fun CoverWithCorner(
     cover: CoverUiModel?,
     decorations: BookCardDecorations,
     menu: CoverMenu?,
+    isLoading: Boolean,
     content: (@Composable () -> Unit)?,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         BookCardCover(
             cover = cover,
             decorations = decorations,
+            isLoading = isLoading,
             modifier = Modifier.fillMaxWidth(),
         )
 
-        if (menu != null || content != null) {
+        if (isLoading.not() && (menu != null || content != null)) {
             Row(modifier = Modifier.align(Alignment.TopEnd)) {
                 if (menu != null) {
                     BookCardMenuButton(

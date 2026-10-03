@@ -13,10 +13,10 @@ After S7-1, the user checks the `BookCard` variants in the Component Gallery bef
 
 | Sub | Scope | Status |
 |---|---|---|
-| S7-1 | `BookCard` models, the component and the fixtures | [ ] |
+| S7-1 | `BookCard` models, the component and the fixtures | [x] |
 | S7-2 | The library grid and cover-only cells, plus the selection covers | [x] |
-| S7-3 | The library rows and dispatchers | [ ] |
-| S7-4 | Explore rails, featured, series and mood tile | [ ] |
+| S7-3 | The library rows and dispatchers | [x] |
+| S7-4 | Explore rails, featured, series and mood tile | [x] |
 | S7-5 | Explore search and hidden suggestions | [ ] |
 | S7-6 | Reading | [ ] |
 | S7-7 | Profile, book_detail's `EditionItem` and `StackedJackets`, plus the final shared-element and skippability verification | [ ] |
@@ -88,6 +88,12 @@ Coverless-monogram (`CoverlessTitleCover`, `MonogramCoverMetrics`) — also done
 - `CoverOnly` ← `CoverOnlyCell`. `Stacked` ← `GridBookCell`, `TrendingCard`, `BecauseYouReadCard`, `SeriesCard`, `UnreleasedSeriesCard`, `PickUpNextTile`, `LovedBookCard`. `Row` ← `CompactRow`, `LargeRow`, `SearchResultRow`, `CompactBookEntry`, `HiddenBookRow`, `HiddenSeriesRow`, `EditionItem`.
 - Out of `BookCard`: explore `FeaturedCard` and reading's featured hero stay feature compositions; `MoodTile` becomes its own component (S7-4), `MoodTileDimensions` leaves `bookcard/`.
 - `LovedBookCard` moves onto `Cover` with a new `ProfileLovedBook` cover variant, and gains `Tap` → book detail (S7-7 wires the navigation).
+- S7-5: `SearchResultRow`'s stats line moves onto `:core:uibinding`'s `bookStatsLine` (grouped readers, 1-decimal rating — the format the user picked in S7-3).
+- S7-4 (user, after the diff): `Stacked` reserves 2 title lines everywhere (library grid included);
+  `BookCardMenuButton` keeps its 48dp target but draws the 26dp circle 6dp in from the cover corner;
+  Because-you-read's author is the "By X" byline. Accepted shifts: rail title `titleMedium` → `titleSmall`,
+  gaps 8/8 → 9/2 (series 8/8/8 → 9/2/2), Trending star 14 → 12dp with tabular editorial `bodySmall`, an
+  unrated / unnumbered book drops the line instead of reserving it.
 - Mappers feature-local per feature; the "year · N readers · ★ rating" line goes to `:core:uibinding` at once; a `BookCardModelsCollector` per feature, one map per surface.
 
 ## S7 — non-symbol tasks

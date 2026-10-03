@@ -12,18 +12,16 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.state.Skeleton
-import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
-import nl.rhaydus.softcover.feature.explore.presentation.screen.TRENDING_SKELETON_COUNT
 
 private val trendingListState = LazyListState()
 
@@ -32,11 +30,9 @@ private val TRENDING_CARD_WIDTH = 118.dp
 @Composable
 internal fun TrendingSection(
     books: List<Book>,
-    covers: Map<Int, CoverUiModel>,
-    unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
+    cards: ImmutableMap<Int, BookCardUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
-    skeleton: SkeletonUiModel,
     onBookClick: (Book, String?) -> Unit,
 ) {
     if (isLoading.not() && books.isEmpty()) return
@@ -49,6 +45,15 @@ internal fun TrendingSection(
     // section's very first paint (design-system.md §2.5 "Staggered entry on first composition").
     val entry = rememberStaggeredEntryCoordinator(key = "explore:trending")
 
+    val onCardEvent = rememberRailCardEventHandler(
+        books = books,
+        surface = SURFACE_TRENDING,
+        onBookClick = onBookClick,
+    )
+
+    // The cards are derived off the books, so they land a frame after them.
+    val cardsReady = books.all { it.id in cards }
+
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
             model = header,
@@ -56,7 +61,7 @@ internal fun TrendingSection(
         )
 
         SkeletonCrossfade(
-            isLoading = isLoading,
+            isLoading = isLoading || cardsReady.not(),
             label = "TrendingRail",
         ) { loading ->
             if (loading) {
@@ -64,9 +69,11 @@ internal fun TrendingSection(
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    items(TRENDING_SKELETON_COUNT) {
-                        Skeleton(
-                            model = skeleton,
+                    items(3) {
+                        BookCard(
+                            model = TRENDING_STAND_IN_CARD,
+                            onEvent = {},
+                            isLoading = true,
                             modifier = Modifier.width(TRENDING_CARD_WIDTH),
                         )
                     }
@@ -78,22 +85,15 @@ internal fun TrendingSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     itemsIndexed(books, key = { _, book -> book.id }) { index, book ->
-                        val cover = covers[book.id]
-
-                        TrendingCard(
-                            modifier = Modifier
-                                .width(TRENDING_CARD_WIDTH)
-                                .staggeredEntry(coordinator = entry, index = index),
-                            book = book,
-                            cover = cover,
-                            unreleasedCoverOverlay = unreleasedCoverOverlays[book.id],
-                            onClick = {
-                                onBookClick(
-                                    book,
-                                    SURFACE_TRENDING,
-                                )
-                            },
-                        )
+                        cards[book.id]?.let { card ->
+                            BookCard(
+                                model = card,
+                                onEvent = onCardEvent,
+                                modifier = Modifier
+                                    .width(TRENDING_CARD_WIDTH)
+                                    .staggeredEntry(coordinator = entry, index = index),
+                            )
+                        }
                     }
                 }
             }

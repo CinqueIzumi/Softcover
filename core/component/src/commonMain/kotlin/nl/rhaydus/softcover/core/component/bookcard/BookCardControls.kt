@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -32,6 +33,20 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverIn
 
 @Composable
 internal fun BookCardTrailingControl(
+    trailing: BookCardTrailing,
+    isLoading: Boolean,
+    onClick: () -> Unit,
+) {
+    Box(modifier = Modifier.skeletonMask(visible = isLoading)) {
+        TrailingControlContent(
+            trailing = trailing,
+            onClick = onClick,
+        )
+    }
+}
+
+@Composable
+private fun TrailingControlContent(
     trailing: BookCardTrailing,
     onClick: () -> Unit,
 ) {
@@ -53,6 +68,10 @@ internal fun BookCardTrailingControl(
     }
 }
 
+/**
+ * The circle sits in the touch target's top-end corner, not its centre, so it lands 6dp in from the
+ * cover's corner.
+ */
 @Composable
 internal fun BookCardMenuButton(
     contentDescription: String,
@@ -69,19 +88,26 @@ internal fun BookCardMenuButton(
     ) {
         Box(
             modifier = Modifier
-                .size(26.dp)
-                .background(
-                    color = MonogramCoverInk.copy(alpha = 0.42f),
-                    shape = CircleShape,
-                ),
-            contentAlignment = Alignment.Center,
+                .fillMaxSize()
+                .padding(6.dp),
+            contentAlignment = Alignment.TopEnd,
         ) {
-            Icon(
-                painter = icon.getIconPainter(),
-                contentDescription = icon.contentDescription,
-                tint = MonogramCoverForeground,
-                modifier = Modifier.size(16.dp),
-            )
+            Box(
+                modifier = Modifier
+                    .size(26.dp)
+                    .background(
+                        color = MonogramCoverInk.copy(alpha = 0.42f),
+                        shape = CircleShape,
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = icon.getIconPainter(),
+                    contentDescription = icon.contentDescription,
+                    tint = MonogramCoverForeground,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
         }
     }
 }

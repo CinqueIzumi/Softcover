@@ -1,18 +1,20 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.mood.MoodTileUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
-import nl.rhaydus.softcover.core.component.state.SkeletonVariant
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
@@ -47,6 +49,11 @@ internal data class ExploreScreenUiState(
     // reproducing today's ExploreShelf.kt:202,236 behaviour.
     val unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
     val featuredReleaseBadge: BadgeUiModel? = null,
+    // The three rails' card models, keyed by book id and mapped off composition by
+    // BookCardModelsCollector from the books, covers and overlays above.
+    val trendingCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
+    val becauseYouReadCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
+    val upNextCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
     // Search paging (explore-3a feedback item 7). The Typesense `search` endpoint returns no
     // total hit count, so `queriedBooksHasMore` is a "maybe more" signal derived from whether the
     // last fetched page came back full, not an authoritative total. `loadingMoreQueriedBooks` is
@@ -60,14 +67,12 @@ internal data class ExploreScreenUiState(
         eyebrow = "Trending this week",
         headline = "What everyone's reading",
     ),
-    val trendingSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreRail),
     val continueSeriesBooks: List<Book> = emptyList(),
     val loadingContinueSeriesBooks: Boolean = true,
     val upNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Pick up where you left off",
         headline = "Up next in your series",
     ),
-    val seriesSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreSeries),
     val continueSeriesEntries: List<ContinueSeriesEntryUiModel> = emptyList(),
     /** The desktop masthead and its refresh action, derived off [isRefreshing] by `MastheadCollector` (R9). */
     val masthead: PageMastheadUiModel = PageMastheadUiModel(
@@ -105,7 +110,6 @@ internal data class ExploreScreenUiState(
     val featuredHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(
         eyebrow = "Most anticipated · next $FEATURED_RELEASE_WINDOW_DAYS days",
     ),
-    val featuredSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreFeatured),
     // "Because you read {genre}" rail (explore-3a deviation 2, made user-selectable by feedback
     // item 10). `becauseYouReadGenre` is the *effective* genre - the user's persisted choice when
     // one exists, otherwise the auto-derived most-read genre - and null hides the section.
@@ -114,8 +118,6 @@ internal data class ExploreScreenUiState(
     val becauseYouReadGenre: String? = null,
     /** `null` hides the because-you-read rail, as a `null` [becauseYouReadGenre] does. */
     val becauseYouReadHeader: SectionHeaderUiModel? = null,
-    val becauseYouReadHeaderSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreSectionHeader),
-    val becauseYouReadSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreRail),
     val becauseYouReadGenreOptions: List<String> = emptyList(),
     val becauseYouReadGenreSheet: SheetScaffoldUiModel = becauseYouReadGenreSheetScaffold(),
     /** A `null` key is the "Auto (most-read)" row. */
@@ -129,9 +131,10 @@ internal data class ExploreScreenUiState(
         eyebrow = "Browse by mood",
         headline = "How do you want to feel?",
     ),
-    val moodTileSkeleton: SkeletonUiModel = SkeletonUiModel(SkeletonVariant.ExploreMoodTile),
     // Built off `moodTags` by `MoodChipsCollector` (`component-contract.md` § 7.2 R9).
     val moodChips: ChipSet<MoodTag> = ChipSet(),
+    // Built off `moodTags` by `MoodTilesCollector`.
+    val moodTiles: ImmutableList<MoodTileUiModel> = persistentListOf(),
     val loadingMoodTags: Boolean = true,
     val activeMoodFilter: MoodTag? = null,
 ) : UiState {

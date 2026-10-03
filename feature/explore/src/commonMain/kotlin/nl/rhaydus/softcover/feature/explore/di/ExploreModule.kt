@@ -38,6 +38,7 @@ import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesBoo
 import nl.rhaydus.softcover.feature.explore.domain.usecase.UndoContinueSeriesDismissalUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouReadCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.BecauseYouReadGenreSheetCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.BookCardModelsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ContinueSeriesBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedBooksCollector
@@ -50,6 +51,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.HiddenSuggest
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MastheadCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodChipsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTagsCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTilesCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueriesCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
@@ -138,6 +140,10 @@ val exploreModule = module {
     factory { CoverModelsCollector() } bind ExploreCollector::class
 
     factory { UnreleasedCoverOverlaysCollector() } bind ExploreCollector::class
+
+    factory { BookCardModelsCollector() } bind ExploreCollector::class
+
+    factory { MoodTilesCollector() } bind ExploreCollector::class
 
     factory {
         HiddenSuggestionsScreenModel(

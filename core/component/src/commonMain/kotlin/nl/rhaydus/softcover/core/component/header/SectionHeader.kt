@@ -53,16 +53,20 @@ private const val PULSE_SCALE_DELTA = 0.5f
  * Without [trailing], the register sizes itself under [modifier] alone — a [SectionHeaderUiModel.Section]
  * still fills the width, an [SectionHeaderUiModel.Inline] or [SectionHeaderUiModel.Label] shrink-wraps.
  * Passing [trailing] switches the whole header to a fill-width row with the register weighted against it.
+ *
+ * While [isLoading] the header's text masks in place; the model's own text sizes the mask.
  */
 @Composable
 fun SectionHeader(
     model: SectionHeaderUiModel,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
     trailing: (@Composable RowScope.() -> Unit)? = null,
 ) {
     if (trailing == null) {
         SectionHeaderRegister(
             model = model,
+            isLoading = isLoading,
             modifier = modifier,
         )
         return
@@ -71,6 +75,7 @@ fun SectionHeader(
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         SectionHeaderRegister(
             model = model,
+            isLoading = isLoading,
             modifier = Modifier.weight(1f),
         )
 
@@ -83,19 +88,23 @@ fun SectionHeader(
 @Composable
 private fun SectionHeaderRegister(
     model: SectionHeaderUiModel,
+    isLoading: Boolean,
     modifier: Modifier,
 ) {
     when (model) {
         is SectionHeaderUiModel.Section -> SectionHeaderRegion(
             model = model,
+            isLoading = isLoading,
             modifier = modifier,
         )
         is SectionHeaderUiModel.Inline -> SectionHeaderInline(
             model = model,
+            isLoading = isLoading,
             modifier = modifier,
         )
         is SectionHeaderUiModel.Label -> SectionHeaderLabel(
             model = model,
+            isLoading = isLoading,
             modifier = modifier,
         )
     }
@@ -116,6 +125,7 @@ private data class SectionHeaderEyebrowStyle(
 @Composable
 private fun SectionHeaderRegion(
     model: SectionHeaderUiModel.Section,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val playMotion = playDecorativeMotion()
@@ -148,6 +158,7 @@ private fun SectionHeaderRegion(
                 tone = model.tone,
                 colorScheme = MaterialTheme.colorScheme,
             ),
+            isLoading = isLoading,
             pulse = pulse,
             isHeading = model.headline == null,
         )
@@ -160,6 +171,8 @@ private fun SectionHeaderRegion(
                     segments = model.headline,
                     colorScheme = MaterialTheme.colorScheme,
                 ),
+                isLoading = isLoading,
+                standIn = model.headlineText.orEmpty(),
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.semantics { heading() },
@@ -174,6 +187,8 @@ private fun SectionHeaderRegion(
                     segments = model.description,
                     colorScheme = MaterialTheme.colorScheme,
                 ),
+                isLoading = isLoading,
+                standIn = model.description.joinToString(separator = "") { it.text },
                 style = MaterialTheme.editorialTypography.body,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -211,6 +226,7 @@ internal fun sectionHeaderToneColor(
 @Composable
 private fun SectionHeaderInline(
     model: SectionHeaderUiModel.Inline,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     SectionHeaderEyebrowRow(
@@ -228,6 +244,7 @@ private fun SectionHeaderInline(
             tone = model.tone,
             colorScheme = MaterialTheme.colorScheme,
         ),
+        isLoading = isLoading,
         modifier = modifier,
     )
 }
@@ -235,6 +252,7 @@ private fun SectionHeaderInline(
 @Composable
 private fun SectionHeaderLabel(
     model: SectionHeaderUiModel.Label,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     SectionHeaderEyebrowRow(
@@ -248,6 +266,7 @@ private fun SectionHeaderLabel(
             tone = model.tone,
             colorScheme = MaterialTheme.colorScheme,
         ),
+        isLoading = isLoading,
         modifier = modifier,
     )
 }
@@ -257,6 +276,7 @@ private fun SectionHeaderEyebrowRow(
     eyebrow: String,
     style: SectionHeaderEyebrowStyle,
     color: Color,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
     pulse: Animatable<Float, AnimationVector1D>? = null,
     isHeading: Boolean = true,
@@ -289,6 +309,7 @@ private fun SectionHeaderEyebrowRow(
             eyebrow = eyebrow,
             style = style.textStyle,
             color = color,
+            isLoading = isLoading,
         )
     }
 }
@@ -300,9 +321,12 @@ internal fun SectionHeaderEyebrowText(
     style: TextStyle,
     color: Color,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     SoftcoverText(
         text = eyebrow.uppercase(),
+        isLoading = isLoading,
+        standIn = eyebrow.uppercase(),
         style = style,
         color = color,
         modifier = modifier,

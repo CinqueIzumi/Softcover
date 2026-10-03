@@ -10,8 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toImmutableMap
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -33,6 +36,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchActivate
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchDismissedAction
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodChipsSnapshot
 import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsSnapshot
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.toTrendingCard
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ActiveSearchContent
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.EditorialContent
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchFocusScreen
@@ -156,6 +160,20 @@ private fun List<Book>.toPreviewCoverModels(
     )
 }
 
+private fun List<Book>.toPreviewTrendingCards(): ImmutableMap<Int, BookCardUiModel> = associate { book ->
+    book.id to book.toTrendingCard(
+        cover = book.toCoverUiModel(
+            variant = CoverVariant.ExploreRail,
+            sharedTransitionKey = bookCoverTransitionKey(
+                editionId = book.currentEdition?.id,
+                bookId = book.id,
+                surface = SURFACE_TRENDING,
+            ),
+        ),
+        coverBadge = null,
+    )
+}.toImmutableMap()
+
 private val previewSearchFocusMoodTags = listOf(
     MoodTag(
         id = 1,
@@ -187,6 +205,7 @@ private val previewMockState = ExploreScreenUiState(
         CoverVariant.ExploreRail,
         SURFACE_TRENDING,
     ),
+    trendingCards = ExploreMockData.trending.toPreviewTrendingCards(),
     loadingTrendingBooks = false,
     continueSeriesBooks = ExploreMockData.continueSeries,
     continueSeriesCovers = ExploreMockData.continueSeries.toPreviewCoverModels(
@@ -228,6 +247,7 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
                     CoverVariant.ExploreRail,
                     SURFACE_TRENDING,
                 ),
+                trendingCards = ExploreMockData.trending.toPreviewTrendingCards(),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = emptyList(),
                 loadingContinueSeriesBooks = false,
@@ -283,6 +303,7 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
                     CoverVariant.ExploreRail,
                     SURFACE_TRENDING,
                 ),
+                trendingCards = ExploreMockData.trending.toPreviewTrendingCards(),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = emptyList(),
                 loadingContinueSeriesBooks = true,

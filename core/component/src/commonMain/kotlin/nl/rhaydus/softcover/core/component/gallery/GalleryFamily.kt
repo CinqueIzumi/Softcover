@@ -24,6 +24,7 @@ enum class GalleryFamily(val label: String) {
     COVER(label = "Covers"),
     ROW(label = "Rows"),
     BOOKCARD(label = "Book cards"),
+    MOOD(label = "Mood tiles"),
     CALLOUT(label = "Callouts"),
     SHEET(label = "Sheets"),
     STATISTIC(label = "Statistics"),

@@ -17,6 +17,7 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,12 +32,14 @@ import nl.rhaydus.softcover.core.component.cover.CoverDimensions
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 @Composable
 internal fun BookCardCover(
     cover: CoverUiModel?,
     decorations: BookCardDecorations,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val selection = decorations.selection
@@ -56,7 +59,10 @@ internal fun BookCardCover(
         ) {
             CoverOverlay(model = decorations.coverBadge) {
                 Cover(
-                    model = cover,
+                    model = rememberMaskedCover(
+                        cover = cover,
+                        isLoading = isLoading,
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -93,6 +99,7 @@ internal fun BookCardCover(
 internal fun BookCardSeriesStack(
     front: CoverUiModel?,
     width: Dp,
+    isLoading: Boolean,
 ) {
     val frontWidth = width - 12.dp
     val plateVariant = front?.variant ?: CoverVariant.HiddenSeriesStack
@@ -114,8 +121,27 @@ internal fun BookCardSeriesStack(
         )
 
         Cover(
-            model = front,
+            model = rememberMaskedCover(
+                        cover = front,
+                        isLoading = isLoading,
+                    ),
             modifier = Modifier.width(frontWidth),
+        )
+    }
+}
+
+@Composable
+private fun rememberMaskedCover(
+    cover: CoverUiModel?,
+    isLoading: Boolean,
+): CoverUiModel? = remember(cover, isLoading) {
+    when {
+        isLoading.not() -> cover
+        cover == null -> null
+        else -> cover.copy(
+            source = null,
+            isLoading = true,
+            sharedTransitionKey = null,
         )
     }
 }
@@ -147,6 +173,7 @@ internal fun BookCardProgressBar(
     progress: BookCardProgress,
     modifier: Modifier = Modifier,
     barHeight: Dp? = null,
+    isLoading: Boolean = false,
 ) {
     when (progress) {
         is BookCardProgress.Reserved -> Box(
@@ -164,7 +191,9 @@ internal fun BookCardProgressBar(
             val label = progress.label
 
             Row(
-                modifier = modifier.fillMaxWidth(),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .skeletonMask(visible = isLoading),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

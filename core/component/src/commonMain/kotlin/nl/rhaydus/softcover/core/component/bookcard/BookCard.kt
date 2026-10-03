@@ -25,12 +25,16 @@ import nl.rhaydus.designsystem.modifier.shakeOnError
 /**
  * [content] is positioned but not sized by the card: at the cover's top-end corner on cover-only and
  * stacked cards, at the row's end on rows.
+ *
+ * While [isLoading] the card lays out [model] as given, with every leaf masked and no event emitted, so
+ * a stand-in model sizes the slot the real one will fill.
  */
 @Composable
 fun BookCard(
     model: BookCardUiModel,
     onEvent: (BookCardEvent) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
     content: (@Composable () -> Unit)? = null,
 ) {
     when (val variant = model.variant) {
@@ -39,6 +43,7 @@ fun BookCard(
             variant = variant,
             onEvent = onEvent,
             modifier = modifier,
+            isLoading = isLoading,
             content = content,
         )
 
@@ -47,6 +52,7 @@ fun BookCard(
             variant = variant,
             onEvent = onEvent,
             modifier = modifier,
+            isLoading = isLoading,
             content = content,
         )
 
@@ -55,6 +61,7 @@ fun BookCard(
             variant = variant,
             onEvent = onEvent,
             modifier = modifier,
+            isLoading = isLoading,
             content = content,
         )
     }
@@ -69,7 +76,10 @@ internal fun Modifier.bookCardInteraction(
     model: BookCardUiModel,
     onEvent: (BookCardEvent) -> Unit,
     hoverHighlight: Boolean,
+    isLoading: Boolean,
 ): Modifier {
+    if (isLoading) return this
+
     val decorations = model.decorations
     val key = model.key
     val latestOnEvent by rememberUpdatedState(newValue = onEvent)

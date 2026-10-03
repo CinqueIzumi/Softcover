@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.modifier.shimmer
-import nl.rhaydus.softcover.core.component.bookcard.MoodTileDimensions
+import nl.rhaydus.softcover.core.component.mood.MoodTileDimensions
 
 /**
  * The shimmering placeholder a loading screen renders in place of content it does not have yet.
@@ -65,6 +65,7 @@ private object SkeletonMetrics {
     data class Line(
         val height: Dp,
         val fraction: Float,
+        val gapBefore: Dp,
     )
 
     val BarCorner: Shape = RoundedCornerShape(4.dp)
@@ -75,7 +76,6 @@ private object SkeletonMetrics {
     val FeaturedContainerCorner: Shape = RoundedCornerShape(20.dp)
 
     const val COVER_ASPECT_RATIO = 2f / 3f
-    val CoverStackGap = 8.dp
 
     val HeaderAccentBarHeight = 4.dp
     val HeaderAccentBarWidth = 32.dp
@@ -106,40 +106,46 @@ private object SkeletonMetrics {
     const val FEATURED_SUBLINE_2_FRACTION = 0.85f
     val FeaturedButtonGap = 16.dp
 
-    /**
-     * Two 20dp bars, not 16dp: the loaded two-line `titleMedium` block is 48dp, and splitting it
-     * across two bars adds one 8dp gap, so the bars must sum to 40dp.
-     */
+    /** Two 20dp bars stand for the 40dp two-line `titleSmall` block, then the 16dp supporting line. */
     val RailLines = listOf(
         Line(
             height = 20.dp,
             fraction = 0.9f,
+            gapBefore = 9.dp,
         ),
         Line(
             height = 20.dp,
             fraction = 0.55f,
+            gapBefore = 0.dp,
         ),
         Line(
             height = 16.dp,
             fraction = 0.4f,
+            gapBefore = 2.dp,
         ),
     )
+
+    /** [RailLines] with the 16dp eyebrow bar ahead of the title block. */
     val SeriesLines = listOf(
         Line(
             height = 16.dp,
             fraction = 0.7f,
+            gapBefore = 9.dp,
         ),
         Line(
-            height = 16.dp,
+            height = 20.dp,
             fraction = 0.95f,
+            gapBefore = 2.dp,
         ),
         Line(
-            height = 16.dp,
+            height = 20.dp,
             fraction = 0.55f,
+            gapBefore = 0.dp,
         ),
         Line(
             height = 16.dp,
             fraction = 0.4f,
+            gapBefore = 2.dp,
         ),
     )
 
@@ -178,10 +184,7 @@ private fun CoverStackSkeleton(
     lines: List<SkeletonMetrics.Line>,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(SkeletonMetrics.CoverStackGap),
-    ) {
+    Column(modifier = modifier) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -191,6 +194,8 @@ private fun CoverStackSkeleton(
         )
 
         lines.forEach { line ->
+            Spacer(modifier = Modifier.height(line.gapBefore))
+
             SkeletonBar(
                 height = line.height,
                 extent = SkeletonMetrics.Extent.Fraction(line.fraction),

@@ -147,7 +147,8 @@ component/
 + verdict/     VerdictBlock  VerdictBlockUiModel/Event
 +              VerdictSheet  VerdictSheetUiModel/Event
 · bookcard/    BookCard  BookCardUiModel/Variant/Content/Decorations
-·              BookCardEvent  BookCardKey  + MoodTileDimensions              S7
+·              BookCardEvent  BookCardKey                                    S7
+· mood/        MoodTile  MoodTileUiModel/Event/Ink  MoodTileDimensions       S7
 · row/         ListRow  ListRowUiModel                                       S6
 ```
 

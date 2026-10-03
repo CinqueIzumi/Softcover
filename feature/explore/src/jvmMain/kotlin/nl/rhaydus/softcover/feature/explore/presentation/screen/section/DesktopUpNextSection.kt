@@ -14,13 +14,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.state.Skeleton
-import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
@@ -30,17 +29,27 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 @Composable
 internal fun DesktopUpNextSection(
     entries: List<ContinueSeriesEntryUiModel>,
-    covers: Map<Int, CoverUiModel>,
-    unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
+    cards: ImmutableMap<Int, BookCardUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
-    skeleton: SkeletonUiModel,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
     if (isLoading.not() && entries.isEmpty()) return
 
     var sheetEntry by remember { mutableStateOf<ContinueSeriesEntryUiModel?>(null) }
+
+    val books = remember(entries) { entries.map { it.book } }
+
+    val onCardEvent = rememberRailCardEventHandler(
+        books = books,
+        surface = SURFACE_UP_NEXT,
+        onBookClick = onBookClick,
+        onMenuClick = { book -> sheetEntry = entries.firstOrNull { it.book.id == book.id } },
+    )
+
+    // The cards are derived off the books, so they land a frame after them.
+    val cardsReady = books.all { it.id in cards }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
@@ -49,7 +58,7 @@ internal fun DesktopUpNextSection(
         )
 
         SkeletonCrossfade(
-            isLoading = isLoading,
+            isLoading = isLoading || cardsReady.not(),
             label = "DesktopUpNextRail",
         ) { loading ->
             FlowRow(
@@ -60,44 +69,21 @@ internal fun DesktopUpNextSection(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 if (loading) {
-                    repeat(DESKTOP_DISCOVERY_SKELETON_COUNT) {
-                        Skeleton(
-                            model = skeleton,
+                    repeat(8) {
+                        BookCard(
+                            model = UP_NEXT_STAND_IN_CARD,
+                            onEvent = {},
+                            isLoading = true,
                             modifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH),
                         )
                     }
                 } else {
                     entries.forEach { item ->
-                        val book = item.book
-                        val cover = covers[book.id]
-                        val cardModifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH)
-
-                        if (book.isUnreleased) {
-                            UnreleasedSeriesCard(
-                                modifier = cardModifier,
-                                book = book,
-                                cover = cover,
-                                unreleasedCoverOverlay = unreleasedCoverOverlays[book.id],
-                                onClick = {
-                                    onBookClick(
-                                        book,
-                                        SURFACE_UP_NEXT,
-                                    )
-                                },
-                                onMenuClick = { sheetEntry = item },
-                            )
-                        } else {
-                            SeriesCard(
-                                modifier = cardModifier,
-                                book = book,
-                                cover = cover,
-                                onClick = {
-                                    onBookClick(
-                                        book,
-                                        SURFACE_UP_NEXT,
-                                    )
-                                },
-                                onMenuClick = { sheetEntry = item },
+                        cards[item.book.id]?.let { card ->
+                            BookCard(
+                                model = card,
+                                onEvent = onCardEvent,
+                                modifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH),
                             )
                         }
                     }

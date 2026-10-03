@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1 (box unticked), S7-2 done. SL-3b waits on foundation F34; detekt type resolution is inert
-  (F33). SL-9 onward wait on S7 / S9.
-- **Next:** S7-3 (library rows; fold cover / selection / deadline collectors into `BookCardModelsCollector`;
-  drop `SelectableCover`); `steps/s7-bookcard.md`. Diff every detail against today's rows.
+- **State:** S7-1 to S7-4 done. SL-3b waits on foundation F34; detekt type resolution is
+  inert (F33). SL-9 onward wait on S7 / S9.
+- **Next:** S7-5 (Explore search and hidden suggestions); `steps/s7-bookcard.md`. Diff every detail
+  against today's rows first.
 - **Open questions:** `BookmarkToggle` → foundation toggle? (No SL entry on issue #275, by the user's call.)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
@@ -36,9 +36,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes; SL-5's hero
-  title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid.
-- **Verification:** S7-2 (`1d3d12e1`): compile, `styleCheck`, tests passed; reviewer ✅.
-- **Uncommitted:** this `## Now` refresh only.
+  title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid; S7-4's rails and skeletons.
+- **Verification:** S7-4: compile, `styleCheck`, tests passed (JBR 21); reviewer ✅.
+- **Uncommitted:** S7-4, SL-9/10a; PF step.
 
 ## Local verification
 
@@ -87,6 +87,7 @@ every sub-step's Verify.
 | S8 | [steps/s8-screen-states.md](steps/s8-screen-states.md) | S8-1–S8-3 | [ ] |
 | S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-5 | [ ] |
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
+| PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-4, any session before S11 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
 | S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-5 | [ ] |
 | S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |
@@ -176,4 +177,4 @@ Cross-cutting only; S7's own risks live in `steps/s7-bookcard.md`.
 | Long-lived red branch — all-at-once means the module split's compile breakage is resolved inside the branch. | S3, S4 | Stage boundaries must compile. Commit per stage so the PR is reviewable commit-by-commit even though it merges once. |
 | Session loss mid-migration | any | This directory. Update checkboxes in the same commit as the work; keep the branch name in the header. |
 | New component docs regrow `components.md` | any | The file is an index; new component docs go into KDoc on the UI model plus one index line. |
-| Reviewer load — a single PR of this size is not reviewable in the normal way. | merge | Commit-per-stage discipline; run `softcover-reviewer` per stage, not once at the end. |
+| Reviewer load — a single PR this size is hard to review. | merge | Commit-per-stage discipline; run `softcover-reviewer` per stage, not once at the end. |

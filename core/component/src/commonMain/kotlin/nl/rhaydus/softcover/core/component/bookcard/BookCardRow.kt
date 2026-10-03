@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.EditorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -26,6 +28,7 @@ internal fun BookCardRowLayout(
     variant: BookCardVariant.Row,
     onEvent: (BookCardEvent) -> Unit,
     modifier: Modifier,
+    isLoading: Boolean,
     content: (@Composable () -> Unit)?,
 ) {
     val selection = model.decorations.selection
@@ -46,6 +49,7 @@ internal fun BookCardRowLayout(
                 model = model,
                 onEvent = onEvent,
                 hoverHighlight = true,
+                isLoading = isLoading,
             ),
     ) {
         Divider(model = DividerUiModel.Horizontal())
@@ -67,12 +71,14 @@ internal fun BookCardRowLayout(
                     is BookCardLead.Cover -> BookCardCover(
                         cover = lead.model,
                         decorations = model.decorations,
+                        isLoading = isLoading,
                         modifier = Modifier.width(metrics.leadWidth),
                     )
 
                     is BookCardLead.SeriesStack -> BookCardSeriesStack(
                         front = lead.front,
                         width = metrics.leadWidth,
+                        isLoading = isLoading,
                     )
 
                     null -> Unit
@@ -84,18 +90,22 @@ internal fun BookCardRowLayout(
                     titleMinLines = 1,
                     titleMaxLines = metrics.titleMaxLines,
                     progress = model.decorations.progress,
+                    isLoading = isLoading,
                     modifier = Modifier.weight(1f),
                 )
 
                 if (trailing != null) {
                     BookCardTrailingControl(
                         trailing = trailing,
+                        isLoading = isLoading,
                         onClick = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
                     )
                 }
 
                 if (content != null) {
-                    content()
+                    Box(modifier = Modifier.skeletonMask(visible = isLoading)) {
+                        content()
+                    }
                 }
             }
 

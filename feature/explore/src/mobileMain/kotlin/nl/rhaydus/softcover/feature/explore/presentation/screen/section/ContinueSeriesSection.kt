@@ -16,19 +16,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.state.Skeleton
-import nl.rhaydus.softcover.core.component.state.SkeletonUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
-import nl.rhaydus.softcover.feature.explore.presentation.screen.CONTINUE_SERIES_SKELETON_COUNT
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 
 private val continueSeriesListState = LazyListState()
@@ -38,11 +36,9 @@ private val UP_NEXT_CARD_WIDTH = 126.dp
 @Composable
 internal fun ContinueSeriesSection(
     entries: List<ContinueSeriesEntryUiModel>,
-    covers: Map<Int, CoverUiModel>,
-    unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,
+    cards: ImmutableMap<Int, BookCardUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
-    skeleton: SkeletonUiModel,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
@@ -53,6 +49,18 @@ internal fun ContinueSeriesSection(
     // Hoisted above the crossfade - see TrendingSection's comment for why.
     val entry = rememberStaggeredEntryCoordinator(key = "explore:continue_series")
 
+    val books = remember(entries) { entries.map { it.book } }
+
+    val onCardEvent = rememberRailCardEventHandler(
+        books = books,
+        surface = SURFACE_UP_NEXT,
+        onBookClick = onBookClick,
+        onMenuClick = { book -> sheetEntry = entries.firstOrNull { it.book.id == book.id } },
+    )
+
+    // The cards are derived off the books, so they land a frame after them.
+    val cardsReady = books.all { it.id in cards }
+
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
             model = header,
@@ -60,7 +68,7 @@ internal fun ContinueSeriesSection(
         )
 
         SkeletonCrossfade(
-            isLoading = isLoading,
+            isLoading = isLoading || cardsReady.not(),
             label = "ContinueSeriesRail",
         ) { loading ->
             if (loading) {
@@ -68,9 +76,11 @@ internal fun ContinueSeriesSection(
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    items(CONTINUE_SERIES_SKELETON_COUNT) {
-                        Skeleton(
-                            model = skeleton,
+                    items(3) {
+                        BookCard(
+                            model = UP_NEXT_STAND_IN_CARD,
+                            onEvent = {},
+                            isLoading = true,
                             modifier = Modifier.width(UP_NEXT_CARD_WIDTH),
                         )
                     }
@@ -82,38 +92,13 @@ internal fun ContinueSeriesSection(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     itemsIndexed(entries, key = { _, item -> item.book.id }) { index, item ->
-                        val book = item.book
-                        val cover = covers[book.id]
-                        val cardModifier = Modifier
-                            .width(UP_NEXT_CARD_WIDTH)
-                            .staggeredEntry(coordinator = entry, index = index)
-
-                        if (book.isUnreleased) {
-                            UnreleasedSeriesCard(
-                                modifier = cardModifier,
-                                book = book,
-                                cover = cover,
-                                unreleasedCoverOverlay = unreleasedCoverOverlays[book.id],
-                                onClick = {
-                                    onBookClick(
-                                        book,
-                                        SURFACE_UP_NEXT,
-                                    )
-                                },
-                                onMenuClick = { sheetEntry = item },
-                            )
-                        } else {
-                            SeriesCard(
-                                modifier = cardModifier,
-                                book = book,
-                                cover = cover,
-                                onClick = {
-                                    onBookClick(
-                                        book,
-                                        SURFACE_UP_NEXT,
-                                    )
-                                },
-                                onMenuClick = { sheetEntry = item },
+                        cards[item.book.id]?.let { card ->
+                            BookCard(
+                                model = card,
+                                onEvent = onCardEvent,
+                                modifier = Modifier
+                                    .width(UP_NEXT_CARD_WIDTH)
+                                    .staggeredEntry(coordinator = entry, index = index),
                             )
                         }
                     }

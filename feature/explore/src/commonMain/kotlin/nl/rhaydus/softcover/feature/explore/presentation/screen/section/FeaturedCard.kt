@@ -24,31 +24,47 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.badge.Badge
+import nl.rhaydus.softcover.core.component.badge.BadgeSize
+import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 
+private val FEATURED_BADGE_STAND_IN = BadgeUiModel(
+    label = "Arriving 12 Mar",
+    tone = BadgeTone.Primary,
+    size = BadgeSize.Regular,
+)
+
+private val FEATURED_COVER_STAND_IN = CoverUiModel(
+    source = null,
+    coverlessTitle = null,
+    variant = CoverVariant.ExploreRail,
+    isLoading = true,
+)
+
+private const val FEATURED_DESCRIPTION_STAND_IN =
+    "A sweeping new novel from a beloved author, where an old promise is called in and a quiet town " +
+        "finds itself at the centre of the story."
+
 /**
- * The feed-opening "upcoming release" hero (explore-3a §4 "Featured card"). Cover-beside-text, never
- * full-bleed — a 2:3 jacket crops badly in a banner. Ships with only the "Want to read" action (explore-
- * 3a deviation 1: the spec's "Remind me" pill and the release-reminder sheet are dropped — the app has no
- * future-notification scheduling infrastructure).
+ * The feed-opening "upcoming release" hero: cover beside text, with only the "Want to read" action. The
+ * card names itself with [SectionHeader]'s [SectionHeaderUiModel.Inline] register on its own top row.
  *
- * The card **names itself** with [SectionHeader]'s [SectionHeaderUiModel.Inline] register on its own top
- * row, rather than being introduced by the `Section` register every rail below it uses. It briefly used
- * that: accent bar, `headline` headline and a description sentence together pushed the card most of
- * the way down the first screen — far too much chrome for a single card whose pick rotates weekly. The
- * inline register says the same thing in one line, which is exactly what the register exists for.
+ * A null [book] is the loading card: while [isLoading] every leaf masks over a stand-in sized like a
+ * typical real value, and the card takes no press.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun FeaturedCard(
-    book: Book,
+    book: Book?,
     // Nullable for the one frame between `featuredUpcomingRelease` landing and `CoverModelsCollector`
     // deriving its cover: the hero must keep its footprint rather than vanish and pop back in.
     cover: CoverUiModel?,
@@ -58,16 +74,24 @@ internal fun FeaturedCard(
     onWantToReadClick: () -> Unit,
     onRemoveFromLibraryClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
-    val inLibrary = book.userBook != null
+    val inLibrary = book?.userBook != null
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .pointerHandCursor()
-            .pressScaleClickable(onClick = onClick)
+            .then(
+                if (isLoading) {
+                    Modifier
+                } else {
+                    Modifier
+                        .pointerHandCursor()
+                        .pressScaleClickable(onClick = onClick)
+                },
+            )
             .padding(18.dp),
     ) {
         SectionHeader(model = header)
@@ -83,17 +107,21 @@ internal fun FeaturedCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            if (releaseBadge != null) {
-                Badge(model = releaseBadge)
+            val badge = if (isLoading) FEATURED_BADGE_STAND_IN else releaseBadge
+
+            if (badge != null) {
+                Badge(
+                    model = badge,
+                    modifier = Modifier.skeletonMask(visible = isLoading),
+                )
             }
 
-            // Explore-3a deviation 3 kept this at a bare "readers" because usersCount is an
-            // all-shelves total rather than a want-to-read count. "Waiting" is added back only
-            // because this card is exclusively the *unreleased* hero: a book that isn't out yet
-            // can only be on a shelf in anticipation, so the total and the wording agree here in a
-            // way they would not on a released book's card.
+            // "Waiting" is accurate only because this card is always an unreleased book, where a shelf
+            // add can only be anticipation.
             SoftcoverText(
-                text = "${formatGroupedNumber(book.usersCount)} readers waiting",
+                text = book?.let { "${formatGroupedNumber(it.usersCount)} readers waiting" },
+                isLoading = isLoading,
+                standIn = "12,345 readers waiting",
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -106,13 +134,15 @@ internal fun FeaturedCard(
             verticalAlignment = Alignment.Top,
         ) {
             Cover(
-               model = cover,
+                model = if (isLoading) FEATURED_COVER_STAND_IN else cover,
                 modifier = Modifier.width(96.dp),
             )
 
             Column(modifier = Modifier.weight(1f)) {
                 SoftcoverText(
-                    text = book.title,
+                    text = book?.title,
+                    isLoading = isLoading,
+                    standIn = "The Name of the Wind",
                     style = MaterialTheme.editorialTypography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -120,16 +150,20 @@ internal fun FeaturedCard(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 SoftcoverText(
-                    text = "By ${book.authorString}".uppercase(),
+                    text = book?.let { "By ${it.authorString}".uppercase() },
+                    isLoading = isLoading,
+                    standIn = "BY PATRICK ROTHFUSS",
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                if (book.headline.isNotBlank()) {
+                if (isLoading || book?.headline.isNullOrBlank().not()) {
                     Spacer(modifier = Modifier.height(10.dp))
 
                     SoftcoverText(
-                        text = book.headline,
+                        text = book?.headline,
+                        isLoading = isLoading,
+                        standIn = FEATURED_DESCRIPTION_STAND_IN,
                         style = MaterialTheme.editorialTypography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -142,7 +176,12 @@ internal fun FeaturedCard(
         RhaydusButton(
             label = if (inLibrary) "Added to library" else "Want to read",
             style = ButtonStyle.FILLED,
-            onClick = if (inLibrary) onRemoveFromLibraryClick else onWantToReadClick,
+            onClick = when {
+                isLoading -> ({})
+                inLibrary -> onRemoveFromLibraryClick
+                else -> onWantToReadClick
+            },
+            modifier = Modifier.skeletonMask(visible = isLoading),
         )
     }
 }
