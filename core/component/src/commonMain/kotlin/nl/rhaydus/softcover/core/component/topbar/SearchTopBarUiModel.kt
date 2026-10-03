@@ -47,6 +47,12 @@ data class SearchTopBarUiModel(
                 focused = true,
                 isLoading = true,
             ),
+            SearchTopBarUiModel(
+                query = "Piranesi",
+                active = true,
+                focused = false,
+                isLoading = false,
+            ),
         )
     }
 }

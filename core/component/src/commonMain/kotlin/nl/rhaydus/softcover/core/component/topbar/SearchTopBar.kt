@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -43,14 +44,14 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 /**
- * The Explore search chrome (explore-3a §4 "Search chrome"): a rounded search field (search glyph,
+ * The Explore search chrome: a rounded search field (search glyph,
  * inline text field, and a trailing clear/loading affordance) beside a square barcode-scan button.
  *
  * It stays a component of its own rather than a variant of [TopBar] (§ 7.6): the focus contract
@@ -147,7 +148,7 @@ private fun SearchChromeField(
     }
 
     Surface(
-        modifier = modifier.height(46.dp),
+        modifier = modifier.height(48.dp),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
         border = if (active) BorderStroke(
@@ -176,21 +177,16 @@ private fun SearchChromeField(
             when {
                 isLoading -> CircularWavyProgressIndicator(modifier = Modifier.size(18.dp))
 
-                active -> {
-                    val clearIcon = drawableIconResource(
-                        icon = SoftcoverIcon.Close,
-                        contentDescription = "Clear search",
-                    )
-
-                    Icon(
-                        painter = clearIcon.getIconPainter(),
-                        contentDescription = clearIcon.contentDescription,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .size(18.dp)
-                            .noRippleClickable { onClearSearch() },
-                    )
-                }
+                active -> ChromeIconButton(
+                    icon = SoftcoverIcon.Close,
+                    contentDescription = "Clear search",
+                    tooltip = "Clear",
+                    onClick = onClearSearch,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
+                    iconSize = 18.dp,
+                )
             }
         }
     }
@@ -302,9 +298,9 @@ private fun SearchChromeBarcodeButton(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         modifier = Modifier
-            .size(46.dp)
+            .size(48.dp)
             .pointerHandCursor(),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Box(

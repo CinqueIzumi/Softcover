@@ -14,9 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.DesktopBackStrip
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
 // Keeps the ISBN panel at a readable modal width rather than stretching the field across a maximized
@@ -27,7 +26,7 @@ private val PANEL_MAX_WIDTH = 460.dp
  * Desktop barcode scanner. Desktop has no camera (the permission stub reports none), so this opens
  * straight into the shared manual ISBN form — the `manualMode` / `cameraGranted` / `onEnterManually`
  * params (the camera branches) are unused here. A centered, modal-style panel matching desktop Create
- * List: a static back strip over an opaque background, with the focused form inside a bordered card.
+ * List: an editorial top bar over an opaque background, with the focused form inside a bordered card.
  */
 @Composable
 internal actual fun BarcodeScannerScreenLayout(
@@ -43,12 +42,13 @@ internal actual fun BarcodeScannerScreenLayout(
         color = MaterialTheme.colorScheme.background,
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            DesktopBackStrip(
-                onNavigateBack = onNavigateBack,
-                backIcon = drawableIconResource(
-                    contentDescription = "Navigate back icon",
-                    icon = SoftcoverIcon.ArrowBack,
-                ),
+            EditorialTopBar(
+                model = state.editorialTopBar,
+                onEvent = { event ->
+                    when (event) {
+                        EditorialTopBarEvent.BackClicked -> onNavigateBack()
+                    }
+                },
             )
 
             Box(

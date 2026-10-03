@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
@@ -47,11 +47,9 @@ internal data class ProfileUiState(
     val shareSheetScaffold: SheetScaffoldUiModel = profileShareSheetScaffold(),
     val logOutSheetScaffold: SheetScaffoldUiModel = logOutSheetScaffold(),
 
-    /** Carries no title — the page's own masthead names it. */
-    val topBar: TopBarUiModel = TopBarUiModel(
-        title = "",
-        navigation = TopBarNavigation.Back,
-    ),
+    /** Both bars carry no title — the page's own masthead names it. */
+    val topBar: TopBarUiModel = TopBarUiModel(),
+    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(),
 ) : UiState {
     private val allAuthorDemographics: AuthorDemographics
         get() = readingLife?.authorDemographics ?: AuthorDemographics()

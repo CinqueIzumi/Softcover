@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
@@ -15,6 +14,8 @@ import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.galleryPaletteChoicesFor
 import nl.rhaydus.softcover.feature.settings.presentation.model.GalleryPaletteChoice
 import nl.rhaydus.toad.UiState
+
+private const val COMPONENT_GALLERY_TITLE = "Component gallery"
 
 /**
  * `null` on [themeModeOverride] and [paletteOverride] means "follow the app's own current setting" —
@@ -50,8 +51,7 @@ internal data class ComponentGalleryUiState(
     val resolvedPalette: SpinePalette = SpinePalette.DEFAULT,
     val paletteChipOptions: ImmutableList<GalleryPaletteChoice> = galleryPaletteChoicesFor(selected = null),
     val topBar: TopBarUiModel = TopBarUiModel(
-        title = "Component gallery",
-        navigation = TopBarNavigation.Back,
+        title = COMPONENT_GALLERY_TITLE,
     ),
-    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = "Component gallery"),
+    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = COMPONENT_GALLERY_TITLE),
 ) : UiState

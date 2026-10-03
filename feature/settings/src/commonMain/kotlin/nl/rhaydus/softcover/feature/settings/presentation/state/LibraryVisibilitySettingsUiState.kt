@@ -3,13 +3,14 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 import nl.rhaydus.softcover.core.component.header.SectionHeaderTone
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.toad.UiState
+
+private const val LIBRARY_TABS_TITLE = "Library tabs"
 
 internal data class LibraryVisibilitySettingsUiState(
     val libraryTabsPageHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
@@ -33,10 +34,9 @@ internal data class LibraryVisibilitySettingsUiState(
     val statusCounts: Map<Int, Int> = emptyMap(),
     val totalCount: Int = 0,
     val topBar: TopBarUiModel = TopBarUiModel(
-        title = "Library tabs",
-        navigation = TopBarNavigation.Back,
+        title = LIBRARY_TABS_TITLE,
     ),
-    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = "Library tabs"),
+    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = LIBRARY_TABS_TITLE),
 ) : UiState {
     val isDirty: Boolean
         get() = initialized && (

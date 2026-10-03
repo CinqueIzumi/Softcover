@@ -35,3 +35,4 @@ shift; tick each during S12.
 - [ ] S8-2: callouts at 16 dp radius (status 24, app update 12); status eyebrow `eyebrowSmall` primary and body
   `bodySmall`; app-update pill → filled `RhaydusButton`; pace nudge animates out, says "Dismiss".
 - [ ] S8-3: desktop back bars' end padding 16 → 8; desktop book detail's bar gains 8 dp on top; onboarding's accent bar now cross-fades with its eyebrow.
+- [ ] S8-C-a: desktop Profile and Scan back bar (`DesktopBackStrip` → `EditorialTopBar`: padding, editorial title on Scan); SearchTopBar clear "×" now a 48 dp tap target, field and scan button 46 → 48 dp tall, scan button radius 14 → 16.

@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.DesktopBackStrip
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
@@ -41,6 +40,8 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -68,7 +69,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
  * Desktop Profile. On a wide surface it is a fixed identity column (cookie-cut avatar, the reader's
  * name and bio, the account foot) beside a wider scrolling "reading life" stats column with a
  * persistent desktop scrollbar. On a narrow desktop window it collapses to a single centered scrolling
- * column. A static top strip carries the back control plus a share glyph; there is no scroll-collapsing
+ * column. An editorial top bar carries the back control plus a share glyph; there is no scroll-collapsing
  * top bar. The whole surface paints an opaque [Surface] background so a pushed Profile never lets the
  * screen beneath it bleed through during the navigation transition. The avatar, section labels, and the
  * whole reading-life content block are shared shelf code ([ProfileAvatar],
@@ -108,37 +109,34 @@ private fun ProfileContent(
     val shareContent = state.readingLifeShareCard
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            DesktopBackStrip(
-                onNavigateBack = onNavigateUp,
-                backIcon = drawableIconResource(
-                    contentDescription = "Navigate back icon",
-                    icon = SoftcoverIcon.ArrowBack,
-                ),
-                modifier = Modifier.weight(1f),
-            )
-
-            DesktopTooltip(text = "Share your reading year") {
-                IconButton(
-                    onClick = { showShareSheet = true },
-                    enabled = shareContent != null,
-                    modifier = Modifier.pointerHandCursor(),
-                ) {
-                    val icon = drawableIconResource(
-                        icon = SoftcoverIcon.Share,
-                        contentDescription = "Share your reading year",
-                    )
-
-                    Icon(
-                        painter = icon.getIconPainter(),
-                        contentDescription = icon.contentDescription,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
+        EditorialTopBar(
+            model = state.editorialTopBar,
+            onEvent = { event ->
+                when (event) {
+                    EditorialTopBarEvent.BackClicked -> onNavigateUp()
                 }
-            }
+            },
+            actions = {
+                DesktopTooltip(text = "Share your reading year") {
+                    IconButton(
+                        onClick = { showShareSheet = true },
+                        enabled = shareContent != null,
+                        modifier = Modifier.pointerHandCursor(),
+                    ) {
+                        val icon = drawableIconResource(
+                            icon = SoftcoverIcon.Share,
+                            contentDescription = "Share your reading year",
+                        )
 
-            Spacer(modifier = Modifier.width(8.dp))
-        }
+                        Icon(
+                            painter = icon.getIconPainter(),
+                            contentDescription = icon.contentDescription,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            },
+        )
 
         BoxWithConstraints(
             modifier = Modifier

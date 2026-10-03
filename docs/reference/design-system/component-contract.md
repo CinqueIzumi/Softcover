@@ -313,7 +313,7 @@ Families consolidate on **shared anatomy, not shared category name.**
 
 | Collapse | Keep separate | Why |
 |---|---|---|
-| The four `*InfoCallout`s → one `Callout` with a tone variant | `TopBar` and `SearchTopBar` | The search bar's focus contract (§ 3.1) — caller-driven `focused`, intents for activate/dismiss/clear — has no counterpart on the plain bar. Merged, it is one component with two disjoint parameter sets. |
+| The four `*InfoCallout`s → one `Callout` with a tone variant | `TopBar`, `EditorialTopBar` and `SearchTopBar` | The search bar's focus contract (§ 3.1) — caller-driven `focused`, intents for activate/dismiss/clear — has no counterpart on the plain bar. `EditorialTopBar` is a plain row with a start-aligned editorial headline, not a Material app bar: no scroll behaviour, subtitle, surface or autosizing. Merged, each is one component with disjoint parameter sets. |
 | The 21 book cards → one `BookCard` with a sealed variant | The 18 sheet **bodies** | Consolidate sheet *chrome* (`SheetScaffold` / `SheetHeader` / `SheetRow` / `SheetFooter`) and leave each body a feature composable built from those parts. `LibraryFilterSheet` and `TagEditorBottomSheet` share no anatomy. |
 
 The test: **can the two share a layout, with the variant choosing only which parts appear?** If yes, one

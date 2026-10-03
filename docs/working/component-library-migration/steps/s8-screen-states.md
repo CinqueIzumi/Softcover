@@ -9,7 +9,10 @@
 | S8-1 | Empty states | [x] |
 | S8-2 | Callouts & banners | [x] |
 | S8-3 | Top bars | [x] |
-| S8-C-states | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
+| S8-C-states | Convergence pass over the family (family-procedure.md § Phase 3) — audit + approval | [x] |
+| S8-C-a | Shared `ChromeIconButton`, heading semantics, top bars | [x] |
+| S8-C-b | Callouts & banners | [ ] |
+| S8-C-c | Empty states + offline models off composition | [ ] |
 
 ## Approved shape
 
@@ -44,6 +47,16 @@ S8-3:
 - Folds: `DesktopSettingsBackBar` (file deleted; About, Appearance, Component gallery, Library tabs, Roadmap), `HiddenSuggestionsDesktopBackBar`, `DesktopBookDetailTopBar`.
 - `OnboardingTopBar` stays feature-local (folio, pager-linked cross-fade); its hand-rolled accent bar + eyebrow becomes `SectionHeader` `Section(eyebrow)`, one model per page on `OnboardingUiState`, inside the existing cross-fade (bar fades with the text; accepted).
 - `components.md` gains an "Editorial top bar" index line; `module-structure.md` marks it built.
+
+S8-C-states (approved 2026-10-04; all visual shifts accepted):
+- Cross-family: one internal `ChromeIconButton(icon, description, tooltip, tint, onClick)` in `:core:component` — full 48 dp target, `pointerHandCursor`, `DesktopTooltip`; serves `TopBar` + `EditorialTopBar` back ("Navigate back" / "Back"), `Callout` + `Banner` dismiss, `SearchTopBar` clear "×".
+- Cross-family: `heading()` on `EmptyState` / `TopBar` / `EditorialTopBar` titles; quote glyph `clearAndSetSemantics {}`.
+- Cross-family: `offlineEmptyStateUiModel()` / `offlineBannerUiModel()` leave composition — a collector resolves the strings and puts the models on `UiState`; one offline-placeholder model replaces the four repeated `EmptyState(fillMaxSize + padding)` call shapes. Settles the contract's open R10 edge; update `component-contract.md` accordingly.
+- C-a: drop `TopBarNavigation` (back always present); `TopBarUiModel.title: String?` (null = untitled); `TopBarSurface` resolves to concrete colours via a pure `ColorScheme` function (no animating to `Color.Unspecified`; book detail's scroll derivation stays S11-3); desktop Profile + Scan fold `DesktopBackStrip` → `EditorialTopBar` (Profile untitled, share in `actions`, `editorialTopBar` UiState fields); one file-level title constant per screen feeds both `topBar` and `editorialTopBar` (six screens); book detail `offlineTopBar` → `BookDetailUiState`; `EditorialTopBar` title `maxLines = 1` + ellipsis; SearchTopBar field + scan button one 16 dp radius; SearchTopBar "active with results" fixture; `component-contract.md` § 7.6 gains `EditorialTopBar`; `foundations.md` `DesktopBackStrip` line rewritten.
+- C-b: `CalloutStyle` gains `accent` + `track`, no `MaterialTheme` reads left in `Callout.kt`; AccentBar lead → `SectionHeader`'s inline eyebrow row (20×1 hairline, gap 8) shared, not re-rolled; `BannerTone` colour only + `BannerVariant` (`Status` centred Material bodySmall, `Editorial` italic start-aligned editorial bodySmall), one padding 16 × 10; enum entries `Warning` / `Highlight`; `planTodayNudgeFor` takes `visible`; book detail and settings jvm/mobile `onEvent` handlers hoisted to one commonMain helper each; `RootScreen` banner background before `statusBarsPadding()` (on-device check); gallery Banner blurb refreshed; KDoc via `document-code`.
+- C-c: `EmptyStateVariant.Centered(button: EmptyStateButtonUiModel? = null)` + `Inline` object (button off the model); one private scaffold + per-variant style; `Inline` title editorial `headlineSmall`; two caller paddings — full pane `fillMaxSize().padding(24.dp)`, in-flow `fillMaxWidth().padding(top = 40.dp)`; `quoteGlyphSway` KDoc, `component-contract.md` § 7.5, `components.md` empty-state line fixed; offline gallery fixture → neutral copy.
+- Fixes wherever touched: unused imports in `EmptyCurrentlyReadingScreen`, `BookList`, `EditionList`; find out why ktlint `no-unused-imports` didn't catch them.
+- Stays outside: `OnboardingTopBar`, `EmptyEntriesCard`, `RoadmapErrorBanner`; `Callout` and `Banner` keep separate scaffolds (card vs full-bleed strip).
 
 ## S8-1 — Empty states (8 → `EmptyState` + `EmptyStateUiModel`)
 

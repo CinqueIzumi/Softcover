@@ -47,7 +47,6 @@ import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBar
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 
@@ -323,8 +322,7 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
 private fun topBarFixtureLabel(model: TopBarUiModel): String = when {
     model.surface == TopBarSurface.OVER_MEDIA -> "Over cover art"
     model.subtitle != null -> "With a subtitle"
-    model.navigation == TopBarNavigation.None -> "Root surface"
-    model.title.length > TOP_BAR_LONG_TITLE_FLOOR -> "Long title, autosized"
+    (model.title?.length ?: 0) > TOP_BAR_LONG_TITLE_FLOOR -> "Long title, autosized"
     else -> "With back"
 }
 
@@ -337,6 +335,7 @@ private fun editorialTopBarFixtureLabel(model: EditorialTopBarUiModel): String =
 /** Names what a [SearchTopBarUiModel] fixture demonstrates. */
 private fun searchTopBarFixtureLabel(model: SearchTopBarUiModel): String = when {
     model.isLoading -> "Searching"
+    model.active && model.focused.not() -> "Results, unfocused"
     model.active -> "Focused, empty"
     else -> "Resting"
 }

@@ -9,7 +9,6 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
@@ -31,6 +30,9 @@ import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsToggleRo
 import nl.rhaydus.softcover.feature.settings.presentation.model.ThemeChoice
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategory
 import nl.rhaydus.toad.UiState
+
+private const val ABOUT_TITLE = "About"
+private const val APPEARANCE_TITLE = "Appearance"
 
 internal data class SettingsScreenUiState(
     val useFloatingBarChecked: Boolean = true,
@@ -154,13 +156,11 @@ internal data class SettingsScreenUiState(
     ),
     val paletteChoices: ImmutableList<PaletteChoice> = paletteChoicesFor(selected = ColorPalette.DEFAULT),
     val aboutTopBar: TopBarUiModel = TopBarUiModel(
-        title = "About",
-        navigation = TopBarNavigation.Back,
+        title = ABOUT_TITLE,
     ),
-    val aboutEditorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = "About"),
+    val aboutEditorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = ABOUT_TITLE),
     val appearanceTopBar: TopBarUiModel = TopBarUiModel(
-        title = "Appearance",
-        navigation = TopBarNavigation.Back,
+        title = APPEARANCE_TITLE,
     ),
-    val appearanceEditorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = "Appearance"),
+    val appearanceEditorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = APPEARANCE_TITLE),
 ) : UiState

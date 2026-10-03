@@ -50,14 +50,12 @@ import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /** Fixed for this screen, so the model is a constant rather than rebuilt per frame. */
 private val MOTION_DEBUG_TOP_BAR = TopBarUiModel(
     title = "Motion & haptics",
-    navigation = TopBarNavigation.Back,
 )
 
 object MotionDebugScreen : Screen {

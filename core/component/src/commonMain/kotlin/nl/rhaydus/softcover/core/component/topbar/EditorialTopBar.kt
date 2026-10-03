@@ -6,23 +6,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.DesktopTooltip
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
+import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
  * The desktop page bar: a back button, a start-aligned editorial headline, and a trailing slot for
- * the screen's own actions. Always leads back out, so unlike [TopBar] it has no navigation switch.
+ * the screen's own actions.
  */
 @Composable
 fun EditorialTopBar(
@@ -42,22 +41,12 @@ fun EditorialTopBar(
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DesktopTooltip(text = "Back") {
-            IconButton(
-                onClick = { onEvent(EditorialTopBarEvent.BackClicked) },
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                val backIcon = drawableIconResource(
-                    icon = SoftcoverIcon.ArrowBack,
-                    contentDescription = "Navigate back",
-                )
-
-                Icon(
-                    painter = backIcon.getIconPainter(),
-                    contentDescription = backIcon.contentDescription,
-                )
-            }
-        }
+        ChromeIconButton(
+            icon = SoftcoverIcon.ArrowBack,
+            contentDescription = "Navigate back",
+            tooltip = "Back",
+            onClick = { onEvent(EditorialTopBarEvent.BackClicked) },
+        )
 
         model.title?.let { title ->
             Spacer(modifier = Modifier.width(4.dp))
@@ -65,7 +54,10 @@ fun EditorialTopBar(
             SoftcoverText(
                 text = title,
                 style = MaterialTheme.editorialTypography.headlineMedium,
+                modifier = Modifier.semantics { heading() },
                 color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
 

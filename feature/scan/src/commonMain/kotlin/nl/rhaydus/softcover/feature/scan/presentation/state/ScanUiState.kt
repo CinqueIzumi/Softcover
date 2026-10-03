@@ -2,9 +2,11 @@ package nl.rhaydus.softcover.feature.scan.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.toad.UiState
+
+private const val SCAN_TITLE = "Scan a barcode"
 
 internal data class ScanUiState(
     val isResolving: Boolean = false,
@@ -20,7 +22,7 @@ internal data class ScanUiState(
         description = "Type the ISBN-10 or ISBN-13 printed near the barcode.",
     ),
     val topBar: TopBarUiModel = TopBarUiModel(
-        title = "Scan a barcode",
-        navigation = TopBarNavigation.Back,
+        title = SCAN_TITLE,
     ),
+    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = SCAN_TITLE),
 ) : UiState

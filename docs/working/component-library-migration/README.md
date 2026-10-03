@@ -14,12 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8-3 done: `EditorialTopBar` (desktop settings ×5, hidden suggestions, book detail with overflow in `actions`); onboarding's eyebrow → `SectionHeader` in its cross-fade. Render-built models moved onto `UiState`: all top bars (mobile + desktop, bar book detail's scroll-derived one), onboarding page headers, edition "N EDITIONS" label. SL-3b waits on F34; F33 open.
-- **Next:** S8-C-states convergence pass (`family-procedure.md` § Phase 3) over empty states, callouts/banners, top bars. App-update `AccentBar` is 30×4, not a foundations bar size (32×4 / 20×1); `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
-- **Open questions:** `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)?
+- **State:** S8-C-states audit approved (shape in `steps/s8-screen-states.md`). S8-C-a done: internal `ChromeIconButton` (`core/component/chrome/`, 48 dp, cursor, tooltip) on all bar back/clear buttons; `TopBarNavigation` deleted; `TopBarUiModel.title: String?`; `TopBarSurface.colors(ColorScheme)`; title `heading()`; desktop Profile + Scan on `EditorialTopBar`; one title const per screen; book detail `offlineTopBar` on UiState; SearchTopBar 48 dp tall, 16 dp radii. SL-3b waits on F34; F33 open.
+- **Next:** S8-C-b — callouts & banners (C-b bullet + cross-family `ChromeIconButton` dismiss). Then S8-C-c. `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
+- **Open questions:** `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** S8-3: compile (incl. onboarding Android), `checkModuleGraph`, `projectHealth`, `styleCheck` (JDK 21), tests, tests (6 feature suites + core:component), two reviews (onboarding width blocker fixed; second clean) ✅. Onboarding top row needs an on-device look.
-- **Uncommitted:** S8-3 + test, docs.
+- **Verification:** S8-C-a: compile (6 features + core:component + app), `checkModuleGraph`, `projectHealth`, `styleCheck` (JDK 21), tests (6 suites, no changes needed), review (46 dp search-field clamp fixed → 48 dp; ChromeIconButton KDoc) ✅.
+- **Uncommitted:** nothing (S8-C-a committed).
 
 ## Local verification
 
@@ -65,7 +65,7 @@ every sub-step's Verify.
 | S6 | — (sheet chrome) | S6-3–S6-7, S6-C-sheets | [x] |
 | S7 | — (book cards) | S7-1–S7-7, S7-C1–C5 | [x] |
 | SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-13, app-wide; SL-1–SL-7 before S7-2 | [ ] |
-| S8 | [steps/s8-screen-states.md](steps/s8-screen-states.md) | S8-1–S8-3 | [ ] |
+| S8 | [steps/s8-screen-states.md](steps/s8-screen-states.md) | S8-1–S8-3, S8-C-a–C-c | [ ] |
 | S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-5 | [ ] |
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |

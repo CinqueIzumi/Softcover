@@ -39,7 +39,6 @@ import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -84,9 +83,9 @@ internal actual fun BookDetailScreenLayout(
 
     val title = remember(shouldBeExpanded) {
         if (shouldBeExpanded.not()) {
-            ""
+            null
         } else {
-            state.book?.title.orEmpty()
+            state.book?.title
         }
     }
 
@@ -97,19 +96,7 @@ internal actual fun BookDetailScreenLayout(
     val topBar = remember(title, shouldBeExpanded) {
         TopBarUiModel(
             title = title,
-            navigation = TopBarNavigation.Back,
             surface = if (shouldBeExpanded) TopBarSurface.OPAQUE else TopBarSurface.OVER_MEDIA,
-        )
-    }
-
-    // The offline placeholder has no hero for the bar to sit over, and no `LazyColumn` either — so
-    // `shouldBeExpanded` never leaves `false` on that branch and [topBar] above would pin it to
-    // OVER_MEDIA, drawing a transparent bar with scrimmed controls over a plain empty state. It gets
-    // its own model instead, matching the opaque default the branch had before the bar took a model.
-    val offlineTopBar = remember {
-        TopBarUiModel(
-            title = "",
-            navigation = TopBarNavigation.Back,
         )
     }
 
@@ -130,7 +117,7 @@ internal actual fun BookDetailScreenLayout(
             )
 
             TopBar(
-                model = offlineTopBar,
+                model = state.offlineTopBar,
                 onEvent = { event ->
                     when (event) {
                         TopBarEvent.BackClicked -> onNavigateBack()
