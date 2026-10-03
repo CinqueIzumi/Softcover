@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +33,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.callout.Callout
+import nl.rhaydus.softcover.core.component.callout.CalloutEvent
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
@@ -48,14 +51,15 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissScanEditionBannerClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToScannedEditionClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensContent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensToggle
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ScanEditionUpdateBanner
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveControlCard
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
@@ -193,13 +197,21 @@ internal actual fun BookDetailScreenLayout(
                 )
             }
 
-            if (state.showScanEditionUpdateBanner) {
+            state.scanEditionCallout?.let { scanEditionCallout ->
                 item { Spacer(modifier = Modifier.height(20.dp)) }
 
                 item {
-                    ScanEditionUpdateBanner(
-                        isUpdating = state.isUpdatingScannedEdition,
-                        runAction = runAction,
+                    Callout(
+                        model = scanEditionCallout,
+                        onEvent = { event ->
+                            when (event) {
+                                CalloutEvent.ActionClicked -> runAction(OnUpdateToScannedEditionClickAction())
+                                CalloutEvent.DismissClicked -> runAction(OnDismissScanEditionBannerClickAction())
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
                     )
                 }
             }

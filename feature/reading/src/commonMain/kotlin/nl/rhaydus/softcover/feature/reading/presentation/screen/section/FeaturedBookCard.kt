@@ -16,6 +16,9 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.callout.Banner
+import nl.rhaydus.softcover.core.component.callout.BannerEvent
+import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -41,7 +44,7 @@ internal fun FeaturedBookCard(
     deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
     paceForecast: ReadingPaceForecast?,
-    planTodayMessage: String?,
+    paceNudge: BannerUiModel?,
     onDismissPlanToday: () -> Unit,
     runAction: (ReadingAction) -> Unit,
     onBookClick: (Book) -> Unit,
@@ -79,10 +82,14 @@ internal fun FeaturedBookCard(
         interactionSource = interactionSource,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            if (planTodayMessage != null) {
-                PaceNudgeRibbon(
-                    text = planTodayMessage,
-                    onDismiss = onDismissPlanToday,
+            if (paceNudge != null) {
+                Banner(
+                    model = paceNudge,
+                    onEvent = { event ->
+                        when (event) {
+                            BannerEvent.DismissClicked -> onDismissPlanToday()
+                        }
+                    },
                 )
             }
 

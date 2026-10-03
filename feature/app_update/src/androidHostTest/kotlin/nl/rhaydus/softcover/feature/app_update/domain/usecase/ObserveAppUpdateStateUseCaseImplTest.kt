@@ -12,14 +12,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class ObserveAppUpdateStateUseCaseTest {
+class ObserveAppUpdateStateUseCaseImplTest {
     private lateinit var appUpdateRepository: AppUpdateRepository
-    private lateinit var useCase: ObserveAppUpdateStateUseCase
+    private lateinit var useCase: ObserveAppUpdateStateUseCaseImpl
 
     @BeforeEach
     fun setUp() {
         appUpdateRepository = mockk()
-        useCase = ObserveAppUpdateStateUseCase(appUpdateRepository = appUpdateRepository)
+        useCase = ObserveAppUpdateStateUseCaseImpl(appUpdateRepository = appUpdateRepository)
     }
 
     @Nested

@@ -31,6 +31,8 @@ import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.softcover.core.component.callout.Callout
+import nl.rhaydus.softcover.core.component.callout.CalloutEvent
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -40,14 +42,15 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissScanEditionBannerClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToScannedEditionClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensContent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensToggle
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ScanEditionUpdateBanner
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveControlCard
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
@@ -307,13 +310,21 @@ private fun SingleColumnContent(
                 )
             }
 
-            if (state.showScanEditionUpdateBanner) {
+            state.scanEditionCallout?.let { scanEditionCallout ->
                 item { Spacer(modifier = Modifier.height(20.dp)) }
 
                 item {
-                    ScanEditionUpdateBanner(
-                        isUpdating = state.isUpdatingScannedEdition,
-                        runAction = runAction,
+                    Callout(
+                        model = scanEditionCallout,
+                        onEvent = { event ->
+                            when (event) {
+                                CalloutEvent.ActionClicked -> runAction(OnUpdateToScannedEditionClickAction())
+                                CalloutEvent.DismissClicked -> runAction(OnDismissScanEditionBannerClickAction())
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
                     )
                 }
             }

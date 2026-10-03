@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -101,6 +102,10 @@ internal data class BookDetailUiState(
 
     /** [Book.effectiveReleaseDate] mapped to an unreleased-release badge by `UnreleasedBadgeCollector` (R9), off [book]. */
     val unreleasedBadge: BadgeUiModel? = null,
+
+    val statusCallout: CalloutUiModel? = null,
+
+    val scanEditionCallout: CalloutUiModel? = null,
 
     /** Non-null only while `isEditionOwned(displayedEdition)`, mapped by `EditionSelectionCollector` (R9). */
     val ownedCoverBadge: BadgeUiModel? = null,
@@ -264,21 +269,6 @@ internal data class BookDetailUiState(
 
     val heroRating: Double?
         get() = book?.rating ?: initialCover?.rating
-
-    /**
-     * Whether to offer updating the on-shelf edition to the scanned one — shown only when the book
-     * is already on a shelf with a *different* edition than the one scanned, and not yet dismissed.
-     */
-    val showScanEditionUpdateBanner: Boolean
-        get() {
-            val scannedId = scannedEditionId ?: return false
-
-            if (scannedEditionBannerDismissed) return false
-
-            val shelvedEditionId = book?.userBook?.editionId ?: return false
-
-            return shelvedEditionId != scannedId
-        }
 
     /**
      * Edition ids the user owns, sourced from the local "Owned" list rather than the per-shelf

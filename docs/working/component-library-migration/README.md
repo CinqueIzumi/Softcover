@@ -14,12 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8-1 done (`EmptyState` Centered / Inline; `BottomBarScreenModel` added). SL-14 drafted. SL-3b waits on F34; F33 open.
-- **Next:** S8-2 (`steps/s8-screen-states.md`).
+- **State:** S8-2 done: `Callout` (status callouts, scan-edition prompt, app-update card) + `Banner` `HIGHLIGHT` (pace nudge); models in collectors; `ObserveAppUpdateStateUseCase` contract in `core:domain`. SL-3b waits on F34; F33 open.
+- **Next:** S8-3 top bars, Phase 1 design (`steps/s8-screen-states.md` § S8-3). For S8-C: app-update `AccentBar` is 30×4, not a foundations bar size (32×4 / 20×1).
 - **Open questions:** `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** S8-1: compile, `styleCheck` (JDK 21), tests, review ✅.
-- **Uncommitted:** S8-1 + tests, docs.
+- **Verification:** S8-2: compile, `checkModuleGraph`, `projectHealth`, `styleCheck` (JDK 21), tests, review (no blockers) ✅.
+- **Uncommitted:** S8-2 + tests, docs.
 
 ## Local verification
 

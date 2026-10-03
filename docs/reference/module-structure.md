@@ -33,7 +33,7 @@ Notes on features that are leaves only for their *screens*:
   `core:designsystem`. The remaining `* → lists` edges are `CreateListScreen` *navigation* imports,
   resolved by the foundation's navigation contract.
 - `app_update` stays a feature (its Play-`AppUpdateManager` domain is the sanctioned `androidMain`
-  exception), but its pure `AppUpdateState` and the `AppUpdateSimulator` contract live in
+  exception), but its pure `AppUpdateState` and the `AppUpdateSimulator` and `ObserveAppUpdateStateUseCase` contracts live in
   `core:domain`.
 
 `deadlines`, `personal`, and `connectivity` were kernels in disguise and are now `core` modules —
@@ -60,7 +60,7 @@ only on modules **below** its tier.
 
 | Module | Holds |
 |--------|-------|
-| `core:domain` | shared domain models, classification enums, config value types, cross-feature use-case **contracts** (`ResetUserDataUseCase`, `InitializeUserIdAndBooksUseCase`, `ReAuthenticateUseCase`, `RefreshLibraryUseCase`, `AppUpdateSimulator`) whose impls live in orchestration |
+| `core:domain` | shared domain models, classification enums, config value types, cross-feature use-case **contracts** (`ResetUserDataUseCase`, `InitializeUserIdAndBooksUseCase`, `ReAuthenticateUseCase`, `RefreshLibraryUseCase`, `AppUpdateSimulator`, `ObserveAppUpdateStateUseCase`) whose impls live in orchestration |
 | `core:book` | the book-operations service: `BooksRepository` + use cases every feature calls (incl. `GetTrendingBooksUseCase`) |
 | `core:lists` | the list-operations service: `ListsRepository`, `GetAllUserListsUseCase`, `AddBookToListUseCase`, `SetEditionAsOwnedUseCase` |
 | `core:deadlines` | the deadline-operations service: `BookDeadlineRepository`, `ObserveBookDeadlineUseCase`, `SetBookDeadlineUseCase` |
@@ -105,7 +105,8 @@ here.
 component/
 + badge/       Badge  BadgeUiModel/Tone/Size/Colors/Dimensions
 +              CoverOverlay(+UiModel, +Corner)
-+ callout/     Banner  BannerUiModel  BannerTone            · Callout
++ callout/     Banner  BannerUiModel  BannerTone  BannerEvent
++              Callout  CalloutUiModel  CalloutTone  CalloutLead  CalloutActionUiModel  CalloutEvent
 + celebration/ MarkAsReadBurst  MarkAsReadBurstUiModel
 + chip/        Chip  ChipUiModel  ChipEvent
 + control/     ThemePreviewTile  ColorPalettePreviewTile  PreviewTile

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.callout.Callout
+import nl.rhaydus.softcover.core.component.callout.CalloutEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -26,7 +29,7 @@ import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
-import nl.rhaydus.softcover.feature.settings.presentation.screen.section.AppUpdateSection
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.appUpdateCalloutFor
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRow
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRowTarget
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsRowGroup
@@ -72,7 +75,6 @@ internal actual fun SettingsScreenLayout(
     roadmapState: RoadmapUiState,
     roadmapRunAction: (RoadmapAction) -> Unit,
     onCreateListClick: () -> Unit,
-    appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
     openUrl: (String) -> Unit,
     debugSection: @Composable () -> Unit,
@@ -97,10 +99,16 @@ internal actual fun SettingsScreenLayout(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (appUpdateState != AppUpdateState.Idle) {
-                AppUpdateSection(
-                    appUpdateState = appUpdateState,
-                    onClick = onStartAppUpdate,
+            state.appUpdateCallout?.let { appUpdateCallout ->
+                Callout(
+                    model = appUpdateCallout,
+                    onEvent = { event ->
+                        when (event) {
+                            CalloutEvent.ActionClicked -> onStartAppUpdate()
+                            CalloutEvent.DismissClicked -> Unit
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -207,7 +215,6 @@ private fun SettingsScreenPreview() {
             roadmapState = RoadmapUiState(),
             roadmapRunAction = {},
             onCreateListClick = {},
-            appUpdateState = AppUpdateState.Idle,
             onStartAppUpdate = {},
             openUrl = {},
             debugSection = {},
@@ -220,7 +227,7 @@ private fun SettingsScreenPreview() {
 private fun SettingsScreenUpdateAvailablePreview() {
     SoftcoverTheme {
         SettingsScreenLayout(
-            state = SettingsScreenUiState(),
+            state = SettingsScreenUiState(appUpdateCallout = appUpdateCalloutFor(state = AppUpdateState.Available)),
             settingsRunAction = {},
             navigateToProfile = {},
             navigateToAppearanceSettings = {},
@@ -234,7 +241,6 @@ private fun SettingsScreenUpdateAvailablePreview() {
             roadmapState = RoadmapUiState(),
             roadmapRunAction = {},
             onCreateListClick = {},
-            appUpdateState = AppUpdateState.Available,
             onStartAppUpdate = {},
             openUrl = {},
             debugSection = {},

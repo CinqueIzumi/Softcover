@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
@@ -31,6 +32,7 @@ internal data class SettingsScreenDependencies(
     val setShelfSwipeEnabledUseCase: SetShelfSwipeEnabledUseCase,
     val getUiScaleAsFlowUseCase: GetUiScaleAsFlowUseCase,
     val setUiScaleUseCase: SetUiScaleUseCase,
+    val observeAppUpdateStateUseCase: ObserveAppUpdateStateUseCase,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

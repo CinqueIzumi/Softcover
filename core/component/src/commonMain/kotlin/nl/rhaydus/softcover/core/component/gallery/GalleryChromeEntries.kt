@@ -19,6 +19,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.callout.Banner
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
+import nl.rhaydus.softcover.core.component.callout.Callout
+import nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel
+import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTile
@@ -86,6 +89,20 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         label = ::bannerFixtureLabel,
         content = { model, modifier ->
             Banner(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "Callout",
+        family = GalleryFamily.CALLOUT,
+        blurb = "A rounded card that calls out one thing worth acting on or knowing — a status, " +
+            "a scanned-edition prompt, an app update — with an optional action and dismiss.",
+        previews = CalloutUiModel,
+        label = ::calloutFixtureLabel,
+        content = { model, modifier ->
+            Callout(
                 model = model,
                 modifier = modifier,
             )
@@ -306,6 +323,13 @@ private fun searchTopBarFixtureLabel(model: SearchTopBarUiModel): String = when 
 /** Names what a [BannerUiModel] fixture demonstrates — its tone is its anatomy. */
 private fun bannerFixtureLabel(model: BannerUiModel): String =
     model.tone.name.lowercase().replaceFirstChar(Char::uppercase)
+
+private fun calloutFixtureLabel(model: CalloutUiModel): String = when (model.action) {
+    null -> "Status"
+    is CalloutActionUiModel.Button -> if (model.dismissible) "Edition prompt" else "Update available"
+    is CalloutActionUiModel.Busy -> "Edition updating"
+    CalloutActionUiModel.Progress -> "Update downloading"
+}
 
 private fun dividerFixtureLabel(model: DividerUiModel): String = when (model) {
     is DividerUiModel.Horizontal -> when {

@@ -7,7 +7,7 @@
 | Sub | Scope | Status |
 |---|---|---|
 | S8-1 | Empty states | [x] |
-| S8-2 | Callouts & banners | [ ] |
+| S8-2 | Callouts & banners | [x] |
 | S8-3 | Top bars | [ ] |
 | S8-C-states | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
@@ -22,6 +22,18 @@ S8-1:
 - `GalleryEmptyState` deleted (registry never empty). `EmptyEntriesCard` stays feature-local (card notice, not this anatomy).
 - Library's model built by the library collector per tab, on `UiState` (feature-local mapper); static copy is a file-level constant in its feature (§ 7.4a).
 - No loading state; fixtures: Centered + button, Centered title-only, Inline.
+
+S8-2:
+- `Callout(model, onEvent: (CalloutEvent) -> Unit = {}, modifier)` in `core/component/callout/`; model `tone: CalloutTone` (`Neutral` surfaceContainerHigh / onSurface, `Highlight` primaryContainer / onPrimaryContainer), `eyebrow`, `lead: CalloutLead?` (`Icon(resource)` | `AccentBar`), `title: String?`, `body`, `action: CalloutActionUiModel?` (`Button(label)` | `Busy(label)` spinner + label | `Progress` indeterminate linear bar), `dismissible: Boolean`; events `ActionClicked`, `DismissClicked`.
+- One 16 dp radius; eyebrow `eyebrowSmall` in primary; body editorial `bodySmall`; title editorial `headlineMedium`; action button is a `RhaydusButton` (tonal on Neutral, filled on Highlight). The component adds no outer gutter — callers keep 16 / 24 dp.
+- No loading flag: no call site renders it while loading; in-flight is `action = Busy`.
+- Folds to `Callout`: the three status callouts (one mapper, `Icon` lead), `ScanEditionUpdateBanner` (`Button`/`Busy`, dismissible), `AppUpdateSection` (`Highlight`, `AccentBar`, title, `Button`/`Progress`; pill button replaced).
+- Book detail: status-callout and edition-banner models built in the state layer by feature-local mappers, on `BookDetailUiState`; copy is file-level constants (§ 7.4a).
+- Settings: a collector observes `ObserveAppUpdateStateUseCase` and puts the `CalloutUiModel?` on settings UiState, replacing the `LocalAppUpdateState` read in composition; cross-feature wiring checked against `module-structure.md` (use case moves to `core:domain` if the rules require).
+- `PaceNudgeRibbon` folds into `Banner`: new `BannerTone.Highlight` (primaryContainer, editorial italic bodySmall; `Warning` keeps Material bodySmall centred), optional leading icon, `dismissible` + `onEvent` (`BannerEvent.DismissClicked`); the reading mapper builds the `BannerUiModel`; dismissal animates.
+- `RoadmapErrorBanner` stays: wrapper over foundation `InlineErrorState`, not a callout.
+- `foundations.md` "inline bar" line corrected: status callouts lead with an icon.
+- Fixtures: Callout status, edition idle + busy, app-update button + progress; Banner warning + highlight dismissible.
 
 ## S8-1 — Empty states (8 → `EmptyState` + `EmptyStateUiModel`)
 

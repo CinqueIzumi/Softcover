@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
-import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSettingsCategorySelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
@@ -61,7 +60,6 @@ internal actual fun SettingsScreenLayout(
     roadmapState: RoadmapUiState,
     roadmapRunAction: (RoadmapAction) -> Unit,
     onCreateListClick: () -> Unit,
-    appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
     openUrl: (String) -> Unit,
     debugSection: @Composable () -> Unit,
@@ -104,7 +102,7 @@ internal actual fun SettingsScreenLayout(
                     creditsHeader = state.aboutCreditsHeader,
                     sourceHeader = state.aboutSourceHeader,
                     contactHeader = state.aboutContactHeader,
-                    appUpdateState = appUpdateState,
+                    appUpdateCallout = state.appUpdateCallout,
                     onStartAppUpdate = onStartAppUpdate,
                     openUrl = openUrl,
                     onRoadmapClick = {

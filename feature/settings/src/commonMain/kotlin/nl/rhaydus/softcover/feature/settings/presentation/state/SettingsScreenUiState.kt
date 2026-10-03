@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
@@ -60,6 +61,8 @@ internal data class SettingsScreenUiState(
         eyebrow = "About",
         headline = "The fine print",
     ),
+
+    val appUpdateCallout: CalloutUiModel? = null,
 
     val appUpdateSimulatorHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Debug",

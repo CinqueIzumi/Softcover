@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SaveUserTagsUseCa
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.SyncUserTagVocabularyUseCase
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDeadlineCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.BookDetailCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CalloutsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ChooseListsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.CurrentUserCollector
@@ -84,6 +85,7 @@ val bookDetailModule = module {
     factory { DateStyleCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class
     factory { UnreleasedBadgeCollector() } bind BookDetailCollector::class
+    factory { CalloutsCollector() } bind BookDetailCollector::class
     factory { EditionSelectionCollector() } bind BookDetailCollector::class
     factory { EditionCardsCollector() } bind BookDetailCollector::class
     factory { UserListsFlowCollector() } bind BookDetailCollector::class

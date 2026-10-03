@@ -22,12 +22,10 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
-import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
-import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
@@ -51,7 +49,6 @@ object SettingsScreen : Screen {
         val appNavigator = koinInject<AppNavigator>()
         val debugRoutesContent = koinInject<DebugRoutesContent>()
         val appUpdateSimulator = koinInject<AppUpdateSimulator>()
-        val appUpdateState = LocalAppUpdateState.current
         val onStartAppUpdate = LocalStartAppUpdate.current
         val createListPresenter = LocalCreateListPresenter.current
         val uriHandler = LocalUriHandler.current
@@ -119,7 +116,6 @@ object SettingsScreen : Screen {
             onCreateListClick = {
                 createListPresenter?.open(onListCreated = null)
             },
-            appUpdateState = appUpdateState,
             onStartAppUpdate = onStartAppUpdate,
             openUrl = uriHandler::openUri,
             debugSection = {
@@ -170,7 +166,6 @@ internal expect fun SettingsScreenLayout(
     roadmapState: RoadmapUiState,
     roadmapRunAction: (RoadmapAction) -> Unit,
     onCreateListClick: () -> Unit,
-    appUpdateState: AppUpdateState,
     onStartAppUpdate: () -> Unit,
     openUrl: (String) -> Unit,
     debugSection: @Composable () -> Unit,

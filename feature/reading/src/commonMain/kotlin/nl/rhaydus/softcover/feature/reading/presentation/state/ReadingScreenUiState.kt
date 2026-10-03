@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.state
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
@@ -120,11 +121,10 @@ internal data class ReadingScreenUiState(
     val featuredDeadlineSummary: DeadlineSummaryUiModel? = null,
 
     /**
-     * The featured book's plan-today nudge copy, mapped off the composition by
-     * `DeadlineModelsCollector` (R9). `null` means either there is nothing to say today or the
-     * reader already dismissed it — [dismissedPlanTodayByBook] is folded in upstream.
+     * `null` only until the first nudge applies. After that a dismissed or lapsed nudge keeps its last
+     * message with `visible = false`, so the banner can animate out.
      */
-    val featuredPlanTodayMessage: String? = null,
+    val featuredPaceNudge: BannerUiModel? = null,
 
     /**
      * The desktop masthead's eyebrow, greeting title and subtitle, mapped off the composition by

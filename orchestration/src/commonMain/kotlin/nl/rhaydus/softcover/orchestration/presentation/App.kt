@@ -29,6 +29,7 @@ import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.cover.ProvideCoverImagePersister
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
@@ -36,7 +37,6 @@ import nl.rhaydus.softcover.core.presentation.theme.isDark
 import nl.rhaydus.softcover.core.presentation.util.LocalAppUpdateState
 import nl.rhaydus.softcover.core.presentation.util.LocalStartAppUpdate
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.CompleteAppUpdateUseCase
-import nl.rhaydus.softcover.feature.app_update.domain.usecase.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.feature.app_update.domain.usecase.StartAppUpdateFlowUseCase
 import nl.rhaydus.softcover.feature.onboarding.presentation.screen.OnboardingScreen
 import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel

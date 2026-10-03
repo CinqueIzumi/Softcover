@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -379,7 +381,7 @@ class DeadlineModelsCollectorTest {
         }
 
         @Test
-        fun `featuredPlanTodayMessage carries the nudge for an active undismissed deadline`() =
+        fun `featuredPaceNudge is visible with the message for an active undismissed deadline`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val edition = stubEdition(pages = 100)
@@ -409,12 +411,14 @@ class DeadlineModelsCollectorTest {
                 )
 
                 // ----- Assert -----
-                stateFlow.value.featuredPlanTodayMessage shouldBe "Read 10 pages today to stay on pace."
+                val nudge = stateFlow.value.featuredPaceNudge.shouldNotBeNull()
+                nudge.message shouldBe "Read 10 pages today to stay on pace."
+                nudge.visible shouldBe true
                 job.cancel()
             }
 
         @Test
-        fun `featuredPlanTodayMessage is null when dismissed today`() = runTest(UnconfinedTestDispatcher()) {
+        fun `featuredPaceNudge is hidden but keeps its message when dismissed today`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val edition = stubEdition(pages = 100)
             val userBookRead = stubUserBookRead(currentPage = 0)
@@ -444,12 +448,14 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.featuredPlanTodayMessage shouldBe null
+            val nudge = stateFlow.value.featuredPaceNudge.shouldNotBeNull()
+            nudge.message shouldBe "Read 10 pages today to stay on pace."
+            nudge.visible shouldBe false
             job.cancel()
         }
 
         @Test
-        fun `featuredPlanTodayMessage returns once the dismissal for that book is cleared`() =
+        fun `featuredPaceNudge becomes visible again once the dismissal for that book is cleared`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val edition = stubEdition(pages = 100)
@@ -478,17 +484,19 @@ class DeadlineModelsCollectorTest {
                     deadlines = mapOf(1 to deadline),
                     dismissedPlanTodayByBook = mapOf(1 to today().toString()),
                 )
-                val dismissedMessage = stateFlow.value.featuredPlanTodayMessage
+                val dismissedVisible = stateFlow.value.featuredPaceNudge.shouldNotBeNull().visible
                 stateFlow.value = stateFlow.value.copy(dismissedPlanTodayByBook = emptyMap())
 
                 // ----- Assert -----
-                dismissedMessage shouldBe null
-                stateFlow.value.featuredPlanTodayMessage shouldBe "Read 10 pages today to stay on pace."
+                dismissedVisible shouldBe false
+                val nudge = stateFlow.value.featuredPaceNudge.shouldNotBeNull()
+                nudge.message shouldBe "Read 10 pages today to stay on pace."
+                nudge.visible shouldBe true
                 job.cancel()
             }
 
         @Test
-        fun `featuredPlanTodayMessage is null for an expired deadline`() = runTest(UnconfinedTestDispatcher()) {
+        fun `featuredPaceNudge stays null for an expired deadline`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val edition = stubEdition(pages = 100)
             val userBookRead = stubUserBookRead(currentPage = 0)
@@ -517,12 +525,12 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.featuredPlanTodayMessage shouldBe null
+            stateFlow.value.featuredPaceNudge.shouldBeNull()
             job.cancel()
         }
 
         @Test
-        fun `featuredPlanTodayMessage reappears once the date rolls over past the dismissal`() =
+        fun `featuredPaceNudge becomes visible again once the date rolls over past the dismissal`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val edition = stubEdition(pages = 100)
@@ -551,12 +559,52 @@ class DeadlineModelsCollectorTest {
                     deadlines = mapOf(1 to deadline),
                     dismissedPlanTodayByBook = mapOf(1 to today().toString()),
                 )
-                val dismissedMessage = stateFlow.value.featuredPlanTodayMessage
+                val dismissedVisible = stateFlow.value.featuredPaceNudge.shouldNotBeNull().visible
                 todayFlow.value = today().plus(DatePeriod(days = 1))
 
                 // ----- Assert -----
-                dismissedMessage shouldBe null
-                stateFlow.value.featuredPlanTodayMessage shouldBe "Read 10 pages today to stay on pace."
+                dismissedVisible shouldBe false
+                val nudge = stateFlow.value.featuredPaceNudge.shouldNotBeNull()
+                nudge.message shouldBe "Read 10 pages today to stay on pace."
+                nudge.visible shouldBe true
+                job.cancel()
+            }
+
+        @Test
+        fun `featuredPaceNudge keeps its message and hides once the nudge no longer applies`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val edition = stubEdition(pages = 100)
+                val userBookRead = stubUserBookRead(currentPage = 0)
+                val book = stubBook(
+                    id = 1,
+                    edition = edition,
+                    userBookRead = userBookRead,
+                )
+                val deadline = buildDeadline(
+                    bookId = 1,
+                    unit = DeadlineUnit.PAGES,
+                    daysFromToday = 10,
+                )
+                val collector = DeadlineModelsCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = ReadingScreenUiState(
+                    books = listOf(book),
+                    deadlines = mapOf(1 to deadline),
+                )
+                stateFlow.value = stateFlow.value.copy(deadlines = emptyMap())
+
+                // ----- Assert -----
+                val nudge = stateFlow.value.featuredPaceNudge.shouldNotBeNull()
+                nudge.message shouldBe "Read 10 pages today to stay on pace."
+                nudge.visible shouldBe false
                 job.cancel()
             }
     }

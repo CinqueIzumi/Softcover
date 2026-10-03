@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -123,7 +124,7 @@ class PlanTodayNudgeMapperTest {
             val result = planTodayNudgeFor(progress = progress)
 
             // ----- Assert -----
-            result shouldBe "Read 15 pages today to stay on pace."
+            result.shouldNotBeNull().message shouldBe "Read 15 pages today to stay on pace."
         }
 
         @Test
@@ -138,7 +139,7 @@ class PlanTodayNudgeMapperTest {
             val result = planTodayNudgeFor(progress = progress)
 
             // ----- Assert -----
-            result shouldBe "Read 15 pages today to stay on pace."
+            result.shouldNotBeNull().message shouldBe "Read 15 pages today to stay on pace."
         }
 
         @Test
@@ -153,7 +154,7 @@ class PlanTodayNudgeMapperTest {
             val result = planTodayNudgeFor(progress = progress)
 
             // ----- Assert -----
-            result shouldBe "Listen 30 min today to stay on pace."
+            result.shouldNotBeNull().message shouldBe "Listen 30 min today to stay on pace."
         }
 
         @Test
@@ -168,7 +169,7 @@ class PlanTodayNudgeMapperTest {
             val result = planTodayNudgeFor(progress = progress)
 
             // ----- Assert -----
-            result shouldBe "Listen 2 min today to stay on pace."
+            result.shouldNotBeNull().message shouldBe "Listen 2 min today to stay on pace."
         }
 
         @Test
@@ -183,7 +184,7 @@ class PlanTodayNudgeMapperTest {
             val result = planTodayNudgeFor(progress = progress)
 
             // ----- Assert -----
-            result shouldBe "Listen 1 min today to stay on pace."
+            result.shouldNotBeNull().message shouldBe "Listen 1 min today to stay on pace."
         }
 
         @Test
@@ -198,7 +199,19 @@ class PlanTodayNudgeMapperTest {
             val result = planTodayNudgeFor(progress = progress)
 
             // ----- Assert -----
-            result shouldBe "Listen 1 min today to stay on pace."
+            result.shouldNotBeNull().message shouldBe "Listen 1 min today to stay on pace."
+        }
+
+        @Test
+        fun `returns a visible model when a nudge applies`() {
+            // ----- Arrange -----
+            val progress = buildProgress(requiredPerDay = 15f)
+
+            // ----- Act -----
+            val result = planTodayNudgeFor(progress = progress)
+
+            // ----- Assert -----
+            result.shouldNotBeNull().visible shouldBe true
         }
     }
 }

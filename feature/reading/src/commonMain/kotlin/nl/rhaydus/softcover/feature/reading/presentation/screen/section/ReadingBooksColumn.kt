@@ -113,7 +113,7 @@ internal fun ReadingBooksColumn(
                     deadlineSummary = state.featuredDeadlineSummary,
                     mutationFailed = featured.id in state.failedMutationBookIds,
                     paceForecast = state.featuredBookPace,
-                    planTodayMessage = state.featuredPlanTodayMessage,
+                    paceNudge = state.featuredPaceNudge,
                     onDismissPlanToday = {
                         runAction(OnDismissPlanTodayAction(bookId = featured.id))
                     },

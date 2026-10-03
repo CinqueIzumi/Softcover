@@ -8,4 +8,6 @@ package nl.rhaydus.softcover.core.component.callout
 enum class BannerTone {
     /** Something the reader should know about but need not act on — the offline notice. */
     WARNING,
+
+    HIGHLIGHT,
 }

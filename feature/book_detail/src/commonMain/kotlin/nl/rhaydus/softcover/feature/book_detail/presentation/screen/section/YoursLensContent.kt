@@ -1,146 +1,21 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.icon.RhaydusIconResource
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlock
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-
-@Composable
-private fun ReadInfoCallout(state: BookDetailUiState) {
-    val book = state.book ?: return
-    val userBook = book.userBook ?: return
-
-    StatusCallout(
-        eyebrow = "Finished",
-        iconRes = drawableIconResource(
-            icon = SoftcoverIcon.BookmarkCheck,
-            contentDescription = "",
-        ),
-        body = when (
-            val readDate = userBook.getReadDateString(
-                style = state.dateStyle,
-                finishedAt = book.userBookRead?.finishedAt,
-            )
-        ) {
-            null -> "This book has been in your library since ${
-                userBook.getFallbackDateString(
-                    style = state.dateStyle,
-                )
-            }."
-
-            else -> "You finished this on $readDate. A great one to revisit."
-        },
-    )
-}
-
-@Composable
-private fun DnfInfoCallout(state: BookDetailUiState) {
-    val userBook = state.book?.userBook ?: return
-
-    StatusCallout(
-        eyebrow = "Did not finish",
-        iconRes = drawableIconResource(
-            icon = SoftcoverIcon.Bookmark,
-            contentDescription = "",
-        ),
-        body = when (val dnfDate = userBook.getDnfDateString(style = state.dateStyle)) {
-            null -> "This book has been in your library since ${
-                userBook.getFallbackDateString(
-                    style = state.dateStyle,
-                )
-            }."
-
-            else -> "You set this aside on $dnfDate."
-        },
-    )
-}
-
-@Composable
-private fun WantToReadInfoCallout(state: BookDetailUiState) {
-    val userBook = state.book?.userBook ?: return
-
-    StatusCallout(
-        eyebrow = "Up next",
-        iconRes = drawableIconResource(
-            icon = SoftcoverIcon.BookmarkAdd,
-            contentDescription = "",
-        ),
-        body = "On your shelf since ${userBook.getFallbackDateString(style = state.dateStyle)}. Ready when you are.",
-    )
-}
-
-@Composable
-private fun StatusCallout(
-    eyebrow: String,
-    iconRes: RhaydusIconResource,
-    body: String,
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(24.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 18.dp,
-                ),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = iconRes.getIconPainter(),
-                    contentDescription = iconRes.contentDescription,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp),
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                SoftcoverText(
-                    text = eyebrow.uppercase(),
-                    style = MaterialTheme.editorialTypography.eyebrow,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            SoftcoverText(
-                text = body,
-                style = MaterialTheme.editorialTypography.body,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    }
-}
 
 /**
  * The "Yours" lens content (design-system.md's lens-toggle pattern): your-copy sections in order —
@@ -161,10 +36,14 @@ internal fun YoursLensContent(
                 runAction = runAction,
             )
 
-            BookStatus.DidNotFinish -> DnfInfoCallout(state = state)
-            BookStatus.Read -> ReadInfoCallout(state = state)
-            BookStatus.WantToRead -> WantToReadInfoCallout(state = state)
-            BookStatus.None -> Unit
+            else -> state.statusCallout?.let { callout ->
+                Callout(
+                    model = callout,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                )
+            }
         }
 
         if (book.status == BookStatus.Read) {

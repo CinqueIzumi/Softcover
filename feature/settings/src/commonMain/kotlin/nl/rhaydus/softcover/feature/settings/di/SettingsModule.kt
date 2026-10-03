@@ -30,6 +30,7 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUse
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledStatusCodesUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetLibraryTabOrderUseCase
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
+import nl.rhaydus.softcover.feature.settings.presentation.collector.AppUpdateCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ComponentGalleryCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.GalleryThemeConfigurationCollector
@@ -80,6 +81,7 @@ val settingsModule = module {
             setShelfSwipeEnabledUseCase = get(),
             getUiScaleAsFlowUseCase = get(),
             setUiScaleUseCase = get(),
+            observeAppUpdateStateUseCase = get(),
             appVersionProvider = get(),
         )
     }
@@ -93,6 +95,8 @@ val settingsModule = module {
     factory { ShelfSwipeCollector() } bind SettingsCollector::class
 
     factory { UiScaleCollector() } bind SettingsCollector::class
+
+    factory { AppUpdateCollector() } bind SettingsCollector::class
 
     factory { SetBottomBarStyleUseCase(settingsRepository = get()) }
 

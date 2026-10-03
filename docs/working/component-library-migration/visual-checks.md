@@ -32,3 +32,5 @@ shift; tick each during S12.
 - [ ] S8-1: quote glyph now on the offline screen and the desktop detail pane; Library and tag-editor glyph
   tint (`primary` → `onSurfaceVariant`) and type one step up; Reading's glyph at standard size and its
   "Find a book" pill as a `RhaydusButton`; tag editor gaps 6/4 → 8/12; Library's empty state top-aligned.
+- [ ] S8-2: callouts at 16 dp radius (status 24, app update 12); status eyebrow `eyebrowSmall` primary and body
+  `bodySmall`; app-update pill → filled `RhaydusButton`; pace nudge animates out, says "Dismiss".
