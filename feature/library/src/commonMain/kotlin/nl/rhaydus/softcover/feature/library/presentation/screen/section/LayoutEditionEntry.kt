@@ -1,7 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -12,7 +16,9 @@ import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 internal fun LayoutEditionEntry(
     edition: BookEdition,
     cover: CoverUiModel?,
+    card: BookCardUiModel?,
     layout: LibraryGridLayout,
+    onCardEvent: (BookCardEvent) -> Unit,
     onEditionClick: (BookEdition) -> Unit,
     modifier: Modifier = Modifier,
     dragHandle: (@Composable () -> Unit)? = null,
@@ -25,35 +31,22 @@ internal fun LayoutEditionEntry(
     when (layout) {
         LibraryGridLayout.GRID_TWO_COLUMNS,
         LibraryGridLayout.GRID_THREE_COLUMNS,
-            -> {
-            CoverGridOverlay(dragHandle = dragHandle) {
-                GridBookCell(
-                    modifier = entryModifier,
-                    title = title,
-                    authorName = authorName,
-                    onClick = { onEditionClick(edition) },
-                ) { coverModifier ->
-                    Cover(
-                       model = cover,
-                        modifier = coverModifier,
-                    )
-                }
-            }
-        }
-
         LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
         LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
             -> {
-            CoverGridOverlay(dragHandle = dragHandle) {
-                CoverOnlyCell(
-                    modifier = entryModifier,
-                    onClick = { onEditionClick(edition) },
-                ) { coverModifier ->
-                    Cover(
-                       model = cover,
-                        modifier = coverModifier,
-                    )
-                }
+            if (card != null) {
+                BookCard(
+                    model = card,
+                    onEvent = onCardEvent,
+                    modifier = modifier,
+                    content = dragHandle,
+                )
+            } else {
+                // One frame before the collector lands: keep the cell's footprint and modifiers.
+                Cover(
+                    model = null,
+                    modifier = modifier.fillMaxWidth(),
+                )
             }
         }
 

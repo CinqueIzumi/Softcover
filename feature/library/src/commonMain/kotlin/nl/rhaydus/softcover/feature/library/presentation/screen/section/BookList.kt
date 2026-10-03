@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
@@ -22,11 +23,14 @@ import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.platformModifierClick
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
+import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfAction
@@ -36,6 +40,7 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderShelfBo
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSelectBookRangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnToggleBookSelectionAction
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.bookReorderStatusFor
 
 @Composable
 internal fun BookList(
@@ -78,17 +83,12 @@ internal fun BookList(
     // their tap targets — so toggling rearrange never disposes and recomposes the grid, which is
     // what flashed every cover (each `AsyncImage` remounting and reloading) on the old
     // swap-between-two-grids path.
-    val reorderStatus: UserBookStatus? = if (
-        sortMode == LibrarySortMode.MANUAL &&
-        tab is LibraryContentTab.Status &&
-        tab.status != UserBookStatus.DID_NOT_FINISH &&
-        selectionMode.not() &&
-        state.isRearranging
-    ) {
-        tab.status
-    } else {
-        null
-    }
+    val reorderStatus: UserBookStatus? = bookReorderStatusFor(
+        tab = tab,
+        sortMode = sortMode,
+        selectionMode = selectionMode,
+        isRearranging = state.isRearranging,
+    )
 
     val isRearranging = reorderStatus != null
 
@@ -108,6 +108,46 @@ internal fun BookList(
     val haptics = LocalHaptics.current
 
     val booksById = remember(visibleBooks) { visibleBooks.associateBy { it.id } }
+
+    val prefetcher = LocalBookDetailPrefetcher.current
+    val currentBooksById by rememberUpdatedState(booksById)
+    val currentSelectionMode by rememberUpdatedState(selectionMode)
+    val currentOnBookClick by rememberUpdatedState(onBookClick)
+    val currentRunAction by rememberUpdatedState(runAction)
+
+    // One handler for the whole grid; the cards route their events here by key.
+    val onCardEvent: (BookCardEvent) -> Unit = remember(haptics, prefetcher) {
+        { event ->
+            val key = event.key
+
+            if (key is BookCardKey.Book) {
+                when (event) {
+                    is BookCardEvent.Clicked -> if (currentSelectionMode) {
+                        haptics.select()
+
+                        currentRunAction(OnToggleBookSelectionAction(bookId = key.bookId))
+                    } else {
+                        currentBooksById[key.bookId]?.let { currentOnBookClick(it) }
+                    }
+
+                    is BookCardEvent.LongClicked -> {
+                        haptics.threshold()
+
+                        currentRunAction(OnEnterSelectionModeAction(bookId = key.bookId))
+                    }
+
+                    is BookCardEvent.PressStarted -> if (currentSelectionMode.not()) {
+                        prefetcher?.prefetch(key.bookId)
+                    }
+
+                    is BookCardEvent.TrailingClicked,
+                    is BookCardEvent.MenuClicked,
+                    is BookCardEvent.ShakeEnded,
+                        -> Unit
+                }
+            }
+        }
+    }
 
     // Live shadow the reorder library mutates during a drag. Eagerly seeded and kept in
     // lock-step with the canonical (DB-sorted) list so the first frame is already correct and
@@ -326,10 +366,11 @@ internal fun BookList(
                         modifier = entryModifier,
                         book = book,
                         cover = cover,
+                        card = state.bookCardsByTab[tab.id]?.get(book.id),
                         layout = state.gridLayout,
+                        onCardEvent = onCardEvent,
                         onClick = onClick,
                         onLongClick = onLongClick,
-                        deadlineCountdownOverlay = state.deadlineCountdownOverlays[book.id],
                         selectionMark = state.selectionMarks[book.id],
                         deadlineBadge = state.deadlineBadges[book.id],
                         deadlineSummary = state.deadlineSummaries[book.id],

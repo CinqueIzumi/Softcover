@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.ActiveFilterC
 import nl.rhaydus.softcover.feature.library.presentation.collector.AllBooksCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ArrangeDraftChipsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ArrangeSheetCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.BookCardModelsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookDeadlinesCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BookListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BooksByStatusCollector
@@ -51,6 +52,7 @@ val libraryModule = module {
     factory { BooksByStatusCollector() } bind LibraryCollector::class
 
     factory { BookListsCollector() } bind LibraryCollector::class
+    factory { BookCardModelsCollector() } bind LibraryCollector::class
     factory { ChooseListsCollector() } bind LibraryCollector::class
     factory { CoverModelsCollector() } bind LibraryCollector::class
     factory { DeadlineModelsCollector() } bind LibraryCollector::class

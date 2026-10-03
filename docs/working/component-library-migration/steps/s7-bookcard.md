@@ -14,7 +14,7 @@ After S7-1, the user checks the `BookCard` variants in the Component Gallery bef
 | Sub | Scope | Status |
 |---|---|---|
 | S7-1 | `BookCard` models, the component and the fixtures | [ ] |
-| S7-2 | The library grid and cover-only cells, plus the selection covers | [ ] |
+| S7-2 | The library grid and cover-only cells, plus the selection covers | [x] |
 | S7-3 | The library rows and dispatchers | [ ] |
 | S7-4 | Explore rails, featured, series and mood tile | [ ] |
 | S7-5 | Explore search and hidden suggestions | [ ] |
@@ -76,7 +76,8 @@ Coverless-monogram (`CoverlessTitleCover`, `MonogramCoverMetrics`) — also done
 - Converged (no per-surface tables, no surface enums): `CoverOnly(cover)` | `Stacked(cover, text, menuLabel: String?)` | `Row(size: Compact|Standard|Large, lead, text, trailing, deadline)`; the caller sizes the cover.
 - Row sizes: Compact 40dp lead, titleMedium 1 line; Standard 56dp lead, titleMedium 2 lines; Large 74dp lead, titleLarge 2 lines. Stacked: titleSmall, 2 lines always.
 - One text rule: eyebrow `eyebrowSmall` primary (red on Error tone); byline "By X" bodySmall; supporting lines bodySmall tabular; rating star first.
-- One row rule: top divider on every row; hover highlight on every clickable row; progress = wavy bar filling the width + "NN%" (on Stacked, under the text, no reserved height).
+- One row rule: top divider on every row; hover highlight on every clickable row; progress = wavy bar filling the width, optional "NN%" beside it; on CoverOnly / Stacked under the cover. `decorations.progress`: null = no slot, `Reserved` = empty slot kept, `Value(fraction, label: String?)`.
+- S7-2: library grid → `Stacked` (byline "By X"), cover-only → `CoverOnly`; progress `Reserved`/`Value(label = null)` on every cell; `BookCardModelsCollector` writes `bookCardsByTab` / `editionCardsByTab` off the existing cover / selection / overlay maps (folded in S7-3); press `None` while that tab rearranges (one shared rule with `BookList`), `Tap` in selection, else `TapAndLongPress`; one hoisted handler per list; `SelectableCover` stays for `LargeRow` until S7-3.
 - `BookCardContent(eyebrow, title, titleIcon: SoftcoverIcon?, byline, supportingLines)` (titleIcon = edition format glyph); lead `Cover` | `SeriesStack` (row-only), null = coverless row; a line is parts `Text` | `Rating` joined " · ".
 - `BookCardDecorations(progress, coverBadge, selection, pressBehaviour: Tap|TapAndLongPress|None, shakeOnError)`; no `emphasized` — edition sheet drops its bordered card (selected → cover ring, owned → badge); trailing `Badge` | `Restore` | `Bookmark(saved)` | `SetProgress`.
 - Selection everywhere: dim + ring on the cover, TopEnd mark; a coverless row leads with the mark.

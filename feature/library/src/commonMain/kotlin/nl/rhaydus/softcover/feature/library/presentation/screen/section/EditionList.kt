@@ -5,8 +5,10 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import sh.calvin.reorderable.ReorderableItem
@@ -16,12 +18,16 @@ import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
+import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnReorderListBooksAction
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.isEditionListRearranging
 
 @Composable
 internal fun EditionList(
@@ -56,7 +62,11 @@ internal fun EditionList(
     // SAME node either way — items only gain a drag handle and drop their tap target — so
     // toggling rearrange never disposes and recomposes the grid, which is what flashed every
     // cover (each `AsyncImage` remounting and reloading) on the old swap-between-two-grids path.
-    val isRearranging = sortMode == LibrarySortMode.ORDER && isRanked && state.isRearranging
+    val isRearranging = isEditionListRearranging(
+        sortMode = sortMode,
+        isRanked = isRanked,
+        isRearranging = state.isRearranging,
+    )
 
     val animator = rememberLazyItemMutationAnimator(keys = visibleEditionIds)
 
@@ -86,6 +96,33 @@ internal fun EditionList(
     }
 
     val editionsById = remember(visibleEditions) { visibleEditions.associateBy { it.id } }
+
+    val prefetcher = LocalBookDetailPrefetcher.current
+    val currentEditionsById by rememberUpdatedState(editionsById)
+    val currentOnEditionClick by rememberUpdatedState(onEditionClick)
+
+    // One handler for the whole grid; the cards route their events here by key.
+    val onCardEvent: (BookCardEvent) -> Unit = remember(prefetcher) {
+        { event ->
+            val key = event.key
+
+            if (key is BookCardKey.Edition) {
+                val edition = currentEditionsById[key.editionId]
+
+                when (event) {
+                    is BookCardEvent.Clicked -> edition?.let { currentOnEditionClick(it) }
+
+                    is BookCardEvent.PressStarted -> edition?.let { prefetcher?.prefetch(it.bookId) }
+
+                    is BookCardEvent.LongClicked,
+                    is BookCardEvent.TrailingClicked,
+                    is BookCardEvent.MenuClicked,
+                    is BookCardEvent.ShakeEnded,
+                        -> Unit
+                }
+            }
+        }
+    }
 
     // Lookup from editionId → listBookId, drawn from the canonical `customLists` snapshot
     // for this tab. `editionsByTab` only carries `BookEdition`s, so without this map we'd
@@ -220,7 +257,9 @@ internal fun EditionList(
                         ),
                     edition = edition,
                     cover = cover,
+                    card = state.editionCardsByTab[tab.id]?.get(edition.id),
                     layout = state.gridLayout,
+                    onCardEvent = onCardEvent,
                     onEditionClick = if (isRearranging) {
                         {}
                     } else {

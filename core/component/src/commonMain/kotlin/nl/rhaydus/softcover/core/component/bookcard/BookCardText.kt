@@ -29,8 +29,8 @@ internal fun BookCardTextBlock(
     titleStyle: TextStyle,
     titleMinLines: Int,
     titleMaxLines: Int,
-    progress: BookCardProgress?,
     modifier: Modifier = Modifier,
+    progress: BookCardProgress? = null,
 ) {
     val typography = MaterialTheme.editorialTypography
     val eyebrow = content.eyebrow

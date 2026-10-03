@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
@@ -239,6 +240,15 @@ internal data class LibraryUiState(
     val selectionMarks: ImmutableMap<Int, SelectionMarkUiModel> = persistentMapOf(),
 
     /**
+     * Grid card models per tab id, then [Book.id], mapped by `BookCardModelsCollector` (R9). Empty
+     * on the list layouts.
+     */
+    val bookCardsByTab: ImmutableMap<String, ImmutableMap<Int, BookCardUiModel>> = persistentMapOf(),
+
+    /** Grid card models per custom-list tab id, then [BookEdition.id]; same shape as [bookCardsByTab]. */
+    val editionCardsByTab: ImmutableMap<String, ImmutableMap<Int, BookCardUiModel>> = persistentMapOf(),
+
+    /**
      * Rearrange mode. A transient editing state entered from the drag-handle icon-button in the
      * view-control strip's trailing cluster, and only meaningful while the current tab is on a
      * positional sort (MANUAL on a built-in shelf, or
@@ -277,7 +287,10 @@ internal data class LibraryUiState(
     val chooseListsSheet: ChooseListsUiModel? = null,
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
-        sortModeByTab[tabId] ?: LibraryTab.defaultSortMode(tabId = tabId)
+        resolveSortMode(
+            sortModeByTab = sortModeByTab,
+            tabId = tabId,
+        )
 
     fun sortDirectionFor(tabId: String): SortDirection =
         sortDirectionByTab[tabId] ?: sortModeFor(tabId = tabId).defaultDirection

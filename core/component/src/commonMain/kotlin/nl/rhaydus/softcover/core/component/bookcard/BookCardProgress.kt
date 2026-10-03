@@ -2,9 +2,17 @@ package nl.rhaydus.softcover.core.component.bookcard
 
 import androidx.compose.runtime.Immutable
 
-/** @property fraction In `0f..1f`. */
 @Immutable
-data class BookCardProgress(
-    val fraction: Float,
-    val label: String,
-)
+sealed interface BookCardProgress {
+    /** Keeps the slot's height so a grid mixing in-progress and untouched books never jumps a row. */
+    data object Reserved : BookCardProgress
+
+    /**
+     * @property fraction In `0f..1f`.
+     * @property label `null` draws the bar alone.
+     */
+    data class Value(
+        val fraction: Float,
+        val label: String?,
+    ) : BookCardProgress
+}

@@ -60,7 +60,7 @@ sealed interface ProgressSheetEvent {
 data class BookCardUiModel(
     val key: BookCardKey,                 // identity
     val variant: BookCardVariant,         // sealed: CoverOnly | Stacked | Row(size); each carries its own text
-    val decorations: BookCardDecorations,  // progress?, coverBadge?, selection?, press behaviour
+    val decorations: BookCardDecorations,  // progress? (Reserved | Value), coverBadge?, selection?, press behaviour
 )
 ```
 

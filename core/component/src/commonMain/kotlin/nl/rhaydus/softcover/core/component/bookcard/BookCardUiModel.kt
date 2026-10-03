@@ -40,9 +40,24 @@ data class BookCardUiModel(
                 key = BookCardKey.Book(bookId = 1),
                 variant = BookCardVariant.CoverOnly(cover = cover(title = "Piranesi")),
                 decorations = BookCardDecorations(
-                    progress = BookCardProgress(
+                    progress = BookCardProgress.Value(
                         fraction = 0.42f,
                         label = "42%",
+                    ),
+                ),
+            ),
+            BookCardUiModel(
+                key = BookCardKey.Book(bookId = 21),
+                variant = BookCardVariant.CoverOnly(cover = cover(title = "Emma")),
+                decorations = BookCardDecorations(progress = BookCardProgress.Reserved),
+            ),
+            BookCardUiModel(
+                key = BookCardKey.Book(bookId = 22),
+                variant = BookCardVariant.CoverOnly(cover = cover(title = "Kindred")),
+                decorations = BookCardDecorations(
+                    progress = BookCardProgress.Value(
+                        fraction = 0.7f,
+                        label = null,
                     ),
                 ),
             ),
@@ -90,7 +105,7 @@ data class BookCardUiModel(
                     ),
                 ),
                 decorations = BookCardDecorations(
-                    progress = BookCardProgress(
+                    progress = BookCardProgress.Value(
                         fraction = 0.6f,
                         label = "60%",
                     ),
@@ -139,7 +154,7 @@ data class BookCardUiModel(
                     ),
                 ),
                 decorations = BookCardDecorations(
-                    progress = BookCardProgress(
+                    progress = BookCardProgress.Value(
                         fraction = 0.3f,
                         label = "30%",
                     ),

@@ -40,7 +40,8 @@ internal fun BookCardCoverOnlyLayout(
         if (progress != null) {
             BookCardProgressBar(
                 progress = progress,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 9.dp),
+                barHeight = 8.dp,
             )
         }
     }
@@ -73,15 +74,24 @@ internal fun BookCardStackedLayout(
             content = content,
         )
 
+        val progress = model.decorations.progress
+
+        if (progress != null) {
+            BookCardProgressBar(
+                progress = progress,
+                modifier = Modifier.padding(top = 9.dp),
+                barHeight = 8.dp,
+            )
+        }
+
         BookCardTextBlock(
             content = variant.text,
             titleStyle = MaterialTheme.editorialTypography.titleSmall,
-            titleMinLines = 2,
+            titleMinLines = 1,
             titleMaxLines = 2,
-            progress = model.decorations.progress,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
+                .padding(top = 9.dp),
         )
     }
 }
