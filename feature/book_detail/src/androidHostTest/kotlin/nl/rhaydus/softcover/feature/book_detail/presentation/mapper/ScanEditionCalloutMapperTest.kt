@@ -5,6 +5,9 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel
+import nl.rhaydus.softcover.core.component.callout.CalloutEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissScanEditionBannerClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToScannedEditionClickAction
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -116,6 +119,31 @@ class ScanEditionCalloutMapperTest {
 
             // ----- Assert -----
             result.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class BookDetailActionFor {
+        @Test
+        fun `maps ActionClicked to the update-to-scanned-edition action`() {
+            // ----- Arrange -----
+
+            // ----- Act -----
+            val result = bookDetailActionFor(CalloutEvent.ActionClicked)
+
+            // ----- Assert -----
+            result.shouldBeInstanceOf<OnUpdateToScannedEditionClickAction>()
+        }
+
+        @Test
+        fun `maps DismissClicked to the dismiss-banner action`() {
+            // ----- Arrange -----
+
+            // ----- Act -----
+            val result = bookDetailActionFor(CalloutEvent.DismissClicked)
+
+            // ----- Assert -----
+            result.shouldBeInstanceOf<OnDismissScanEditionBannerClickAction>()
         }
     }
 }

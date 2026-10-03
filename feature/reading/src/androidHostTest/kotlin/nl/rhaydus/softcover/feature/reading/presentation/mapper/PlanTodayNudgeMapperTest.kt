@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
+import nl.rhaydus.softcover.core.component.callout.BannerTone
+import nl.rhaydus.softcover.core.component.callout.BannerVariant
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import org.junit.jupiter.api.Nested
@@ -43,7 +45,10 @@ class PlanTodayNudgeMapperTest {
             // ----- Arrange -----
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = null)
+            val result = planTodayNudgeFor(
+                progress = null,
+                visible = true,
+            )
 
             // ----- Assert -----
             result shouldBe null
@@ -55,7 +60,10 @@ class PlanTodayNudgeMapperTest {
             val progress = buildProgress(isExpired = true)
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result shouldBe null
@@ -70,7 +78,10 @@ class PlanTodayNudgeMapperTest {
             )
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result shouldBe null
@@ -82,7 +93,10 @@ class PlanTodayNudgeMapperTest {
             val progress = buildProgress(daysRemaining = 0L)
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result shouldBe null
@@ -94,7 +108,10 @@ class PlanTodayNudgeMapperTest {
             val progress = buildProgress(daysRemaining = -1L)
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result shouldBe null
@@ -106,7 +123,10 @@ class PlanTodayNudgeMapperTest {
             val progress = buildProgress(requiredPerDay = 0f)
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result shouldBe null
@@ -121,7 +141,10 @@ class PlanTodayNudgeMapperTest {
             )
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result.shouldNotBeNull().message shouldBe "Read 15 pages today to stay on pace."
@@ -136,7 +159,10 @@ class PlanTodayNudgeMapperTest {
             )
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result.shouldNotBeNull().message shouldBe "Read 15 pages today to stay on pace."
@@ -151,7 +177,10 @@ class PlanTodayNudgeMapperTest {
             )
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result.shouldNotBeNull().message shouldBe "Listen 30 min today to stay on pace."
@@ -166,7 +195,10 @@ class PlanTodayNudgeMapperTest {
             )
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result.shouldNotBeNull().message shouldBe "Listen 2 min today to stay on pace."
@@ -181,7 +213,10 @@ class PlanTodayNudgeMapperTest {
             )
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result.shouldNotBeNull().message shouldBe "Listen 1 min today to stay on pace."
@@ -196,7 +231,10 @@ class PlanTodayNudgeMapperTest {
             )
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result.shouldNotBeNull().message shouldBe "Listen 1 min today to stay on pace."
@@ -208,10 +246,44 @@ class PlanTodayNudgeMapperTest {
             val progress = buildProgress(requiredPerDay = 15f)
 
             // ----- Act -----
-            val result = planTodayNudgeFor(progress = progress)
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            )
 
             // ----- Assert -----
             result.shouldNotBeNull().visible shouldBe true
+        }
+
+        @Test
+        fun `carries visible false as passed`() {
+            // ----- Arrange -----
+            val progress = buildProgress(requiredPerDay = 15f)
+
+            // ----- Act -----
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = false,
+            )
+
+            // ----- Assert -----
+            result.shouldNotBeNull().visible shouldBe false
+        }
+
+        @Test
+        fun `returns a highlight editorial banner`() {
+            // ----- Arrange -----
+            val progress = buildProgress(requiredPerDay = 15f)
+
+            // ----- Act -----
+            val result = planTodayNudgeFor(
+                progress = progress,
+                visible = true,
+            ).shouldNotBeNull()
+
+            // ----- Assert -----
+            result.tone shouldBe BannerTone.Highlight
+            result.variant shouldBe BannerVariant.Editorial
         }
     }
 }

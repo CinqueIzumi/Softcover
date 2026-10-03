@@ -6,17 +6,20 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -28,27 +31,35 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  *
  * It owns its own expand/shrink transition, so a caller flips [BannerUiModel.visible] and the banner
  * handles arriving and leaving.
+ *
+ * [windowInsets] pads inside the container colour, so the colour fills the inset.
  */
 @Composable
 fun Banner(
     model: BannerUiModel,
     onEvent: (BannerEvent) -> Unit = {},
     modifier: Modifier = Modifier,
+    windowInsets: WindowInsets = WindowInsets(0),
 ) {
     val style = bannerStyle(
         tone = model.tone,
+        variant = model.variant,
         scheme = MaterialTheme.colorScheme,
+        typography = MaterialTheme.typography,
+        editorialTypography = MaterialTheme.editorialTypography,
     )
 
     AnimatedVisibility(
         visible = model.visible,
         enter = expandVertically(),
         exit = shrinkVertically(),
+        modifier = modifier,
     ) {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .background(style.container)
+                .windowInsetsPadding(windowInsets)
                 .padding(
                     horizontal = style.horizontalPadding,
                     vertical = style.verticalPadding,
@@ -73,33 +84,21 @@ fun Banner(
 
             SoftcoverText(
                 text = model.message,
-                style = if (style.editorial) {
-                    MaterialTheme.editorialTypography.bodySmall
-                } else {
-                    MaterialTheme.typography.bodySmall
-                },
+                style = style.textStyle,
                 color = style.content,
                 textAlign = style.textAlign,
                 modifier = Modifier.weight(1f),
             )
 
             if (model.dismissible) {
-                IconButton(
+                ChromeIconButton(
+                    icon = SoftcoverIcon.Close,
+                    contentDescription = "Dismiss",
+                    tooltip = "Dismiss",
                     onClick = { onEvent(BannerEvent.DismissClicked) },
-                    modifier = Modifier.size(22.dp),
-                ) {
-                    val close = drawableIconResource(
-                        icon = SoftcoverIcon.Close,
-                        contentDescription = "Dismiss",
-                    )
-
-                    Icon(
-                        painter = close.getIconPainter(),
-                        contentDescription = close.contentDescription,
-                        tint = style.dismissInk,
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = style.dismissInk),
+                    iconSize = 16.dp,
+                )
             }
         }
     }

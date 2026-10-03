@@ -6,8 +6,8 @@ package nl.rhaydus.softcover.core.component.callout
  * colour that does not belong to the design system.
  */
 enum class BannerTone {
-    /** Something the reader should know about but need not act on — the offline notice. */
-    WARNING,
+    /** Something the reader should know about but need not act on. */
+    Warning,
 
-    HIGHLIGHT,
+    Highlight,
 }

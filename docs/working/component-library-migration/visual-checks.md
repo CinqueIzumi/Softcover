@@ -36,3 +36,4 @@ shift; tick each during S12.
   `bodySmall`; app-update pill → filled `RhaydusButton`; pace nudge animates out, says "Dismiss".
 - [ ] S8-3: desktop back bars' end padding 16 → 8; desktop book detail's bar gains 8 dp on top; onboarding's accent bar now cross-fades with its eyebrow.
 - [ ] S8-C-a: desktop Profile and Scan back bar (`DesktopBackStrip` → `EditorialTopBar`: padding, editorial title on Scan); SearchTopBar clear "×" now a 48 dp tap target, field and scan button 46 → 48 dp tall, scan button radius 14 → 16.
+- [ ] S8-C-b: app-update callout accent bar 30×4 → 20×1 hairline, gap 8; Callout and Banner dismiss targets 48 dp (Banner taller when dismissible); Banner padding 16×10 in both variants; offline banner colour fills behind the status bar; Banner dismiss glyph sits ~32 dp from the edge, Callout's lower against the eyebrow — check on device.

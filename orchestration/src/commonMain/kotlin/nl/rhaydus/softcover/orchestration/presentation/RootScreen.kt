@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -77,7 +76,7 @@ internal object RootScreen : Screen {
                     Column {
                         Banner(
                             model = offlineBannerUiModel(visible = isOnline.not()),
-                            modifier = Modifier.statusBarsPadding(),
+                            windowInsets = WindowInsets.statusBars,
                         )
 
                         Box(

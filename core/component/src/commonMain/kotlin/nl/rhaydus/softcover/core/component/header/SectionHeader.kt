@@ -229,8 +229,27 @@ private fun SectionHeaderInline(
     isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    SectionHeaderEyebrowRow(
+    SectionHeaderInlineEyebrow(
         eyebrow = model.eyebrow,
+        color = sectionHeaderToneColor(
+            tone = model.tone,
+            colorScheme = MaterialTheme.colorScheme,
+        ),
+        isLoading = isLoading,
+        modifier = modifier,
+    )
+}
+
+/** The hairline-bar eyebrow of [SectionHeaderUiModel.Inline], for callers that colour it themselves. */
+@Composable
+internal fun SectionHeaderInlineEyebrow(
+    eyebrow: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+) {
+    SectionHeaderEyebrowRow(
+        eyebrow = eyebrow,
         style = SectionHeaderEyebrowStyle(
             bar = SectionHeaderEyebrowStyle.BarSpec(
                 width = 20.dp,
@@ -240,10 +259,7 @@ private fun SectionHeaderInline(
             gap = 8.dp,
             textStyle = MaterialTheme.editorialTypography.eyebrowSmall,
         ),
-        color = sectionHeaderToneColor(
-            tone = model.tone,
-            colorScheme = MaterialTheme.colorScheme,
-        ),
+        color = color,
         isLoading = isLoading,
         modifier = modifier,
     )

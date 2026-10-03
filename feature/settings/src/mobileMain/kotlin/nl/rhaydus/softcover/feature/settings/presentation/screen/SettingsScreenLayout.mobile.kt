@@ -20,7 +20,6 @@ import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.callout.Callout
-import nl.rhaydus.softcover.core.component.callout.CalloutEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -103,10 +102,10 @@ internal actual fun SettingsScreenLayout(
                 Callout(
                     model = appUpdateCallout,
                     onEvent = { event ->
-                        when (event) {
-                            CalloutEvent.ActionClicked -> onStartAppUpdate()
-                            CalloutEvent.DismissClicked -> Unit
-                        }
+                        handleAppUpdateCalloutEvent(
+                            event = event,
+                            onStartAppUpdate = onStartAppUpdate,
+                        )
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )

@@ -18,13 +18,13 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.callout.Callout
-import nl.rhaydus.softcover.core.component.callout.CalloutEvent
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.screen.AboutContent
+import nl.rhaydus.softcover.feature.settings.presentation.screen.handleAppUpdateCalloutEvent
 
 /**
  * The master–detail `About` category: [AboutContent] (Credits/Source/Contact, closing with its own
@@ -86,10 +86,10 @@ internal fun AboutPane(
                     Callout(
                         model = appUpdateCallout,
                         onEvent = { event ->
-                            when (event) {
-                                CalloutEvent.ActionClicked -> onStartAppUpdate()
-                                CalloutEvent.DismissClicked -> Unit
-                            }
+                            handleAppUpdateCalloutEvent(
+                                event = event,
+                                onStartAppUpdate = onStartAppUpdate,
+                            )
                         },
                         modifier = Modifier.fillMaxWidth(),
                     )

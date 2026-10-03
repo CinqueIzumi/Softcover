@@ -2,12 +2,16 @@ package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
 import nl.rhaydus.softcover.core.component.callout.BannerTone
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
+import nl.rhaydus.softcover.core.component.callout.BannerVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import kotlin.math.ceil
 
-internal fun planTodayNudgeFor(progress: DeadlineProgress?): BannerUiModel? {
+internal fun planTodayNudgeFor(
+    progress: DeadlineProgress?,
+    visible: Boolean,
+): BannerUiModel? {
     progress ?: return null
     if (progress.isExpired) return null
     if (progress.unitsRemaining == 0) return null
@@ -26,8 +30,9 @@ internal fun planTodayNudgeFor(progress: DeadlineProgress?): BannerUiModel? {
 
     return BannerUiModel(
         message = message,
-        tone = BannerTone.HIGHLIGHT,
-        visible = true,
+        tone = BannerTone.Highlight,
+        variant = BannerVariant.Editorial,
+        visible = visible,
         icon = SoftcoverIcon.Info,
         dismissible = true,
     )

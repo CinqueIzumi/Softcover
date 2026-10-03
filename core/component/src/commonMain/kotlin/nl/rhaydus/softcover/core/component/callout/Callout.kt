@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.component.callout
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,17 +13,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
+import nl.rhaydus.softcover.core.component.header.SectionHeaderEyebrowText
+import nl.rhaydus.softcover.core.component.header.SectionHeaderInlineEyebrow
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -51,7 +51,7 @@ fun Callout(
             modifier = Modifier.padding(
                 start = 20.dp,
                 top = 18.dp,
-                end = if (model.dismissible) 8.dp else 20.dp,
+                end = if (model.dismissible) 4.dp else 20.dp,
                 bottom = 18.dp,
             ),
             verticalAlignment = Alignment.Top,
@@ -64,9 +64,13 @@ fun Callout(
             )
 
             if (model.dismissible) {
-                CalloutDismissButton(
-                    ink = style.mutedInk,
+                ChromeIconButton(
+                    icon = SoftcoverIcon.Close,
+                    contentDescription = "Dismiss",
+                    tooltip = "Dismiss",
                     onClick = { onEvent(CalloutEvent.DismissClicked) },
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = style.mutedInk),
+                    iconSize = 16.dp,
                 )
             }
         }
@@ -81,15 +85,11 @@ private fun CalloutContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            CalloutLeadContent(lead = model.lead)
-
-            SoftcoverText(
-                text = model.eyebrow.uppercase(),
-                style = MaterialTheme.editorialTypography.eyebrowSmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
+        CalloutEyebrow(
+            eyebrow = model.eyebrow,
+            lead = model.lead,
+            style = style,
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -122,40 +122,39 @@ private fun CalloutContent(
 }
 
 @Composable
-private fun CalloutLeadContent(lead: CalloutLead?) {
+private fun CalloutEyebrow(
+    eyebrow: String,
+    lead: CalloutLead?,
+    style: CalloutStyle,
+) {
     when (lead) {
-        null -> Unit
+        CalloutLead.AccentBar -> SectionHeaderInlineEyebrow(
+            eyebrow = eyebrow,
+            color = style.accent,
+        )
 
-        is CalloutLead.Icon -> {
-            val resource = drawableIconResource(
-                icon = lead.icon,
-                contentDescription = "",
+        null, is CalloutLead.Icon -> Row(verticalAlignment = Alignment.CenterVertically) {
+            if (lead is CalloutLead.Icon) {
+                val resource = drawableIconResource(
+                    icon = lead.icon,
+                    contentDescription = "",
+                )
+
+                Icon(
+                    painter = resource.getIconPainter(),
+                    contentDescription = null,
+                    tint = style.accent,
+                    modifier = Modifier.size(18.dp),
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            SectionHeaderEyebrowText(
+                eyebrow = eyebrow,
+                style = MaterialTheme.editorialTypography.eyebrowSmall,
+                color = style.accent,
             )
-
-            Icon(
-                painter = resource.getIconPainter(),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp),
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
-        CalloutLead.AccentBar -> {
-            Box(
-                modifier = Modifier
-                    .size(
-                        width = 30.dp,
-                        height = 4.dp,
-                    )
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(2.dp),
-                    ),
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
         }
     }
 }
@@ -191,32 +190,9 @@ private fun CalloutActionContent(
         }
 
         CalloutActionUiModel.Progress -> LinearWavyProgressIndicator(
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.outlineVariant,
+            color = style.accent,
+            trackColor = style.track,
             modifier = Modifier.fillMaxWidth(),
-        )
-    }
-}
-
-@Composable
-private fun CalloutDismissButton(
-    ink: Color,
-    onClick: () -> Unit,
-) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier.size(32.dp),
-    ) {
-        val resource = drawableIconResource(
-            icon = SoftcoverIcon.Close,
-            contentDescription = "Dismiss",
-        )
-
-        Icon(
-            painter = resource.getIconPainter(),
-            contentDescription = resource.contentDescription,
-            tint = ink,
-            modifier = Modifier.size(16.dp),
         )
     }
 }

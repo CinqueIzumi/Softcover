@@ -184,8 +184,9 @@ RichText(model = state.review)          // model.variant decides the face and th
 
 - **Allowed: a trailing `content` slot** (§ 7.1). It is a composition hole the caller fills with a
   composable, which a data model cannot hold.
-- **Allowed: Compose plumbing that cannot live in an immutable value** — `modifier`, or a hoisted mutable
-  state object shared with the scaffold (`TopAppBarScrollBehavior`). The test: could it be serialised with
+- **Allowed: Compose plumbing that cannot live in an immutable value** — `modifier`, a platform
+  `WindowInsets` the component pads inside its own container (`Banner(windowInsets = …)`), or a hoisted
+  mutable state object shared with the scaffold (`TopAppBarScrollBehavior`). The test: could it be serialised with
   the rest of the model? A `TextStyle` could, a `ScrollState` could not.
 - **Not yet satisfied by the whole library.** Fixed in the same S11 retrofit as R10. Current holdouts:
   `RichText` (`style`, `color`, `maxLines`, `overflow`, `onClick`, `onTextLayout`), `StatNumber` (`style`,

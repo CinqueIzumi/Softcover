@@ -56,8 +56,10 @@ internal class DeadlineModelsCollector : ReadingCollector {
                             dateStyle = snapshot.dateStyle,
                             tone = DeadlineSummaryTone.OnHeroBackdrop,
                         ),
-                        featuredPaceNudge = planTodayNudgeFor(progressByBook[featuredId])
-                            ?.copy(visible = isFeaturedPlanTodayDismissed.not())
+                        featuredPaceNudge = planTodayNudgeFor(
+                            progress = progressByBook[featuredId],
+                            visible = isFeaturedPlanTodayDismissed.not(),
+                        )
                             ?: it.featuredPaceNudge?.copy(visible = false),
                     )
                 }

@@ -14,12 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8-C-states audit approved (shape in `steps/s8-screen-states.md`). S8-C-a done: internal `ChromeIconButton` (`core/component/chrome/`, 48 dp, cursor, tooltip) on all bar back/clear buttons; `TopBarNavigation` deleted; `TopBarUiModel.title: String?`; `TopBarSurface.colors(ColorScheme)`; title `heading()`; desktop Profile + Scan on `EditorialTopBar`; one title const per screen; book detail `offlineTopBar` on UiState; SearchTopBar 48 dp tall, 16 dp radii. SL-3b waits on F34; F33 open.
-- **Next:** S8-C-b — callouts & banners (C-b bullet + cross-family `ChromeIconButton` dismiss). Then S8-C-c. `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
+- **State:** S8-C-states audit approved (shape in `steps/s8-screen-states.md`). S8-C-a done: internal `ChromeIconButton` (`core/component/chrome/`, 48 dp, cursor, tooltip) on all bar back/clear buttons; `TopBarNavigation` deleted; `TopBarUiModel.title: String?`; `TopBarSurface.colors(ColorScheme)`; title `heading()`; desktop Profile + Scan on `EditorialTopBar`; one title const per screen; book detail `offlineTopBar` on UiState; SearchTopBar 48 dp tall, 16 dp radii (committed `15328195`). S8-C-b done: `CalloutStyle` accent/track; accent bar → internal `SectionHeaderInlineEyebrow`; `BannerTone` (Warning/Highlight) + `BannerVariant` (Status/Editorial), 16×10; both dismisses `ChromeIconButton`; `Banner(windowInsets)` (R11 plumbing exemption added); `planTodayNudgeFor(visible)`; `bookDetailActionFor` / `handleAppUpdateCalloutEvent` shared by jvm + mobile. SL-3b waits on F34; F33 open.
+- **Next:** S8-C-c — empty states + offline models off composition (C-c bullet + cross-family offline bullet; glyph `clearAndSetSemantics`, title `heading()`; unused imports + why ktlint missed them). `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
 - **Open questions:** `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** S8-C-a: compile (6 features + core:component + app), `checkModuleGraph`, `projectHealth`, `styleCheck` (JDK 21), tests (6 suites, no changes needed), review (46 dp search-field clamp fixed → 48 dp; ChromeIconButton KDoc) ✅.
-- **Uncommitted:** nothing (S8-C-a committed).
+- **Verification:** S8-C-b: compile (6 modules + app), `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck` (JDK 21), tests (incl. new event-helper + nudge `visible` cases), review (Banner modifier back on root; R11 doc; helper naming) ✅.
+- **Uncommitted:** nothing (S8-C-b committed).
 
 ## Local verification
 

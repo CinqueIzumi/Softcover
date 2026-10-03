@@ -10,6 +10,8 @@ internal data class CalloutStyle(
     val container: Color,
     val content: Color,
     val mutedInk: Color,
+    val accent: Color,
+    val track: Color,
     val buttonStyle: ButtonStyle,
 )
 
@@ -21,6 +23,8 @@ internal fun calloutStyle(
         container = scheme.surfaceContainerHigh,
         content = scheme.onSurface,
         mutedInk = scheme.onSurfaceVariant,
+        accent = scheme.primary,
+        track = scheme.outlineVariant,
         buttonStyle = ButtonStyle.TONAL,
     )
 
@@ -28,6 +32,8 @@ internal fun calloutStyle(
         container = scheme.primaryContainer,
         content = scheme.onPrimaryContainer,
         mutedInk = scheme.onPrimaryContainer.copy(alpha = 0.8f),
+        accent = scheme.primary,
+        track = scheme.outlineVariant,
         buttonStyle = ButtonStyle.FILLED,
     )
 }

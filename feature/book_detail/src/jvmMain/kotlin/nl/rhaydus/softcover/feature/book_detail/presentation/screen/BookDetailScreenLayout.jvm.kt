@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.callout.Callout
-import nl.rhaydus.softcover.core.component.callout.CalloutEvent
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -38,10 +37,9 @@ import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissScanEditionBannerClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToScannedEditionClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.bookDetailActionFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection
@@ -281,12 +279,7 @@ private fun SingleColumnContent(
                 item {
                     Callout(
                         model = scanEditionCallout,
-                        onEvent = { event ->
-                            when (event) {
-                                CalloutEvent.ActionClicked -> runAction(OnUpdateToScannedEditionClickAction())
-                                CalloutEvent.DismissClicked -> runAction(OnDismissScanEditionBannerClickAction())
-                            }
-                        },
+                        onEvent = { event -> runAction(bookDetailActionFor(event)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp),

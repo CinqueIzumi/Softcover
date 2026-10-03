@@ -22,7 +22,7 @@ Distinct from the inline filter chip strip above: this row renders only the *cur
 
 ### Pace-nudge ribbon
 
-A dismissable `Banner` in the `HIGHLIGHT` tone, **fused to the top of the card it speaks to** — not an in-flow row above it, so the message reads as the card's own voice rather than page chrome. Used on the Reading screen's featured-hero card to surface a per-day pacing target derived from the featured book's active deadline. Persistence is per-book-per-day; once dismissed, the ribbon stays gone until the local date rolls over. Reach for it when a single sentence of guidance derives from existing state, is scoped to one card, and should not earn the weight of a sheet.
+A dismissable `Banner` in the `Highlight` tone and `Editorial` variant, **fused to the top of the card it speaks to** — not an in-flow row above it, so the message reads as the card's own voice rather than page chrome. Used on the Reading screen's featured-hero card to surface a per-day pacing target derived from the featured book's active deadline. Persistence is per-book-per-day; once dismissed, the ribbon stays gone until the local date rolls over. Reach for it when a single sentence of guidance derives from existing state, is scoped to one card, and should not earn the weight of a sheet.
 
 ### Actionable inline banner
 

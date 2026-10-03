@@ -13,15 +13,15 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The content of a [Banner] and whether it is currently showing.
  *
- * @property visible Whether the banner is on screen. It rides on the model rather than being a second
- * parameter (a component takes only model, onEvent and modifier) *and* rather than the caller wrapping the component in its own
- * `AnimatedVisibility`: the expand/shrink transition is part of the banner's anatomy, and a nullable
- * model could not survive its own exit animation.
+ * @property visible Whether the banner is on screen. It rides on the model rather than the caller
+ * wrapping the component in its own `AnimatedVisibility`: the expand/shrink transition is part of the
+ * banner's anatomy, and a nullable model could not survive its own exit animation.
  */
 @Immutable
 data class BannerUiModel(
     val message: String,
     val tone: BannerTone,
+    val variant: BannerVariant,
     val visible: Boolean,
     val icon: SoftcoverIcon? = null,
     val dismissible: Boolean = false,
@@ -30,12 +30,14 @@ data class BannerUiModel(
         override val previews: ImmutableList<BannerUiModel> = persistentListOf(
             BannerUiModel(
                 message = "You're offline. Progress changes are saved and will sync when you reconnect.",
-                tone = BannerTone.WARNING,
+                tone = BannerTone.Warning,
+                variant = BannerVariant.Status,
                 visible = true,
             ),
             BannerUiModel(
                 message = "Read 24 pages today to stay on pace.",
-                tone = BannerTone.HIGHLIGHT,
+                tone = BannerTone.Highlight,
+                variant = BannerVariant.Editorial,
                 visible = true,
                 icon = SoftcoverIcon.Info,
                 dismissible = true,
@@ -55,6 +57,7 @@ data class BannerUiModel(
 @Composable
 fun offlineBannerUiModel(visible: Boolean): BannerUiModel = BannerUiModel(
     message = stringResource(Res.string.connectivity_offline_banner),
-    tone = BannerTone.WARNING,
+    tone = BannerTone.Warning,
+    variant = BannerVariant.Status,
     visible = visible,
 )

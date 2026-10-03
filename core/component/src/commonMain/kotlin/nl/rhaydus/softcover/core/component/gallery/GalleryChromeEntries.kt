@@ -99,8 +99,8 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "Banner",
         family = GalleryFamily.CALLOUT,
-        blurb = "A full-width notice that slides in above a screen's content — today the " +
-            "offline report, raised once at the app root.",
+        blurb = "A full-width notice that slides in above a screen's content — the offline " +
+            "report at the app root, and a dismissible pace nudge on a book card.",
         previews = BannerUiModel,
         label = ::bannerFixtureLabel,
         content = { model, modifier ->

@@ -11,7 +11,7 @@
 | S8-3 | Top bars | [x] |
 | S8-C-states | Convergence pass over the family (family-procedure.md § Phase 3) — audit + approval | [x] |
 | S8-C-a | Shared `ChromeIconButton`, heading semantics, top bars | [x] |
-| S8-C-b | Callouts & banners | [ ] |
+| S8-C-b | Callouts & banners | [x] |
 | S8-C-c | Empty states + offline models off composition | [ ] |
 
 ## Approved shape
