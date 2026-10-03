@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditorChipGroup
@@ -34,6 +35,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditor
 internal fun TagEditorBottomSheet(
     model: SheetScaffoldUiModel,
     userTagEditorGroups: List<UserTagEditorChipGroup>,
+    emptyState: EmptyStateUiModel,
     newlyAddedTagKey: String?,
     categoryChips: List<ChipUiModel>,
     suggestions: ChipSet<UserTag>,
@@ -90,6 +92,7 @@ internal fun TagEditorBottomSheet(
 
             TagEditorCollection(
                 groups = userTagEditorGroups,
+                emptyState = emptyState,
                 newlyAddedTagKey = newlyAddedTagKey,
                 onEvent = onTagChipEvent,
                 modifier = Modifier

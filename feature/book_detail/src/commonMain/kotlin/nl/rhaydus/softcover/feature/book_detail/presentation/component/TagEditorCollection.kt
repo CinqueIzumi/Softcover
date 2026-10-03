@@ -32,6 +32,8 @@ import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -40,13 +42,24 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditor
 @Composable
 internal fun TagEditorCollection(
     groups: List<UserTagEditorChipGroup>,
+    emptyState: EmptyStateUiModel,
     newlyAddedTagKey: String?,
     onEvent: (ChipEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         if (groups.isEmpty()) {
-            TagEditorEmptyState(modifier = Modifier.fillMaxWidth())
+            EmptyState(
+                model = emptyState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = 40.dp,
+                        bottom = 30.dp,
+                        start = 10.dp,
+                        end = 10.dp,
+                    ),
+            )
         } else {
             groups.forEachIndexed { index, group ->
                 TagGroupSection(
@@ -154,42 +167,6 @@ private fun EditorTagChip(
         Chip(
             model = chip,
             onEvent = onEvent,
-        )
-    }
-}
-
-@Composable
-private fun TagEditorEmptyState(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.padding(
-            top = 40.dp,
-            bottom = 30.dp,
-            start = 10.dp,
-            end = 10.dp,
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        SoftcoverText(
-            text = "“",
-            style = MaterialTheme.editorialTypography.quoteGlyph,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-            modifier = Modifier.quoteGlyphSway(),
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        SoftcoverText(
-            text = "Nothing here yet.",
-            style = MaterialTheme.editorialTypography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        SoftcoverText(
-            text = "Name the first thing this book is to you.",
-            style = MaterialTheme.editorialTypography.body,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

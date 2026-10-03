@@ -20,6 +20,8 @@ import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
@@ -33,8 +35,15 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 data class ChooseListsUiModel(
     val rows: ImmutableList<ChooseListsRowUiModel>,
     val scaffold: SheetScaffoldUiModel,
+    val emptyState: EmptyStateUiModel,
 ) {
     companion object : UiModelPreviews<ChooseListsUiModel> {
+        private val fixtureEmptyState = EmptyStateUiModel(
+            title = "No custom lists yet",
+            body = "Create your first list below.",
+            variant = EmptyStateVariant.Inline,
+        )
+
         private fun fixtureScaffold(
             name: String,
             description: String,
@@ -77,6 +86,7 @@ data class ChooseListsUiModel(
          */
         override val previews: ImmutableList<ChooseListsUiModel> = persistentListOf(
             ChooseListsUiModel(
+                emptyState = fixtureEmptyState,
                 scaffold = singleBookScaffold(name = "Piranesi"),
                 rows = persistentListOf(
                     ChooseListsRowUiModel(
@@ -130,6 +140,7 @@ data class ChooseListsUiModel(
                 ),
             ),
             ChooseListsUiModel(
+                emptyState = fixtureEmptyState,
                 scaffold = fixtureScaffold(
                     name = "5 books",
                     description = "A part-filled list adds the rest first — then a second tap takes all 5 off.",
@@ -195,6 +206,7 @@ data class ChooseListsUiModel(
                 ),
             ),
             ChooseListsUiModel(
+                emptyState = fixtureEmptyState,
                 scaffold = singleBookScaffold(name = "The Name of the Wind"),
                 rows = persistentListOf(),
             ),

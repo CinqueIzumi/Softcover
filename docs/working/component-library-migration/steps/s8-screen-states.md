@@ -6,10 +6,22 @@
 
 | Sub | Scope | Status |
 |---|---|---|
-| S8-1 | Empty states | [ ] |
+| S8-1 | Empty states | [x] |
 | S8-2 | Callouts & banners | [ ] |
 | S8-3 | Top bars | [ ] |
 | S8-C-states | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
+
+## Approved shape
+
+S8-1:
+- `EmptyState(model, onEvent: (EmptyStateEvent) -> Unit = {}, modifier)`; model `title`, `body: String?`, `button: EmptyStateButtonUiModel?` (label + optional icon), `variant: EmptyStateVariant` (`Centered` default, `Inline`); event `ButtonClicked`.
+- `Centered`: swaying quote glyph (`onSurfaceVariant` 0.15 dark / 0.3 light, standard `quoteGlyph`), editorial headlineMedium, bodyLarge, gaps 8 / 12, optional `RhaydusButton`; all centred.
+- `Inline`: start-aligned italic editorial titleLarge + editorial body, gap 4, no glyph, no button.
+- `EmptyState` no longer fills; full-surface callers pass `fillMaxSize()`.
+- Folds to `Centered`: Library, Reading's top block (glyph/copy/"Find a book"), Hidden suggestions, Tag editor, `EmptyDetailPane`, offline (gains the glyph). `Inline`: ChooseLists.
+- `GalleryEmptyState` deleted (registry never empty). `EmptyEntriesCard` stays feature-local (card notice, not this anatomy).
+- Library's model built by the library collector per tab, on `UiState` (feature-local mapper); static copy is a file-level constant in its feature (§ 7.4a).
+- No loading state; fixtures: Centered + button, Centered title-only, Inline.
 
 ## S8-1 — Empty states (8 → `EmptyState` + `EmptyStateUiModel`)
 

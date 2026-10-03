@@ -32,6 +32,7 @@ import nl.rhaydus.softcover.feature.scan.di.scanModule
 import nl.rhaydus.softcover.feature.session.di.sessionModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import nl.rhaydus.softcover.orchestration.navigation.AppNavigatorImpl
+import nl.rhaydus.softcover.orchestration.presentation.screenmodel.BottomBarScreenModel
 import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.orchestration.session.ActiveSessionControllerImpl
 import nl.rhaydus.softcover.orchestration.usecase.InitializeUserIdAndBooksUseCaseImpl
@@ -68,6 +69,8 @@ internal val orchestrationModule = module {
         settingsModule,
         appUpdateModule,
     )
+
+    factory { BottomBarScreenModel(appDispatchers = get()) }
 
     single<AppNavigator> { AppNavigatorImpl() }
 

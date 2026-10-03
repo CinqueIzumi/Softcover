@@ -117,14 +117,14 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "EmptyState",
         family = GalleryFamily.STATE,
-        blurb = "The centred headline-and-body message a screen shows in place of content it " +
-            "has nothing to draw.",
+        blurb = "The message a screen shows in place of content it has nothing to draw: a " +
+            "centred flourish with an optional body and button, or an inline title and body.",
         previews = EmptyStateUiModel,
         label = { model -> model.title },
         content = { model, modifier ->
             EmptyState(
                 model = model,
-                modifier = modifier.height(180.dp),
+                modifier = modifier,
             )
         },
     ),

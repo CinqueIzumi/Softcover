@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
@@ -82,7 +83,12 @@ internal fun HiddenSuggestionsContent(
 
     Column(modifier = modifier) {
         if (state.isEmpty) {
-            HiddenSuggestionsEmptyState()
+            EmptyState(
+                model = state.emptyState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp),
+            )
         } else {
             SoftcoverText(
                 text = "Books and series you’ve muted stay out of your " +
@@ -217,49 +223,6 @@ private fun HiddenSuggestionsGroupHeader(
             text = model.subline,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-/**
- * The "nothing hidden at all" state — the same low-alpha, swaying quote-glyph flourish used by the
- * empty Reading screen (DS §5 editorial quote, empty-state variant), with copy tailored to explain
- * what this screen is for rather than a bare "nothing here" panel.
- */
-@Composable
-private fun HiddenSuggestionsEmptyState() {
-    val quoteAlpha = if (LocalDarkTheme.current) 0.15f else 0.3f
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        SoftcoverText(
-            text = "“",
-            style = MaterialTheme.editorialTypography.quoteGlyph,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
-            modifier = Modifier.quoteGlyphSway(),
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        SoftcoverText(
-            text = "Nothing hidden",
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        SoftcoverText(
-            text = "Books and series you mute from “Up next in your series” land here, " +
-                "so you can bring any of them back whenever you like.",
-            style = MaterialTheme.editorialTypography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
         )
     }
 }

@@ -120,7 +120,9 @@ internal actual fun BookDetailScreenLayout(
                 model = offlineEmptyStateUiModel(),
                 modifier = Modifier
                     .padding(innerPadding)
-                    .padding(bottom = bottomChromePadding()),
+                    .padding(bottom = bottomChromePadding())
+                    .fillMaxSize()
+                    .padding(24.dp),
             )
 
             TopBar(

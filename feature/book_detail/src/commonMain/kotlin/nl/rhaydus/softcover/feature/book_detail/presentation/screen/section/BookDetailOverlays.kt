@@ -88,6 +88,7 @@ internal fun BookDetailOverlays(
         TagEditorBottomSheet(
             model = tagEditorSheet,
             userTagEditorGroups = state.userTagEditorGroups,
+            emptyState = state.tagEditorEmptyState,
             newlyAddedTagKey = state.newlyAddedTagKey,
             categoryChips = state.tagEditorCategoryChips,
             suggestions = state.tagSuggestionChips,

@@ -103,7 +103,8 @@ internal actual fun BookDetailScreenLayout(
                     model = offlineEmptyStateUiModel(),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = bottomChromePadding()),
+                        .padding(bottom = bottomChromePadding())
+                        .padding(24.dp),
                 )
             } else {
                 BoxWithConstraints(

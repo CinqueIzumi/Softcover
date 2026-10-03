@@ -22,13 +22,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.CurrentTab
@@ -40,6 +43,7 @@ import nl.rhaydus.designsystem.layout.TwoPaneScaffold
 import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.BookDetailPresenter
@@ -48,9 +52,11 @@ import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.feature.reading.presentation.screen.ReadingTab
 import nl.rhaydus.softcover.feature.session.presentation.component.SessionPeekBar
+import nl.rhaydus.softcover.orchestration.presentation.screenmodel.BottomBarScreenModel
 import org.koin.compose.koinInject
 
 private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
+
 private val TAB_ROOT_DRIFT = 12.dp
 
 // Expanded two-pane list-pane sizing: a fraction of the available body width, clamped so a desktop
@@ -69,6 +75,8 @@ private val EXPANDED_LIST_PANE_MAX = 680.dp
 internal object BottomBarScreen : Screen {
     @Composable
     override fun Content() {
+        val screenModel = koinScreenModel<BottomBarScreenModel>()
+        val state by screenModel.state.collectAsStateWithLifecycle()
         val rootNavigator = LocalNavigator.currentOrThrow
         val appNavigator = koinInject<AppNavigator>()
         val widthClass = rememberWindowSizeClass().widthClass
@@ -167,7 +175,12 @@ internal object BottomBarScreen : Screen {
                                                     overlayNavigator = rootNavigator,
                                                 )
                                             } else {
-                                                EmptyDetailPane()
+                                                EmptyState(
+                                                    model = state.emptyDetailPane,
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .padding(24.dp),
+                                                )
                                             }
                                         }
                                     } else {

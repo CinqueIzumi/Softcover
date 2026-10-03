@@ -2,48 +2,128 @@ package nl.rhaydus.softcover.core.component.state
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.component.RhaydusButton
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
- * The centred headline-and-body message a screen shows in place of content it has nothing to draw —
- * today the offline screen, and the shape the rest of the app's empty states consolidate onto.
+ * The message a surface shows in place of content it has nothing to draw.
  *
- * It fills the space its [modifier] gives it and centres within it; the caller decides what that
- * space is (the whole screen, a pane, a sheet body).
+ * It takes only the size its [modifier] gives it: a [EmptyStateVariant.Centered] state centres
+ * vertically only when the caller hands it a height, as a full screen or pane does with
+ * `fillMaxSize()`.
  */
 @Composable
 fun EmptyState(
     model: EmptyStateUiModel,
+    onEvent: (EmptyStateEvent) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    when (model.variant) {
+        EmptyStateVariant.Centered -> CenteredEmptyState(
+            model = model,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
+
+        EmptyStateVariant.Inline -> InlineEmptyState(
+            model = model,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun CenteredEmptyState(
+    model: EmptyStateUiModel,
+    onEvent: (EmptyStateEvent) -> Unit,
+    modifier: Modifier,
+) {
+    val quoteAlpha = if (LocalDarkTheme.current) 0.15f else 0.3f
+
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         SoftcoverText(
+            text = "“",
+            style = MaterialTheme.editorialTypography.quoteGlyph,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
+            modifier = Modifier.quoteGlyphSway(),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        SoftcoverText(
             text = model.title,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
 
+        model.body?.let { body ->
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SoftcoverText(
+                text = body,
+                style = MaterialTheme.editorialTypography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+
+        model.button?.let { button ->
+            Spacer(modifier = Modifier.height(24.dp))
+
+            RhaydusButton(
+                label = button.label,
+                style = ButtonStyle.FILLED,
+                icon = button.icon?.let { icon ->
+                    drawableIconResource(
+                        icon = icon,
+                        contentDescription = "",
+                    )
+                },
+                onClick = { onEvent(EmptyStateEvent.ButtonClicked) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun InlineEmptyState(
+    model: EmptyStateUiModel,
+    modifier: Modifier,
+) {
+    Column(modifier = modifier) {
         SoftcoverText(
-            text = model.body,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp),
+            text = model.title,
+            style = MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic),
+            color = MaterialTheme.colorScheme.onSurface,
         )
+
+        model.body?.let { body ->
+            Spacer(modifier = Modifier.height(4.dp))
+
+            SoftcoverText(
+                text = body,
+                style = MaterialTheme.editorialTypography.body,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }

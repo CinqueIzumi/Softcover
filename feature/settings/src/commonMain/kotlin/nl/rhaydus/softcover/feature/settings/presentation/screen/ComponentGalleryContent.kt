@@ -228,21 +228,17 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
             Column(modifier = Modifier.padding(24.dp)) {
                 val families = GalleryRegistry.families
 
-                if (families.isEmpty()) {
-                    GalleryEmptyState()
-                } else {
-                    val visibleFamilies = families.filter {
-                        state.selectedFamily == null || it == state.selectedFamily
-                    }
+                val visibleFamilies = families.filter {
+                    state.selectedFamily == null || it == state.selectedFamily
+                }
 
-                    visibleFamilies.forEachIndexed { index, family ->
-                        if (index > 0) Spacer(modifier = Modifier.height(40.dp))
+                visibleFamilies.forEachIndexed { index, family ->
+                    if (index > 0) Spacer(modifier = Modifier.height(40.dp))
 
-                        GalleryFamilySection(
-                            family = family,
-                            header = state.familySectionHeaders.getValue(family),
-                        )
-                    }
+                    GalleryFamilySection(
+                        family = family,
+                        header = state.familySectionHeaders.getValue(family),
+                    )
                 }
             }
         }
@@ -324,52 +320,6 @@ private fun GalleryFixtureFrame(fixture: GalleryFixture) {
                     .padding(16.dp),
             )
         }
-    }
-}
-// endregion
-// region Empty state
-/**
- * The S2 reality: the registry is empty until the first migration stage appends to it. Reuses the
- * documented "editorial quote, empty-state variant" (design-system §5) — the same low-alpha, swaying
- * quote glyph the empty Reading and Hidden-suggestions screens use — with copy that explains what will
- * eventually fill this frame rather than reading as an unfinished placeholder.
- */
-@Composable
-private fun GalleryEmptyState() {
-    val quoteAlpha = if (LocalDarkTheme.current) 0.15f else 0.3f
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        SoftcoverText(
-            text = "“",
-            style = MaterialTheme.editorialTypography.quoteGlyph,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
-            modifier = Modifier.quoteGlyphSway(),
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        SoftcoverText(
-            text = "The shelf is being built",
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        SoftcoverText(
-            text = "Every component the app renders is moving into this library, one migration " +
-                "stage at a time. A family's fixtures appear here the moment its stage lands — " +
-                "rendered in whichever brightness and spine colour you've chosen above.",
-            style = MaterialTheme.editorialTypography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
     }
 }
 // endregion

@@ -14,29 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7 closed, SL-9–SL-11 done; SL-14 drafted. SL-3b waits on F34; F33 open.
-- **Next:** S8-1 (`steps/s8-screen-states.md`).
+- **State:** S8-1 done (`EmptyState` Centered / Inline; `BottomBarScreenModel` added). SL-14 drafted. SL-3b waits on F34; F33 open.
+- **Next:** S8-2 (`steps/s8-screen-states.md`).
 - **Open questions:** `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)?
-- **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
-  render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
-  titles, reading's mobile masthead line height; S5-C-headers' "Your tabs" tracking (2.2 → 1.2sp) and
-  `FeaturedCard`'s eyebrow gap (10 → 8dp); the whole badge family in the gallery and on device (never
-  visually checked since S4-5b) — SemiBold everywhere, TrackingTag pill → 6dp, Owned 14 → 12dp icon,
-  cover selection mark 26 → 24dp, Expired on `surfaceContainerHigh`; S5-C-dividers' quote-glyph gap
-  (14 → 12dp), the "Or type it" label on plain `eyebrowSmall`, and the version footer on `eyebrowSmall`;
-  S6-C-rows' settings rows (16dp vertical everywhere, 4dp title gap, top rule and press feedback on
-  toggle / choice lists); S6-3's sheet header gaps (12/8/8), 56dp jackets, sheet padding (top 8 / bottom 16,
-  LoadingSheet 32 → 16), and the progress sheet's tap-to-clear-focus now covering the body only; S6-4's
-  verdict cover as a 56dp header jacket (was above the header); S6-5's Filter footer inset (22 → 24),
-  bulk-remove and re-auth as sheets, and the animated close on Apply / Save / Delete / top action; S6-6's
-  tag editor and edition jackets (56dp), the edition footer divider, ShareBook's eyebrow bar, and the
-  unknown-ISBN footer; S6-7's streak sheet insets, log-out no longer centred, and the genre /
-  Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
-  (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
-  TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes; SL-5's hero
-  title block while loading; S7-2/4/5/6/7 cards; SL-10b/11 loading; desktop chip gap (24dp); C2 bars; C3 eyebrows, bylines; C5 uncrossfaded swap.
-- **Verification:** S7-C5: `check buildHealth styleCheck` (JDK 21), review ✅.
-- **Uncommitted:** S7-C1–C5 + tests, SL-14, docs, gallery split, iOS / dep fixes.
+- **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
+- **Verification:** S8-1: compile, `styleCheck` (JDK 21), tests, review ✅.
+- **Uncommitted:** S8-1 + tests, docs.
 
 ## Local verification
 

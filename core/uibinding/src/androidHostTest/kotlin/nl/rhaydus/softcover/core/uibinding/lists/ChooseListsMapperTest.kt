@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
+import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
@@ -841,6 +842,44 @@ class ChooseListsMapperTest {
 
             // ----- Assert -----
             result.rows shouldBe emptyList()
+        }
+    }
+
+    @Nested
+    inner class EmptyStateMapping {
+        @Test
+        fun `single book mapping uses the inline variant with a title`() {
+            // ----- Arrange -----
+            val lists = emptyList<BookList>()
+
+            // ----- Act -----
+            val result = lists.toChooseListsUiModel(
+                bookId = 42,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.emptyState.variant shouldBe EmptyStateVariant.Inline
+            result.emptyState.title.isNotBlank() shouldBe true
+        }
+
+        @Test
+        fun `bulk mapping uses the inline variant with a title`() {
+            // ----- Arrange -----
+            val lists = emptyList<BookList>()
+
+            // ----- Act -----
+            val result = lists.toBulkChooseListsUiModel(
+                bookIds = setOf(1, 2),
+                covers = emptyList(),
+                listsBeingMutated = emptySet(),
+            )
+
+            // ----- Assert -----
+            result.emptyState.variant shouldBe EmptyStateVariant.Inline
+            result.emptyState.title.isNotBlank() shouldBe true
         }
     }
 }

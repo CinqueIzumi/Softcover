@@ -32,6 +32,10 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.component.state.EmptyStateButtonUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateEvent
+import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -47,6 +51,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 internal fun EmptyCurrentlyReadingScreen(
     pickUpNextHeader: SectionHeaderUiModel,
     trendingHeader: SectionHeaderUiModel,
+    emptyState: EmptyStateUiModel,
     wantToReadBooks: List<Book> = emptyList(),
     trendingBooks: List<Book> = emptyList(),
     pickUpNextCards: ImmutableList<BookCardUiModel>? = persistentListOf(),
@@ -80,71 +85,14 @@ internal fun EmptyCurrentlyReadingScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (showAdaptive) Spacer(modifier = Modifier.height(40.dp))
-        val quoteAlpha = if (LocalDarkTheme.current) 0.15f else 0.3f
-
-        SoftcoverText(
-            text = "“",
-            style = MaterialTheme.editorialTypography.quoteGlyph.copy(
-                fontSize = 140.sp,
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .quoteGlyphSway(),
+        EmptyState(
+            model = emptyState,
+            onEvent = { event ->
+                when (event) {
+                    EmptyStateEvent.ButtonClicked -> onNavigateToSearch()
+                }
+            },
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        SoftcoverText(
-            text = "An open page awaits",
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        SoftcoverText(
-            text = "Nothing is currently between your fingers. Find a title worth losing an evening to.",
-            style = MaterialTheme.editorialTypography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Surface(
-            onClick = onNavigateToSearch,
-            color = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            shape = RoundedCornerShape(percent = 50),
-            modifier = Modifier.pointerHandCursor(),
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 22.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val searchIcon = drawableIconResource(
-                    icon = SoftcoverIcon.Search,
-                    contentDescription = "",
-                )
-
-                Icon(
-                    painter = searchIcon.getIconPainter(),
-                    contentDescription = searchIcon.contentDescription,
-                    modifier = Modifier.size(18.dp),
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                SoftcoverText(
-                    text = "Find a book",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                )
-            }
-        }
 
         // When the streak is enabled we show the full 21-day grid even with zero days
         // read (all-unlit), inviting a brand-new reader to start a streak; isNotEmpty()

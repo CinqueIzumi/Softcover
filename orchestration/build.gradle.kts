@@ -58,14 +58,17 @@ kotlin {
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.corePlatform)
             implementation(libs.rhaydus.designsystemCore)
+            implementation(libs.rhaydus.toad)
 
             // Owns MainActivityViewModel (the one app-level ViewModel) since M1 moved it out of
             // :core:designsystem.
             implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.lifecycle.runtime.compose)
 
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.navigator)
+            implementation(libs.voyager.koin)
             implementation(libs.voyager.tabNavigator)
             implementation(libs.voyager.transitions)
         }

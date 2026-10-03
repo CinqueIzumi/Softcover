@@ -13,7 +13,10 @@ import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateButtonUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -57,6 +60,14 @@ internal data class ReadingScreenUiState(
 
     val pickUpNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Pick up next"),
     val trendingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Trending now"),
+    val emptyCurrentlyReading: EmptyStateUiModel = EmptyStateUiModel(
+        title = "An open page awaits",
+        body = "Nothing is currently between your fingers. Find a title worth losing an evening to.",
+        button = EmptyStateButtonUiModel(
+            label = "Find a book",
+            icon = SoftcoverIcon.Search,
+        ),
+    ),
 
     val recentReadingActivity: List<ReadingDayActivity> = emptyList(),
     val streakEnabled: Boolean = true,

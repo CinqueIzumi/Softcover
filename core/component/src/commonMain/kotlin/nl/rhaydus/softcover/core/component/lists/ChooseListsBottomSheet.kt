@@ -50,6 +50,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -89,7 +90,10 @@ fun ChooseListsBottomSheet(
         modifier = modifier,
     ) {
         if (model.rows.isEmpty()) {
-            ChooseListsEmptyState()
+            EmptyState(
+                model = model.emptyState,
+                modifier = Modifier.padding(vertical = 20.dp),
+            )
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -120,25 +124,6 @@ fun ChooseListsBottomSheet(
         NewListRow(
             onClick = { onEvent(ChooseListsEvent.NewListRequested) },
             modifier = Modifier.padding(top = 20.dp),
-        )
-    }
-}
-
-@Composable
-private fun ChooseListsEmptyState(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.padding(vertical = 20.dp)) {
-        SoftcoverText(
-            text = "No custom lists yet",
-            style = MaterialTheme.editorialTypography.titleLarge.copy(fontStyle = FontStyle.Italic),
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        SoftcoverText(
-            text = "Create your first list below.",
-            style = MaterialTheme.editorialTypography.body,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

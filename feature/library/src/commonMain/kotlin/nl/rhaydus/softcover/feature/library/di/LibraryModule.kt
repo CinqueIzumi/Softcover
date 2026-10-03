@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.BulkRemoveShe
 import nl.rhaydus.softcover.feature.library.presentation.collector.ChooseListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.DateStyleCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.DisplayListsCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.EmptyStatesCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterChipModelsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterDraftChipsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterOptionsCollector
@@ -54,6 +55,7 @@ val libraryModule = module {
 
     factory { VisibleTabsCollector() } bind LibraryCollector::class
     factory { ShelfSidebarCollector() } bind LibraryCollector::class
+    factory { EmptyStatesCollector() } bind LibraryCollector::class
 
     factory { GridLayoutCollector() } bind LibraryCollector::class
     factory { MastheadCollector() } bind LibraryCollector::class

@@ -51,7 +51,8 @@ internal actual fun ExploreScreenLayout(
             model = offlineEmptyStateUiModel(),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = rememberBottomBarPadding()),
+                .padding(bottom = rememberBottomBarPadding())
+                .padding(24.dp),
         )
         return
     }

@@ -59,7 +59,7 @@ gate or gallery check stands in for it. Walk every screen and every navigation p
   back.
 - **States:** empty, error, offline and loading on every screen; long titles, missing covers, no data.
 - **Layouts:** compact, medium and expanded widths; light and dark; each palette; larger font scale.
-- **The accepted visual shifts** listed under `README.md` § Now → Visual checks.
+- **The accepted visual shifts** listed in [`visual-checks.md`](../visual-checks.md).
 
 Regressions found so far:
 

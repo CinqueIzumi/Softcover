@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -198,6 +199,10 @@ internal data class BookDetailUiState(
      * (R9) off [userTags].
      */
     val userTagEditorGroups: List<UserTagEditorChipGroup> = emptyList(),
+    val tagEditorEmptyState: EmptyStateUiModel = EmptyStateUiModel(
+        title = "Nothing here yet.",
+        body = "Name the first thing this book is to you.",
+    ),
 
     /**
      * Every [userTagEditorGroups] chip key resolved back to the [UserTag] the remove / spoiler-toggle
