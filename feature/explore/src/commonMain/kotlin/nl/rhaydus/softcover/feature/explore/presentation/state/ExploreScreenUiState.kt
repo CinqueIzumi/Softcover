@@ -92,8 +92,6 @@ internal data class ExploreScreenUiState(
         focused = false,
         isLoading = false,
     ),
-    /** The search-results opener, mapped by `SearchResultsHeaderCollector` (R9). */
-    val searchResultsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Showing 0 results"),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val searchError: String? = null,

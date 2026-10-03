@@ -56,7 +56,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueri
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsCollector
-import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchResultsHeaderCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchTopBarCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.UnreleasedCoverOverlaysCollector
@@ -114,8 +113,6 @@ val exploreModule = module {
     factory { QueriedBooksCollector() } bind ExploreCollector::class
 
     factory { QueriedBooksHasMoreCollector() } bind ExploreCollector::class
-
-    factory { SearchResultsHeaderCollector() } bind ExploreCollector::class
 
     factory { MastheadCollector() } bind ExploreCollector::class
 

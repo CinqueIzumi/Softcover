@@ -28,7 +28,6 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
-import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnLoadMoreSearchResultsAction
@@ -55,11 +54,6 @@ internal fun DesktopSearchResults(
                 runAction = runAction,
             )
         }
-
-        SectionHeader(
-            model = state.searchResultsHeader,
-            isLoading = state.isLoading,
-        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
