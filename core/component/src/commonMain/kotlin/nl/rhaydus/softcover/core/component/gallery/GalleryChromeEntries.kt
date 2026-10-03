@@ -42,6 +42,8 @@ import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBar
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
@@ -59,6 +61,21 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         label = ::topBarFixtureLabel,
         content = { model, modifier ->
             TopBar(
+                model = model,
+                onEvent = {},
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "EditorialTopBar",
+        family = GalleryFamily.TOPBAR,
+        blurb = "The desktop page bar: a back button, a start-aligned editorial headline and a " +
+            "slot for the screen's own actions.",
+        previews = EditorialTopBarUiModel,
+        label = ::editorialTopBarFixtureLabel,
+        content = { model, modifier ->
+            EditorialTopBar(
                 model = model,
                 onEvent = {},
                 modifier = modifier,
@@ -312,6 +329,10 @@ private fun topBarFixtureLabel(model: TopBarUiModel): String = when {
 }
 
 private const val TOP_BAR_LONG_TITLE_FLOOR = 30
+
+/** Names what an [EditorialTopBarUiModel] fixture demonstrates. */
+private fun editorialTopBarFixtureLabel(model: EditorialTopBarUiModel): String =
+    if (model.title == null) "Back only" else "Titled"
 
 /** Names what a [SearchTopBarUiModel] fixture demonstrates. */
 private fun searchTopBarFixtureLabel(model: SearchTopBarUiModel): String = when {

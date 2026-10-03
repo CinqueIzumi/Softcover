@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
 import nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState
 
@@ -32,9 +34,13 @@ internal actual fun ComponentGalleryScreenLayout(
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        DesktopSettingsBackBar(
-            title = "Component gallery",
-            onNavigateBack = onNavigateBack,
+        EditorialTopBar(
+            model = state.editorialTopBar,
+            onEvent = { event ->
+                when (event) {
+                    EditorialTopBarEvent.BackClicked -> onNavigateBack()
+                }
+            },
         )
 
         Box(

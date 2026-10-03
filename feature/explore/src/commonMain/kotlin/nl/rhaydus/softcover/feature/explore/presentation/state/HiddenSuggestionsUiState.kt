@@ -4,6 +4,9 @@ import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import nl.rhaydus.softcover.feature.explore.presentation.model.HiddenGroupHeaderUiModel
@@ -32,6 +35,11 @@ internal data class HiddenSuggestionsUiState(
     val hiddenSeriesCards: ImmutableList<BookCardUiModel>? = null,
     val hiddenBooksLoaded: Boolean = false,
     val hiddenSeriesLoaded: Boolean = false,
+    val topBar: TopBarUiModel = TopBarUiModel(
+        title = "Hidden suggestions",
+        navigation = TopBarNavigation.Back,
+    ),
+    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = "Hidden suggestions"),
 ) : UiState {
     val isEmpty: Boolean
         get() = hiddenBooksLoaded && hiddenSeriesLoaded && hiddenBooks.isEmpty() && hiddenSeries.isEmpty()

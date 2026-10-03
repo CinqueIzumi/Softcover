@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -37,6 +38,9 @@ class EditionCardsCollectorTest {
         )
         dependencies = mockk(relaxed = true)
     }
+
+    private fun headerEyebrow(): String =
+        stateFlow.value.editionCountHeader.shouldBeInstanceOf<SectionHeaderUiModel.Label>().eyebrow
 
     private fun keys(): List<BookCardKey> = stateFlow.value.editionCards.map { it.key }
 
@@ -151,6 +155,81 @@ class EditionCardsCollectorTest {
             }
             trailing[0] shouldBe null
             trailing[1].shouldNotBeNull()
+            job.cancel()
+        }
+
+        @Test
+        fun `header counts zero cards when there are no editions`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(
+                editions = emptyList(),
+            )
+            val collector = EditionCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            headerEyebrow() shouldBe "0 EDITIONS"
+            stateFlow.value.editionCards.size shouldBe 0
+            job.cancel()
+        }
+
+        @Test
+        fun `header counts every published card`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(
+                editions = listOf(
+                    buildEdition(id = 1),
+                    buildEdition(id = 2),
+                    buildEdition(id = 3),
+                ),
+            )
+            val collector = EditionCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            headerEyebrow() shouldBe "3 EDITIONS"
+            stateFlow.value.editionCards.size shouldBe 3
+            job.cancel()
+        }
+
+        @Test
+        fun `header counts only the search-filtered subset`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(
+                editions = listOf(
+                    buildEdition(id = 1).copy(publisher = "Tor"),
+                    buildEdition(id = 2).copy(publisher = "Penguin"),
+                    buildEdition(id = 3).copy(publisher = "Tor"),
+                ),
+                editionSearchQuery = "tor",
+            )
+            val collector = EditionCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            headerEyebrow() shouldBe "2 EDITIONS"
+            stateFlow.value.editionCards.size shouldBe 2
             job.cancel()
         }
     }

@@ -12,17 +12,9 @@ import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
-import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
-
-/** The bar is fixed for this screen, so the model is a constant rather than rebuilt per frame. */
-private val APPEARANCE_TOP_BAR = TopBarUiModel(
-    title = "Appearance",
-    navigation = TopBarNavigation.Back,
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +26,7 @@ internal actual fun AppearanceSettingsScreenLayout(
     Scaffold(
         topBar = {
             TopBar(
-                model = APPEARANCE_TOP_BAR,
+                model = state.appearanceTopBar,
                 onEvent = { event ->
                     when (event) {
                         TopBarEvent.BackClicked -> onNavigateBack()

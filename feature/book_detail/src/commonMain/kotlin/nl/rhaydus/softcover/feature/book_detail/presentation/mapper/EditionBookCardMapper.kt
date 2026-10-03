@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
@@ -118,3 +119,6 @@ private fun BookEdition.isbnWhisper(): String? {
 
     return isbn?.let { "ISBN $it" }
 }
+
+/** The edition selector's "N EDITIONS" label for [count] cards. */
+internal fun editionCountHeaderFor(count: Int): SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "$count EDITIONS")

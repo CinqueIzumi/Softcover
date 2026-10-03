@@ -2,6 +2,9 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderTone
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -29,6 +32,11 @@ internal data class LibraryVisibilitySettingsUiState(
     val availableLists: List<BookList> = emptyList(),
     val statusCounts: Map<Int, Int> = emptyMap(),
     val totalCount: Int = 0,
+    val topBar: TopBarUiModel = TopBarUiModel(
+        title = "Library tabs",
+        navigation = TopBarNavigation.Back,
+    ),
+    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = "Library tabs"),
 ) : UiState {
     val isDirty: Boolean
         get() = initialized && (

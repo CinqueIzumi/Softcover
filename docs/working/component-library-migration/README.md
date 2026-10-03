@@ -14,12 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8-2 done: `Callout` (status callouts, scan-edition prompt, app-update card) + `Banner` `HIGHLIGHT` (pace nudge); models in collectors; `ObserveAppUpdateStateUseCase` contract in `core:domain`. SL-3b waits on F34; F33 open.
-- **Next:** S8-3 top bars, Phase 1 design (`steps/s8-screen-states.md` § S8-3). For S8-C: app-update `AccentBar` is 30×4, not a foundations bar size (32×4 / 20×1).
+- **State:** S8-3 done: `EditorialTopBar` (desktop settings ×5, hidden suggestions, book detail with overflow in `actions`); onboarding's eyebrow → `SectionHeader` in its cross-fade. Render-built models moved onto `UiState`: all top bars (mobile + desktop, bar book detail's scroll-derived one), onboarding page headers, edition "N EDITIONS" label. SL-3b waits on F34; F33 open.
+- **Next:** S8-C-states convergence pass (`family-procedure.md` § Phase 3) over empty states, callouts/banners, top bars. App-update `AccentBar` is 30×4, not a foundations bar size (32×4 / 20×1); `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
 - **Open questions:** `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** S8-2: compile, `checkModuleGraph`, `projectHealth`, `styleCheck` (JDK 21), tests, review (no blockers) ✅.
-- **Uncommitted:** S8-2 + tests, docs.
+- **Verification:** S8-3: compile (incl. onboarding Android), `checkModuleGraph`, `projectHealth`, `styleCheck` (JDK 21), tests, tests (6 feature suites + core:component), two reviews (onboarding width blocker fixed; second clean) ✅. Onboarding top row needs an on-device look.
+- **Uncommitted:** S8-3 + test, docs.
 
 ## Local verification
 

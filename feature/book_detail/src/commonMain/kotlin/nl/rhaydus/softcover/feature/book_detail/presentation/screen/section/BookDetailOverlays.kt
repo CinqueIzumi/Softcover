@@ -184,6 +184,7 @@ internal fun BookDetailOverlays(
         EditionBottomSheetSelector(
             model = editionSheet,
             editionCards = state.editionCards,
+            editionCountHeader = state.editionCountHeader,
             isLoading = state.loadingEditions,
             searchQuery = state.editionSearchQuery,
             onSearchQueryChange = {

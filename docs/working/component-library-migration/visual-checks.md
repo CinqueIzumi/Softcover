@@ -34,3 +34,4 @@ shift; tick each during S12.
   "Find a book" pill as a `RhaydusButton`; tag editor gaps 6/4 → 8/12; Library's empty state top-aligned.
 - [ ] S8-2: callouts at 16 dp radius (status 24, app update 12); status eyebrow `eyebrowSmall` primary and body
   `bodySmall`; app-update pill → filled `RhaydusButton`; pace nudge animates out, says "Dismiss".
+- [ ] S8-3: desktop back bars' end padding 16 → 8; desktop book detail's bar gains 8 dp on top; onboarding's accent bar now cross-fades with its eyebrow.

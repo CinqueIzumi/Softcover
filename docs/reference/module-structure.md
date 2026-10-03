@@ -144,7 +144,7 @@ component/
 +              · StatTile  · Chart  · Legend
 + text/        SoftcoverText
 + topbar/      TopBar  TopBarUiModel/Event/Navigation/Surface
-+              SearchTopBar(+UiModel, +Event)   · BackBar
++              SearchTopBar(+UiModel, +Event)   EditorialTopBar(+UiModel, +Event)
 + verdict/     VerdictBlock  VerdictBlockUiModel/Event
 +              VerdictSheet  VerdictSheetUiModel/Event
 · bookcard/    BookCard  BookCardUiModel/Variant/Content/Decorations

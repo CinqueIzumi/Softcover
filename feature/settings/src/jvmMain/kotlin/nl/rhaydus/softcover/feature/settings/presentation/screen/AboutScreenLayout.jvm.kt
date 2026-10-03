@@ -16,6 +16,10 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 
 /**
  * Standalone desktop About page — a fallback for a direct push (the primary desktop entry is the
@@ -24,6 +28,8 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
  */
 @Composable
 internal actual fun AboutScreenLayout(
+    topBar: TopBarUiModel,
+    editorialTopBar: EditorialTopBarUiModel,
     versionFooterDivider: DividerUiModel,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
@@ -36,9 +42,13 @@ internal actual fun AboutScreenLayout(
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        DesktopSettingsBackBar(
-            title = "About",
-            onNavigateBack = onNavigateBack,
+        EditorialTopBar(
+            model = editorialTopBar,
+            onEvent = { event ->
+                when (event) {
+                    EditorialTopBarEvent.BackClicked -> onNavigateBack()
+                }
+            },
         )
 
         Box(

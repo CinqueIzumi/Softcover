@@ -8,7 +8,7 @@
 |---|---|---|
 | S8-1 | Empty states | [x] |
 | S8-2 | Callouts & banners | [x] |
-| S8-3 | Top bars | [ ] |
+| S8-3 | Top bars | [x] |
 | S8-C-states | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## Approved shape
@@ -34,6 +34,16 @@ S8-2:
 - `RoadmapErrorBanner` stays: wrapper over foundation `InlineErrorState`, not a callout.
 - `foundations.md` "inline bar" line corrected: status callouts lead with an icon.
 - Fixtures: Callout status, edition idle + busy, app-update button + progress; Banner warning + highlight dismissible.
+
+S8-3:
+- `EditorialTopBar(model, onEvent: (EditorialTopBarEvent) -> Unit, modifier, actions: @Composable RowScope.() -> Unit = {})` in `core/component/topbar/`; model `title: String? = null`; event `BackClicked`. Separate from `TopBar` per § 7.6 (Material app bar vs plain row with start-aligned editorial headline).
+- Anatomy: back `IconButton` (pointer-hand cursor, "Back" `DesktopTooltip`, "Navigate back" description), 4 dp gap, editorial `headlineMedium` onSurface title, trailing `actions`; one padding set start 8 / end 8 / top 12 / bottom 4 (book detail gains 8 dp on top — log in `visual-checks.md`).
+- No loading state (static copy); fixtures titled + untitled; gallery entry in the top-bar family.
+- Models live on each screen's `UiState` as defaulted fields (as `SettingsScreenUiState.aboutCreditsHeader`), passed through by the render; book detail's untitled model carries `BookOverflowMenu` in `actions`. No mapper.
+- Same move for the older render-built models: the 9 mobile `*_TOP_BAR`s (settings ×5, hidden suggestions, profile, scan) and `EditionBottomSheetSelector`'s count label. Loading stand-ins (Roadmap, Explore headers and cards) stay for the R10 sweep.
+- Folds: `DesktopSettingsBackBar` (file deleted; About, Appearance, Component gallery, Library tabs, Roadmap), `HiddenSuggestionsDesktopBackBar`, `DesktopBookDetailTopBar`.
+- `OnboardingTopBar` stays feature-local (folio, pager-linked cross-fade); its hand-rolled accent bar + eyebrow becomes `SectionHeader` `Section(eyebrow)`, one model per page on `OnboardingUiState`, inside the existing cross-fade (bar fades with the text; accepted).
+- `components.md` gains an "Editorial top bar" index line; `module-structure.md` marks it built.
 
 ## S8-1 — Empty states (8 → `EmptyState` + `EmptyStateUiModel`)
 
@@ -66,17 +76,17 @@ S4-5a as `Banner` + `BannerUiModel` + `BannerTone` (`core/component/callout/`), 
 | `RoadmapErrorBanner` | `feature/settings/presentation/screen/RoadmapContent.kt:122` | |
 | `PaceNudgeRibbon` | `feature/reading/presentation/screen/section/PaceNudgeRibbon.kt:30` | |
 
-## S8-3 — Top bars (9 → `TopBar` + `SearchTopBar` + `BackBar`)
+## S8-3 — Top bars (9 → `TopBar` + `SearchTopBar` + `EditorialTopBar`)
 
 `TopBar` and `SearchTopBar` stay separate (`component-contract.md` § 7.6); already migrated in S4-5a
 with `TopBarUiModel`/`Event`/`Navigation`/`Surface` and `SearchTopBarUiModel`/`Event`, consumed by
 ~12 screen layouts. `SoftcoverTopBarAction` was deleted rather than migrated — `TopBarUiModel` carries
 `title`/`subtitle`/`navigation`/`surface`, and a screen's own actions go in the trailing slot. Only
-`BackBar` is left of this family.
+the desktop back bars and onboarding's bar are left of this family; `TagEditorTopBar` went with the
+sheet-chrome move.
 
 | Symbol(s) | Current path:line | Note |
 |---|---|---|
-| `TagEditorTopBar` | `feature/book_detail/presentation/component/TagEditorTopBar.kt:17` | |
 | `DesktopBookDetailTopBar` | `feature/book_detail/presentation/screen/BookDetailScreenLayout.jvm.kt:138` | |
 | `OnboardingTopBar` | `feature/onboarding/presentation/screen/OnboardingScreenLayout.mobile.kt:173` | |
 | `DesktopSettingsBackBar` | `feature/settings/presentation/screen/DesktopSettingsBackBar.kt:28` | |

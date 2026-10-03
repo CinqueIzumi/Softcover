@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,13 +18,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -48,6 +43,8 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -59,14 +56,6 @@ import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 
 private val PAGE_NUMBERS = listOf(1, 2, 3)
-
-/** The persistent top bar's per-page eyebrow label, keyed on the pager's settled current page. */
-private val IntroScreen.eyebrow: String
-    get() = when (this) {
-        IntroScreen.FIRST -> "Welcome"
-        IntroScreen.SECOND -> "Connect"
-        IntroScreen.THIRD -> "API key"
-    }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -94,9 +83,9 @@ internal actual fun OnboardingScreenLayout(
                 .imePadding(),
         ) {
             // Persistent chrome, rendered once above the pager (not per-page) so it never shifts as
-            // pages swipe — only the eyebrow label and the folio's active digit track the pager below.
+            // pages swipe — only the header and the folio's active digit track the pager below.
             OnboardingTopBar(
-                eyebrow = pages[pagerState.currentPage].eyebrow,
+                header = state.pageHeaders.getValue(pages[pagerState.currentPage]),
                 activePage = pagerState.currentPage + 1,
                 modifier = Modifier
                     .padding(horizontal = 30.dp)
@@ -151,15 +140,15 @@ internal actual fun OnboardingScreenLayout(
 }
 
 /**
- * The persistent chrome above the pager: an accent-bar eyebrow on the left (the established
- * hand-composed pattern) and the "01 — 02 — 03" folio
+ * The persistent chrome above the pager: a [SectionHeader] on the left and the "01 — 02 — 03" folio
  * indicator on the right. Rendered once above the pager rather than per-page, so its position never
- * shifts as pages swipe — only the [eyebrow] label cross-fades and the folio's active digit updates as
- * the pager settles on a new page. Back/Skip live only in [PrimaryActionFooterRow], never here.
+ * shifts as pages swipe — only the [header] cross-fades, accent bar included, and the folio's active
+ * digit updates as the pager settles on a new page. Back/Skip live only in [PrimaryActionFooterRow],
+ * never here.
  */
 @Composable
 private fun OnboardingTopBar(
-    eyebrow: String,
+    header: SectionHeaderUiModel.Section,
     activePage: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -168,35 +157,18 @@ private fun OnboardingTopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(
-                        width = 32.dp,
-                        height = 4.dp,
-                    )
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.primary),
-            )
+        val playMotion = playDecorativeMotion()
+        val fadeSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap()
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            val playMotion = playDecorativeMotion()
-            val fadeSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap()
-
-            AnimatedContent(
-                targetState = eyebrow,
-                transitionSpec = {
-                    fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
-                },
-                label = "OnboardingTopBarEyebrow",
-            ) { label ->
-                SoftcoverText(
-                    text = label.uppercase(),
-                    style = MaterialTheme.editorialTypography.eyebrow,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+        AnimatedContent(
+            targetState = header,
+            modifier = Modifier.weight(1f),
+            transitionSpec = {
+                fadeIn(animationSpec = fadeSpec) togetherWith fadeOut(animationSpec = fadeSpec)
+            },
+            label = "OnboardingTopBarHeader",
+        ) { pageHeader ->
+            SectionHeader(model = pageHeader)
         }
 
         FolioIndicator(activePage = activePage)

@@ -8,6 +8,9 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
+import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -150,4 +153,14 @@ internal data class SettingsScreenUiState(
         dynamicColor = false,
     ),
     val paletteChoices: ImmutableList<PaletteChoice> = paletteChoicesFor(selected = ColorPalette.DEFAULT),
+    val aboutTopBar: TopBarUiModel = TopBarUiModel(
+        title = "About",
+        navigation = TopBarNavigation.Back,
+    ),
+    val aboutEditorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = "About"),
+    val appearanceTopBar: TopBarUiModel = TopBarUiModel(
+        title = "Appearance",
+        navigation = TopBarNavigation.Back,
+    ),
+    val appearanceEditorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = "Appearance"),
 ) : UiState

@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -33,6 +34,7 @@ import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.editionCountHeaderFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.toad.UiState
 
@@ -158,6 +160,12 @@ internal data class BookDetailUiState(
 
     /** Ordered like `filteredEditions`, mapped by `EditionCardsCollector` (R9). */
     val editionCards: ImmutableList<BookCardUiModel> = persistentListOf(),
+
+    /** The selector's "N EDITIONS" label, mapped alongside [editionCards] by `EditionCardsCollector` (R9). */
+    val editionCountHeader: SectionHeaderUiModel = editionCountHeaderFor(count = 0),
+
+    /** Desktop only; mobile's bar follows the scroll position and is built by its layout. */
+    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(),
     val tagEditorCover: CoverUiModel? = null,
 
     val tagEditorSheet: SheetScaffoldUiModel? = null,

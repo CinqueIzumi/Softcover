@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar
@@ -35,9 +37,13 @@ internal actual fun LibraryVisibilitySettingsScreenLayout(
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        DesktopSettingsBackBar(
-            title = "Library tabs",
-            onNavigateBack = onNavigateBack,
+        EditorialTopBar(
+            model = state.editorialTopBar,
+            onEvent = { event ->
+                when (event) {
+                    EditorialTopBarEvent.BackClicked -> onNavigateBack()
+                }
+            },
         )
 
         Box(

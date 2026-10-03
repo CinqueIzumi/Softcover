@@ -36,12 +36,14 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.editionCountHeaderFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toEditionCard
 
 @Composable
 internal fun EditionBottomSheetSelector(
     model: SheetScaffoldUiModel,
     editionCards: ImmutableList<BookCardUiModel>,
+    editionCountHeader: SectionHeaderUiModel,
     isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
@@ -70,6 +72,7 @@ internal fun EditionBottomSheetSelector(
 
         EditionBottomSheetContent(
             editionCards = editionCards,
+            editionCountHeader = editionCountHeader,
             isLoading = isLoading,
             searchQuery = searchQuery,
             onSearchQueryChange = onSearchQueryChange,
@@ -82,6 +85,7 @@ internal fun EditionBottomSheetSelector(
 @Composable
 private fun ColumnScope.EditionBottomSheetContent(
     editionCards: ImmutableList<BookCardUiModel>,
+    editionCountHeader: SectionHeaderUiModel,
     isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
@@ -109,7 +113,7 @@ private fun ColumnScope.EditionBottomSheetContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SectionHeader(model = SectionHeaderUiModel.Label(eyebrow = "${editionCards.size} EDITIONS"))
+        SectionHeader(model = editionCountHeader)
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -228,6 +232,7 @@ private fun EditionBottomSheetContentPreview() {
         Column {
             EditionBottomSheetContent(
                 editionCards = editionCards,
+                editionCountHeader = editionCountHeaderFor(count = editionCards.size),
                 isLoading = false,
                 searchQuery = "",
                 onSearchQueryChange = {},

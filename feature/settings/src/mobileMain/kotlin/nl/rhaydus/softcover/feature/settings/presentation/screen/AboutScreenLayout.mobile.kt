@@ -13,22 +13,18 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
-/** The bar is fixed for this screen, so the model is a constant rather than rebuilt per frame. */
-private val ABOUT_TOP_BAR = TopBarUiModel(
-    title = "About",
-    navigation = TopBarNavigation.Back,
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal actual fun AboutScreenLayout(
+    topBar: TopBarUiModel,
+    editorialTopBar: EditorialTopBarUiModel,
     versionFooterDivider: DividerUiModel,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
@@ -41,7 +37,7 @@ internal actual fun AboutScreenLayout(
     Scaffold(
         topBar = {
             TopBar(
-                model = ABOUT_TOP_BAR,
+                model = topBar,
                 onEvent = { event ->
                     when (event) {
                         TopBarEvent.BackClicked -> onNavigateBack()
@@ -77,6 +73,8 @@ private fun AboutScreenPreview() {
 
     SoftcoverTheme {
         AboutScreenLayout(
+            topBar = state.aboutTopBar,
+            editorialTopBar = state.aboutEditorialTopBar,
             versionFooterDivider = DividerUiModel.Horizontal(
                 center = DividerCenter.Label(text = "Version 1.0.0 (1)"),
             ),

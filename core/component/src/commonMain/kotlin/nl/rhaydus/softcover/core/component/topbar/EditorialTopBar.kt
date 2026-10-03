@@ -1,6 +1,7 @@
-package nl.rhaydus.softcover.feature.settings.presentation.screen
+package nl.rhaydus.softcover.core.component.topbar
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,21 +21,22 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
- * Static back bar for the standalone desktop sub-setting pages ([AppearanceSettingsScreenLayout],
- * [LibraryVisibilitySettingsScreenLayout]). Those pages are a fallback for a direct push — the
- * primary desktop entry to these settings is the [SettingsScreenLayout] master–detail pane.
+ * The desktop page bar: a back button, a start-aligned editorial headline, and a trailing slot for
+ * the screen's own actions. Always leads back out, so unlike [TopBar] it has no navigation switch.
  */
 @Composable
-internal fun DesktopSettingsBackBar(
-    title: String,
-    onNavigateBack: () -> Unit,
+fun EditorialTopBar(
+    model: EditorialTopBarUiModel,
+    onEvent: (EditorialTopBarEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(
                 start = 8.dp,
-                end = 16.dp,
+                end = 8.dp,
                 top = 12.dp,
                 bottom = 4.dp,
             ),
@@ -42,7 +44,7 @@ internal fun DesktopSettingsBackBar(
     ) {
         DesktopTooltip(text = "Back") {
             IconButton(
-                onClick = onNavigateBack,
+                onClick = { onEvent(EditorialTopBarEvent.BackClicked) },
                 modifier = Modifier.pointerHandCursor(),
             ) {
                 val backIcon = drawableIconResource(
@@ -57,12 +59,18 @@ internal fun DesktopSettingsBackBar(
             }
         }
 
-        Spacer(modifier = Modifier.width(4.dp))
+        model.title?.let { title ->
+            Spacer(modifier = Modifier.width(4.dp))
 
-        SoftcoverText(
-            text = title,
-            style = MaterialTheme.editorialTypography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+            SoftcoverText(
+                text = title,
+                style = MaterialTheme.editorialTypography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        actions()
     }
 }

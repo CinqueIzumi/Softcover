@@ -18,8 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -27,9 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
-import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.callout.CalloutEvent
@@ -37,8 +33,8 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
@@ -94,11 +90,20 @@ internal actual fun BookDetailScreenLayout(
         color = MaterialTheme.colorScheme.background,
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            DesktopBookDetailTopBar(
-                state = state,
-                runAction = runAction,
-                isOnline = isOnline,
-                onNavigateBack = onNavigateBack,
+            EditorialTopBar(
+                model = state.editorialTopBar,
+                onEvent = { event ->
+                    when (event) {
+                        EditorialTopBarEvent.BackClicked -> onNavigateBack()
+                    }
+                },
+                actions = {
+                    BookOverflowMenu(
+                        state = state,
+                        runAction = runAction,
+                        isOnline = isOnline,
+                    )
+                },
             )
 
             if (showOfflinePlaceholder) {
@@ -141,46 +146,6 @@ internal actual fun BookDetailScreenLayout(
         onCreateNewListClick = onCreateNewListClick,
         shareCaptureEvents = shareCaptureEvents,
     )
-}
-
-@Composable
-private fun DesktopBookDetailTopBar(
-    state: BookDetailUiState,
-    runAction: (BookDetailAction) -> Unit,
-    isOnline: Boolean,
-    onNavigateBack: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        DesktopTooltip(text = "Back") {
-            IconButton(
-                onClick = onNavigateBack,
-                modifier = Modifier.pointerHandCursor(),
-            ) {
-                val backIcon = drawableIconResource(
-                    icon = SoftcoverIcon.ArrowBack,
-                    contentDescription = "Navigate back icon",
-                )
-
-                Icon(
-                    painter = backIcon.getIconPainter(),
-                    contentDescription = backIcon.contentDescription,
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        BookOverflowMenu(
-            state = state,
-            runAction = runAction,
-            isOnline = isOnline,
-        )
-    }
 }
 
 @Composable

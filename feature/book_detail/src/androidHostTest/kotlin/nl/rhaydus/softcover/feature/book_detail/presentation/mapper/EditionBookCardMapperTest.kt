@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
@@ -281,6 +282,33 @@ class EditionBookCardMapperTest {
             // ----- Assert -----
             tracked.row().trailing.shouldBeInstanceOf<BookCardTrailing.Badge>()
             untracked.row().trailing.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class EditionCountHeaderFor {
+        @Test
+        fun `is a label whose eyebrow carries the count`() {
+            // ----- Arrange -----
+            val count = 7
+
+            // ----- Act -----
+            val header = editionCountHeaderFor(count = count)
+
+            // ----- Assert -----
+            header.shouldBeInstanceOf<SectionHeaderUiModel.Label>().eyebrow shouldBe "7 EDITIONS"
+        }
+
+        @Test
+        fun `carries a zero count`() {
+            // ----- Arrange -----
+            val count = 0
+
+            // ----- Act -----
+            val header = editionCountHeaderFor(count = count)
+
+            // ----- Assert -----
+            header.shouldBeInstanceOf<SectionHeaderUiModel.Label>().eyebrow shouldBe "0 EDITIONS"
         }
     }
 }

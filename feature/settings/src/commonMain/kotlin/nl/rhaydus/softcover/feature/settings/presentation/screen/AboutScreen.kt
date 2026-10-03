@@ -10,6 +10,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
+import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenScreenModel
 
 class AboutScreen : Screen {
@@ -24,6 +26,8 @@ class AboutScreen : Screen {
         val uriHandler = LocalUriHandler.current
 
         AboutScreenLayout(
+            topBar = state.aboutTopBar,
+            editorialTopBar = state.aboutEditorialTopBar,
             versionFooterDivider = state.versionFooterDivider,
             creditsHeader = state.aboutCreditsHeader,
             sourceHeader = state.aboutSourceHeader,
@@ -52,6 +56,8 @@ class AboutScreen : Screen {
  */
 @Composable
 internal expect fun AboutScreenLayout(
+    topBar: TopBarUiModel,
+    editorialTopBar: EditorialTopBarUiModel,
     versionFooterDivider: DividerUiModel,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,

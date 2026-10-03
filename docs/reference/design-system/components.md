@@ -5,6 +5,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 ## Navigation & chrome
 
 - **Top app bar** — `core:component/topbar` — page title, back/trailing actions, opaque or over-media.
+- **Editorial top bar** — `core:component/topbar` — desktop page bar: back affordance, start-aligned editorial headline, trailing actions.
 - **Search top app bar** — `core:component/topbar` — mobile search chrome.
 - **Section header** — `core:component/header` — region opener in three accent-bar registers.
 - **Page masthead** — `core:component/header` — a page's title block.

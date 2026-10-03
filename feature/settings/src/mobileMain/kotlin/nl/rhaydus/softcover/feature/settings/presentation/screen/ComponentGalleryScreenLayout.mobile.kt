@@ -13,17 +13,9 @@ import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
-import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState
-
-/** The bar is fixed for this screen, so the model is a constant rather than rebuilt per frame. */
-private val COMPONENT_GALLERY_TOP_BAR = TopBarUiModel(
-    title = "Component gallery",
-    navigation = TopBarNavigation.Back,
-)
 
 /**
  * No pull-to-refresh here — the gallery has nothing to refresh, unlike [RoadmapScreenLayout]'s use of
@@ -39,7 +31,7 @@ internal actual fun ComponentGalleryScreenLayout(
     Scaffold(
         topBar = {
             TopBar(
-                model = COMPONENT_GALLERY_TOP_BAR,
+                model = state.topBar,
                 onEvent = { event ->
                     when (event) {
                         TopBarEvent.BackClicked -> onNavigateBack()

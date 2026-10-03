@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.editionCountHeaderFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toEditionCard
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -45,7 +46,12 @@ internal class EditionCardsCollector : BookDetailCollector {
                     }
                     .toImmutableList()
 
-                scope.setState { it.copy(editionCards = cards) }
+                scope.setState {
+                    it.copy(
+                        editionCards = cards,
+                        editionCountHeader = editionCountHeaderFor(count = cards.size),
+                    )
+                }
             }
     }
 

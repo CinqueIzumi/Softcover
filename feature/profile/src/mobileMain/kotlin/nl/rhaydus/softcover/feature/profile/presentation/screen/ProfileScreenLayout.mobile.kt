@@ -39,8 +39,6 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
-import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -64,15 +62,6 @@ import nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColu
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
-/**
- * The profile bar carries no title — the page's own masthead names it — so the model is a
- * constant rather than something rebuilt per frame.
- */
-private val PROFILE_TOP_BAR = TopBarUiModel(
-    title = "",
-    navigation = TopBarNavigation.Back,
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal actual fun ProfileScreenLayout(
@@ -95,7 +84,7 @@ internal actual fun ProfileScreenLayout(
     Scaffold(
         topBar = {
             TopBar(
-                model = PROFILE_TOP_BAR,
+                model = state.topBar,
                 onEvent = { event ->
                     when (event) {
                         TopBarEvent.BackClicked -> onNavigateUp()

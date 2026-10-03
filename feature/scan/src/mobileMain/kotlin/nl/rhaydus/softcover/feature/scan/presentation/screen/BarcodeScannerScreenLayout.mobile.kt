@@ -17,16 +17,8 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
-import nl.rhaydus.softcover.core.component.topbar.TopBarNavigation
-import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.feature.scan.presentation.component.BarcodeScanner
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
-
-/** The bar is fixed for this screen, so the model is a constant rather than rebuilt per frame. */
-private val SCANNER_TOP_BAR = TopBarUiModel(
-    title = "Scan a barcode",
-    navigation = TopBarNavigation.Back,
-)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -41,7 +33,7 @@ internal actual fun BarcodeScannerScreenLayout(
     Scaffold(
         topBar = {
             TopBar(
-                model = SCANNER_TOP_BAR,
+                model = state.topBar,
                 onEvent = { event ->
                     when (event) {
                         TopBarEvent.BackClicked -> onNavigateBack()
