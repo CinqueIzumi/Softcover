@@ -30,6 +30,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestion
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockBookAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockSeriesAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.HiddenGroupHeaderUiModel
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.HIDDEN_BOOK_STAND_IN_CARD
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.HIDDEN_SERIES_STAND_IN_CARD
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
 
 /**
@@ -90,22 +92,24 @@ internal fun HiddenSuggestionsContent(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (state.hiddenBooks.isNotEmpty()) {
+            if (state.hiddenBooksLoaded.not() || state.hiddenBooks.isNotEmpty()) {
                 HiddenBooksSection(
                     header = state.hiddenBooksGroupHeader,
                     books = state.hiddenBooks,
                     cards = state.hiddenBookCards,
+                    isLoading = state.hiddenBooksLoaded.not(),
                     onEvent = onEvent,
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
             }
 
-            if (state.hiddenSeries.isNotEmpty()) {
+            if (state.hiddenSeriesLoaded.not() || state.hiddenSeries.isNotEmpty()) {
                 HiddenSeriesSection(
                     header = state.hiddenSeriesGroupHeader,
                     series = state.hiddenSeries,
                     cards = state.hiddenSeriesCards,
+                    isLoading = state.hiddenSeriesLoaded.not(),
                     onEvent = onEvent,
                 )
             }
@@ -120,19 +124,33 @@ private fun HiddenBooksSection(
     header: HiddenGroupHeaderUiModel,
     books: List<DismissedSeriesBook>,
     cards: ImmutableMap<Int, BookCardUiModel>,
+    isLoading: Boolean,
     onEvent: (BookCardEvent) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        HiddenSuggestionsGroupHeader(model = header)
+        HiddenSuggestionsGroupHeader(
+            model = header,
+            isLoading = isLoading,
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        books.forEach { book ->
-            cards[book.bookId]?.let { card ->
+        if (isLoading) {
+            repeat(2) {
                 BookCard(
-                    model = card,
-                    onEvent = onEvent,
+                    model = HIDDEN_BOOK_STAND_IN_CARD,
+                    onEvent = {},
+                    isLoading = true,
                 )
+            }
+        } else {
+            books.forEach { book ->
+                cards[book.bookId]?.let { card ->
+                    BookCard(
+                        model = card,
+                        onEvent = onEvent,
+                    )
+                }
             }
         }
     }
@@ -143,19 +161,33 @@ private fun HiddenSeriesSection(
     header: HiddenGroupHeaderUiModel,
     series: List<DismissedSeries>,
     cards: ImmutableMap<Int, BookCardUiModel>,
+    isLoading: Boolean,
     onEvent: (BookCardEvent) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        HiddenSuggestionsGroupHeader(model = header)
+        HiddenSuggestionsGroupHeader(
+            model = header,
+            isLoading = isLoading,
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        series.forEach { entry ->
-            cards[entry.seriesId]?.let { card ->
+        if (isLoading) {
+            repeat(2) {
                 BookCard(
-                    model = card,
-                    onEvent = onEvent,
+                    model = HIDDEN_SERIES_STAND_IN_CARD,
+                    onEvent = {},
+                    isLoading = true,
                 )
+            }
+        } else {
+            series.forEach { entry ->
+                cards[entry.seriesId]?.let { card ->
+                    BookCard(
+                        model = card,
+                        onEvent = onEvent,
+                    )
+                }
             }
         }
     }
@@ -169,11 +201,16 @@ private fun HiddenSeriesSection(
  * only once a second screen needs the same "nested group inside an already-opened page" header shape.
  */
 @Composable
-private fun HiddenSuggestionsGroupHeader(model: HiddenGroupHeaderUiModel) {
+private fun HiddenSuggestionsGroupHeader(
+    model: HiddenGroupHeaderUiModel,
+    isLoading: Boolean,
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = model.header) {
             SoftcoverText(
                 text = model.count,
+                isLoading = isLoading,
+                standIn = "00",
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontFeatureSettings = "tnum"),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

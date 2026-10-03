@@ -4,8 +4,10 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEyebrow
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
+import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -50,6 +52,75 @@ internal val UP_NEXT_STAND_IN_CARD = standInCard(
         ),
     ),
     menuLabel = "More options",
+)
+
+internal val SEARCH_RESULT_STAND_IN_CARD = BookCardUiModel(
+    key = BookCardKey.Book(bookId = -4),
+    variant = BookCardVariant.Row(
+        size = BookCardVariant.Row.Size.Standard,
+        lead = BookCardLead.Cover(
+            model = CoverUiModel(
+                source = null,
+                coverlessTitle = null,
+                variant = CoverVariant.ExploreSearchRow,
+                isLoading = true,
+            ),
+        ),
+        text = BookCardContent(
+            title = "The Name of the Wind",
+            eyebrow = BookCardEyebrow(text = "The Kingkiller Chronicle"),
+            byline = "By Patrick Rothfuss",
+            supportingLines = persistentListOf(
+                BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = "2007 · 1.2k readers"))),
+            ),
+        ),
+        trailing = BookCardTrailing.Bookmark(
+            saved = false,
+            contentDescription = "",
+        ),
+    ),
+)
+
+internal val HIDDEN_BOOK_STAND_IN_CARD = BookCardUiModel(
+    key = BookCardKey.Book(bookId = -5),
+    variant = BookCardVariant.Row(
+        size = BookCardVariant.Row.Size.Compact,
+        lead = BookCardLead.Cover(
+            model = CoverUiModel(
+                source = null,
+                coverlessTitle = null,
+                variant = CoverVariant.HiddenBookRow,
+                isLoading = true,
+            ),
+        ),
+        text = BookCardContent(
+            title = "The Name of the Wind",
+            byline = "By Patrick Rothfuss",
+        ),
+        trailing = BookCardTrailing.Restore(label = "Restore"),
+    ),
+)
+
+internal val HIDDEN_SERIES_STAND_IN_CARD = BookCardUiModel(
+    key = BookCardKey.Series(seriesId = -6),
+    variant = BookCardVariant.Row(
+        size = BookCardVariant.Row.Size.Compact,
+        lead = BookCardLead.SeriesStack(
+            front = CoverUiModel(
+                source = null,
+                coverlessTitle = null,
+                variant = CoverVariant.HiddenSeriesStack,
+                isLoading = true,
+            ),
+        ),
+        text = BookCardContent(
+            title = "The Kingkiller Chronicle",
+            supportingLines = persistentListOf(
+                BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = "Patrick Rothfuss · 3 books"))),
+            ),
+        ),
+        trailing = BookCardTrailing.Restore(label = "Restore"),
+    ),
 )
 
 private fun standInCard(

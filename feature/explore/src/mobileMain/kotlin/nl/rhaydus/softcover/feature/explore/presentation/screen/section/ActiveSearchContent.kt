@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
-import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
@@ -66,11 +66,6 @@ internal fun ActiveSearchContent(
             )
         }
 
-        SectionHeader(
-            model = state.searchResultsHeader,
-            modifier = Modifier.padding(horizontal = 20.dp),
-        )
-
         val resultsListState = rememberLazyListState()
 
         // Feedback item 7: append the next page once the visible window nears the fetched end.
@@ -98,32 +93,58 @@ internal fun ActiveSearchContent(
             runAction = runAction,
         )
 
-        LazyColumn(
-            state = resultsListState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-        ) {
-            items(state.queriedBooks, key = { it.id }) { book ->
-                state.queriedBookCards[book.id]?.let { card ->
-                    BookCard(
-                        model = card,
-                        onEvent = onSearchResultEvent,
-                    )
-                }
-            }
+        // Cards land a frame after their books; only the first row is checked so a load-more page does
+        // not swap the list back to stand-ins while its cards catch up.
+        val cardsReady = state.queriedBooks.firstOrNull()?.let { it.id in state.queriedBookCards } ?: true
 
-            if (state.loadingMoreQueriedBooks) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularWavyProgressIndicator()
+        SkeletonCrossfade(
+            isLoading = state.isLoading || cardsReady.not(),
+            label = "SearchResults",
+            modifier = Modifier.weight(1f),
+        ) { loading ->
+            if (loading) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+                ) {
+                    items(6) {
+                        BookCard(
+                            model = SEARCH_RESULT_STAND_IN_CARD,
+                            onEvent = {},
+                            isLoading = true,
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    state = resultsListState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+                ) {
+                    items(state.queriedBooks, key = { it.id }) { book ->
+                        state.queriedBookCards[book.id]?.let { card ->
+                            BookCard(
+                                model = card,
+                                onEvent = onSearchResultEvent,
+                            )
+                        }
+                    }
+
+                    if (state.loadingMoreQueriedBooks) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 24.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularWavyProgressIndicator()
+                            }
+                        }
                     }
                 }
             }

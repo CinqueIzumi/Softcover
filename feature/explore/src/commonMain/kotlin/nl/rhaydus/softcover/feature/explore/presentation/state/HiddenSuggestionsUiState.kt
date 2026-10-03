@@ -26,8 +26,9 @@ internal data class HiddenSuggestionsUiState(
     // because book ids and series ids share the same Int namespace.
     val hiddenBookCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
     val hiddenSeriesCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
-    val initialized: Boolean = false,
+    val hiddenBooksLoaded: Boolean = false,
+    val hiddenSeriesLoaded: Boolean = false,
 ) : UiState {
     val isEmpty: Boolean
-        get() = initialized && hiddenBooks.isEmpty() && hiddenSeries.isEmpty()
+        get() = hiddenBooksLoaded && hiddenSeriesLoaded && hiddenBooks.isEmpty() && hiddenSeries.isEmpty()
 }

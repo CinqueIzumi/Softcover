@@ -66,7 +66,7 @@ class DismissedSeriesCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates hiddenSeries, cards and initialized on emission`() = runTest(UnconfinedTestDispatcher()) {
+        fun `updates hiddenSeries, cards and hiddenSeriesLoaded on emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val series = stubDismissedSeries(seriesId = 1)
             val collector = DismissedSeriesCollector()
@@ -82,7 +82,25 @@ class DismissedSeriesCollectorTest {
             stateFlow.value.hiddenSeries shouldBe listOf(series)
             stateFlow.value.hiddenSeriesCards.keys shouldBe setOf(1)
             stateFlow.value.hiddenSeriesCards.getValue(1).key shouldBe BookCardKey.Series(seriesId = 1)
-            stateFlow.value.initialized shouldBe true
+            stateFlow.value.hiddenSeriesLoaded shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `leaves hiddenBooksLoaded false when only series are emitted`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = DismissedSeriesCollector()
+            val job = launch { collector.onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            ) }
+
+            // ----- Act -----
+            dismissedSeriesFlow.emit(emptyList())
+
+            // ----- Assert -----
+            stateFlow.value.hiddenSeriesLoaded shouldBe true
+            stateFlow.value.hiddenBooksLoaded shouldBe false
             job.cancel()
         }
 

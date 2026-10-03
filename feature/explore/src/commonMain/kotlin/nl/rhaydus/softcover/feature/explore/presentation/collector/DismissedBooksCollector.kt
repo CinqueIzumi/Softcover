@@ -26,7 +26,7 @@ internal class DismissedBooksCollector : HiddenSuggestionsCollector {
                         book.bookId to book.toHiddenBookCard(cover = book.toCoverUiModel())
                     }.toImmutableMap(),
                     hiddenBooksGroupHeader = it.hiddenBooksGroupHeader.copy(count = books.size.toString()),
-                    initialized = true,
+                    hiddenBooksLoaded = true,
                 )
             }
         }
