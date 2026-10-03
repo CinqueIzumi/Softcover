@@ -49,11 +49,11 @@ internal data class ExploreScreenUiState(
     // reproducing today's ExploreShelf.kt:202,236 behaviour.
     val unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
     val featuredReleaseBadge: BadgeUiModel? = null,
-    // The three rails' card models, keyed by book id and mapped off composition by
-    // BookCardModelsCollector from the books, covers and overlays above.
+    // Keyed by book id.
     val trendingCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
     val becauseYouReadCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
     val upNextCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
+    val queriedBookCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
     // Search paging (explore-3a feedback item 7). The Typesense `search` endpoint returns no
     // total hit count, so `queriedBooksHasMore` is a "maybe more" signal derived from whether the
     // last fetched page came back full, not an authoritative total. `loadingMoreQueriedBooks` is

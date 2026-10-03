@@ -13,14 +13,18 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
+import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
+import nl.rhaydus.softcover.core.domain.model.BookStatus
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -43,6 +47,9 @@ class ExploreBookCardMapperTest {
         authors: List<Author> = emptyList(),
         bookSeries: BookSeries? = null,
         positionsInSeries: List<Double> = emptyList(),
+        userBook: UserBook? = null,
+        releaseYear: Int = 2020,
+        usersCount: Int = 0,
     ): Book = Book(
         id = id,
         title = title,
@@ -50,15 +57,15 @@ class ExploreBookCardMapperTest {
         defaultEdition = null,
         rating = rating,
         description = "",
-        releaseYear = 2020,
+        releaseYear = releaseYear,
         coverUrl = "",
         authors = authors,
-        usersCount = 0,
+        usersCount = usersCount,
         ratingsCount = 0,
         bookSeries = bookSeries,
         positionsInSeries = positionsInSeries,
         isCompilation = false,
-        userBook = null,
+        userBook = userBook,
         userBookRead = null,
     )
 
@@ -248,6 +255,134 @@ class ExploreBookCardMapperTest {
             card.decorations.coverBadge shouldBe overlay
             card.decorations.pressBehaviour shouldBe BookCardDecorations.Press.Tap
             card.decorations.progress.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class ToSearchResultCard {
+        private fun BookCardUiModel.row(): BookCardVariant.Row =
+            variant.shouldBeInstanceOf<BookCardVariant.Row>()
+
+        @Test
+        fun `builds a standard row keyed by book id with the cover as lead`() {
+            // ----- Act -----
+            val card = book(id = 42).toSearchResultCard(cover = cover)
+
+            // ----- Assert -----
+            card.key shouldBe BookCardKey.Book(bookId = 42)
+            card.row().size shouldBe BookCardVariant.Row.Size.Standard
+            card.row().lead shouldBe BookCardLead.Cover(model = cover)
+        }
+
+        @Test
+        fun `offers to add a book that is not in the library`() {
+            // ----- Act -----
+            val card = book(userBook = null).toSearchResultCard(cover = cover)
+
+            // ----- Assert -----
+            card.row().trailing shouldBe BookCardTrailing.Bookmark(
+                saved = false,
+                contentDescription = "Add to library",
+            )
+        }
+
+        @Test
+        fun `offers to remove a book that is in the library`() {
+            // ----- Act -----
+            val savedBook = UserBook(
+                id = 1,
+                status = BookStatus.WantToRead,
+                dateAdded = "2024-01-01",
+                createdAt = null,
+                privacySettingId = 1,
+                reviewHasSpoilers = false,
+                editionId = null,
+                lastReadDate = null,
+                rating = null,
+                referrerUserId = null,
+                reviewedAt = null,
+                updatedAt = null,
+                journals = emptyList(),
+            )
+            val card = book(userBook = savedBook).toSearchResultCard(cover = cover)
+
+            // ----- Assert -----
+            card.row().trailing shouldBe BookCardTrailing.Bookmark(
+                saved = true,
+                contentDescription = "Remove from library",
+            )
+        }
+
+        @Test
+        fun `uses the series text as eyebrow only when the book is in a series`() {
+            // ----- Act -----
+            val inSeries = book(
+                bookSeries = BookSeries(
+                    id = 1,
+                    name = "Earthsea",
+                    amountOfBooks = 3,
+                ),
+                positionsInSeries = listOf(2.0),
+            ).toSearchResultCard(cover = cover)
+            val standalone = book(bookSeries = null).toSearchResultCard(cover = cover)
+
+            // ----- Assert -----
+            inSeries.row().text.eyebrow.shouldNotBeNull().text shouldBe "#2 of 3 in Earthsea"
+            standalone.row().text.eyebrow.shouldBeNull()
+        }
+
+        @Test
+        fun `prefixes the byline with By and drops it when the author is blank`() {
+            // ----- Act -----
+            val withAuthor = book(authors = listOf(Author(
+                id = 1,
+                name = "Ann",
+            ),),)
+                .toSearchResultCard(cover = cover)
+            val withoutAuthor = book(authors = emptyList()).toSearchResultCard(cover = cover)
+
+            // ----- Assert -----
+            withAuthor.row().text.byline shouldBe "By Ann"
+            withoutAuthor.row().text.byline.shouldBeNull()
+        }
+
+        @Test
+        fun `shows the stats line with year readers and rating`() {
+            // ----- Act -----
+            val card = book(
+                releaseYear = 2021,
+                usersCount = 12,
+                rating = 4.5,
+            ).toSearchResultCard(cover = cover)
+
+            // ----- Assert -----
+            card.row().text.supportingLines shouldBe persistentListOf(
+                BookCardLine(
+                    parts = persistentListOf(
+                        BookCardLinePart.Text(text = "2021"),
+                        BookCardLinePart.Text(text = "12 readers"),
+                        BookCardLinePart.Rating(label = formatDecimalNumber(
+                                4.5,
+                                fractionDigits = 1,
+                            ),),
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `leaves the year and rating out of the stats line when unknown`() {
+            // ----- Act -----
+            val card = book(
+                releaseYear = -1,
+                usersCount = 5,
+                rating = 0.0,
+            ).toSearchResultCard(cover = cover)
+
+            // ----- Assert -----
+            card.row().text.supportingLines shouldBe persistentListOf(
+                BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = "5 readers"))),
+            )
         }
     }
 }

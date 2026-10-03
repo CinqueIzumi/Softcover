@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetDismissedContinueSeriesUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.HiddenSuggestionsEvent
@@ -65,7 +66,7 @@ class DismissedSeriesCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates hiddenSeries, covers and initialized on emission`() = runTest(UnconfinedTestDispatcher()) {
+        fun `updates hiddenSeries, cards and initialized on emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val series = stubDismissedSeries(seriesId = 1)
             val collector = DismissedSeriesCollector()
@@ -79,7 +80,8 @@ class DismissedSeriesCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.hiddenSeries shouldBe listOf(series)
-            stateFlow.value.hiddenSeriesCovers.keys shouldBe setOf(1)
+            stateFlow.value.hiddenSeriesCards.keys shouldBe setOf(1)
+            stateFlow.value.hiddenSeriesCards.getValue(1).key shouldBe BookCardKey.Series(seriesId = 1)
             stateFlow.value.initialized shouldBe true
             job.cancel()
         }

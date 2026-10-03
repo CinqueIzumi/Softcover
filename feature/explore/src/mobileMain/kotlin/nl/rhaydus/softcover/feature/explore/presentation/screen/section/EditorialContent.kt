@@ -4,9 +4,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ContainedLoadingIndicator
@@ -57,13 +55,13 @@ internal fun EditorialContent(
         },
     ) {
         Column(
-            // The opening 8dp is padding, not a leading Spacer: a Spacer is a child like any other,
-            // so `spacedBy(36.dp)` used to add its full gap *between* it and the featured card,
-            // costing 44dp under the search chrome instead of the 8 it looked like it asked for.
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(editorialScrollState)
-                .padding(top = 8.dp),
+                .padding(
+                    top = 8.dp,
+                    bottom = rememberBottomBarPadding(),
+                ),
             verticalArrangement = Arrangement.spacedBy(36.dp),
         ) {
             FeaturedSection(
@@ -118,8 +116,6 @@ internal fun EditorialContent(
                 chips = state.recentSearchChips.chips,
                 runAction = runAction,
             )
-
-            Spacer(modifier = Modifier.height(rememberBottomBarPadding()))
         }
     }
 }

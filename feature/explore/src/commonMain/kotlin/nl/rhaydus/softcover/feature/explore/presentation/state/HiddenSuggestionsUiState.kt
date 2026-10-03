@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
@@ -21,11 +23,9 @@ internal data class HiddenSuggestionsUiState(
         subline = "A muted series hides every book in it.",
     ),
     // Keyed by DismissedSeriesBook.bookId / DismissedSeries.seriesId respectively — two maps
-    // because book ids and series ids share the same Int namespace. Mapped by DismissedBooksCollector
-    // / DismissedSeriesCollector directly (component-contract.md § 7.2 R9); no snapshot type and no
-    // distinctUntilChanged here since each source flow's emission is already the dedupe point.
-    val hiddenBookCovers: Map<Int, CoverUiModel> = emptyMap(),
-    val hiddenSeriesCovers: Map<Int, CoverUiModel> = emptyMap(),
+    // because book ids and series ids share the same Int namespace.
+    val hiddenBookCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
+    val hiddenSeriesCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
     val initialized: Boolean = false,
 ) : UiState {
     val isEmpty: Boolean

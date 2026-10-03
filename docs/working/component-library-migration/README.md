@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1 to S7-4 done. SL-3b waits on foundation F34; detekt type resolution is
-  inert (F33). SL-9 onward wait on S7 / S9.
-- **Next:** S7-5 (Explore search and hidden suggestions); `steps/s7-bookcard.md`. Diff every detail
-  against today's rows first.
+- **State:** S7-1–S7-5, SL-9, SL-10a done. SL-3b waits on F34; detekt type
+  resolution inert (F33).
+- **Next:** SL-10b (Explore search and hidden suggestions load in their real layout);
+  `steps/sl-lean-loading.md`. Then S7-6 (Reading).
 - **Open questions:** `BookmarkToggle` → foundation toggle? (No SL entry on issue #275, by the user's call.)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
@@ -36,9 +36,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes; SL-5's hero
-  title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid; S7-4's rails and skeletons.
-- **Verification:** S7-4: compile, `styleCheck`, tests passed (JBR 21); reviewer ✅.
-- **Uncommitted:** S7-4, SL-9/10a; PF step.
+  title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid; S7-4's rails; S7-5's rows.
+- **Verification:** S7-5: compile, `styleCheck`, tests passed (JBR 21); reviewer ✅.
+- **Uncommitted:** S7-5 (plus the feed's bottom-bar gap fix).
 
 ## Local verification
 

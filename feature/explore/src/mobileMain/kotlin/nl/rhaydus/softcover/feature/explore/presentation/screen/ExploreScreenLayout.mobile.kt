@@ -36,6 +36,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchActivate
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchDismissedAction
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodChipsSnapshot
 import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsSnapshot
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSearchResultCard
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toTrendingCard
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ActiveSearchContent
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.EditorialContent
@@ -389,6 +390,8 @@ private fun ActiveExploreScreenPreview() {
         ),
     )
 
+    val queriedBookCovers = queriedBooks.toPreviewCoverModels(CoverVariant.ExploreSearchRow)
+
     SoftcoverTheme {
         ExploreScreenLayout(
             runAction = {},
@@ -398,7 +401,10 @@ private fun ActiveExploreScreenPreview() {
             state = ExploreScreenUiState(
                 searchText = "Last to leave",
                 queriedBooks = queriedBooks,
-                queriedBookCovers = queriedBooks.toPreviewCoverModels(CoverVariant.ExploreSearchRow),
+                queriedBookCovers = queriedBookCovers,
+                queriedBookCards = queriedBooks.associate { book ->
+                    book.id to book.toSearchResultCard(cover = queriedBookCovers.getValue(book.id))
+                }.toImmutableMap(),
             ),
         )
     }

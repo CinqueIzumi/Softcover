@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -91,6 +92,12 @@ internal fun ActiveSearchContent(
                 }
         }
 
+        val onSearchResultEvent = rememberSearchResultEventHandler(
+            books = state.queriedBooks,
+            onBookClick = onBookClick,
+            runAction = runAction,
+        )
+
         LazyColumn(
             state = resultsListState,
             modifier = Modifier
@@ -100,14 +107,12 @@ internal fun ActiveSearchContent(
             contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
         ) {
             items(state.queriedBooks, key = { it.id }) { book ->
-                val cover = state.queriedBookCovers[book.id]
-
-                SearchResultRow(
-                    book = book,
-                    cover = cover,
-                    onBookClick = onBookClick,
-                    runAction = runAction,
-                )
+                state.queriedBookCards[book.id]?.let { card ->
+                    BookCard(
+                        model = card,
+                        onEvent = onSearchResultEvent,
+                    )
+                }
             }
 
             if (state.loadingMoreQueriedBooks) {

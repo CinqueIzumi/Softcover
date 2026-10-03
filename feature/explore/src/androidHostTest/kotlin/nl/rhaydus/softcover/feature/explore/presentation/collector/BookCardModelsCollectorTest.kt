@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -245,5 +246,71 @@ class BookCardModelsCollectorTest {
             (stateFlow.value.trendingCards === cardsAfterFirstEmit) shouldBe true
             job.cancel()
         }
+
+        @Test
+        fun `builds search result cards keyed by book id with each book's own cover`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launch { BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                ) }
+                val firstCover = mockk<CoverUiModel>()
+                val secondCover = mockk<CoverUiModel>()
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    queriedBooks = listOf(book(id = 1), book(id = 2)),
+                    queriedBookCovers = mapOf(1 to firstCover, 2 to secondCover),
+                )
+
+                // ----- Assert -----
+                val cards = stateFlow.value.queriedBookCards
+                cards.keys shouldBe setOf(1, 2)
+                cards.getValue(1).key shouldBe BookCardKey.Book(bookId = 1)
+                val first = cards.getValue(1).variant.shouldBeInstanceOf<BookCardVariant.Row>()
+                val second = cards.getValue(2).variant.shouldBeInstanceOf<BookCardVariant.Row>()
+                first.lead shouldBe BookCardLead.Cover(model = firstCover)
+                second.lead shouldBe BookCardLead.Cover(model = secondCover)
+                job.cancel()
+            }
+
+        @Test
+        fun `omits a queried book that has no mapped cover from the search result cards`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launch { BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                ) }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    queriedBooks = listOf(book(id = 1), book(id = 2)),
+                    queriedBookCovers = mapOf(1 to mockk<CoverUiModel>()),
+                )
+
+                // ----- Assert -----
+                stateFlow.value.queriedBookCards.keys shouldBe setOf(1)
+                job.cancel()
+            }
+
+        @Test
+        fun `empties the search result cards when the queried books are cleared`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                stateFlow.value = stateFlow.value.copy(queriedBooks = listOf(book(id = 1)))
+                val job = launch { BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                ) }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(queriedBooks = emptyList())
+
+                // ----- Assert -----
+                stateFlow.value.queriedBookCards shouldBe persistentMapOf()
+                job.cancel()
+            }
     }
 }

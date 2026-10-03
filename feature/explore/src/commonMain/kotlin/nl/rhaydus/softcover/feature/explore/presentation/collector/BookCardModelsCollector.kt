@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toBecauseYouReadCard
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSearchResultCard
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toTrendingCard
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toUpNextCard
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
@@ -19,9 +20,9 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiSt
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps the trending, because-you-read and up-next rails to [BookCardUiModel]s off the composition
- * (`component-contract.md` § 7.2 R9), keyed by [Book.id] into one map per rail: the same book can sit in
- * several rails, each stamping its own cover transition key.
+ * Maps the trending, because-you-read and up-next rails and the search results to [BookCardUiModel]s off
+ * the composition (`component-contract.md` § 7.2 R9), keyed by [Book.id] into one map per surface: the same
+ * book can sit on several surfaces, each stamping its own cover transition key.
  *
  * Derives from the books, [CoverModelsCollector]'s covers and [UnreleasedCoverOverlaysCollector]'s
  * overlays, so it re-runs whenever any of them changes.
@@ -37,9 +38,11 @@ internal class BookCardModelsCollector : ExploreCollector {
                     trendingBooks = it.trendingBooks,
                     becauseYouReadBooks = it.becauseYouReadBooks,
                     continueSeriesBooks = it.continueSeriesBooks,
+                    queriedBooks = it.queriedBooks,
                     trendingCovers = it.trendingCovers,
                     becauseYouReadCovers = it.becauseYouReadCovers,
                     continueSeriesCovers = it.continueSeriesCovers,
+                    queriedBookCovers = it.queriedBookCovers,
                     unreleasedCoverOverlays = it.unreleasedCoverOverlays,
                 )
             }
@@ -62,6 +65,11 @@ internal class BookCardModelsCollector : ExploreCollector {
                             overlays = snapshot.unreleasedCoverOverlays,
                             map = Book::toUpNextCard,
                         ),
+                        queriedBookCards = snapshot.queriedBooks.mapNotNull { book ->
+                            snapshot.queriedBookCovers[book.id]?.let { cover ->
+                                book.id to book.toSearchResultCard(cover = cover)
+                            }
+                        }.toMap().toImmutableMap(),
                     )
                 }
             }

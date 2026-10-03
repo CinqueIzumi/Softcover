@@ -1,11 +1,13 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.presentation.event.HiddenSuggestionsEvent
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.toHiddenSeriesCard
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
@@ -20,7 +22,9 @@ internal class DismissedSeriesCollector : HiddenSuggestionsCollector {
             scope.setState {
                 it.copy(
                     hiddenSeries = series,
-                    hiddenSeriesCovers = series.associate { entry -> entry.seriesId to entry.toCoverUiModel() },
+                    hiddenSeriesCards = series.associate { entry ->
+                        entry.seriesId to entry.toHiddenSeriesCard(cover = entry.toCoverUiModel())
+                    }.toImmutableMap(),
                     hiddenSeriesGroupHeader = it.hiddenSeriesGroupHeader.copy(count = series.size.toString()),
                     initialized = true,
                 )
