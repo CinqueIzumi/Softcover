@@ -13,8 +13,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
-import nl.rhaydus.softcover.core.component.state.EmptyState
-import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
+import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -47,13 +46,12 @@ internal actual fun ExploreScreenLayout(
     isOnline: Boolean,
 ) {
     if (isOnline.not()) {
-        EmptyState(
-            model = offlineEmptyStateUiModel(),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = rememberBottomBarPadding())
-                .padding(24.dp),
-        )
+        state.offlineEmptyState?.let { offlineEmptyState ->
+            OfflineEmptyStatePlaceholder(
+                model = offlineEmptyState,
+                modifier = Modifier.padding(bottom = rememberBottomBarPadding()),
+            )
+        }
         return
     }
 

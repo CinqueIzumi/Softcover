@@ -52,6 +52,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.MastheadColle
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodChipsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTagsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MoodTilesCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.OfflineStateCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.PreviousQueriesCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
@@ -102,6 +103,7 @@ val exploreModule = module {
             searchByMoodUseCase = get(),
             setBecauseYouReadGenreUseCase = get(),
             flows = getAll(),
+            offlineCopy = get(),
             appDispatchers = get(),
         )
     }
@@ -115,6 +117,8 @@ val exploreModule = module {
     factory { QueriedBooksHasMoreCollector() } bind ExploreCollector::class
 
     factory { MastheadCollector() } bind ExploreCollector::class
+
+    factory { OfflineStateCollector() } bind ExploreCollector::class
 
     factory { TrendingBooksCollector() } bind ExploreCollector::class
 

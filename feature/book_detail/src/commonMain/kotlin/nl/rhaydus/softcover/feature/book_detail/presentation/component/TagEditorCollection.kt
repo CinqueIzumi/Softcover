@@ -52,13 +52,9 @@ internal fun TagEditorCollection(
             EmptyState(
                 model = emptyState,
                 modifier = Modifier
+                    .padding(horizontal = 10.dp)
                     .fillMaxWidth()
-                    .padding(
-                        top = 40.dp,
-                        bottom = 30.dp,
-                        start = 10.dp,
-                        end = 10.dp,
-                    ),
+                    .padding(top = 40.dp),
             )
         } else {
             groups.forEachIndexed { index, group ->

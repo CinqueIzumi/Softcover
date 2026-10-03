@@ -21,27 +21,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.ScreenTransition
 import kotlinx.coroutines.flow.combine
 import nl.rhaydus.softcover.core.component.callout.Banner
-import nl.rhaydus.softcover.core.component.callout.offlineBannerUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
-import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.navigation.CreateListPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.feature.lists.presentation.screen.CreateListSheet
 import nl.rhaydus.softcover.feature.session.presentation.screen.FocusModeScreen
+import nl.rhaydus.softcover.orchestration.presentation.screenmodel.RootScreenModel
 import org.koin.compose.koinInject
 
 internal object RootScreen : Screen {
     @OptIn(ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Content() {
-        val isOnline = rememberIsOnline()
+        val screenModel = koinScreenModel<RootScreenModel>()
+
+        val state by screenModel.state.collectAsStateWithLifecycle()
 
         val activeSessionController = koinInject<ActiveSessionController>()
 
@@ -74,13 +77,15 @@ internal object RootScreen : Screen {
                         .consumeWindowInsets(innerPadding),
                 ) {
                     Column {
-                        Banner(
-                            model = offlineBannerUiModel(visible = isOnline.not()),
-                            windowInsets = WindowInsets.statusBars,
-                        )
+                        state.offlineBanner?.let { offlineBanner ->
+                            Banner(
+                                model = offlineBanner,
+                                windowInsets = WindowInsets.statusBars,
+                            )
+                        }
 
                         Box(
-                            modifier = if (isOnline.not()) {
+                            modifier = if (state.offlineBanner?.visible == true) {
                                 Modifier.consumeWindowInsets(WindowInsets.statusBars)
                             } else {
                                 Modifier

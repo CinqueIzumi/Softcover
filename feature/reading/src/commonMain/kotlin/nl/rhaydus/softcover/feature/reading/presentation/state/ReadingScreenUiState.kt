@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateButtonUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -64,9 +65,11 @@ internal data class ReadingScreenUiState(
     val emptyCurrentlyReading: EmptyStateUiModel = EmptyStateUiModel(
         title = "An open page awaits",
         body = "Nothing is currently between your fingers. Find a title worth losing an evening to.",
-        button = EmptyStateButtonUiModel(
-            label = "Find a book",
-            icon = SoftcoverIcon.Search,
+        variant = EmptyStateVariant.Centered(
+            button = EmptyStateButtonUiModel(
+                label = "Find a book",
+                icon = SoftcoverIcon.Search,
+            ),
         ),
     ),
 

@@ -38,10 +38,9 @@ the `UiState`, assembled by the collector.
    and local `sheetVisible`; ContinueSeries `DismissedSeriesBook` and copy; Filter `filterChipsFor`;
    Streak day labels and `today`; ProfileShare `isBusy` / "Saving…"; UnknownIsbn loose `isbn`.
 
-S11 settles the three R10 edges `component-contract.md` names. Two stay open on purpose, as recorded
-exceptions rather than holdouts: a component resolving its own copy from `composeResources`
-(`offlineBannerUiModel()`), and the preview fixtures / Component Gallery, which construct models by
-definition. The third, a model that depends on a value only composition has (scroll position, window
+S11 settles the three R10 edges `component-contract.md` names. One stays open on purpose, as a recorded
+exception rather than a holdout: the preview fixtures / Component Gallery, which construct models by
+definition. The library-owned-copy edge is already settled by the `OfflineCopy` seam. The third, a model that depends on a value only composition has (scroll position, window
 size class, a `CompositionLocal`), is decided in S11-3 through `TopBarSurface`.
 
 ## S11-2 — R11 holdouts

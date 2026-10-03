@@ -45,7 +45,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 - **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error.
 - **Banner** — `core:component/callout` — full-width slide-in strip for a screen-level condition or a card-fused nudge; tone picks the colour (`Warning`, `Highlight`), variant the voice (`Status` centred Material text, `Editorial` start-aligned italic); one 16×10 dp padding, 48 dp dismiss target.
-- **Empty state** — `core:component/state` — centred headline-and-body placeholder.
+- **Empty state** — `core:component/state` — placeholder for content a surface has nothing to draw; `EmptyStateVariant.Centered(button?)` (swaying quote glyph, editorial headline, optional filled button) or `Inline` (start-aligned italic title and body); title is a heading, caller pads it as full pane (`fillMaxSize().padding(24.dp)`) or in flow (`fillMaxWidth().padding(top = 40.dp)`).
 - **Skeleton** — `core:component/state` — per-surface shimmer placeholder matching its loaded footprint.
 - **SkeletonMask** — `core:component/state` — `Modifier.skeletonMask(visible, shape)`: hides a leaf's content and draws the foundation shimmer over its measured bounds, so a component keeps its real layout while loading.
 - **Divider** — `core:component/divider` — hairline rule, bare, centred, or vertical.
@@ -56,7 +56,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Selection mark** — `core:component/selection` — selected-state circle mark for a cover, row or edition card.
 - **Mark-as-read celebration** — `core:component/celebration` — mark-as-read particle burst.
 - **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.
-- **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner` + `EmptyState` + `rememberIsOnline()`.
+- **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner` + `EmptyState` + `OfflineEmptyStatePlaceholder` + `OfflineCopy` + `rememberIsOnline()`.
 - **Callout** — `core:component/callout` — in-flow card for one condition, optionally with a single next step; an accent-bar lead reuses the Inline `SectionHeader` eyebrow (20×1 hairline), and the dismiss is a 48 dp target.
 
 ## Sheets

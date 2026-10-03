@@ -173,6 +173,9 @@ internal data class BookDetailUiState(
      * sit over, so that bar would pin to a transparent surface over a plain empty state.
      */
     val offlineTopBar: TopBarUiModel = TopBarUiModel(),
+
+    /** `null` until the library's offline copy has resolved. */
+    val offlineEmptyState: EmptyStateUiModel? = null,
     val tagEditorCover: CoverUiModel? = null,
 
     val tagEditorSheet: SheetScaffoldUiModel? = null,

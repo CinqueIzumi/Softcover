@@ -1,14 +1,10 @@
 package nl.rhaydus.softcover.core.component.callout
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
-import nl.rhaydus.softcover.core.component.generated.resources.Res
-import nl.rhaydus.softcover.core.component.generated.resources.connectivity_offline_banner
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * The content of a [Banner] and whether it is currently showing.
@@ -45,19 +41,3 @@ data class BannerUiModel(
         )
     }
 }
-
-/**
- * The offline notice, in the library's own words.
- *
- * The copy belongs to the component rather than to a feature — every surface that reports being
- * offline reports it identically — so the library owns the string and this factory resolves it.
- * Reading a string resource is a composition-scoped platform read, not a domain mapping, so it may
- * run in composition (the same carve-out `ThemeMode.isDark()` sits in).
- */
-@Composable
-fun offlineBannerUiModel(visible: Boolean): BannerUiModel = BannerUiModel(
-    message = stringResource(Res.string.connectivity_offline_banner),
-    tone = BannerTone.Warning,
-    variant = BannerVariant.Status,
-    visible = visible,
-)

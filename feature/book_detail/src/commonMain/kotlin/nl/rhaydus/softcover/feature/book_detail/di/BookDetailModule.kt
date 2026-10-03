@@ -44,6 +44,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionCa
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
@@ -83,6 +84,7 @@ val bookDetailModule = module {
     factory { UserBooksFlowCollector() } bind BookDetailCollector::class
     factory { CoverModelsCollector() } bind BookDetailCollector::class
     factory { DateStyleCollector() } bind BookDetailCollector::class
+    factory { OfflineStateCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class
     factory { UnreleasedBadgeCollector() } bind BookDetailCollector::class
     factory { CalloutsCollector() } bind BookDetailCollector::class
@@ -188,6 +190,7 @@ val bookDetailModule = module {
             markBookAsReadUseCase = get(),
             saveBookVerdictUseCase = get(),
             flows = getAll(),
+            offlineCopy = get(),
             appDispatchers = get(),
             getDateStyleAsFlowUseCase = get(),
             observeCurrentDateUseCase = get(),

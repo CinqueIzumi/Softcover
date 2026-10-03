@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
@@ -54,6 +55,7 @@ internal class ExploreScreenScreenModel(
     private val getMoodTagsUseCase: GetMoodTagsUseCase,
     private val searchByMoodUseCase: SearchByMoodUseCase,
     private val setBecauseYouReadGenreUseCase: SetBecauseYouReadGenreUseCase,
+    offlineCopy: OfflineCopy,
     flows: List<ExploreCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<ExploreScreenUiState, ExploreEvent, ExploreDependencies, ExploreCollector, ExploreLocalVariables>(
@@ -86,6 +88,7 @@ internal class ExploreScreenScreenModel(
         getMoodTagsUseCase = getMoodTagsUseCase,
         searchByMoodUseCase = searchByMoodUseCase,
         setBecauseYouReadGenreUseCase = setBecauseYouReadGenreUseCase,
+        offlineCopy = offlineCopy,
     )
 
     init {

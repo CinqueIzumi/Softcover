@@ -18,12 +18,11 @@ private const val SWAY_HALF_PERIOD_MS = 6_800
 /**
  * Slow infinite ±2° drift for a decorative quote glyph in an empty state. The glyph rocks
  * imperceptibly slowly — a magazine pull-quote breathing, not a marquee. Suppressed under
- * reduced motion: the glyph sits perfectly upright as it does today.
+ * reduced motion: the glyph then sits upright.
  *
- * Apply only to decorative quote glyphs in empty states (Library empty tabs, Reading empty
- * currently-reading). Do not apply to quote glyphs that decorate populated cards (review
- * cards, share cards) — those carry content next to the glyph and a swaying mark fights
- * the body for the reader's eye.
+ * Apply only to the decorative quote glyph of an empty state. Do not apply to quote glyphs that
+ * decorate populated cards (review cards, share cards) — those carry content next to the glyph and a
+ * swaying mark fights the body for the reader's eye.
  */
 @Composable
 fun Modifier.quoteGlyphSway(): Modifier {

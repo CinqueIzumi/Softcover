@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCas
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
+import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
@@ -65,6 +66,7 @@ internal class BookDetailDependencies(
     val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
     val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
     val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
+    val offlineCopy: OfflineCopy,
     override val coroutineScope: CoroutineScope,
     override val mainDispatcher: CoroutineDispatcher,
 ) : ActionDependencies()

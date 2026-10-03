@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCas
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
+import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ClearBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.SetBookDeadlineUseCase
@@ -77,6 +78,7 @@ internal class BookDetailScreenScreenModel(
     private val observeUserTagVocabularyUseCase: ObserveUserTagVocabularyUseCase,
     private val syncUserTagVocabularyUseCase: SyncUserTagVocabularyUseCase,
     private val recordAppliedTagsUseCase: RecordAppliedTagsUseCase,
+    offlineCopy: OfflineCopy,
     flows: List<BookDetailCollector>,
     appDispatchers: AppDispatchers,
 ) : ToadScreenModel<BookDetailUiState, BookDetailEvent, BookDetailDependencies, BookDetailCollector, BookDetailLocalVariables>(
@@ -122,6 +124,7 @@ internal class BookDetailScreenScreenModel(
         observeUserTagVocabularyUseCase = observeUserTagVocabularyUseCase,
         syncUserTagVocabularyUseCase = syncUserTagVocabularyUseCase,
         recordAppliedTagsUseCase = recordAppliedTagsUseCase,
+        offlineCopy = offlineCopy,
     )
 
     init {

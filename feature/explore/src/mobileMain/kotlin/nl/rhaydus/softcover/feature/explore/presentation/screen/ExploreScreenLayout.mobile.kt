@@ -18,8 +18,7 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.component.state.EmptyState
-import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
+import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBar
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -110,14 +109,14 @@ internal actual fun ExploreScreenLayout(
         },
     ) { padding ->
         if (isOnline.not()) {
-            EmptyState(
-                model = offlineEmptyStateUiModel(),
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(bottom = rememberBottomBarPadding())
-                    .fillMaxSize()
-                    .padding(24.dp),
-            )
+            state.offlineEmptyState?.let { offlineEmptyState ->
+                OfflineEmptyStatePlaceholder(
+                    model = offlineEmptyState,
+                    modifier = Modifier
+                        .padding(padding)
+                        .padding(bottom = rememberBottomBarPadding()),
+                )
+            }
             return@Scaffold
         }
 

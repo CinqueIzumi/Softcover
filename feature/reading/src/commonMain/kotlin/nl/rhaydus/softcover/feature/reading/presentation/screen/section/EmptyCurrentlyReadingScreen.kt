@@ -2,46 +2,29 @@ package nl.rhaydus.softcover.feature.reading.presentation.screen.section
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
-import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
-import nl.rhaydus.softcover.core.component.state.EmptyStateButtonUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateEvent
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
@@ -84,9 +67,17 @@ internal fun EmptyCurrentlyReadingScreen(
         verticalArrangement = if (showAdaptive) Arrangement.Top else Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (showAdaptive) Spacer(modifier = Modifier.height(40.dp))
         EmptyState(
             model = emptyState,
+            modifier = if (showAdaptive) {
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp)
+            } else {
+                Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+            },
             onEvent = { event ->
                 when (event) {
                     EmptyStateEvent.ButtonClicked -> onNavigateToSearch()

@@ -34,8 +34,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.callout.Callout
-import nl.rhaydus.softcover.core.component.state.EmptyState
-import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
+import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
@@ -105,14 +104,14 @@ internal actual fun BookDetailScreenLayout(
         contentWindowInsets = WindowInsets(),
     ) { innerPadding ->
         if (showOfflinePlaceholder) {
-            EmptyState(
-                model = offlineEmptyStateUiModel(),
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(bottom = bottomChromePadding())
-                    .fillMaxSize()
-                    .padding(24.dp),
-            )
+            state.offlineEmptyState?.let { offlineEmptyState ->
+                OfflineEmptyStatePlaceholder(
+                    model = offlineEmptyState,
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .padding(bottom = bottomChromePadding()),
+                )
+            }
 
             TopBar(
                 model = state.offlineTopBar,

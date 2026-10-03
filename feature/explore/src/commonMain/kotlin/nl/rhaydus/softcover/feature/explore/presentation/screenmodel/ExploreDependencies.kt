@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetTrendingBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
+import nl.rhaydus.softcover.core.component.state.OfflineCopy
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetBecauseYouReadGenreUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.ClearSearchResultsUseCase
 import nl.rhaydus.softcover.feature.explore.domain.usecase.DismissContinueSeriesBookUseCase
@@ -50,6 +51,7 @@ internal data class ExploreDependencies(
     val getMoodTagsUseCase: GetMoodTagsUseCase,
     val searchByMoodUseCase: SearchByMoodUseCase,
     val setBecauseYouReadGenreUseCase: SetBecauseYouReadGenreUseCase,
+    val offlineCopy: OfflineCopy,
     // Bumping this re-subscribes the continue-series flow in its collector, forcing
     // the `fetchNextInSeries` network calls to run again on user-triggered refresh.
     val continueSeriesRefreshTrigger: MutableStateFlow<Long> = MutableStateFlow(0L),

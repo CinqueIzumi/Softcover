@@ -92,7 +92,9 @@ fun ChooseListsBottomSheet(
         if (model.rows.isEmpty()) {
             EmptyState(
                 model = model.emptyState,
-                modifier = Modifier.padding(vertical = 20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp),
             )
         } else {
             LazyColumn(

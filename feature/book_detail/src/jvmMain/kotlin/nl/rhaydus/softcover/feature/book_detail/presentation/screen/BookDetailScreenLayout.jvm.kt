@@ -30,8 +30,7 @@ import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
-import nl.rhaydus.softcover.core.component.state.EmptyState
-import nl.rhaydus.softcover.core.component.state.offlineEmptyStateUiModel
+import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
@@ -47,14 +46,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.Lens
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensToggle
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveControlCard
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-
-private val IDENTITY_SIDEBAR_WIDTH = 360.dp
-
-// Below this available width a 360dp identity sidebar plus a readable narrative column no longer fit,
-// so the layout collapses to a single scrolling column. The expanded two-pane detail slot
-// (`BottomBarScreen`, ~460–700dp) lands here, while a full-screen pushed detail on a normal desktop
-// window clears it and gets the two-column treatment.
-private val TWO_COLUMN_MIN_WIDTH = 720.dp
 
 /**
  * Desktop Book Detail. On a wide surface (a full-screen pushed detail) it is a fixed identity sidebar
@@ -105,20 +96,23 @@ internal actual fun BookDetailScreenLayout(
             )
 
             if (showOfflinePlaceholder) {
-                EmptyState(
-                    model = offlineEmptyStateUiModel(),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = bottomChromePadding())
-                        .padding(24.dp),
-                )
+                state.offlineEmptyState?.let { offlineEmptyState ->
+                    OfflineEmptyStatePlaceholder(
+                        model = offlineEmptyState,
+                        modifier = Modifier.padding(bottom = bottomChromePadding()),
+                    )
+                }
             } else {
                 BoxWithConstraints(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
                 ) {
-                    if (maxWidth >= TWO_COLUMN_MIN_WIDTH) {
+                    // Below 720dp a 360dp identity sidebar plus a readable narrative column no longer
+                    // fit, so the layout collapses to a single scrolling column. The expanded two-pane
+                    // detail slot (`BottomBarScreen`, ~460–700dp) lands here, while a full-screen pushed
+                    // detail on a normal desktop window clears it and gets the two-column treatment.
+                    if (maxWidth >= 720.dp) {
                         TwoColumnContent(
                             state = state,
                             runAction = runAction,
@@ -156,7 +150,7 @@ private fun TwoColumnContent(
     Row(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .width(IDENTITY_SIDEBAR_WIDTH)
+                .width(360.dp)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState()),
         ) {

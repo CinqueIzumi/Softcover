@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.core.presentation.di
 
 import nl.rhaydus.designsystem.nav.NavPulse
 import nl.rhaydus.softcover.core.book.di.bookModule
+import nl.rhaydus.softcover.core.component.state.OfflineCopy
+import nl.rhaydus.softcover.core.component.state.ResourceOfflineCopy
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import org.koin.dsl.module
 
@@ -19,4 +21,7 @@ val presentationModule = module {
     // A single shared instance so the trigger (feature:reading) and the bottom bar (:orchestration)
     // observe the same signal.
     single { NavPulse() }
+
+    // `:core:component` cannot use DI, so its default implementation is bound here.
+    single<OfflineCopy> { ResourceOfflineCopy() }
 }

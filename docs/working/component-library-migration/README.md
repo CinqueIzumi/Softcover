@@ -14,12 +14,15 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8-C-states audit approved (shape in `steps/s8-screen-states.md`). S8-C-a done: internal `ChromeIconButton` (`core/component/chrome/`, 48 dp, cursor, tooltip) on all bar back/clear buttons; `TopBarNavigation` deleted; `TopBarUiModel.title: String?`; `TopBarSurface.colors(ColorScheme)`; title `heading()`; desktop Profile + Scan on `EditorialTopBar`; one title const per screen; book detail `offlineTopBar` on UiState; SearchTopBar 48 dp tall, 16 dp radii (committed `15328195`). S8-C-b done: `CalloutStyle` accent/track; accent bar → internal `SectionHeaderInlineEyebrow`; `BannerTone` (Warning/Highlight) + `BannerVariant` (Status/Editorial), 16×10; both dismisses `ChromeIconButton`; `Banner(windowInsets)` (R11 plumbing exemption added); `planTodayNudgeFor(visible)`; `bookDetailActionFor` / `handleAppUpdateCalloutEvent` shared by jvm + mobile. SL-3b waits on F34; F33 open.
-- **Next:** S8-C-c — empty states + offline models off composition (C-c bullet + cross-family offline bullet; glyph `clearAndSetSemantics`, title `heading()`; unused imports + why ktlint missed them). `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
-- **Open questions:** `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
+- **State:** S8 screen states done (S8-C-a `15328195`, S8-C-b `d9869363`, S8-C-c uncommitted): `EmptyStateVariant.Centered(button)` / `Inline`; `OfflineCopy` seam (`ResourceOfflineCopy` bound in `presentationModule`) feeds `OfflineStateCollector` (explore, book_detail) and the new orchestration `RootScreenModel` / `OfflineBannerCollector`; `OfflineEmptyStatePlaceholder` owns the full-pane padding. SL-3b waits on F34; F33 open.
+- **Next (user-approved, in order):**
+  1. Fix the BookCard row gutter (S7 regression from `6c9cffee`): the old Reading row had a full-bleed divider and hover with content inset 24 horizontal / 18 vertical; `BookCardRow.kt:57` pads only 12 dp vertically, so "Also between your fingers" rows touch the screen edges. Approved option: the row model carries the content inset (divider + hover stay full-bleed); Reading's mapper sets 24 / 18; check whether Library's list rows (`LibraryBookCardMapper`) have the same missing gutter and set theirs.
+  2. Grey flash when opening book detail — the user expected lean loading to have removed it. Find the cause (check `steps/sl-lean-loading.md`, SL-3b / F34) and fix it.
+  Later: `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
+- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** S8-C-b: compile (6 modules + app), `checkModuleGraph`, `projectHealth`, `ktlintCheck`, `styleCheck` (JDK 21), tests (incl. new event-helper + nudge `visible` cases), review (Banner modifier back on root; R11 doc; helper naming) ✅.
-- **Uncommitted:** nothing (S8-C-b committed).
+- **Verification:** S8-C-c: compile (7 modules + app), `checkModuleGraph`, `ktlintCheck`, `checkDocBudgets`, `styleCheck` (JDK 21), tests (`OfflineBannerCollectorTest` ×3, explore + book_detail `OfflineStateCollectorTest`), two review rounds (final: no blockers) ✅.
+- **Uncommitted:** all of S8-C-c (empty states, offline seam, root TOAD stack, gutters, docs, step file deleted).
 
 ## Local verification
 
@@ -65,7 +68,7 @@ every sub-step's Verify.
 | S6 | — (sheet chrome) | S6-3–S6-7, S6-C-sheets | [x] |
 | S7 | — (book cards) | S7-1–S7-7, S7-C1–C5 | [x] |
 | SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-13, app-wide; SL-1–SL-7 before S7-2 | [ ] |
-| S8 | [steps/s8-screen-states.md](steps/s8-screen-states.md) | S8-1–S8-3, S8-C-a–C-c | [ ] |
+| S8 | — (screen states) | S8-1–S8-3, S8-C-a–C-c | [x] |
 | S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-5 | [ ] |
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |

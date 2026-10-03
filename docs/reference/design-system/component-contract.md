@@ -161,9 +161,14 @@ TopBar(model = state.topBar)
 - **One model per identity unless it varies by surface.** A collector building per-item models keeps one map
   keyed by identity; a cover carries a per-rail shared-element key and needs one map per rail, a badge with
   no surface-scoped data needs exactly one.
+- **Library-owned copy arrives through a seam.** Copy a component owns and resolves from its own
+  `composeResources` (the offline banner and offline screen) is exposed as the `OfflineCopy` interface
+  (`state/`), whose methods are `suspend` and return the models. `ResourceOfflineCopy` is the default
+  implementation, bound once in `presentationModule` (`:core:component` itself uses no DI). A collector
+  reads it from its `Dependencies` and puts the result on the `UiState`, so the render never builds the
+  model and a collector test can substitute the copy.
 - **Not yet satisfied by the whole library.** Write new components to R10 and do not take an existing call
-  site as precedent. Three edges are unsettled: copy the library owns and resolves from its own
-  `composeResources` (`offlineBannerUiModel()`); preview fixtures and the gallery, which construct models by
+  site as precedent. Two edges are unsettled: preview fixtures and the gallery, which construct models by
   definition; and a model that depends on a value only composition has (scroll position, window size class,
   a `CompositionLocal`).
 
@@ -302,11 +307,11 @@ wrapping a hairline-bordered, rounded surface filled with that theme's `backgrou
 family gets a `SectionHeader` (Section register), then per component its name and blurb, then each fixture as a small
 label over a tonal tile that constrains the fixture's width and lets it size its own height.
 
-With the registry empty, the frame shows the empty-state variant of the
-[editorial quote](patterns/editorial.md#editorial-quote) pattern (the swaying low-alpha quote glyph, as on
-the empty Reading and Hidden-suggestions screens), with copy explaining that the library fills one
-migration stage at a time. It renders inside the themed region, so it still shows the chosen brightness and
-palette.
+The registry is never empty, so the frame has no empty state of its own. The library's `EmptyState` is a
+registry entry like any other: `Centered` (with and without a button) and `Inline` fixtures, where
+`Centered` takes its button from the variant (`EmptyStateVariant.Centered(button)`) and `Inline` has none.
+A caller gives a full pane `fillMaxSize().padding(24.dp)` and an in-flow placement
+`fillMaxWidth().padding(top = 40.dp)`; the component adds no gutter of its own.
 
 ### 7.6 Where consolidation is the wrong call
 

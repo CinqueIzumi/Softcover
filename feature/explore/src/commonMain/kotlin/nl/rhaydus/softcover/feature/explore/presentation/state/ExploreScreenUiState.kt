@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.mood.MoodTileUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
@@ -73,6 +74,8 @@ internal data class ExploreScreenUiState(
         headline = "Up next in your series",
     ),
     val continueSeriesEntries: List<ContinueSeriesEntryUiModel> = emptyList(),
+    /** `null` until the library's offline copy has resolved. */
+    val offlineEmptyState: EmptyStateUiModel? = null,
     /** The desktop masthead and its refresh action, derived off [isRefreshing] by `MastheadCollector` (R9). */
     val masthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = "Discover",

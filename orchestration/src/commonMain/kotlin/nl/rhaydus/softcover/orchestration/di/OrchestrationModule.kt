@@ -32,13 +32,17 @@ import nl.rhaydus.softcover.feature.scan.di.scanModule
 import nl.rhaydus.softcover.feature.session.di.sessionModule
 import nl.rhaydus.softcover.feature.settings.di.settingsModule
 import nl.rhaydus.softcover.orchestration.navigation.AppNavigatorImpl
+import nl.rhaydus.softcover.orchestration.presentation.collector.OfflineBannerCollector
+import nl.rhaydus.softcover.orchestration.presentation.collector.RootCollector
 import nl.rhaydus.softcover.orchestration.presentation.screenmodel.BottomBarScreenModel
+import nl.rhaydus.softcover.orchestration.presentation.screenmodel.RootScreenModel
 import nl.rhaydus.softcover.orchestration.presentation.viewmodel.MainActivityViewModel
 import nl.rhaydus.softcover.orchestration.session.ActiveSessionControllerImpl
 import nl.rhaydus.softcover.orchestration.usecase.InitializeUserIdAndBooksUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ReAuthenticateUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.RefreshLibraryUseCaseImpl
 import nl.rhaydus.softcover.orchestration.usecase.ResetUserDataUseCaseImpl
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 internal val orchestrationModule = module {
@@ -71,6 +75,17 @@ internal val orchestrationModule = module {
     )
 
     factory { BottomBarScreenModel(appDispatchers = get()) }
+
+    factory { OfflineBannerCollector() } bind RootCollector::class
+
+    factory {
+        RootScreenModel(
+            networkAvailabilityProvider = get(),
+            offlineCopy = get(),
+            flows = getAll(),
+            appDispatchers = get(),
+        )
+    }
 
     single<AppNavigator> { AppNavigatorImpl() }
 
