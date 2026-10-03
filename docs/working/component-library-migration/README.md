@@ -14,13 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8 screen states committed (`15328195`, `d9869363`, `b3adec2b`). BookCard row gutter fix done, uncommitted: `BookCardVariant.Row.contentHorizontalInset` / `contentVerticalInset` (defaults 0 / 12) pad the content only, divider + hover stay full-bleed; Reading's also-reading row 24 / 18; Library list rows vertical 14 / 18 via `libraryCompactRow` / `libraryLargeRow` (`LibraryBookCardMapper`), horizontal stays on `LayoutGrid`. SL-3b waits on F34; F33 open.
-- **Next (user-requested):** grey flash when opening book detail — user expected lean loading to have removed it; find the cause (`steps/sl-lean-loading.md`, SL-3b / F34) and fix it.
+- **State:** SL-14 done, uncommitted: book detail's grey flash was the `skeletonMask` shimmer on shelve rows / About / Reviews showing ~130ms while a re-open is served from Apollo's memory cache. `skeletonMask` now runs `skeletonRevealPhase` on the frame clock (blank 250ms, shimmer held ≥300ms, `SKELETON_GRACE_MILLIS` / `SKELETON_MINIMUM_VISIBLE_MILLIS`); `Cover`'s loading boxes go through it (`CoverShimmer`); `ShelveControlCard` drops `key(isLoading)` for `wasLoading` (no wipe / tween on landing). Stand-in cards and `Cover`'s loading slot leave composition on load, so they get the grace but not the 300ms hold (accepted). SL-3b waits on F34; F33 open.
+- **Next:** SL-13 (delete the `Skeleton` family; its prerequisites SL-8 and SL-10 are done).
+- **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `Color.LightGray` / `White`, not theme roles, so network-latency shimmers are a light-grey block on the dark theme — foundation upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
-- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
+- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** row gutter: compile (component, reading, library, explore, book_detail; JVM + Android), `styleCheck` (JDK 21), `testAndroidHostTest` library + reading + core:component, two review rounds (final: no blockers) ✅. No new tests (padding values only).
-- **Uncommitted:** the row gutter fix (6 Kotlin files, staged), this block, `visual-checks.md`.
+- **Verification:** SL-14: `styleCheck` (JDK 21), `SkeletonRevealPhaseTest` 13/13, emulator recordings (re-open: no shimmer; cold open: shimmer after the grace, lands correctly), 2 reviews (final clean) ✅.
+- **Uncommitted:** `SkeletonMask.kt`, `SkeletonRevealPhase.kt` (new), `Cover.kt`, `ShelveControlCard.kt`, `SkeletonRevealPhaseTest.kt` (new), `components.md` SkeletonMask line, this block, the SL-14 tick.
 
 ## Local verification
 
@@ -76,6 +77,7 @@ every sub-step's Verify.
 
 ## Decisions
 
+- Book detail's shelve rows mask while the book loads, never seeded from the entry's known status (Explore entries don't know it).
 - Test posture: no Compose UI tests; unit tests follow `.claude/rules/tests.md`; the Component Gallery is the visual-acceptance surface.
 - A `:core:uibinding` → `:core:<data>` edge is pre-approved when a mapper needs one; write it when the edge exists.
 - Loading follows `component-contract.md` R12; SL retrofits the existing surfaces.

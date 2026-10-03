@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +21,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -101,59 +101,56 @@ internal fun ShelveControlCard(
                         ),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    // Fresh row state on landing, so the shelved row does not play its selection wipe.
-                    key(isLoading) {
-                        ShelveRow(
-                            label = "Want to read",
-                            iconRes = drawableIconResource(
-                                icon = SoftcoverIcon.BookmarkAdd,
-                                contentDescription = "",
-                            ),
-                            selected = status == BookStatus.WantToRead,
-                            isLoading = isLoading,
-                            onClick = {
-                                book?.let {
-                                    haptics.select()
-                                    runAction(OnMarkBookAsWantToReadClickAction(book = it))
-                                }
-                            },
-                        )
-    
-                        ShelveRow(
-                            label = "Reading",
-                            iconRes = drawableIconResource(
-                                icon = SoftcoverIcon.Reading,
-                                contentDescription = "",
-                            ),
-                            selected = status == BookStatus.Reading,
-                            isLoading = isLoading,
-                            onClick = {
-                                book?.let {
-                                    haptics.select()
-                                    runAction(OnMarkBookAsReadingClickAction(book = it))
-                                }
-                            },
-                            trailingStatus = book?.let { readingTrailingStatus(book = it) },
-                        )
-    
-                        ShelveRow(
-                            label = "Read",
-                            iconRes = drawableIconResource(
-                                icon = SoftcoverIcon.BookmarkCheck,
-                                contentDescription = "",
-                            ),
-                            selected = status == BookStatus.Read,
-                            isLoading = isLoading,
-                            onClick = { book?.let { runAction(OnMarkBookAsReadClickAction(book = it)) } },
-                            celebrationKey = celebrationKey,
-                            trailingStatus = book?.let {
-                                readStatusDateTrailing(
-                                    book = it,
-                                    dateStyle = dateStyle,
-                                )
-                            },
-                        )
-                    }
+                    ShelveRow(
+                        label = "Want to read",
+                        iconRes = drawableIconResource(
+                            icon = SoftcoverIcon.BookmarkAdd,
+                            contentDescription = "",
+                        ),
+                        selected = status == BookStatus.WantToRead,
+                        isLoading = isLoading,
+                        onClick = {
+                            book?.let {
+                                haptics.select()
+                                runAction(OnMarkBookAsWantToReadClickAction(book = it))
+                            }
+                        },
+                    )
+
+                    ShelveRow(
+                        label = "Reading",
+                        iconRes = drawableIconResource(
+                            icon = SoftcoverIcon.Reading,
+                            contentDescription = "",
+                        ),
+                        selected = status == BookStatus.Reading,
+                        isLoading = isLoading,
+                        onClick = {
+                            book?.let {
+                                haptics.select()
+                                runAction(OnMarkBookAsReadingClickAction(book = it))
+                            }
+                        },
+                        trailingStatus = book?.let { readingTrailingStatus(book = it) },
+                    )
+
+                    ShelveRow(
+                        label = "Read",
+                        iconRes = drawableIconResource(
+                            icon = SoftcoverIcon.BookmarkCheck,
+                            contentDescription = "",
+                        ),
+                        selected = status == BookStatus.Read,
+                        isLoading = isLoading,
+                        onClick = { book?.let { runAction(OnMarkBookAsReadClickAction(book = it)) } },
+                        celebrationKey = celebrationKey,
+                        trailingStatus = book?.let {
+                            readStatusDateTrailing(
+                                book = it,
+                                dateStyle = dateStyle,
+                            )
+                        },
+                    )
                 }
             }
         }
@@ -211,9 +208,19 @@ private fun ShelveRow(
     val playMotion = playDecorativeMotion()
 
     var settledSelected by remember { mutableStateOf(selected) }
+    var wasLoading by remember { mutableStateOf(isLoading) }
     val wipe = remember { Animatable(initialValue = 1f) }
 
-    LaunchedEffect(selected) {
+    // Landing from the loading state adopts the shelved row as already selected, so it plays no wipe.
+    LaunchedEffect(selected, isLoading) {
+        if (isLoading || wasLoading) {
+            settledSelected = selected
+            wasLoading = isLoading
+            wipe.snapTo(targetValue = 1f)
+
+            return@LaunchedEffect
+        }
+
         if (selected == settledSelected) return@LaunchedEffect
 
         if (playMotion.not()) {
@@ -235,7 +242,7 @@ private fun ShelveRow(
 
     val contentColor by animateColorAsState(
         targetValue = if (selected) selectedContent else unselectedContent,
-        animationSpec = tween(durationMillis = 180),
+        animationSpec = if (wasLoading) snap() else tween(durationMillis = 180),
         label = "ShelfChipContent",
     )
 

@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.isSpecified
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
@@ -29,9 +30,9 @@ import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
@@ -129,7 +130,7 @@ fun Cover(
         label = "Cover",
     ) { loading ->
         if (loading) {
-            Box(modifier = Modifier.fillMaxSize().shimmer())
+            CoverShimmer()
         } else if (request == null) {
             if (coverlessFallback != null) {
                 CoverlessTitleCover(title = coverlessFallback)
@@ -152,7 +153,7 @@ fun Cover(
                             contentScale = ContentScale.Fit,
                         )
                     } else {
-                        Box(modifier = Modifier.fillMaxSize().shimmer())
+                        CoverShimmer()
                     }
                 },
                 error = {
@@ -349,4 +350,16 @@ private fun CoverLoadingPreview() {
             modifier = Modifier.width(140.dp),
         )
     }
+}
+
+@Composable
+private fun CoverShimmer() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .skeletonMask(
+                visible = true,
+                shape = RectangleShape,
+            ),
+    )
 }

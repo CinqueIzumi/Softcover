@@ -28,7 +28,7 @@ deleted.
 | SL-11 | Library and Reading: audit how they show loading; convert any loading branch to the shape below | S7-6 | [x] |
 | SL-12 | Profile: sections and both layouts move from `.shimmer` blocks to masked real leaves | S9-3 | [ ] |
 | SL-13 | Delete `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry, `SkeletonUiModelTest` and doc lines | SL-8, SL-10 | [ ] |
-| SL-14 | Delayed reveal: `skeletonMask` and `Cover`'s loading shimmer wait out a grace period and hold a minimum once shown | SL-11 | [ ] |
+| SL-14 | Delayed reveal: `skeletonMask` and `Cover`'s loading shimmer wait out a grace period and hold a minimum once shown | SL-11 | [x] |
 
 SL-1 to SL-7 run before S7-2. A sub-step whose "Runs after" is open waits; the tracker's `## Now` picks the
 next one whose prerequisites are done.
@@ -68,14 +68,14 @@ next one whose prerequisites are done.
 - SL-11 Reading: the pick-up-next field becomes nullable (null = loading; no separate flag); loading renders
   3 stand-in tiles. The masthead eyebrow copy stays (refresh feedback).
 - SL-14: local-cache screens (Library, Reading) load in a few frames, so the shimmer only flashes. The
-  timing lives in `skeletonMask`, not per screen: for the first 150ms of loading the leaf draws nothing
+  timing lives in `skeletonMask`, not per screen: for the first 250ms of loading the leaf draws nothing
   (content hidden, layout kept); then the shimmer shows and, once shown, stays at least 300ms even if
   loading ends sooner. Both values are constants beside the mask. A load that ends inside the grace period
   shows its content with no shimmer.
 - SL-14: the timing is a plain function (elapsed time, loading → hidden / shimmer / content), unit-tested;
   the modifier only drives it with a clock. Leaves composed in the same frame share the same start.
 - SL-14: `Cover`'s own `isLoading` shimmer follows the same timing.
-- SL-14: app-wide, explore and book detail included (accepted: network surfaces show their shimmer 150ms
+- SL-14: app-wide, explore and book detail included (accepted: network surfaces show their shimmer 250ms
   later). F32 carries the timing upstream.
 
 ## Inventory (current paths)
