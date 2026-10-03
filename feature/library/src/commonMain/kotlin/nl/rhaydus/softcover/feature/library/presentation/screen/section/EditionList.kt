@@ -197,12 +197,11 @@ internal fun EditionList(
             val gridItemScope = this
 
             val edition = editionsById[id] ?: return@itemsIndexed
-            val cover = state.editionCovers[id]
 
             ReorderableItem(state = reorderableState, key = id) {
                 // Built unconditionally so the per-item composable structure is identical whether
-                // or not rearranging — only the dragHandle slot and tap target are toggled below,
-                // so the cover is never remounted (no flash).
+                // or not rearranging — only the drag-handle slot is toggled below, so the cover is
+                // never remounted (no flash).
                 val handleModifier = Modifier.draggableHandle(
                     onDragStarted = {
                         minTouchedIndex.intValue = -1
@@ -243,29 +242,24 @@ internal fun EditionList(
                     },
                 )
 
-                // Drag-only while rearranging: tapping a cover doesn't open the edition with the
-                // handle live (matches the built-in shelf grid).
-                LayoutEditionEntry(
-                    modifier = Modifier.mutationAnimated(
-                        scope = gridItemScope,
-                        animator = animator,
-                        itemKey = edition.id,
+                val card = state.editionCardsByTab[tab.id]?.get(edition.id)
+
+                val entryModifier = Modifier.mutationAnimated(
+                    scope = gridItemScope,
+                    animator = animator,
+                    itemKey = edition.id,
+                )
+                    .staggeredEntry(
+                        coordinator = entry,
+                        index = index,
                     )
-                        .staggeredEntry(
-                            coordinator = entry,
-                            index = index,
-                        ),
-                    edition = edition,
-                    cover = cover,
-                    card = state.editionCardsByTab[tab.id]?.get(edition.id),
+
+                LibraryBookCard(
+                    card = card,
                     layout = state.gridLayout,
-                    onCardEvent = onCardEvent,
-                    onEditionClick = if (isRearranging) {
-                        {}
-                    } else {
-                        onEditionClick
-                    },
-                    dragHandle = if (isRearranging) {
+                    onEvent = onCardEvent,
+                    modifier = entryModifier,
+                    content = if (isRearranging) {
                         { DragHandle(modifier = handleModifier) }
                     } else {
                         null

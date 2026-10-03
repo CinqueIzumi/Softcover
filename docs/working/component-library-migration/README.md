@@ -17,7 +17,7 @@ checkboxes in step with `## Steps` and `## Gates` here.
 - **State:** S7-1 (box unticked), S7-2 done. SL-3b waits on foundation F34; detekt type resolution is inert
   (F33). SL-9 onward wait on S7 / S9.
 - **Next:** S7-3 (library rows; fold cover / selection / deadline collectors into `BookCardModelsCollector`;
-  delete `SelectableCover`). Diff every detail against today's rows first.
+  drop `SelectableCover`); `steps/s7-bookcard.md`. Diff every detail against today's rows.
 - **Open questions:** `BookmarkToggle` → foundation toggle? (No SL entry on issue #275, by the user's call.)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
@@ -37,8 +37,8 @@ checkboxes in step with `## Steps` and `## Gates` here.
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes; SL-5's hero
   title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid.
-- **Verification:** S7-2: compile, `styleCheck`, tests passed; reviewer ✅.
-- **Uncommitted:** S7-2 (bookcard, library grid + collector + tests), trackers.
+- **Verification:** S7-2 (`1d3d12e1`): compile, `styleCheck`, tests passed; reviewer ✅.
+- **Uncommitted:** this `## Now` refresh only.
 
 ## Local verification
 

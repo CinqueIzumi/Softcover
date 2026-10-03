@@ -1,24 +1,20 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
-import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
-import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
-import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.domain.model.Author
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.mapper.toBookCard
+import nl.rhaydus.softcover.feature.library.presentation.mapper.toEditionCard
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -28,12 +24,9 @@ import nl.rhaydus.softcover.feature.library.presentation.state.resolveSortMode
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps every book and edition on the Library's grid layouts to a [BookCardUiModel] off the
- * composition (`component-contract.md` § 7.2 R9), keyed by tab id then by [Book.id] or edition id
- * into [LibraryUiState.bookCardsByTab] and [LibraryUiState.editionCardsByTab].
- * [LibraryGridLayout.GRID_TWO_COLUMNS] and [LibraryGridLayout.GRID_THREE_COLUMNS] map to
- * [BookCardVariant.Stacked]; the cover-only layouts to [BookCardVariant.CoverOnly]. Both maps are
- * empty on the list layouts, which keep their own rows.
+ * Maps every book and edition on every Library layout to a [BookCardUiModel] off the composition
+ * (`component-contract.md` § 7.2 R9), keyed by tab id then by [Book.id] or edition id into
+ * [LibraryUiState.bookCardsByTab] and [LibraryUiState.editionCardsByTab].
  *
  * Only tabs in [LibraryUiState.visibleTabs] are mapped. A tab whose inputs are unchanged since the
  * last run keeps its previous inner map, so a selection toggle rebuilds only the tab it touches.
@@ -56,11 +49,10 @@ internal class BookCardModelsCollector : LibraryCollector {
                     booksByTab = state.booksByTab,
                     editionsByTab = state.editionsByTab,
                     gridLayout = state.gridLayout,
-                    bookCovers = state.bookCovers,
-                    editionCovers = state.editionCovers,
-                    selectionMarks = state.selectionMarks,
-                    deadlineCountdownOverlays = state.deadlineCountdownOverlays,
+                    deadlines = state.deadlines,
+                    dateStyle = state.dateStyle,
                     selectionMode = state.selectionMode,
+                    selectedBookIds = state.selectedBookIds,
                     isRearranging = state.isRearranging,
                     sortModeByTab = state.sortModeByTab,
                     customLists = state.customLists,
@@ -69,13 +61,8 @@ internal class BookCardModelsCollector : LibraryCollector {
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 val (books, editions) = withContext(dependencies.defaultDispatcher) {
-                    if (snapshot.gridLayout.isGrid()) {
-                        snapshot.toBookCards(previous = bookCache) to
-                            snapshot.toEditionCards(previous = editionCache)
-                    } else {
-                        emptyMap<String, CachedTab<BookTabInputs>>() to
-                            emptyMap<String, CachedTab<EditionTabInputs>>()
-                    }
+                    snapshot.toBookCards(previous = bookCache) to
+                        snapshot.toEditionCards(previous = editionCache)
                 }
 
                 bookCache = books
@@ -90,22 +77,6 @@ internal class BookCardModelsCollector : LibraryCollector {
             }
     }
 }
-
-private fun LibraryGridLayout.isGrid(): Boolean = when (this) {
-    LibraryGridLayout.GRID_TWO_COLUMNS,
-    LibraryGridLayout.GRID_THREE_COLUMNS,
-    LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-    LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-        -> true
-
-    LibraryGridLayout.LIST_COMPACT,
-    LibraryGridLayout.LIST_LARGE,
-        -> false
-}
-
-private fun LibraryGridLayout.isCoverOnly(): Boolean =
-    this == LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY ||
-        this == LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY
 
 /** Reuses [previous] when its inputs equal [inputs]; otherwise rebuilds the cards from [build]. */
 private inline fun <I> cachedTab(
@@ -124,6 +95,12 @@ private inline fun <I> cachedTab(
 private fun BookCardModelsSnapshot.toBookCards(
     previous: Map<String, CachedTab<BookTabInputs>>,
 ): Map<String, CachedTab<BookTabInputs>> = buildMap {
+    val backdrop = if (gridLayout == LibraryGridLayout.LIST_COMPACT) {
+        SelectionMarkBackdrop.Surface
+    } else {
+        SelectionMarkBackdrop.Image
+    }
+
     visibleTabs.forEach { tab ->
         val books = booksByTab[tab.id] ?: return@forEach
 
@@ -145,11 +122,20 @@ private fun BookCardModelsSnapshot.toBookCards(
 
         val inputs = BookTabInputs(
             books = books,
-            covers = books.map { bookCovers[it.id] },
-            marks = books.map { selectionMarks[it.id] },
-            overlays = books.map { deadlineCountdownOverlays[it.id] },
+            deadlines = books.map { deadlines[it.id] },
+            dateStyle = dateStyle,
+            marks = books.map { book ->
+                if (selectionMode) {
+                    SelectionMarkUiModel(
+                        selected = book.id in selectedBookIds,
+                        backdrop = backdrop,
+                    )
+                } else {
+                    null
+                }
+            },
             press = press,
-            coverOnly = gridLayout.isCoverOnly(),
+            layout = gridLayout,
         )
 
         put(
@@ -159,19 +145,12 @@ private fun BookCardModelsSnapshot.toBookCards(
                 inputs = inputs,
             ) {
                 books.mapIndexed { index, book ->
-                    book.id to BookCardUiModel(
-                        key = BookCardKey.Book(bookId = book.id),
-                        variant = variantFor(
-                            cover = inputs.covers[index],
-                            title = book.title,
-                            authors = book.authors,
-                        ),
-                        decorations = BookCardDecorations(
-                            progress = book.cardProgress(),
-                            coverBadge = inputs.overlays[index],
-                            selection = inputs.marks[index],
-                            pressBehaviour = press,
-                        ),
+                    book.id to book.toBookCard(
+                        layout = inputs.layout,
+                        press = press,
+                        selection = inputs.marks[index],
+                        deadline = inputs.deadlines[index],
+                        dateStyle = inputs.dateStyle,
                     )
                 }
             },
@@ -199,9 +178,8 @@ private fun BookCardModelsSnapshot.toEditionCards(
 
         val inputs = EditionTabInputs(
             editions = editions,
-            covers = editions.map { editionCovers[it.id] },
             press = press,
-            coverOnly = gridLayout.isCoverOnly(),
+            layout = gridLayout,
         )
 
         put(
@@ -210,52 +188,13 @@ private fun BookCardModelsSnapshot.toEditionCards(
                 previous = previous[tab.id],
                 inputs = inputs,
             ) {
-                editions.mapIndexed { index, edition ->
-                    edition.id to BookCardUiModel(
-                        key = BookCardKey.Edition(editionId = edition.id),
-                        variant = variantFor(
-                            cover = inputs.covers[index],
-                            title = edition.title.orEmpty(),
-                            authors = edition.authors,
-                        ),
-                        decorations = BookCardDecorations(
-                            progress = BookCardProgress.Reserved,
-                            pressBehaviour = press,
-                        ),
+                editions.map { edition ->
+                    edition.id to edition.toEditionCard(
+                        layout = inputs.layout,
+                        press = press,
                     )
                 }
             },
         )
-    }
-}
-
-private fun BookCardModelsSnapshot.variantFor(
-    cover: CoverUiModel?,
-    title: String,
-    authors: List<Author>,
-): BookCardVariant {
-    if (gridLayout.isCoverOnly()) return BookCardVariant.CoverOnly(cover = cover)
-
-    val firstAuthor = authors.firstOrNull()?.name?.takeIf { it.isNotBlank() }
-
-    return BookCardVariant.Stacked(
-        cover = cover,
-        text = BookCardContent(
-            title = title,
-            byline = firstAuthor?.let { "By $it" },
-        ),
-    )
-}
-
-private fun Book.cardProgress(): BookCardProgress {
-    val progress = userBookRead?.progress
-
-    return if (status == BookStatus.Reading && progress != null) {
-        BookCardProgress.Value(
-            fraction = progress / 100f,
-            label = null,
-        )
-    } else {
-        BookCardProgress.Reserved
     }
 }

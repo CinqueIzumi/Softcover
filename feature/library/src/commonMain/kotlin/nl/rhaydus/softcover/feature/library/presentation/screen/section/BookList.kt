@@ -208,13 +208,11 @@ internal fun BookList(
             val gridItemScope = this
 
             val book = booksById[id] ?: return@itemsIndexed
-            val cover = state.bookCovers[id]
 
             ReorderableItem(state = reorderableState, key = id) {
                 // Built unconditionally so the per-item composable structure is identical in and
-                // out of rearrange mode — only the dragHandle slot and click handlers are
-                // swapped below (parameter values, not composable calls), so the cover is never
-                // remounted (no flash).
+                // out of rearrange mode — only the drag-handle slot is swapped below (a parameter
+                // value, not a composable call), so the cover is never remounted (no flash).
                 val handleModifier = Modifier.draggableHandle(
                     onDragStarted = {
                         maxTouchedIndex.intValue = -1
@@ -239,30 +237,6 @@ internal fun BookList(
                 )
 
                 val isSelected = selectionMode && book.id in state.selectedBookIds
-
-                // Rearrange mode is drag-only (tap and long-press suppressed); otherwise selection
-                // mode toggles, and the default opens the book / long-press enters bulk-select.
-                val onClick: () -> Unit = if (isRearranging) {
-                    {}
-                } else if (selectionMode) {
-                    {
-                        haptics.select()
-
-                        runAction(OnToggleBookSelectionAction(bookId = book.id))
-                    }
-                } else {
-                    { onBookClick(book) }
-                }
-
-                val onLongClick: (() -> Unit)? = if (isRearranging || selectionMode) {
-                    null
-                } else {
-                    {
-                        haptics.threshold()
-
-                        runAction(OnEnterSelectionModeAction(bookId = book.id))
-                    }
-                }
 
                 // Desktop selection affordances, inert on touch: Ctrl/Cmd-click toggles this cover's
                 // selection (entering selection mode if needed), Shift-click range-selects the
@@ -362,19 +336,14 @@ internal fun BookList(
                 }
 
                 DesktopContextMenu(items = contextMenuItems) {
-                    LayoutBookEntry(
-                        modifier = entryModifier,
-                        book = book,
-                        cover = cover,
-                        card = state.bookCardsByTab[tab.id]?.get(book.id),
+                    val card = state.bookCardsByTab[tab.id]?.get(book.id)
+
+                    LibraryBookCard(
+                        card = card,
                         layout = state.gridLayout,
-                        onCardEvent = onCardEvent,
-                        onClick = onClick,
-                        onLongClick = onLongClick,
-                        selectionMark = state.selectionMarks[book.id],
-                        deadlineBadge = state.deadlineBadges[book.id],
-                        deadlineSummary = state.deadlineSummaries[book.id],
-                        dragHandle = if (isRearranging) {
+                        onEvent = onCardEvent,
+                        modifier = entryModifier,
+                        content = if (isRearranging) {
                             { DragHandle(modifier = handleModifier) }
                         } else {
                             null

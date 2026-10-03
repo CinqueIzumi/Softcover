@@ -4,17 +4,12 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
-import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
-import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
@@ -52,20 +47,6 @@ internal data class LibraryUiState(
     ),
     val booksByTab: Map<String, List<Book>> = emptyMap(),
     val editionsByTab: Map<String, List<BookEdition>> = emptyMap(),
-
-    /**
-     * Book covers keyed by [Book.id], mapped by `CoverModelsCollector` (R9) off every shelf
-     * collected into [booksByTab]. Id-keyed rather than paired index-for-index with a shelf's
-     * render order: the render's `renderIds` is a `MutableStateList` the reorder library permutes
-     * live during a drag, and an id-keyed map cannot desync from a list being mutated mid-gesture.
-     */
-    val bookCovers: Map<Int, CoverUiModel> = emptyMap(),
-
-    /**
-     * Edition covers keyed by [BookEdition.id], mapped by `CoverModelsCollector` (R9) off every
-     * custom-list shelf collected into [editionsByTab]. See [bookCovers] for why this is id-keyed.
-     */
-    val editionCovers: Map<Int, CoverUiModel> = emptyMap(),
 
     /**
      * Custom-list `list_books.created_at` keyed by tab id, then edition id. Populated by
@@ -210,18 +191,6 @@ internal data class LibraryUiState(
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
 
-    /**
-     * Each deadline-tracked book's grid-cover countdown overlay keyed by [Book.id], mapped by
-     * `DeadlineModelsCollector` (R9) off [booksByTab] and [deadlines].
-     */
-    val deadlineCountdownOverlays: ImmutableMap<Int, CoverOverlayUiModel> = persistentMapOf(),
-
-    /** Each deadline-tracked book's status badge keyed by [Book.id]. */
-    val deadlineBadges: Map<Int, BadgeUiModel> = emptyMap(),
-
-    /** Each deadline-tracked book's summary line keyed by [Book.id]. */
-    val deadlineSummaries: Map<Int, DeadlineSummaryUiModel> = emptyMap(),
-
     val searchQuery: String = "",
 
     /**
@@ -233,19 +202,10 @@ internal data class LibraryUiState(
     val selectionMode: Boolean = false,
     val selectedBookIds: Set<Int> = emptySet(),
 
-    /**
-     * A [SelectionMarkUiModel] per book keyed by [Book.id], mapped by `SelectionMarksCollector`
-     * (R9) off [selectionMode], [selectedBookIds] and [gridLayout]. Empty outside selection mode.
-     */
-    val selectionMarks: ImmutableMap<Int, SelectionMarkUiModel> = persistentMapOf(),
-
-    /**
-     * Grid card models per tab id, then [Book.id], mapped by `BookCardModelsCollector` (R9). Empty
-     * on the list layouts.
-     */
+    /** Card models per tab id, then [Book.id], mapped by `BookCardModelsCollector` (R9). */
     val bookCardsByTab: ImmutableMap<String, ImmutableMap<Int, BookCardUiModel>> = persistentMapOf(),
 
-    /** Grid card models per custom-list tab id, then [BookEdition.id]; same shape as [bookCardsByTab]. */
+    /** Card models per custom-list tab id, then [BookEdition.id]; same shape as [bookCardsByTab]. */
     val editionCardsByTab: ImmutableMap<String, ImmutableMap<Int, BookCardUiModel>> = persistentMapOf(),
 
     /**

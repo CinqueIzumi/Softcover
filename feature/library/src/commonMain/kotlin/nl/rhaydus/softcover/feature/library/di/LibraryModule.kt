@@ -18,9 +18,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.BookListsColl
 import nl.rhaydus.softcover.feature.library.presentation.collector.BooksByStatusCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.BulkRemoveSheetCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ChooseListsCollector
-import nl.rhaydus.softcover.feature.library.presentation.collector.CoverModelsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.DateStyleCollector
-import nl.rhaydus.softcover.feature.library.presentation.collector.DeadlineModelsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.DisplayListsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterChipModelsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.FilterDraftChipsCollector
@@ -29,7 +27,6 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.GridLayoutCol
 import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.MastheadCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.RearrangeChipCollector
-import nl.rhaydus.softcover.feature.library.presentation.collector.SelectionMarksCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSidebarCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelvesSheetCollector
@@ -54,9 +51,6 @@ val libraryModule = module {
     factory { BookListsCollector() } bind LibraryCollector::class
     factory { BookCardModelsCollector() } bind LibraryCollector::class
     factory { ChooseListsCollector() } bind LibraryCollector::class
-    factory { CoverModelsCollector() } bind LibraryCollector::class
-    factory { DeadlineModelsCollector() } bind LibraryCollector::class
-    factory { SelectionMarksCollector() } bind LibraryCollector::class
 
     factory { VisibleTabsCollector() } bind LibraryCollector::class
     factory { ShelfSidebarCollector() } bind LibraryCollector::class
