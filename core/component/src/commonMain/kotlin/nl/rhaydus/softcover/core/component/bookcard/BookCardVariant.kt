@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 
 /** A `null` cover still reserves the cover's 2:3 footprint. */
@@ -25,6 +27,8 @@ sealed interface BookCardVariant {
         val text: BookCardContent,
         val trailing: BookCardTrailing? = null,
         val deadline: DeadlineSummaryUiModel? = null,
+        val contentHorizontalInset: Dp = 0.dp,
+        val contentVerticalInset: Dp = 12.dp,
     ) : BookCardVariant {
         /** Sets the lead's width (40, 56 or 74dp) and the title's type and line count. */
         enum class Size {

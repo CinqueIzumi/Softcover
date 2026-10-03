@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen.section
 
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
@@ -41,6 +42,8 @@ internal val ALSO_READING_STAND_IN_CARD = BookCardUiModel(
             byline = "By Patrick Rothfuss",
         ),
         trailing = BookCardTrailing.SetProgress(label = "Set progress"),
+        contentHorizontalInset = 24.dp,
+        contentVerticalInset = 18.dp,
     ),
     decorations = BookCardDecorations(
         progress = BookCardProgress.Value(

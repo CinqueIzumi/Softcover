@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
@@ -66,6 +67,8 @@ internal fun Book.toAlsoReadingCard(
                 dateStyle = dateStyle,
                 tone = DeadlineSummaryTone.OnSurface,
             ),
+            contentHorizontalInset = 24.dp,
+            contentVerticalInset = 18.dp,
         ),
         decorations = BookCardDecorations(
             progress = BookCardProgress.Value(

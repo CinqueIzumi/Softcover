@@ -54,7 +54,10 @@ internal fun BookCardRowLayout(
         Divider(model = DividerUiModel.Horizontal())
 
         Column(
-            modifier = Modifier.padding(vertical = 12.dp),
+            modifier = Modifier.padding(
+                horizontal = variant.contentHorizontalInset,
+                vertical = variant.contentVerticalInset,
+            ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(

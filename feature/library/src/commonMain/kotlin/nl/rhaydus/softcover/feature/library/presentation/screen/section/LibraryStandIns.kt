@@ -15,6 +15,8 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
+import nl.rhaydus.softcover.feature.library.presentation.mapper.libraryCompactRow
+import nl.rhaydus.softcover.feature.library.presentation.mapper.libraryLargeRow
 
 internal fun LibraryGridLayout.standInCard(): BookCardUiModel = when (this) {
     LibraryGridLayout.GRID_TWO_COLUMNS,
@@ -56,9 +58,7 @@ private val COVER_ONLY_STAND_IN_CARD = BookCardUiModel(
 
 private val COMPACT_ROW_STAND_IN_CARD = BookCardUiModel(
     key = BookCardKey.Book(bookId = -3),
-    variant = BookCardVariant.Row(
-        size = BookCardVariant.Row.Size.Compact,
-        lead = null,
+    variant = libraryCompactRow(
         text = BookCardContent(
             title = "The Name of the Wind",
             byline = "By Patrick Rothfuss",
@@ -70,8 +70,7 @@ private val COMPACT_ROW_STAND_IN_CARD = BookCardUiModel(
 
 private val LARGE_ROW_STAND_IN_CARD = BookCardUiModel(
     key = BookCardKey.Book(bookId = -4),
-    variant = BookCardVariant.Row(
-        size = BookCardVariant.Row.Size.Large,
+    variant = libraryLargeRow(
         lead = BookCardLead.Cover(cover = standInCover()),
         text = BookCardContent(
             title = "The Name of the Wind",

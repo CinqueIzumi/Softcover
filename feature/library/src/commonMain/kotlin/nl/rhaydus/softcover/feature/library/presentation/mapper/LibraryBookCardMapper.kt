@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.mapper
 
+import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
@@ -12,6 +13,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
+import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -78,9 +80,7 @@ internal fun Book.toBookCard(
         }
 
         LibraryGridLayout.LIST_COMPACT -> {
-            variant = BookCardVariant.Row(
-                size = BookCardVariant.Row.Size.Compact,
-                lead = null,
+            variant = libraryCompactRow(
                 text = BookCardContent(
                     title = title,
                     byline = byline(author = authorString),
@@ -94,8 +94,7 @@ internal fun Book.toBookCard(
         }
 
         LibraryGridLayout.LIST_LARGE -> {
-            variant = BookCardVariant.Row(
-                size = BookCardVariant.Row.Size.Large,
+            variant = libraryLargeRow(
                 lead = BookCardLead.Cover(cover = BookCardCover(model = toShelfBookCover())),
                 text = BookCardContent(
                     title = title,
@@ -149,14 +148,9 @@ internal fun BookEdition.toEditionCard(
             text = text,
         )
 
-        LibraryGridLayout.LIST_COMPACT -> BookCardVariant.Row(
-            size = BookCardVariant.Row.Size.Compact,
-            lead = null,
-            text = text,
-        )
+        LibraryGridLayout.LIST_COMPACT -> libraryCompactRow(text = text)
 
-        LibraryGridLayout.LIST_LARGE -> BookCardVariant.Row(
-            size = BookCardVariant.Row.Size.Large,
+        LibraryGridLayout.LIST_LARGE -> libraryLargeRow(
             lead = BookCardLead.Cover(cover = BookCardCover(model = toShelfEditionCover())),
             text = text,
         )
@@ -173,6 +167,29 @@ internal fun BookEdition.toEditionCard(
         ),
     )
 }
+
+internal fun libraryCompactRow(
+    text: BookCardContent,
+    trailing: BookCardTrailing? = null,
+): BookCardVariant.Row = BookCardVariant.Row(
+    size = BookCardVariant.Row.Size.Compact,
+    lead = null,
+    text = text,
+    trailing = trailing,
+    contentVerticalInset = 14.dp,
+)
+
+internal fun libraryLargeRow(
+    lead: BookCardLead,
+    text: BookCardContent,
+    deadline: DeadlineSummaryUiModel? = null,
+): BookCardVariant.Row = BookCardVariant.Row(
+    size = BookCardVariant.Row.Size.Large,
+    lead = lead,
+    text = text,
+    deadline = deadline,
+    contentVerticalInset = 18.dp,
+)
 
 private fun Book.gridDecorations(
     selection: SelectionMarkUiModel?,

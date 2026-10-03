@@ -14,15 +14,13 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8 screen states done (S8-C-a `15328195`, S8-C-b `d9869363`, S8-C-c uncommitted): `EmptyStateVariant.Centered(button)` / `Inline`; `OfflineCopy` seam (`ResourceOfflineCopy` bound in `presentationModule`) feeds `OfflineStateCollector` (explore, book_detail) and the new orchestration `RootScreenModel` / `OfflineBannerCollector`; `OfflineEmptyStatePlaceholder` owns the full-pane padding. SL-3b waits on F34; F33 open.
-- **Next (user-approved, in order):**
-  1. Fix the BookCard row gutter (S7 regression from `6c9cffee`): the old Reading row had a full-bleed divider and hover with content inset 24 horizontal / 18 vertical; `BookCardRow.kt:57` pads only 12 dp vertically, so "Also between your fingers" rows touch the screen edges. Approved option: the row model carries the content inset (divider + hover stay full-bleed); Reading's mapper sets 24 / 18; check whether Library's list rows (`LibraryBookCardMapper`) have the same missing gutter and set theirs.
-  2. Grey flash when opening book detail — the user expected lean loading to have removed it. Find the cause (check `steps/sl-lean-loading.md`, SL-3b / F34) and fix it.
-  Later: `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
+- **State:** S8 screen states committed (`15328195`, `d9869363`, `b3adec2b`). BookCard row gutter fix done, uncommitted: `BookCardVariant.Row.contentHorizontalInset` / `contentVerticalInset` (defaults 0 / 12) pad the content only, divider + hover stay full-bleed; Reading's also-reading row 24 / 18; Library list rows vertical 14 / 18 via `libraryCompactRow` / `libraryLargeRow` (`LibraryBookCardMapper`), horizontal stays on `LayoutGrid`. SL-3b waits on F34; F33 open.
+- **Next (user-requested):** grey flash when opening book detail — user expected lean loading to have removed it; find the cause (`steps/sl-lean-loading.md`, SL-3b / F34) and fix it.
+- **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
 - **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? SL-14 app-wide? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** S8-C-c: compile (7 modules + app), `checkModuleGraph`, `ktlintCheck`, `checkDocBudgets`, `styleCheck` (JDK 21), tests (`OfflineBannerCollectorTest` ×3, explore + book_detail `OfflineStateCollectorTest`), two review rounds (final: no blockers) ✅.
-- **Uncommitted:** all of S8-C-c (empty states, offline seam, root TOAD stack, gutters, docs, step file deleted).
+- **Verification:** row gutter: compile (component, reading, library, explore, book_detail; JVM + Android), `styleCheck` (JDK 21), `testAndroidHostTest` library + reading + core:component, two review rounds (final: no blockers) ✅. No new tests (padding values only).
+- **Uncommitted:** the row gutter fix (6 Kotlin files, staged), this block, `visual-checks.md`.
 
 ## Local verification
 
