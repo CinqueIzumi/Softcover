@@ -103,7 +103,7 @@ internal actual fun ReadingScreenLayout(
                     },
                 ) {
                     when {
-                        state.books.isNotEmpty() -> {
+                        state.books.isNotEmpty() || state.isLoading -> {
                             ReadingBooksColumn(
                                 state = state,
                                 runAction = runAction,
@@ -120,9 +120,8 @@ internal actual fun ReadingScreenLayout(
                             }
                         }
 
-                        state.isLoading -> Unit
                         else -> EmptyCurrentlyReadingScreen(
-                            wantToReadBooks = state.wantToReadBooks,
+                            wantToReadBooks = state.wantToReadBooks.orEmpty(),
                             trendingBooks = state.trendingBooks,
                             pickUpNextCards = state.pickUpNextCards,
                             trendingTileCover = state.trendingTileCover,

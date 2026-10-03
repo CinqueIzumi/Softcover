@@ -15,7 +15,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVaria
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 import nl.rhaydus.toad.ActionScope
 
-private const val PICK_UP_NEXT_TILE_COUNT = 3
+internal const val PICK_UP_NEXT_TILE_COUNT = 3
 
 /**
  * Maps the "Also reading" rows and the empty-state "Pick up next" tiles to book cards off the
@@ -34,7 +34,7 @@ internal class BookCardModelsCollector : ReadingCollector {
             .map {
                 BookCardModelsSnapshot(
                     alsoReadingBooks = it.books.drop(1),
-                    pickUpNextBooks = it.wantToReadBooks.take(PICK_UP_NEXT_TILE_COUNT),
+                    pickUpNextBooks = it.wantToReadBooks?.take(PICK_UP_NEXT_TILE_COUNT),
                     deadlines = it.deadlines,
                     deadlineCoverOverlays = it.deadlineCoverOverlays,
                     dateStyle = it.dateStyle,
@@ -54,8 +54,8 @@ internal class BookCardModelsCollector : ReadingCollector {
                             )
                         }.toImmutableMap(),
                         pickUpNextCards = snapshot.pickUpNextBooks
-                            .map(Book::toPickUpNextCard)
-                            .toImmutableList(),
+                            ?.map(Book::toPickUpNextCard)
+                            ?.toImmutableList(),
                     )
                 }
             }

@@ -1,19 +1,17 @@
 package nl.rhaydus.softcover.feature.library.presentation.screen.section
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
-import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 
 /**
  * Renders [card] only when it [fits] [layout]: the layout flips at once while `BookCardModelsCollector`
- * recomputes cards asynchronously, so a stale card would draw in the wrong layout. Otherwise the grids keep
- * the cell's footprint and [modifier] with an empty cover, and the lists render nothing.
+ * recomputes cards asynchronously, so a stale card would draw in the wrong layout. Otherwise a masked
+ * stand-in of the layout's own shape keeps the cell's footprint and [modifier].
  */
 @Composable
 internal fun LibraryBookCard(
@@ -33,20 +31,12 @@ internal fun LibraryBookCard(
         return
     }
 
-    when (layout) {
-        LibraryGridLayout.GRID_TWO_COLUMNS,
-        LibraryGridLayout.GRID_THREE_COLUMNS,
-        LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-        LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY,
-            -> Cover(
-            model = null,
-            modifier = modifier.fillMaxWidth(),
-        )
-
-        LibraryGridLayout.LIST_COMPACT,
-        LibraryGridLayout.LIST_LARGE,
-            -> Unit
-    }
+    BookCard(
+        model = layout.standInCard(),
+        onEvent = onEvent,
+        modifier = modifier,
+        isLoading = true,
+    )
 }
 
 internal fun BookCardUiModel.fits(layout: LibraryGridLayout): Boolean =

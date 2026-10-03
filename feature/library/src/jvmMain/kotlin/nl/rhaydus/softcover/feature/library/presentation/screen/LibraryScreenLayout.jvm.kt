@@ -172,6 +172,7 @@ internal actual fun LibraryScreenLayout(
                         end = 12.dp,
                         top = 16.dp,
                     ),
+                    isLoading = state.isMastheadLoadingFor(currentTab?.id),
                 ) {
                     MastheadRefreshAction(
                         model = state.mastheadRefresh,

@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 internal fun MastheadHeader(
     title: String,
     subtitle: String,
+    isSubtitleLoading: Boolean,
     pullToRefreshState: PullToRefreshState,
     isRefreshing: Boolean,
     topAppBarState: TopAppBarState,
@@ -133,6 +134,8 @@ internal fun MastheadHeader(
 
                 SoftcoverText(
                     text = subtitle,
+                    isLoading = isSubtitleLoading,
+                    standIn = subtitle,
                     style = MaterialTheme.editorialTypography.body,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(end = 16.dp),

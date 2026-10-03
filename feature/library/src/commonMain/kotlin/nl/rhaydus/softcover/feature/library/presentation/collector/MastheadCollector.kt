@@ -10,10 +10,10 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
- * The only writer of [LibraryUiState.mastheads], [LibraryUiState.fallbackMasthead] and
- * [LibraryUiState.mastheadRefresh] — one masthead per visible tab, derived from that tab's stats
- * and [LibraryUiState.isLoading]. Both the desktop and mobile mastheads resolve their tab's entry
- * through [LibraryUiState.mastheadFor] rather than building any copy themselves.
+ * The only writer of [LibraryUiState.mastheads], [LibraryUiState.fallbackMasthead],
+ * [LibraryUiState.loadingMastheadTabIds] and [LibraryUiState.mastheadRefresh] — one masthead per visible
+ * tab, derived from that tab's stats and [LibraryUiState.isLoading]. Both the desktop and mobile mastheads
+ * resolve their tab's entry through [LibraryUiState.mastheadFor] rather than building any copy themselves.
  */
 internal class MastheadCollector : LibraryCollector {
     override suspend fun onLaunch(
@@ -24,9 +24,9 @@ internal class MastheadCollector : LibraryCollector {
             .map { state ->
                 MastheadSnapshot(
                     visibleTabs = state.visibleTabs,
-                    tabStatsByTab = state.visibleTabs.associate { tab ->
-                        tab.id to state.tabStatsFor(tabId = tab.id)
-                    },
+                    tabStatsByTab = state.visibleTabs.mapNotNull { tab ->
+                        state.tabStatsByTab[tab.id]?.let { stats -> tab.id to stats }
+                    }.toMap(),
                     isLoading = state.isLoading,
                 )
             }
@@ -36,6 +36,7 @@ internal class MastheadCollector : LibraryCollector {
                     it.copy(
                         mastheads = snapshot.mastheads(),
                         fallbackMasthead = snapshot.fallbackMasthead(),
+                        loadingMastheadTabIds = snapshot.loadingTabIds(),
                         mastheadRefresh = snapshot.refresh(),
                     )
                 }

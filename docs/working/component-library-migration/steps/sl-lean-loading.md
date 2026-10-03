@@ -25,7 +25,7 @@ deleted.
 | SL-9 | `BookCard` and `MoodTile` take `isLoading` and mask their own leaves, with loading fixtures | S7-4 | [x] |
 | SL-10a | Explore feed (featured, trending, up next, because-you-read, mood), mobile and desktop, render their real layout while loading; their `*Skeleton` state fields go | SL-9 | [x] |
 | SL-10b | Explore search and hidden suggestions, the same; the remaining `*Skeleton` state fields go | SL-10a, S7-5 | [x] |
-| SL-11 | Library and Reading: audit how they show loading; convert any loading branch to the shape below | S7-6 | [ ] |
+| SL-11 | Library and Reading: audit how they show loading; convert any loading branch to the shape below | S7-6 | [x] |
 | SL-12 | Profile: sections and both layouts move from `.shimmer` blocks to masked real leaves | S9-3 | [ ] |
 | SL-13 | Delete `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry, `SkeletonUiModelTest` and doc lines | SL-8, SL-10 | [ ] |
 
@@ -52,6 +52,20 @@ next one whose prerequisites are done.
 - Author and release year keep coming from `displayedEdition`, which already falls back to `initialCover`.
 - `Cover`'s own `CoverUiModel.isLoading` shimmer stays as is.
 - `skeletonMask` moves to the foundation later (F32); SL builds on the local copy.
+- SL-11 Library: a null tab list, or an empty one while loading, renders the real grid with N
+  `BookCard(isLoading = true)` stand-ins — 2-col 6, 3-col 9, cover-only 12, large list 6, compact list 10,
+  desktop 12, counts at the call site.
+- SL-11 Library: an unmapped card renders a stand-in `BookCard(isLoading = true)` of its layout's shape, not a
+  bare `Cover(null)` / nothing.
+- SL-11 Library: stand-in cards live feature-local (mirroring `ExploreStandIns.kt`), one per `BookCardVariant`.
+- SL-11 Library: the masthead subtitle masks a count-shaped stand-in instead of "Loading your shelf…".
+- SL-11 Reading: the `isLoading -> Unit` branches go (mobile and jvm); loading renders masthead, a loading
+  `FeaturedBookCard` and 2 stand-in rows.
+- SL-11 Reading: `FeaturedBookCard` takes `isLoading` plus a stand-in; text leaves via `SoftcoverText`,
+  cover / backdrop / progress bar via `skeletonMask`.
+- SL-11 Reading: an unmapped also-reading row renders a stand-in `BookCard(isLoading = true)`.
+- SL-11 Reading: the pick-up-next field becomes nullable (null = loading; no separate flag); loading renders
+  3 stand-in tiles. The masthead eyebrow copy stays (refresh feedback).
 
 ## Inventory (current paths)
 

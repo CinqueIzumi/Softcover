@@ -220,6 +220,7 @@ internal actual fun LibraryScreenLayout(
                 MastheadHeader(
                     title = masthead.title,
                     subtitle = masthead.subtitle.orEmpty(),
+                    isSubtitleLoading = state.isMastheadLoadingFor(currentTab?.id),
                     pullToRefreshState = pullToRefreshState,
                     isRefreshing = state.isLoading,
                     topAppBarState = topAppBarState,

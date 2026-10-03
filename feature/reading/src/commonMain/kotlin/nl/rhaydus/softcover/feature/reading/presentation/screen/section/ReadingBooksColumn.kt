@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -37,6 +38,9 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiSt
  * plan-today/pace nudge to its top edge), and the "also reading" list. The hosting [listState] and
  * [contentPadding] are supplied by each layout so desktop can attach a scrollbar and mobile can
  * reserve bottom-bar space.
+ *
+ * With no books yet it renders the same layout around [FEATURED_STAND_IN_BOOK] and
+ * [ALSO_READING_STAND_IN_COUNT] loading rows.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +54,9 @@ internal fun ReadingBooksColumn(
     modifier: Modifier = Modifier,
     header: @Composable () -> Unit,
 ) {
-    val featured = state.books.first()
+    val featuredBook = state.books.firstOrNull()
+    val isLoading = featuredBook == null
+    val featured = featuredBook ?: FEATURED_STAND_IN_BOOK
     val rest = state.books.drop(1)
 
     val animator = rememberLazyItemMutationAnimator(keys = rest.map { it.id })
@@ -93,10 +99,32 @@ internal fun ReadingBooksColumn(
                     runAction = runAction,
                     onBookClick = onBookClick,
                     modifier = controller.slideModifier(featured.id),
+                    isLoading = isLoading,
                 )
             }
 
-            if (rest.isNotEmpty()) {
+            if (isLoading) {
+                item(key = "also-reading-label") {
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                        SectionHeader(model = state.alsoReadingHeader)
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                items(
+                    count = ALSO_READING_STAND_IN_COUNT,
+                    key = { "also-reading-stand-in-$it" },
+                ) {
+                    BookCard(
+                        model = ALSO_READING_STAND_IN_CARD,
+                        onEvent = {},
+                        isLoading = true,
+                    )
+                }
+            } else if (rest.isNotEmpty()) {
                 item(key = "also-reading-label") {
                     Spacer(modifier = Modifier.height(32.dp))
 
@@ -108,22 +136,21 @@ internal fun ReadingBooksColumn(
                 }
 
                 itemsIndexed(rest, key = { _, book -> book.id }) { index, book ->
-                    state.alsoReadingCards[book.id]?.let { card ->
-                        BookCard(
-                            model = card,
-                            onEvent = onCardEvent,
-                            modifier = Modifier.mutationAnimated(
-                                scope = this,
-                                animator = animator,
-                                itemKey = book.id,
-                            )
-                                .staggeredEntry(
-                                    coordinator = entry,
-                                    index = index,
-                                )
-                                .then(controller.slideModifier(book.id)),
+                    BookCard(
+                        model = state.alsoReadingCards[book.id] ?: ALSO_READING_STAND_IN_CARD,
+                        onEvent = onCardEvent,
+                        isLoading = book.id !in state.alsoReadingCards,
+                        modifier = Modifier.mutationAnimated(
+                            scope = this,
+                            animator = animator,
+                            itemKey = book.id,
                         )
-                    }
+                            .staggeredEntry(
+                                coordinator = entry,
+                                index = index,
+                            )
+                            .then(controller.slideModifier(book.id)),
+                    )
                 }
             }
         }

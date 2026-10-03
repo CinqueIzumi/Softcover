@@ -17,10 +17,12 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.feature.reading.presentation.collector.PICK_UP_NEXT_TILE_COUNT
 
+/** [cards] is `null` while the want-to-read shelf loads, which renders [PICK_UP_NEXT_TILE_COUNT] loading tiles. */
 @Composable
 internal fun PickUpNextSection(
-    cards: ImmutableList<BookCardUiModel>,
+    cards: ImmutableList<BookCardUiModel>?,
     header: SectionHeaderUiModel,
     onEvent: (BookCardEvent) -> Unit,
 ) {
@@ -39,12 +41,23 @@ internal fun PickUpNextSection(
                 Alignment.CenterHorizontally,
             ),
         ) {
-            cards.forEach { card ->
-                BookCard(
-                    model = card,
-                    onEvent = onEvent,
-                    modifier = Modifier.width(96.dp),
-                )
+            if (cards == null) {
+                repeat(PICK_UP_NEXT_TILE_COUNT) {
+                    BookCard(
+                        model = PICK_UP_NEXT_STAND_IN_CARD,
+                        onEvent = onEvent,
+                        isLoading = true,
+                        modifier = Modifier.width(96.dp),
+                    )
+                }
+            } else {
+                cards.forEach { card ->
+                    BookCard(
+                        model = card,
+                        onEvent = onEvent,
+                        modifier = Modifier.width(96.dp),
+                    )
+                }
             }
         }
     }

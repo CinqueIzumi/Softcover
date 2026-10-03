@@ -17,6 +17,7 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -30,6 +31,7 @@ import org.koin.compose.koinInject
 internal fun FeaturedSessionButton(
     book: Book,
     foreground: Color,
+    isLoading: Boolean = false,
 ) {
     val controller = koinInject<ActiveSessionController>()
     val navigator = LocalNavigator.currentOrThrow
@@ -47,7 +49,7 @@ internal fun FeaturedSessionButton(
     )
 
     when {
-        active?.book?.id == book.id -> {
+        isLoading.not() && active?.book?.id == book.id -> {
             Spacer(modifier = Modifier.height(10.dp))
 
             // Kept tonal (rather than the idle state's outlined pill) so the active-session state
@@ -69,9 +71,9 @@ internal fun FeaturedSessionButton(
 
         // Audiobooks are tracked by listening time, not page-based reading sessions, so
         // the start control is never offered for them.
-        book.currentEdition?.isAudiobook == true -> Unit
+        isLoading.not() && book.currentEdition?.isAudiobook == true -> Unit
 
-        active == null -> {
+        isLoading || active == null -> {
             Spacer(modifier = Modifier.height(10.dp))
 
             // The catalog's OUTLINED style hardcodes its border and label colour to the theme's
@@ -94,11 +96,16 @@ internal fun FeaturedSessionButton(
                         contentDescription = "Start reading session icon",
                     ),
                     onClick = {
-                        haptics.threshold()
+                        if (isLoading.not()) {
+                            haptics.threshold()
 
-                        sessionPermissionRequester.request()
+                            sessionPermissionRequester.request()
+                        }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    enabled = isLoading.not(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .skeletonMask(visible = isLoading),
                 )
             }
         }

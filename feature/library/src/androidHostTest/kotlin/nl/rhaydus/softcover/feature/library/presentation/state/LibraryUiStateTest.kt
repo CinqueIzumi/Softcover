@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
@@ -17,6 +18,7 @@ import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.feature.library.presentation.collector.MASTHEAD_SUBTITLE_STAND_IN
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -189,7 +191,7 @@ class LibraryUiStateTest {
             state.fallbackMasthead shouldBe PageMastheadUiModel(
                 eyebrow = "Refreshing your shelf…",
                 title = "Library",
-                subtitle = "Loading your shelf…",
+                subtitle = MASTHEAD_SUBTITLE_STAND_IN,
             )
         }
 
@@ -241,6 +243,48 @@ class LibraryUiStateTest {
 
             // ----- Act & Assert -----
             state.mastheadFor(null) shouldBe fallback
+        }
+    }
+
+    @Nested
+    inner class IsMastheadLoadingFor {
+        @Test
+        fun `is true for a null tab id`() {
+            // ----- Arrange & Act & Assert -----
+            LibraryUiState().isMastheadLoadingFor(null) shouldBe true
+        }
+
+        @Test
+        fun `is true when the tab has no masthead yet`() {
+            // ----- Arrange -----
+            val state = LibraryUiState(mastheads = persistentMapOf(readTabId to PageMastheadUiModel(title = "Read")))
+
+            // ----- Act & Assert -----
+            state.isMastheadLoadingFor(otherTabId) shouldBe true
+        }
+
+        @Test
+        fun `is true when the tab has a masthead but is listed as loading`() {
+            // ----- Arrange -----
+            val state = LibraryUiState(
+                mastheads = persistentMapOf(readTabId to PageMastheadUiModel(title = "Read")),
+                loadingMastheadTabIds = persistentSetOf(readTabId),
+            )
+
+            // ----- Act & Assert -----
+            state.isMastheadLoadingFor(readTabId) shouldBe true
+        }
+
+        @Test
+        fun `is false when the tab has a masthead and is not listed as loading`() {
+            // ----- Arrange -----
+            val state = LibraryUiState(
+                mastheads = persistentMapOf(readTabId to PageMastheadUiModel(title = "Read")),
+                loadingMastheadTabIds = persistentSetOf(otherTabId),
+            )
+
+            // ----- Act & Assert -----
+            state.isMastheadLoadingFor(readTabId) shouldBe false
         }
     }
 

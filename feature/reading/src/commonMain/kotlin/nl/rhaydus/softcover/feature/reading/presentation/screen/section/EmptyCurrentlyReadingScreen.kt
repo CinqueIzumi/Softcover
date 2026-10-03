@@ -45,7 +45,7 @@ internal fun EmptyCurrentlyReadingScreen(
     trendingHeader: SectionHeaderUiModel,
     wantToReadBooks: List<Book> = emptyList(),
     trendingBooks: List<Book> = emptyList(),
-    pickUpNextCards: ImmutableList<BookCardUiModel> = persistentListOf(),
+    pickUpNextCards: ImmutableList<BookCardUiModel>? = persistentListOf(),
     trendingTileCover: CoverUiModel? = null,
     streakEnabled: Boolean = false,
     recentReadingActivity: List<ReadingDayActivity> = emptyList(),
@@ -55,7 +55,7 @@ internal fun EmptyCurrentlyReadingScreen(
 ) {
     // Mirrors CoverModelsCollector's own trendingBooks.firstOrNull(): the tile's cover is mapped there.
     val trendingTile = trendingBooks.firstOrNull()
-    val showAdaptive = pickUpNextCards.isNotEmpty() || trendingTile != null
+    val showAdaptive = pickUpNextCards == null || pickUpNextCards.isNotEmpty() || trendingTile != null
     val onPickUpNextEvent = rememberReadingCardEventHandler(
         books = wantToReadBooks,
         onBookClick = onBookClick,
@@ -149,7 +149,7 @@ internal fun EmptyCurrentlyReadingScreen(
             )
         }
 
-        if (pickUpNextCards.isNotEmpty()) {
+        if (pickUpNextCards == null || pickUpNextCards.isNotEmpty()) {
             Spacer(modifier = Modifier.height(40.dp))
 
             PickUpNextSection(

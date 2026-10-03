@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
@@ -156,13 +158,73 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(wantToReadBooks = (1..5).map { book(it) })
 
             // ----- Assert -----
-            stateFlow.value.pickUpNextCards.map { it.key } shouldBe listOf(
+            stateFlow.value.pickUpNextCards.shouldNotBeNull().map { it.key } shouldBe listOf(
                 BookCardKey.Book(bookId = 1),
                 BookCardKey.Book(bookId = 2),
                 BookCardKey.Book(bookId = 3),
             )
             job.cancel()
         }
+
+        @Test
+        fun `keeps pick up next loading while the want to read shelf has not loaded`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launch {
+                    BookCardModelsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(books = listOf(book(1), book(2)))
+
+                // ----- Assert -----
+                stateFlow.value.pickUpNextCards.shouldBeNull()
+                job.cancel()
+            }
+
+        @Test
+        fun `maps a loaded but empty want to read shelf to an empty list`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launch {
+                    BookCardModelsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(wantToReadBooks = emptyList())
+
+                // ----- Assert -----
+                stateFlow.value.pickUpNextCards shouldBe emptyList()
+                job.cancel()
+            }
+
+        @Test
+        fun `a shelf that loads after being null replaces the loading state`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launch {
+                    BookCardModelsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+                val loading = stateFlow.value.pickUpNextCards
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(wantToReadBooks = listOf(book(7)))
+
+                // ----- Assert -----
+                loading.shouldBeNull()
+                stateFlow.value.pickUpNextCards.shouldNotBeNull().map { it.key } shouldBe
+                    listOf(BookCardKey.Book(bookId = 7))
+                job.cancel()
+            }
 
         @Test
         fun `builds fewer tiles when fewer books are wanted`() = runTest(UnconfinedTestDispatcher()) {
@@ -178,7 +240,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(wantToReadBooks = listOf(book(1)))
 
             // ----- Assert -----
-            stateFlow.value.pickUpNextCards.size shouldBe 1
+            stateFlow.value.pickUpNextCards.shouldNotBeNull().size shouldBe 1
             job.cancel()
         }
 

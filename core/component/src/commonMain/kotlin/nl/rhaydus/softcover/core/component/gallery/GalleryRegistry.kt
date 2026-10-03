@@ -227,29 +227,47 @@ object GalleryRegistry {
                 )
             },
         ),
-        galleryEntry(
+        GalleryEntry(
             name = "PageMasthead",
             family = GalleryFamily.HEADER,
             blurb = "Names the page, once per page: an optional eyebrow, the title, and an optional " +
                 "subtitle, sized for the surface that hosts it.",
-            previews = PageMastheadUiModel,
-            label = ::pageMastheadFixtureLabel,
-            content = { model, modifier ->
-                PageMasthead(
-                    model = model,
-                    modifier = modifier,
-                ) {
-                    if (model.eyebrow == null && model.size == PageMastheadSize.Regular) {
-                        MastheadRefreshAction(
-                            model = MastheadRefreshUiModel(
-                                label = "Refresh",
-                                enabled = true,
+            fixtures = (
+                PageMastheadUiModel.previews.map { model ->
+                    GalleryFixture(
+                        label = pageMastheadFixtureLabel(model),
+                        render = { modifier ->
+                            PageMasthead(
+                                model = model,
+                                modifier = modifier,
+                            ) {
+                                if (model.eyebrow == null && model.size == PageMastheadSize.Regular) {
+                                    MastheadRefreshAction(
+                                        model = MastheadRefreshUiModel(
+                                            label = "Refresh",
+                                            enabled = true,
+                                        ),
+                                        onEvent = {},
+                                    )
+                                }
+                            }
+                        },
+                    )
+                } + GalleryFixture(
+                    label = "Loading subtitle",
+                    render = { modifier ->
+                        PageMasthead(
+                            model = PageMastheadUiModel(
+                                title = "Want to read",
+                                eyebrow = "Your collection",
+                                subtitle = "128 books · 34,000 pages",
                             ),
-                            onEvent = {},
+                            modifier = modifier,
+                            isLoading = true,
                         )
-                    }
-                }
-            },
+                    },
+                )
+                ).toImmutableList(),
         ),
         galleryEntry(
             name = "MastheadRefreshAction",

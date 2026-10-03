@@ -2,8 +2,10 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
@@ -23,6 +25,7 @@ import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.feature.library.presentation.collector.MASTHEAD_SUBTITLE_STAND_IN
 import nl.rhaydus.softcover.feature.library.presentation.collector.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.library.presentation.collector.shelfSidebarFor
 import nl.rhaydus.toad.UiState
@@ -182,8 +185,14 @@ internal data class LibraryUiState(
     val fallbackMasthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = "Refreshing your shelf…",
         title = "Library",
-        subtitle = "Loading your shelf…",
+        subtitle = MASTHEAD_SUBTITLE_STAND_IN,
     ),
+
+    /**
+     * Visible tabs whose list has not landed, so their [mastheads] subtitle is the count-shaped stand-in and
+     * renders masked. Resolve through [isMastheadLoadingFor]; mapped by `MastheadCollector`.
+     */
+    val loadingMastheadTabIds: ImmutableSet<String> = persistentSetOf(),
 
     /** The masthead's trailing refresh action, mapped by `MastheadCollector` off [isLoading]. */
     val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = true),
@@ -307,6 +316,9 @@ internal data class LibraryUiState(
         )
 
     fun mastheadFor(tabId: String?): PageMastheadUiModel = tabId?.let(mastheads::get) ?: fallbackMasthead
+
+    fun isMastheadLoadingFor(tabId: String?): Boolean =
+        tabId == null || tabId !in mastheads || tabId in loadingMastheadTabIds
 
     /**
      * Resolves [bookIds] (defaulting to the current [selectedBookIds]) to the underlying [Book]

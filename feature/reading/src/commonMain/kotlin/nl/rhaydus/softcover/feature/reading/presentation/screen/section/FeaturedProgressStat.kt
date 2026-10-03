@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -34,6 +35,7 @@ import kotlin.math.roundToInt
 internal fun FeaturedProgressStat(
     book: Book,
     foreground: Color,
+    isLoading: Boolean = false,
 ) {
     val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
 
@@ -42,17 +44,25 @@ internal fun FeaturedProgressStat(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
     ) {
+        val pageCount = pageCountLabel(
+            book = book,
+            foreground = foreground,
+        )
+
         SoftcoverText(
-            text = pageCountLabel(
-                book = book,
-                foreground = foreground,
-            ),
+            text = pageCount,
+            isLoading = isLoading,
+            standIn = pageCount.text,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             color = foreground,
         )
 
+        val percentage = "${(book.userBookRead?.progress ?: 0f).roundToInt()}%"
+
         SoftcoverText(
-            text = "${(book.userBookRead?.progress ?: 0f).roundToInt()}%",
+            text = percentage,
+            isLoading = isLoading,
+            standIn = percentage,
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = foreground,
         )
@@ -69,7 +79,8 @@ internal fun FeaturedProgressStat(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .height(10.dp),
+            .height(10.dp)
+            .skeletonMask(visible = isLoading),
     )
 }
 

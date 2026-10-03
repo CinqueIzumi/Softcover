@@ -38,9 +38,19 @@ internal fun EditionList(
     runAction: (LibraryAction) -> Unit,
     columnsOverride: GridCells? = null,
 ) {
-    val rawEditions = state.editionsByTab[tab.id] ?: return
+    val rawEditions = state.editionsByTab[tab.id]
 
-    if (rawEditions.isEmpty() && state.isLoading.not()) {
+    if (rawEditions == null || (rawEditions.isEmpty() && state.isLoading)) {
+        LibraryLoadingGrid(
+            layout = state.gridLayout,
+            gridState = gridState,
+            columnsOverride = columnsOverride,
+        )
+
+        return
+    }
+
+    if (rawEditions.isEmpty()) {
         EmptyListScreen(tab = tab)
 
         return

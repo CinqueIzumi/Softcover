@@ -14,9 +14,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S7-1–S7-6, SL-9, SL-10a, SL-10b done. SL-3b waits on F34; detekt type
+- **State:** S7-1–S7-6, SL-9–SL-11 done. SL-3b waits on F34; detekt type
   resolution inert (F33).
-- **Next:** SL-11; `steps/sl-lean-loading.md` § Sub-steps. Then S7-7.
+- **Next:** S7-7; `steps/s7-bookcard.md` § Sub-steps.
 - **Open questions:** `BookmarkToggle` → foundation toggle? (No SL entry on issue #275, by the user's call.)
 - **Visual checks, for the final UI pass (S12):** confirm on device that the Arrange / Filter sheets no longer
   render empty or stale for a frame on open. Eyeball the accepted shifts: S5-6's 4dp eyebrow gap, 1-line
@@ -35,9 +35,9 @@ checkboxes in step with `## Steps` and `## Gates` here.
   Continue-series headers; that the Arrange sheet's "Show titles" row does not pop in a frame after open
   (collector-only writer now); S6-C-sheets' header trailing gap (16 → 12), verdict jacket radius 4, the
   TEXT dismiss label's right edge, ShareBook's TEXT Cancel, animated state-driven closes; SL-5's hero
-  title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid; S7-4's rails; S7-5's rows; SL-10b's stand-ins; desktop chip gap (24dp); S7-6's rows, tiles.
-- **Verification:** S7-6: compile, `styleCheck`, tests passed (JBR 21); reviewer ✅.
-- **Uncommitted:** S7-6, `Stacked` → `Column` rename.
+  title block while loading (accepted: an unrated / seriesless book collapses that row on landing); S7-2's grid; S7-4's rails; S7-5's rows; SL-10b's stand-ins; desktop chip gap (24dp); S7-6's rows, tiles; SL-11's loading layouts.
+- **Verification:** SL-11: compile, `styleCheck`, tests passed (JBR 21); reviewer ✅.
+- **Uncommitted:** SL-11.
 
 ## Local verification
 
@@ -86,7 +86,7 @@ every sub-step's Verify.
 | S8 | [steps/s8-screen-states.md](steps/s8-screen-states.md) | S8-1–S8-3 | [ ] |
 | S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-5 | [ ] |
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
-| PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-4, any session before S11 | [ ] |
+| PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
 | S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-5 | [ ] |
 | S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |

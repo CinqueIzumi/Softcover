@@ -38,7 +38,10 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSh
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ALSO_READING_STAND_IN_CARD
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ALSO_READING_STAND_IN_COUNT
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.FEATURED_STAND_IN_BOOK
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBookCard
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
@@ -86,7 +89,7 @@ internal actual fun ReadingScreenLayout(
                     .fillMaxWidth(),
             ) {
                 when {
-                    state.books.isNotEmpty() -> {
+                    state.books.isNotEmpty() || state.isLoading -> {
                         Column(modifier = Modifier.fillMaxSize()) {
                             DesktopReadingHeader(
                                 state = state,
@@ -106,9 +109,8 @@ internal actual fun ReadingScreenLayout(
                         }
                     }
 
-                    state.isLoading -> Unit
                     else -> EmptyCurrentlyReadingScreen(
-                        wantToReadBooks = state.wantToReadBooks,
+                        wantToReadBooks = state.wantToReadBooks.orEmpty(),
                         trendingBooks = state.trendingBooks,
                         pickUpNextCards = state.pickUpNextCards,
                         trendingTileCover = state.trendingTileCover,
@@ -159,7 +161,9 @@ private fun DesktopReadingContent(
     controller: MarkAsReadController,
     modifier: Modifier = Modifier,
 ) {
-    val featured = state.books.first()
+    val featuredBook = state.books.firstOrNull()
+    val isLoading = featuredBook == null
+    val featured = featuredBook ?: FEATURED_STAND_IN_BOOK
     val rest = state.books.drop(1)
 
     val isInspection = LocalInspectionMode.current
@@ -195,9 +199,10 @@ private fun DesktopReadingContent(
                     runAction = runAction,
                     onBookClick = onBookClick,
                     modifier = controller.slideModifier(featured.id),
+                    isLoading = isLoading,
                 )
 
-                if (rest.isNotEmpty()) {
+                if (isLoading || rest.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Box(modifier = Modifier.padding(horizontal = 24.dp)) {
@@ -205,15 +210,24 @@ private fun DesktopReadingContent(
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
+                }
 
+                if (isLoading) {
+                    repeat(ALSO_READING_STAND_IN_COUNT) {
+                        BookCard(
+                            model = ALSO_READING_STAND_IN_CARD,
+                            onEvent = {},
+                            isLoading = true,
+                        )
+                    }
+                } else {
                     rest.forEach { book ->
-                        state.alsoReadingCards[book.id]?.let { card ->
-                            BookCard(
-                                model = card,
-                                onEvent = onCardEvent,
-                                modifier = controller.slideModifier(book.id),
-                            )
-                        }
+                        BookCard(
+                            model = state.alsoReadingCards[book.id] ?: ALSO_READING_STAND_IN_CARD,
+                            onEvent = onCardEvent,
+                            isLoading = book.id !in state.alsoReadingCards,
+                            modifier = controller.slideModifier(book.id),
+                        )
                     }
                 }
             }

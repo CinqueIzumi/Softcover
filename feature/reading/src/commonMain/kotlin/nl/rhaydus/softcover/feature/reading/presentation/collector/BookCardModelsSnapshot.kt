@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 /** The state slices the "Also reading" rows and "Pick up next" tiles are derived from. */
 internal data class BookCardModelsSnapshot(
     val alsoReadingBooks: List<Book>,
-    val pickUpNextBooks: List<Book>,
+    val pickUpNextBooks: List<Book>?,
     val deadlines: Map<Int, BookDeadline>,
     val deadlineCoverOverlays: Map<Int, CoverOverlayUiModel>,
     val dateStyle: DateStyle,

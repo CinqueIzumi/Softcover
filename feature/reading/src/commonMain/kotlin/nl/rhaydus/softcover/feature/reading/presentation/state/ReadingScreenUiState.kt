@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.reading.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
@@ -54,7 +53,8 @@ internal data class ReadingScreenUiState(
     val failedMutationBookIds: Set<Int> = emptySet(),
     val dismissedPlanTodayByBook: Map<Int, String> = emptyMap(),
 
-    val wantToReadBooks: List<Book> = emptyList(),
+    /** `null` until the want-to-read shelf first loads; empty means it loaded with nothing on it. */
+    val wantToReadBooks: List<Book>? = null,
     val trendingBooks: List<Book> = emptyList(),
 
     val pickUpNextHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Pick up next"),
@@ -88,12 +88,12 @@ internal data class ReadingScreenUiState(
 
     /**
      * The "Also reading" rows keyed by book id (every book but the featured first), and the empty
-     * screen's "Pick up next" tiles in display order, mapped off the composition by
-     * `BookCardModelsCollector` (R9) from [books], [wantToReadBooks], [deadlines], [dateStyle],
-     * [deadlineCoverOverlays] and [failedMutationBookIds] — never by the render.
+     * screen's "Pick up next" tiles in display order (`null` until [wantToReadBooks] loads), mapped off
+     * the composition by `BookCardModelsCollector` (R9) from [books], [wantToReadBooks], [deadlines],
+     * [dateStyle], [deadlineCoverOverlays] and [failedMutationBookIds] — never by the render.
      */
     val alsoReadingCards: ImmutableMap<Int, BookCardUiModel> = persistentMapOf(),
-    val pickUpNextCards: ImmutableList<BookCardUiModel> = persistentListOf(),
+    val pickUpNextCards: ImmutableList<BookCardUiModel>? = null,
 
     /**
      * Each book's deadline cover overlay badge, mapped off the composition by

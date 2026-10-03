@@ -53,9 +53,17 @@ internal fun BookList(
 ) {
     val rawBooks = state.booksByTab[tab.id]
 
-    if (rawBooks == null) return
+    if (rawBooks == null || (rawBooks.isEmpty() && state.isLoading)) {
+        LibraryLoadingGrid(
+            layout = state.gridLayout,
+            gridState = gridState,
+            columnsOverride = columnsOverride,
+        )
 
-    if (rawBooks.isEmpty() && state.isLoading.not()) {
+        return
+    }
+
+    if (rawBooks.isEmpty()) {
         EmptyListScreen(tab = tab)
 
         return

@@ -45,6 +45,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.rememberCoverImageRequest
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -75,6 +76,7 @@ internal fun FeaturedBackdropCard(
     paceForecast: ReadingPaceForecast?,
     cardColor: Color,
     runAction: (ReadingAction) -> Unit,
+    isLoading: Boolean = false,
 ) {
     val isInspection = LocalInspectionMode.current
     // ReadingHeroBackdrop never renders through Cover (component-contract.md's note on
@@ -99,6 +101,12 @@ internal fun FeaturedBackdropCard(
                             ),
                         ),
                     ),
+            )
+        } else if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .skeletonMask(visible = true),
             )
         } else if (backdropRequest != null) {
             AsyncImage(
@@ -156,12 +164,14 @@ internal fun FeaturedBackdropCard(
                 FeaturedCover(
                     cover = heroCover,
                     deadlineCoverOverlay = deadlineCoverOverlay,
+                    isLoading = isLoading,
                 )
 
                 FeaturedBackdropMeta(
                     book = book,
                     mutationFailed = mutationFailed,
                     paceForecast = paceForecast,
+                    isLoading = isLoading,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -171,6 +181,7 @@ internal fun FeaturedBackdropCard(
             FeaturedProgressStat(
                 book = book,
                 foreground = foreground,
+                isLoading = isLoading,
             )
 
             // The deadline readout arrives from its own collector, independently of the progress block
@@ -212,12 +223,16 @@ internal fun FeaturedBackdropCard(
                     contentDescription = "Update progress icon",
                 ),
                 onClick = { runAction(OnShowProgressSheetClickAction(book = book)) },
-                modifier = Modifier.fillMaxWidth(),
+                enabled = isLoading.not(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .skeletonMask(visible = isLoading),
             )
 
             FeaturedSessionButton(
                 book = book,
                 foreground = foreground,
+                isLoading = isLoading,
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -238,11 +253,14 @@ internal fun FeaturedBackdropCard(
 private fun FeaturedCover(
     cover: CoverUiModel?,
     deadlineCoverOverlay: CoverOverlayUiModel?,
+    isLoading: Boolean,
 ) {
     CoverOverlay(model = deadlineCoverOverlay) {
         Cover(
             model = cover,
-            modifier = Modifier.width(108.dp),
+            modifier = Modifier
+                .width(108.dp)
+                .skeletonMask(visible = isLoading),
         )
     }
 }

@@ -46,6 +46,7 @@ internal fun FeaturedBookCard(
     runAction: (ReadingAction) -> Unit,
     onBookClick: (Book) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     val shape = RoundedCornerShape(22.dp)
     val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
@@ -55,9 +56,16 @@ internal fun FeaturedBookCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .prefetchBookDetailOnPress(book.id)
-            .pointerHandCursor()
-            .pressScale(interactionSource)
+            .then(if (isLoading) Modifier else Modifier.prefetchBookDetailOnPress(book.id))
+            .then(
+                if (isLoading) {
+                    Modifier
+                } else {
+                    Modifier
+                        .pointerHandCursor()
+                        .pressScale(interactionSource)
+                },
+            )
             .shakeOnError(
                 trigger = mutationFailed,
                 onShakeEnd = {
@@ -67,6 +75,7 @@ internal fun FeaturedBookCard(
         color = cardColor,
         shape = shape,
         onClick = { onBookClick(book) },
+        enabled = isLoading.not(),
         interactionSource = interactionSource,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -87,6 +96,7 @@ internal fun FeaturedBookCard(
                 paceForecast = paceForecast,
                 cardColor = cardColor,
                 runAction = runAction,
+                isLoading = isLoading,
             )
         }
     }

@@ -46,6 +46,7 @@ internal fun FeaturedBackdropMeta(
     mutationFailed: Boolean,
     paceForecast: ReadingPaceForecast?,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     val overlayShadow = Shadow(
         color = Color.Black.copy(alpha = 0.85f),
@@ -67,6 +68,8 @@ internal fun FeaturedBackdropMeta(
         if (topLineText != null) {
             SoftcoverText(
                 text = topLineText,
+                isLoading = isLoading,
+                standIn = topLineText,
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                     letterSpacing = 1.3.sp,
                     fontWeight = FontWeight.Bold,
@@ -82,6 +85,8 @@ internal fun FeaturedBackdropMeta(
 
         SoftcoverText(
             text = book.title,
+            isLoading = isLoading,
+            standIn = book.title,
             style = MaterialTheme.editorialTypography.headlineSmall.copy(
                 lineHeight = 27.sp,
                 shadow = overlayShadow,
@@ -96,6 +101,8 @@ internal fun FeaturedBackdropMeta(
 
             SoftcoverText(
                 text = "By $authors".uppercase(),
+                isLoading = isLoading,
+                standIn = "By $authors".uppercase(),
                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                     letterSpacing = 1.2.sp,
                     shadow = overlayShadow,
