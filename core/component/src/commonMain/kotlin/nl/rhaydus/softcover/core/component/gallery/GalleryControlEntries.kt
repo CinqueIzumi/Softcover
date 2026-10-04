@@ -10,8 +10,6 @@ import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleVariant
-import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbar
-import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbarUiModel
 
 internal val controlEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
@@ -50,27 +48,6 @@ internal val controlEntries: ImmutableList<GalleryEntry> = persistentListOf(
         label = ::toggleRowFixtureLabel,
         content = { model, modifier ->
             ToggleRow(
-                model = model,
-                onEvent = {},
-                modifier = modifier,
-            )
-        },
-    ),
-    galleryEntry(
-        name = "RichTextFormattingToolbar",
-        family = GalleryFamily.CONTROL,
-        blurb = "The review editor's bold, italic and spoiler chips, selected while the whole " +
-            "selection carries the mark.",
-        previews = RichTextFormattingToolbarUiModel,
-        label = { model ->
-            when {
-                model.enabled.not() -> "No selection"
-                model.activeMarks.isEmpty() -> "Nothing marked"
-                else -> "Marked selection"
-            }
-        },
-        content = { model, modifier ->
-            RichTextFormattingToolbar(
                 model = model,
                 onEvent = {},
                 modifier = modifier,

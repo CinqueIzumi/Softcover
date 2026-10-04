@@ -48,3 +48,6 @@ shift; tick each during S12.
 - [ ] S8-C-controls: 48 dp hit areas on toggles, segments and field affordances; ghost placeholder ink on every field; Numeral's "0" placeholder; Hero field at a fixed height; segmented controls in the Track look; Library arrange switch rows press with the row wash; disabled pills and chips 45% → 40%.
 - [ ] SS-3: gallery coverless `Edition` fixture's selection mark Image → Surface backdrop; Explore search-result loading card's series eyebrow uppercased (wider stand-in).
 - [ ] SS-4: Explore hidden-series stack covers 3 → 4 dp corner; Reading row thumb 6 → 8 dp and pick-up-next tile 10 → 8 dp corner (trending tile unchanged at 8 dp).
+- [ ] SS-6: verdict sheet and Library `ToggleRow` titles take the `Plain` / `Inset` variant's type instead of a per-call style.
+- [ ] SS-8: Explore mood grid tiles no longer crossfade from loading to loaded.
+- [ ] SS-7: book detail reviews show their stand-ins and load independently of the book details (no longer held behind the details fetch).

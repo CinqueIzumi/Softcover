@@ -42,6 +42,7 @@ import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.BOOK_REVIEW_STAND_INS
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.editionCountHeaderFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.toad.UiState
@@ -152,9 +153,7 @@ internal data class BookDetailUiState(
     /** Non-null only while `isEditionOwned(displayedEdition)`, mapped by `EditionSelectionCollector` (R9). */
     val ownedCoverBadge: BadgeUiModel? = null,
 
-    val reviews: ImmutableList<BookReviewUiModel> = persistentListOf(),
-    val loadingReviews: Boolean = false,
-    val revealedSpoilerReviewIds: Set<Int> = emptySet(),
+    val reviews: ImmutableList<BookReviewUiModel> = BOOK_REVIEW_STAND_INS,
 
     /** Which caller opened the verdict sheet — the open flag; `null` while it is closed. */
     val verdictSheetContext: VerdictSheetContext? = null,

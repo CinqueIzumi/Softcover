@@ -32,7 +32,6 @@ internal actual fun BarcodeScannerScreenLayout(
     cameraGranted: Boolean,
     onIsbnSubmit: (String) -> Unit,
     onIsbnFieldEvent: (TextFieldEvent) -> Unit,
-    onAutoFocusRequested: () -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
@@ -73,8 +72,6 @@ internal actual fun BarcodeScannerScreenLayout(
                         header = state.manualEntryHeader,
                         onFieldEvent = onIsbnFieldEvent,
                         onIsbnSubmit = onIsbnSubmit,
-                        onAutoFocusRequested = onAutoFocusRequested,
-                        autoFocus = true,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 28.dp, vertical = 28.dp),

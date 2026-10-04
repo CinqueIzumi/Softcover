@@ -2,10 +2,13 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -32,14 +35,30 @@ class OnRevealReviewSpoilerActionTest {
         )
     }
 
+    private fun review(
+        id: Int,
+        spoilerRevealed: Boolean = false,
+    ) = BookReviewUiModel(
+        id = id,
+        body = RichTextUiModel.EMPTY,
+        hasSpoilers = true,
+        spoilerRevealed = spoilerRevealed,
+        rating = null,
+        reviewedMonthYear = null,
+        reviewerName = "Alice",
+        reviewerAvatarUrl = null,
+        isLoading = false,
+    )
+
     @Nested
     inner class Execute {
         @Test
-        fun `adds the reviewId to revealedSpoilerReviewIds when the set was empty`() = runTest {
+        fun `reveals only the review with the matching id`() = runTest {
             // ----- Arrange -----
-            val reviewId = 5
-            stateFlow.value = BookDetailUiState(revealedSpoilerReviewIds = emptySet())
-            val action = OnRevealReviewSpoilerAction(reviewId = reviewId)
+            stateFlow.value = BookDetailUiState(
+                reviews = persistentListOf(review(id = 1), review(id = 2), review(id = 3)),
+            )
+            val action = OnRevealReviewSpoilerAction(reviewId = 2)
 
             // ----- Act -----
             action.execute(
@@ -48,16 +67,24 @@ class OnRevealReviewSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.revealedSpoilerReviewIds shouldBe setOf(5)
+            stateFlow.value.reviews.map { it.spoilerRevealed } shouldBe listOf(false, true, false)
         }
 
         @Test
-        fun `adds the reviewId to revealedSpoilerReviewIds without removing existing ids`() = runTest {
+        fun `keeps an already revealed review revealed`() = runTest {
             // ----- Arrange -----
-            val existingId = 3
-            val newId = 7
-            stateFlow.value = BookDetailUiState(revealedSpoilerReviewIds = setOf(existingId))
-            val action = OnRevealReviewSpoilerAction(reviewId = newId)
+            val revealed = review(
+                id = 1,
+                spoilerRevealed = true,
+            )
+            val unrevealed = review(id = 2)
+            stateFlow.value = BookDetailUiState(
+                reviews = persistentListOf(
+                    revealed,
+                    unrevealed,
+                ),
+            )
+            val action = OnRevealReviewSpoilerAction(reviewId = 2)
 
             // ----- Act -----
             action.execute(
@@ -66,15 +93,15 @@ class OnRevealReviewSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.revealedSpoilerReviewIds shouldBe setOf(existingId, newId)
+            stateFlow.value.reviews.map { it.spoilerRevealed } shouldBe listOf(true, true)
         }
 
         @Test
-        fun `does not duplicate a reviewId already present in the set`() = runTest {
+        fun `leaves the reviews untouched when no id matches`() = runTest {
             // ----- Arrange -----
-            val reviewId = 11
-            stateFlow.value = BookDetailUiState(revealedSpoilerReviewIds = setOf(reviewId))
-            val action = OnRevealReviewSpoilerAction(reviewId = reviewId)
+            val reviews = persistentListOf(review(id = 1), review(id = 2))
+            stateFlow.value = BookDetailUiState(reviews = reviews)
+            val action = OnRevealReviewSpoilerAction(reviewId = 99)
 
             // ----- Act -----
             action.execute(
@@ -83,16 +110,14 @@ class OnRevealReviewSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.revealedSpoilerReviewIds shouldBe setOf(reviewId)
+            stateFlow.value.reviews shouldBe reviews
         }
 
         @Test
-        fun `preserves all previously revealed ids when adding a new one`() = runTest {
+        fun `changes nothing but the matching review`() = runTest {
             // ----- Arrange -----
-            val existing = setOf(1, 2, 3)
-            val newId = 4
-            stateFlow.value = BookDetailUiState(revealedSpoilerReviewIds = existing)
-            val action = OnRevealReviewSpoilerAction(reviewId = newId)
+            stateFlow.value = BookDetailUiState(reviews = persistentListOf(review(id = 5)))
+            val action = OnRevealReviewSpoilerAction(reviewId = 5)
 
             // ----- Act -----
             action.execute(
@@ -101,27 +126,11 @@ class OnRevealReviewSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.revealedSpoilerReviewIds shouldBe setOf(1, 2, 3, 4)
-        }
-
-        @Test
-        fun `does not alter any other fields in the state`() = runTest {
-            // ----- Arrange -----
-            val initialState = BookDetailUiState(
-                loadingReviews = true,
-                revealedSpoilerReviewIds = emptySet(),
+            val expected = review(
+                id = 5,
+                spoilerRevealed = true,
             )
-            stateFlow.value = initialState
-            val action = OnRevealReviewSpoilerAction(reviewId = 9)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.loadingReviews shouldBe true
+            stateFlow.value.reviews shouldBe listOf(expected)
         }
     }
 }

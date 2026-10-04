@@ -97,7 +97,7 @@ class TagNamingFieldBuilderTest {
             )
 
             // ----- Assert -----
-            field.variant.shouldBeInstanceOf<TextFieldVariant.Pill>().submittable shouldBe true
+            field.submittable shouldBe true
         }
 
         @Test

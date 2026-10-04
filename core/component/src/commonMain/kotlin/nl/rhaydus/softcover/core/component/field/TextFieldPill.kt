@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
@@ -47,7 +48,23 @@ internal fun PillTextField(
     modifier: Modifier = Modifier,
 ) {
     val playMotion = playDecorativeMotion()
-    val dimensions = variant.size.dimensions(MaterialTheme.typography)
+    val height = when (variant.size) {
+        TextFieldPillSize.Compact -> 42.dp
+        TextFieldPillSize.Regular -> 48.dp
+        TextFieldPillSize.Large -> 52.dp
+    }
+    val horizontalPadding = if (variant.size == TextFieldPillSize.Large) 18.dp else 14.dp
+    val iconSize = if (variant.size == TextFieldPillSize.Compact) 18.dp else 20.dp
+    val textStyle = when (variant.size) {
+        TextFieldPillSize.Compact -> MaterialTheme.typography.bodyMedium
+        TextFieldPillSize.Regular -> MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+        TextFieldPillSize.Large -> MaterialTheme.typography.bodyLarge
+    }
+    val container = when (variant.size) {
+        TextFieldPillSize.Compact -> MaterialTheme.colorScheme.surfaceContainer
+        TextFieldPillSize.Regular,
+        TextFieldPillSize.Large -> MaterialTheme.colorScheme.surfaceContainerHigh
+    }
 
     // The exit animation needs the pill after the model has already dropped it.
     var retainedTrailing by remember { mutableStateOf(variant.trailing) }
@@ -58,27 +75,27 @@ internal fun PillTextField(
 
     // Eased alongside the pill's own fade so the field's edge does not jump when the pill leaves.
     val endPadding: Dp by animateDpAsState(
-        targetValue = if (variant.trailing == null) dimensions.horizontalPadding else 8.dp,
+        targetValue = if (variant.trailing == null) horizontalPadding else 8.dp,
         animationSpec = if (playMotion) MaterialTheme.motionScheme.fastSpatialSpec() else snap(),
     )
 
     TextFieldInput(
         model = model,
-        textStyle = dimensions.textStyle,
+        textStyle = textStyle,
         onEvent = onEvent,
         focusRequester = focusRequester,
         modifier = modifier
             .fillMaxWidth()
-            .height(dimensions.height)
+            .height(height)
             .clip(CircleShape)
-            .background(variant.tone.container(MaterialTheme.colorScheme)),
+            .background(container),
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(dimensions.height)
+                    .height(height)
                     .padding(
-                        start = dimensions.horizontalPadding,
+                        start = horizontalPadding,
                         end = endPadding,
                     ),
                 verticalAlignment = Alignment.CenterVertically,
@@ -94,7 +111,7 @@ internal fun PillTextField(
                         painter = leading.getIconPainter(),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.forEnabled(model.enabled),
-                        modifier = Modifier.size(dimensions.iconSize),
+                        modifier = Modifier.size(iconSize),
                     )
                 }
 
@@ -103,7 +120,7 @@ internal fun PillTextField(
                         TextFieldPlaceholder(
                             text = model.placeholder,
                             enabled = model.enabled,
-                            style = dimensions.textStyle,
+                            style = textStyle,
                         )
                     }
 

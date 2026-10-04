@@ -8,11 +8,15 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class TextFieldKeyboardOptionsTest {
-    private fun model(variant: TextFieldVariant) = TextFieldUiModel(
+    private fun model(
+        variant: TextFieldVariant,
+        submittable: Boolean = false,
+    ) = TextFieldUiModel(
         key = "field",
         text = "",
         placeholder = "",
         variant = variant,
+        submittable = submittable,
     )
 
     @Nested
@@ -20,7 +24,10 @@ class TextFieldKeyboardOptionsTest {
         @Test
         fun `a submittable pill offers Done`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Pill(submittable = true))
+            val field = model(
+                TextFieldVariant.Pill(),
+                submittable = true,
+            )
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -32,7 +39,7 @@ class TextFieldKeyboardOptionsTest {
         @Test
         fun `a pill that is not submittable keeps the platform default action`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Pill(submittable = false))
+            val field = model(TextFieldVariant.Pill())
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -44,7 +51,10 @@ class TextFieldKeyboardOptionsTest {
         @Test
         fun `a submittable outlined field offers Done`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Outlined(submittable = true))
+            val field = model(
+                TextFieldVariant.Outlined(),
+                submittable = true,
+            )
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -56,7 +66,7 @@ class TextFieldKeyboardOptionsTest {
         @Test
         fun `an outlined field that is not submittable keeps the platform default action`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Outlined(submittable = false))
+            val field = model(TextFieldVariant.Outlined())
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -68,7 +78,10 @@ class TextFieldKeyboardOptionsTest {
         @Test
         fun `a submittable hero offers Done`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Hero(submittable = true))
+            val field = model(
+                TextFieldVariant.Hero,
+                submittable = true,
+            )
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -80,7 +93,7 @@ class TextFieldKeyboardOptionsTest {
         @Test
         fun `a hero that is not submittable keeps the platform default action`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Hero(submittable = false))
+            val field = model(TextFieldVariant.Hero)
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -90,9 +103,12 @@ class TextFieldKeyboardOptionsTest {
         }
 
         @Test
-        fun `a numeral always offers Done`() {
+        fun `a numeral offers Done even when it is not submittable`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Numeral(charCount = 2))
+            val field = model(
+                TextFieldVariant.Numeral(charCount = 2),
+                submittable = false,
+            )
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -105,9 +121,9 @@ class TextFieldKeyboardOptionsTest {
     @Nested
     inner class KeyboardMapping {
         @Test
-        fun `maps an outlined Text keyboard to the text keyboard`() {
+        fun `a non-numeric outlined field uses the text keyboard`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Outlined(keyboard = TextFieldKeyboard.Text))
+            val field = model(TextFieldVariant.Outlined(numeric = false))
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -117,9 +133,9 @@ class TextFieldKeyboardOptionsTest {
         }
 
         @Test
-        fun `maps an outlined Number keyboard to the number keyboard`() {
+        fun `a numeric outlined field uses the number keyboard`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Outlined(keyboard = TextFieldKeyboard.Number))
+            val field = model(TextFieldVariant.Outlined(numeric = true))
 
             // ----- Act -----
             val options = field.keyboardOptions()
@@ -144,7 +160,7 @@ class TextFieldKeyboardOptionsTest {
         fun `pill and hero use the text keyboard`() {
             // ----- Arrange -----
             val pill = model(TextFieldVariant.Pill())
-            val hero = model(TextFieldVariant.Hero())
+            val hero = model(TextFieldVariant.Hero)
 
             // ----- Act -----
             val pillType = pill.keyboardOptions().keyboardType
@@ -159,10 +175,8 @@ class TextFieldKeyboardOptionsTest {
         fun `keeps the keyboard type independent of the ime action`() {
             // ----- Arrange -----
             val field = model(
-                TextFieldVariant.Outlined(
-                    keyboard = TextFieldKeyboard.Number,
-                    submittable = true,
-                ),
+                TextFieldVariant.Outlined(numeric = true),
+                submittable = true,
             )
 
             // ----- Act -----
@@ -179,7 +193,7 @@ class TextFieldKeyboardOptionsTest {
         @Test
         fun `a field that is not submittable gets the default actions`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Pill(submittable = false))
+            val field = model(TextFieldVariant.Pill())
 
             // ----- Act -----
             val actions = field.keyboardActions(onEvent = {})
@@ -191,7 +205,10 @@ class TextFieldKeyboardOptionsTest {
         @Test
         fun `a submittable field gets its own actions`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Hero(submittable = true))
+            val field = model(
+                TextFieldVariant.Hero,
+                submittable = true,
+            )
 
             // ----- Act -----
             val actions = field.keyboardActions(onEvent = {})
@@ -199,6 +216,18 @@ class TextFieldKeyboardOptionsTest {
             // ----- Assert -----
             (actions == KeyboardActions.Default) shouldBe false
             (actions.onDone != null) shouldBe true
+        }
+
+        @Test
+        fun `a numeral gets its own actions even when it is not submittable`() {
+            // ----- Arrange -----
+            val field = model(TextFieldVariant.Numeral(charCount = 2))
+
+            // ----- Act -----
+            val actions = field.keyboardActions(onEvent = {})
+
+            // ----- Assert -----
+            (actions == KeyboardActions.Default) shouldBe false
         }
     }
 }

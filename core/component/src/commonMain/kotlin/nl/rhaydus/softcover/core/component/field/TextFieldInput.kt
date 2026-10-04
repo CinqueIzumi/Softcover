@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.component.field
 
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -61,12 +60,6 @@ internal fun TextFieldUiModel.onTextChange(
 /** Dimmed to the disabled alpha used across the component library. */
 internal fun Color.forEnabled(enabled: Boolean): Color = if (enabled) this else copy(alpha = alpha * DISABLED_ALPHA)
 
-/** The ghost ink every variant's placeholder shares. */
-internal fun placeholderInk(
-    colorScheme: ColorScheme,
-    enabled: Boolean,
-): Color = colorScheme.onSurface.copy(alpha = 0.32f).forEnabled(enabled)
-
 /** Hidden from accessibility: the field announces its placeholder as its own label. */
 @Composable
 internal fun TextFieldPlaceholder(
@@ -79,10 +72,7 @@ internal fun TextFieldPlaceholder(
         text = text,
         modifier = modifier.clearAndSetSemantics {},
         style = style,
-        color = placeholderInk(
-            colorScheme = MaterialTheme.colorScheme,
-            enabled = enabled,
-        ),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.32f).forEnabled(enabled),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         softWrap = false,

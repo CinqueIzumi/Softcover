@@ -36,9 +36,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 /**
  * The manual ISBN-entry form, shared by the mobile scanner (reached via "Enter ISBN manually") and the
  * desktop scanner (the only path there — desktop has no camera). Submits on the IME Done action (Enter
- * on desktop) when an ISBN is present and nothing is in flight. Outer padding is the caller's; [autoFocus]
- * asks the host, through [onAutoFocusRequested], to set the field model's `autoFocus` (desktop opens
- * straight into the form, so it asks; mobile defaults to off, preserving today's behaviour).
+ * on desktop) when an ISBN is present and nothing is in flight. Outer padding is the caller's.
  * Hover/cursor on the submit button is inert on touch.
  */
 @Composable
@@ -49,8 +47,6 @@ internal fun ManualEntryContent(
     header: SectionHeaderUiModel,
     onFieldEvent: (TextFieldEvent) -> Unit,
     onIsbnSubmit: (String) -> Unit,
-    autoFocus: Boolean,
-    onAutoFocusRequested: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -63,10 +59,6 @@ internal fun ManualEntryContent(
 
             onIsbnSubmit(field.text)
         }
-    }
-
-    LaunchedEffect(Unit) {
-        if (autoFocus) onAutoFocusRequested()
     }
 
     Column(

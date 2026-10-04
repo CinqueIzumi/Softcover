@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -13,8 +14,14 @@ internal class OnRevealReviewSpoilerAction(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState {
-            it.copy(revealedSpoilerReviewIds = it.revealedSpoilerReviewIds + reviewId)
+        scope.setState { state ->
+            state.copy(
+                reviews = state.reviews
+                    .map { review ->
+                        if (review.id == reviewId) review.copy(spoilerRevealed = true) else review
+                    }
+                    .toImmutableList(),
+            )
         }
     }
 }

@@ -111,8 +111,3 @@ fun RichTextUiModel.canonical(): RichTextUiModel = RichTextUiModel(
         RichTextParagraph(runs = merged.toImmutableList())
     }.toImmutableList(),
 )
-
-/** The model's visible text with all marks dropped, paragraphs joined by newlines. */
-fun RichTextUiModel.plainText(): String = paragraphs.joinToString(separator = "\n") { paragraph ->
-    paragraph.runs.joinToString(separator = "") { it.text }
-}

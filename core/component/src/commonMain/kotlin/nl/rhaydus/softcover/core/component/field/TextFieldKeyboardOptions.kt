@@ -6,23 +6,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 
 private val TextFieldUiModel.submits: Boolean
-    get() = when (variant) {
-        is TextFieldVariant.Pill -> variant.submittable
-        is TextFieldVariant.Outlined -> variant.submittable
-        is TextFieldVariant.Hero -> variant.submittable
-        is TextFieldVariant.Numeral -> true
-    }
+    get() = submittable || variant is TextFieldVariant.Numeral
 
 private val TextFieldUiModel.keyboardType: KeyboardType
     get() = when (variant) {
         is TextFieldVariant.Numeral -> KeyboardType.Number
-        is TextFieldVariant.Outlined -> when (variant.keyboard) {
-            TextFieldKeyboard.Text -> KeyboardType.Text
-            TextFieldKeyboard.Number -> KeyboardType.Number
-        }
-
+        is TextFieldVariant.Outlined -> if (variant.numeric) KeyboardType.Number else KeyboardType.Text
         is TextFieldVariant.Pill,
-        is TextFieldVariant.Hero -> KeyboardType.Text
+        TextFieldVariant.Hero -> KeyboardType.Text
     }
 
 internal fun TextFieldUiModel.keyboardOptions(): KeyboardOptions = KeyboardOptions(

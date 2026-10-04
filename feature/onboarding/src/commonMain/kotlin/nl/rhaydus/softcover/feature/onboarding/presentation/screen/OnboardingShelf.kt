@@ -30,7 +30,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,9 +45,6 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
-import nl.rhaydus.softcover.core.component.richtext.ClickableText
-import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
-import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -252,20 +251,20 @@ private fun HelperLine(openUrl: (String) -> Unit) {
     val annotatedString = buildAnnotatedString {
         append("Find your key on the Hardcover website ")
 
-        pushStringAnnotation(
-            tag = "url",
-            annotation = HARDCOVER_API_KEY_URL,
+        val link = LinkAnnotation.Url(
+            url = HARDCOVER_API_KEY_URL,
+            linkInteractionListener = { openUrl(HARDCOVER_API_KEY_URL) },
         )
 
-        withStyle(style = SpanStyle(color = linkColor)) {
-            append("here")
-            appendInlineContent(
-                OPEN_IN_NEW_INLINE_CONTENT_ID,
-                "[external link]",
-            )
+        withLink(link = link) {
+            withStyle(style = SpanStyle(color = linkColor)) {
+                append("here")
+                appendInlineContent(
+                    OPEN_IN_NEW_INLINE_CONTENT_ID,
+                    "[external link]",
+                )
+            }
         }
-
-        pop()
 
         append(".")
     }
@@ -275,13 +274,8 @@ private fun HelperLine(openUrl: (String) -> Unit) {
         contentDescription = "",
     )
 
-    ClickableText(
-        model = ClickableTextUiModel(text = annotatedString),
-        onEvent = { event ->
-            when (event) {
-                is ClickableTextEvent.LinkClicked -> openUrl(event.url)
-            }
-        },
+    SoftcoverText(
+        text = annotatedString,
         style = MaterialTheme.editorialTypography.bodySmall.copy(
             fontSize = 13.sp,
             lineHeight = 19.sp,

@@ -48,10 +48,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 
 private const val REVIEW_COLLAPSED_LINES = 8
 
-private const val LOADING_BODY_STAND_IN =
-    "A few sentences of what a reader made of the book sit here while the reviews load, " +
-        "enough to fill about four lines of the card."
-
 /**
  * "Voices" (The Book lens): section-opener bar + eyebrow, the "What readers think" italic headline,
  * the community review cards, and a footer summary line (`★ avg across N ratings`).
@@ -61,9 +57,7 @@ internal fun ReviewsSection(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
-    val isLoading = state.loadingBookDetails || state.loadingReviews
-
-    if (isLoading.not() && state.reviews.isEmpty()) return
+    if (state.reviews.isEmpty()) return
 
     Spacer(modifier = Modifier.height(36.dp))
 
@@ -82,32 +76,17 @@ internal fun ReviewsSection(
         Spacer(modifier = Modifier.height(14.dp))
 
         Column {
-            if (isLoading) {
-                repeat(2) { index ->
-                    if (index > 0) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
-
-                    ReviewCard(
-                        review = null,
-                        isSpoilerRevealed = false,
-                        onRevealSpoilerClick = {},
-                    )
+            state.reviews.forEachIndexed { index, review ->
+                if (index > 0) {
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-            } else {
-                state.reviews.forEachIndexed { index, review ->
-                    if (index > 0) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
 
-                    ReviewCard(
-                        review = review,
-                        isSpoilerRevealed = review.id in state.revealedSpoilerReviewIds,
-                        onRevealSpoilerClick = {
-                            runAction(OnRevealReviewSpoilerAction(reviewId = review.id))
-                        },
-                    )
-                }
+                ReviewCard(
+                    review = review,
+                    onRevealSpoilerClick = {
+                        runAction(OnRevealReviewSpoilerAction(reviewId = review.id))
+                    },
+                )
             }
 
             state.book?.let { book ->
@@ -151,16 +130,9 @@ internal fun ReviewsSection(
 
 @Composable
 private fun ReviewCard(
-    review: BookReviewUiModel?,
-    isSpoilerRevealed: Boolean,
+    review: BookReviewUiModel,
     onRevealSpoilerClick: () -> Unit,
 ) {
-    val isLoading = review == null
-    val avatarUrl = review?.reviewerAvatarUrl
-    val reviewerName = review?.reviewerName?.uppercase()
-    val monthYear = review?.reviewedMonthYear
-    val rating = review?.rating
-
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -189,16 +161,8 @@ private fun ReviewCard(
 
                 // Whole-review spoiler gate (HEAD behavior): a review flagged as containing
                 // spoilers withholds its body entirely behind a quiet "Show spoiler" text button —
-                // never rendered underneath, unlike an inline-span reveal. Reveal state is
-                // transient, held by the caller per review id.
-                if (review == null) {
-                    SoftcoverText(
-                        text = null as String?,
-                        standIn = LOADING_BODY_STAND_IN,
-                        style = MaterialTheme.editorialTypography.review,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                } else if (review.hasSpoilers && isSpoilerRevealed.not()) {
+                // never rendered underneath, unlike an inline-span reveal.
+                if (review.hasSpoilers && review.spoilerRevealed.not()) {
                     TextButton(onClick = onRevealSpoilerClick) {
                         SoftcoverText(text = "Show spoiler")
                     }
@@ -211,6 +175,7 @@ private fun ReviewCard(
                         style = MaterialTheme.editorialTypography.review,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = if (expanded) Int.MAX_VALUE else REVIEW_COLLAPSED_LINES,
+                        modifier = Modifier.skeletonMask(visible = review.isLoading),
                         overflow = TextOverflow.Ellipsis,
                         onTextLayout = { layout ->
                             if (expanded.not() && layout.hasVisualOverflow) {
@@ -233,13 +198,13 @@ private fun ReviewCard(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RhaydusShimmerImage(
-                        model = avatarUrl,
+                        model = review.reviewerAvatarUrl,
                         contentDescription = "Reviewer avatar",
                         modifier = Modifier
                             .size(36.dp)
                             .clip(RoundedCornerShape(18.dp))
                             .skeletonMask(
-                                visible = isLoading,
+                                visible = review.isLoading,
                                 shape = RoundedCornerShape(18.dp),
                             ),
                         contentScale = ContentScale.Crop,
@@ -250,18 +215,16 @@ private fun ReviewCard(
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             SoftcoverText(
-                                text = reviewerName,
-                                standIn = "REVIEWER NAME",
+                                text = review.reviewerName.uppercase(),
                                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                                 color = MaterialTheme.colorScheme.primary,
                             )
 
-                            if (isLoading || monthYear != null) {
+                            review.reviewedMonthYear?.let { monthYear ->
                                 Spacer(modifier = Modifier.width(6.dp))
 
                                 SoftcoverText(
                                     text = monthYear,
-                                    standIn = "January 2025",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -269,12 +232,12 @@ private fun ReviewCard(
                         }
                     }
 
-                    if (isLoading || rating != null) {
+                    review.rating?.let { rating ->
                         Surface(
                             color = MaterialTheme.colorScheme.tertiaryContainer,
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.skeletonMask(
-                                visible = isLoading,
+                                visible = review.isLoading,
                                 shape = RoundedCornerShape(10.dp),
                             ),
                         ) {
@@ -300,13 +263,7 @@ private fun ReviewCard(
                                 Spacer(modifier = Modifier.width(4.dp))
 
                                 SoftcoverText(
-                                    text = rating?.let {
-                                        formatDecimalNumber(
-                                            value = it,
-                                            fractionDigits = 1,
-                                        )
-                                    },
-                                    standIn = "4.0",
+                                    text = rating,
                                     style = MaterialTheme.typography.labelMedium.copy(
                                         fontFamily = displayFontFamily(),
                                     ),

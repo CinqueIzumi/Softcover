@@ -132,8 +132,7 @@ component/
 +              ProgressSheetEvent  ProgressSheetTab  ProgressSheetMedium
 +              ProgressBar  WhenReadUiModel
 + richtext/    RichText  RichTextUiModel  RichTextRun/Mark/Paragraph
-+              RichTextEditing  RichTextEditorBuffer  ClickableText(+UiModel)
-+              RichTextFormattingToolbar(+UiModel/Event)
++              RichTextEditing  RichTextEditorBuffer
 + selection/   SelectionMark  SelectionMarkBackdrop
 + share/       ShareCard  ShareCardUiModel  ShareCardDimensions
 +              one file per card body  ShareCardNumerals

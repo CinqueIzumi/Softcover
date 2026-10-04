@@ -11,7 +11,8 @@ internal fun nameFieldFor(
     key = "list-name",
     text = name,
     placeholder = "Summer reads",
-    variant = TextFieldVariant.Hero(submittable = true),
+    variant = TextFieldVariant.Hero,
     enabled = enabled,
     autoFocus = true,
+    submittable = true,
 )

@@ -195,7 +195,7 @@ RichText(model = state.review)          // model.variant decides the face and th
   the rest of the model? A `TextStyle` could, a `ScrollState` could not.
 - **Not yet satisfied by the whole library.** Fixed in the same S11 retrofit as R10. Current holdouts:
   `RichText` (`style`, `color`, `maxLines`, `overflow`, `onClick`, `onTextLayout`), `StatNumber` (`style`,
-  `color`, `autoSize`, `maxLines`), `ClickableText` (`style`, `inlineContent`), `MarkAsReadBurst` (`color`,
+  `color`, `autoSize`, `maxLines`), `MarkAsReadBurst` (`color`,
   `secondaryColor`), `CoverlessTitleCover` (`title`).
   Write new components to R11; an existing signature is not licence.
 

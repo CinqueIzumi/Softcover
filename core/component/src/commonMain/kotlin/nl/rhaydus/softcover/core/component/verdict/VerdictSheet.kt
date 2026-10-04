@@ -9,12 +9,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -44,13 +46,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import kotlinx.collections.immutable.toImmutableSet
+import nl.rhaydus.softcover.core.component.chip.Chip
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.chip.ChipFace
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.header.SectionHeader
-import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbar
-import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbarEvent
-import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbarUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextMark
 import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
 import nl.rhaydus.softcover.core.component.richtext.applyEditToMarks
@@ -238,29 +242,25 @@ fun VerdictSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            RichTextFormattingToolbar(
-                model = RichTextFormattingToolbarUiModel(
-                    activeMarks = RichTextMarkType.entries
-                        .filter { type ->
-                            isRangeMarked(
-                                marks = marks,
-                                start = selectionStart,
-                                end = selectionEnd,
-                                type = type,
-                            )
-                        }
-                        .toImmutableSet(),
-                    enabled = hasSelection,
-                ),
-                onEvent = { event ->
-                    when (event) {
-                        is RichTextFormattingToolbarEvent.MarkToggled -> marks = toggleMark(
+            MarkToolbar(
+                activeMarks = RichTextMarkType.entries
+                    .filter { type ->
+                        isRangeMarked(
                             marks = marks,
                             start = selectionStart,
                             end = selectionEnd,
-                            type = event.mark,
+                            type = type,
                         )
                     }
+                    .toSet(),
+                enabled = hasSelection,
+                onMarkToggled = { mark ->
+                    marks = toggleMark(
+                        marks = marks,
+                        start = selectionStart,
+                        end = selectionEnd,
+                        type = mark,
+                    )
                 },
             )
 
@@ -389,4 +389,47 @@ private fun buildEditorAnnotatedString(
             end = end,
         )
     }
+}
+
+/**
+ * One chip per mark, each selected while the whole selection already carries that mark. The labels are
+ * words, the bold and italic ones previewing their own effect. The row is inert while [enabled] is false.
+ */
+@Composable
+private fun MarkToolbar(
+    activeMarks: Set<RichTextMarkType>,
+    enabled: Boolean,
+    onMarkToggled: (RichTextMarkType) -> Unit,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        RichTextMarkType.entries.forEach { mark ->
+            Chip(
+                model = ChipUiModel(
+                    key = mark.name,
+                    label = mark.chipLabel(),
+                    tone = ChipTone.Tonal,
+                    selected = mark in activeMarks,
+                    interaction = if (enabled) ChipInteraction.Clickable else ChipInteraction.Disabled,
+                    face = mark.chipFace(),
+                ),
+                onEvent = { event ->
+                    if (event is ChipEvent.Clicked) {
+                        onMarkToggled(mark)
+                    }
+                },
+            )
+        }
+    }
+}
+
+private fun RichTextMarkType.chipLabel(): String = when (this) {
+    RichTextMarkType.BOLD -> "Bold"
+    RichTextMarkType.ITALIC -> "Italic"
+    RichTextMarkType.SPOILER -> "Spoiler"
+}
+
+private fun RichTextMarkType.chipFace(): ChipFace = when (this) {
+    RichTextMarkType.BOLD -> ChipFace.Bold
+    RichTextMarkType.ITALIC -> ChipFace.Italic
+    RichTextMarkType.SPOILER -> ChipFace.Plain
 }

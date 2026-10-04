@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -27,8 +28,7 @@ class OnDismissVerdictSheetActionTest {
         stateFlow = MutableStateFlow(
             BookDetailUiState(
                 verdictSheetContext = VerdictSheetContext.EDIT,
-                loadingReviews = true,
-                revealedSpoilerReviewIds = setOf(1, 2),
+                reviews = persistentListOf(),
             ),
         )
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
@@ -68,8 +68,7 @@ class OnDismissVerdictSheetActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.loadingReviews shouldBe true
-            stateFlow.value.revealedSpoilerReviewIds shouldBe setOf(1, 2)
+            stateFlow.value.reviews shouldBe emptyList()
         }
     }
 }

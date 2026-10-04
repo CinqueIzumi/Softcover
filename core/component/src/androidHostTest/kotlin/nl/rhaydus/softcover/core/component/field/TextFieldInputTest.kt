@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.component.field
 
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import io.kotest.matchers.shouldBe
@@ -8,43 +7,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class TextFieldInputTest {
-    private val scheme = lightColorScheme()
-
-    @Nested
-    inner class PlaceholderInk {
-        @Test
-        fun `a disabled placeholder is dimmer than an enabled one`() {
-            // ----- Act -----
-            val enabled = placeholderInk(
-                scheme,
-                enabled = true,
-            )
-            val disabled = placeholderInk(
-                scheme,
-                enabled = false,
-            )
-
-            // ----- Assert -----
-            (disabled.alpha < enabled.alpha) shouldBe true
-        }
-
-        @Test
-        fun `enabled and disabled placeholders share the same hue`() {
-            // ----- Act -----
-            val enabled = placeholderInk(
-                scheme,
-                enabled = true,
-            )
-            val disabled = placeholderInk(
-                scheme,
-                enabled = false,
-            )
-
-            // ----- Assert -----
-            disabled.copy(alpha = 1f) shouldBe enabled.copy(alpha = 1f)
-        }
-    }
-
     @Nested
     inner class FitFontSize {
         private val max: TextUnit = 40.sp

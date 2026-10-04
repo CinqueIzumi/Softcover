@@ -17,8 +17,8 @@ internal fun tagNamingFieldFor(
     variant = TextFieldVariant.Pill(
         leadingIcon = SoftcoverIcon.Edit,
         trailing = addPill.takeIf { input.isNotBlank() },
-        submittable = true,
     ),
+    submittable = true,
 )
 
 /**

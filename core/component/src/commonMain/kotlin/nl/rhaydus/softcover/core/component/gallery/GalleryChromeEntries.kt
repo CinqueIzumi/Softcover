@@ -40,8 +40,6 @@ import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
-import nl.rhaydus.softcover.core.component.richtext.ClickableText
-import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
@@ -414,22 +412,6 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
                 model = model,
                 onEvent = {},
                 modifier = modifier.width(120.dp),
-            )
-        },
-    ),
-    galleryEntry(
-        name = "ClickableText",
-        family = GalleryFamily.RICHTEXT,
-        blurb = "Prose with tappable runs in it — the component resolves the link annotations " +
-            "so a screen never wires its own tap detection.",
-        previews = ClickableTextUiModel,
-        label = { "With an inline link" },
-        content = { model, modifier ->
-            ClickableText(
-                model = model,
-                onEvent = {},
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = modifier,
             )
         },
     ),

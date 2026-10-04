@@ -45,7 +45,7 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 | SS-4 | `cover`, `lists`; uibinding `cover` (all platforms), `lists`; library `ArrangeMakeOrderedUiModel` — ~2.1k | [x] |
 | SS-5 | `sheet`, `dialog`, `callout`, `state`; explore `ContinueSeriesEntryUiModel`, orchestration `ReAuthSheetUiModel` — ~2.2k | [x] |
 | SS-6 | `control`, `button`; book_detail `ExternalLinksUiModel`, `ShareSheetBodyUiModel`; settings `SettingsToggleRowUiModel`, `SettingsChoiceRowUiModel` — ~1.9k | [x] |
-| SS-7 | `field`, `richtext`; uibinding `richtext`; book_detail `BookReviewUiModel` — ~1.8k | [ ] |
+| SS-7 | `field`, `richtext`; uibinding `richtext`; book_detail `BookReviewUiModel` — ~1.8k | [x] |
 | SS-8 | `progress`, `deadline`, `mood`, `celebration`; uibinding `progress`, `deadline`; book_detail `InProgressUiModel`, reading `FeaturedProgressUiModel`, session `FocusPageEditorUiModel` — ~2.3k | [x] |
 | SS-9 | `statistic`, `chart`; profile `ReadingAtlasUiModel` — ~1.2k | [x] |
 | SS-10 | `share`, `verdict`; uibinding `verdict`; book_detail `ShareCardVariant` — ~2.5k | [ ] |

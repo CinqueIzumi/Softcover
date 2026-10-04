@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * @property placeholder Shown while [text] is empty, and the field's accessibility label.
  * [TextFieldVariant.Outlined] shows it once the label has floated.
  * @property autoFocus Requests focus when the field enters composition and whenever it flips from false to true.
+ * @property submittable Offers Done on the keyboard and sends [TextFieldEvent.Submitted] when it is pressed.
  * There is no loading state: a field holds user input, so a field that must not be edited yet is built with `enabled = false`.
  */
 @Immutable
@@ -25,6 +26,7 @@ data class TextFieldUiModel(
     val variant: TextFieldVariant,
     val enabled: Boolean = true,
     val autoFocus: Boolean = false,
+    val submittable: Boolean = false,
 ) {
     companion object : UiModelPreviews<TextFieldUiModel> {
         override val previews: ImmutableList<TextFieldUiModel> = persistentListOf(
@@ -41,7 +43,6 @@ data class TextFieldUiModel(
                 variant = TextFieldVariant.Pill(
                     leadingIcon = SoftcoverIcon.Search,
                     size = TextFieldPillSize.Compact,
-                    tone = TextFieldPillTone.Container,
                 ),
             ),
             TextFieldUiModel(
@@ -69,14 +70,14 @@ data class TextFieldUiModel(
                 placeholder = "e.g. 9780374710781",
                 variant = TextFieldVariant.Outlined(
                     label = "ISBN",
-                    keyboard = TextFieldKeyboard.Number,
+                    numeric = true,
                 ),
             ),
             TextFieldUiModel(
                 key = "outlined-unlabelled",
                 text = "",
                 placeholder = "e.g. 9780374710781",
-                variant = TextFieldVariant.Outlined(keyboard = TextFieldKeyboard.Number),
+                variant = TextFieldVariant.Outlined(numeric = true),
             ),
             TextFieldUiModel(
                 key = "outlined-disabled",
@@ -84,7 +85,7 @@ data class TextFieldUiModel(
                 placeholder = "e.g. 9780374710781",
                 variant = TextFieldVariant.Outlined(
                     label = "ISBN",
-                    keyboard = TextFieldKeyboard.Number,
+                    numeric = true,
                 ),
                 enabled = false,
             ),
@@ -92,13 +93,13 @@ data class TextFieldUiModel(
                 key = "hero-empty",
                 text = "",
                 placeholder = "Summer reads",
-                variant = TextFieldVariant.Hero(),
+                variant = TextFieldVariant.Hero,
             ),
             TextFieldUiModel(
                 key = "hero-long",
                 text = "Books I keep meaning to reread before the year ends",
                 placeholder = "Summer reads",
-                variant = TextFieldVariant.Hero(),
+                variant = TextFieldVariant.Hero,
             ),
             TextFieldUiModel(
                 key = "pill-disabled",
@@ -111,7 +112,7 @@ data class TextFieldUiModel(
                 key = "hero-disabled",
                 text = "",
                 placeholder = "Summer reads",
-                variant = TextFieldVariant.Hero(),
+                variant = TextFieldVariant.Hero,
                 enabled = false,
             ),
             TextFieldUiModel(

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.scan.presentation.state
 
-import nl.rhaydus.softcover.core.component.field.TextFieldKeyboard
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -17,16 +16,15 @@ internal data class ScanUiState(
 
     /**
      * The manual ISBN entry. Its text is the stored draft; `IsbnFieldCollector` keeps `enabled` in step
-     * with the in-flight flags, and `OnManualEntryAutoFocusRequestedAction` sets `autoFocus`.
+     * with the in-flight flags.
      */
     val isbnField: TextFieldUiModel = TextFieldUiModel(
         key = "isbn",
         text = "",
         placeholder = "e.g. 9780374710781",
-        variant = TextFieldVariant.Outlined(
-            keyboard = TextFieldKeyboard.Number,
-            submittable = true,
-        ),
+        variant = TextFieldVariant.Outlined(numeric = true),
+        autoFocus = manualEntryAutoFocuses,
+        submittable = true,
     ),
 
     /** Asks the shown unknown-ISBN sheet to hide; cleared by its `Dismissed` event. */

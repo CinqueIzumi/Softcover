@@ -17,12 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextIndent
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,9 +32,6 @@ import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.richtext.ClickableText
-import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
-import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -46,7 +45,6 @@ import nl.rhaydus.softcover.feature.settings.presentation.model.RoadmapRenderUni
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 
 private val LIST_ITEM_RESTLINE_INDENT = 20.sp
-private const val URL_ANNOTATION_TAG = "url"
 private val STAND_IN_HEADING = RoadmapRenderUnit.Heading(
     header = SectionHeaderUiModel.Section(
         eyebrow = "0.0.0",
@@ -264,13 +262,11 @@ private fun RoadmapParagraph(
     spans: List<RoadmapSpan>,
     openUrl: (String) -> Unit,
 ) {
-    ClickableText(
-        model = ClickableTextUiModel(text = roadmapAnnotatedString(spans = spans)),
-        onEvent = { event ->
-            when (event) {
-                is ClickableTextEvent.LinkClicked -> openUrl(event.url)
-            }
-        },
+    SoftcoverText(
+        text = roadmapAnnotatedString(
+            spans = spans,
+            openUrl = openUrl,
+        ),
         style = MaterialTheme.editorialTypography.review.copy(color = MaterialTheme.colorScheme.onSurface),
     )
 }
@@ -295,18 +291,12 @@ private fun RoadmapList(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            ClickableText(
-                model = ClickableTextUiModel(
-                    text = roadmapAnnotatedString(
-                        spans = spans,
-                        leadingMarker = marker,
-                    ),
+            SoftcoverText(
+                text = roadmapAnnotatedString(
+                    spans = spans,
+                    openUrl = openUrl,
+                    leadingMarker = marker,
                 ),
-                onEvent = { event ->
-                    when (event) {
-                        is ClickableTextEvent.LinkClicked -> openUrl(event.url)
-                    }
-                },
                 modifier = Modifier.skeletonMask(visible = isLoading),
                 style = MaterialTheme.editorialTypography.review.copy(color = MaterialTheme.colorScheme.onSurface),
             )
@@ -338,13 +328,11 @@ private fun RoadmapBlockQuote(
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        ClickableText(
-            model = ClickableTextUiModel(text = roadmapAnnotatedString(spans = spans)),
-            onEvent = { event ->
-                when (event) {
-                    is ClickableTextEvent.LinkClicked -> openUrl(event.url)
-                }
-            },
+        SoftcoverText(
+            text = roadmapAnnotatedString(
+                spans = spans,
+                openUrl = openUrl,
+            ),
             style = MaterialTheme.editorialTypography.body.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
         )
     }
@@ -356,11 +344,12 @@ private fun RoadmapBlockQuote(
  * a `Row` of `Text`s. [leadingMarker] (a bullet `"•"` or an ordered `"N."`) is prepended inside a
  * [ParagraphStyle] carrying a hanging [TextIndent], so a wrapped continuation line aligns under the
  * item's own text rather than under the marker. A span with a non-null [RoadmapSpan.url] is pushed as
- * a `"url"`-tagged string annotation that [ClickableText] resolves back to a tap.
+ * a [LinkAnnotation.Url] whose tap is handed to [openUrl].
  */
 @Composable
 private fun roadmapAnnotatedString(
     spans: List<RoadmapSpan>,
+    openUrl: (String) -> Unit,
     leadingMarker: String? = null,
 ): AnnotatedString {
     val linkColor = MaterialTheme.colorScheme.primary
@@ -389,14 +378,14 @@ private fun roadmapAnnotatedString(
             )
 
             if (span.url != null) {
-                pushStringAnnotation(
-                    tag = URL_ANNOTATION_TAG,
-                    annotation = span.url,
+                val link = LinkAnnotation.Url(
+                    url = span.url,
+                    linkInteractionListener = { openUrl(span.url) },
                 )
 
-                withStyle(style = spanStyle) { append(span.text) }
-
-                pop()
+                withLink(link = link) {
+                    withStyle(style = spanStyle) { append(span.text) }
+                }
             } else {
                 withStyle(style = spanStyle) { append(span.text) }
             }

@@ -21,7 +21,6 @@ import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnCon
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnChangedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction
-import nl.rhaydus.softcover.feature.scan.presentation.action.OnManualEntryAutoFocusRequestedAction
 import nl.rhaydus.softcover.feature.scan.presentation.component.UnknownIsbnSheet
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraAvailable
@@ -101,7 +100,6 @@ class BarcodeScannerScreen : Screen {
                     is TextFieldEvent.TrailingClicked -> Unit
                 }
             },
-            onAutoFocusRequested = { screenModel.runAction(OnManualEntryAutoFocusRequestedAction()) },
             onEnterManually = { manualMode = true },
             onNavigateBack = navigator::pop,
         )
@@ -129,7 +127,6 @@ internal expect fun BarcodeScannerScreenLayout(
     cameraGranted: Boolean,
     onIsbnSubmit: (String) -> Unit,
     onIsbnFieldEvent: (TextFieldEvent) -> Unit,
-    onAutoFocusRequested: () -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,
 )
