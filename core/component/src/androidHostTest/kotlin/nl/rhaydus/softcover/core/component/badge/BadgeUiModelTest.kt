@@ -13,7 +13,7 @@ class BadgeUiModelTest {
             val expectedTones = BadgeTone.entries.toSet()
 
             // ----- Act -----
-            val coveredTones = BadgeUiModel.previews.map { it.tone }.toSet()
+            val coveredTones = BadgeUiModel.previews.values.map { it.tone }.toSet()
 
             // ----- Assert -----
             coveredTones shouldBe expectedTones
@@ -25,7 +25,7 @@ class BadgeUiModelTest {
             val expectedSizes = BadgeSize.entries.toSet()
 
             // ----- Act -----
-            val coveredSizes = BadgeUiModel.previews.map { it.size }.toSet()
+            val coveredSizes = BadgeUiModel.previews.values.map { it.size }.toSet()
 
             // ----- Assert -----
             coveredSizes shouldBe expectedSizes
@@ -34,7 +34,7 @@ class BadgeUiModelTest {
         @Test
         fun `at least one fixture carries a leading icon`() {
             // ----- Arrange & Act -----
-            val withIcon = BadgeUiModel.previews.filter { it.icon != null }
+            val withIcon = BadgeUiModel.previews.values.filter { it.icon != null }
 
             // ----- Assert -----
             withIcon.size shouldBe 2

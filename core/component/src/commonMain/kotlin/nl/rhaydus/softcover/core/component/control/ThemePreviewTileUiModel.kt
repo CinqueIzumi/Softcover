@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 
@@ -26,8 +26,8 @@ data class ThemePreviewTileUiModel<K>(
     val dynamicColor: Boolean,
 ) {
     companion object : UiModelPreviews<ThemePreviewTileUiModel<String>> {
-        override val previews: ImmutableList<ThemePreviewTileUiModel<String>> = persistentListOf(
-            ThemePreviewTileUiModel(
+        override val previews: ImmutableMap<String, ThemePreviewTileUiModel<String>> = persistentMapOf(
+            "Light" to ThemePreviewTileUiModel(
                 key = "light",
                 label = "Light",
                 painting = ThemeTilePainting.LIGHT,
@@ -35,7 +35,7 @@ data class ThemePreviewTileUiModel<K>(
                 palette = SpinePalette.DEFAULT,
                 dynamicColor = false,
             ),
-            ThemePreviewTileUiModel(
+            "Dark" to ThemePreviewTileUiModel(
                 key = "dark",
                 label = "Dark",
                 painting = ThemeTilePainting.DARK,
@@ -43,7 +43,7 @@ data class ThemePreviewTileUiModel<K>(
                 palette = SpinePalette.DEFAULT,
                 dynamicColor = false,
             ),
-            ThemePreviewTileUiModel(
+            "System" to ThemePreviewTileUiModel(
                 key = "system",
                 label = "System",
                 painting = ThemeTilePainting.SPLIT,

@@ -4,7 +4,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toPersistentMap
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
-import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
@@ -35,7 +34,7 @@ internal data class ComponentGalleryUiState(
         headline = "See it in every light",
     ),
 
-    val familySectionHeaders: ImmutableMap<GalleryFamily, SectionHeaderUiModel> = GalleryRegistry.families
+    val familySectionHeaders: ImmutableMap<GalleryFamily, SectionHeaderUiModel> = GalleryFamily.entries
         .associateWith { family ->
             SectionHeaderUiModel.Section(
                 eyebrow = "Family",

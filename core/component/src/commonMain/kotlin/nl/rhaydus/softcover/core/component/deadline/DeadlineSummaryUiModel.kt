@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.deadline
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -19,16 +19,12 @@ data class DeadlineSummaryUiModel(
     val tone: DeadlineSummaryTone,
 ) {
     companion object : UiModelPreviews<DeadlineSummaryUiModel> {
-        override val previews: ImmutableList<DeadlineSummaryUiModel> = persistentListOf(
-            DeadlineSummaryUiModel(
+        override val previews: ImmutableMap<String, DeadlineSummaryUiModel> = persistentMapOf(
+            "On track" to DeadlineSummaryUiModel(
                 text = "28 Aug • 18 pages/day",
                 tone = DeadlineSummaryTone.OnSurface,
             ),
-            DeadlineSummaryUiModel(
-                text = "12 Jul • Expired",
-                tone = DeadlineSummaryTone.OnSurface,
-            ),
-            DeadlineSummaryUiModel(
+            "On hero backdrop" to DeadlineSummaryUiModel(
                 text = "28 Aug • 18 pages/day",
                 tone = DeadlineSummaryTone.OnHeroBackdrop,
             ),

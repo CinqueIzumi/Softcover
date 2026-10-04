@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.topbar
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -18,12 +18,12 @@ data class TopBarUiModel(
     val surface: TopBarSurface = TopBarSurface.OPAQUE,
 ) {
     companion object : UiModelPreviews<TopBarUiModel> {
-        override val previews: ImmutableList<TopBarUiModel> = persistentListOf(
-            TopBarUiModel(title = "Appearance"),
-            TopBarUiModel(
+        override val previews: ImmutableMap<String, TopBarUiModel> = persistentMapOf(
+            "With back" to TopBarUiModel(title = "Appearance"),
+            "Long title, autosized" to TopBarUiModel(
                 title = "A Title Long Enough That The Bar Has To Shrink It Across Two Lines",
             ),
-            TopBarUiModel(
+            "Over cover art" to TopBarUiModel(
                 surface = TopBarSurface.OVER_MEDIA,
             ),
         )

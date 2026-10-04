@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -22,21 +22,21 @@ data class ToggleRowUiModel<K>(
     val enabled: Boolean = true,
 ) {
     companion object : UiModelPreviews<ToggleRowUiModel<String>> {
-        override val previews: ImmutableList<ToggleRowUiModel<String>> = persistentListOf(
-            ToggleRowUiModel(
+        override val previews: ImmutableMap<String, ToggleRowUiModel<String>> = persistentMapOf(
+            "Title and gloss" to ToggleRowUiModel(
                 key = "reading-streak",
                 title = "Reading streak",
                 gloss = "Count the days you read in a row, shown on your profile.",
                 checked = true,
                 variant = ToggleRowVariant.Inset,
             ),
-            ToggleRowUiModel(
+            "Title only" to ToggleRowUiModel(
                 key = "show-titles",
                 title = "Show titles & authors",
                 gloss = null,
                 checked = false,
             ),
-            ToggleRowUiModel(
+            "Disabled" to ToggleRowUiModel(
                 key = "dynamic-colour",
                 title = "Dynamic colour",
                 gloss = "Take the whole scheme from your wallpaper instead of a spine colour.",

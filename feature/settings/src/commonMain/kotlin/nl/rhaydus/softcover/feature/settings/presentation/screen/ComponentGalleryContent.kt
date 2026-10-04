@@ -45,9 +45,8 @@ private val FIXTURE_FRAME_SHAPE = RoundedCornerShape(12.dp)
 /**
  * The Component Gallery screen body, shared by the mobile [ComponentGalleryScreen] page and the
  * desktop standalone fallback (`component-contract.md` § 7.5). Opens with the two override chip rows
- * (brightness, spine colour — always rendered, since they retint the themed region below even with an
- * empty registry) and, once [GalleryRegistry.families] is non-empty, a family filter row — all three
- * stay in the app's own current look, since they are chrome, not previewed content. Everything from
+ * (brightness, spine colour) and a family filter row — all three stay in the app's own current look,
+ * since they are chrome, not previewed content. Everything from
  * [GalleryThemedRegion] down renders inside a [SoftcoverTheme] resolved from [state]'s overrides, so
  * only the previewed material steps into the chosen brightness/palette.
  */
@@ -76,14 +75,12 @@ internal fun ComponentGalleryContent(
             runAction = runAction,
         )
 
-        if (GalleryRegistry.families.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-            GalleryFamilyFilterRow(
-                selectedFamily = state.selectedFamily,
-                runAction = runAction,
-            )
-        }
+        GalleryFamilyFilterRow(
+            selectedFamily = state.selectedFamily,
+            runAction = runAction,
+        )
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -144,7 +141,7 @@ private fun GalleryFamilyFilterRow(
         Spacer(modifier = Modifier.height(10.dp))
 
         GalleryChipRow(
-            options = GalleryRegistry.families,
+            options = GalleryFamily.entries,
             label = { it.label },
             isSelected = { it == selectedFamily },
             onSelect = { family -> runAction(OnGalleryFamilySelectedAction(family = family)) },
@@ -226,9 +223,7 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
             ),
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                val families = GalleryRegistry.families
-
-                val visibleFamilies = families.filter {
+                val visibleFamilies = GalleryFamily.entries.filter {
                     state.selectedFamily == null || it == state.selectedFamily
                 }
 
@@ -255,7 +250,7 @@ private fun GalleryFamilySection(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        val entries = GalleryRegistry.entriesIn(family)
+        val entries = GalleryRegistry.entries.filter { it.family == family }
 
         entries.forEachIndexed { index, entry ->
             if (index > 0) Spacer(modifier = Modifier.height(32.dp))

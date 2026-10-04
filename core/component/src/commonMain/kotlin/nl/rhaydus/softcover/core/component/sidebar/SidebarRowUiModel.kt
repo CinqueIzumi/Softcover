@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.sidebar
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -15,24 +15,24 @@ data class SidebarRowUiModel<K>(
     val icon: SoftcoverIcon? = null,
 ) {
     companion object : UiModelPreviews<SidebarRowUiModel<String>> {
-        override val previews: ImmutableList<SidebarRowUiModel<String>> = persistentListOf(
-            SidebarRowUiModel(
+        override val previews: ImmutableMap<String, SidebarRowUiModel<String>> = persistentMapOf(
+            "Plain" to SidebarRowUiModel(
                 key = "plain",
                 label = "Appearance",
                 variant = SidebarRowVariant.Destination(selected = false),
             ),
-            SidebarRowUiModel(
+            "Selected" to SidebarRowUiModel(
                 key = "selected",
                 label = "Library tabs",
                 variant = SidebarRowVariant.Destination(selected = true),
             ),
-            SidebarRowUiModel(
+            "Icon and arrow" to SidebarRowUiModel(
                 key = "icon-and-arrow",
                 label = "Your profile",
                 icon = SoftcoverIcon.Account,
                 variant = SidebarRowVariant.Push,
             ),
-            SidebarRowUiModel(
+            "Long-pressable" to SidebarRowUiModel(
                 key = "long-pressable",
                 label = "Currently reading",
                 variant = SidebarRowVariant.Destination(

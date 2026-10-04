@@ -49,7 +49,7 @@ class SheetFooterUiModelTest {
         @Test
         fun `every footer kind appears in the fixtures`() {
             // ----- Act -----
-            val kinds = SheetFooterUiModel.previews.map { it::class }.toSet()
+            val kinds = SheetFooterUiModel.previews.values.map { it::class }.toSet()
 
             // ----- Assert -----
             kinds shouldBe setOf(
@@ -61,7 +61,7 @@ class SheetFooterUiModelTest {
         @Test
         fun `fixtures cover a stacked footer with and without a secondary`() {
             // ----- Act -----
-            val secondaryPresence = SheetFooterUiModel.previews
+            val secondaryPresence = SheetFooterUiModel.previews.values
                 .filterIsInstance<SheetFooterUiModel.Stacked>()
                 .map { it.secondary != null }
                 .toSet()
@@ -73,7 +73,7 @@ class SheetFooterUiModelTest {
         @Test
         fun `fixtures cover an inline footer with a disabled primary`() {
             // ----- Act -----
-            val primaryEnabledStates = SheetFooterUiModel.previews
+            val primaryEnabledStates = SheetFooterUiModel.previews.values
                 .filterIsInstance<SheetFooterUiModel.Inline>()
                 .map { it.primary.enabled }
                 .toSet()

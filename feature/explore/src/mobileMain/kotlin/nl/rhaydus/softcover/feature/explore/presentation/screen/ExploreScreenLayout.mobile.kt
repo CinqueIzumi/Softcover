@@ -352,28 +352,30 @@ private fun ActiveExploreScreenPreview() {
         ),
     )
 
+    val state = ExploreScreenUiState(
+        searchText = "Last to leave",
+        queriedBooks = queriedBooks,
+        queriedBookCards = queriedBooks.map { book ->
+            book.toSearchResultCard(
+                cover = book.toCoverUiModel(
+                    variant = CoverVariant.Flat,
+                    sharedTransitionKey = bookCoverTransitionKey(
+                        editionId = book.currentEdition?.id,
+                        bookId = book.id,
+                        surface = null,
+                    ),
+                ),
+            )
+        }.toImmutableList(),
+    )
+
     SoftcoverTheme {
         ExploreScreenLayout(
             runAction = {},
             onBookClick = { _, _ -> },
             onScanClick = {},
             isOnline = true,
-            state = ExploreScreenUiState(
-                searchText = "Last to leave",
-                queriedBooks = queriedBooks,
-                queriedBookCards = queriedBooks.map { book ->
-                    book.toSearchResultCard(
-                        cover = book.toCoverUiModel(
-                            variant = CoverVariant.Flat,
-                            sharedTransitionKey = bookCoverTransitionKey(
-                                editionId = book.currentEdition?.id,
-                                bookId = book.id,
-                                surface = null,
-                            ),
-                        ),
-                    )
-                }.toImmutableList(),
-            ),
+            state = state,
         )
     }
 }

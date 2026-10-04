@@ -364,7 +364,7 @@ private fun persistFromDiskCache(
 private fun CoverWithArtPreview() {
     SoftcoverTheme {
         Cover(
-            model = CoverUiModel.previews.first { it.source != null },
+            model = CoverUiModel.previews.getValue("With cover art"),
             modifier = Modifier.width(140.dp),
         )
     }
@@ -374,18 +374,12 @@ private fun CoverWithArtPreview() {
 @Composable
 private fun CoverCoverlessLongTitlePreview() {
     SoftcoverTheme {
-        val longTitleFixture = CoverUiModel.previews.first {
-            it.source == null && it.coverlessTitle.orEmpty().length > COVERLESS_LONG_TITLE_FLOOR
-        }
-
         Cover(
-            model = longTitleFixture,
+            model = CoverUiModel.previews.getValue("Coverless, long title"),
             modifier = Modifier.width(140.dp),
         )
     }
 }
-
-private const val COVERLESS_LONG_TITLE_FLOOR = 30
 
 /** A thumbnail-sized tile: the coverless jacket degrades to a single initial at this width. */
 @StandardPreview
@@ -393,7 +387,7 @@ private const val COVERLESS_LONG_TITLE_FLOOR = 30
 private fun CoverCoverlessThumbnailPreview() {
     SoftcoverTheme {
         Cover(
-            model = CoverUiModel.previews.first { it.variant == CoverVariant.Flat },
+            model = CoverUiModel.previews.getValue("Coverless, thumbnail-sized"),
             modifier = Modifier.width(48.dp),
         )
     }
@@ -404,7 +398,7 @@ private fun CoverCoverlessThumbnailPreview() {
 private fun CoverLoadingPreview() {
     SoftcoverTheme {
         Cover(
-            model = CoverUiModel.previews.first { it.isLoading },
+            model = CoverUiModel.previews.getValue("Loading"),
             modifier = Modifier.width(140.dp),
         )
     }

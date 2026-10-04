@@ -10,7 +10,7 @@ class ProportionChartUiModelTest {
         @Test
         fun `includes a loading fixture`() {
             // ----- Arrange -----
-            val previews = ProportionChartUiModel.previews
+            val previews = ProportionChartUiModel.previews.values
 
             // ----- Act -----
             val loading = previews.filter { it.isLoading }
@@ -22,7 +22,7 @@ class ProportionChartUiModelTest {
         @Test
         fun `includes a fixture with an Unknown-toned segment`() {
             // ----- Arrange -----
-            val previews = ProportionChartUiModel.previews
+            val previews = ProportionChartUiModel.previews.values
 
             // ----- Act -----
             val withUnknown = previews
@@ -36,7 +36,7 @@ class ProportionChartUiModelTest {
         @Test
         fun `includes a fixture with a zero-fraction segment`() {
             // ----- Arrange -----
-            val previews = ProportionChartUiModel.previews
+            val previews = ProportionChartUiModel.previews.values
 
             // ----- Act -----
             val withZero = previews

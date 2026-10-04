@@ -11,14 +11,7 @@ import kotlinx.collections.immutable.toImmutableList
  */
 object GalleryRegistry {
     val entries: ImmutableList<GalleryEntry> = (
-        headerEntries + chromeEntries + bookAndSheetEntries + controlEntries + fieldEntries
-    ).toImmutableList()
-
-    val families: ImmutableList<GalleryFamily> = GalleryFamily.entries
-        .filter { family -> entries.any { it.family == family } }
-        .toImmutableList()
-
-    fun entriesIn(family: GalleryFamily): ImmutableList<GalleryEntry> = entries
-        .filter { it.family == family }
-        .toImmutableList()
+        primitiveEntries + chromeEntries + statisticEntries + controlEntries + fieldEntries +
+            bookEntries + sheetEntries
+        ).toImmutableList()
 }

@@ -1,6 +1,6 @@
 # Softcover roadmap
 
-What we're building next for [Softcover](https://hardcover.app/), grouped by the version it's planned to land in. This is the public view of our plan.
+What we're building next for [Softcover](https://github.com/CinqueIzumi/Softcover), grouped by the version it's planned to land in. This is the public view of our plan.
 
 **Current release: {{CURRENT_VERSION}}.** Softcover runs on Android, iPhone, iPad and desktop. 3.1.3 smooths two rough edges in the 3.1 redesign, which rebuilt nearly every screen with a cleaner, more editorial look: deadlines now land on the day you picked no matter where in the world you are, and the app paces its requests against Hardcover's limits so busy screens load without stalling.
 

@@ -2,7 +2,10 @@ package nl.rhaydus.softcover.core.component.sidebar
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
@@ -13,14 +16,14 @@ data class SidebarSectionUiModel<K>(
     val rows: ImmutableList<SidebarRowUiModel<K>>,
 ) {
     companion object : UiModelPreviews<SidebarSectionUiModel<String>> {
-        override val previews: ImmutableList<SidebarSectionUiModel<String>> = persistentListOf(
-            SidebarSectionUiModel(
+        override val previews: ImmutableMap<String, SidebarSectionUiModel<String>> = persistentMapOf(
+            "With label" to SidebarSectionUiModel(
                 label = SectionHeaderUiModel.Label(eyebrow = "Personalise"),
-                rows = SidebarRowUiModel.previews,
+                rows = SidebarRowUiModel.previews.values.toImmutableList(),
             ),
-            SidebarSectionUiModel(
+            "No label" to SidebarSectionUiModel(
                 label = null,
-                rows = persistentListOf(SidebarRowUiModel.previews.first()),
+                rows = persistentListOf(SidebarRowUiModel.previews.getValue("Plain")),
             ),
         )
     }

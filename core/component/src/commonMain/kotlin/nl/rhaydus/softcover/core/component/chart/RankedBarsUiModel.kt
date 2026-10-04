@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.core.component.chart
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -16,8 +18,8 @@ data class RankedBarsUiModel(
     val isLoading: Boolean = false,
 ) {
     companion object : UiModelPreviews<RankedBarsUiModel> {
-        override val previews: ImmutableList<RankedBarsUiModel> = persistentListOf(
-            RankedBarsUiModel(
+        override val previews: ImmutableMap<String, RankedBarsUiModel> = persistentMapOf(
+            "5 rows" to RankedBarsUiModel(
                 rows = persistentListOf(
                     ChartSliceUiModel(
                         label = "Fantasy",
@@ -51,7 +53,7 @@ data class RankedBarsUiModel(
                     ),
                 ),
             ),
-            RankedBarsUiModel(
+            "Loading" to RankedBarsUiModel(
                 rows = persistentListOf(
                     loadingRow(ChartTone.Lead),
                     loadingRow(ChartTone.Second),

@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -17,8 +19,8 @@ data class SegmentedControlUiModel<K>(
     val variant: SegmentedControlVariant = SegmentedControlVariant.Track,
 ) {
     companion object : UiModelPreviews<SegmentedControlUiModel<String>> {
-        override val previews: ImmutableList<SegmentedControlUiModel<String>> = persistentListOf(
-            SegmentedControlUiModel(
+        override val previews: ImmutableMap<String, SegmentedControlUiModel<String>> = persistentMapOf(
+            "Track" to SegmentedControlUiModel(
                 options = persistentListOf(
                     SegmentUiModel(
                         key = "book",
@@ -31,7 +33,7 @@ data class SegmentedControlUiModel<K>(
                 ),
                 selected = "book",
             ),
-            SegmentedControlUiModel(
+            "Track, one option disabled" to SegmentedControlUiModel(
                 options = persistentListOf(
                     SegmentUiModel(
                         key = "book",
@@ -45,7 +47,7 @@ data class SegmentedControlUiModel<K>(
                 ),
                 selected = "book",
             ),
-            SegmentedControlUiModel(
+            "Prose" to SegmentedControlUiModel(
                 options = persistentListOf(
                     SegmentUiModel(
                         key = "public",

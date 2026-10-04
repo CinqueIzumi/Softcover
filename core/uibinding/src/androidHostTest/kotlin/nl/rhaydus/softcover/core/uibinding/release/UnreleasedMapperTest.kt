@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.uibinding.release
 
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
@@ -14,10 +15,22 @@ class UnreleasedMapperTest {
         dayOfMonth = 2,
     )
 
+    private val currentYearDate = LocalDate(
+        year = currentLocalDate().year,
+        monthNumber = 9,
+        dayOfMonth = 2,
+    )
+    private val otherYear = if (currentLocalDate().year == 2019) 2020 else 2019
+    private val otherYearDate = LocalDate(
+        year = otherYear,
+        monthNumber = 9,
+        dayOfMonth = 2,
+    )
+
     @Test
     fun `Compact mapper maps to a Compact release badge with an Out-prefixed compact date`() {
         // ----- Act -----
-        val result = date.toCompactUnreleasedBadgeUiModel()
+        val result = currentYearDate.toCompactUnreleasedBadgeUiModel()
 
         // ----- Assert -----
         result shouldBe BadgeUiModel(
@@ -43,7 +56,7 @@ class UnreleasedMapperTest {
     @Test
     fun `Featured mapper maps to a Regular badge with an Arriving-prefixed compact date`() {
         // ----- Act -----
-        val result = date.toFeaturedUnreleasedBadgeUiModel()
+        val result = currentYearDate.toFeaturedUnreleasedBadgeUiModel()
 
         // ----- Assert -----
         result shouldBe BadgeUiModel(
@@ -51,5 +64,23 @@ class UnreleasedMapperTest {
             tone = BadgeTone.Primary,
             size = BadgeSize.Regular,
         )
+    }
+
+    @Test
+    fun `Compact mapper appends the year when the date is not in the current year`() {
+        // ----- Act -----
+        val result = otherYearDate.toCompactUnreleasedBadgeUiModel()
+
+        // ----- Assert -----
+        result.label shouldBe "Out Sep 2, $otherYear"
+    }
+
+    @Test
+    fun `Featured mapper appends the year when the date is not in the current year`() {
+        // ----- Act -----
+        val result = otherYearDate.toFeaturedUnreleasedBadgeUiModel()
+
+        // ----- Assert -----
+        result.label shouldBe "Arriving Sep 2, $otherYear"
     }
 }

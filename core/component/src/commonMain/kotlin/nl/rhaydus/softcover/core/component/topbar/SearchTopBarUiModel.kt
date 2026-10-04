@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.topbar
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -24,26 +24,26 @@ data class SearchTopBarUiModel(
     val isLoading: Boolean,
 ) {
     companion object : UiModelPreviews<SearchTopBarUiModel> {
-        override val previews: ImmutableList<SearchTopBarUiModel> = persistentListOf(
-            SearchTopBarUiModel(
+        override val previews: ImmutableMap<String, SearchTopBarUiModel> = persistentMapOf(
+            "Resting" to SearchTopBarUiModel(
                 query = "",
                 active = false,
                 focused = false,
                 isLoading = false,
             ),
-            SearchTopBarUiModel(
+            "Focused, empty" to SearchTopBarUiModel(
                 query = "",
                 active = true,
                 focused = true,
                 isLoading = false,
             ),
-            SearchTopBarUiModel(
+            "Searching" to SearchTopBarUiModel(
                 query = "Piranesi",
                 active = true,
                 focused = true,
                 isLoading = true,
             ),
-            SearchTopBarUiModel(
+            "Results, unfocused" to SearchTopBarUiModel(
                 query = "Piranesi",
                 active = true,
                 focused = false,

@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.progress
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipLeading
@@ -111,8 +111,8 @@ data class ProgressSheetUiModel(
          * the sheet drops the Percentage tab entirely and hides the suffix line and the progress
          * indicator, so they exercise a different layout rather than different copy.
          */
-        override val previews: ImmutableList<ProgressSheetUiModel> = persistentListOf(
-            fixture(
+        override val previews: ImmutableMap<String, ProgressSheetUiModel> = persistentMapOf(
+            "Pages" to fixture(
                 bookTitle = "The Dungeon Anarchist's Cookbook",
                 medium = ProgressSheetMedium.Paged(
                     totalPages = 534,
@@ -121,7 +121,7 @@ data class ProgressSheetUiModel(
                 progressPercent = 15,
                 selectedTab = ProgressSheetTab.PAGE,
             ),
-            fixture(
+            "Percentage" to fixture(
                 bookTitle = "The Dungeon Anarchist's Cookbook",
                 medium = ProgressSheetMedium.Paged(
                     totalPages = 534,
@@ -130,7 +130,7 @@ data class ProgressSheetUiModel(
                 progressPercent = 35,
                 selectedTab = ProgressSheetTab.PERCENTAGE,
             ),
-            fixture(
+            "Paged, no total" to fixture(
                 bookTitle = "Piranesi",
                 medium = ProgressSheetMedium.Paged(
                     totalPages = 0,
@@ -139,7 +139,7 @@ data class ProgressSheetUiModel(
                 progressPercent = 0,
                 selectedTab = ProgressSheetTab.PAGE,
             ),
-            fixture(
+            "Audiobook" to fixture(
                 bookTitle = "The Name of the Wind",
                 medium = ProgressSheetMedium.Timed(
                     totalSeconds = 100_320,
@@ -159,7 +159,7 @@ data class ProgressSheetUiModel(
                 progressPercent = 12,
                 selectedTab = ProgressSheetTab.TIME,
             ),
-            fixture(
+            "Audiobook, no total" to fixture(
                 bookTitle = "The Name of the Wind",
                 medium = ProgressSheetMedium.Timed(
                     totalSeconds = 0,

@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.statistic
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -18,17 +18,17 @@ data class StatNumberUiModel(
     val isLoading: Boolean = false,
 ) {
     companion object : UiModelPreviews<StatNumberUiModel> {
-        override val previews: ImmutableList<StatNumberUiModel> = persistentListOf(
-            StatNumberUiModel(value = 12_481.0),
-            StatNumberUiModel(
+        override val previews: ImmutableMap<String, StatNumberUiModel> = persistentMapOf(
+            "Grouped thousands" to StatNumberUiModel(value = 12_481.0),
+            "Plain integer" to StatNumberUiModel(
                 value = 30.0,
                 format = StatNumberFormat.Plain,
             ),
-            StatNumberUiModel(
+            "One decimal" to StatNumberUiModel(
                 value = 4.23,
                 format = StatNumberFormat.Decimal,
             ),
-            StatNumberUiModel(
+            "Loading" to StatNumberUiModel(
                 value = 0.0,
                 isLoading = true,
             ),

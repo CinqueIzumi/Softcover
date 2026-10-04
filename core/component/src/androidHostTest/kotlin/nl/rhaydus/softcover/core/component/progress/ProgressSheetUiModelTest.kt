@@ -188,7 +188,7 @@ class ProgressSheetUiModelTest {
             )
 
             // ----- Act -----
-            val model = ProgressSheetUiModel.previews.first().copy(
+            val model = ProgressSheetUiModel.previews.getValue("Pages").copy(
                 medium = medium,
                 tabs = tabs,
             )
@@ -203,7 +203,7 @@ class ProgressSheetUiModelTest {
         @Test
         fun `fixtures include both a paged and a timed medium`() {
             // ----- Act -----
-            val media = ProgressSheetUiModel.previews.map { it.medium }
+            val media = ProgressSheetUiModel.previews.values.map { it.medium }
 
             // ----- Assert -----
             media.any { it is ProgressSheetMedium.Paged } shouldBe true
@@ -213,7 +213,7 @@ class ProgressSheetUiModelTest {
         @Test
         fun `fixtures include a medium with no known total for each medium`() {
             // ----- Act -----
-            val media = ProgressSheetUiModel.previews.map { it.medium }
+            val media = ProgressSheetUiModel.previews.values.map { it.medium }
 
             // ----- Assert -----
             media.any { it is ProgressSheetMedium.Paged && it.hasKnownTotal.not() } shouldBe true
@@ -223,7 +223,7 @@ class ProgressSheetUiModelTest {
         @Test
         fun `every fixture selects a tab its medium offers`() {
             // ----- Act -----
-            val offered = ProgressSheetUiModel.previews.map { model ->
+            val offered = ProgressSheetUiModel.previews.values.map { model ->
                 model.tabs.options.any { it.key == model.tabs.selected }
             }
 

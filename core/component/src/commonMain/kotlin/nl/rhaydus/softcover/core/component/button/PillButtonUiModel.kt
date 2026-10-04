@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.button
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -20,8 +20,8 @@ data class PillButtonUiModel(
     val enabled: Boolean = true,
 ) {
     companion object : UiModelPreviews<PillButtonUiModel> {
-        override val previews: ImmutableList<PillButtonUiModel> = persistentListOf(
-            PillButtonUiModel(
+        override val previews: ImmutableMap<String, PillButtonUiModel> = persistentMapOf(
+            "Large Tonal" to PillButtonUiModel(
                 key = "tonal-label",
                 content = PillButtonContent.Label(
                     text = "Add to list",
@@ -29,14 +29,14 @@ data class PillButtonUiModel(
                 ),
                 size = PillButtonSize.Large,
             ),
-            PillButtonUiModel(
+            "Icon only, Tonal" to PillButtonUiModel(
                 key = "icon-only",
                 content = PillButtonContent.IconOnly(
                     icon = SoftcoverIcon.CheckCircle,
                     description = "Select books",
                 ),
             ),
-            PillButtonUiModel(
+            "Regular Accent" to PillButtonUiModel(
                 key = "accent",
                 content = PillButtonContent.Label(
                     text = "Update",
@@ -44,12 +44,12 @@ data class PillButtonUiModel(
                 ),
                 tone = PillButtonTone.Accent,
             ),
-            PillButtonUiModel(
+            "Regular Filled" to PillButtonUiModel(
                 key = "filled",
                 content = PillButtonContent.Label(text = "Add"),
                 tone = PillButtonTone.Filled,
             ),
-            PillButtonUiModel(
+            "Regular Outlined" to PillButtonUiModel(
                 key = "outlined",
                 content = PillButtonContent.Label(
                     text = "Bookshop",
@@ -57,7 +57,7 @@ data class PillButtonUiModel(
                 ),
                 tone = PillButtonTone.Outlined,
             ),
-            PillButtonUiModel(
+            "Quiet, with indicator" to PillButtonUiModel(
                 key = "quiet-indicator",
                 content = PillButtonContent.Label(
                     text = "Filter",
@@ -66,14 +66,14 @@ data class PillButtonUiModel(
                 ),
                 tone = PillButtonTone.Quiet,
             ),
-            PillButtonUiModel(
+            "Regular Tonal" to PillButtonUiModel(
                 key = "regular-tonal",
                 content = PillButtonContent.Label(
                     text = "Sort",
                     leadingIcon = SoftcoverIcon.Sort,
                 ),
             ),
-            PillButtonUiModel(
+            "Disabled" to PillButtonUiModel(
                 key = "disabled",
                 content = PillButtonContent.Label(
                     text = "Move",

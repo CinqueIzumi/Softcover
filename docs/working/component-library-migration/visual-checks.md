@@ -52,3 +52,4 @@ shift; tick each during S12.
 - [ ] SS-8: Explore mood grid tiles no longer crossfade from loading to loaded.
 - [ ] SS-7: book detail reviews show their stand-ins and load independently of the book details (no longer held behind the details fetch).
 - [ ] SS-10: book share card's rating now shows the ×2 verdict score, matching the verdict block.
+- [ ] SS-11: gallery drops DeadlineSummary "Expired" and TextField "Hero, long value"; palette tiles read "Selected" / "Unselected".

@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -26,8 +26,8 @@ data class ToggleUiModel(
     val enabled: Boolean = true,
 ) {
     companion object : UiModelPreviews<ToggleUiModel> {
-        override val previews: ImmutableList<ToggleUiModel> = persistentListOf(
-            ToggleUiModel(
+        override val previews: ImmutableMap<String, ToggleUiModel> = persistentMapOf(
+            "Filled icon, on" to ToggleUiModel(
                 key = "bookmark-saved",
                 checked = true,
                 description = "Saved to your library",
@@ -35,7 +35,7 @@ data class ToggleUiModel(
                 on = SoftcoverIcon.BookmarkAdded,
                 off = SoftcoverIcon.BookmarkAdd,
             ),
-            ToggleUiModel(
+            "Filled icon, off" to ToggleUiModel(
                 key = "bookmark-unsaved",
                 checked = false,
                 description = "Save to your library",
@@ -43,7 +43,7 @@ data class ToggleUiModel(
                 on = SoftcoverIcon.BookmarkAdded,
                 off = SoftcoverIcon.BookmarkAdd,
             ),
-            ToggleUiModel(
+            "Filled icon, disabled" to ToggleUiModel(
                 key = "bookmark-loading",
                 checked = false,
                 description = "Save to your library",
@@ -52,7 +52,7 @@ data class ToggleUiModel(
                 off = SoftcoverIcon.BookmarkAdd,
                 enabled = false,
             ),
-            ToggleUiModel(
+            "Bare icon, on" to ToggleUiModel(
                 key = "eye-visible",
                 checked = true,
                 description = "Hide Reading from the library tabs",
@@ -60,7 +60,7 @@ data class ToggleUiModel(
                 on = SoftcoverIcon.Visibility,
                 off = SoftcoverIcon.VisibilityOff,
             ),
-            ToggleUiModel(
+            "Bare icon, off" to ToggleUiModel(
                 key = "eye-hidden",
                 checked = false,
                 description = "Show Reading on the library tabs",

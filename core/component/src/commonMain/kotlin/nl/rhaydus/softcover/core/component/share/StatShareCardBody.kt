@@ -41,6 +41,6 @@ internal fun StatShareCardBody(content: StatShareCardUiModel) {
 @Composable
 private fun StatShareCardPreview() {
     SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.filterIsInstance<StatShareCardUiModel>().single())
+        ShareCard(model = ShareCardUiModel.previews.getValue("Stat"))
     }
 }

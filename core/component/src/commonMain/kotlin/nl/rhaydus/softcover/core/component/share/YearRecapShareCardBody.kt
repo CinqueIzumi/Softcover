@@ -63,6 +63,6 @@ internal fun YearRecapShareCardBody(content: YearRecapShareCardUiModel) {
 @Composable
 private fun YearRecapShareCardPreview() {
     SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.filterIsInstance<YearRecapShareCardUiModel>().single())
+        ShareCard(model = ShareCardUiModel.previews.getValue("Year recap"))
     }
 }

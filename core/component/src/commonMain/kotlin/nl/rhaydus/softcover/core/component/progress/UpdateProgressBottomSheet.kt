@@ -148,9 +148,7 @@ private fun ProgressBottomSheetContent(
 @Composable
 private fun ProgressSheetContentPagePreview() {
     ProgressSheetPreview(
-        model = ProgressSheetUiModel.previews.first {
-            it.tabs.selected == ProgressSheetTab.PAGE && it.medium.hasKnownTotal
-        },
+        model = ProgressSheetUiModel.previews.getValue("Pages"),
     )
 }
 
@@ -158,7 +156,7 @@ private fun ProgressSheetContentPagePreview() {
 @Composable
 private fun ProgressSheetContentPercentagePreview() {
     ProgressSheetPreview(
-        model = ProgressSheetUiModel.previews.first { it.tabs.selected == ProgressSheetTab.PERCENTAGE },
+        model = ProgressSheetUiModel.previews.getValue("Percentage"),
     )
 }
 
@@ -167,9 +165,7 @@ private fun ProgressSheetContentPercentagePreview() {
 @Composable
 private fun ProgressSheetContentTimePreview() {
     ProgressSheetPreview(
-        model = ProgressSheetUiModel.previews.first {
-            it.tabs.selected == ProgressSheetTab.TIME && it.medium.hasKnownTotal
-        },
+        model = ProgressSheetUiModel.previews.getValue("Audiobook"),
     )
 }
 
@@ -178,9 +174,7 @@ private fun ProgressSheetContentTimePreview() {
 @Composable
 private fun ProgressSheetContentNoTotalPreview() {
     ProgressSheetPreview(
-        model = ProgressSheetUiModel.previews.first {
-            it.medium is ProgressSheetMedium.Paged && it.medium.hasKnownTotal.not()
-        },
+        model = ProgressSheetUiModel.previews.getValue("Paged, no total"),
     )
 }
 

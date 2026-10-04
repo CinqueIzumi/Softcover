@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.cover
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -42,8 +42,8 @@ data class CoverUiModel(
          * per the gallery's network-independence rule, no fixture in this library may carry a live
          * URL, and a local path exercises the same success-rung anatomy without one.
          */
-        override val previews: ImmutableList<CoverUiModel> = persistentListOf(
-            CoverUiModel(
+        override val previews: ImmutableMap<String, CoverUiModel> = persistentMapOf(
+            "With cover art" to CoverUiModel(
                 source = CoverSource.Local(
                     path = "/fixtures/piranesi-cover.jpg",
                     cacheKey = null,
@@ -51,22 +51,22 @@ data class CoverUiModel(
                 coverlessTitle = "Piranesi",
                 variant = CoverVariant.Shelf,
             ),
-            CoverUiModel(
+            "Coverless, short title" to CoverUiModel(
                 source = null,
                 coverlessTitle = "It",
                 variant = CoverVariant.Shelf,
             ),
-            CoverUiModel(
+            "Coverless, long title" to CoverUiModel(
                 source = null,
                 coverlessTitle = "The Very Long and Overwrought Title of a Book That Will Not Fit",
                 variant = CoverVariant.Shelf,
             ),
-            CoverUiModel(
+            "Coverless, thumbnail-sized" to CoverUiModel(
                 source = null,
                 coverlessTitle = "The Name of the Wind",
                 variant = CoverVariant.Flat,
             ),
-            CoverUiModel(
+            "Loading" to CoverUiModel(
                 source = null,
                 coverlessTitle = "The Dungeon Anarchist's Cookbook",
                 variant = CoverVariant.Shelf,

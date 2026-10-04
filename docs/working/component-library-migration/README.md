@@ -14,14 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SS-1–SS-10 done; SS-11 approved (step file § Approved shape). SL-3b blocked on F34; F33 open.
-- **Next:** build SS-11 (approved bullet) per family-procedure Phase 2.
-- **Follow-ups (user to schedule):** foundation `shimmer` paints fixed `LightGray` / `White` — light block on dark theme; upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands.
-- **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
-- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile`, charts, `ProgressBar`, 12 dp card bars unchecked in gallery. Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
-- **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** SS-10: tests + `styleCheck` + projectHealth pass, review fixed. Device: fast typing in time fields; scan manual-entry focus (desktop only); share card rating.
-- **Uncommitted:** SS-10.
+- **State:** SS-1–SS-11 done (SS-11 uncommitted). SL-3b blocked on F34; F33 open.
+- **Next:** SS-C Phase 1 — `steps/ss-simplicity-audit.md` SS-C row, per `family-procedure.md` § Phase 3; covers § Approved shape "Left over" / "Undecided" and SS-3 "Later". Stop for approval.
+- **Open questions:** Foundation `shimmer` fixed `LightGray` / `White` (upstream?); book detail hero `Cover` jumps on fetch; `BookDetailUiState` KDoc cites "(R9)" (S11 sweep). ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile`, charts, `ProgressBar`, 12 dp card bars unchecked in gallery. Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
+- **Verification:** SS-11: tests + `styleCheck` + projectHealth passed, review fixed. On device, unchecked: fast typing in time fields; scan manual-entry focus (desktop only); share card rating.
+- **Uncommitted:** SS-11 (component models, gallery, tests, uibinding date, explore preview, R5, tracker docs); roadmap header link.
 
 ## Local verification
 
@@ -70,7 +67,7 @@ every sub-step's Verify.
 | S8 | — (screen states) | S8-1–S8-3, S8-C-a–C-c | [x] |
 | S8 | — (controls) | S8-4–S8-6, S8-C-controls | [x] |
 | S9 | — (statistics & progress) | S9-1–S9-4, S9-C | [x] |
-| SS | [steps/ss-simplicity-audit.md](steps/ss-simplicity-audit.md) | SS-0–SS-11; after S9, before PF / S10 | [ ] |
+| SS | [steps/ss-simplicity-audit.md](steps/ss-simplicity-audit.md) | SS-0–SS-11, SS-C; after S9, before PF / S10 | [ ] |
 | TP | [steps/tp-test-prune.md](steps/tp-test-prune.md) | TP-0 timings, then per module group; after SS | [ ] |
 | SD | [steps/sd-screen-dedup.md](steps/sd-screen-dedup.md) | SD-0 inventory, then per screen group; after TP, before PF / S10 | [ ] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |

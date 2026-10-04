@@ -1,10 +1,7 @@
 package nl.rhaydus.softcover.core.component.dialog
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.LocalDate
-import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
  * Everything [SoftcoverDatePickerDialog] renders: the day the calendar opens on and highlights.
@@ -15,16 +12,4 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 @Immutable
 data class DatePickerUiModel(
     val initialDate: LocalDate,
-) {
-    companion object : UiModelPreviews<DatePickerUiModel> {
-        override val previews: ImmutableList<DatePickerUiModel> = persistentListOf(
-            DatePickerUiModel(
-                initialDate = LocalDate(
-                    2026,
-                    6,
-                    15,
-                ),
-            ),
-        )
-    }
-}
+)

@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.chip
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -31,22 +31,22 @@ data class ChipUiModel(
          * Per R5: one fixture per [ChipTone], one per [ChipLeading] / [ChipTrailing] kind, plus
          * [ChipInteraction.Disabled], [ChipInteraction.Inert] and a label long enough to ellipsise.
          */
-        override val previews: ImmutableList<ChipUiModel> = persistentListOf(
-            ChipUiModel(
+        override val previews: ImmutableMap<String, ChipUiModel> = persistentMapOf(
+            "Idle" to ChipUiModel(
                 key = "tonal-idle",
                 label = "Fantasy",
             ),
-            ChipUiModel(
+            "Selected" to ChipUiModel(
                 key = "tonal-selected",
                 label = "Currently reading",
                 selected = true,
             ),
-            ChipUiModel(
+            "Choice" to ChipUiModel(
                 key = "choice-idle",
                 label = "Grid · 2",
                 tone = ChipTone.Choice,
             ),
-            ChipUiModel(
+            "Choice, selected" to ChipUiModel(
                 key = "choice-selected",
                 label = "Ascending",
                 tone = ChipTone.Choice,
@@ -56,13 +56,13 @@ data class ChipUiModel(
                     description = "Ascending",
                 ),
             ),
-            ChipUiModel(
+            "Filled" to ChipUiModel(
                 key = "filled",
                 label = "Winter reading",
                 tone = ChipTone.Filled,
                 leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
             ),
-            ChipUiModel(
+            "Container" to ChipUiModel(
                 key = "container",
                 label = "On the list",
                 tone = ChipTone.Container,
@@ -71,24 +71,24 @@ data class ChipUiModel(
                     description = "Remove from list",
                 ),
             ),
-            ChipUiModel(
+            "Outlined" to ChipUiModel(
                 key = "outlined",
                 label = "Second helpings",
                 tone = ChipTone.Outlined,
                 leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
             ),
-            ChipUiModel(
+            "Dashed" to ChipUiModel(
                 key = "dashed",
                 label = "Add tags",
                 tone = ChipTone.Dashed,
                 leading = ChipLeading.Icon(icon = SoftcoverIcon.Add),
             ),
-            ChipUiModel(
+            "Spoiler" to ChipUiModel(
                 key = "spoiler",
                 label = "Contains a major death",
                 tone = ChipTone.Spoiler,
             ),
-            ChipUiModel(
+            "Spoiler toggle, marked" to ChipUiModel(
                 key = "spoiler-toggle-marked",
                 label = "Contains a major death",
                 size = ChipSize.Compact,
@@ -99,7 +99,7 @@ data class ChipUiModel(
                 trailing = ChipTrailing.Dismiss(label = "Remove Contains a major death"),
                 interaction = ChipInteraction.Inert,
             ),
-            ChipUiModel(
+            "Spoiler toggle" to ChipUiModel(
                 key = "spoiler-toggle-unmarked",
                 label = "Cozy mystery",
                 size = ChipSize.Compact,
@@ -110,34 +110,34 @@ data class ChipUiModel(
                 trailing = ChipTrailing.Dismiss(label = "Remove Cozy mystery"),
                 interaction = ChipInteraction.Inert,
             ),
-            ChipUiModel(
+            "Leading icon" to ChipUiModel(
                 key = "leading-icon",
                 label = "Just now",
                 leading = ChipLeading.Icon(icon = SoftcoverIcon.DateRange),
             ),
-            ChipUiModel(
+            "Dismissible" to ChipUiModel(
                 key = "dismissible",
                 label = "Yesterday, 14:30",
                 selected = true,
                 leading = ChipLeading.Icon(icon = SoftcoverIcon.DateRange),
                 trailing = ChipTrailing.Dismiss(label = "Reset to just now"),
             ),
-            ChipUiModel(
+            "Format" to ChipUiModel(
                 key = "format-bold",
                 label = "Bold",
                 face = ChipFace.Bold,
             ),
-            ChipUiModel(
+            "Disabled" to ChipUiModel(
                 key = "disabled",
                 label = "Cozy mystery",
                 interaction = ChipInteraction.Disabled,
             ),
-            ChipUiModel(
+            "Read-only" to ChipUiModel(
                 key = "inert",
                 label = "Cozy mystery",
                 interaction = ChipInteraction.Inert,
             ),
-            ChipUiModel(
+            "Long label, ellipsised" to ChipUiModel(
                 key = "long-label",
                 label = "A Chip Label Long Enough That It Must Ellipsise Somewhere",
             ),

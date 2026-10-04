@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.control
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 
@@ -18,13 +18,13 @@ data class ColorPalettePreviewTileUiModel<K>(
     val selected: Boolean,
 ) {
     companion object : UiModelPreviews<ColorPalettePreviewTileUiModel<String>> {
-        override val previews: ImmutableList<ColorPalettePreviewTileUiModel<String>> = persistentListOf(
-            ColorPalettePreviewTileUiModel(
+        override val previews: ImmutableMap<String, ColorPalettePreviewTileUiModel<String>> = persistentMapOf(
+            "Selected" to ColorPalettePreviewTileUiModel(
                 key = "selected",
                 palette = SpinePalette.DEFAULT,
                 selected = true,
             ),
-            ColorPalettePreviewTileUiModel(
+            "Unselected" to ColorPalettePreviewTileUiModel(
                 key = "unselected",
                 palette = SpinePalette.DEFAULT,
                 selected = false,

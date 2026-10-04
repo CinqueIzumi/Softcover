@@ -95,20 +95,23 @@ keyed by its `ColorPalette`) as long as R9 holds — the render neither maps nor
 `kotlinx.datetime.LocalDate` is an allowed value type: a plain calendar day carries no domain vocabulary
 (`DatePickerUiModel.initialDate`).
 
-**R5 — Every UI model ships preview fixtures.**
+**R5 — A UI model that is rendered or tested ships preview fixtures.**
 
 ```kotlin
 data class ChipUiModel(…) {
     companion object : UiModelPreviews<ChipUiModel> {
-        override val previews: ImmutableList<ChipUiModel> = persistentListOf(…)
+        override val previews: ImmutableMap<String, ChipUiModel> = persistentMapOf("Idle" to …)
     }
 }
 ```
 
-The companion implements `UiModelPreviews<T>` (`gallery/`). The fixtures are both the Component Gallery's
-data and the mappers' expected outputs. Cover the variants, not the permutations: one fixture per `variant`
-branch, plus one per decoration that changes the anatomy (a truncating title, a missing cover, a selected
-state). A fixture that differs only in string content is noise.
+The companion implements `UiModelPreviews<T>` (`gallery/`), keyed by the label the Component Gallery shows;
+`@Preview`s read a fixture by that label. It is required wherever the model is rendered in the gallery or a
+`@Preview`, or its fixtures are read by a test — a model nothing reads carries no companion. The fixtures
+are both the Component Gallery's data and the mappers' expected outputs. Cover the variants, not the
+permutations: one fixture per `variant` branch, plus one per decoration that changes the anatomy (a
+truncating title, a missing cover, a selected state). A fixture that differs only in string content is
+noise.
 
 **R6 — Mapper placement: feature-local first, promoted on the second consumer.** A
 `Book -> BookCardUiModel` mapper starts in the consuming feature's `presentation/mapper/` and moves to
@@ -273,7 +276,8 @@ Consequences:
 - **Debug screens (`app/src/debug/`) are exempt from R10.** They may build UI models in composition or hold
   file-level `*UiModel` constants.
 - **No migrated sheet or dialog has a gallery entry**, because a fixture tile cannot render a modal inline. Their
-  models still ship `previews` (R5), and the components' own `@Preview` functions render from that list. A
+  models ship `previews` where R5 requires it (rendered or tested), and the components' own `@Preview`
+  functions render from that map. A
   "tap to open" fixture is a gallery feature to design once for all sheets, not per sheet.
 
 ### 7.5 The Component Gallery

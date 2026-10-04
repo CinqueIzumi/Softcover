@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 @Immutable
@@ -27,20 +27,20 @@ sealed interface SheetFooterUiModel {
     ) : SheetFooterUiModel
 
     companion object : UiModelPreviews<SheetFooterUiModel> {
-        override val previews: ImmutableList<SheetFooterUiModel> = persistentListOf(
-            Stacked(
+        override val previews: ImmutableMap<String, SheetFooterUiModel> = persistentMapOf(
+            "Stacked" to Stacked(
                 primary = SheetFooterButton(label = "Save"),
                 secondary = SheetFooterButton(label = "Not now"),
             ),
-            Stacked(
+            "Stacked, no secondary" to Stacked(
                 primary = SheetFooterButton(label = "Save"),
                 secondary = null,
             ),
-            Inline(
+            "Inline" to Inline(
                 primary = SheetFooterButton(label = "Apply filters"),
                 secondary = SheetFooterButton(label = "Clear"),
             ),
-            Inline(
+            "Inline, primary disabled" to Inline(
                 primary = SheetFooterButton(
                     label = "Apply filters",
                     enabled = false,

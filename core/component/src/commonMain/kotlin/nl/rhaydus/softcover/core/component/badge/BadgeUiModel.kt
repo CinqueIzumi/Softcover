@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.badge
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -26,35 +26,35 @@ data class BadgeUiModel(
 ) {
     companion object : UiModelPreviews<BadgeUiModel> {
         /** Per R5, one fixture per tone, one Regular, and one with a leading icon. */
-        override val previews: ImmutableList<BadgeUiModel> = persistentListOf(
-            BadgeUiModel(
+        override val previews: ImmutableMap<String, BadgeUiModel> = persistentMapOf(
+            "On track" to BadgeUiModel(
                 label = "On track",
                 tone = BadgeTone.PrimaryContainer,
             ),
-            BadgeUiModel(
+            "Behind" to BadgeUiModel(
                 label = "Behind",
                 tone = BadgeTone.ErrorContainer,
             ),
-            BadgeUiModel(
+            "Expired" to BadgeUiModel(
                 label = "Expired",
                 tone = BadgeTone.Neutral,
             ),
-            BadgeUiModel(
+            "Release" to BadgeUiModel(
                 label = "Out Sep 2",
                 tone = BadgeTone.Primary,
             ),
-            BadgeUiModel(
+            "TRACKING NOW, regular" to BadgeUiModel(
                 label = "TRACKING NOW",
                 tone = BadgeTone.Neutral,
                 size = BadgeSize.Regular,
             ),
-            BadgeUiModel(
+            "Owned, with icon" to BadgeUiModel(
                 label = "Owned",
                 tone = BadgeTone.Scrim,
                 size = BadgeSize.Regular,
                 icon = SoftcoverIcon.Check,
             ),
-            BadgeUiModel(
+            "3 days, with icon" to BadgeUiModel(
                 label = "3 days",
                 tone = BadgeTone.Primary,
                 size = BadgeSize.Regular,

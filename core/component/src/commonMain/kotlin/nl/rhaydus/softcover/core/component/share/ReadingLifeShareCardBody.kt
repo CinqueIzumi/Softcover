@@ -463,7 +463,7 @@ private fun readingLifeInitials(readerName: String): String {
     }
 }
 
-private val ReadingLifePreviewContent = ShareCardUiModel.previews.filterIsInstance<ReadingLifeShareCardUiModel>().single()
+private val ReadingLifePreviewContent = ShareCardUiModel.previews.getValue("Reading life")
 
 @StandardPreview
 @Composable

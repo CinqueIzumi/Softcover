@@ -11,7 +11,7 @@ class RankedBarsUiModelTest {
         @Test
         fun `includes a loading fixture`() {
             // ----- Arrange -----
-            val previews = RankedBarsUiModel.previews
+            val previews = RankedBarsUiModel.previews.values
 
             // ----- Act -----
             val loading = previews.filter { it.isLoading }
@@ -26,7 +26,7 @@ class RankedBarsUiModelTest {
             val expectedTones = ChartTone.entries.filter { it != ChartTone.Unknown }.toSet()
 
             // ----- Act -----
-            val coveredTones = RankedBarsUiModel.previews
+            val coveredTones = RankedBarsUiModel.previews.values
                 .filter { it.isLoading.not() }
                 .flatMap { it.rows }
                 .map { it.tone }

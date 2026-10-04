@@ -21,29 +21,37 @@ class GalleryEntry(
 
 /**
  * Builds a [GalleryEntry] from a UI model's [UiModelPreviews], keeping the construction site
- * type-safe ([M] flows straight from [previews] into [label] and [content]) while the stored
- * [GalleryEntry] itself stays generic-free.
+ * type-safe ([M] flows straight from [previews] into [content]) while the stored [GalleryEntry]
+ * itself stays generic-free.
  */
 fun <M> galleryEntry(
     name: String,
     family: GalleryFamily,
     blurb: String,
     previews: UiModelPreviews<M>,
-    label: (M) -> String,
     content: @Composable (M, Modifier) -> Unit,
 ): GalleryEntry = GalleryEntry(
     name = name,
     family = family,
     blurb = blurb,
-    fixtures = previews.previews.map { model ->
-        GalleryFixture(
-            label = label(model),
-            render = { modifier ->
-                content(
-                    model,
-                    modifier,
-                )
-            },
-        )
-    }.toImmutableList(),
+    fixtures = galleryFixtures(
+        previews = previews,
+        content = content,
+    ),
 )
+
+/** One [GalleryFixture] per [UiModelPreviews.previews] entry, labelled by its key. */
+fun <M> galleryFixtures(
+    previews: UiModelPreviews<M>,
+    content: @Composable (M, Modifier) -> Unit,
+): ImmutableList<GalleryFixture> = previews.previews.map { (label, model) ->
+    GalleryFixture(
+        label = label,
+        render = { modifier ->
+            content(
+                model,
+                modifier,
+            )
+        },
+    )
+}.toImmutableList()

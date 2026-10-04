@@ -10,7 +10,7 @@ class TextFieldUiModelTest {
         @Test
         fun `fixtures cover every variant`() {
             // ----- Act -----
-            val variants = TextFieldUiModel.previews.map { it.variant }
+            val variants = TextFieldUiModel.previews.values.map { it.variant }
 
             // ----- Assert -----
             variants.any { it is TextFieldVariant.Pill } shouldBe true
@@ -22,7 +22,7 @@ class TextFieldUiModelTest {
         @Test
         fun `fixtures cover a pill with and without a trailing button`() {
             // ----- Act -----
-            val pills = TextFieldUiModel.previews.map { it.variant }.filterIsInstance<TextFieldVariant.Pill>()
+            val pills = TextFieldUiModel.previews.values.map { it.variant }.filterIsInstance<TextFieldVariant.Pill>()
 
             // ----- Assert -----
             pills.any { it.trailing != null } shouldBe true
@@ -32,7 +32,7 @@ class TextFieldUiModelTest {
         @Test
         fun `fixtures cover every pill size`() {
             // ----- Act -----
-            val sizes = TextFieldUiModel.previews
+            val sizes = TextFieldUiModel.previews.values
                 .map { it.variant }
                 .filterIsInstance<TextFieldVariant.Pill>()
                 .map { it.size }
@@ -45,7 +45,7 @@ class TextFieldUiModelTest {
         @Test
         fun `fixtures include an outlined field without a label`() {
             // ----- Act -----
-            val outlined = TextFieldUiModel.previews
+            val outlined = TextFieldUiModel.previews.values
                 .map { it.variant }
                 .filterIsInstance<TextFieldVariant.Outlined>()
 
@@ -57,7 +57,7 @@ class TextFieldUiModelTest {
         @Test
         fun `fixtures include a disabled field and an empty field`() {
             // ----- Act -----
-            val previews = TextFieldUiModel.previews
+            val previews = TextFieldUiModel.previews.values
 
             // ----- Assert -----
             previews.any { it.enabled.not() } shouldBe true
@@ -67,7 +67,7 @@ class TextFieldUiModelTest {
         @Test
         fun `fixture keys are unique so events can be routed`() {
             // ----- Act -----
-            val keys = TextFieldUiModel.previews.map { it.key }
+            val keys = TextFieldUiModel.previews.values.map { it.key }
 
             // ----- Assert -----
             keys.distinct() shouldBe keys

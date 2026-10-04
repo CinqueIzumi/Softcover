@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.core.component.richtext
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
@@ -32,9 +34,9 @@ data class RichTextUiModel(
          * on its own, all three marks at once, a multi-paragraph body, and a concealed span mid-run
          * (the only fixture whose rendering is interactive).
          */
-        override val previews: ImmutableList<RichTextUiModel> = persistentListOf(
-            paragraphOf(RichTextRun(text = "A gorgeous, immersive tale told at a walking pace.")),
-            paragraphOf(
+        override val previews: ImmutableMap<String, RichTextUiModel> = persistentMapOf(
+            "Plain prose" to paragraphOf(RichTextRun(text = "A gorgeous, immersive tale told at a walking pace.")),
+            "Bold + Italic" to paragraphOf(
                 RichTextRun(text = "Some of it is "),
                 RichTextRun(
                     text = "genuinely superb",
@@ -47,7 +49,7 @@ data class RichTextUiModel(
                 ),
                 RichTextRun(text = "."),
             ),
-            paragraphOf(
+            "A concealed spoiler" to paragraphOf(
                 RichTextRun(text = "The ending — "),
                 RichTextRun(
                     text = "she was the lighthouse keeper all along",
@@ -55,7 +57,7 @@ data class RichTextUiModel(
                 ),
                 RichTextRun(text = " — still floored me."),
             ),
-            paragraphOf(
+            "All three marks" to paragraphOf(
                 RichTextRun(
                     text = "Everything at once.",
                     bold = true,
@@ -63,7 +65,7 @@ data class RichTextUiModel(
                     spoiler = true,
                 ),
             ),
-            RichTextUiModel(
+            "Two paragraphs" to RichTextUiModel(
                 paragraphs = persistentListOf(
                     RichTextParagraph(runs = persistentListOf(RichTextRun(text = "The first paragraph sets the scene."))),
                     RichTextParagraph(runs = persistentListOf(RichTextRun(text = "The second one turns it over."))),

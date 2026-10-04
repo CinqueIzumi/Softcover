@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -16,18 +16,18 @@ data class SheetRowUiModel<K>(
     val countDescription: String? = null,
 ) {
     companion object : UiModelPreviews<SheetRowUiModel<String>> {
-        override val previews: ImmutableList<SheetRowUiModel<String>> = persistentListOf(
-            SheetRowUiModel(
+        override val previews: ImmutableMap<String, SheetRowUiModel<String>> = persistentMapOf(
+            "Unselected" to SheetRowUiModel(
                 key = "unselected",
                 label = "Fantasy",
                 selected = false,
             ),
-            SheetRowUiModel(
+            "Selected" to SheetRowUiModel(
                 key = "selected",
                 label = "Science fiction",
                 selected = true,
             ),
-            SheetRowUiModel(
+            "Icon and count" to SheetRowUiModel(
                 key = "icon-and-count",
                 label = "Currently reading",
                 selected = false,
@@ -35,7 +35,7 @@ data class SheetRowUiModel<K>(
                 count = "12",
                 countDescription = "12 books",
             ),
-            SheetRowUiModel(
+            "Selected, icon and count" to SheetRowUiModel(
                 key = "selected-icon-and-count",
                 label = "Want to read",
                 selected = true,

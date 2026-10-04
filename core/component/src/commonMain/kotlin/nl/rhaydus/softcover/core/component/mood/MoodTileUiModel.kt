@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.mood
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -21,32 +21,32 @@ data class MoodTileUiModel(
     val isLoading: Boolean = false,
 ) {
     companion object : UiModelPreviews<MoodTileUiModel> {
-        override val previews: ImmutableList<MoodTileUiModel> = persistentListOf(
-            MoodTileUiModel(
+        override val previews: ImmutableMap<String, MoodTileUiModel> = persistentMapOf(
+            "Cosy ink" to MoodTileUiModel(
                 key = 1,
                 title = "Cosy & Comforting",
                 countLabel = "820 books",
                 ink = MoodTileInk.Cosy,
             ),
-            MoodTileUiModel(
+            "Dread ink" to MoodTileUiModel(
                 key = 2,
                 title = "Dread & Unease",
                 countLabel = "1,540 books",
                 ink = MoodTileInk.Dread,
             ),
-            MoodTileUiModel(
+            "Neutral ink" to MoodTileUiModel(
                 key = 3,
                 title = "Adventurous",
                 countLabel = "2,310 books",
                 ink = MoodTileInk.Neutral,
             ),
-            MoodTileUiModel(
+            "HeartWrench ink" to MoodTileUiModel(
                 key = 4,
                 title = "Heartbreaking",
                 countLabel = "640 books",
                 ink = MoodTileInk.HeartWrench,
             ),
-            MoodTileUiModel(
+            "Loading" to MoodTileUiModel(
                 key = 1,
                 title = "Cosy & Comforting",
                 countLabel = "820 books",

@@ -10,7 +10,7 @@ class ChipUiModelTest {
         @Test
         fun `every fixture has a unique key`() {
             // ----- Arrange -----
-            val keys = ChipUiModel.previews.map { it.key }
+            val keys = ChipUiModel.previews.values.map { it.key }
 
             // ----- Act -----
             val uniqueKeys = keys.toSet()
@@ -25,7 +25,7 @@ class ChipUiModelTest {
             val expectedTones = ChipTone.entries.toSet()
 
             // ----- Act -----
-            val coveredTones = ChipUiModel.previews.map { it.tone }.toSet()
+            val coveredTones = ChipUiModel.previews.values.map { it.tone }.toSet()
 
             // ----- Assert -----
             coveredTones shouldBe expectedTones
@@ -37,7 +37,7 @@ class ChipUiModelTest {
             val expectedSelectedStates = setOf(true, false)
 
             // ----- Act -----
-            val coveredSelectedStates = ChipUiModel.previews.map { it.selected }.toSet()
+            val coveredSelectedStates = ChipUiModel.previews.values.map { it.selected }.toSet()
 
             // ----- Assert -----
             coveredSelectedStates shouldBe expectedSelectedStates
@@ -52,7 +52,7 @@ class ChipUiModelTest {
             )
 
             // ----- Act -----
-            val coveredLeadingTypes = ChipUiModel.previews
+            val coveredLeadingTypes = ChipUiModel.previews.values
                 .mapNotNull { it.leading }
                 .map { it::class }
                 .toSet()
@@ -70,7 +70,7 @@ class ChipUiModelTest {
             )
 
             // ----- Act -----
-            val coveredTrailingTypes = ChipUiModel.previews
+            val coveredTrailingTypes = ChipUiModel.previews.values
                 .mapNotNull { it.trailing }
                 .map { it::class }
                 .toSet()
@@ -85,7 +85,7 @@ class ChipUiModelTest {
             val expectedInteractions = ChipInteraction.entries.toSet()
 
             // ----- Act -----
-            val coveredInteractions = ChipUiModel.previews.map { it.interaction }.toSet()
+            val coveredInteractions = ChipUiModel.previews.values.map { it.interaction }.toSet()
 
             // ----- Assert -----
             coveredInteractions shouldBe expectedInteractions
@@ -97,7 +97,7 @@ class ChipUiModelTest {
             val expectedSizes = ChipSize.entries.toSet()
 
             // ----- Act -----
-            val coveredSizes = ChipUiModel.previews.map { it.size }.toSet()
+            val coveredSizes = ChipUiModel.previews.values.map { it.size }.toSet()
 
             // ----- Assert -----
             coveredSizes shouldBe expectedSizes

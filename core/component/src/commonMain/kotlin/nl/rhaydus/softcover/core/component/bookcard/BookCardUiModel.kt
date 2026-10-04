@@ -1,8 +1,9 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
@@ -88,8 +89,8 @@ data class BookCardUiModel(
             isLoading = true,
         )
 
-        override val previews: ImmutableList<BookCardUiModel> = persistentListOf(
-            BookCardUiModel(
+        override val previews: ImmutableMap<String, BookCardUiModel> = persistentMapOf(
+            "Cover only, progress" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 1),
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Piranesi")),
                 decorations = BookCardDecorations(
@@ -99,12 +100,12 @@ data class BookCardUiModel(
                     ),
                 ),
             ),
-            BookCardUiModel(
+            "Cover only, progress reserved" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 21),
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Emma")),
                 decorations = BookCardDecorations(progress = BookCardProgress.Reserved),
             ),
-            BookCardUiModel(
+            "Cover only, progress without label" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 22),
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Kindred")),
                 decorations = BookCardDecorations(
@@ -114,17 +115,17 @@ data class BookCardUiModel(
                     ),
                 ),
             ),
-            BookCardUiModel(
+            "Cover only, selected" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 2),
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Dune")),
                 decorations = BookCardDecorations(selection = BookCardSelection.Multiple(selected = true)),
             ),
-            BookCardUiModel(
+            "Cover only, unselected" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 3),
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Hyperion")),
                 decorations = BookCardDecorations(selection = BookCardSelection.Multiple(selected = false)),
             ),
-            BookCardUiModel(
+            "Column, cover badge" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 4),
                 variant = BookCardVariant.Column(
                     cover = bookCover(
@@ -146,7 +147,7 @@ data class BookCardUiModel(
                     menuLabel = "More options",
                 ),
             ),
-            BookCardUiModel(
+            "Column, progress" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 5),
                 variant = BookCardVariant.Column(
                     cover = null,
@@ -169,7 +170,7 @@ data class BookCardUiModel(
                     ),
                 ),
             ),
-            BookCardUiModel(
+            "Row Compact, Bookmark" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 6),
                 variant = BookCardVariant.Row(
                     size = BookCardVariant.Row.Size.Compact,
@@ -192,7 +193,7 @@ data class BookCardUiModel(
                     ),
                 ),
             ),
-            BookCardUiModel(
+            "Row Standard, progress, deadline, SetProgress" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 7),
                 variant = BookCardVariant.Row(
                     size = BookCardVariant.Row.Size.Standard,
@@ -219,7 +220,7 @@ data class BookCardUiModel(
                     shakeOnError = true,
                 ),
             ),
-            BookCardUiModel(
+            "Row Large, cover badge, Badge" to BookCardUiModel(
                 key = BookCardKey.Book(bookId = 8),
                 variant = BookCardVariant.Row(
                     size = BookCardVariant.Row.Size.Large,
@@ -250,7 +251,7 @@ data class BookCardUiModel(
                 ),
                 decorations = BookCardDecorations(pressBehaviour = BookCardDecorations.Press.TapAndLongPress),
             ),
-            BookCardUiModel(
+            "Row Standard, series stack, Restore" to BookCardUiModel(
                 key = BookCardKey.Series(seriesId = 9),
                 variant = BookCardVariant.Row(
                     size = BookCardVariant.Row.Size.Standard,
@@ -262,7 +263,7 @@ data class BookCardUiModel(
                     trailing = BookCardTrailing.Restore(label = "Restore"),
                 ),
             ),
-            BookCardUiModel(
+            "Row Compact, selected, coverless" to BookCardUiModel(
                 key = BookCardKey.Edition(editionId = 10),
                 variant = BookCardVariant.Row(
                     size = BookCardVariant.Row.Size.Compact,
@@ -275,7 +276,7 @@ data class BookCardUiModel(
                 ),
                 decorations = BookCardDecorations(selection = BookCardSelection.Multiple(selected = true)),
             ),
-            BookCardUiModel(
+            "Row Standard, single choice, selected" to BookCardUiModel(
                 key = BookCardKey.Edition(editionId = 11),
                 variant = BookCardVariant.Row(
                     size = BookCardVariant.Row.Size.Standard,
@@ -288,7 +289,7 @@ data class BookCardUiModel(
                 ),
                 decorations = BookCardDecorations(selection = BookCardSelection.Single(selected = true)),
             ),
-            BookCardUiModel(
+            "Row Standard, single choice, unselected" to BookCardUiModel(
                 key = BookCardKey.Edition(editionId = 12),
                 variant = BookCardVariant.Row(
                     size = BookCardVariant.Row.Size.Standard,
@@ -301,10 +302,10 @@ data class BookCardUiModel(
                 ),
                 decorations = BookCardDecorations(selection = BookCardSelection.Single(selected = false)),
             ),
-            LOADING_COVER_ONLY,
-            LOADING_COLUMN,
-            LOADING_ROW,
-            LOADING_SERIES_ROW,
+            "Cover only, loading, progress" to LOADING_COVER_ONLY,
+            "Column, loading" to LOADING_COLUMN,
+            "Row Standard, loading" to LOADING_ROW,
+            "Row Standard, loading, series stack" to LOADING_SERIES_ROW,
         )
 
         private fun bookCover(

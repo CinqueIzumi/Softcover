@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.callout
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -19,13 +19,13 @@ data class BannerUiModel(
     val visible: Boolean,
 ) {
     companion object : UiModelPreviews<BannerUiModel> {
-        override val previews: ImmutableList<BannerUiModel> = persistentListOf(
-            BannerUiModel(
+        override val previews: ImmutableMap<String, BannerUiModel> = persistentMapOf(
+            "Status" to BannerUiModel(
                 message = "You're offline. Progress changes are saved and will sync when you reconnect.",
                 variant = BannerVariant.Status,
                 visible = true,
             ),
-            BannerUiModel(
+            "Editorial" to BannerUiModel(
                 message = "Read 24 pages today to stay on pace.",
                 variant = BannerVariant.Editorial,
                 visible = true,

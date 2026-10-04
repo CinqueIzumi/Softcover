@@ -10,7 +10,7 @@ class ToggleUiModelTest {
         @Test
         fun `every fixture has a unique key`() {
             // ----- Act -----
-            val keys = ToggleUiModel.previews.map { it.key }
+            val keys = ToggleUiModel.previews.values.map { it.key }
 
             // ----- Assert -----
             keys.distinct() shouldBe keys
@@ -19,7 +19,7 @@ class ToggleUiModelTest {
         @Test
         fun `fixtures cover both variants`() {
             // ----- Act -----
-            val variants = ToggleUiModel.previews.map { it.variant }
+            val variants = ToggleUiModel.previews.values.map { it.variant }
 
             // ----- Assert -----
             variants.toSet() shouldBe ToggleVariant.entries.toSet()
@@ -28,7 +28,7 @@ class ToggleUiModelTest {
         @Test
         fun `fixtures cover checked, unchecked, enabled and disabled`() {
             // ----- Act -----
-            val toggles = ToggleUiModel.previews
+            val toggles = ToggleUiModel.previews.values
 
             // ----- Assert -----
             toggles.any { it.checked } shouldBe true

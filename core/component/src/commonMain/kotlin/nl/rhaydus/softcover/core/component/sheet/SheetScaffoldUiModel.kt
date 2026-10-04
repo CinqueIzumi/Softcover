@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
@@ -25,17 +25,17 @@ data class SheetScaffoldUiModel(
     val closeRequested: Boolean = false,
 ) {
     companion object : UiModelPreviews<SheetScaffoldUiModel> {
-        override val previews: ImmutableList<SheetScaffoldUiModel> = persistentListOf(
-            SheetScaffoldUiModel(
+        override val previews: ImmutableMap<String, SheetScaffoldUiModel> = persistentMapOf(
+            "Scrolling, footer" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
                     section = SectionHeaderUiModel.Section(
                         eyebrow = "Reading progress",
                         headline = "Piranesi",
                     ),
                 ),
-                footer = SheetFooterUiModel.previews.first(),
+                footer = SheetFooterUiModel.previews.getValue("Stacked"),
             ),
-            SheetScaffoldUiModel(
+            "Scrolling, dismiss label and jacket" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
                     section = SectionHeaderUiModel.Section(
                         eyebrow = "Tags",
@@ -52,7 +52,7 @@ data class SheetScaffoldUiModel(
                 ),
                 dismissLabel = "Done",
             ),
-            SheetScaffoldUiModel(
+            "Pinned, jacket stack and inline footer" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
                     section = SectionHeaderUiModel.Section(
                         eyebrow = "Lists",
@@ -68,10 +68,10 @@ data class SheetScaffoldUiModel(
                         }.toImmutableList(),
                     ),
                 ),
-                footer = SheetFooterUiModel.previews.filterIsInstance<SheetFooterUiModel.Inline>().first(),
+                footer = SheetFooterUiModel.previews.getValue("Inline"),
                 layout = SheetLayout.PinnedLazy,
             ),
-            SheetScaffoldUiModel(
+            "Pinned, header action" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
                     section = SectionHeaderUiModel.Section(
                         eyebrow = "Genres",
@@ -81,7 +81,7 @@ data class SheetScaffoldUiModel(
                 ),
                 layout = SheetLayout.Pinned,
             ),
-            SheetScaffoldUiModel(
+            "Not dismissible" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
                     section = SectionHeaderUiModel.Section(
                         eyebrow = "Setting up",
@@ -90,7 +90,7 @@ data class SheetScaffoldUiModel(
                 ),
                 dismissible = false,
             ),
-            SheetScaffoldUiModel(
+            "Busy" to SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
                     section = SectionHeaderUiModel.Section(
                         eyebrow = "Signing in",

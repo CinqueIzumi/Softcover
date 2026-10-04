@@ -49,7 +49,8 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 | SS-8 | `progress`, `deadline`, `mood`, `celebration`; uibinding `progress`, `deadline`; book_detail `InProgressUiModel`, reading `FeaturedProgressUiModel`, session `FocusPageEditorUiModel` — ~2.3k | [x] |
 | SS-9 | `statistic`, `chart`; profile `ReadingAtlasUiModel` — ~1.2k | [x] |
 | SS-10 | `share`, `verdict`; uibinding `verdict`; book_detail `ShareCardVariant` — ~2.5k | [x] |
-| SS-11 | `gallery`; uibinding `date`, `format`, `theme` — ~1.5k | [ ] |
+| SS-11 | `gallery`; uibinding `date`, `format`, `theme` — ~1.5k | [x] |
+| SS-C | Convergence pass over SS's output (`family-procedure.md` § Phase 3); absorbs the leftovers in § Approved shape | [ ] |
 
 Out of scope: `core/domain` `BottomBarStyle` and `DateStyle` are stored preferences, not UI types.
 
@@ -113,4 +114,5 @@ SS-5–SS-11 (audited together; built in rounds SS-5 + SS-9, SS-6 + SS-8, SS-7 +
 - SS-10 `share`: Stat / Quote / YearRecap kept; `ShareCardDimensions` → private `when`; `ShareCardNumerals.kt` goes; Book + Update share one header; `quote` goes; `ReadingUpdateKind` + nullables → sealed `Finished` / `Reading`; month normaliser goes; `ShareCard(model =)`; fix: rating uses the ×2 verdict score.
 - SS-10 `verdict` / book_detail: `VerdictBlockUiModel` → sealed `Empty` / `Filled`; one `VerdictScoreLine`; `reviewLabel` goes; `verdictReview` state goes; `ShareSheetCollector` merges into `ShareCardsCollector`, one `shareCard` field.
 - SS-11: `UiModelPreviews.previews` → label → fixture map, label functions and `*_FLOOR` consts go; masthead entry uses fixtures; registry filter goes; entry files renamed; duplicate fixtures pruned; unread previews deleted, R5 → "rendered or tested"; `formatCompactDate` private; Reading / Explore previews built through mappers.
-- Left over: `ShareBookBottomSheet`'s eight callbacks; `VerdictSheet` spoilers model built in composition.
+- Left over: `ShareBookBottomSheet`'s eight callbacks; `VerdictSheet` spoilers model built in composition; EditorialTopBar gallery entry's inline `TopBarUiModel`s; label-string `previews.getValue(…)` lookups fail only at render.
+- Undecided: keep or drop the long-text fixtures (Chip label, TopBar title, Cover coverless title).

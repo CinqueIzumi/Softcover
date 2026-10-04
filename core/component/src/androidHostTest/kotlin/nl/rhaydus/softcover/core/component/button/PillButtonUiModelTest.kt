@@ -10,7 +10,7 @@ class PillButtonUiModelTest {
         @Test
         fun `every fixture has a unique key`() {
             // ----- Arrange -----
-            val keys = PillButtonUiModel.previews.map { it.key }
+            val keys = PillButtonUiModel.previews.values.map { it.key }
 
             // ----- Act -----
             val uniqueKeys = keys.toSet()
@@ -25,7 +25,7 @@ class PillButtonUiModelTest {
             val expectedTones = PillButtonTone.entries.toSet()
 
             // ----- Act -----
-            val coveredTones = PillButtonUiModel.previews.map { it.tone }.toSet()
+            val coveredTones = PillButtonUiModel.previews.values.map { it.tone }.toSet()
 
             // ----- Assert -----
             coveredTones shouldBe expectedTones
@@ -37,7 +37,7 @@ class PillButtonUiModelTest {
             val expectedSizes = PillButtonSize.entries.toSet()
 
             // ----- Act -----
-            val coveredSizes = PillButtonUiModel.previews.map { it.size }.toSet()
+            val coveredSizes = PillButtonUiModel.previews.values.map { it.size }.toSet()
 
             // ----- Assert -----
             coveredSizes shouldBe expectedSizes
@@ -46,7 +46,7 @@ class PillButtonUiModelTest {
         @Test
         fun `both content kinds appear in at least one fixture`() {
             // ----- Arrange -----
-            val previews = PillButtonUiModel.previews
+            val previews = PillButtonUiModel.previews.values
 
             // ----- Act -----
             val hasLabel = previews.any { it.content is PillButtonContent.Label }
@@ -60,7 +60,7 @@ class PillButtonUiModelTest {
         @Test
         fun `an indicator fixture exists`() {
             // ----- Arrange -----
-            val previews = PillButtonUiModel.previews
+            val previews = PillButtonUiModel.previews.values
 
             // ----- Act -----
             val hasIndicator = previews.any { (it.content as? PillButtonContent.Label)?.indicator == true }

@@ -13,7 +13,7 @@ class CoverOverlayUiModelTest {
             val expectedCorners = CoverOverlayCorner.entries.toSet()
 
             // ----- Act -----
-            val coveredCorners = CoverOverlayUiModel.previews.map { it.corner }.toSet()
+            val coveredCorners = CoverOverlayUiModel.previews.values.map { it.corner }.toSet()
 
             // ----- Assert -----
             coveredCorners shouldBe expectedCorners
@@ -25,7 +25,7 @@ class CoverOverlayUiModelTest {
             val expectedGrayscaleStates = setOf(true, false)
 
             // ----- Act -----
-            val coveredGrayscaleStates = CoverOverlayUiModel.previews.map { it.grayscale }.toSet()
+            val coveredGrayscaleStates = CoverOverlayUiModel.previews.values.map { it.grayscale }.toSet()
 
             // ----- Assert -----
             coveredGrayscaleStates shouldBe expectedGrayscaleStates

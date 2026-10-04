@@ -18,7 +18,7 @@ class SectionHeaderUiModelTest {
             )
 
             // ----- Act -----
-            val coveredRegisters = SectionHeaderUiModel.previews.map { it::class }.toSet()
+            val coveredRegisters = SectionHeaderUiModel.previews.values.map { it::class }.toSet()
 
             // ----- Assert -----
             coveredRegisters shouldBe expectedRegisters
@@ -30,7 +30,7 @@ class SectionHeaderUiModelTest {
             val expectedHeadlinePresence = setOf(true, false)
 
             // ----- Act -----
-            val coveredHeadlinePresence = SectionHeaderUiModel.previews
+            val coveredHeadlinePresence = SectionHeaderUiModel.previews.values
                 .filterIsInstance<SectionHeaderUiModel.Section>()
                 .map { it.headline != null }
                 .toSet()
@@ -45,7 +45,7 @@ class SectionHeaderUiModelTest {
             val expectedTones = setOf(SectionHeaderTone.Muted, SectionHeaderTone.Accent)
 
             // ----- Act -----
-            val coveredTones = SectionHeaderUiModel.previews
+            val coveredTones = SectionHeaderUiModel.previews.values
                 .filterIsInstance<SectionHeaderUiModel.Label>()
                 .map { it.tone }
                 .toSet()
@@ -60,7 +60,7 @@ class SectionHeaderUiModelTest {
             val expectedTones = setOf(SectionHeaderTone.Accent, SectionHeaderTone.Error)
 
             // ----- Act -----
-            val coveredTones = SectionHeaderUiModel.previews
+            val coveredTones = SectionHeaderUiModel.previews.values
                 .filterIsInstance<SectionHeaderUiModel.Inline>()
                 .map { it.tone }
                 .toSet()
@@ -124,7 +124,7 @@ class SectionHeaderUiModelTest {
         @Test
         fun `a Section fixture carries an emphasised headline run`() {
             // ----- Act -----
-            val hasEmphasis = SectionHeaderUiModel.previews
+            val hasEmphasis = SectionHeaderUiModel.previews.values
                 .filterIsInstance<SectionHeaderUiModel.Section>()
                 .any { section -> section.headline.orEmpty().any { it is HeaderTextSegment.Emphasised } }
 

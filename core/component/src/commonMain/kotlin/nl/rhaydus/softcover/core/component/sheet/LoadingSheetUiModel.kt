@@ -1,10 +1,6 @@
 package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
-import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
 /**
  * Everything [LoadingSheet] renders: the [scaffold] chrome and how far along the wait is.
@@ -21,35 +17,4 @@ data class LoadingSheetUiModel(
     val scaffold: SheetScaffoldUiModel,
     val progress: Float?,
     val isLoading: Boolean,
-) {
-    companion object : UiModelPreviews<LoadingSheetUiModel> {
-        private fun fixtureScaffold(header: SectionHeaderUiModel.Section): SheetScaffoldUiModel = SheetScaffoldUiModel(
-            header = SheetHeaderUiModel(section = header),
-            dismissible = false,
-        )
-
-        override val previews: ImmutableList<LoadingSheetUiModel> = persistentListOf(
-            LoadingSheetUiModel(
-                scaffold = fixtureScaffold(
-                    header = SectionHeaderUiModel.Section(
-                        eyebrow = "Setting up",
-                        headline = "Pulling your library together.",
-                        description = "Depending on its size, this might take a moment.",
-                    ),
-                ),
-                progress = 0.4f,
-                isLoading = true,
-            ),
-            LoadingSheetUiModel(
-                scaffold = fixtureScaffold(
-                    header = SectionHeaderUiModel.Section(
-                        eyebrow = "Setting up",
-                        headline = "Pulling your library together.",
-                    ),
-                ),
-                progress = null,
-                isLoading = true,
-            ),
-        )
-    }
-}
+)

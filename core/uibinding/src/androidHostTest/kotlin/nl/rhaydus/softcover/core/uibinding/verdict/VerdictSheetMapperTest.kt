@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 
 class VerdictSheetMapperTest {
     private val book = PreviewData.baseBook
-    private val review = RichTextUiModel.previews.first()
+    private val review = RichTextUiModel.previews.getValue("Plain prose")
     private val cover = CoverUiModel(
         source = null,
         coverlessTitle = book.title,

@@ -13,7 +13,7 @@ class PageMastheadUiModelTest {
             val expectedSizes = PageMastheadSize.entries.toSet()
 
             // ----- Act -----
-            val coveredSizes = PageMastheadUiModel.previews.map { it.size }.toSet()
+            val coveredSizes = PageMastheadUiModel.previews.values.map { it.size }.toSet()
 
             // ----- Assert -----
             coveredSizes shouldBe expectedSizes
@@ -22,7 +22,7 @@ class PageMastheadUiModelTest {
         @Test
         fun `at least one fixture carries an eyebrow`() {
             // ----- Act -----
-            val hasEyebrow = PageMastheadUiModel.previews.any { it.eyebrow != null }
+            val hasEyebrow = PageMastheadUiModel.previews.values.any { it.eyebrow != null }
 
             // ----- Assert -----
             hasEyebrow shouldBe true
@@ -31,7 +31,7 @@ class PageMastheadUiModelTest {
         @Test
         fun `at least one fixture omits the eyebrow`() {
             // ----- Act -----
-            val hasNoEyebrow = PageMastheadUiModel.previews.any { it.eyebrow == null }
+            val hasNoEyebrow = PageMastheadUiModel.previews.values.any { it.eyebrow == null }
 
             // ----- Assert -----
             hasNoEyebrow shouldBe true

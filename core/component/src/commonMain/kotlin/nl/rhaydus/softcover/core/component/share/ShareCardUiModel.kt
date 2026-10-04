@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.core.component.share
 
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.richtext.RichTextParagraph
 import nl.rhaydus.softcover.core.component.richtext.RichTextRun
@@ -26,8 +27,8 @@ sealed interface ShareCardUiModel {
          * re-declaring sample literals inline, so the preview set and the Component Gallery's set
          * cannot drift apart.
          */
-        override val previews: ImmutableList<ShareCardUiModel> = persistentListOf(
-            BookShareCardUiModel(
+        override val previews: ImmutableMap<String, ShareCardUiModel> = persistentMapOf(
+            "Book" to BookShareCardUiModel(
                 coverUrl = null,
                 title = "We Have Always Lived in the Castle",
                 author = "Shirley Jackson",
@@ -39,7 +40,7 @@ sealed interface ShareCardUiModel {
                     "mansion outside the village. A quiet gothic tale of isolation, ritual, and the slow-burning " +
                     "aftermath of a single, devastating poisoning.",
             ),
-            BookShareCardUiModel(
+            "Book (minimal)" to BookShareCardUiModel(
                 coverUrl = null,
                 title = "Piranesi",
                 author = "Susanna Clarke",
@@ -49,7 +50,7 @@ sealed interface ShareCardUiModel {
                 pageCount = null,
                 description = null,
             ),
-            ReadingUpdateShareCardUiModel.Finished(
+            "Reading update (finished)" to ReadingUpdateShareCardUiModel.Finished(
                 username = "cinque",
                 avatarUrl = null,
                 coverUrl = null,
@@ -72,7 +73,7 @@ sealed interface ShareCardUiModel {
                     ),
                 ),
             ),
-            ReadingUpdateShareCardUiModel.Reading(
+            "Reading update (in progress)" to ReadingUpdateShareCardUiModel.Reading(
                 username = "cinque",
                 avatarUrl = null,
                 coverUrl = null,
@@ -81,18 +82,18 @@ sealed interface ShareCardUiModel {
                 tags = persistentListOf(),
                 progressLabel = "page 212 / 662 · 32%",
             ),
-            StatShareCardUiModel(
+            "Stat" to StatShareCardUiModel(
                 eyebrow = "Pages read in 2026",
                 value = 8_402L,
                 caption = "across 14 books, mostly on Sunday afternoons.",
             ),
-            QuoteShareCardUiModel(
+            "Quote" to QuoteShareCardUiModel(
                 quote = "The reader is the protagonist; the page is the stage.",
                 sourceTitle = "Piranesi",
                 sourceAuthor = "Susanna Clarke",
                 page = 142,
             ),
-            YearRecapShareCardUiModel(
+            "Year recap" to YearRecapShareCardUiModel(
                 eyebrow = "Year in Books",
                 year = 2026,
                 headline = "A year of long evenings.",
@@ -102,7 +103,7 @@ sealed interface ShareCardUiModel {
                     "Longest haul: Lonesome Dove.",
                 ),
             ),
-            ReadingLifeShareCardUiModel(
+            "Reading life" to ReadingLifeShareCardUiModel(
                 readerName = "Elena Marchetti",
                 avatarUrl = null,
                 totalPagesRead = 128_406,

@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.badge
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -24,8 +24,8 @@ data class CoverOverlayUiModel(
 ) {
     companion object : UiModelPreviews<CoverOverlayUiModel> {
         /** Per R5: both grayscale states on [CoverOverlayCorner.TopEnd], plus the other corner. */
-        override val previews: ImmutableList<CoverOverlayUiModel> = persistentListOf(
-            CoverOverlayUiModel(
+        override val previews: ImmutableMap<String, CoverOverlayUiModel> = persistentMapOf(
+            "On track" to CoverOverlayUiModel(
                 badge = BadgeUiModel(
                     label = "On track",
                     tone = BadgeTone.PrimaryContainer,
@@ -33,7 +33,7 @@ data class CoverOverlayUiModel(
                 corner = CoverOverlayCorner.TopEnd,
                 grayscale = false,
             ),
-            CoverOverlayUiModel(
+            "Expired (grayscale cover)" to CoverOverlayUiModel(
                 badge = BadgeUiModel(
                     label = "Expired",
                     tone = BadgeTone.Neutral,
@@ -41,7 +41,7 @@ data class CoverOverlayUiModel(
                 corner = CoverOverlayCorner.TopEnd,
                 grayscale = true,
             ),
-            CoverOverlayUiModel(
+            "Library countdown (top-start)" to CoverOverlayUiModel(
                 badge = BadgeUiModel(
                     label = "3 days",
                     tone = BadgeTone.Primary,

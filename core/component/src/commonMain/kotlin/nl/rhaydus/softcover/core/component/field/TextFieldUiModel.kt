@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.component.field
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.button.PillButtonContent
 import nl.rhaydus.softcover.core.component.button.PillButtonTone
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
@@ -29,14 +29,14 @@ data class TextFieldUiModel(
     val submittable: Boolean = false,
 ) {
     companion object : UiModelPreviews<TextFieldUiModel> {
-        override val previews: ImmutableList<TextFieldUiModel> = persistentListOf(
-            TextFieldUiModel(
+        override val previews: ImmutableMap<String, TextFieldUiModel> = persistentMapOf(
+            "Pill, leading glyph" to TextFieldUiModel(
                 key = "pill-empty",
                 text = "",
                 placeholder = "Name a tag…",
                 variant = TextFieldVariant.Pill(leadingIcon = SoftcoverIcon.Edit),
             ),
-            TextFieldUiModel(
+            "Pill, compact" to TextFieldUiModel(
                 key = "pill-compact",
                 text = "",
                 placeholder = "Search your tags",
@@ -45,7 +45,7 @@ data class TextFieldUiModel(
                     size = TextFieldPillSize.Compact,
                 ),
             ),
-            TextFieldUiModel(
+            "Pill, trailing action" to TextFieldUiModel(
                 key = "pill-with-trailing",
                 text = "slow burn",
                 placeholder = "Name a tag…",
@@ -58,13 +58,13 @@ data class TextFieldUiModel(
                     ),
                 ),
             ),
-            TextFieldUiModel(
+            "Pill, large" to TextFieldUiModel(
                 key = "pill-plain",
                 text = "",
                 placeholder = "Enter your key",
                 variant = TextFieldVariant.Pill(size = TextFieldPillSize.Large),
             ),
-            TextFieldUiModel(
+            "Outlined" to TextFieldUiModel(
                 key = "outlined",
                 text = "9780374710781",
                 placeholder = "e.g. 9780374710781",
@@ -73,13 +73,13 @@ data class TextFieldUiModel(
                     numeric = true,
                 ),
             ),
-            TextFieldUiModel(
+            "Outlined, no label" to TextFieldUiModel(
                 key = "outlined-unlabelled",
                 text = "",
                 placeholder = "e.g. 9780374710781",
                 variant = TextFieldVariant.Outlined(numeric = true),
             ),
-            TextFieldUiModel(
+            "Outlined, disabled" to TextFieldUiModel(
                 key = "outlined-disabled",
                 text = "9780374710781",
                 placeholder = "e.g. 9780374710781",
@@ -89,40 +89,34 @@ data class TextFieldUiModel(
                 ),
                 enabled = false,
             ),
-            TextFieldUiModel(
+            "Hero" to TextFieldUiModel(
                 key = "hero-empty",
                 text = "",
                 placeholder = "Summer reads",
                 variant = TextFieldVariant.Hero,
             ),
-            TextFieldUiModel(
-                key = "hero-long",
-                text = "Books I keep meaning to reread before the year ends",
-                placeholder = "Summer reads",
-                variant = TextFieldVariant.Hero,
-            ),
-            TextFieldUiModel(
+            "Pill, disabled" to TextFieldUiModel(
                 key = "pill-disabled",
                 text = "slow burn",
                 placeholder = "Name a tag…",
                 variant = TextFieldVariant.Pill(leadingIcon = SoftcoverIcon.Edit),
                 enabled = false,
             ),
-            TextFieldUiModel(
+            "Hero, disabled" to TextFieldUiModel(
                 key = "hero-disabled",
                 text = "",
                 placeholder = "Summer reads",
                 variant = TextFieldVariant.Hero,
                 enabled = false,
             ),
-            TextFieldUiModel(
+            "Numeral, disabled" to TextFieldUiModel(
                 key = "numeral-disabled",
                 text = "42",
                 placeholder = "0",
                 variant = TextFieldVariant.Numeral(charCount = 2),
                 enabled = false,
             ),
-            TextFieldUiModel(
+            "Numeral" to TextFieldUiModel(
                 key = "numeral",
                 text = "42",
                 placeholder = "0",

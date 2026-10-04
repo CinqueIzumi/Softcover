@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.core.component.header
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -47,14 +49,14 @@ sealed interface SectionHeaderUiModel {
 
     companion object : UiModelPreviews<SectionHeaderUiModel> {
         /** One fixture per register, plus [Section] with and without headline/description. */
-        override val previews: ImmutableList<SectionHeaderUiModel> = persistentListOf(
-            Section(
+        override val previews: ImmutableMap<String, SectionHeaderUiModel> = persistentMapOf(
+            "Section, with headline" to Section(
                 eyebrow = "Your progress",
                 headline = "Halfway through",
                 description = "You're on pace to finish by the deadline.",
             ),
-            Section(eyebrow = "Currently reading"),
-            Section(
+            "Section, eyebrow only" to Section(eyebrow = "Currently reading"),
+            "Section, with emphasis" to Section(
                 eyebrow = "Lists",
                 headline = persistentListOf(
                     HeaderTextSegment.Plain(text = "Shelve "),
@@ -62,13 +64,13 @@ sealed interface SectionHeaderUiModel {
                 ),
                 description = null,
             ),
-            Inline(eyebrow = "Recently added"),
-            Inline(
+            "Inline" to Inline(eyebrow = "Recently added"),
+            "Inline, error" to Inline(
                 eyebrow = "Couldn't save — tap to retry",
                 tone = SectionHeaderTone.Error,
             ),
-            Label(eyebrow = "Shelves"),
-            Label(
+            "Label" to Label(eyebrow = "Shelves"),
+            "Label, accent" to Label(
                 eyebrow = "Your tabs",
                 tone = SectionHeaderTone.Accent,
             ),

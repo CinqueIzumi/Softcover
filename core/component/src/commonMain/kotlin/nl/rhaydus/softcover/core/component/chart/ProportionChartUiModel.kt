@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.core.component.chart
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
@@ -16,8 +18,8 @@ data class ProportionChartUiModel(
     val isLoading: Boolean = false,
 ) {
     companion object : UiModelPreviews<ProportionChartUiModel> {
-        override val previews: ImmutableList<ProportionChartUiModel> = persistentListOf(
-            ProportionChartUiModel(
+        override val previews: ImmutableMap<String, ProportionChartUiModel> = persistentMapOf(
+            "Known segments" to ProportionChartUiModel(
                 segments = persistentListOf(
                     ChartSliceUiModel(
                         label = "Women",
@@ -39,7 +41,7 @@ data class ProportionChartUiModel(
                     ),
                 ),
             ),
-            ProportionChartUiModel(
+            "With Unknown" to ProportionChartUiModel(
                 segments = persistentListOf(
                     ChartSliceUiModel(
                         label = "Yes",
@@ -61,7 +63,7 @@ data class ProportionChartUiModel(
                     ),
                 ),
             ),
-            ProportionChartUiModel(
+            "Zero segment" to ProportionChartUiModel(
                 segments = persistentListOf(
                     ChartSliceUiModel(
                         label = "Yes",
@@ -77,7 +79,7 @@ data class ProportionChartUiModel(
                     ),
                 ),
             ),
-            ProportionChartUiModel(
+            "Loading" to ProportionChartUiModel(
                 segments = persistentListOf(
                     loadingSegment(ChartTone.Lead),
                     loadingSegment(ChartTone.Second),

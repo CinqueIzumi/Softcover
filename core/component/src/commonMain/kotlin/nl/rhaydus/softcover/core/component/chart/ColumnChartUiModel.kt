@@ -2,7 +2,9 @@ package nl.rhaydus.softcover.core.component.chart
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
@@ -25,8 +27,8 @@ data class ColumnChartUiModel(
         private const val LOADING_COLUMN_COUNT = 8
         private val RATING_FRACTIONS = listOf(0.05f, 0f, 0.1f, 0.15f, 0.2f, 0.45f, 0.4f, 1f, 0.7f)
 
-        override val previews: ImmutableList<ColumnChartUiModel> = persistentListOf(
-            ColumnChartUiModel(
+        override val previews: ImmutableMap<String, ColumnChartUiModel> = persistentMapOf(
+            "8 columns" to ColumnChartUiModel(
                 columns = persistentListOf(
                     ColumnUiModel(
                         fraction = 0.3f,
@@ -87,7 +89,7 @@ data class ColumnChartUiModel(
                 ),
                 showsValues = true,
             ),
-            ColumnChartUiModel(
+            "9 columns" to ColumnChartUiModel(
                 columns = List(RATING_STEP_COUNT) { index ->
                     val isWholeStep = index % 2 == 0
 
@@ -109,7 +111,7 @@ data class ColumnChartUiModel(
                 }.toImmutableList(),
                 showsValues = false,
             ),
-            ColumnChartUiModel(
+            "Loading" to ColumnChartUiModel(
                 columns = List(LOADING_COLUMN_COUNT) {
                     ColumnUiModel(
                         fraction = 0.5f,

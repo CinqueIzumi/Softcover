@@ -291,7 +291,7 @@ private fun ReadingUpdateReaderIdentity(
 @Composable
 private fun BookShareCardPreview() {
     SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.filterIsInstance<BookShareCardUiModel>().first { it.description != null })
+        ShareCard(model = ShareCardUiModel.previews.getValue("Book"))
     }
 }
 
@@ -299,7 +299,7 @@ private fun BookShareCardPreview() {
 @Composable
 private fun BookShareCardMinimalPreview() {
     SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.filterIsInstance<BookShareCardUiModel>().first { it.description == null })
+        ShareCard(model = ShareCardUiModel.previews.getValue("Book (minimal)"))
     }
 }
 
@@ -307,7 +307,7 @@ private fun BookShareCardMinimalPreview() {
 @Composable
 private fun ReadingUpdateFinishedShareCardPreview() {
     SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.filterIsInstance<ReadingUpdateShareCardUiModel.Finished>().first())
+        ShareCard(model = ShareCardUiModel.previews.getValue("Reading update (finished)"))
     }
 }
 
@@ -315,6 +315,6 @@ private fun ReadingUpdateFinishedShareCardPreview() {
 @Composable
 private fun ReadingUpdateReadingShareCardPreview() {
     SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.filterIsInstance<ReadingUpdateShareCardUiModel.Reading>().first())
+        ShareCard(model = ShareCardUiModel.previews.getValue("Reading update (in progress)"))
     }
 }
