@@ -22,7 +22,6 @@ data class SheetScaffoldUiModel(
     val layout: SheetLayout = SheetLayout.Scrolling,
     val dismissible: Boolean = true,
     val busy: Boolean = false,
-    val busyDescription: String = "Loading",
     val closeRequested: Boolean = false,
 ) {
     companion object : UiModelPreviews<SheetScaffoldUiModel> {

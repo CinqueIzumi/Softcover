@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.toChipSet
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -36,8 +37,8 @@ internal fun buildLibraryArrangeChips(
             label = chip.arrangeLabel,
             tone = ChipTone.Choice,
             selected = chip == draft.gridLayout.chip,
-        )
-    }
+        ) to chip
+    }.toChipSet()
 
     // librarySortOptions only reads customLists/booksByTab/deadlines off state; a scratch
     // LibraryUiState avoids widening its signature for this one caller.
@@ -64,8 +65,8 @@ internal fun buildLibraryArrangeChips(
             } else {
                 null
             },
-        )
-    }
+        ) to mode
+    }.toChipSet()
 
     val sortHeader = SectionHeaderUiModel.Label(eyebrow = "Sort by · ${tab.label}")
 
@@ -101,9 +102,3 @@ private val LibraryLayoutChip.arrangeLabel: String
         LibraryLayoutChip.GRID_THREE -> "Grid · 3"
         LibraryLayoutChip.LIST -> "List"
     }
-
-internal fun libraryLayoutChipForKey(key: String): LibraryLayoutChip? =
-    LibraryLayoutChip.entries.firstOrNull { it.arrangeChipKey == key }
-
-internal fun librarySortModeForKey(key: String): LibrarySortMode? =
-    LibrarySortMode.entries.firstOrNull { it.arrangeChipKey == key }

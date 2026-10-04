@@ -16,9 +16,7 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.button.PillButtonContent
-import nl.rhaydus.softcover.core.component.button.PillButtonInteraction
 import nl.rhaydus.softcover.core.component.button.PillButtonSize
-import nl.rhaydus.softcover.core.component.button.PillButtonTone
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipFace
@@ -253,7 +251,7 @@ private fun chipFixtureLabel(model: ChipUiModel): String = when {
 private const val CHIP_LONG_LABEL_FLOOR = 30
 
 private fun pillButtonFixtureLabel(model: PillButtonUiModel): String = when {
-    model.interaction == PillButtonInteraction.Disabled -> "Disabled"
+    model.enabled.not() -> "Disabled"
     model.content is PillButtonContent.IconOnly -> "Icon only, ${model.tone.name}"
     (model.content as? PillButtonContent.Label)?.indicator == true -> "${model.tone.name}, with indicator"
     model.size == PillButtonSize.Large -> "Large ${model.tone.name}"
@@ -320,13 +318,11 @@ private fun selectionMarkFixture(
     )
 }
 
-/** Names what a [DeadlineSummaryUiModel] fixture demonstrates, derived from its anatomy branch. */
+/** Names what a [DeadlineSummaryUiModel] fixture demonstrates. */
 private fun deadlineSummaryLineFixtureLabel(model: DeadlineSummaryUiModel): String = when {
     model.tone == DeadlineSummaryTone.OnHeroBackdrop -> "On hero backdrop"
-    model.paceText == "Expired" -> "Expired"
-    model.paceText.contains("m/day") -> "Audio pace"
-    model.paceText.startsWith("1149") -> "Extreme pace, ellipsised"
-    else -> "Pages pace"
+    model.text.endsWith("Expired") -> "Expired"
+    else -> "On track"
 }
 
 /** Names what a [RichTextUiModel] fixture demonstrates, derived from the marks it actually carries. */

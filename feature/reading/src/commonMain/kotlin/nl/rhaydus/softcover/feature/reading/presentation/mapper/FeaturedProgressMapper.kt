@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
 import nl.rhaydus.common.secondsToHm
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
@@ -25,8 +24,6 @@ internal fun Book.toFeaturedProgress(): FeaturedProgressUiModel {
         percent = percentLabel(fraction = progress / 100f),
         pageLead = pageLead,
         pageTail = pageTail,
-        bar = ProgressBarUiModel(
-            fraction = (progress / 100f),
-        ),
+        fraction = progress / 100f,
     )
 }

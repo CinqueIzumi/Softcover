@@ -47,7 +47,7 @@ internal fun AuthorRepresentationSection(
     bipocChart: ProportionChartUiModel,
     lgbtqChart: ProportionChartUiModel,
     hideUntaggedAuthors: Boolean,
-    hideUntaggedAuthorsToggle: ToggleRowUiModel,
+    hideUntaggedAuthorsToggle: ToggleRowUiModel<String>,
     canHideUntaggedAuthors: Boolean,
     isLoading: Boolean,
     header: SectionHeaderUiModel,

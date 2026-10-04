@@ -119,8 +119,6 @@ class OnDeadlinePickedActionTest {
             6,
             15,
         ),
-        confirmLabel = "Confirm",
-        cancelLabel = "Cancel",
     )
 
     @Nested

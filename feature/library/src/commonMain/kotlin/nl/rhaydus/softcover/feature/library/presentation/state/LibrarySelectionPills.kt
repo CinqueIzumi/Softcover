@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import nl.rhaydus.softcover.core.component.button.PillButtonContent
-import nl.rhaydus.softcover.core.component.button.PillButtonInteraction
 import nl.rhaydus.softcover.core.component.button.PillButtonSize
 import nl.rhaydus.softcover.core.component.button.PillButtonTone
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
@@ -16,12 +15,6 @@ internal data class LibrarySelectionPills(
 ) {
     companion object {
         fun of(bulkActionInProgress: Boolean): LibrarySelectionPills {
-            val interaction = if (bulkActionInProgress) {
-                PillButtonInteraction.Disabled
-            } else {
-                PillButtonInteraction.Clickable
-            }
-
             return LibrarySelectionPills(
                 exit = PillButtonUiModel(
                     key = "exit",
@@ -29,7 +22,7 @@ internal data class LibrarySelectionPills(
                         icon = SoftcoverIcon.Close,
                         description = "Exit selection mode",
                     ),
-                    interaction = interaction,
+                    enabled = bulkActionInProgress.not(),
                 ),
                 move = PillButtonUiModel(
                     key = "move",
@@ -38,7 +31,7 @@ internal data class LibrarySelectionPills(
                         leadingIcon = SoftcoverIcon.Bookmark,
                     ),
                     size = PillButtonSize.Large,
-                    interaction = interaction,
+                    enabled = bulkActionInProgress.not(),
                 ),
                 addToList = PillButtonUiModel(
                     key = "add-to-list",
@@ -47,7 +40,7 @@ internal data class LibrarySelectionPills(
                         leadingIcon = SoftcoverIcon.BookmarkAdd,
                     ),
                     size = PillButtonSize.Large,
-                    interaction = interaction,
+                    enabled = bulkActionInProgress.not(),
                 ),
                 remove = PillButtonUiModel(
                     key = "remove",
@@ -57,7 +50,7 @@ internal data class LibrarySelectionPills(
                     ),
                     tone = PillButtonTone.Accent,
                     size = PillButtonSize.Large,
-                    interaction = interaction,
+                    enabled = bulkActionInProgress.not(),
                 ),
             )
         }

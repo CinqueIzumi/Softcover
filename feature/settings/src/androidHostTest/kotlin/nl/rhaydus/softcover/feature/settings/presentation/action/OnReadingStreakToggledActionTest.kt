@@ -134,7 +134,7 @@ class OnReadingStreakToggledActionTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             stateFlow.value = SettingsScreenUiState(
-                readingStreakEnabledChecked = false,
+                appVersionName = "1.2.3",
                 dropDownExpanded = true,
             )
 
@@ -151,7 +151,7 @@ class OnReadingStreakToggledActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.readingStreakEnabledChecked shouldBe false
+            stateFlow.value.appVersionName shouldBe "1.2.3"
             stateFlow.value.dropDownExpanded shouldBe true
         }
     }

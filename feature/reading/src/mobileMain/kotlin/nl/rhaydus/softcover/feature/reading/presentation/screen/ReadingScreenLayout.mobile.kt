@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
@@ -33,7 +32,7 @@ import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
-import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -51,10 +50,6 @@ import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingB
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingMasthead
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
-
-/** The reading screen celebrates at full-screen scale, so its burst is bigger and slower. */
-private const val READING_BURST_PARTICLES = 28
-private const val READING_BURST_DURATION_MS = 1000
 
 private val booksListState = LazyListState()
 
@@ -148,14 +143,9 @@ internal actual fun ReadingScreenLayout(
         }
 
         MarkAsReadBurst(
-            model = remember(controller.celebrationKey) {
-                MarkAsReadBurstUiModel(
-                    triggerKey = controller.celebrationKey,
-                    particleCount = READING_BURST_PARTICLES,
-                    durationMillis = READING_BURST_DURATION_MS,
-                )
-            },
+            triggerKey = controller.celebrationKey,
             modifier = Modifier.fillMaxSize(),
+            scale = MarkAsReadBurstScale.Screen,
         )
     }
 }

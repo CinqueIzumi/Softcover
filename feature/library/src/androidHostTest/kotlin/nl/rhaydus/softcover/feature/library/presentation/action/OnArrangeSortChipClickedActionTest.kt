@@ -39,33 +39,12 @@ class OnArrangeSortChipClickedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `unknown key is a no-op`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryArrangeDraft(
-                tabId = tabId,
-                sortMode = LibrarySortMode.TITLE,
-                sortDirection = SortDirection.ASCENDING,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-            stateFlow.value = LibraryUiState(arrangeDraft = draft)
-
-            // ----- Act -----
-            OnArrangeSortChipClickedAction(key = "sort:BOGUS").execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.arrangeDraft shouldBe draft
-        }
-
-        @Test
         fun `no-op when arrangeDraft is null`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(arrangeDraft = null)
 
             // ----- Act -----
-            OnArrangeSortChipClickedAction(key = "sort:TITLE").execute(
+            OnArrangeSortChipClickedAction(mode = LibrarySortMode.TITLE).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -86,7 +65,7 @@ class OnArrangeSortChipClickedActionTest {
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----
-            OnArrangeSortChipClickedAction(key = "sort:TITLE").execute(
+            OnArrangeSortChipClickedAction(mode = LibrarySortMode.TITLE).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -108,7 +87,7 @@ class OnArrangeSortChipClickedActionTest {
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----
-            OnArrangeSortChipClickedAction(key = "sort:TITLE").execute(
+            OnArrangeSortChipClickedAction(mode = LibrarySortMode.TITLE).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -129,7 +108,7 @@ class OnArrangeSortChipClickedActionTest {
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----
-            OnArrangeSortChipClickedAction(key = "sort:RATING").execute(
+            OnArrangeSortChipClickedAction(mode = LibrarySortMode.RATING).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -151,7 +130,7 @@ class OnArrangeSortChipClickedActionTest {
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----
-            OnArrangeSortChipClickedAction(key = "sort:RATING").execute(
+            OnArrangeSortChipClickedAction(mode = LibrarySortMode.RATING).execute(
                 dependencies = dependencies,
                 scope = scope,
             )

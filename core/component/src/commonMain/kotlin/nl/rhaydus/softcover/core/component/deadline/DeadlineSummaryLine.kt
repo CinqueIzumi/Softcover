@@ -63,7 +63,7 @@ fun DeadlineSummaryLine(
         )
 
         SoftcoverText(
-            text = "${model.dateText} • ${model.paceText}",
+            text = model.text,
             style = MaterialTheme.typography.bodySmall,
             color = contentColor,
             maxLines = 1,

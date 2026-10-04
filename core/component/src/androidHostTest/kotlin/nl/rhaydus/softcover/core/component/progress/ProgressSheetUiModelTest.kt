@@ -7,10 +7,8 @@ import org.junit.jupiter.api.Test
 class ProgressSheetUiModelTest {
     private fun timed(
         totalSeconds: Int,
-        currentSeconds: Int,
     ): ProgressSheetMedium.Timed = ProgressSheetMedium.Timed(
         totalSeconds = totalSeconds,
-        currentSeconds = currentSeconds,
         hours = progressTimeField(
             unit = ProgressTimeUnit.HOURS,
             text = "0",
@@ -71,7 +69,6 @@ class ProgressSheetUiModelTest {
             // ----- Arrange -----
             val medium = timed(
                 totalSeconds = 36_000,
-                currentSeconds = 600,
             )
 
             // ----- Act -----
@@ -92,7 +89,6 @@ class ProgressSheetUiModelTest {
             // ----- Arrange -----
             val medium = timed(
                 totalSeconds = 0,
-                currentSeconds = 0,
             )
 
             // ----- Act -----
@@ -146,7 +142,6 @@ class ProgressSheetUiModelTest {
             // ----- Arrange -----
             val medium = timed(
                 totalSeconds = 36_000,
-                currentSeconds = 600,
             )
 
             // ----- Act -----
@@ -199,7 +194,7 @@ class ProgressSheetUiModelTest {
             )
 
             // ----- Assert -----
-            model.selectedTab shouldBe ProgressSheetTab.PERCENTAGE
+            model.tabs.selected shouldBe ProgressSheetTab.PERCENTAGE
         }
     }
 
@@ -229,7 +224,7 @@ class ProgressSheetUiModelTest {
         fun `every fixture selects a tab its medium offers`() {
             // ----- Act -----
             val offered = ProgressSheetUiModel.previews.map { model ->
-                model.tabs.options.any { it.key == model.selectedTab }
+                model.tabs.options.any { it.key == model.tabs.selected }
             }
 
             // ----- Assert -----
@@ -273,11 +268,9 @@ class ProgressSheetUiModelTest {
             // ----- Act -----
             val known = timed(
                 totalSeconds = 1,
-                currentSeconds = 0,
             )
             val unknown = timed(
                 totalSeconds = 0,
-                currentSeconds = 0,
             )
 
             // ----- Assert -----

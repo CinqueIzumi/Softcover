@@ -95,7 +95,7 @@ class FocusPageEditorCollectorTest {
             stateFlow.value.pageDraft.text shouldBe "50"
             val editor = stateFlow.value.pageEditor.shouldNotBeNull()
             editor.caption shouldBe "of 200 pages"
-            editor.bar.fraction shouldBe 0.25f
+            editor.fraction shouldBe 0.25f
             job.cancel()
         }
 
@@ -158,7 +158,7 @@ class FocusPageEditorCollectorTest {
             stateFlow.value = stateFlow.value.copy(pageDraft = TextFieldValue(text = "100"))
 
             // ----- Assert -----
-            stateFlow.value.pageEditor.shouldNotBeNull().bar.fraction shouldBe 0.5f
+            stateFlow.value.pageEditor.shouldNotBeNull().fraction shouldBe 0.5f
             job.cancel()
         }
 

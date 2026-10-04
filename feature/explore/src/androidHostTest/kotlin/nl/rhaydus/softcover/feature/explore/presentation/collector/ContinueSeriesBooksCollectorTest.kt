@@ -238,7 +238,7 @@ class ContinueSeriesBooksCollectorTest {
         }
 
         @Test
-        fun `builds one continueSeriesEntries per book in the same order`() = runTest(UnconfinedTestDispatcher()) {
+        fun `builds one continueSeriesMenuSheets entry per book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val firstBook = stubBook(
                 id = 1,
@@ -266,9 +266,9 @@ class ContinueSeriesBooksCollectorTest {
             allUserBooksFlow.emit(emptyList())
 
             // ----- Assert -----
-            val entries = stateFlow.value.continueSeriesEntries
-            entries.map { it.book } shouldBe listOf(firstBook, secondBook)
-            entries.map { it.menuSheet.header.section } shouldBe listOf(
+            val menuSheets = stateFlow.value.continueSeriesMenuSheets
+            menuSheets.keys.toList() shouldBe listOf(1, 2)
+            menuSheets.values.map { it.header.section } shouldBe listOf(
                 SectionHeaderUiModel.Section(
                     eyebrow = "Mistborn Era",
                     headline = "Mistborn",
@@ -282,7 +282,7 @@ class ContinueSeriesBooksCollectorTest {
         }
 
         @Test
-        fun `shrinks continueSeriesEntries when a later emission drops a book`() = runTest(UnconfinedTestDispatcher()) {
+        fun `shrinks continueSeriesMenuSheets when a later emission drops a book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val firstBook = stubBook(id = 1)
             val secondBook = stubBook(id = 2)
@@ -295,14 +295,13 @@ class ContinueSeriesBooksCollectorTest {
             }
             continueSeriesBooksFlow.emit(listOf(firstBook, secondBook))
             allUserBooksFlow.emit(emptyList())
-            stateFlow.value.continueSeriesEntries.size shouldBe 2
+            stateFlow.value.continueSeriesMenuSheets.size shouldBe 2
 
             // ----- Act -----
             continueSeriesBooksFlow.emit(listOf(firstBook))
 
             // ----- Assert -----
-            stateFlow.value.continueSeriesEntries.size shouldBe 1
-            stateFlow.value.continueSeriesEntries.single().book shouldBe firstBook
+            stateFlow.value.continueSeriesMenuSheets.keys.single() shouldBe firstBook.id
             job.cancel()
         }
     }

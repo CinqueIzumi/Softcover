@@ -133,7 +133,7 @@ class OnDateStyleClickActionTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             stateFlow.value = SettingsScreenUiState(
-                useFloatingBarChecked = false,
+                appVersionName = "1.2.3",
                 dropDownExpanded = true,
             )
 
@@ -150,7 +150,7 @@ class OnDateStyleClickActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.useFloatingBarChecked shouldBe false
+            stateFlow.value.appVersionName shouldBe "1.2.3"
             stateFlow.value.dropDownExpanded shouldBe false
         }
     }

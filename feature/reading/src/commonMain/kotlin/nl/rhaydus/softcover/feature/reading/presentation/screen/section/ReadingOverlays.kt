@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissVerdictPromptAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressMinutesSteppedAction
@@ -17,6 +18,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnSaveVerdictAct
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdateTimeProgressClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnWhenReadResetAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnWhenReadShiftedAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStripSheet
 import nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
@@ -54,14 +57,12 @@ internal fun ReadingOverlays(
                     is ProgressSheetEvent.PagesSubmitted -> runAction(
                         OnUpdatePageProgressClickAction(
                             newPage = event.page,
-                            actionAt = event.actionAt,
                         ),
                     )
 
                     is ProgressSheetEvent.PercentageSubmitted -> runAction(
                         OnUpdatePercentageProgressClickAction(
                             newPercentage = event.percentage,
-                            actionAt = event.actionAt,
                         ),
                     )
 
@@ -79,11 +80,10 @@ internal fun ReadingOverlays(
                             hours = event.hours,
                             minutes = event.minutes,
                             seconds = event.seconds,
-                            actionAt = event.actionAt,
                         ),
                     )
 
-                    is ProgressSheetEvent.MarkAsReadRequested -> {
+                    ProgressSheetEvent.MarkAsReadRequested -> {
                         // Routes through the same controller the row/hero "mark as read" affordances used
                         // to drive directly, so the sheet-triggered path keeps the full commit choreography
                         // (haptic, burst, bottom-bar pulse, and — when motion is enabled — the "slide to
@@ -91,11 +91,15 @@ internal fun ReadingOverlays(
                         // would give it. The picked backdate travels with it, same as the progress tabs.
                         controller.requestMarkAsRead(
                             book = updatingBook,
-                            actionAt = event.actionAt,
+                            actionAt = state.readAt.toActionAt(),
                         )
 
                         runAction(DismissProgressSheetAction)
                     }
+
+                    is ProgressSheetEvent.WhenReadShifted -> runAction(OnWhenReadShiftedAction(minutes = event.minutes))
+
+                    ProgressSheetEvent.WhenReadReset -> runAction(OnWhenReadResetAction())
 
                     ProgressSheetEvent.Dismissed -> runAction(DismissProgressSheetAction)
                 }

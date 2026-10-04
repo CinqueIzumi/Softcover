@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,7 +24,6 @@ fun ProportionChart(
     modifier: Modifier = Modifier,
 ) {
     val barShape = RoundedCornerShape(6.dp)
-    val swatchShape = RoundedCornerShape(3.dp)
 
     Column(modifier = modifier) {
         Row(
@@ -56,24 +53,10 @@ fun ProportionChart(
             Divider()
 
             ChartLegendRow(
-                label = segment.label,
-                share = segment.share,
+                slice = segment,
                 isLoading = model.isLoading,
+                swatch = true,
                 modifier = Modifier.padding(vertical = 7.dp),
-                leading = {
-                    Box(
-                        modifier = Modifier
-                            .size(11.dp)
-                            .clip(swatchShape)
-                            .background(segment.tone.color())
-                            .skeletonMask(
-                                visible = model.isLoading,
-                                shape = swatchShape,
-                            ),
-                    )
-
-                    Spacer(modifier = Modifier.width(10.dp))
-                },
             )
         }
     }

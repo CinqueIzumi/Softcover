@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.core.uibinding.progress
 
 import nl.rhaydus.common.toHoursMinutesSeconds
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressTimeUnit
 
 /**
@@ -74,16 +72,3 @@ private val ProgressTimeUnit.maximum: Int
         ProgressTimeUnit.MINUTES,
         ProgressTimeUnit.SECONDS -> 59
     }
-
-/** Writes the draft's text onto the Timed medium's fields; any other medium is unchanged. */
-fun ProgressSheetUiModel.withTimeDraft(draft: ProgressTimeDraft): ProgressSheetUiModel {
-    val timed = medium as? ProgressSheetMedium.Timed ?: return this
-
-    return copy(
-        medium = timed.copy(
-            hours = timed.hours.copy(text = draft.hours),
-            minutes = timed.minutes.copy(text = draft.minutes),
-            seconds = timed.seconds.copy(text = draft.seconds),
-        ),
-    )
-}

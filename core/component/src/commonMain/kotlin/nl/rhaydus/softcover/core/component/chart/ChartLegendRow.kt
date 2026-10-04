@@ -1,25 +1,30 @@
 package nl.rhaydus.softcover.core.component.chart
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 @Composable
 internal fun ChartLegendRow(
-    label: String,
-    share: String,
+    slice: ChartSliceUiModel,
     isLoading: Boolean,
+    swatch: Boolean,
     modifier: Modifier = Modifier,
-    leading: @Composable (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -27,10 +32,25 @@ internal fun ChartLegendRow(
             .semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        leading?.invoke()
+        if (swatch) {
+            val swatchShape = RoundedCornerShape(3.dp)
+
+            Box(
+                modifier = Modifier
+                    .size(11.dp)
+                    .clip(swatchShape)
+                    .background(slice.tone.color())
+                    .skeletonMask(
+                        visible = isLoading,
+                        shape = swatchShape,
+                    ),
+            )
+
+            Spacer(modifier = Modifier.width(10.dp))
+        }
 
         SoftcoverText(
-            text = label,
+            text = slice.label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
             isLoading = isLoading,
@@ -43,7 +63,7 @@ internal fun ChartLegendRow(
         Spacer(modifier = Modifier.width(12.dp))
 
         SoftcoverText(
-            text = share,
+            text = slice.share,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             isLoading = isLoading,

@@ -108,7 +108,7 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.bar.fraction shouldBe 0.25f
+            result.fraction shouldBe 0.25f
         }
 
         @Test
@@ -120,7 +120,7 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.bar.fraction shouldBe 1.4f
+            result.fraction shouldBe 1.4f
         }
 
         @Test
@@ -132,7 +132,7 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.bar.fraction shouldBe -0.1f
+            result.fraction shouldBe -0.1f
         }
 
         @Test
@@ -144,7 +144,7 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.bar.fraction shouldBe 0f
+            result.fraction shouldBe 0f
         }
     }
 

@@ -22,7 +22,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 - **Button** — [detail](components/buttons-controls.md#button) — five styles/sizes; filled is one primary per region.
 - **Pill button** — `core:component/button` — fixed-height action pill or icon-only circle in five tones, with an optional active dot.
-- **Toggle** — `core:component/control` — two-state control: filled or bare icon toggle (the bookmark and the library-tab eye), the platform switch, or a display-only switch inside a row that owns the tap.
+- **Toggle** — `core:component/control` — two-state control: filled or bare icon toggle (the bookmark and the library-tab eye), or a display-only switch inside a row that owns the tap.
 - **Text field** — `core:component/field` — single-line input as a tonal pill (compact, regular or large; optional glyph and trailing action), the Material outlined box (label optional), a display-size hero, or a centred numeral.
 - **Segmented control** — `core:component/control` — one-of-N choice as a pill track (lens, share variant, year metric, progress tabs) or as words in a sentence.
 - **Split button** — [detail](components/buttons-controls.md#split-button) — primary action with a chevron menu of variants.
@@ -46,7 +46,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 ## States & feedback
 
 - **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error.
-- **Banner** — `core:component/callout` — full-width slide-in strip for a screen-level condition or a card-fused nudge; tone picks the colour (`Warning`, `Highlight`), variant the voice (`Status` centred Material text, `Editorial` start-aligned italic); one 16×10 dp padding, 48 dp dismiss target.
+- **Banner** — `core:component/callout` — full-width slide-in strip for a screen-level condition or a card-fused nudge; `BannerVariant` sets colour, voice, icon and dismiss (`Status` centred Material text; `Editorial` start-aligned italic, info icon, dismiss); 16×10 dp padding, 48 dp dismiss target.
 - **Empty state** — `core:component/state` — placeholder for content a surface has nothing to draw; `EmptyStateVariant.Centered(button?)` (swaying quote glyph, editorial headline, optional filled button) or `Inline` (start-aligned italic title and body); title is a heading, caller pads it as full pane (`fillMaxSize().padding(24.dp)`) or in flow (`fillMaxWidth().padding(top = 40.dp)`).
 - **SkeletonMask** — `core:component/state` — `Modifier.skeletonMask(visible, shape)`: shimmers a leaf over its bounds while loading, keeping its real layout.
 - **Divider** — `core:component/divider` — hairline rule, bare, centred, or vertical.
@@ -58,7 +58,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Mark-as-read celebration** — `core:component/celebration` — mark-as-read particle burst.
 - **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.
 - **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner` + `EmptyState` + `OfflineEmptyStatePlaceholder` + `OfflineCopy` + `rememberIsOnline()`.
-- **Callout** — `core:component/callout` — in-flow card for one condition, optionally with a single next step; an accent-bar lead reuses the Inline `SectionHeader` eyebrow (20×1 hairline), and the dismiss is a 48 dp target.
+- **Callout** — `core:component/callout` — in-flow card for one condition, optionally with a single next step; `CalloutVariant` is `Neutral` (optional icon) or `Highlight` (title, accent-bar eyebrow); the dismiss is a 48 dp target.
 
 ## Sheets
 

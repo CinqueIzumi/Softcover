@@ -32,7 +32,7 @@ internal fun readingAtlasUiModel(profileData: UserProfileData?): ReadingAtlasUiM
             eyebrow = "Avg. rating",
             stat = StatNumberUiModel(
                 value = profileData?.averageRating ?: 0.0,
-                format = StatNumberFormat.Decimal(fractionDigits = RATING_FRACTION_DIGITS),
+                format = StatNumberFormat.Decimal,
                 isLoading = isLoading,
             ),
             variant = StatTileVariant.Compact(unit = "★"),

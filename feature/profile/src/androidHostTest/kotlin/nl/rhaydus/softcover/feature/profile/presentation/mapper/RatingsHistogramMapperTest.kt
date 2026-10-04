@@ -171,7 +171,7 @@ class RatingsHistogramMapperTest {
             // ----- Assert -----
             result.isLoading shouldBe false
             result.value shouldBe 4.2
-            result.format shouldBe StatNumberFormat.Decimal(fractionDigits = 1)
+            result.format shouldBe StatNumberFormat.Decimal
         }
     }
 

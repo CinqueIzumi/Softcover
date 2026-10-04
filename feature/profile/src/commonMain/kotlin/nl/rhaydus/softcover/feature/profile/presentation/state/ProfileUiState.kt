@@ -38,7 +38,7 @@ internal data class ProfileUiState(
     val hideUntaggedAuthors: Boolean = false,
 
     /** Mapped by \`HideUntaggedAuthorsCollector\` alongside [hideUntaggedAuthors]. */
-    val hideUntaggedAuthorsToggle: ToggleRowUiModel = hideUntaggedAuthorsToggleFor(hide = false),
+    val hideUntaggedAuthorsToggle: ToggleRowUiModel<String> = hideUntaggedAuthorsToggleFor(hide = false),
     val selectedYearMetric: YearMetric = YearMetric.BOOKS,
 
     /** Mapped by \`YearMetricToggleCollector\` off [selectedYearMetric] and whether the reading life has loaded. */

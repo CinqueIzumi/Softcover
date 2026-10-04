@@ -1,10 +1,7 @@
 package nl.rhaydus.softcover.core.uibinding.progress
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressTimeUnit
-import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -274,77 +271,6 @@ class ProgressTimeDraftTest {
                 minutes = "0",
                 seconds = "0",
             )
-        }
-    }
-
-    @Nested
-    inner class WithTimeDraft {
-        private val timedModel = ProgressSheetUiModel.previews.first { it.medium is ProgressSheetMedium.Timed }
-        private val pagedModel = ProgressSheetUiModel.previews.first { it.medium is ProgressSheetMedium.Paged }
-
-        @Test
-        fun `writes the draft text onto the three timed fields`() {
-            // ----- Act -----
-            val result = timedModel.withTimeDraft(draft)
-
-            // ----- Assert -----
-            val medium = result.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
-            medium.hours.text shouldBe "1"
-            medium.minutes.text shouldBe "2"
-            medium.seconds.text shouldBe "3"
-        }
-
-        @Test
-        fun `leaves the totals and the field keys alone`() {
-            // ----- Arrange -----
-            val before = timedModel.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
-
-            // ----- Act -----
-            val result = timedModel.withTimeDraft(draft)
-
-            // ----- Assert -----
-            val after = result.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
-            after.totalSeconds shouldBe before.totalSeconds
-            after.currentSeconds shouldBe before.currentSeconds
-            after.hours.key shouldBe before.hours.key
-            after.minutes.key shouldBe before.minutes.key
-            after.seconds.key shouldBe before.seconds.key
-        }
-
-        @Test
-        fun `leaves everything outside the medium alone`() {
-            // ----- Act -----
-            val result = timedModel.withTimeDraft(draft)
-
-            // ----- Assert -----
-            result.tabs shouldBe timedModel.tabs
-            result.scaffold shouldBe timedModel.scaffold
-            result.progressPercent shouldBe timedModel.progressPercent
-        }
-
-        @Test
-        fun `returns a paged model unchanged`() {
-            // ----- Act -----
-            val result = pagedModel.withTimeDraft(draft)
-
-            // ----- Assert -----
-            result shouldBe pagedModel
-        }
-
-        @Test
-        fun `keeps cleared text so the field can be emptied`() {
-            // ----- Arrange -----
-            val cleared = draft.withText(
-                unit = ProgressTimeUnit.HOURS,
-                text = "",
-            )
-
-            // ----- Act -----
-            val result = timedModel.withTimeDraft(cleared)
-
-            // ----- Assert -----
-            val medium = result.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
-            medium.hours.text shouldBe ""
         }
     }
 }

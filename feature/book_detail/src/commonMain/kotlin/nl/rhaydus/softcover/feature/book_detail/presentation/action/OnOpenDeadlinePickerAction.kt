@@ -21,8 +21,6 @@ internal class OnOpenDeadlinePickerAction : BookDetailAction {
             it.copy(
                 deadlinePicker = DatePickerUiModel(
                     initialDate = initialDate,
-                    confirmLabel = "Confirm",
-                    cancelLabel = "Cancel",
                 ),
                 fabMenuExpanded = false,
             )

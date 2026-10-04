@@ -63,14 +63,14 @@ internal class MainActivityViewModel(
         )
 
     private val _reAuthState = MutableStateFlow(ReAuthState())
-    val reAuthState = _reAuthState.asStateFlow()
 
-    val reAuthSheet: StateFlow<ReAuthSheetUiModel> = _reAuthState
-        .map { it.toSheetUiModel() }
+    /** The re-auth sheet's model, or null while the sheet is not showing. */
+    val reAuthSheet: StateFlow<ReAuthSheetUiModel?> = _reAuthState
+        .map { if (it.visible) it.toSheetUiModel() else null }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = ReAuthState().toSheetUiModel(),
+            initialValue = null,
         )
 
     init {

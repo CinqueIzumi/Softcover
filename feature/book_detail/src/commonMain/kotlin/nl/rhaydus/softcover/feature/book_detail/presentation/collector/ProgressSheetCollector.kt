@@ -28,7 +28,8 @@ internal class ProgressSheetCollector : BookDetailCollector {
                 ProgressSheetSnapshot(
                     book = it.book,
                     selectedTab = it.selectedProgressSheetTab,
-                    hasTimeDraft = it.progressTimeDraft != null,
+                    timeDraft = it.progressTimeDraft,
+                    readAt = it.readAt,
                 )
             }
             .distinctUntilChanged()
@@ -37,7 +38,8 @@ internal class ProgressSheetCollector : BookDetailCollector {
                     it.copy(
                         progressSheet = snapshot.book?.toProgressSheetUiModel(
                             selectedTab = snapshot.selectedTab,
-                            timeDraft = it.progressTimeDraft,
+                            timeDraft = snapshot.timeDraft,
+                            readAt = snapshot.readAt,
                         ),
                     )
                 }

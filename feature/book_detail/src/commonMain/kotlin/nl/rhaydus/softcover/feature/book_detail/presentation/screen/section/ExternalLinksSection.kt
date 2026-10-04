@@ -57,7 +57,7 @@ internal fun ExternalLinksSection(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    knownLinks.links.pills.forEach { pill ->
+                    knownLinks.forEach { pill ->
                         key(pill.key) {
                             PillButton(
                                 model = pill,

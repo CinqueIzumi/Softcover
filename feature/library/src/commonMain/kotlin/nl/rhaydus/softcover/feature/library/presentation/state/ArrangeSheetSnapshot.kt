@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 
 internal data class ArrangeSheetSnapshot(
     val resultCount: Int,
-    val titlesToggle: ToggleRowUiModel?,
+    val titlesToggle: ToggleRowUiModel<String>?,
     val makeOrderedListId: Int?,
 ) {
     companion object {

@@ -39,10 +39,10 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            result.layoutChips.map { it.key } shouldBe listOf("layout:GRID_TWO", "layout:GRID_THREE", "layout:LIST")
-            result.layoutChips.map { it.label } shouldBe listOf("Grid · 2", "Grid · 3", "List")
-            result.layoutChips.map { it.tone } shouldBe listOf(ChipTone.Choice, ChipTone.Choice, ChipTone.Choice)
-            result.layoutChips.map { it.selected } shouldBe listOf(false, true, false)
+            result.layoutChips.chips.map { it.key } shouldBe listOf("layout:GRID_TWO", "layout:GRID_THREE", "layout:LIST")
+            result.layoutChips.chips.map { it.label } shouldBe listOf("Grid · 2", "Grid · 3", "List")
+            result.layoutChips.chips.map { it.tone } shouldBe listOf(ChipTone.Choice, ChipTone.Choice, ChipTone.Choice)
+            result.layoutChips.chips.map { it.selected } shouldBe listOf(false, true, false)
             result.sortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Currently Reading")
         }
 
@@ -93,7 +93,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            val titleChip = result.sortChips.single { it.key == "sort:TITLE" }
+            val titleChip = result.sortChips.chips.single { it.key == "sort:TITLE" }
             titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
             titleChip.trailing shouldBe ChipTrailing.Icon(
@@ -122,7 +122,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            val titleChip = result.sortChips.single { it.key == "sort:TITLE" }
+            val titleChip = result.sortChips.chips.single { it.key == "sort:TITLE" }
             titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
             titleChip.trailing shouldBe ChipTrailing.Icon(
@@ -151,7 +151,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            val manualChip = result.sortChips.single { it.key == "sort:MANUAL" }
+            val manualChip = result.sortChips.chips.single { it.key == "sort:MANUAL" }
             manualChip.tone shouldBe ChipTone.Choice
             manualChip.selected shouldBe true
             manualChip.trailing shouldBe null
@@ -177,7 +177,7 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            val authorChip = result.sortChips.single { it.key == "sort:AUTHOR" }
+            val authorChip = result.sortChips.chips.single { it.key == "sort:AUTHOR" }
             authorChip.tone shouldBe ChipTone.Choice
             authorChip.selected shouldBe false
             authorChip.trailing shouldBe null
@@ -214,9 +214,9 @@ class LibraryArrangeChipsBuilderTest {
             )
 
             // ----- Assert -----
-            result.sortChips.first().key shouldBe "sort:ORDER"
-            result.sortChips.first().tone shouldBe ChipTone.Choice
-            result.sortChips.first().selected shouldBe true
+            result.sortChips.chips.first().key shouldBe "sort:ORDER"
+            result.sortChips.chips.first().tone shouldBe ChipTone.Choice
+            result.sortChips.chips.first().selected shouldBe true
         }
 
         @Test
@@ -267,42 +267,75 @@ class LibraryArrangeChipsBuilderTest {
     }
 
     @Nested
-    inner class LibraryLayoutChipForKey {
+    inner class ChipPayloads {
         @Test
-        fun `every layout chip key round-trips back to its LibraryLayoutChip`() {
-            // ----- Act & Assert -----
-            LibraryLayoutChip.entries.forEach { chip ->
-                libraryLayoutChipForKey(key = chip.arrangeChipKey) shouldBe chip
-            }
-        }
+        fun `every layout chip key resolves to its LibraryLayoutChip`() {
+            // ----- Arrange -----
+            val draft = LibraryArrangeDraft(
+                tabId = readingTab.id,
+                sortMode = LibrarySortMode.TITLE,
+                sortDirection = SortDirection.ASCENDING,
+                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
 
-        @Test
-        fun `an unknown key resolves to null`() {
             // ----- Act -----
-            val result = libraryLayoutChipForKey(key = "layout:UNKNOWN")
+            val result = buildLibraryArrangeChips(
+                draft = draft,
+                visibleTabs = listOf(readingTab),
+                customLists = emptyList(),
+                booksByTab = emptyMap(),
+                deadlines = emptyMap(),
+            )
 
             // ----- Assert -----
-            result shouldBe null
-        }
-    }
-
-    @Nested
-    inner class LibrarySortModeForKey {
-        @Test
-        fun `every sort chip key round-trips back to its LibrarySortMode`() {
-            // ----- Act & Assert -----
-            LibrarySortMode.entries.forEach { mode ->
-                librarySortModeForKey(key = mode.arrangeChipKey) shouldBe mode
-            }
+            result.layoutChips.chips.map { result.layoutChips[it.key] } shouldBe LibraryLayoutChip.entries
         }
 
         @Test
-        fun `an unknown key resolves to null`() {
+        fun `every sort chip key resolves to its LibrarySortMode`() {
+            // ----- Arrange -----
+            val draft = LibraryArrangeDraft(
+                tabId = readingTab.id,
+                sortMode = LibrarySortMode.TITLE,
+                sortDirection = SortDirection.ASCENDING,
+                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
+
             // ----- Act -----
-            val result = librarySortModeForKey(key = "sort:UNKNOWN")
+            val result = buildLibraryArrangeChips(
+                draft = draft,
+                visibleTabs = listOf(readingTab),
+                customLists = emptyList(),
+                booksByTab = emptyMap(),
+                deadlines = emptyMap(),
+            )
 
             // ----- Assert -----
-            result shouldBe null
+            result.sortChips.chips.forEach { result.sortChips[it.key]?.arrangeChipKey shouldBe it.key }
+        }
+
+        @Test
+        fun `a key no chip carries resolves to no payload in either set`() {
+            // ----- Arrange -----
+            val draft = LibraryArrangeDraft(
+                tabId = readingTab.id,
+                sortMode = LibrarySortMode.TITLE,
+                sortDirection = SortDirection.ASCENDING,
+                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
+
+            // ----- Act -----
+            val result = buildLibraryArrangeChips(
+                draft = draft,
+                visibleTabs = listOf(readingTab),
+                customLists = emptyList(),
+                booksByTab = emptyMap(),
+                deadlines = emptyMap(),
+            )
+
+            // ----- Assert -----
+            result.layoutChips["layout:BOGUS"] shouldBe null
+            result.sortChips["sort:BOGUS"] shouldBe null
         }
     }
 }

@@ -6,22 +6,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.designsystem.model.ModalSheetForm
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.control.SegmentedControl
 import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
@@ -79,25 +70,9 @@ private fun ProgressBottomSheetContent(
 ) {
     val medium = model.medium
 
-    val activeTab = model.selectedTab
+    val activeTab = model.tabs.selected
 
     val focusManager = LocalFocusManager.current
-
-    // Shared across all three tabs (patterns/reading.md, "Backdate a logged action") — whichever
-    // tab's "Update progress" button fires carries this value. Null means "just now": the server stamps
-    // the mutation with its own current time, reproducing today's behaviour exactly. Once the reader
-    // backdates it, the picked instant travels with every tab's submit until cleared.
-    var readAt by remember { mutableStateOf<LocalDateTime?>(null) }
-
-    val actionAt = readAt?.toInstant(TimeZone.currentSystemDefault())?.toString()
-
-    // A moderate 56dp M button on both forms — the sheet form previously used a 96dp L button, but
-    // that read as oversized against the redline spec's ~52/48dp actions, so both the phone sheet
-    // and the desktop panel now share the same size. Still read through LocalModalSheetForm (rather
-    // than hardcoding M directly) so a future form-specific need has a seam to hook into.
-    val actionButtonSize = when (LocalModalSheetForm.current) {
-        ModalSheetForm.PANEL, ModalSheetForm.SHEET -> ButtonSize.M
-    }
 
     Column(
         modifier = Modifier
@@ -119,8 +94,8 @@ private fun ProgressBottomSheetContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         WhenReadRow(
-            pickedDateTime = readAt,
-            onPickedDateTimeChange = { readAt = it },
+            model = model.whenRead,
+            onEvent = onEvent,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -131,23 +106,17 @@ private fun ProgressBottomSheetContent(
         if (activeTab == ProgressSheetTab.PERCENTAGE) {
             ProgressBottomSheetPercentageContent(
                 progressPercent = model.progressPercent,
-                buttonSize = actionButtonSize,
-                actionAt = actionAt,
                 onEvent = onEvent,
             )
         } else {
             when (medium) {
                 is ProgressSheetMedium.Paged -> ProgressBottomSheetPageContent(
                     medium = medium,
-                    buttonSize = actionButtonSize,
-                    actionAt = actionAt,
                     onEvent = onEvent,
                 )
 
                 is ProgressSheetMedium.Timed -> ProgressBottomSheetTimeContent(
                     medium = medium,
-                    buttonSize = actionButtonSize,
-                    actionAt = actionAt,
                     onEvent = onEvent,
                 )
             }
@@ -158,12 +127,12 @@ private fun ProgressBottomSheetContent(
         RhaydusButton(
             label = "Mark as read",
             style = ButtonStyle.OUTLINED,
-            size = actionButtonSize,
+            size = ButtonSize.M,
             icon = drawableIconResource(
                 icon = SoftcoverIcon.Check,
                 contentDescription = "Mark as read icon",
             ),
-            onClick = { onEvent(ProgressSheetEvent.MarkAsReadRequested(actionAt = actionAt)) },
+            onClick = { onEvent(ProgressSheetEvent.MarkAsReadRequested) },
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -180,7 +149,7 @@ private fun ProgressBottomSheetContent(
 private fun ProgressSheetContentPagePreview() {
     ProgressSheetPreview(
         model = ProgressSheetUiModel.previews.first {
-            it.selectedTab == ProgressSheetTab.PAGE && it.medium.hasKnownTotal
+            it.tabs.selected == ProgressSheetTab.PAGE && it.medium.hasKnownTotal
         },
     )
 }
@@ -189,7 +158,7 @@ private fun ProgressSheetContentPagePreview() {
 @Composable
 private fun ProgressSheetContentPercentagePreview() {
     ProgressSheetPreview(
-        model = ProgressSheetUiModel.previews.first { it.selectedTab == ProgressSheetTab.PERCENTAGE },
+        model = ProgressSheetUiModel.previews.first { it.tabs.selected == ProgressSheetTab.PERCENTAGE },
     )
 }
 
@@ -199,7 +168,7 @@ private fun ProgressSheetContentPercentagePreview() {
 private fun ProgressSheetContentTimePreview() {
     ProgressSheetPreview(
         model = ProgressSheetUiModel.previews.first {
-            it.selectedTab == ProgressSheetTab.TIME && it.medium.hasKnownTotal
+            it.tabs.selected == ProgressSheetTab.TIME && it.medium.hasKnownTotal
         },
     )
 }

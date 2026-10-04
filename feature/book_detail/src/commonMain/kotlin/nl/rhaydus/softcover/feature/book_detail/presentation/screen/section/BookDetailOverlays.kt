@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.component.progress.ProgressSheetEvent
 import nl.rhaydus.softcover.core.component.progress.UpdateProgressBottomSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnAddUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDeadlinePickedAction
@@ -46,6 +47,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleUser
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdatePercentageProgressClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateTimeProgressClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnWhenReadResetAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnWhenReadShiftedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
@@ -231,14 +234,12 @@ internal fun BookDetailOverlays(
                     is ProgressSheetEvent.PagesSubmitted -> runAction(
                         OnUpdatePageProgressClickAction(
                             newPage = event.page,
-                            actionAt = event.actionAt,
                         ),
                     )
 
                     is ProgressSheetEvent.PercentageSubmitted -> runAction(
                         OnUpdatePercentageProgressClickAction(
                             newPercentage = event.percentage,
-                            actionAt = event.actionAt,
                         ),
                     )
 
@@ -256,20 +257,23 @@ internal fun BookDetailOverlays(
                             hours = event.hours,
                             minutes = event.minutes,
                             seconds = event.seconds,
-                            actionAt = event.actionAt,
                         ),
                     )
 
-                    is ProgressSheetEvent.MarkAsReadRequested -> {
+                    ProgressSheetEvent.MarkAsReadRequested -> {
                         runAction(
                             OnMarkBookAsReadClickAction(
                                 book = bookToUpdate,
-                                actionAt = event.actionAt,
+                                actionAt = state.readAt.toActionAt(),
                             ),
                         )
 
                         runAction(OnDismissProgressSheetAction())
                     }
+
+                    is ProgressSheetEvent.WhenReadShifted -> runAction(OnWhenReadShiftedAction(minutes = event.minutes))
+
+                    ProgressSheetEvent.WhenReadReset -> runAction(OnWhenReadResetAction())
 
                     ProgressSheetEvent.Dismissed -> runAction(OnDismissProgressSheetAction())
                 }

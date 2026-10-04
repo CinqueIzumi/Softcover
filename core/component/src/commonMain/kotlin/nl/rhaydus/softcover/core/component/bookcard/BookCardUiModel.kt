@@ -14,7 +14,6 @@ import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
@@ -43,7 +42,7 @@ data class BookCardUiModel(
             variant = BookCardVariant.CoverOnly(cover = BookCardCover(model = loadingCover())),
             decorations = BookCardDecorations(
                 progress = BookCardProgress.Value(
-                    bar = ProgressBarUiModel(fraction = 0.5f),
+                    fraction = 0.5f,
                     label = "50%",
                 ),
             ),
@@ -95,7 +94,7 @@ data class BookCardUiModel(
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Piranesi")),
                 decorations = BookCardDecorations(
                     progress = BookCardProgress.Value(
-                        bar = ProgressBarUiModel(fraction = 0.42f),
+                        fraction = 0.42f,
                         label = "42%",
                     ),
                 ),
@@ -110,7 +109,7 @@ data class BookCardUiModel(
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Kindred")),
                 decorations = BookCardDecorations(
                     progress = BookCardProgress.Value(
-                        bar = ProgressBarUiModel(fraction = 0.7f),
+                        fraction = 0.7f,
                         label = null,
                     ),
                 ),
@@ -165,7 +164,7 @@ data class BookCardUiModel(
                 ),
                 decorations = BookCardDecorations(
                     progress = BookCardProgress.Value(
-                        bar = ProgressBarUiModel(fraction = 0.6f),
+                        fraction = 0.6f,
                         label = "60%",
                     ),
                 ),
@@ -206,16 +205,15 @@ data class BookCardUiModel(
                         ),
                         byline = "By Arkady Martine",
                     ),
-                    trailing = BookCardTrailing.SetProgress.labelled(label = "Set progress"),
+                    trailing = BookCardTrailing.SetProgress.labelled(),
                     deadline = DeadlineSummaryUiModel(
-                        dateText = "28 Aug",
-                        paceText = "18 pages/day",
+                        text = "28 Aug • 18 pages/day",
                         tone = DeadlineSummaryTone.OnSurface,
                     ),
                 ),
                 decorations = BookCardDecorations(
                     progress = BookCardProgress.Value(
-                        bar = ProgressBarUiModel(fraction = 0.3f),
+                        fraction = 0.3f,
                         label = "30%",
                     ),
                     shakeOnError = true,

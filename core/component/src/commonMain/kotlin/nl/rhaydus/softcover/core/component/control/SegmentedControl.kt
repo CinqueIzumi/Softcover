@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -43,8 +43,6 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-
-private val TrackShape = RoundedCornerShape(percent = 50)
 
 /**
  * A one-of-N choice. The caller supplies the outer padding; [SegmentedControlVariant.Track] fills the
@@ -83,7 +81,7 @@ private fun <K> TrackSegments(
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = TrackShape,
+        shape = CircleShape,
     ) {
         Row(modifier = Modifier.selectableGroup().padding(4.dp)) {
             model.options.forEach { option ->
@@ -109,19 +107,16 @@ private fun <K> RowScope.TrackSegment(
     val playMotion = playDecorativeMotion()
     val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
 
-    val colors = segmentColors(
-        scheme = MaterialTheme.colorScheme,
-        selected = isSelected,
-    )
+    val scheme = MaterialTheme.colorScheme
 
     val containerColor by animateColorAsState(
-        targetValue = colors.container,
+        targetValue = if (isSelected) scheme.primary else Color.Transparent,
         animationSpec = colorSpec,
         label = "SegmentContainer",
     )
 
     val contentColor by animateColorAsState(
-        targetValue = colors.content,
+        targetValue = if (isSelected) scheme.onPrimary else scheme.onSurfaceVariant,
         animationSpec = colorSpec,
         label = "SegmentContent",
     )
@@ -145,7 +140,7 @@ private fun <K> RowScope.TrackSegment(
             },
         color = containerColor,
         contentColor = contentColor,
-        shape = TrackShape,
+        shape = CircleShape,
         onClick = { if (isSelected.not()) onSelect() },
         enabled = option.enabled,
     ) {
@@ -224,19 +219,16 @@ private fun ProseWord(
     onSelect: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val colors = proseWordColors(
-        scheme = MaterialTheme.colorScheme,
-        selected = isSelected,
-    )
+    val scheme = MaterialTheme.colorScheme
     val playMotion = playDecorativeMotion()
     val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
     val wordColor by animateColorAsState(
-        targetValue = colors.word,
+        targetValue = if (isSelected) scheme.primary else scheme.onSurfaceVariant.copy(alpha = 0.55f),
         animationSpec = colorSpec,
         label = "ProseWordColor",
     )
     val underlineColor by animateColorAsState(
-        targetValue = colors.underline,
+        targetValue = if (isSelected) scheme.primary else Color.Transparent,
         animationSpec = colorSpec,
         label = "ProseWordUnderline",
     )

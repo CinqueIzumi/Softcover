@@ -7,8 +7,7 @@ import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
- * Everything [SoftcoverDatePickerDialog] renders: the day the calendar opens on and highlights, and
- * the two button labels.
+ * Everything [SoftcoverDatePickerDialog] renders: the day the calendar opens on and highlights.
  *
  * [initialDate] is required, so the caller decides the fallback (usually today) where it builds the
  * model rather than the dialog reading the clock during composition.
@@ -16,8 +15,6 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 @Immutable
 data class DatePickerUiModel(
     val initialDate: LocalDate,
-    val confirmLabel: String,
-    val cancelLabel: String,
 ) {
     companion object : UiModelPreviews<DatePickerUiModel> {
         override val previews: ImmutableList<DatePickerUiModel> = persistentListOf(
@@ -27,8 +24,6 @@ data class DatePickerUiModel(
                     6,
                     15,
                 ),
-                confirmLabel = "Confirm",
-                cancelLabel = "Cancel",
             ),
         )
     }

@@ -20,7 +20,7 @@ class ThemeChoiceMapperTest {
             )
 
             // ----- Assert -----
-            result.map { it.mode } shouldBe ThemeMode.entries
+            result.map { it.key } shouldBe ThemeMode.entries
         }
     }
 
@@ -36,7 +36,7 @@ class ThemeChoiceMapperTest {
             )
 
             // ----- Assert -----
-            result.first { it.mode == ThemeMode.LIGHT }.tile.painting shouldBe ThemeTilePainting.LIGHT
+            result.first { it.key == ThemeMode.LIGHT }.painting shouldBe ThemeTilePainting.LIGHT
         }
 
         @Test
@@ -49,7 +49,7 @@ class ThemeChoiceMapperTest {
             )
 
             // ----- Assert -----
-            result.first { it.mode == ThemeMode.DARK }.tile.painting shouldBe ThemeTilePainting.DARK
+            result.first { it.key == ThemeMode.DARK }.painting shouldBe ThemeTilePainting.DARK
         }
 
         @Test
@@ -62,7 +62,7 @@ class ThemeChoiceMapperTest {
             )
 
             // ----- Assert -----
-            result.first { it.mode == ThemeMode.SYSTEM }.tile.painting shouldBe ThemeTilePainting.SPLIT
+            result.first { it.key == ThemeMode.SYSTEM }.painting shouldBe ThemeTilePainting.SPLIT
         }
     }
 
@@ -79,8 +79,8 @@ class ThemeChoiceMapperTest {
                 )
 
                 // ----- Assert -----
-                result.count { it.tile.selected } shouldBe 1
-                result.first { it.tile.selected }.mode shouldBe selectedMode
+                result.count { it.selected } shouldBe 1
+                result.first { it.selected }.key shouldBe selectedMode
             }
         }
     }
@@ -101,8 +101,8 @@ class ThemeChoiceMapperTest {
 
             // ----- Assert -----
             result.forEach {
-                it.tile.palette shouldBe palette
-                it.tile.dynamicColor shouldBe true
+                it.palette shouldBe palette
+                it.dynamicColor shouldBe true
             }
         }
     }
@@ -119,7 +119,7 @@ class ThemeChoiceMapperTest {
             )
 
             // ----- Assert -----
-            result.map { it.mode }.toSet() shouldBe ThemeMode.entries.toSet()
+            result.map { it.key }.toSet() shouldBe ThemeMode.entries.toSet()
         }
     }
 }

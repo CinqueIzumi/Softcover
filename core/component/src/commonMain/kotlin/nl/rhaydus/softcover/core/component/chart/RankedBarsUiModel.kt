@@ -12,38 +12,38 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  */
 @Immutable
 data class RankedBarsUiModel(
-    val rows: ImmutableList<RankedBarUiModel>,
+    val rows: ImmutableList<ChartSliceUiModel>,
     val isLoading: Boolean = false,
 ) {
     companion object : UiModelPreviews<RankedBarsUiModel> {
         override val previews: ImmutableList<RankedBarsUiModel> = persistentListOf(
             RankedBarsUiModel(
                 rows = persistentListOf(
-                    RankedBarUiModel(
+                    ChartSliceUiModel(
                         label = "Fantasy",
                         share = "62%",
                         fraction = 0.62f,
                         tone = ChartTone.Lead,
                     ),
-                    RankedBarUiModel(
+                    ChartSliceUiModel(
                         label = "Science fiction",
                         share = "41%",
                         fraction = 0.41f,
                         tone = ChartTone.Second,
                     ),
-                    RankedBarUiModel(
+                    ChartSliceUiModel(
                         label = "Literary fiction",
                         share = "27%",
                         fraction = 0.27f,
                         tone = ChartTone.Third,
                     ),
-                    RankedBarUiModel(
+                    ChartSliceUiModel(
                         label = "Historical",
                         share = "12%",
                         fraction = 0.12f,
                         tone = ChartTone.Fourth,
                     ),
-                    RankedBarUiModel(
+                    ChartSliceUiModel(
                         label = "Poetry",
                         share = "1%",
                         fraction = 0.01f,
@@ -61,7 +61,7 @@ data class RankedBarsUiModel(
             ),
         )
 
-        private fun loadingRow(tone: ChartTone) = RankedBarUiModel(
+        private fun loadingRow(tone: ChartTone) = ChartSliceUiModel(
             label = "",
             share = "",
             fraction = 0f,

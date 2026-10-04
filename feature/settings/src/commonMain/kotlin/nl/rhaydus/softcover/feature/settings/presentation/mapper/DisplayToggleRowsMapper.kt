@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.feature.settings.presentation.mapper
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
+import nl.rhaydus.softcover.core.component.control.ToggleRowVariant
 import nl.rhaydus.softcover.feature.settings.presentation.model.DisplayToggle
-import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsToggleRowUiModel
 
 /**
  * The Display section's toggle rows, off the composition (`component-contract.md` R9):
@@ -17,44 +17,38 @@ internal fun displayToggleRowsFor(
     useFloatingBarChecked: Boolean,
     shelfSwipeEnabledChecked: Boolean,
     readingStreakEnabledChecked: Boolean,
-): ImmutableList<SettingsToggleRowUiModel<DisplayToggle>> = buildList {
+): ImmutableList<ToggleRowUiModel<DisplayToggle>> = buildList {
     if (showFloatingBarToggle) {
         add(
-            SettingsToggleRowUiModel(
+            ToggleRowUiModel(
                 key = DisplayToggle.FLOATING_BOTTOM_BAR,
-                row = ToggleRowUiModel(
-                    key = DisplayToggle.FLOATING_BOTTOM_BAR.name,
-                    title = "Floating bottom bar",
-                    gloss = "Lift the nav off the edge, with rounded corners.",
-                    checked = useFloatingBarChecked,
-                ),
+                title = "Floating bottom bar",
+                gloss = "Lift the nav off the edge, with rounded corners.",
+                checked = useFloatingBarChecked,
+                variant = ToggleRowVariant.Inset,
             ),
         )
     }
 
     if (showShelfSwipeToggle) {
         add(
-            SettingsToggleRowUiModel(
+            ToggleRowUiModel(
                 key = DisplayToggle.SHELF_SWIPE,
-                row = ToggleRowUiModel(
-                    key = DisplayToggle.SHELF_SWIPE.name,
-                    title = "Swipe between shelves",
-                    gloss = "Flick left or right in your Library to move to the next shelf.",
-                    checked = shelfSwipeEnabledChecked,
-                ),
+                title = "Swipe between shelves",
+                gloss = "Flick left or right in your Library to move to the next shelf.",
+                checked = shelfSwipeEnabledChecked,
+                variant = ToggleRowVariant.Inset,
             ),
         )
     }
 
     add(
-        SettingsToggleRowUiModel(
+        ToggleRowUiModel(
             key = DisplayToggle.READING_STREAK,
-            row = ToggleRowUiModel(
-                key = DisplayToggle.READING_STREAK.name,
-                title = "Reading streak",
-                gloss = "Count the days you read in a row, shown on your profile.",
-                checked = readingStreakEnabledChecked,
-            ),
+            title = "Reading streak",
+            gloss = "Count the days you read in a row, shown on your profile.",
+            checked = readingStreakEnabledChecked,
+            variant = ToggleRowVariant.Inset,
         ),
     )
 }.toImmutableList()

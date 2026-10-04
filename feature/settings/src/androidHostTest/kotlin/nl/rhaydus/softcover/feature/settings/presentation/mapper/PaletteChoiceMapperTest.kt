@@ -15,7 +15,7 @@ class PaletteChoiceMapperTest {
             val result = paletteChoicesFor(selected = ColorPalette.DEFAULT)
 
             // ----- Assert -----
-            result.map { it.colorPalette } shouldBe ColorPalette.entries
+            result.map { it.key } shouldBe ColorPalette.entries
         }
     }
 
@@ -28,8 +28,8 @@ class PaletteChoiceMapperTest {
                 val result = paletteChoicesFor(selected = selectedPalette)
 
                 // ----- Assert -----
-                result.count { it.tile.selected } shouldBe 1
-                result.first { it.tile.selected }.colorPalette shouldBe selectedPalette
+                result.count { it.selected } shouldBe 1
+                result.first { it.selected }.key shouldBe selectedPalette
             }
         }
     }
@@ -43,7 +43,7 @@ class PaletteChoiceMapperTest {
 
             // ----- Assert -----
             result.forEach {
-                it.tile.palette shouldBe it.colorPalette.toSpinePalette()
+                it.palette shouldBe it.key.toSpinePalette()
             }
         }
     }
@@ -56,7 +56,7 @@ class PaletteChoiceMapperTest {
             val result = paletteChoicesFor(selected = ColorPalette.DEFAULT)
 
             // ----- Assert -----
-            result.map { it.colorPalette }.toSet() shouldBe ColorPalette.entries.toSet()
+            result.map { it.key }.toSet() shouldBe ColorPalette.entries.toSet()
         }
     }
 }

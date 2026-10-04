@@ -4,6 +4,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonContent
@@ -80,6 +81,9 @@ internal data class BookDetailUiState(
     /** The reader's uncommitted time entry; `null` seeds the sheet's fields from the book. */
     val progressTimeDraft: ProgressTimeDraft? = null,
 
+    /** The reader's backdate for the next logged action; `null` is "just now". */
+    val readAt: LocalDateTime? = null,
+
     /**
      * What the progress sheet renders, mapped off the composition by `ProgressSheetCollector`
      * (R9) from [book] and [selectedProgressSheetTab]. The tab's stored home is
@@ -125,7 +129,7 @@ internal data class BookDetailUiState(
     val unreleasedBadge: BadgeUiModel? = null,
 
     /** The "Find it" pills, mapped by `ExternalLinksCollector` off [displayedEdition]; null without an ISBN. */
-    val externalLinks: ExternalLinksUiModel? = null,
+    val externalLinks: ImmutableList<PillButtonUiModel>? = null,
 
     val updateProgressPill: PillButtonUiModel = PillButtonUiModel(
         key = "update-progress",

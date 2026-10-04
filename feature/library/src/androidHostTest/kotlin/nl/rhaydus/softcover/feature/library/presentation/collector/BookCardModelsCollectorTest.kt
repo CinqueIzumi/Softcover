@@ -33,7 +33,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -518,7 +517,7 @@ class BookCardModelsCollectorTest {
             // ----- Assert -----
             val progress = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.progress
             progress shouldBe BookCardProgress.Value(
-                bar = ProgressBarUiModel(fraction = 0.5f),
+                fraction = 0.5f,
                 label = null,
             )
             job.cancel()
@@ -1054,10 +1053,12 @@ class BookCardModelsCollectorTest {
             val job = launchCollector()
 
             // ----- Act -----
-            stateFlow.value = largeState(stubBook(
-                id = 1,
-                seriesText = "Dune Chronicles #1",
-            ),)
+            stateFlow.value = largeState(
+                stubBook(
+                    id = 1,
+                    seriesText = "Dune Chronicles #1",
+                ),
+            )
 
             // ----- Assert -----
             stateFlow.value.row().text.eyebrow.shouldNotBeNull().text shouldBe "DUNE CHRONICLES #1"
@@ -1072,10 +1073,12 @@ class BookCardModelsCollectorTest {
                 val job = launchCollector()
 
                 // ----- Act -----
-                stateFlow.value = largeState(stubBook(
-                    id = 1,
-                    seriesText = series,
-                ),)
+                stateFlow.value = largeState(
+                    stubBook(
+                        id = 1,
+                        seriesText = series,
+                    ),
+                )
 
                 // ----- Assert -----
                 stateFlow.value.row().text.eyebrow.shouldBeNull()
@@ -1129,10 +1132,12 @@ class BookCardModelsCollectorTest {
                 val job = launchCollector()
 
                 // ----- Act -----
-                stateFlow.value = largeState(stubBook(
-                    id = 1,
-                    edition = edition,
-                ),)
+                stateFlow.value = largeState(
+                    stubBook(
+                        id = 1,
+                        edition = edition,
+                    ),
+                )
 
                 // ----- Assert -----
                 stateFlow.value.row().text.byline.shouldBeNull()
@@ -1185,7 +1190,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.card().decorations.progress shouldBe BookCardProgress.Value(
-                bar = ProgressBarUiModel(fraction = 0.4f),
+                fraction = 0.4f,
                 label = "40%",
             )
             job.cancel()
@@ -1243,7 +1248,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.row().deadline.shouldNotBeNull().paceText shouldBe "10 pages/day"
+            stateFlow.value.row().deadline.shouldNotBeNull().text.substringAfter(" • ") shouldBe "10 pages/day"
             stateFlow.value.card().coverBadge().shouldBeNull()
             job.cancel()
         }
@@ -1271,7 +1276,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.row().deadline.shouldNotBeNull().paceText shouldBe "1h 0m/day"
+            stateFlow.value.row().deadline.shouldNotBeNull().text.substringAfter(" • ") shouldBe "1h 0m/day"
             job.cancel()
         }
 
@@ -1298,7 +1303,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.row().deadline.shouldNotBeNull().paceText shouldBe "5 pages/day"
+            stateFlow.value.row().deadline.shouldNotBeNull().text.substringAfter(" • ") shouldBe "5 pages/day"
             job.cancel()
         }
 
@@ -1343,10 +1348,12 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = bookState(
-                    books = listOf(stubBook(
-                        id = 1,
-                        edition = stubCurrentEdition(pages = 100),
-                    ),),
+                    books = listOf(
+                        stubBook(
+                            id = 1,
+                            edition = stubCurrentEdition(pages = 100),
+                        ),
+                    ),
                     layout = layout,
                 ).copy(
                     deadlines = mapOf(
@@ -1631,7 +1638,7 @@ class BookCardModelsCollectorTest {
         )
 
         private fun BookCardUiModel.deadlineDateText(): String = variant.shouldBeInstanceOf<BookCardVariant.Row>()
-            .deadline.shouldNotBeNull().dateText
+            .deadline.shouldNotBeNull().text.substringBefore(" • ")
 
         private fun deadlineFor(bookId: Int) = buildDeadline(
             bookId = bookId,
@@ -1686,10 +1693,12 @@ class BookCardModelsCollectorTest {
             // ----- Arrange -----
             val job = launchCollector()
             stateFlow.value = bookState(
-                books = listOf(stubBook(
-                    id = 1,
-                    edition = stubCurrentEdition(pages = 100),
-                ),),
+                books = listOf(
+                    stubBook(
+                        id = 1,
+                        edition = stubCurrentEdition(pages = 100),
+                    ),
+                ),
                 layout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
             stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).coverBadge().shouldBeNull()
@@ -1707,14 +1716,18 @@ class BookCardModelsCollectorTest {
             // ----- Arrange -----
             val job = launchCollector()
             stateFlow.value = twoTabState(
-                booksA = listOf(stubBook(
-                    id = 1,
-                    edition = stubCurrentEdition(pages = 100),
-                ),),
-                booksB = listOf(stubBook(
-                    id = 2,
-                    edition = stubCurrentEdition(pages = 100),
-                ),),
+                booksA = listOf(
+                    stubBook(
+                        id = 1,
+                        edition = stubCurrentEdition(pages = 100),
+                    ),
+                ),
+                booksB = listOf(
+                    stubBook(
+                        id = 2,
+                        edition = stubCurrentEdition(pages = 100),
+                    ),
+                ),
                 layout = LibraryGridLayout.LIST_LARGE,
             ).copy(
                 deadlines = mapOf(

@@ -49,7 +49,7 @@ private const val HIDDEN_ROW_ALPHA = 0.52f
 internal fun ReorderableRow(
     entry: LibraryTabEntry,
     isDragging: Boolean,
-    onToggle: (ToggleEvent) -> Unit,
+    onToggle: (ToggleEvent<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val hidden = entry.visibilityToggle?.checked == false

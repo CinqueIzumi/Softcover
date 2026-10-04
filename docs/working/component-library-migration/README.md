@@ -14,13 +14,13 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S9 closed; SS-1–SS-4 done; SD and TP steps added. SL-3b blocked on F34; SL-12 unblocked; F33 open.
-- **Next:** `steps/ss-simplicity-audit.md` § Sub-steps, SS-5 — Phase 1 audit, stop for approval.
-- **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `LightGray` / `White`, not theme roles — a light block on the dark theme; upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
+- **State:** SS-1–SS-6, SS-8, SS-9 done; SS-7/10/11 approved (step file § Approved shape). SL-3b blocked on F34; F33 open.
+- **Next:** build SS-7 + SS-10 (approved bullets) per family-procedure Phase 2, then SS-11. First log in `visual-checks.md`: ToggleRow verdict/library type, MoodGrid crossfade gone.
+- **Follow-ups (user to schedule):** foundation `shimmer` paints fixed `LightGray` / `White` — light block on dark theme; upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
 - **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile`, charts, `ProgressBar`, 12 dp card bars unchecked in gallery. Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** SS-4: JDK 21 tests of 8 modules + `styleCheck` pass; reviewer no blockers, nit fixed.
+- **Verification:** SS-8: tests + `styleCheck` pass, review fixed. Device: fast typing in time fields.
 - **Uncommitted:** nothing.
 
 ## Local verification

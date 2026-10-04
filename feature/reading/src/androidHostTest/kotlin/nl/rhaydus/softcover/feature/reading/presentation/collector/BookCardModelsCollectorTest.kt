@@ -442,7 +442,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             before shouldBe null
-            stateFlow.value.alsoReadingCards.card(2).row().deadline?.paceText shouldBe "10 pages/day"
+            stateFlow.value.alsoReadingCards.card(2).row().deadline?.text?.substringAfter(" • ") shouldBe "10 pages/day"
             job.cancel()
         }
 

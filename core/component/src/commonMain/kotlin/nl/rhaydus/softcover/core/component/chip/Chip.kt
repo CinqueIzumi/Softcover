@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
@@ -37,7 +38,6 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.shape.PillShape
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -48,7 +48,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHi
  * surface, its colours resolved from [ChipUiModel.tone] and [ChipUiModel.selected] through one
  * [ChipScaffold]. [ChipUiModel.interaction] gates the tap affordance independently of the tone.
  * Every clickable pill reports through this one [ChipEvent] lambda (R1) using the same press-scale +
- * hand-cursor affordance as `WhenReadRow` and `ChooseListsRow`, never a `Surface(onClick)` ripple.
+ * hand-cursor affordance, never a `Surface(onClick)` ripple.
  */
 @Composable
 fun Chip(
@@ -93,7 +93,7 @@ private fun ChipScaffold(
     val selectable = model.tone == ChipTone.Tonal || model.tone == ChipTone.Choice
 
     val rowModifier = modifier
-        .clip(PillShape)
+        .clip(CircleShape)
         .background(animatedStyle.container)
         .thenChipBorder(
             tone = model.tone,
@@ -146,7 +146,7 @@ private fun Modifier.thenChipBorder(
     ChipTone.Outlined -> this.border(
         width = 1.dp,
         color = scheme.outlineVariant,
-        shape = PillShape,
+        shape = CircleShape,
     )
     ChipTone.Dashed -> this.drawBehind {
         drawRoundRect(

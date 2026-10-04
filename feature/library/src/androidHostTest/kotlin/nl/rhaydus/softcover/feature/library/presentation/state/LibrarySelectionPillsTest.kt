@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.button.PillButtonInteraction
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -17,8 +16,7 @@ class LibrarySelectionPillsTest {
             val pills = LibrarySelectionPills.of(bulkActionInProgress = bulkActionInProgress)
 
             // ----- Assert -----
-            listOf(pills.exit, pills.move, pills.addToList, pills.remove).map { it.interaction } shouldBe
-                List(4) { PillButtonInteraction.Disabled }
+            listOf(pills.exit, pills.move, pills.addToList, pills.remove).map { it.enabled } shouldBe List(4) { false }
         }
 
         @Test
@@ -30,8 +28,7 @@ class LibrarySelectionPillsTest {
             val pills = LibrarySelectionPills.of(bulkActionInProgress = bulkActionInProgress)
 
             // ----- Assert -----
-            listOf(pills.exit, pills.move, pills.addToList, pills.remove).map { it.interaction } shouldBe
-                List(4) { PillButtonInteraction.Clickable }
+            listOf(pills.exit, pills.move, pills.addToList, pills.remove).map { it.enabled } shouldBe List(4) { true }
         }
 
         @Test

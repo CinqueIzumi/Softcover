@@ -42,13 +42,13 @@ internal fun ThemeSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(PREVIEW_TILE_GAP),
         ) {
-            state.themeChoices.forEach { choice ->
+            state.themeChoices.forEach { tile ->
                 ThemePreviewTile(
-                    model = choice.tile,
+                    model = tile,
                     onEvent = { event ->
                         when (event) {
-                            ThemePreviewTileEvent.Clicked ->
-                                runAction(OnThemeModeSelectedAction(mode = choice.mode))
+                            is ThemePreviewTileEvent.Clicked ->
+                                runAction(OnThemeModeSelectedAction(mode = event.key))
                         }
                     },
                     modifier = Modifier

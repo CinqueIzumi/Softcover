@@ -26,14 +26,13 @@ internal fun ChromeIconButton(
     contentDescription: String,
     tooltip: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     iconSize: Dp = 24.dp,
 ) {
     DesktopTooltip(text = tooltip) {
         IconButton(
             onClick = onClick,
-            modifier = modifier.pointerHandCursor(),
+            modifier = Modifier.pointerHandCursor(),
             colors = colors,
         ) {
             val iconResource = drawableIconResource(

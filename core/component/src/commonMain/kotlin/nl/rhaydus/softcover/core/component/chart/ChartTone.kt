@@ -18,10 +18,11 @@ enum class ChartTone {
     ;
 
     companion object {
-        private val ranked = listOf(Lead, Second, Third, Fourth, Fifth)
-
         /** The tone for a zero-based rank; ranks past `Fifth` keep its fill. */
-        fun forRank(rank: Int): ChartTone = ranked.getOrElse(rank) { ranked.last() }
+        fun forRank(rank: Int): ChartTone = entries[rank.coerceIn(
+            0,
+            Fifth.ordinal,
+        )]
     }
 }
 

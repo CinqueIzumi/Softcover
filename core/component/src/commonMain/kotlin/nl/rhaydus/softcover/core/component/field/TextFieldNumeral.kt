@@ -38,9 +38,17 @@ internal fun NumeralTextField(
     val focusManager = LocalFocusManager.current
     val onTextChange = model.onTextChange(onEvent)
 
-    // The model carries only the text, so the selection is the field's own: all of it on focus
-    // (typing replaces the value), none once focus leaves.
-    var selection by remember { mutableStateOf(TextRange.Zero) }
+    // The text round-trips through the collector, so the field keeps its own value and re-seeds
+    // only when the model's text moves away from it. The selection is the field's own: all of it on
+    // focus (typing replaces the value), none once focus leaves.
+    var fieldValue by remember { mutableStateOf(TextFieldValue(text = model.text)) }
+
+    if (fieldValue.text != model.text) {
+        fieldValue = TextFieldValue(
+            text = model.text,
+            selection = TextRange(model.text.length),
+        )
+    }
 
     // 0.62 is an estimated average digit advance in em, not a measurement of the text.
     val width = remember(density, textStyle, variant.charCount) {
@@ -50,19 +58,13 @@ internal fun NumeralTextField(
     }
 
     BasicTextField(
-        value = TextFieldValue(
-            text = model.text,
-            selection = TextRange(
-                start = selection.start.coerceAtMost(model.text.length),
-                end = selection.end.coerceAtMost(model.text.length),
-            ),
-        ),
+        value = fieldValue,
         onValueChange = { newValue ->
-            selection = newValue.selection
-
             val digits = newValue.text.filter { it.isDigit() }
 
-            if (digits != model.text) onTextChange(digits)
+            fieldValue = newValue.copy(text = digits)
+
+            onTextChange(digits)
         },
         enabled = model.enabled,
         singleLine = true,
@@ -94,14 +96,16 @@ internal fun NumeralTextField(
             .focusRequester(focusRequester)
             .semantics { contentDescription = model.placeholder }
             .onFocusChanged { focusState ->
-                selection = if (focusState.hasFocus) {
-                    TextRange(
-                        start = 0,
-                        end = model.text.length,
-                    )
-                } else {
-                    TextRange.Zero
-                }
+                fieldValue = fieldValue.copy(
+                    selection = if (focusState.hasFocus) {
+                        TextRange(
+                            start = 0,
+                            end = fieldValue.text.length,
+                        )
+                    } else {
+                        TextRange.Zero
+                    },
+                )
             },
     )
 }

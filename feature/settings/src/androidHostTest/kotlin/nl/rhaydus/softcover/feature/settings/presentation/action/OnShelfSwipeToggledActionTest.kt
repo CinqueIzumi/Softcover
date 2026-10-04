@@ -134,7 +134,7 @@ class OnShelfSwipeToggledActionTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             stateFlow.value = SettingsScreenUiState(
-                shelfSwipeEnabledChecked = false,
+                appVersionName = "1.2.3",
                 dropDownExpanded = true,
             )
 
@@ -151,7 +151,7 @@ class OnShelfSwipeToggledActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.shelfSwipeEnabledChecked shouldBe false
+            stateFlow.value.appVersionName shouldBe "1.2.3"
             stateFlow.value.dropDownExpanded shouldBe true
         }
     }

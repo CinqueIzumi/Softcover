@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.session.presentation.state
 
 import androidx.compose.runtime.Immutable
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 
 /**
  * The page editor on Focus mode.
@@ -12,6 +11,6 @@ import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 @Immutable
 internal data class FocusPageEditorUiModel(
     val caption: String,
-    val bar: ProgressBarUiModel,
+    val fraction: Float,
     val isEditable: Boolean,
 )

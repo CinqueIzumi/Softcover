@@ -61,7 +61,10 @@ internal fun FeaturedProgressStat(
 
     Spacer(modifier = Modifier.height(9.dp))
 
-    ProgressBar(model = model.bar)
+    ProgressBar(
+        fraction = model.fraction,
+        isLoading = model.isLoading,
+    )
 }
 
 /** [lead] at full [foreground] alpha followed by [tail] demoted to 0.6 alpha, in one line. */

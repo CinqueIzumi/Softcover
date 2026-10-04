@@ -31,7 +31,7 @@ class AppUpdateCalloutMapperTest {
             val result = appUpdateCalloutFor(state = AppUpdateState.Available)
 
             // ----- Assert -----
-            result.shouldNotBeNull().action.shouldBeInstanceOf<CalloutActionUiModel.Button>()
+            result.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Button>()
         }
 
         @Test
@@ -40,7 +40,7 @@ class AppUpdateCalloutMapperTest {
             val result = appUpdateCalloutFor(state = AppUpdateState.Downloading)
 
             // ----- Assert -----
-            result.shouldNotBeNull().action shouldBe CalloutActionUiModel.Progress
+            result.shouldNotBeNull().callToAction shouldBe CalloutActionUiModel.Progress
         }
 
         @Test
@@ -49,7 +49,7 @@ class AppUpdateCalloutMapperTest {
             val result = appUpdateCalloutFor(state = AppUpdateState.Downloaded)
 
             // ----- Assert -----
-            result.shouldNotBeNull().action.shouldBeInstanceOf<CalloutActionUiModel.Button>()
+            result.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Button>()
         }
 
         @Test
@@ -58,7 +58,7 @@ class AppUpdateCalloutMapperTest {
             val result = appUpdateCalloutFor(state = AppUpdateState.Failed)
 
             // ----- Assert -----
-            result.shouldNotBeNull().action.shouldBeInstanceOf<CalloutActionUiModel.Button>()
+            result.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Button>()
         }
 
         @Test
@@ -71,7 +71,7 @@ class AppUpdateCalloutMapperTest {
             ).map { state ->
                 appUpdateCalloutFor(state = state)
                     .shouldNotBeNull()
-                    .action
+                    .callToAction
                     .shouldBeInstanceOf<CalloutActionUiModel.Button>()
                     .label
             }

@@ -6,54 +6,31 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
- * Everything [DeadlineSummaryLine] renders: the deadline date and the pace needed to still make it,
- * already formatted by the mapper — "28 Aug" and "18 pages/day" become one line, "28 Aug • 18
- * pages/day" — or, once the deadline has passed, the status label in place of the pace, "12 Jul •
- * Expired".
+ * Everything [DeadlineSummaryLine] renders.
  *
- * @property dateText The deadline date, already formatted with the reader's own date style — the
- * mapper's job (§ 7.2 R4), not this component's.
- * @property paceText The pace needed to make the deadline ("18 pages/day", "12m/day"), or the status
- * label ("Expired") once the deadline has passed — the mapper already decided which.
- * @property tone Which ink the line paints in — see [DeadlineSummaryTone].
+ * @property text The line, already formatted by the mapper: the deadline date and the pace needed to
+ * make it ("28 Aug • 18 pages/day"), or the status label in place of the pace once it has passed
+ * ("12 Jul • Expired").
+ * @property tone Which ink the line paints in.
  */
 @Immutable
 data class DeadlineSummaryUiModel(
-    val dateText: String,
-    val paceText: String,
+    val text: String,
     val tone: DeadlineSummaryTone,
 ) {
     companion object : UiModelPreviews<DeadlineSummaryUiModel> {
-        /**
-         * Per R5: an on-track pages pace, an on-track audio pace (the `m`/`h` unit), an expired
-         * deadline (the status label instead of a pace), the hero-backdrop tone, and a pace extreme
-         * enough ("1149 pages/day") to exercise the line's single-line ellipsis.
-         */
         override val previews: ImmutableList<DeadlineSummaryUiModel> = persistentListOf(
             DeadlineSummaryUiModel(
-                dateText = "28 Aug",
-                paceText = "18 pages/day",
+                text = "28 Aug • 18 pages/day",
                 tone = DeadlineSummaryTone.OnSurface,
             ),
             DeadlineSummaryUiModel(
-                dateText = "28 Aug",
-                paceText = "12m/day",
+                text = "12 Jul • Expired",
                 tone = DeadlineSummaryTone.OnSurface,
             ),
             DeadlineSummaryUiModel(
-                dateText = "12 Jul",
-                paceText = "Expired",
-                tone = DeadlineSummaryTone.OnSurface,
-            ),
-            DeadlineSummaryUiModel(
-                dateText = "28 Aug",
-                paceText = "18 pages/day",
+                text = "28 Aug • 18 pages/day",
                 tone = DeadlineSummaryTone.OnHeroBackdrop,
-            ),
-            DeadlineSummaryUiModel(
-                dateText = "1 Sep",
-                paceText = "1149 pages/day",
-                tone = DeadlineSummaryTone.OnSurface,
             ),
         )
     }

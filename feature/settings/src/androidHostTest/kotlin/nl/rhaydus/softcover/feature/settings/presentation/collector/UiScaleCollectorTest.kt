@@ -55,33 +55,18 @@ class UiScaleCollectorTest {
         fun `sets uiScale to the emitted value when flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UiScaleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             uiScaleFlow.emit(UiScale.PERCENT_150)
 
             // ----- Assert -----
-            stateFlow.value.uiScale shouldBe UiScale.PERCENT_150
-            job.cancel()
-        }
-
-        @Test
-        fun `recomputes uiScaleRows so the emitted scale is the selected row`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = UiScaleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            uiScaleFlow.emit(UiScale.PERCENT_175)
-
-            // ----- Assert -----
-            stateFlow.value.uiScaleRows.first { it.selected }.key shouldBe UiScale.PERCENT_175
+            stateFlow.value.uiScaleRows.single { it.selected }.key shouldBe UiScale.PERCENT_150
             job.cancel()
         }
 
@@ -89,17 +74,19 @@ class UiScaleCollectorTest {
         fun `updates uiScale to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UiScaleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             uiScaleFlow.emit(UiScale.PERCENT_125)
             uiScaleFlow.emit(UiScale.PERCENT_200)
 
             // ----- Assert -----
-            stateFlow.value.uiScale shouldBe UiScale.PERCENT_200
+            stateFlow.value.uiScaleRows.single { it.selected }.key shouldBe UiScale.PERCENT_200
             job.cancel()
         }
 
@@ -107,13 +94,15 @@ class UiScaleCollectorTest {
         fun `does not change uiScale before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UiScaleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
-            stateFlow.value.uiScale shouldBe UiScale.DEFAULT
+            stateFlow.value.uiScaleRows.single { it.selected }.key shouldBe UiScale.DEFAULT
             job.cancel()
         }
 
@@ -121,21 +110,22 @@ class UiScaleCollectorTest {
         fun `preserves other state fields when updating uiScale`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = SettingsScreenUiState(
-                uiScale = UiScale.DEFAULT,
                 dropDownExpanded = true,
             )
             val collector = UiScaleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             uiScaleFlow.emit(UiScale.PERCENT_175)
 
             // ----- Assert -----
             stateFlow.value.dropDownExpanded shouldBe true
-            stateFlow.value.uiScale shouldBe UiScale.PERCENT_175
+            stateFlow.value.uiScaleRows.single { it.selected }.key shouldBe UiScale.PERCENT_175
             job.cancel()
         }
 
@@ -143,15 +133,17 @@ class UiScaleCollectorTest {
         fun `retains last emitted uiScale after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UiScaleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             uiScaleFlow.emit(UiScale.PERCENT_150)
             job.cancel()
 
             // ----- Act & Assert -----
-            stateFlow.value.uiScale shouldBe UiScale.PERCENT_150
+            stateFlow.value.uiScaleRows.single { it.selected }.key shouldBe UiScale.PERCENT_150
         }
     }
 }

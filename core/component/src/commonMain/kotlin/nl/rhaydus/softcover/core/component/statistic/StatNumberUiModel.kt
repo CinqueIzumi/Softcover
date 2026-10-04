@@ -26,7 +26,7 @@ data class StatNumberUiModel(
             ),
             StatNumberUiModel(
                 value = 4.23,
-                format = StatNumberFormat.Decimal(fractionDigits = 1),
+                format = StatNumberFormat.Decimal,
             ),
             StatNumberUiModel(
                 value = 0.0,

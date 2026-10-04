@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen.section
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,24 +30,20 @@ internal fun DisplaySection(
         Spacer(modifier = Modifier.height(20.dp))
 
         SettingsRowGroup {
-            state.displayToggleRows.forEach { displayToggleRow ->
+            state.displayToggleRows.forEach { toggleRow ->
                 row {
                     ToggleRow(
-                        model = displayToggleRow.row,
+                        model = toggleRow,
                         onEvent = { event ->
                             when (event) {
                                 is ToggleEvent.Toggled -> runAction(
                                     displayToggleActionFor(
-                                        key = displayToggleRow.key,
+                                        key = toggleRow.key,
                                         newValue = event.checked,
                                     ),
                                 )
                             }
                         },
-                        contentPadding = PaddingValues(
-                            horizontal = 4.dp,
-                            vertical = 16.dp,
-                        ),
                     )
                 }
             }

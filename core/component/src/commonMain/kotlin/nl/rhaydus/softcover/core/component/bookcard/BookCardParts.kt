@@ -31,8 +31,6 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.cornerRadius
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
-import nl.rhaydus.softcover.core.component.progress.ProgressBarHeight
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -158,7 +156,7 @@ internal fun BookCardProgressBar(
         is BookCardProgress.Reserved -> Box(
             modifier = modifier
                 .fillMaxWidth()
-                .height(ProgressBarHeight),
+                .height(12.dp),
         )
 
         is BookCardProgress.Value -> {
@@ -170,11 +168,9 @@ internal fun BookCardProgressBar(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ProgressBar(
-                    model = maskedBar(
-                        bar = progress.bar,
-                        isLoading = isLoading,
-                    ),
+                    fraction = progress.fraction,
                     modifier = Modifier.weight(1f),
+                    isLoading = isLoading,
                 )
 
                 if (label != null) {
@@ -187,11 +183,6 @@ internal fun BookCardProgressBar(
         }
     }
 }
-
-private fun maskedBar(
-    bar: ProgressBarUiModel,
-    isLoading: Boolean,
-): ProgressBarUiModel = if (isLoading) bar.copy(isLoading = true) else bar
 
 @Composable
 private fun ProgressLabel(

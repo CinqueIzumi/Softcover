@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
@@ -28,11 +27,11 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
-import nl.rhaydus.softcover.core.component.shape.PillShape
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -48,24 +47,41 @@ fun PillButton(
     onEvent: (PillButtonEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val style = model.tone.style(scheme = MaterialTheme.colorScheme)
-    val height = PillButtonDimensions.heightFor(size = model.size)
+    val scheme = MaterialTheme.colorScheme
+    val container = when (model.tone) {
+        PillButtonTone.Tonal, PillButtonTone.Accent -> scheme.surfaceContainerHigh
+        PillButtonTone.Filled -> scheme.primary
+        PillButtonTone.Outlined -> Color.Transparent
+        PillButtonTone.Quiet -> scheme.surfaceContainer
+    }
+    val ink = when (model.tone) {
+        PillButtonTone.Tonal -> scheme.onSurface
+        PillButtonTone.Accent -> scheme.primary
+        PillButtonTone.Filled -> scheme.onPrimary
+        PillButtonTone.Outlined -> scheme.onSurface
+        PillButtonTone.Quiet -> scheme.onSurfaceVariant
+    }
+    val iconTint = if (model.tone == PillButtonTone.Outlined) scheme.primary else ink
+    val height = when (model.size) {
+        PillButtonSize.Regular -> 38.dp
+        PillButtonSize.Large -> 44.dp
+    }
     val isIconOnly = model.content is PillButtonContent.IconOnly
     val pillModifier = modifier
         .minimumInteractiveComponentSize()
-        .pillButtonInteraction(interaction = model.interaction) {
+        .pillButtonInteraction(enabled = model.enabled) {
             onEvent(PillButtonEvent.Clicked(key = model.key))
         }
         .height(height)
         .let { base -> if (isIconOnly) base.width(height) else base }
-        .clip(PillShape)
-        .background(style.container)
+        .clip(CircleShape)
+        .background(container)
         .let { base ->
-            if (style.border != null) {
+            if (model.tone == PillButtonTone.Outlined) {
                 base.border(
-                    width = PillButtonDimensions.borderWidth,
-                    color = style.border,
-                    shape = PillShape,
+                    width = 1.dp,
+                    color = scheme.outlineVariant,
+                    shape = CircleShape,
                 )
             } else {
                 base
@@ -74,13 +90,14 @@ fun PillButton(
 
     when (val content = model.content) {
         is PillButtonContent.Label -> Row(
-            modifier = pillModifier.padding(horizontal = PillButtonDimensions.horizontalPadding),
+            modifier = pillModifier.padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
             PillButtonLabel(
                 content = content,
-                style = style,
+                ink = ink,
+                iconTint = iconTint,
             )
         }
 
@@ -92,53 +109,24 @@ fun PillButton(
                 PillButtonGlyph(
                     icon = content.icon,
                     description = content.description,
-                    tint = style.iconTint,
+                    tint = iconTint,
                 )
             }
         }
     }
 }
 
-internal fun PillButtonTone.style(scheme: ColorScheme): PillButtonStyle = when (this) {
-    PillButtonTone.Tonal -> PillButtonStyle(
-        container = scheme.surfaceContainerHigh,
-        ink = scheme.onSurface,
-    )
-
-    PillButtonTone.Accent -> PillButtonStyle(
-        container = scheme.surfaceContainerHigh,
-        ink = scheme.primary,
-    )
-
-    PillButtonTone.Filled -> PillButtonStyle(
-        container = scheme.primary,
-        ink = scheme.onPrimary,
-    )
-
-    PillButtonTone.Outlined -> PillButtonStyle(
-        container = Color.Transparent,
-        ink = scheme.onSurface,
-        iconTint = scheme.primary,
-        border = scheme.outlineVariant,
-    )
-
-    PillButtonTone.Quiet -> PillButtonStyle(
-        container = scheme.surfaceContainer,
-        ink = scheme.onSurfaceVariant,
-    )
-}
-
 @Composable
 private fun Modifier.pillButtonInteraction(
-    interaction: PillButtonInteraction,
+    enabled: Boolean,
     onClick: () -> Unit,
-): Modifier = when (interaction) {
-    PillButtonInteraction.Clickable -> this
+): Modifier = if (enabled) {
+    this
         .pointerHandCursor()
         .pressScaleClickable(onClick = onClick)
         .semantics { role = Role.Button }
-
-    PillButtonInteraction.Disabled -> this
+} else {
+    this
         .alpha(DISABLED_ALPHA)
         .semantics(mergeDescendants = true) {
             role = Role.Button
@@ -149,22 +137,23 @@ private fun Modifier.pillButtonInteraction(
 @Composable
 private fun RowScope.PillButtonLabel(
     content: PillButtonContent.Label,
-    style: PillButtonStyle,
+    ink: Color,
+    iconTint: Color,
 ) {
     content.leadingIcon?.let { icon ->
         PillButtonGlyph(
             icon = icon,
             description = null,
-            tint = style.iconTint,
+            tint = iconTint,
         )
 
-        Spacer(modifier = Modifier.width(PillButtonDimensions.iconGap))
+        Spacer(modifier = Modifier.width(6.dp))
     }
 
     SoftcoverText(
         text = content.text,
         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-        color = style.ink,
+        color = ink,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.weight(
@@ -174,11 +163,11 @@ private fun RowScope.PillButtonLabel(
     )
 
     if (content.indicator) {
-        Spacer(modifier = Modifier.width(PillButtonDimensions.iconGap))
+        Spacer(modifier = Modifier.width(6.dp))
 
         Box(
             modifier = Modifier
-                .size(PillButtonDimensions.indicatorSize)
+                .size(6.dp)
                 .background(
                     color = MaterialTheme.colorScheme.primary,
                     shape = CircleShape,
@@ -202,6 +191,6 @@ private fun PillButtonGlyph(
         painter = resource.getIconPainter(),
         contentDescription = description?.let { resource.contentDescription },
         tint = tint,
-        modifier = Modifier.size(PillButtonDimensions.iconSize),
+        modifier = Modifier.size(17.dp),
     )
 }

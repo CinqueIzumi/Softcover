@@ -12,9 +12,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
-import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -108,7 +106,6 @@ internal fun Book.toBookCard(
                 ),
                 deadline = deadlineProgress?.toDeadlineSummaryUiModel(
                     dateStyle = dateStyle,
-                    tone = DeadlineSummaryTone.OnSurface,
                 ),
             )
             decorations = BookCardDecorations(
@@ -200,7 +197,7 @@ private fun Book.gridDecorations(
     return BookCardDecorations(
         progress = if (status == BookStatus.Reading && progress != null) {
             BookCardProgress.Value(
-                bar = ProgressBarUiModel(fraction = progress / 100f),
+                fraction = progress / 100f,
                 label = null,
             )
         } else {
@@ -219,7 +216,7 @@ private fun Book.labelledProgress(): BookCardProgress.Value? {
     val fraction = progress / 100f
 
     return BookCardProgress.Value(
-        bar = ProgressBarUiModel(fraction = fraction),
+        fraction = fraction,
         label = percentLabel(fraction = fraction),
     )
 }

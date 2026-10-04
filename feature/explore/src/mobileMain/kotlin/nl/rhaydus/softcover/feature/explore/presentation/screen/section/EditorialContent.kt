@@ -75,9 +75,10 @@ internal fun EditorialContent(
             )
 
             ContinueSeriesSection(
-                entries = state.continueSeriesEntries,
+                books = state.continueSeriesBooks,
+                menuSheets = state.continueSeriesMenuSheets,
                 cards = state.upNextCards,
-                isLoading = state.loadingContinueSeriesBooks && state.continueSeriesBooks.isEmpty(),
+                isLoading = state.loadingContinueSeriesBooks,
                 header = state.upNextHeader,
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -107,7 +108,6 @@ internal fun EditorialContent(
             MoodGrid(
                 moods = state.moodTags,
                 tiles = state.moodTiles,
-                isLoading = state.loadingMoodTags && state.moodTags.isEmpty(),
                 header = state.moodGridHeader,
                 runAction = runAction,
             )

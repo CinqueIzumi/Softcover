@@ -105,15 +105,15 @@ here.
 component/
 + badge/       Badge  BadgeUiModel/Tone/Size/Colors/Dimensions
 +              CoverOverlay(+UiModel, +Corner)
-+ button/      PillButton  PillButtonUiModel  PillButtonEvent  PillButtonContent/Tone/Size/Interaction
-+ callout/     Banner  BannerUiModel  BannerTone  BannerEvent
-+              Callout  CalloutUiModel  CalloutTone  CalloutLead  CalloutActionUiModel  CalloutEvent
-+ celebration/ MarkAsReadBurst  MarkAsReadBurstUiModel
++ button/      PillButton  PillButtonUiModel  PillButtonEvent  PillButtonContent/Tone/Size
++ callout/     Banner  BannerUiModel  BannerVariant  BannerEvent
++              Callout  CalloutUiModel  CalloutVariant  CalloutActionUiModel  CalloutEvent
++ celebration/ MarkAsReadBurst  MarkAsReadBurstScale
 + chip/        Chip  ChipUiModel  ChipEvent
 + chrome/      ChromeIconButton (internal)
 + control/     ThemePreviewTile  ColorPalettePreviewTile  PreviewTile
 +              ThemeTilePainting
-+              Toggle  ToggleUiModel/Variant/Event
++              Toggle  ToggleUiModel/Variant/Event  ToggleRowVariant
 +              SegmentedControl  SegmentedControlUiModel/Variant/Event
 + cover/       Cover  CoverUiModel  CoverVariant  CoverSource
 +              CoverlessTitleCover  MonogramCoverMetrics
@@ -130,7 +130,7 @@ component/
 +              ChooseListsEvent  ListMembership
 + progress/    UpdateProgressBottomSheet  ProgressSheetUiModel
 +              ProgressSheetEvent  ProgressSheetTab  ProgressSheetMedium
-+              ProgressBar  ProgressBarUiModel
++              ProgressBar  WhenReadUiModel
 + richtext/    RichText  RichTextUiModel  RichTextRun/Mark/Paragraph
 +              RichTextEditing  RichTextEditorBuffer  ClickableText(+UiModel)
 +              RichTextFormattingToolbar(+UiModel/Event)
@@ -139,7 +139,7 @@ component/
 +              one file per card body  ShareCardNumerals
 + sheet/       LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent
 +              SheetScaffold(+UiModel, +Event, +Layout)  SheetHeaderUiModel/Trailing
-+              SheetFooterUiModel/Button/Layout  SheetRow(+UiModel, +Event)
++              SheetFooterUiModel/Button/Layout  SheetRowUiModel, SheetRowEvent
 +              SheetRowGroup(+UiModel), which owns selectableGroup() for the radio rows
 + sidebar/     Sidebar  SidebarUiModel  SidebarSectionUiModel  SidebarRowUiModel/Variant  SidebarEvent
 + state/       EmptyState(+UiModel, +Variant, +Event, +ButtonUiModel)
@@ -157,7 +157,7 @@ component/
 +              VerdictSheet  VerdictSheetUiModel/Event
 · bookcard/    BookCard  BookCardUiModel/Variant/Content/Decorations
 ·              BookCardEvent  BookCardKey                                    S7
-· mood/        MoodTile  MoodTileUiModel/Event/Ink  MoodTileDimensions       S7
+· mood/        MoodTile  MoodTileUiModel/Event/Ink       S7
 · row/         ListRow  ListRowUiModel                                       S6
 ```
 

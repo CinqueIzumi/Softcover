@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -44,7 +43,7 @@ private const val PULSE_DURATION_MS = 220
  *
  * It takes the `Text`-shaped render parameters after the model, the same way `RichText` does: a
  * number is type, and which face it is set in belongs to the surface rather than to the datum.
- * [style] / [color] / [autoSize] / [maxLines] as loose parameters are an exception to components
+ * [style] / [autoSize] as loose parameters are an exception to components
  * taking only their model, event lambda and modifier, not a pattern to copy.
  */
 @Composable
@@ -52,9 +51,7 @@ fun StatNumber(
     model: StatNumberUiModel,
     style: TextStyle,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
     autoSize: TextAutoSize? = null,
-    maxLines: Int = 1,
 ) {
     val playMotion = playDecorativeMotion()
 
@@ -65,54 +62,9 @@ fun StatNumber(
 
     val displayValue = if (playMotion) animated.toDouble() else model.value
 
-    val formatted = remember(displayValue, model.format) { model.format.render(displayValue) }
+    val integerKey = displayValue.toInt()
 
-    val resolvedColor = color.takeOrUnspecified(LocalContentColor.current)
-
-    StatPulseText(
-        text = formatted,
-        integerKey = displayValue.toInt(),
-        style = style,
-        color = resolvedColor,
-        modifier = modifier,
-        autoSize = autoSize,
-        maxLines = maxLines,
-        isLoading = model.isLoading,
-        standIn = model.format.standIn(),
-    )
-}
-
-private fun StatNumberFormat.standIn(): String = when (this) {
-    StatNumberFormat.Grouped -> "0,000"
-    StatNumberFormat.Plain -> "00"
-    is StatNumberFormat.Decimal -> "0." + "0".repeat(fractionDigits)
-}
-
-private fun StatNumberFormat.render(value: Double): String = when (this) {
-    StatNumberFormat.Grouped -> formatGroupedNumber(value.toInt())
-    StatNumberFormat.Plain -> value.toInt().toString()
-
-    is StatNumberFormat.Decimal -> formatDecimalNumber(
-        value = value,
-        fractionDigits = fractionDigits,
-    )
-}
-
-@Composable
-private fun StatPulseText(
-    text: String,
-    integerKey: Int,
-    style: TextStyle,
-    color: Color,
-    modifier: Modifier,
-    autoSize: TextAutoSize?,
-    maxLines: Int,
-    isLoading: Boolean,
-    standIn: String,
-) {
-    val playMotion = playDecorativeMotion()
-
-    val pulseColor = color
+    val color = LocalContentColor.current
 
     val hairlinePx = with(LocalDensity.current) { 1.dp.toPx() }
 
@@ -142,7 +94,7 @@ private fun StatPulseText(
             if (currentAlpha <= 0f) return@drawBehind
 
             drawRect(
-                color = pulseColor.copy(alpha = currentAlpha),
+                color = color.copy(alpha = currentAlpha),
                 topLeft = Offset(
                     x = 0f,
                     y = size.height - hairlinePx,
@@ -155,16 +107,28 @@ private fun StatPulseText(
         },
     ) {
         SoftcoverText(
-            text = text,
+            text = remember(displayValue, model.format) { model.format.render(displayValue) },
             color = color,
             style = style.copy(fontFeatureSettings = TABULAR_NUMS),
             autoSize = autoSize,
-            maxLines = maxLines,
-            isLoading = isLoading,
-            standIn = standIn,
+            maxLines = 1,
+            isLoading = model.isLoading,
+            standIn = model.format.standIn(),
         )
     }
 }
 
-private fun Color.takeOrUnspecified(fallback: Color): Color =
-    if (this == Color.Unspecified) fallback else this
+private fun StatNumberFormat.standIn(): String = when (this) {
+    StatNumberFormat.Grouped -> "0,000"
+    StatNumberFormat.Plain -> "00"
+    StatNumberFormat.Decimal -> "0.0"
+}
+
+private fun StatNumberFormat.render(value: Double): String = when (this) {
+    StatNumberFormat.Grouped -> formatGroupedNumber(value.toInt())
+    StatNumberFormat.Plain -> value.toInt().toString()
+    StatNumberFormat.Decimal -> formatDecimalNumber(
+        value = value,
+        fractionDigits = 1,
+    )
+}

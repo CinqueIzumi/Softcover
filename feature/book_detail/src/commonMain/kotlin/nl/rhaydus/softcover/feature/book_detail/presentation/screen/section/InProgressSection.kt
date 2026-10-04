@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
@@ -79,7 +78,7 @@ internal fun InProgressSection(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        ProgressBar(model = inProgress.bar)
+        ProgressBar(fraction = inProgress.fraction)
 
         Spacer(modifier = Modifier.height(10.dp))
 

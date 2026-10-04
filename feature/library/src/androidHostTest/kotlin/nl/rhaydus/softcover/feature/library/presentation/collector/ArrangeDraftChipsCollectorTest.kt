@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -69,8 +70,8 @@ class ArrangeDraftChipsCollectorTest {
                 stateFlow.value = LibraryUiState(visibleTabs = listOf(readingTab))
 
                 // ----- Assert -----
-                stateFlow.value.arrangeLayoutChips shouldBe emptyList()
-                stateFlow.value.arrangeSortChips shouldBe emptyList()
+                stateFlow.value.arrangeLayoutChips shouldBe ChipSet()
+                stateFlow.value.arrangeSortChips shouldBe ChipSet()
                 stateFlow.value.arrangeSortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort")
                 job.cancel()
             }
@@ -99,10 +100,10 @@ class ArrangeDraftChipsCollectorTest {
                 )
 
                 // ----- Assert -----
-                val layoutChip = stateFlow.value.arrangeLayoutChips.first { it.key == "layout:GRID_TWO" }
+                val layoutChip = stateFlow.value.arrangeLayoutChips.chips.first { it.key == "layout:GRID_TWO" }
                 layoutChip.tone shouldBe ChipTone.Choice
                 layoutChip.selected shouldBe true
-                val sortChip = stateFlow.value.arrangeSortChips.first { it.key == "sort:MANUAL" }
+                val sortChip = stateFlow.value.arrangeSortChips.chips.first { it.key == "sort:MANUAL" }
                 sortChip.tone shouldBe ChipTone.Choice
                 sortChip.selected shouldBe true
                 stateFlow.value.arrangeSortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Currently Reading")
@@ -166,10 +167,10 @@ class ArrangeDraftChipsCollectorTest {
             )
 
             // ----- Assert -----
-            val manualChip = stateFlow.value.arrangeSortChips.first { it.key == "sort:MANUAL" }
+            val manualChip = stateFlow.value.arrangeSortChips.chips.first { it.key == "sort:MANUAL" }
             manualChip.tone shouldBe ChipTone.Choice
             manualChip.selected shouldBe false
-            val titleChip = stateFlow.value.arrangeSortChips.first { it.key == "sort:TITLE" }
+            val titleChip = stateFlow.value.arrangeSortChips.chips.first { it.key == "sort:TITLE" }
             titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
             titleChip.trailing shouldBe ChipTrailing.Icon(

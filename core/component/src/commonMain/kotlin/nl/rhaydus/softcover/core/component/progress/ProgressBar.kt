@@ -8,30 +8,15 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 
-internal val ProgressBarHeight: Dp = 12.dp
-
-@Composable
-fun ProgressBar(
-    model: ProgressBarUiModel,
-    modifier: Modifier = Modifier,
-) {
-    ProgressBarBody(
-        fraction = model.fraction,
-        modifier = modifier,
-        isLoading = model.isLoading,
-    )
-}
-
 /**
- * Draws the bar from a bare fraction, for callers whose fraction comes from input state the component owns.
+ * A determinate progress bar. A [fraction] outside 0..1 is clamped when drawn.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun ProgressBarBody(
+fun ProgressBar(
     fraction: Float,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
@@ -48,7 +33,7 @@ internal fun ProgressBarBody(
         progress = { animatedFraction },
         modifier = modifier
             .fillMaxWidth()
-            .height(height = ProgressBarHeight)
+            .height(height = 12.dp)
             .skeletonMask(visible = isLoading),
     )
 }

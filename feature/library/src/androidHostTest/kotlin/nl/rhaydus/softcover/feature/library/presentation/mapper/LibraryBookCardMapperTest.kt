@@ -209,7 +209,7 @@ class LibraryBookCardMapperTest {
             // ----- Assert -----
             val value = progress.shouldBeInstanceOf<BookCardProgress.Value>()
             value.label shouldBe "42%"
-            value.bar.fraction shouldBe 0.42f
+            value.fraction shouldBe 0.42f
         }
 
         @Test
@@ -255,7 +255,7 @@ class LibraryBookCardMapperTest {
 
             // ----- Assert -----
             val value = progress.shouldBeInstanceOf<BookCardProgress.Value>()
-            value.bar.fraction shouldBe 1.5f
+            value.fraction shouldBe 1.5f
             value.label shouldBe "100%"
         }
 
@@ -271,7 +271,7 @@ class LibraryBookCardMapperTest {
             val progress = book.card(LibraryGridLayout.GRID_TWO_COLUMNS).decorations.progress
 
             // ----- Assert -----
-            progress.shouldBeInstanceOf<BookCardProgress.Value>().bar.fraction shouldBe 0.42f
+            progress.shouldBeInstanceOf<BookCardProgress.Value>().fraction shouldBe 0.42f
         }
 
         @Test
@@ -286,7 +286,7 @@ class LibraryBookCardMapperTest {
             val progress = book.card(LibraryGridLayout.GRID_TWO_COLUMNS).decorations.progress
 
             // ----- Assert -----
-            progress.shouldBeInstanceOf<BookCardProgress.Value>().bar.fraction shouldBe -0.05f
+            progress.shouldBeInstanceOf<BookCardProgress.Value>().fraction shouldBe -0.05f
         }
     }
 }

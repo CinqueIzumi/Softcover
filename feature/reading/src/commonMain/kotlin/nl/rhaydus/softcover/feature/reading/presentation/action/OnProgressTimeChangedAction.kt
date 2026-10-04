@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.reading.presentation.action
 import nl.rhaydus.softcover.core.component.progress.ProgressTimeUnit
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.core.uibinding.progress.progressCurrentSeconds
-import nl.rhaydus.softcover.core.uibinding.progress.withTimeDraft
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -31,10 +30,7 @@ internal class OnProgressTimeChangedAction(
                     text = text,
                 )
 
-            state.copy(
-                progressTimeDraft = draft,
-                progressSheet = state.progressSheet?.withTimeDraft(draft = draft),
-            )
+            state.copy(progressTimeDraft = draft)
         }
     }
 }

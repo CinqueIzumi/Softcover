@@ -74,7 +74,7 @@ private fun ratingColumnDescription(
 
 internal fun ratingsAverageUiModel(ratings: RatingsDistribution?): StatNumberUiModel = StatNumberUiModel(
     value = ratings?.average ?: 0.0,
-    format = StatNumberFormat.Decimal(fractionDigits = RATING_FRACTION_DIGITS),
+    format = StatNumberFormat.Decimal,
     isLoading = ratings == null,
 )
 

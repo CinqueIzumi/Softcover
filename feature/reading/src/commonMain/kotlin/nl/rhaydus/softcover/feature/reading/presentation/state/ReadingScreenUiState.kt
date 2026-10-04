@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
@@ -50,6 +51,9 @@ internal data class ReadingScreenUiState(
     /** The reader's uncommitted time entry; `null` seeds the sheet's fields from the book. */
     val progressTimeDraft: ProgressTimeDraft? = null,
     val showProgressSheet: Boolean = false,
+
+    /** The reader's backdate for the next logged action; `null` is "just now". */
+    val readAt: LocalDateTime? = null,
 
     /**
      * What the progress sheet renders, mapped off the composition by `ProgressSheetCollector`

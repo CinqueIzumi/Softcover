@@ -9,5 +9,5 @@ import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 interface OfflineCopy {
     suspend fun emptyState(): EmptyStateUiModel
 
-    suspend fun banner(visible: Boolean): BannerUiModel
+    suspend fun banner(): BannerUiModel
 }

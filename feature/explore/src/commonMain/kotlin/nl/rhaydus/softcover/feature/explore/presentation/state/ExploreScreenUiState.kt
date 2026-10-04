@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
@@ -27,7 +29,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.SEARCH_RESULT_ST
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.TRENDING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.UP_NEXT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSortPillButton
-import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class ExploreScreenUiState(
@@ -72,7 +73,7 @@ internal data class ExploreScreenUiState(
         eyebrow = "Pick up where you left off",
         headline = "Up next in your series",
     ),
-    val continueSeriesEntries: List<ContinueSeriesEntryUiModel> = emptyList(),
+    val continueSeriesMenuSheets: ImmutableMap<Int, SheetScaffoldUiModel> = persistentMapOf(),
     /** `null` until the library's offline copy has resolved. */
     val offlineEmptyState: EmptyStateUiModel? = null,
     /** The desktop masthead and its refresh action, derived off [isRefreshing] by `MastheadCollector` (R9). */

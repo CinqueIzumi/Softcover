@@ -37,9 +37,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorS
  * Never render a palette as a bare colour swatch, a paint chip, or a radio row.
  */
 @Composable
-fun ColorPalettePreviewTile(
-    model: ColorPalettePreviewTileUiModel,
-    onEvent: (ColorPalettePreviewTileEvent) -> Unit,
+fun <K> ColorPalettePreviewTile(
+    model: ColorPalettePreviewTileUiModel<K>,
+    onEvent: (ColorPalettePreviewTileEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scheme = softcoverColorScheme(
@@ -50,7 +50,7 @@ fun ColorPalettePreviewTile(
     PreviewTileFrame(
         label = model.palette.label,
         selected = model.selected,
-        onClick = { onEvent(ColorPalettePreviewTileEvent.Clicked) },
+        onClick = { onEvent(ColorPalettePreviewTileEvent.Clicked(key = model.key)) },
         modifier = modifier,
     ) {
         AccentMiniature(

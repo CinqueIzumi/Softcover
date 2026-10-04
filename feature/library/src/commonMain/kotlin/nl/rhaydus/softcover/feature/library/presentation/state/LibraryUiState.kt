@@ -8,6 +8,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
@@ -106,16 +107,16 @@ internal data class LibraryUiState(
     val arrangeLayoutHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Layout"),
 
     /** The Arrange sheet's layout row, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
-    val arrangeLayoutChips: List<ChipUiModel> = emptyList(),
+    val arrangeLayoutChips: ChipSet<LibraryLayoutChip> = ChipSet(),
 
     /** The Arrange sheet's sort row, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
-    val arrangeSortChips: List<ChipUiModel> = emptyList(),
+    val arrangeSortChips: ChipSet<LibrarySortMode> = ChipSet(),
 
     /** The Arrange sheet's sort-row header, mapped by `ArrangeDraftChipsCollector` off [arrangeDraft]. */
     val arrangeSortHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Sort"),
 
     /** The Arrange sheet's titles toggle; null when the layout is a list. */
-    val arrangeTitlesToggle: ToggleRowUiModel? = null,
+    val arrangeTitlesToggle: ToggleRowUiModel<String>? = null,
 
     /** The unranked custom list the Arrange sheet offers to make ordered; null on any other shelf. */
     val arrangeMakeOrderedListId: Int? = null,

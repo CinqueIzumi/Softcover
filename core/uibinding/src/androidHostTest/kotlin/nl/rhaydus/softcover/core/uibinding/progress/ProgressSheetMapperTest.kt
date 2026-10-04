@@ -15,13 +15,11 @@ import org.junit.jupiter.api.Test
 class ProgressSheetMapperTest {
     private fun expectedTimed(
         totalSeconds: Int,
-        currentSeconds: Int,
         hours: String = "0",
         minutes: String = "0",
         seconds: String = "0",
     ): ProgressSheetMedium.Timed = ProgressSheetMedium.Timed(
         totalSeconds = totalSeconds,
-        currentSeconds = currentSeconds,
         hours = progressTimeField(
             unit = ProgressTimeUnit.HOURS,
             text = hours,
@@ -74,7 +72,6 @@ class ProgressSheetMapperTest {
             book.currentEdition shouldBe audioEdition
             result.medium shouldBe expectedTimed(
                 totalSeconds = 5_400,
-                currentSeconds = 0,
             )
         }
 
@@ -159,7 +156,6 @@ class ProgressSheetMapperTest {
             book.currentEdition shouldBe currentEd
             result.medium shouldBe expectedTimed(
                 totalSeconds = 0,
-                currentSeconds = 0,
             )
             (result.medium as ProgressSheetMedium.Timed).hasKnownTotal shouldBe false
         }
@@ -214,7 +210,6 @@ class ProgressSheetMapperTest {
             book.currentEdition shouldBe currentEd
             result.medium shouldBe expectedTimed(
                 totalSeconds = 0,
-                currentSeconds = 0,
             )
             (result.medium as ProgressSheetMedium.Timed).hasKnownTotal shouldBe false
         }
@@ -254,7 +249,6 @@ class ProgressSheetMapperTest {
 
             // ----- Assert -----
             book.currentEdition shouldBe audioEdition
-            (result.medium as ProgressSheetMedium.Timed).currentSeconds shouldBe 0
             result.progressPercent shouldBe 0
         }
     }
@@ -330,7 +324,7 @@ class ProgressSheetMapperTest {
             val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PERCENTAGE)
 
             // ----- Assert -----
-            result.selectedTab shouldBe ProgressSheetTab.PERCENTAGE
+            result.tabs.selected shouldBe ProgressSheetTab.PERCENTAGE
         }
     }
 
@@ -347,7 +341,6 @@ class ProgressSheetMapperTest {
             // ----- Assert -----
             result.medium shouldBe expectedTimed(
                 totalSeconds = 20_000,
-                currentSeconds = 3_725,
                 hours = "1",
                 minutes = "2",
                 seconds = "5",
@@ -374,8 +367,33 @@ class ProgressSheetMapperTest {
             // ----- Assert -----
             result.medium shouldBe expectedTimed(
                 totalSeconds = 20_000,
-                currentSeconds = 600,
                 hours = "7",
+                minutes = "8",
+                seconds = "9",
+            )
+        }
+
+        @Test
+        fun `keeps cleared draft text so the field can be emptied`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = 600)
+            val draft = ProgressTimeDraft(
+                forSeconds = 600,
+                hours = "",
+                minutes = "8",
+                seconds = "9",
+            )
+
+            // ----- Act -----
+            val result = book.toProgressSheetUiModel(
+                selectedTab = ProgressSheetTab.TIME,
+                timeDraft = draft,
+            )
+
+            // ----- Assert -----
+            result.medium shouldBe expectedTimed(
+                totalSeconds = 20_000,
+                hours = "",
                 minutes = "8",
                 seconds = "9",
             )
@@ -401,7 +419,6 @@ class ProgressSheetMapperTest {
             // ----- Assert -----
             result.medium shouldBe expectedTimed(
                 totalSeconds = 20_000,
-                currentSeconds = 3_600,
                 hours = "1",
             )
         }

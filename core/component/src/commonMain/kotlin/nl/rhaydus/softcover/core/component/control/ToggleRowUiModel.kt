@@ -10,22 +10,25 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  * [title] is the row's accessibility label. A row that must not be used yet is built with `enabled = false`.
  *
  * @property key Identity — [ToggleEvent.Toggled] carries it back.
+ * @property variant The row's padding; see [ToggleRowVariant].
  */
 @Immutable
-data class ToggleRowUiModel(
-    val key: String,
+data class ToggleRowUiModel<K>(
+    val key: K,
     val title: String,
     val gloss: String?,
     val checked: Boolean,
+    val variant: ToggleRowVariant = ToggleRowVariant.Plain,
     val enabled: Boolean = true,
 ) {
-    companion object : UiModelPreviews<ToggleRowUiModel> {
-        override val previews: ImmutableList<ToggleRowUiModel> = persistentListOf(
+    companion object : UiModelPreviews<ToggleRowUiModel<String>> {
+        override val previews: ImmutableList<ToggleRowUiModel<String>> = persistentListOf(
             ToggleRowUiModel(
                 key = "reading-streak",
                 title = "Reading streak",
                 gloss = "Count the days you read in a row, shown on your profile.",
                 checked = true,
+                variant = ToggleRowVariant.Inset,
             ),
             ToggleRowUiModel(
                 key = "show-titles",

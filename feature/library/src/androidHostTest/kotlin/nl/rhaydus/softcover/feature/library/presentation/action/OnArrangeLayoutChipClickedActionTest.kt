@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryArrangeDraft
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLayoutChip
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
@@ -39,33 +40,12 @@ class OnArrangeLayoutChipClickedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `unknown key is a no-op`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryArrangeDraft(
-                tabId = tabId,
-                sortMode = LibrarySortMode.TITLE,
-                sortDirection = SortDirection.ASCENDING,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-            stateFlow.value = LibraryUiState(arrangeDraft = draft)
-
-            // ----- Act -----
-            OnArrangeLayoutChipClickedAction(key = "layout:BOGUS").execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.arrangeDraft shouldBe draft
-        }
-
-        @Test
         fun `no-op when arrangeDraft is null`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(arrangeDraft = null)
 
             // ----- Act -----
-            OnArrangeLayoutChipClickedAction(key = "layout:GRID_TWO").execute(
+            OnArrangeLayoutChipClickedAction(chip = LibraryLayoutChip.GRID_TWO).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -86,7 +66,7 @@ class OnArrangeLayoutChipClickedActionTest {
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----
-            OnArrangeLayoutChipClickedAction(key = "layout:GRID_TWO").execute(
+            OnArrangeLayoutChipClickedAction(chip = LibraryLayoutChip.GRID_TWO).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -107,7 +87,7 @@ class OnArrangeLayoutChipClickedActionTest {
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----
-            OnArrangeLayoutChipClickedAction(key = "layout:GRID_TWO").execute(
+            OnArrangeLayoutChipClickedAction(chip = LibraryLayoutChip.GRID_TWO).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -128,7 +108,7 @@ class OnArrangeLayoutChipClickedActionTest {
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----
-            OnArrangeLayoutChipClickedAction(key = "layout:LIST").execute(
+            OnArrangeLayoutChipClickedAction(chip = LibraryLayoutChip.LIST).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -149,7 +129,7 @@ class OnArrangeLayoutChipClickedActionTest {
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 
             // ----- Act -----
-            OnArrangeLayoutChipClickedAction(key = "layout:GRID_THREE").execute(
+            OnArrangeLayoutChipClickedAction(chip = LibraryLayoutChip.GRID_THREE).execute(
                 dependencies = dependencies,
                 scope = scope,
             )

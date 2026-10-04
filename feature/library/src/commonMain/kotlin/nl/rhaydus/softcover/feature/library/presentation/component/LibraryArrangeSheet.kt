@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
@@ -21,7 +22,6 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyArrangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeLayoutChipClickedAction
@@ -73,8 +73,10 @@ internal fun LibraryArrangeSheet(
         Spacer(modifier = Modifier.height(10.dp))
 
         ChipFlowRow(
-            chips = state.arrangeLayoutChips,
-            onChipEvent = { key -> runAction(OnArrangeLayoutChipClickedAction(key = key)) },
+            chips = state.arrangeLayoutChips.chips,
+            onChipEvent = { key ->
+                state.arrangeLayoutChips[key]?.let { chip -> runAction(OnArrangeLayoutChipClickedAction(chip = chip)) }
+            },
         )
 
         state.arrangeTitlesToggle?.let { titlesToggle ->
@@ -87,7 +89,6 @@ internal fun LibraryArrangeSheet(
                         is ToggleEvent.Toggled -> runAction(OnArrangeTitlesToggleChangedAction(show = event.checked))
                     }
                 },
-                titleStyle = MaterialTheme.editorialTypography.body,
             )
         }
 
@@ -98,8 +99,10 @@ internal fun LibraryArrangeSheet(
         Spacer(modifier = Modifier.height(10.dp))
 
         ChipFlowRow(
-            chips = state.arrangeSortChips,
-            onChipEvent = { key -> runAction(OnArrangeSortChipClickedAction(key = key)) },
+            chips = state.arrangeSortChips.chips,
+            onChipEvent = { key ->
+                state.arrangeSortChips[key]?.let { mode -> runAction(OnArrangeSortChipClickedAction(mode = mode)) }
+            },
         )
 
         state.arrangeMakeOrderedListId?.let { listId ->
@@ -130,7 +133,7 @@ internal fun LibraryArrangeSheet(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ChipFlowRow(
-    chips: List<ChipUiModel>,
+    chips: ImmutableList<ChipUiModel>,
     onChipEvent: (key: String) -> Unit,
 ) {
     FlowRow(

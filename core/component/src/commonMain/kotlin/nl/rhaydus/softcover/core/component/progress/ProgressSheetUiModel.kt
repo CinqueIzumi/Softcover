@@ -4,12 +4,16 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
  * Everything `UpdateProgressBottomSheet` renders: the book it is logging against, what that book's
@@ -23,16 +27,17 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
  *
  * [progressPercent] is whole percent (0-100), already rounded — the sheet never sees the underlying
  * float.
+ *
+ * [whenRead] is the backdating row shared by every tab.
  */
 @Immutable
 data class ProgressSheetUiModel(
     val medium: ProgressSheetMedium,
     val progressPercent: Int,
     val tabs: SegmentedControlUiModel<ProgressSheetTab>,
+    val whenRead: WhenReadUiModel,
     val scaffold: SheetScaffoldUiModel,
 ) {
-    val selectedTab: ProgressSheetTab get() = tabs.selected
-
     companion object : UiModelPreviews<ProgressSheetUiModel> {
         /**
          * Percentage entry needs a known total to convert a fraction into pages (or seconds); without one
@@ -79,6 +84,16 @@ data class ProgressSheetUiModel(
             tabs = tabsFor(
                 medium = medium,
                 selectedTab = selectedTab,
+            ),
+            whenRead = WhenReadUiModel(
+                chip = ChipUiModel(
+                    key = "when-read",
+                    label = "Just now",
+                    interaction = ChipInteraction.Clickable,
+                    leading = ChipLeading.Icon(icon = SoftcoverIcon.DateRange),
+                ),
+                dayLabel = "Today",
+                timeLabel = "09:41",
             ),
             scaffold = SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
@@ -128,7 +143,6 @@ data class ProgressSheetUiModel(
                 bookTitle = "The Name of the Wind",
                 medium = ProgressSheetMedium.Timed(
                     totalSeconds = 100_320,
-                    currentSeconds = 12_045,
                     hours = progressTimeField(
                         unit = ProgressTimeUnit.HOURS,
                         text = "3",
@@ -149,7 +163,6 @@ data class ProgressSheetUiModel(
                 bookTitle = "The Name of the Wind",
                 medium = ProgressSheetMedium.Timed(
                     totalSeconds = 0,
-                    currentSeconds = 3_600,
                     hours = progressTimeField(
                         unit = ProgressTimeUnit.HOURS,
                         text = "1",

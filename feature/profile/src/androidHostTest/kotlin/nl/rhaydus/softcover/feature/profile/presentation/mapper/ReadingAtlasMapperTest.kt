@@ -73,7 +73,7 @@ class ReadingAtlasMapperTest {
                     eyebrow = "Avg. rating",
                     stat = StatNumberUiModel(
                         value = 4.2,
-                        format = StatNumberFormat.Decimal(fractionDigits = 1),
+                        format = StatNumberFormat.Decimal,
                     ),
                     variant = StatTileVariant.Compact(unit = "★"),
                 ),

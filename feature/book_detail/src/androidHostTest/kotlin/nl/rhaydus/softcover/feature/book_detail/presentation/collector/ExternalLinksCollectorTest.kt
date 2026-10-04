@@ -11,6 +11,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.AMAZON_KEY
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.BOOKSHOP_KEY
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.OPEN_LIBRARY_KEY
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -72,8 +75,7 @@ class ExternalLinksCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.externalLinks.shouldNotBeNull().links["amazon"] shouldBe
-                "https://www.amazon.com/s?k=9780306406157"
+            stateFlow.value.externalLinks.shouldNotBeNull().map { it.key } shouldBe listOf(BOOKSHOP_KEY, AMAZON_KEY, OPEN_LIBRARY_KEY)
             job.cancel()
         }
 
@@ -97,8 +99,7 @@ class ExternalLinksCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.externalLinks.shouldNotBeNull().links["amazon"] shouldBe
-                "https://www.amazon.com/s?k=9781234567897"
+            stateFlow.value.externalLinks.shouldNotBeNull().map { it.key } shouldBe listOf(BOOKSHOP_KEY, AMAZON_KEY, OPEN_LIBRARY_KEY)
             job.cancel()
         }
 

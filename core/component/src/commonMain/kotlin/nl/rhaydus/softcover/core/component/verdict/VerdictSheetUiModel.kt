@@ -29,7 +29,7 @@ data class VerdictSheetUiModel(
     val scaffold: SheetScaffoldUiModel,
     val initialRating: Double?,
     val initialReview: RichTextUiModel,
-    val spoilers: ToggleRowUiModel,
+    val spoilers: ToggleRowUiModel<String>,
     val reviewLabel: SectionHeaderUiModel.Label = SectionHeaderUiModel.Label(eyebrow = "In your words"),
 ) {
     companion object : UiModelPreviews<VerdictSheetUiModel> {
@@ -51,7 +51,7 @@ data class VerdictSheetUiModel(
             layout = SheetLayout.Pinned,
         )
 
-        private fun fixtureSpoilers(checked: Boolean): ToggleRowUiModel = ToggleRowUiModel(
+        private fun fixtureSpoilers(checked: Boolean): ToggleRowUiModel<String> = ToggleRowUiModel(
             key = "spoilers",
             title = "Contains spoilers",
             gloss = "Readers will need to tap to reveal the whole review.",

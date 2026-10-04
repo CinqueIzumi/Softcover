@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.session.presentation.mapper
 
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.session.presentation.state.FocusPageEditorUiModel
 import kotlin.math.roundToInt
@@ -15,9 +14,7 @@ internal fun Book.toFocusPageEditor(draft: String): FocusPageEditorUiModel {
 
         return FocusPageEditorUiModel(
             caption = "${percent.roundToInt()}% complete",
-            bar = ProgressBarUiModel(
-                fraction = (percent / 100f),
-            ),
+            fraction = percent / 100f,
             isEditable = false,
         )
     }
@@ -26,9 +23,7 @@ internal fun Book.toFocusPageEditor(draft: String): FocusPageEditorUiModel {
 
     return FocusPageEditorUiModel(
         caption = "of $totalPages pages",
-        bar = ProgressBarUiModel(
-            fraction = (page.toFloat() / totalPages),
-        ),
+        fraction = page.toFloat() / totalPages,
         isEditable = true,
     )
 }

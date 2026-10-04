@@ -1,12 +1,9 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screenmodel
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
-import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetShelfSwipeEnabledAsFlowUseCase
@@ -25,9 +22,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsColl
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
-import nl.rhaydus.softcover.feature.settings.presentation.util.settingsDisplayToggleAvailability
 import nl.rhaydus.toad.ToadScreenModel
-import kotlin.time.Clock
 
 internal class SettingsScreenScreenModel(
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
@@ -48,19 +43,10 @@ internal class SettingsScreenScreenModel(
     appDispatchers: AppDispatchers,
     flows: List<SettingsCollector>,
 ) : ToadScreenModel<SettingsScreenUiState, SettingsScreenEvent, SettingsScreenDependencies, SettingsCollector, SettingsLocalVariables>(
-    initialState = run {
-        val displayToggleAvailability = settingsDisplayToggleAvailability()
-
-        SettingsScreenUiState(
-            appVersionName = appVersionProvider.versionInfo.name,
-            appVersionCode = appVersionProvider.versionInfo.code,
-            dateStyleExamples = DateStyle.entries.associateWith {
-                it.format(Clock.System.todayIn(TimeZone.currentSystemDefault()))
-            },
-            showFloatingBarToggle = displayToggleAvailability.showsFloatingBarToggle,
-            showShelfSwipeToggle = displayToggleAvailability.showsShelfSwipeToggle,
-        )
-    },
+    initialState = SettingsScreenUiState(
+        appVersionName = appVersionProvider.versionInfo.name,
+        appVersionCode = appVersionProvider.versionInfo.code,
+    ),
     initialLocalVariables = SettingsLocalVariables(),
     initializers = flows,
 ) {

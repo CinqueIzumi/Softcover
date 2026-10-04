@@ -31,7 +31,7 @@ class ScanEditionCalloutMapperTest {
             // ----- Assert -----
             val callout = result.shouldNotBeNull()
             callout.dismissible shouldBe true
-            callout.action.shouldBeInstanceOf<CalloutActionUiModel.Button>()
+            callout.callToAction.shouldBeInstanceOf<CalloutActionUiModel.Button>()
         }
 
         @Test
@@ -49,7 +49,7 @@ class ScanEditionCalloutMapperTest {
             )
 
             // ----- Assert -----
-            result.shouldNotBeNull().action.shouldBeInstanceOf<CalloutActionUiModel.Busy>()
+            result.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Busy>()
         }
 
         @Test

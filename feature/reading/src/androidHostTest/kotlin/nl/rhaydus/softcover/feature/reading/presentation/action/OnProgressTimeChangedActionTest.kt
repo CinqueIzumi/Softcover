@@ -1,12 +1,10 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressTimeUnit
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -266,32 +264,6 @@ class OnProgressTimeChangedActionTest {
                 minutes = "0",
                 seconds = "0",
             )
-        }
-
-        @Test
-        fun `writes the new text onto the progress sheet fields immediately`() = runTest {
-            // ----- Arrange -----
-            val audiobook = audiobookAt(currentSeconds = 3725)
-            stateFlow.value = ReadingScreenUiState(
-                bookToUpdate = audiobook,
-                progressSheet = audiobook.toProgressSheetUiModel(selectedTab = ProgressSheetTab.TIME),
-            )
-            val action = OnProgressTimeChangedAction(
-                unit = ProgressTimeUnit.MINUTES,
-                text = "45",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            val medium = stateFlow.value.progressSheet?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
-            medium.hours.text shouldBe "1"
-            medium.minutes.text shouldBe "45"
-            medium.seconds.text shouldBe "5"
         }
 
         @Test

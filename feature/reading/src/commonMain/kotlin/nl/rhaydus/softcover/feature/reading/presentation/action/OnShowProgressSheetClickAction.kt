@@ -18,6 +18,7 @@ internal data class OnShowProgressSheetClickAction(val book: Book) : ReadingActi
             it.copy(
                 bookToUpdate = book,
                 showProgressSheet = true,
+                readAt = null,
             )
         }
     }

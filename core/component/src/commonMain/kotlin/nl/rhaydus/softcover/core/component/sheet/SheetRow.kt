@@ -27,7 +27,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
-fun <K> SheetRow(
+internal fun <K> SheetRow(
     model: SheetRowUiModel<K>,
     onEvent: (SheetRowEvent<K>) -> Unit,
     modifier: Modifier = Modifier,

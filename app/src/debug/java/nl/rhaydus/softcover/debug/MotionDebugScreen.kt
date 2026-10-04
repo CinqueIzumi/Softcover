@@ -42,7 +42,6 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
-import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
@@ -226,7 +225,7 @@ object MotionDebugScreen : Screen {
             ) {}
 
             MarkAsReadBurst(
-                model = remember(triggerKey) { MarkAsReadBurstUiModel(triggerKey = triggerKey) },
+                triggerKey = triggerKey,
                 modifier = Modifier.size(160.dp),
             )
 
@@ -307,7 +306,6 @@ object MotionDebugScreen : Screen {
                 StatNumber(
                     model = remember(value) { StatNumberUiModel(value = value.toDouble()) },
                     style = MaterialTheme.editorialTypography.statHero,
-                    color = MaterialTheme.colorScheme.primary,
                 )
 
                 RhaydusButton(

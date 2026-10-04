@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import kotlinx.datetime.LocalDateTime
+import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -11,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -19,6 +20,7 @@ import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
 import nl.rhaydus.softcover.core.domain.model.ReviewRun
 import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -209,8 +211,18 @@ class OnUpdatePercentageProgressClickActionTest {
         @Test
         fun `passes actionAt through to updateBookProgress when provided`() = runTest {
             // ----- Arrange -----
+            val readAt = LocalDateTime(
+                2026,
+                7,
+                21,
+                21,
+                0,
+            )
             val book = stubBookWithCurrentEditionPages(pages = 200)
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
+            stateFlow.value = ReadingScreenUiState(
+                bookToUpdate = book,
+                readAt = readAt,
+            )
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -218,13 +230,12 @@ class OnUpdatePercentageProgressClickActionTest {
                     book = book,
                     newPage = any(),
                     newSeconds = any(),
-                    actionAt = "2026-07-21T21:00:00Z",
+                    actionAt = readAt.toActionAt(),
                 )
             } returns Result.success(null)
 
             val action = OnUpdatePercentageProgressClickAction(
                 newPercentage = "50",
-                actionAt = "2026-07-21T21:00:00Z",
             )
 
             // ----- Act -----
@@ -239,7 +250,7 @@ class OnUpdatePercentageProgressClickActionTest {
                     book = book,
                     newPage = 100,
                     newSeconds = null,
-                    actionAt = "2026-07-21T21:00:00Z",
+                    actionAt = readAt.toActionAt(),
                 )
             }
         }

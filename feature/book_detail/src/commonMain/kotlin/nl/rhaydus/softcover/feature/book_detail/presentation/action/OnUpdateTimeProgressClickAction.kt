@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -13,13 +14,14 @@ internal data class OnUpdateTimeProgressClickAction(
     val hours: String,
     val minutes: String,
     val seconds: String,
-    val actionAt: String? = null,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val bookToUpdate: Book = scope.currentState.book ?: return
+
+        val actionAt = scope.currentState.readAt.toActionAt()
 
         val h = hours.toIntOrNull() ?: 0
         val m = minutes.toIntOrNull() ?: 0

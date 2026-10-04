@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 
 /**
- * Everything [ThemePreviewTile] renders: the tile's label, which pairing of the light/dark scheme it
+ * Everything [ThemePreviewTile] renders: the tile's [key], label, which pairing of the light/dark scheme it
  * paints, whether it is the reader's current choice, and the [palette] / [dynamicColor] the tile
  * resolves its own miniature scheme from.
  *
@@ -17,16 +17,18 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
  * delivers.
  */
 @Immutable
-data class ThemePreviewTileUiModel(
+data class ThemePreviewTileUiModel<K>(
+    val key: K,
     val label: String,
     val painting: ThemeTilePainting,
     val selected: Boolean,
     val palette: SpinePalette,
     val dynamicColor: Boolean,
 ) {
-    companion object : UiModelPreviews<ThemePreviewTileUiModel> {
-        override val previews: ImmutableList<ThemePreviewTileUiModel> = persistentListOf(
+    companion object : UiModelPreviews<ThemePreviewTileUiModel<String>> {
+        override val previews: ImmutableList<ThemePreviewTileUiModel<String>> = persistentListOf(
             ThemePreviewTileUiModel(
+                key = "light",
                 label = "Light",
                 painting = ThemeTilePainting.LIGHT,
                 selected = true,
@@ -34,6 +36,7 @@ data class ThemePreviewTileUiModel(
                 dynamicColor = false,
             ),
             ThemePreviewTileUiModel(
+                key = "dark",
                 label = "Dark",
                 painting = ThemeTilePainting.DARK,
                 selected = false,
@@ -41,6 +44,7 @@ data class ThemePreviewTileUiModel(
                 dynamicColor = false,
             ),
             ThemePreviewTileUiModel(
+                key = "system",
                 label = "System",
                 painting = ThemeTilePainting.SPLIT,
                 selected = false,

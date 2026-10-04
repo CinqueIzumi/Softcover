@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.chart.ChartSliceUiModel
 import nl.rhaydus.softcover.core.component.chart.ChartTone
-import nl.rhaydus.softcover.core.component.chart.RankedBarUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
@@ -15,7 +15,7 @@ internal fun genreRankingUiModel(genres: GenreBreakdown?): RankedBarsUiModel {
     if (genres == null) {
         return RankedBarsUiModel(
             rows = List(LOADING_ROW_COUNT) { index ->
-                RankedBarUiModel(
+                ChartSliceUiModel(
                     label = "",
                     share = "",
                     fraction = 0f,
@@ -30,7 +30,7 @@ internal fun genreRankingUiModel(genres: GenreBreakdown?): RankedBarsUiModel {
         rows = genres.slices
             .take(RANKED_GENRE_COUNT)
             .mapIndexed { index, slice ->
-                RankedBarUiModel(
+                ChartSliceUiModel(
                     label = slice.name,
                     share = percentLabel(fraction = slice.fraction.toFloat()),
                     fraction = slice.fraction.toFloat(),

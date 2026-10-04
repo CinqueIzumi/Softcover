@@ -13,54 +13,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.daysUntil
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
 
 /**
- * The inline day + time-of-day editor beneath [WhenReadRow]'s pill. Every stepper shifts
- * [pickedDateTime] by a fixed [Duration] through instant arithmetic — which rolls a day/hour/minute
- * over correctly on its own — then clamps the result to [now] so the reader can never dial in a
- * future moment; a stepper simply stops moving once it reaches that boundary.
+ * The inline day + time-of-day editor beneath [WhenReadRow]'s pill. Every stepper asks the host to shift
+ * the backdate by a fixed number of minutes; the host rolls the day over and stops at the current moment,
+ * so the reader can never dial in a future time.
  */
 @Composable
 internal fun WhenReadEditor(
-    pickedDateTime: LocalDateTime,
-    now: LocalDateTime,
-    timeZone: TimeZone,
-    onPickedDateTimeChange: (LocalDateTime) -> Unit,
+    model: WhenReadUiModel,
+    onEvent: (ProgressSheetEvent) -> Unit,
 ) {
-    fun shiftBy(duration: Duration) {
-        val shifted = pickedDateTime
-            .toInstant(timeZone)
-            .plus(duration)
-            .toLocalDateTime(timeZone)
-
-        onPickedDateTimeChange(if (shifted > now) now else shifted)
-    }
-
-    val dayLabel = dayLabelFor(
-        picked = pickedDateTime,
-        now = now,
-    )
-
     val timeStyle = MaterialTheme.editorialTypography.headlineMedium
-    val hh = pickedDateTime.hour.toString().padStart(
-        2,
-        '0',
-    )
-    val mm = pickedDateTime.minute.toString().padStart(
-        2,
-        '0',
-    )
 
     Column(
         modifier = Modifier
@@ -75,13 +41,13 @@ internal fun WhenReadEditor(
             StepperCircle(
                 symbol = "−",
                 contentDescription = "Earlier day",
-                onClick = { shiftBy((-1).days) },
+                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -1440)) },
             )
 
             Spacer(modifier = Modifier.width(18.dp))
 
             SoftcoverText(
-                text = dayLabel,
+                text = model.dayLabel,
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -91,7 +57,7 @@ internal fun WhenReadEditor(
             StepperCircle(
                 symbol = "+",
                 contentDescription = "Later day",
-                onClick = { shiftBy(1.days) },
+                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 1440)) },
             )
         }
 
@@ -105,7 +71,7 @@ internal fun WhenReadEditor(
             StepperCircle(
                 symbol = "−",
                 contentDescription = "Earlier hour",
-                onClick = { shiftBy((-1).hours) },
+                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -60)) },
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -113,13 +79,13 @@ internal fun WhenReadEditor(
             StepperCircle(
                 symbol = "−",
                 contentDescription = "Earlier 15 minutes",
-                onClick = { shiftBy((-15).minutes) },
+                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -15)) },
             )
 
             Spacer(modifier = Modifier.width(14.dp))
 
             SoftcoverText(
-                text = "$hh:$mm",
+                text = model.timeLabel,
                 style = timeStyle,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -129,7 +95,7 @@ internal fun WhenReadEditor(
             StepperCircle(
                 symbol = "+",
                 contentDescription = "Later 15 minutes",
-                onClick = { shiftBy(15.minutes) },
+                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 15)) },
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -137,18 +103,8 @@ internal fun WhenReadEditor(
             StepperCircle(
                 symbol = "+",
                 contentDescription = "Later hour",
-                onClick = { shiftBy(1.hours) },
+                onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 60)) },
             )
         }
     }
-}
-
-/** "Today" / "Yesterday" / "N days ago". */
-internal fun dayLabelFor(
-    picked: LocalDateTime,
-    now: LocalDateTime,
-): String = when (val daysAgo = picked.date.daysUntil(now.date)) {
-    0 -> "Today"
-    1 -> "Yesterday"
-    else -> "$daysAgo days ago"
 }

@@ -23,7 +23,7 @@ import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
-import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
@@ -40,7 +40,6 @@ import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -314,19 +313,50 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
             )
         },
     ),
-    galleryEntry(
+    GalleryEntry(
         name = "ProgressBar",
         family = GalleryFamily.PROGRESS,
         blurb = "A determinate wavy bar for reading progress; it animates to each new fraction " +
             "and masks while loading.",
-        previews = ProgressBarUiModel,
-        label = ::progressBarFixtureLabel,
-        content = { model, modifier ->
-            ProgressBar(
-                model = model,
-                modifier = modifier,
-            )
-        },
+        fixtures = persistentListOf(
+            GalleryFixture(
+                label = "Partial",
+                render = { modifier ->
+                    ProgressBar(
+                        fraction = 0.42f,
+                        modifier = modifier,
+                    )
+                },
+            ),
+            GalleryFixture(
+                label = "Empty",
+                render = { modifier ->
+                    ProgressBar(
+                        fraction = 0f,
+                        modifier = modifier,
+                    )
+                },
+            ),
+            GalleryFixture(
+                label = "Full",
+                render = { modifier ->
+                    ProgressBar(
+                        fraction = 1f,
+                        modifier = modifier,
+                    )
+                },
+            ),
+            GalleryFixture(
+                label = "Loading",
+                render = { modifier ->
+                    ProgressBar(
+                        fraction = 0f,
+                        modifier = modifier,
+                        isLoading = true,
+                    )
+                },
+            ),
+        ),
     ),
     galleryEntry(
         name = "StatNumber",
@@ -403,19 +433,32 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
             )
         },
     ),
-    galleryEntry(
+    GalleryEntry(
         name = "MarkAsReadBurst",
         family = GalleryFamily.CELEBRATION,
         blurb = "The radial particle burst played on a mark-as-read commit. A still fixture " +
             "cannot show it — the motion debug screen is where you watch one.",
-        previews = MarkAsReadBurstUiModel,
-        label = { "Burst" },
-        content = { model, modifier ->
-            MarkAsReadBurst(
-                model = model,
-                modifier = modifier.size(160.dp),
-            )
-        },
+        fixtures = persistentListOf(
+            GalleryFixture(
+                label = "Card",
+                render = { modifier ->
+                    MarkAsReadBurst(
+                        triggerKey = 1,
+                        modifier = modifier.size(160.dp),
+                    )
+                },
+            ),
+            GalleryFixture(
+                label = "Screen",
+                render = { modifier ->
+                    MarkAsReadBurst(
+                        triggerKey = 1,
+                        modifier = modifier.size(160.dp),
+                        scale = MarkAsReadBurstScale.Screen,
+                    )
+                },
+            ),
+        ),
     ),
 )
 
@@ -436,11 +479,11 @@ private fun searchTopBarFixtureLabel(model: SearchTopBarUiModel): String = when 
     else -> "Resting"
 }
 
-/** Names what a [BannerUiModel] fixture demonstrates — its tone is its anatomy. */
+/** Names what a [BannerUiModel] fixture demonstrates — its variant is its anatomy. */
 private fun bannerFixtureLabel(model: BannerUiModel): String =
-    model.tone.name.lowercase().replaceFirstChar(Char::uppercase)
+    model.variant.name
 
-private fun calloutFixtureLabel(model: CalloutUiModel): String = when (model.action) {
+private fun calloutFixtureLabel(model: CalloutUiModel): String = when (model.callToAction) {
     null -> "Status"
     is CalloutActionUiModel.Button -> if (model.dismissible) "Edition prompt" else "Update available"
     is CalloutActionUiModel.Busy -> "Edition updating"
@@ -455,13 +498,6 @@ private fun statNumberFixtureLabel(model: StatNumberUiModel): String {
         StatNumberFormat.Plain -> "Plain integer"
         is StatNumberFormat.Decimal -> "One decimal"
     }
-}
-
-private fun progressBarFixtureLabel(model: ProgressBarUiModel): String = when {
-    model.isLoading -> "Loading"
-    model.fraction <= 0f -> "Empty"
-    model.fraction >= 1f -> "Full"
-    else -> "Partial"
 }
 
 private fun statTileFixtureLabel(model: StatTileUiModel): String {

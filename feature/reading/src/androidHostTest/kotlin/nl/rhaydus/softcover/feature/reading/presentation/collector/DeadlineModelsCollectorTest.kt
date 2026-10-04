@@ -152,7 +152,7 @@ class DeadlineModelsCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.deadlineCoverOverlays.keys shouldBe setOf(1)
-                stateFlow.value.featuredDeadlineSummary?.paceText shouldBe "10 pages/day"
+                stateFlow.value.featuredDeadlineSummary?.text?.substringAfter(" • ") shouldBe "10 pages/day"
                 job.cancel()
             }
 
@@ -245,7 +245,7 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.featuredDeadlineSummary?.paceText shouldBe "1h 0m/day"
+            stateFlow.value.featuredDeadlineSummary?.text?.substringAfter(" • ") shouldBe "1h 0m/day"
             job.cancel()
         }
 
@@ -278,7 +278,7 @@ class DeadlineModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.featuredDeadlineSummary?.paceText shouldBe "5 pages/day"
+            stateFlow.value.featuredDeadlineSummary?.text?.substringAfter(" • ") shouldBe "5 pages/day"
             job.cancel()
         }
 

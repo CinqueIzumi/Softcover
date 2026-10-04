@@ -41,7 +41,6 @@ import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
-import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -156,7 +155,7 @@ internal fun ShelveControlCard(
         }
 
         MarkAsReadBurst(
-            model = remember(celebrationKey) { MarkAsReadBurstUiModel(triggerKey = celebrationKey) },
+            triggerKey = celebrationKey,
             modifier = Modifier.matchParentSize(),
         )
     }

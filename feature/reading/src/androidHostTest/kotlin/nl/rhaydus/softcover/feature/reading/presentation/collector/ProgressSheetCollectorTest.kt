@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldEndWith
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -8,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
@@ -27,6 +30,14 @@ class ProgressSheetCollectorTest {
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
     private lateinit var scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>
+
+    private val pastReadAt = LocalDateTime(
+        2020,
+        1,
+        2,
+        9,
+        15,
+    )
 
     @BeforeEach
     fun setUp() {
@@ -58,9 +69,9 @@ class ProgressSheetCollectorTest {
             stateFlow.value = stateFlow.value.copy(bookToUpdate = book)
 
             // ----- Assert -----
-            stateFlow.value.progressSheet shouldBe book.toProgressSheetUiModel(
-                selectedTab = stateFlow.value.progressSheetTab,
-            )
+            val expected = book.toProgressSheetUiModel(selectedTab = stateFlow.value.progressSheetTab)
+            val sheet = stateFlow.value.progressSheet.shouldNotBeNull()
+            sheet.copy(whenRead = expected.whenRead) shouldBe expected
             job.cancel()
         }
 
@@ -96,9 +107,9 @@ class ProgressSheetCollectorTest {
             }
 
             stateFlow.value = stateFlow.value.copy(bookToUpdate = book)
-            stateFlow.value.progressSheet shouldBe book.toProgressSheetUiModel(
-                selectedTab = stateFlow.value.progressSheetTab,
-            )
+            val expected = book.toProgressSheetUiModel(selectedTab = stateFlow.value.progressSheetTab)
+            val sheet = stateFlow.value.progressSheet.shouldNotBeNull()
+            sheet.copy(whenRead = expected.whenRead) shouldBe expected
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(bookToUpdate = null)
@@ -124,13 +135,13 @@ class ProgressSheetCollectorTest {
                 bookToUpdate = book,
                 progressSheetTab = ProgressSheetTab.PAGE,
             )
-            stateFlow.value.progressSheet?.selectedTab shouldBe ProgressSheetTab.PAGE
+            stateFlow.value.progressSheet?.tabs?.selected shouldBe ProgressSheetTab.PAGE
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(progressSheetTab = ProgressSheetTab.PERCENTAGE)
 
             // ----- Assert -----
-            stateFlow.value.progressSheet?.selectedTab shouldBe stateFlow.value.progressSheetTab
+            stateFlow.value.progressSheet?.tabs?.selected shouldBe stateFlow.value.progressSheetTab
             job.cancel()
         }
 
@@ -216,7 +227,7 @@ class ProgressSheetCollectorTest {
         }
 
         @Test
-        fun `does not reseed the fields while a draft stays present and only its text changes`() = runTest(UnconfinedTestDispatcher()) {
+        fun `follows the edited text while a draft stays present`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val audioEdition = PreviewData.baseEdition.copy(
                 readingFormat = ReadingFormat.Audio,
@@ -252,7 +263,101 @@ class ProgressSheetCollectorTest {
 
             // ----- Assert -----
             val medium = stateFlow.value.progressSheet?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
-            medium.minutes.text shouldBe "1"
+            medium.hours.text shouldBe "1"
+            medium.minutes.text shouldBe "45"
+            medium.seconds.text shouldBe "1"
+            job.cancel()
+        }
+
+        @Test
+        fun `a backdate shows the picked time on the whenRead row and selects its chip`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ProgressSheetCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            stateFlow.value = stateFlow.value.copy(bookToUpdate = PreviewData.baseBook)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(readAt = pastReadAt)
+
+            // ----- Assert -----
+            val whenRead = stateFlow.value.progressSheet.shouldNotBeNull().whenRead
+            whenRead.timeLabel shouldBe "09:15"
+            whenRead.chip.selected shouldBe true
+            whenRead.chip.label shouldEndWith ", 09:15"
+            job.cancel()
+        }
+
+        @Test
+        fun `resetting the backdate returns the whenRead row to just now`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = ProgressSheetCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            stateFlow.value = stateFlow.value.copy(
+                bookToUpdate = PreviewData.baseBook,
+                readAt = pastReadAt,
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(readAt = null)
+
+            // ----- Assert -----
+            val whenRead = stateFlow.value.progressSheet.shouldNotBeNull().whenRead
+            whenRead.chip.selected shouldBe false
+            whenRead.chip.label shouldBe "Just now"
+            job.cancel()
+        }
+
+        @Test
+        fun `a backdate alone leaves the time fields and tabs as they were`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val audioEdition = PreviewData.baseEdition.copy(
+                readingFormat = ReadingFormat.Audio,
+                audioSeconds = 7200,
+            )
+            val book = PreviewData.baseBook.copy(
+                editions = listOf(audioEdition),
+                defaultEdition = audioEdition,
+                userBookRead = null,
+            )
+            val draft = ProgressTimeDraft(
+                forSeconds = 0,
+                hours = "2",
+                minutes = "20",
+                seconds = "5",
+            )
+            val collector = ProgressSheetCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            stateFlow.value = stateFlow.value.copy(
+                bookToUpdate = book,
+                progressTimeDraft = draft,
+            )
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(readAt = pastReadAt)
+
+            // ----- Assert -----
+            val medium = stateFlow.value.progressSheet?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
+            medium.hours.text shouldBe "2"
+            medium.minutes.text shouldBe "20"
+            medium.seconds.text shouldBe "5"
             job.cancel()
         }
     }

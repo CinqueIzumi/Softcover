@@ -1,9 +1,8 @@
 package nl.rhaydus.softcover.feature.settings.presentation.mapper
 
 import nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel
-import nl.rhaydus.softcover.core.component.callout.CalloutLead
-import nl.rhaydus.softcover.core.component.callout.CalloutTone
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
+import nl.rhaydus.softcover.core.component.callout.CalloutVariant
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 
 private const val DOWNLOADING_EYEBROW = "Downloading"
@@ -68,11 +67,9 @@ private fun appUpdateCallout(
     body: String,
     callToAction: CalloutActionUiModel,
 ) = CalloutUiModel(
-    tone = CalloutTone.Highlight,
-    lead = CalloutLead.AccentBar,
+    variant = CalloutVariant.Highlight(title = title),
     eyebrow = eyebrow,
-    title = title,
     body = body,
-    action = callToAction,
+    callToAction = callToAction,
     dismissible = false,
 )

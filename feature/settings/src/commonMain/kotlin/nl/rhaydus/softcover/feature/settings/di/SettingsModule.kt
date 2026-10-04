@@ -7,10 +7,6 @@ import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.httpModule
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetReadingStreakEnabledAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.GetUiScaleAsFlowUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetReadingStreakEnabledUseCase
-import nl.rhaydus.softcover.core.preferences.domain.usecase.SetUiScaleUseCase
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapBundledDataSource
 import nl.rhaydus.softcover.feature.settings.data.datasource.RoadmapBundledDataSourceImpl
@@ -33,16 +29,15 @@ import nl.rhaydus.softcover.feature.settings.domain.usecase.SetThemeModeUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.collector.AppUpdateCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ComponentGalleryCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.DateStyleCollector
+import nl.rhaydus.softcover.feature.settings.presentation.collector.DisplayToggleRowsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.GalleryThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryTabCountsCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.LibraryVisibilityCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.PersistedLibraryVisibilityCollector
-import nl.rhaydus.softcover.feature.settings.presentation.collector.ReadingStreakCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.RoadmapCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.RoadmapDocumentCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.RoadmapRefreshCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.SettingsCollector
-import nl.rhaydus.softcover.feature.settings.presentation.collector.ShelfSwipeCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UiScaleCollector
 import nl.rhaydus.softcover.feature.settings.presentation.collector.UserListsCollector
@@ -90,9 +85,7 @@ val settingsModule = module {
 
     factory { DateStyleCollector() } bind SettingsCollector::class
 
-    factory { ReadingStreakCollector() } bind SettingsCollector::class
-
-    factory { ShelfSwipeCollector() } bind SettingsCollector::class
+    factory { DisplayToggleRowsCollector() } bind SettingsCollector::class
 
     factory { UiScaleCollector() } bind SettingsCollector::class
 

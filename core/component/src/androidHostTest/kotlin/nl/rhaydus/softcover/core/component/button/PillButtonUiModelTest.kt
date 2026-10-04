@@ -32,18 +32,6 @@ class PillButtonUiModelTest {
         }
 
         @Test
-        fun `every PillButtonInteraction value appears in at least one fixture`() {
-            // ----- Arrange -----
-            val expectedInteractions = PillButtonInteraction.entries.toSet()
-
-            // ----- Act -----
-            val coveredInteractions = PillButtonUiModel.previews.map { it.interaction }.toSet()
-
-            // ----- Assert -----
-            coveredInteractions shouldBe expectedInteractions
-        }
-
-        @Test
         fun `every PillButtonSize value appears in at least one fixture`() {
             // ----- Arrange -----
             val expectedSizes = PillButtonSize.entries.toSet()

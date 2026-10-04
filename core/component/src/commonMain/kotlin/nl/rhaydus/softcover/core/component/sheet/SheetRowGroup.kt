@@ -21,9 +21,7 @@ fun <K> SheetRowGroup(
                 onEvent = { event ->
                     onEvent(event)
 
-                    if (model.dismissesSheetOnSelect) {
-                        dismissSheet()
-                    }
+                    dismissSheet()
                 },
             )
         }

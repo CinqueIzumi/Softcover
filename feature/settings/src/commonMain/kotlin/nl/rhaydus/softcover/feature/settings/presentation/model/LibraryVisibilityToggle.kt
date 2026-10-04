@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.model
 
-import nl.rhaydus.softcover.core.component.control.ToggleIconStyle
 import nl.rhaydus.softcover.core.component.control.ToggleUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -13,9 +12,7 @@ internal fun libraryVisibilityToggleFor(
     key = "library-tab-visibility",
     checked = visible,
     description = if (visible) "Hide $label from the library tabs" else "Show $label on the library tabs",
-    variant = ToggleVariant.Icon(
-        on = SoftcoverIcon.Visibility,
-        off = SoftcoverIcon.VisibilityOff,
-        style = ToggleIconStyle.Bare,
-    ),
+    variant = ToggleVariant.Bare,
+    on = SoftcoverIcon.Visibility,
+    off = SoftcoverIcon.VisibilityOff,
 )

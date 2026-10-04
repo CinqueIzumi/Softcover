@@ -17,9 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.divider.Divider
@@ -34,22 +32,19 @@ fun StatTile(
 ) {
     when (val variant = model.variant) {
         is StatTileVariant.Hero -> HeroTile(
-            eyebrow = model.eyebrow,
-            stat = model.stat,
+            model = model,
             variant = variant,
             modifier = modifier,
         )
 
         is StatTileVariant.Standard -> StandardTile(
-            eyebrow = model.eyebrow,
-            stat = model.stat,
+            model = model,
             variant = variant,
             modifier = modifier,
         )
 
         is StatTileVariant.Compact -> CompactTile(
-            eyebrow = model.eyebrow,
-            stat = model.stat,
+            model = model,
             variant = variant,
             modifier = modifier,
         )
@@ -58,8 +53,7 @@ fun StatTile(
 
 @Composable
 private fun HeroTile(
-    eyebrow: String,
-    stat: StatNumberUiModel,
+    model: StatTileUiModel,
     variant: StatTileVariant.Hero,
     modifier: Modifier,
 ) {
@@ -73,8 +67,8 @@ private fun HeroTile(
         val demoted = LocalContentColor.current.copy(alpha = 0.75f)
 
         Column(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
-            TileEyebrow(
-                text = eyebrow,
+            SoftcoverText(
+                text = model.eyebrow.uppercase(),
                 style = typography.eyebrow,
                 color = demoted,
             )
@@ -82,7 +76,7 @@ private fun HeroTile(
             Spacer(modifier = Modifier.height(8.dp))
 
             StatNumber(
-                model = stat,
+                model = model.stat,
                 style = typography.statHero,
                 autoSize = TextAutoSize.StepBased(
                     minFontSize = 44.sp,
@@ -108,8 +102,7 @@ private fun HeroTile(
 
 @Composable
 private fun StandardTile(
-    eyebrow: String,
-    stat: StatNumberUiModel,
+    model: StatTileUiModel,
     variant: StatTileVariant.Standard,
     modifier: Modifier,
 ) {
@@ -125,8 +118,8 @@ private fun StandardTile(
             modifier = Modifier.fillMaxSize().padding(18.dp),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            TileEyebrow(
-                text = eyebrow,
+            SoftcoverText(
+                text = model.eyebrow.uppercase(),
                 style = typography.eyebrowSmall,
                 color = colors.primary,
             )
@@ -134,7 +127,7 @@ private fun StandardTile(
             Spacer(modifier = Modifier.height(20.dp))
 
             StatNumber(
-                model = stat,
+                model = model.stat,
                 style = typography.statLarge,
             )
 
@@ -149,8 +142,7 @@ private fun StandardTile(
 
 @Composable
 private fun CompactTile(
-    eyebrow: String,
-    stat: StatNumberUiModel,
+    model: StatTileUiModel,
     variant: StatTileVariant.Compact,
     modifier: Modifier,
 ) {
@@ -168,8 +160,8 @@ private fun CompactTile(
                 vertical = 14.dp,
             ),
         ) {
-            TileEyebrow(
-                text = eyebrow,
+            SoftcoverText(
+                text = model.eyebrow.uppercase(),
                 style = typography.eyebrowSmall,
                 color = colors.primary,
             )
@@ -178,7 +170,7 @@ private fun CompactTile(
 
             Row(verticalAlignment = Alignment.Bottom) {
                 StatNumber(
-                    model = stat,
+                    model = model.stat,
                     style = typography.headlineMedium,
                 )
 
@@ -193,17 +185,4 @@ private fun CompactTile(
             }
         }
     }
-}
-
-@Composable
-private fun TileEyebrow(
-    text: String,
-    style: TextStyle,
-    color: Color,
-) {
-    SoftcoverText(
-        text = text.uppercase(),
-        style = style,
-        color = color,
-    )
 }

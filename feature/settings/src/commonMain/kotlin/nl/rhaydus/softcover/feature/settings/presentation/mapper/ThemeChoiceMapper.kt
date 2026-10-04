@@ -6,7 +6,6 @@ import nl.rhaydus.softcover.core.component.control.ThemePreviewTileUiModel
 import nl.rhaydus.softcover.core.component.control.ThemeTilePainting
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
-import nl.rhaydus.softcover.feature.settings.presentation.model.ThemeChoice
 
 /**
  * Which of the light/dark pair each theme choice paints in its preview tile: the two explicit modes
@@ -23,7 +22,7 @@ private fun ThemeMode.toTilePainting(): ThemeTilePainting = when (this) {
 }
 
 /**
- * One [ThemeChoice] per [ThemeMode], marking [selected] as the reader's chosen mode and building its
+ * One keyed tile per [ThemeMode], marking [selected] as the reader's chosen mode and building its
  * [ThemePreviewTileUiModel] from [palette] and [dynamicColor]. Invoked off the composition — in
  * [nl.rhaydus.softcover.feature.settings.presentation.collector.ThemeConfigurationCollector]
  * and as [nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState]'s own
@@ -34,17 +33,15 @@ internal fun themeChoicesFor(
     selected: ThemeMode,
     palette: SpinePalette,
     dynamicColor: Boolean,
-): ImmutableList<ThemeChoice> = ThemeMode.entries
+): ImmutableList<ThemePreviewTileUiModel<ThemeMode>> = ThemeMode.entries
     .map { mode ->
-        ThemeChoice(
-            tile = ThemePreviewTileUiModel(
-                label = mode.label,
-                painting = mode.toTilePainting(),
-                selected = mode == selected,
-                palette = palette,
-                dynamicColor = dynamicColor,
-            ),
-            mode = mode,
+        ThemePreviewTileUiModel(
+            key = mode,
+            label = mode.label,
+            painting = mode.toTilePainting(),
+            selected = mode == selected,
+            palette = palette,
+            dynamicColor = dynamicColor,
         )
     }
     .toImmutableList()

@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import kotlinx.collections.immutable.toImmutableSet
-import nl.rhaydus.softcover.core.component.control.Toggle
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -282,10 +281,6 @@ fun VerdictSheet(
                         is ToggleEvent.Toggled -> spoilers = spoilers.copy(checked = event.checked)
                     }
                 },
-                titleStyle = MaterialTheme.typography.titleSmall,
-                glossStyle = MaterialTheme.typography.bodySmall,
-                titleGap = 2.dp,
-                switchGap = 12.dp,
             )
 
             Spacer(modifier = Modifier.height(20.dp))

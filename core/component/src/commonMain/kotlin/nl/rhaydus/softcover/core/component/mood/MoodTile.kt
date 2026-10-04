@@ -37,17 +37,18 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkHeartWre
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
- * A tappable tile that opens a mood-filtered search. Grows past [MoodTileDimensions.minHeight] with its
- * title and fills the height its parent gives it, so a row measured at `IntrinsicSize.Max` lines two tiles
- * up. While [isLoading] its leaves mask in place and it ignores presses.
+ * A tappable tile that opens a mood-filtered search. Grows past 104.dp with its title and fills the
+ * height its parent gives it, so a row measured at `IntrinsicSize.Max` lines two tiles up. While
+ * [MoodTileUiModel.isLoading] its leaves mask in place and it ignores presses.
  */
 @Composable
 fun MoodTile(
     model: MoodTileUiModel,
     onEvent: (MoodTileEvent) -> Unit,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
 ) {
+    val isLoading = model.isLoading
+
     val background: Color
     val foreground: Color
     val eyebrowColor: Color
@@ -85,7 +86,7 @@ fun MoodTile(
 
     Column(
         modifier = modifier
-            .heightIn(min = MoodTileDimensions.minHeight)
+            .heightIn(min = 104.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(background)
             .then(

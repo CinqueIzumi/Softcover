@@ -14,6 +14,6 @@ sealed interface StatNumberFormat {
     /** The bare integer — "30". For counts small enough that grouping would be noise. */
     data object Plain : StatNumberFormat
 
-    /** A fixed number of decimals — "4.2" at one digit. For averages. */
-    data class Decimal(val fractionDigits: Int) : StatNumberFormat
+    /** One decimal — "4.2". For averages. */
+    data object Decimal : StatNumberFormat
 }

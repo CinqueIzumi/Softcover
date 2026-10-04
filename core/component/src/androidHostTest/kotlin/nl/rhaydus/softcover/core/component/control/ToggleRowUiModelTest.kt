@@ -17,6 +17,15 @@ class ToggleRowUiModelTest {
         }
 
         @Test
+        fun `every ToggleRowVariant appears in at least one fixture`() {
+            // ----- Act -----
+            val variants = ToggleRowUiModel.previews.map { it.variant }
+
+            // ----- Assert -----
+            variants.toSet() shouldBe ToggleRowVariant.entries.toSet()
+        }
+
+        @Test
         fun `fixtures cover checked, unchecked, with and without a gloss`() {
             // ----- Act -----
             val rows = ToggleRowUiModel.previews

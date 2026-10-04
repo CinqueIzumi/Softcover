@@ -7,65 +7,61 @@ import org.junit.jupiter.api.Test
 class SheetChromeTest {
     private fun chrome(
         canDismiss: Boolean,
-        dismissal: SheetDismissal,
+        dismissStarted: Boolean = false,
+        close: () -> Unit,
     ) = SheetChrome(
         busy = false,
-        busyDescription = "Loading",
         canDismiss = canDismiss,
-        dismissal = dismissal,
+        dismissStarted = dismissStarted,
+        close = close,
     )
 
     @Nested
     inner class Dismiss {
         @Test
-        fun `dismiss hides the sheet when it can be dismissed`() {
+        fun `dismiss closes the sheet when it can be dismissed`() {
             // ----- Arrange -----
-            var hides = 0
+            var closes = 0
             val chrome = chrome(
                 canDismiss = true,
-                dismissal = SheetDismissal(hide = { hides++ }),
+                close = { closes++ },
             )
 
             // ----- Act -----
             chrome.dismiss()
 
             // ----- Assert -----
-            hides shouldBe 1
-            chrome.unlocked shouldBe false
+            closes shouldBe 1
         }
 
         @Test
         fun `dismiss does nothing when the sheet cannot be dismissed`() {
             // ----- Arrange -----
-            var hides = 0
+            var closes = 0
             val chrome = chrome(
                 canDismiss = false,
-                dismissal = SheetDismissal(hide = { hides++ }),
+                close = { closes++ },
             )
 
             // ----- Act -----
             chrome.dismiss()
 
             // ----- Assert -----
-            hides shouldBe 0
+            closes shouldBe 0
             chrome.unlocked shouldBe true
         }
 
         @Test
-        fun `a second dismiss during the hide does not hide again`() {
-            // ----- Arrange -----
-            var hides = 0
+        fun `the chrome is locked once a dismiss has started`() {
+            // ----- Act -----
             val chrome = chrome(
                 canDismiss = true,
-                dismissal = SheetDismissal(hide = { hides++ }),
+                dismissStarted = true,
+                close = {},
             )
 
-            // ----- Act -----
-            chrome.dismiss()
-            chrome.dismiss()
-
             // ----- Assert -----
-            hides shouldBe 1
+            chrome.unlocked shouldBe false
         }
     }
 }

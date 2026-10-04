@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
 import androidx.compose.runtime.Immutable
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 
 /**
  * The featured card's progress readout.
@@ -14,7 +13,7 @@ internal data class FeaturedProgressUiModel(
     val percent: String,
     val pageLead: String,
     val pageTail: String?,
-    val bar: ProgressBarUiModel,
+    val fraction: Float,
     val isLoading: Boolean = false,
 ) {
     companion object {
@@ -23,10 +22,7 @@ internal data class FeaturedProgressUiModel(
             percent = "50%",
             pageLead = "Page 331",
             pageTail = " of 662",
-            bar = ProgressBarUiModel(
-                fraction = 0.5f,
-                isLoading = true,
-            ),
+            fraction = 0.5f,
             isLoading = true,
         )
     }

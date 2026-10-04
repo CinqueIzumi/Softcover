@@ -66,7 +66,7 @@ internal fun DesktopTrendingSection(
                     BookCard(
                         model = card,
                         onEvent = onCardEvent,
-                        modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
+                        modifier = Modifier.width(168.dp),
                     )
                 }
             }

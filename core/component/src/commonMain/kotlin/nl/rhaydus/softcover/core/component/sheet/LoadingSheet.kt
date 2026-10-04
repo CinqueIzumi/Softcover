@@ -19,6 +19,7 @@ import kotlin.time.Duration.Companion.seconds
  * [LoadingSheetUiModel.isLoading] on [LoadingSheetEvent.Dismissed]. Prefer inline shimmer on cards when
  * the wait is short or the surface can stay interactive.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingSheet(
     model: LoadingSheetUiModel,
@@ -26,47 +27,33 @@ fun LoadingSheet(
     modifier: Modifier = Modifier,
 ) {
     if (model.isLoading) {
-        LoadingSheetContent(
-            model = model,
-            onEvent = onEvent,
-            modifier = modifier,
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun LoadingSheetContent(
-    model: LoadingSheetUiModel,
-    onEvent: (LoadingSheetEvent) -> Unit,
-    modifier: Modifier,
-) {
-    SheetScaffold(
-        model = model.scaffold,
-        onEvent = { event ->
-            if (event == SheetScaffoldEvent.Dismissed) {
-                onEvent(LoadingSheetEvent.Dismissed)
-            }
-        },
-        modifier = modifier,
-    ) {
-        if (model.progress != null) {
-            val animatedProgress by animateFloatAsState(targetValue = model.progress)
-
-            LaunchedEffect(animatedProgress) {
-                if (animatedProgress >= 1f) {
-                    delay(1.seconds)
-
-                    onEvent(LoadingSheetEvent.LoaderFinished)
+        SheetScaffold(
+            model = model.scaffold,
+            onEvent = { event ->
+                if (event == SheetScaffoldEvent.Dismissed) {
+                    onEvent(LoadingSheetEvent.Dismissed)
                 }
-            }
+            },
+            modifier = modifier,
+        ) {
+            if (model.progress != null) {
+                val animatedProgress by animateFloatAsState(targetValue = model.progress)
 
-            LinearWavyProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        } else {
-            LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
+                LaunchedEffect(animatedProgress) {
+                    if (animatedProgress >= 1f) {
+                        delay(1.seconds)
+
+                        onEvent(LoadingSheetEvent.LoaderFinished)
+                    }
+                }
+
+                LinearWavyProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
         }
     }
 }

@@ -32,8 +32,6 @@ import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.StatShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.YearRecapShareCardUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetFooter
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetRow
@@ -83,9 +81,10 @@ internal val bookAndSheetEntries: ImmutableList<GalleryEntry> = persistentListOf
     galleryEntry(
         name = "MoodTile",
         family = GalleryFamily.MOOD,
-        blurb = "A tappable mood tile in one of four inks, opening a mood-filtered search.",
+        blurb = "A tappable mood tile in one of four inks, opening a mood-filtered search; loading masks " +
+            "its text and icon and drops the press.",
         previews = MoodTileUiModel,
-        label = { model -> "${model.ink.name} ink" },
+        label = { model -> if (model.isLoading) "Loading" else "${model.ink.name} ink" },
         content = { model, modifier ->
             MoodTile(
                 model = model,
@@ -93,24 +92,6 @@ internal val bookAndSheetEntries: ImmutableList<GalleryEntry> = persistentListOf
                 modifier = modifier.width(160.dp),
             )
         },
-    ),
-    GalleryEntry(
-        name = "MoodTile (loading)",
-        family = GalleryFamily.MOOD,
-        blurb = "The tile at its real size with its text and icon masked and no press.",
-        fixtures = persistentListOf(
-            GalleryFixture(
-                label = "Loading",
-                render = { modifier ->
-                    MoodTile(
-                        model = MoodTileUiModel.previews.first(),
-                        onEvent = {},
-                        isLoading = true,
-                        modifier = modifier.width(160.dp),
-                    )
-                },
-            ),
-        ),
     ),
     galleryEntry(
         name = "Sidebar",
@@ -152,20 +133,6 @@ internal val bookAndSheetEntries: ImmutableList<GalleryEntry> = persistentListOf
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        },
-    ),
-    galleryEntry(
-        name = "SheetFooter",
-        family = GalleryFamily.SHEET,
-        blurb = "A sheet's closing button row: a filled primary and a text secondary, stacked or inline.",
-        previews = SheetFooterUiModel,
-        label = ::sheetFooterFixtureLabel,
-        content = { model, modifier ->
-            SheetFooter(
-                model = model,
-                onEvent = {},
-                modifier = modifier,
-            )
         },
     ),
     galleryEntry(
@@ -237,13 +204,6 @@ private fun sheetScaffoldFixtureLabel(model: SheetScaffoldUiModel): String = whe
     model.layout == SheetLayout.Scrolling -> "Scrolling, footer"
     model.header.trailing is SheetHeaderTrailing.Action -> "Pinned, header action"
     else -> "Pinned, jacket stack and inline footer"
-}
-
-private fun sheetFooterFixtureLabel(model: SheetFooterUiModel): String = when {
-    model.primary?.enabled == false -> "Inline, primary disabled"
-    model is SheetFooterUiModel.Stacked && model.secondary == null -> "Stacked, primary only"
-    model is SheetFooterUiModel.Stacked -> "Stacked"
-    else -> "Inline"
 }
 
 private fun sheetRowFixtureLabel(model: SheetRowUiModel<String>): String = when {

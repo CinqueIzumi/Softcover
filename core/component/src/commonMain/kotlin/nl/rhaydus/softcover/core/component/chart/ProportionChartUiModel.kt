@@ -12,26 +12,26 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  */
 @Immutable
 data class ProportionChartUiModel(
-    val segments: ImmutableList<ProportionSegmentUiModel>,
+    val segments: ImmutableList<ChartSliceUiModel>,
     val isLoading: Boolean = false,
 ) {
     companion object : UiModelPreviews<ProportionChartUiModel> {
         override val previews: ImmutableList<ProportionChartUiModel> = persistentListOf(
             ProportionChartUiModel(
                 segments = persistentListOf(
-                    ProportionSegmentUiModel(
+                    ChartSliceUiModel(
                         label = "Women",
                         share = "58%",
                         fraction = 0.58f,
                         tone = ChartTone.Lead,
                     ),
-                    ProportionSegmentUiModel(
+                    ChartSliceUiModel(
                         label = "Men",
                         share = "34%",
                         fraction = 0.34f,
                         tone = ChartTone.Second,
                     ),
-                    ProportionSegmentUiModel(
+                    ChartSliceUiModel(
                         label = "Other",
                         share = "8%",
                         fraction = 0.08f,
@@ -41,19 +41,19 @@ data class ProportionChartUiModel(
             ),
             ProportionChartUiModel(
                 segments = persistentListOf(
-                    ProportionSegmentUiModel(
+                    ChartSliceUiModel(
                         label = "Yes",
                         share = "30%",
                         fraction = 0.3f,
                         tone = ChartTone.Lead,
                     ),
-                    ProportionSegmentUiModel(
+                    ChartSliceUiModel(
                         label = "No",
                         share = "50%",
                         fraction = 0.5f,
                         tone = ChartTone.Fourth,
                     ),
-                    ProportionSegmentUiModel(
+                    ChartSliceUiModel(
                         label = "Unknown",
                         share = "20%",
                         fraction = 0.2f,
@@ -63,13 +63,13 @@ data class ProportionChartUiModel(
             ),
             ProportionChartUiModel(
                 segments = persistentListOf(
-                    ProportionSegmentUiModel(
+                    ChartSliceUiModel(
                         label = "Yes",
                         share = "0%",
                         fraction = 0f,
                         tone = ChartTone.Lead,
                     ),
-                    ProportionSegmentUiModel(
+                    ChartSliceUiModel(
                         label = "No",
                         share = "100%",
                         fraction = 1f,
@@ -87,7 +87,7 @@ data class ProportionChartUiModel(
             ),
         )
 
-        private fun loadingSegment(tone: ChartTone) = ProportionSegmentUiModel(
+        private fun loadingSegment(tone: ChartTone) = ChartSliceUiModel(
             label = "",
             share = "",
             fraction = 0f,

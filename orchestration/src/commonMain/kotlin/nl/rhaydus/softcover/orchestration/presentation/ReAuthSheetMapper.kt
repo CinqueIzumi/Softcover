@@ -10,7 +10,26 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 
 internal fun ReAuthState.toSheetUiModel(): ReAuthSheetUiModel = ReAuthSheetUiModel(
-    scaffold = toScaffoldUiModel(),
+    scaffold = SheetScaffoldUiModel(
+        header = SheetHeaderUiModel(
+            section = SectionHeaderUiModel.Section(
+                eyebrow = "Account",
+                headline = "Session expired",
+                description = "Your Hardcover API token was rejected. " +
+                    "Paste a valid token below to continue without losing your local data.",
+            ),
+        ),
+        footer = SheetFooterUiModel.Stacked(
+            primary = SheetFooterButton(
+                label = "Re-authenticate",
+                enabled = apiKey.isNotBlank(),
+            ),
+            secondary = SheetFooterButton(label = "Log out"),
+        ),
+        dismissible = false,
+        busy = isSubmitting,
+        closeRequested = closeRequested,
+    ),
     apiKeyField = TextFieldUiModel(
         key = "api-token",
         text = apiKey,
@@ -19,25 +38,4 @@ internal fun ReAuthState.toSheetUiModel(): ReAuthSheetUiModel = ReAuthSheetUiMod
         enabled = isSubmitting.not(),
     ),
     errorMessage = errorMessage,
-)
-
-private fun ReAuthState.toScaffoldUiModel(): SheetScaffoldUiModel = SheetScaffoldUiModel(
-    header = SheetHeaderUiModel(
-        section = SectionHeaderUiModel.Section(
-            eyebrow = "Account",
-            headline = "Session expired",
-            description = "Your Hardcover API token was rejected. " +
-                "Paste a valid token below to continue without losing your local data.",
-        ),
-    ),
-    footer = SheetFooterUiModel.Stacked(
-        primary = SheetFooterButton(
-            label = "Re-authenticate",
-            enabled = apiKey.isNotBlank(),
-        ),
-        secondary = SheetFooterButton(label = "Log out"),
-    ),
-    dismissible = false,
-    busy = isSubmitting,
-    closeRequested = closeRequested,
 )

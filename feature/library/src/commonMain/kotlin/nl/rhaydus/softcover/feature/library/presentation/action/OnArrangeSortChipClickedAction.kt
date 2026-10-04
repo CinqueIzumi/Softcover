@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
-import nl.rhaydus.softcover.feature.library.presentation.state.librarySortModeForKey
 import nl.rhaydus.toad.ActionScope
 
 /**
@@ -13,14 +13,12 @@ import nl.rhaydus.toad.ActionScope
  * default direction.
  */
 internal class OnArrangeSortChipClickedAction(
-    private val key: String,
+    private val mode: LibrarySortMode,
 ) : LibraryAction {
     override suspend fun execute(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        val mode = librarySortModeForKey(key = key) ?: return
-
         scope.setState { state ->
             val draft = state.arrangeDraft ?: return@setState state
 

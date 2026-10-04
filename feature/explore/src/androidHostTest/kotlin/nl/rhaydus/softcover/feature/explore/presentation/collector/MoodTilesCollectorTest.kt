@@ -61,7 +61,10 @@ class MoodTilesCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(moodTags = listOf(cosy, dark))
+            stateFlow.value = stateFlow.value.copy(
+                moodTags = listOf(cosy, dark),
+                loadingMoodTags = false,
+            )
 
             // ----- Assert -----
             stateFlow.value.moodTiles.map { it.key } shouldBe listOf(1, 2)
@@ -73,7 +76,10 @@ class MoodTilesCollectorTest {
         @Test
         fun `empties moodTiles when moodTags becomes empty`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(moodTags = listOf(cosy))
+            stateFlow.value = stateFlow.value.copy(
+                moodTags = listOf(cosy),
+                loadingMoodTags = false,
+            )
             val job = launch {
                 MoodTilesCollector().onLaunch(
                     scope = scope,
@@ -90,9 +96,99 @@ class MoodTilesCollectorTest {
         }
 
         @Test
+        fun `emits four loading stand-in tiles while the first load has no tags`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(
+                moodTags = emptyList(),
+                loadingMoodTags = true,
+            )
+
+            // ----- Act -----
+            val job = launch {
+                MoodTilesCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.moodTiles.size shouldBe 4
+            stateFlow.value.moodTiles.all { it.isLoading } shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `replaces the stand-ins with the real tiles once the tags arrive`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                MoodTilesCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            stateFlow.value.moodTiles.size shouldBe 4
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                moodTags = listOf(cosy, dark),
+                loadingMoodTags = false,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.moodTiles.map { it.key } shouldBe listOf(1, 2)
+            stateFlow.value.moodTiles.none { it.isLoading } shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `real tags are shown rather than stand-ins even while a refresh is still loading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                MoodTilesCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                moodTags = listOf(cosy),
+                loadingMoodTags = true,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.moodTiles.map { it.key } shouldBe listOf(1)
+            job.cancel()
+        }
+
+        @Test
+        fun `shows no tiles when loading finished with no tags`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                MoodTilesCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                moodTags = emptyList(),
+                loadingMoodTags = false,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.moodTiles shouldBe persistentListOf()
+            job.cancel()
+        }
+
+        @Test
         fun `unrelated state change does not recompute the tiles`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(moodTags = listOf(cosy))
+            stateFlow.value = stateFlow.value.copy(
+                moodTags = listOf(cosy),
+                loadingMoodTags = false,
+            )
             val job = launch {
                 MoodTilesCollector().onLaunch(
                     scope = scope,

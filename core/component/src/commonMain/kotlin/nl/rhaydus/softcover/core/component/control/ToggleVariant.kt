@@ -1,17 +1,9 @@
 package nl.rhaydus.softcover.core.component.control
 
-import androidx.compose.runtime.Immutable
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+enum class ToggleVariant {
+    /** A 44dp rounded tile that fills with the primary colour while checked. */
+    Filled,
 
-@Immutable
-sealed interface ToggleVariant {
-    /** A glyph that swaps between [on] and [off]. */
-    data class Icon(
-        val on: SoftcoverIcon,
-        val off: SoftcoverIcon,
-        val style: ToggleIconStyle,
-    ) : ToggleVariant
-
-    /** The platform switch; the visible label stays with the caller. */
-    data object Switch : ToggleVariant
+    /** A 38dp circle with no fill; only the glyph's colour changes. */
+    Bare,
 }

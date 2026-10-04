@@ -89,7 +89,6 @@ private fun RatingsAverageRow(
                     fontSize = 52.sp,
                     lineHeight = 52.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurface,
             )
 
             SoftcoverText(

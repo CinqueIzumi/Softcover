@@ -22,17 +22,7 @@ class ToggleUiModelTest {
             val variants = ToggleUiModel.previews.map { it.variant }
 
             // ----- Assert -----
-            variants.any { it is ToggleVariant.Icon } shouldBe true
-            variants.any { it == ToggleVariant.Switch } shouldBe true
-        }
-
-        @Test
-        fun `every ToggleIconStyle appears in at least one fixture`() {
-            // ----- Act -----
-            val styles = ToggleUiModel.previews.map { it.variant }.filterIsInstance<ToggleVariant.Icon>().map { it.style }
-
-            // ----- Assert -----
-            styles.toSet() shouldBe ToggleIconStyle.entries.toSet()
+            variants.toSet() shouldBe ToggleVariant.entries.toSet()
         }
 
         @Test

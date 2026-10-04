@@ -58,10 +58,10 @@ class ArrangeDraftChipsSnapshotTest {
             val result = snapshot.compute()
 
             // ----- Assert -----
-            val layoutChip = result.layoutChips.first { it.key == "layout:GRID_TWO" }
+            val layoutChip = result.layoutChips.chips.first { it.key == "layout:GRID_TWO" }
             layoutChip.tone shouldBe ChipTone.Choice
             layoutChip.selected shouldBe true
-            val titleChip = result.sortChips.first { it.key == "sort:TITLE" }
+            val titleChip = result.sortChips.chips.first { it.key == "sort:TITLE" }
             titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
             titleChip.trailing shouldBe ChipTrailing.Icon(

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.orchestration.presentation.viewmodel
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -14,9 +16,9 @@ import kotlinx.coroutines.test.setMain
 import nl.rhaydus.softcover.core.domain.account.ReAuthenticateUseCase
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
+import nl.rhaydus.softcover.core.domain.message.SessionExpiredNotifier
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
-import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshReadingActivityUseCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -66,17 +68,61 @@ class MainActivityViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private fun showReAuthSheet() {
+        viewModel.setUserAuthenticated(authenticated = true)
+        SessionExpiredNotifier.notifySessionExpired()
+    }
+
+    @Nested
+    inner class ReAuthSheetVisibility {
+        @Test
+        fun `is null until the session expires`() {
+            // ----- Assert -----
+            viewModel.reAuthSheet.value.shouldBeNull()
+        }
+
+        @Test
+        fun `stays null when the session expires while unauthenticated`() {
+            // ----- Act -----
+            SessionExpiredNotifier.notifySessionExpired()
+
+            // ----- Assert -----
+            viewModel.reAuthSheet.value.shouldBeNull()
+        }
+
+        @Test
+        fun `is shown when the session expires while authenticated`() {
+            // ----- Act -----
+            showReAuthSheet()
+
+            // ----- Assert -----
+            viewModel.reAuthSheet.value.shouldNotBeNull()
+        }
+    }
+
     @Nested
     inner class OnReAuthApiKeyChanged {
         @Test
         fun `updates the stored api key and the sheet model`() {
+            // ----- Arrange -----
+            showReAuthSheet()
+
             // ----- Act -----
             viewModel.onReAuthApiKeyChanged("abc")
 
             // ----- Assert -----
-            viewModel.reAuthState.value.apiKey shouldBe "abc"
-            viewModel.reAuthSheet.value.apiKeyField.text shouldBe "abc"
-            viewModel.reAuthSheet.value.scaffold.footer?.primary?.enabled shouldBe true
+            val sheet = viewModel.reAuthSheet.value.shouldNotBeNull()
+            sheet.apiKeyField.text shouldBe "abc"
+            sheet.scaffold.footer?.primary?.enabled shouldBe true
+        }
+
+        @Test
+        fun `does not show the sheet by itself`() {
+            // ----- Act -----
+            viewModel.onReAuthApiKeyChanged("abc")
+
+            // ----- Assert -----
+            viewModel.reAuthSheet.value.shouldBeNull()
         }
     }
 
@@ -105,15 +151,16 @@ class MainActivityViewModelTest {
             coEvery {
                 reAuthenticateUseCase("abc")
             } returns Result.success(Unit)
+            showReAuthSheet()
             viewModel.onReAuthApiKeyChanged("abc")
 
             // ----- Act -----
             viewModel.reAuthenticate()
 
             // ----- Assert -----
-            viewModel.reAuthState.value.closeRequested shouldBe true
-            viewModel.reAuthState.value.apiKey shouldBe "abc"
-            viewModel.reAuthSheet.value.scaffold.closeRequested shouldBe true
+            val sheet = viewModel.reAuthSheet.value.shouldNotBeNull()
+            sheet.apiKeyField.text shouldBe "abc"
+            sheet.scaffold.closeRequested shouldBe true
         }
 
         @Test
@@ -122,17 +169,18 @@ class MainActivityViewModelTest {
             coEvery {
                 reAuthenticateUseCase("abc")
             } returns Result.failure(IllegalStateException("rejected"))
+            showReAuthSheet()
             viewModel.onReAuthApiKeyChanged("abc")
 
             // ----- Act -----
             viewModel.reAuthenticate()
 
             // ----- Assert -----
-            val state = viewModel.reAuthState.value
-            state.apiKey shouldBe "abc"
-            state.isSubmitting shouldBe false
-            (state.errorMessage != null) shouldBe true
-            state.closeRequested shouldBe false
+            val sheet = viewModel.reAuthSheet.value.shouldNotBeNull()
+            sheet.apiKeyField.text shouldBe "abc"
+            sheet.scaffold.busy shouldBe false
+            sheet.errorMessage.shouldNotBeNull()
+            sheet.scaffold.closeRequested shouldBe false
         }
     }
 
@@ -144,6 +192,7 @@ class MainActivityViewModelTest {
             coEvery {
                 reAuthenticateUseCase("abc")
             } returns Result.success(Unit)
+            showReAuthSheet()
             viewModel.onReAuthApiKeyChanged("abc")
             viewModel.reAuthenticate()
 
@@ -151,7 +200,7 @@ class MainActivityViewModelTest {
             viewModel.onReAuthDismissed()
 
             // ----- Assert -----
-            viewModel.reAuthState.value shouldBe ReAuthState()
+            viewModel.reAuthSheet.value.shouldBeNull()
         }
     }
 }

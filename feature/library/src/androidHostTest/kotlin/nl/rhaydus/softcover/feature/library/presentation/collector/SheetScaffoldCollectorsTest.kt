@@ -367,7 +367,6 @@ class SheetScaffoldCollectorsTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.shelvesSheetGroup.dismissesSheetOnSelect shouldBe true
         }
     }
 }

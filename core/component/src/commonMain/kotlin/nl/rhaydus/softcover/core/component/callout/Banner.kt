@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -41,13 +42,10 @@ fun Banner(
     modifier: Modifier = Modifier,
     windowInsets: WindowInsets = WindowInsets(0),
 ) {
-    val style = bannerStyle(
-        tone = model.tone,
-        variant = model.variant,
-        scheme = MaterialTheme.colorScheme,
-        typography = MaterialTheme.typography,
-        editorialTypography = MaterialTheme.editorialTypography,
-    )
+    val scheme = MaterialTheme.colorScheme
+    val editorial = model.variant == BannerVariant.Editorial
+    val container = if (editorial) scheme.primaryContainer else scheme.errorContainer
+    val content = if (editorial) scheme.onPrimaryContainer else scheme.onErrorContainer
 
     AnimatedVisibility(
         visible = model.visible,
@@ -58,24 +56,24 @@ fun Banner(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(style.container)
+                .background(container)
                 .windowInsetsPadding(windowInsets)
                 .padding(
-                    horizontal = style.horizontalPadding,
-                    vertical = style.verticalPadding,
+                    horizontal = 16.dp,
+                    vertical = 10.dp,
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (model.icon != null) {
+            if (editorial) {
                 val leading = drawableIconResource(
-                    icon = model.icon,
+                    icon = SoftcoverIcon.Info,
                     contentDescription = "",
                 )
 
                 Icon(
                     painter = leading.getIconPainter(),
                     contentDescription = null,
-                    tint = style.content,
+                    tint = content,
                     modifier = Modifier.size(18.dp),
                 )
 
@@ -84,19 +82,19 @@ fun Banner(
 
             SoftcoverText(
                 text = model.message,
-                style = style.textStyle,
-                color = style.content,
-                textAlign = style.textAlign,
+                style = if (editorial) MaterialTheme.editorialTypography.bodySmall else MaterialTheme.typography.bodySmall,
+                color = content,
+                textAlign = if (editorial) TextAlign.Start else TextAlign.Center,
                 modifier = Modifier.weight(1f),
             )
 
-            if (model.dismissible) {
+            if (editorial) {
                 ChromeIconButton(
                     icon = SoftcoverIcon.Close,
                     contentDescription = "Dismiss",
                     tooltip = "Dismiss",
                     onClick = { onEvent(BannerEvent.DismissClicked) },
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = style.dismissInk),
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = content.copy(alpha = 0.8f)),
                     iconSize = 16.dp,
                 )
             }

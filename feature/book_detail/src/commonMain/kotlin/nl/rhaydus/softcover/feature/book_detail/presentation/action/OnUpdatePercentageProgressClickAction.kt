@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -11,13 +12,14 @@ import nl.rhaydus.toad.ActionScope
 
 internal data class OnUpdatePercentageProgressClickAction(
     val newPercentage: String,
-    val actionAt: String? = null,
 ) : BookDetailAction {
     override suspend fun execute(
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         val bookToUpdate: Book = scope.currentState.book ?: return
+
+        val actionAt = scope.currentState.readAt.toActionAt()
 
         val newPercentageValue: Double = newPercentage.toDoubleOrNull() ?: 0.0
         val fraction = (newPercentageValue / 100.0).coerceIn(

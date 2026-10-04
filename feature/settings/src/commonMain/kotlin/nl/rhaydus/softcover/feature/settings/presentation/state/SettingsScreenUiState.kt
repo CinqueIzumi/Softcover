@@ -2,6 +2,9 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
+import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileUiModel
+import nl.rhaydus.softcover.core.component.control.ThemePreviewTileUiModel
+import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -20,20 +23,16 @@ import nl.rhaydus.softcover.feature.settings.presentation.mapper.settingsSidebar
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.themeChoicesFor
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.uiScaleRowsFor
 import nl.rhaydus.softcover.feature.settings.presentation.model.DisplayToggle
-import nl.rhaydus.softcover.feature.settings.presentation.model.PaletteChoice
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsChoiceRowUiModel
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarKey
-import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsToggleRowUiModel
-import nl.rhaydus.softcover.feature.settings.presentation.model.ThemeChoice
 import nl.rhaydus.softcover.feature.settings.presentation.screen.SettingsCategory
+import nl.rhaydus.softcover.feature.settings.presentation.util.settingsDisplayToggleAvailability
 import nl.rhaydus.toad.UiState
 
 private const val ABOUT_TITLE = "About"
 private const val APPEARANCE_TITLE = "Appearance"
 
 internal data class SettingsScreenUiState(
-    val useFloatingBarChecked: Boolean = true,
-
     /** Mobile only; desktop uses [settingsSidebarMasthead] instead. */
     val settingsPageMasthead: PageMastheadUiModel = PageMastheadUiModel(
         title = "Settings",
@@ -117,39 +116,33 @@ internal data class SettingsScreenUiState(
     ),
     val themeMode: ThemeMode = ThemeMode.DEFAULT,
     val colorPalette: ColorPalette = ColorPalette.DEFAULT,
-    val useDynamicColorChecked: Boolean = false,
-    val readingStreakEnabledChecked: Boolean = true,
-    val shelfSwipeEnabledChecked: Boolean = false,
-    val showFloatingBarToggle: Boolean = true,
-    val showShelfSwipeToggle: Boolean = true,
-    val displayToggleRows: ImmutableList<SettingsToggleRowUiModel<DisplayToggle>> = displayToggleRowsFor(
-        showFloatingBarToggle = showFloatingBarToggle,
-        showShelfSwipeToggle = showShelfSwipeToggle,
-        useFloatingBarChecked = useFloatingBarChecked,
-        shelfSwipeEnabledChecked = shelfSwipeEnabledChecked,
-        readingStreakEnabledChecked = readingStreakEnabledChecked,
-    ),
-    val dynamicColorToggleRow: SettingsToggleRowUiModel<DisplayToggle> = dynamicColorToggleRowFor(checked = useDynamicColorChecked),
-    val userDateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
-    val dateStyleExamples: Map<DateStyle, String> = emptyMap(),
+    val displayToggleRows: ImmutableList<ToggleRowUiModel<DisplayToggle>> = settingsDisplayToggleAvailability().let { availability ->
+        displayToggleRowsFor(
+            showFloatingBarToggle = availability.showsFloatingBarToggle,
+            showShelfSwipeToggle = availability.showsShelfSwipeToggle,
+            useFloatingBarChecked = true,
+            shelfSwipeEnabledChecked = false,
+            readingStreakEnabledChecked = true,
+        )
+    },
+    val dynamicColorToggleRow: ToggleRowUiModel<DisplayToggle> = dynamicColorToggleRowFor(checked = false),
     val dateStyleRows: ImmutableList<SettingsChoiceRowUiModel<DateStyle>> = dateStyleRowsFor(
-        examples = dateStyleExamples,
-        selected = userDateStyle,
+        examples = emptyMap(),
+        selected = DateStyle.DAY_MONTH_YEAR,
     ),
     val dropDownExpanded: Boolean = false,
     val appVersionName: String = "",
     val appVersionCode: Int = 0,
     val versionLabel: String = "Version $appVersionName ($appVersionCode)",
-    val uiScale: UiScale = UiScale.DEFAULT,
-    val uiScaleRows: ImmutableList<SettingsChoiceRowUiModel<UiScale>> = uiScaleRowsFor(selected = uiScale),
+    val uiScaleRows: ImmutableList<SettingsChoiceRowUiModel<UiScale>> = uiScaleRowsFor(selected = UiScale.DEFAULT),
     val spinePalette: SpinePalette = SpinePalette.DEFAULT,
     val paletteGloss: String = SpinePalette.DEFAULT.gloss,
-    val themeChoices: ImmutableList<ThemeChoice> = themeChoicesFor(
+    val themeChoices: ImmutableList<ThemePreviewTileUiModel<ThemeMode>> = themeChoicesFor(
         selected = ThemeMode.DEFAULT,
         palette = SpinePalette.DEFAULT,
         dynamicColor = false,
     ),
-    val paletteChoices: ImmutableList<PaletteChoice> = paletteChoicesFor(selected = ColorPalette.DEFAULT),
+    val paletteChoices: ImmutableList<ColorPalettePreviewTileUiModel<ColorPalette>> = paletteChoicesFor(selected = ColorPalette.DEFAULT),
     val aboutTopBar: TopBarUiModel = TopBarUiModel(
         title = ABOUT_TITLE,
     ),

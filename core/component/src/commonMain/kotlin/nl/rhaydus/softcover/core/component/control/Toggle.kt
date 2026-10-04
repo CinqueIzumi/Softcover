@@ -8,9 +8,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,8 +22,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
@@ -30,63 +30,44 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
-/** A two-state control reporting through one [ToggleEvent] lambda; the caller's [modifier] places it. */
+/** A two-state glyph control reporting through one [ToggleEvent] lambda; the caller's [modifier] places it. */
 @Composable
 fun Toggle(
     model: ToggleUiModel,
-    onEvent: (ToggleEvent) -> Unit,
+    onEvent: (ToggleEvent<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    when (val variant = model.variant) {
-        is ToggleVariant.Icon -> IconToggle(
-            model = model,
-            variant = variant,
-            onEvent = onEvent,
-            modifier = modifier,
-        )
-
-        ToggleVariant.Switch -> Switch(
-            checked = model.checked,
-            onCheckedChange = { checked ->
-                onEvent(
-                    ToggleEvent.Toggled(
-                        key = model.key,
-                        checked = checked,
-                    ),
-                )
-            },
-            enabled = model.enabled,
-            modifier = modifier.semantics { contentDescription = model.description },
-        )
+    val scheme = MaterialTheme.colorScheme
+    val filled = model.variant == ToggleVariant.Filled
+    val size = if (filled) 44.dp else 38.dp
+    val iconSize = if (filled) 24.dp else 20.dp
+    val shape = if (filled) RoundedCornerShape(12.dp) else CircleShape
+    val targetContainer = when {
+        filled.not() -> Color.Transparent
+        model.checked -> scheme.primary
+        else -> scheme.surfaceContainerHigh
     }
-}
-
-@Composable
-private fun IconToggle(
-    model: ToggleUiModel,
-    variant: ToggleVariant.Icon,
-    onEvent: (ToggleEvent) -> Unit,
-    modifier: Modifier,
-) {
-    val style = variant.style.style(
-        scheme = MaterialTheme.colorScheme,
-        checked = model.checked,
-    )
+    val targetTint = when {
+        filled && model.checked -> scheme.onPrimary
+        filled -> scheme.primary
+        model.checked -> scheme.primary
+        else -> scheme.outline
+    }
     val playMotion = playDecorativeMotion()
     val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
     val container by animateColorAsState(
-        targetValue = style.container,
+        targetValue = targetContainer,
         animationSpec = colorSpec,
         label = "IconToggleContainer",
     )
     val tint by animateColorAsState(
-        targetValue = style.tint,
+        targetValue = targetTint,
         animationSpec = colorSpec,
         label = "IconToggleTint",
     )
     val interactionSource = remember { MutableInteractionSource() }
     val icon = drawableIconResource(
-        icon = if (model.checked) variant.on else variant.off,
+        icon = if (model.checked) model.on else model.off,
         contentDescription = model.description,
     )
 
@@ -95,9 +76,9 @@ private fun IconToggle(
             modifier = modifier
                 .minimumInteractiveComponentSize()
                 .alpha(if (model.enabled) 1f else DISABLED_ALPHA)
-                .size(style.size)
+                .size(size)
                 .pressScale(interactionSource)
-                .clip(style.shape)
+                .clip(shape)
                 .background(container)
                 .pointerHandCursor()
                 .toggleable(
@@ -121,16 +102,16 @@ private fun IconToggle(
                 painter = icon.getIconPainter(),
                 contentDescription = icon.contentDescription,
                 tint = tint,
-                modifier = Modifier.size(style.iconSize),
+                modifier = Modifier.size(iconSize),
             )
         }
     }
 
-    if (style.hasTooltip) {
+    if (filled) {
+        tile()
+    } else {
         DesktopTooltip(text = model.description) {
             tile()
         }
-    } else {
-        tile()
     }
 }

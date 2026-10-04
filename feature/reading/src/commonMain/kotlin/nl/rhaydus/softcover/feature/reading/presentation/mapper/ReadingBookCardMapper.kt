@@ -13,8 +13,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -60,17 +58,16 @@ internal fun Book.toAlsoReadingCard(
                 eyebrow = eyebrow,
                 byline = byline(author = authorString),
             ),
-            trailing = BookCardTrailing.SetProgress.labelled(label = "Set progress"),
+            trailing = BookCardTrailing.SetProgress.labelled(),
             deadline = deadlineProgress?.toDeadlineSummaryUiModel(
                 dateStyle = dateStyle,
-                tone = DeadlineSummaryTone.OnSurface,
             ),
             contentHorizontalInset = 24.dp,
             contentVerticalInset = 18.dp,
         ),
         decorations = BookCardDecorations(
             progress = BookCardProgress.Value(
-                bar = ProgressBarUiModel(fraction = fraction),
+                fraction = fraction,
                 label = percentLabel(fraction = fraction),
             ),
             shakeOnError = mutationFailed,

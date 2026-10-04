@@ -110,7 +110,7 @@ class InProgressMapperTest {
             val result = book.toInProgress()
 
             // ----- Assert -----
-            result.shouldNotBeNull().bar.fraction shouldBe 0.25f
+            result.shouldNotBeNull().fraction shouldBe 0.25f
         }
 
         @Test
@@ -125,7 +125,7 @@ class InProgressMapperTest {
             val result = book.toInProgress()
 
             // ----- Assert -----
-            result.shouldNotBeNull().bar.fraction shouldBe 1.3f
+            result.shouldNotBeNull().fraction shouldBe 1.3f
         }
 
         @Test
@@ -140,7 +140,7 @@ class InProgressMapperTest {
             val result = book.toInProgress()
 
             // ----- Assert -----
-            result.shouldNotBeNull().bar.fraction shouldBe -0.05f
+            result.shouldNotBeNull().fraction shouldBe -0.05f
         }
 
         @Test

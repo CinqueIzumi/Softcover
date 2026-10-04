@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
 import androidx.compose.runtime.Immutable
-import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 
 @Immutable
 sealed interface BookCardProgress {
@@ -12,7 +11,7 @@ sealed interface BookCardProgress {
      * @property label `null` draws the bar alone.
      */
     data class Value(
-        val bar: ProgressBarUiModel,
+        val fraction: Float,
         val label: String?,
     ) : BookCardProgress
 }

@@ -159,13 +159,13 @@ class CalloutsCollectorTest {
                         dependencies = dependencies,
                     )
                 }
-                stateFlow.value.scanEditionCallout.shouldNotBeNull().action.shouldBeInstanceOf<CalloutActionUiModel.Button>()
+                stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Button>()
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(isUpdatingScannedEdition = true)
 
                 // ----- Assert -----
-                stateFlow.value.scanEditionCallout.shouldNotBeNull().action.shouldBeInstanceOf<CalloutActionUiModel.Busy>()
+                stateFlow.value.scanEditionCallout.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Busy>()
                 job.cancel()
             }
     }

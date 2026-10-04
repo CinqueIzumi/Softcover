@@ -20,9 +20,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
+import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.header.SectionHeaderEyebrowText
 import nl.rhaydus.softcover.core.component.header.SectionHeaderInlineEyebrow
@@ -37,14 +39,13 @@ fun Callout(
     onEvent: (CalloutEvent) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val style = calloutStyle(
-        tone = model.tone,
-        scheme = MaterialTheme.colorScheme,
-    )
-
     Surface(
         modifier = modifier,
-        color = style.container,
+        color = if (model.variant is CalloutVariant.Highlight) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        },
         shape = RoundedCornerShape(16.dp),
     ) {
         Row(
@@ -58,7 +59,6 @@ fun Callout(
         ) {
             CalloutContent(
                 model = model,
-                style = style,
                 onEvent = onEvent,
                 modifier = Modifier.weight(1f),
             )
@@ -69,7 +69,7 @@ fun Callout(
                     contentDescription = "Dismiss",
                     tooltip = "Dismiss",
                     onClick = { onEvent(CalloutEvent.DismissClicked) },
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = style.mutedInk),
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = mutedInk(model.variant)),
                     iconSize = 16.dp,
                 )
             }
@@ -80,24 +80,28 @@ fun Callout(
 @Composable
 private fun CalloutContent(
     model: CalloutUiModel,
-    style: CalloutStyle,
     onEvent: (CalloutEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val content = if (model.variant is CalloutVariant.Highlight) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
     Column(modifier = modifier) {
         CalloutEyebrow(
             eyebrow = model.eyebrow,
-            lead = model.lead,
-            style = style,
+            variant = model.variant,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (model.title != null) {
+        if (model.variant is CalloutVariant.Highlight) {
             SoftcoverText(
-                text = model.title,
+                text = model.variant.title,
                 style = MaterialTheme.editorialTypography.headlineMedium,
-                color = style.content,
+                color = content,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -106,15 +110,15 @@ private fun CalloutContent(
         SoftcoverText(
             text = model.body,
             style = MaterialTheme.editorialTypography.bodySmall,
-            color = style.content,
+            color = content,
         )
 
-        if (model.action != null) {
+        if (model.callToAction != null) {
             Spacer(modifier = Modifier.height(12.dp))
 
             CalloutActionContent(
-                action = model.action,
-                style = style,
+                action = model.callToAction,
+                variant = model.variant,
                 onEvent = onEvent,
             )
         }
@@ -124,26 +128,27 @@ private fun CalloutContent(
 @Composable
 private fun CalloutEyebrow(
     eyebrow: String,
-    lead: CalloutLead?,
-    style: CalloutStyle,
+    variant: CalloutVariant,
 ) {
-    when (lead) {
-        CalloutLead.AccentBar -> SectionHeaderInlineEyebrow(
+    val accent = MaterialTheme.colorScheme.primary
+
+    when (variant) {
+        is CalloutVariant.Highlight -> SectionHeaderInlineEyebrow(
             eyebrow = eyebrow,
-            color = style.accent,
+            color = accent,
         )
 
-        null, is CalloutLead.Icon -> Row(verticalAlignment = Alignment.CenterVertically) {
-            if (lead is CalloutLead.Icon) {
+        is CalloutVariant.Neutral -> Row(verticalAlignment = Alignment.CenterVertically) {
+            if (variant.icon != null) {
                 val resource = drawableIconResource(
-                    icon = lead.icon,
+                    icon = variant.icon,
                     contentDescription = "",
                 )
 
                 Icon(
                     painter = resource.getIconPainter(),
                     contentDescription = null,
-                    tint = style.accent,
+                    tint = accent,
                     modifier = Modifier.size(18.dp),
                 )
 
@@ -153,7 +158,7 @@ private fun CalloutEyebrow(
             SectionHeaderEyebrowText(
                 eyebrow = eyebrow,
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
-                color = style.accent,
+                color = accent,
             )
         }
     }
@@ -163,13 +168,13 @@ private fun CalloutEyebrow(
 @Composable
 private fun CalloutActionContent(
     action: CalloutActionUiModel,
-    style: CalloutStyle,
+    variant: CalloutVariant,
     onEvent: (CalloutEvent) -> Unit,
 ) {
     when (action) {
         is CalloutActionUiModel.Button -> RhaydusButton(
             label = action.label,
-            style = style.buttonStyle,
+            style = if (variant is CalloutVariant.Highlight) ButtonStyle.FILLED else ButtonStyle.TONAL,
             size = ButtonSize.S,
             onClick = { onEvent(CalloutEvent.ActionClicked) },
         )
@@ -185,14 +190,21 @@ private fun CalloutActionContent(
             SoftcoverText(
                 text = action.label,
                 style = MaterialTheme.editorialTypography.bodySmall,
-                color = style.mutedInk,
+                color = mutedInk(variant),
             )
         }
 
         CalloutActionUiModel.Progress -> LinearWavyProgressIndicator(
-            color = style.accent,
-            trackColor = style.track,
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.outlineVariant,
             modifier = Modifier.fillMaxWidth(),
         )
     }
+}
+
+@Composable
+private fun mutedInk(variant: CalloutVariant): Color = if (variant is CalloutVariant.Highlight) {
+    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+} else {
+    MaterialTheme.colorScheme.onSurfaceVariant
 }

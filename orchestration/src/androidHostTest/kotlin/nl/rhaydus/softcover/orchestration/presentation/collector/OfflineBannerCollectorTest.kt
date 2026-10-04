@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.platform.NetworkAvailabilityProvider
-import nl.rhaydus.softcover.core.component.callout.BannerTone
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.callout.BannerVariant
 import nl.rhaydus.softcover.core.component.state.OfflineCopy
@@ -27,7 +26,6 @@ import org.junit.jupiter.api.Test
 class OfflineBannerCollectorTest {
     private val banner = BannerUiModel(
         message = "Offline",
-        tone = BannerTone.Warning,
         variant = BannerVariant.Status,
         visible = true,
     )
@@ -46,7 +44,7 @@ class OfflineBannerCollectorTest {
         } returns isOnline
         val offlineCopy = mockk<OfflineCopy>()
         coEvery {
-            offlineCopy.banner(visible = true)
+            offlineCopy.banner()
         } returns banner
         dependencies = mockk(relaxed = true)
         every {

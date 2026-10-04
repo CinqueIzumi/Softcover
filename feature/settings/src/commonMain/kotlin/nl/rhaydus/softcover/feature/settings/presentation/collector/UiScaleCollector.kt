@@ -16,7 +16,6 @@ internal class UiScaleCollector : SettingsCollector {
         dependencies.getUiScaleAsFlowUseCase().collectLatest { scale ->
             scope.setState {
                 it.copy(
-                    uiScale = scale,
                     uiScaleRows = uiScaleRowsFor(selected = scale),
                 )
             }

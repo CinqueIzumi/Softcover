@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
 import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.chart.ChartSliceUiModel
 import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
-import nl.rhaydus.softcover.core.component.chart.ProportionSegmentUiModel
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
@@ -23,7 +23,7 @@ internal fun genderChartUiModel(slices: List<GenderSlice>?): ProportionChartUiMo
     return ProportionChartUiModel(
         segments = slices
             .map { slice ->
-                ProportionSegmentUiModel(
+                ChartSliceUiModel(
                     label = slice.gender.toDisplayLabel(),
                     share = percentLabel(fraction = slice.fraction.toFloat()),
                     fraction = slice.fraction.toFloat(),
@@ -75,10 +75,10 @@ private fun demographicSegment(
     count: Int,
     total: Int,
     tone: ChartTone,
-): ProportionSegmentUiModel {
+): ChartSliceUiModel {
     val fraction = count.toDouble() / total
 
-    return ProportionSegmentUiModel(
+    return ChartSliceUiModel(
         label = label,
         share = percentLabel(fraction = fraction.toFloat()),
         fraction = fraction.toFloat(),
@@ -88,7 +88,7 @@ private fun demographicSegment(
 
 private fun loadingProportionChart(): ProportionChartUiModel = ProportionChartUiModel(
     segments = List(LOADING_SEGMENT_COUNT) { index ->
-        ProportionSegmentUiModel(
+        ChartSliceUiModel(
             label = "",
             share = "",
             fraction = 0f,

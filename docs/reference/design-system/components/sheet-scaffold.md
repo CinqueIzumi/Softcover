@@ -13,4 +13,4 @@
 
 ### Sheet rows
 
-`SheetRowGroup` renders hairline-divided single-choice `SheetRow`s (italic label, optional leading icon, count, check on the selection). `SheetRowGroupUiModel.dismissesSheetOnSelect` hides the sheet after `Selected`. A row's `count` pairs with `countDescription` so a screen reader hears "12 titles" rather than a bare number.
+`SheetRowGroup` renders hairline-divided single-choice rows (italic label, optional leading icon, count, check on the selection) and always runs the sheet's animated dismiss after `Selected`. A row's `count` pairs with `countDescription` so a screen reader hears "12 titles" rather than a bare number.

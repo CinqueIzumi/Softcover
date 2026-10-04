@@ -43,12 +43,12 @@ fun SoftcoverDatePickerDialog(
                     }
                 },
             ) {
-                SoftcoverText(text = model.confirmLabel)
+                SoftcoverText(text = "Confirm")
             }
         },
         dismissButton = {
             TextButton(onClick = { onEvent(DatePickerEvent.Dismissed) }) {
-                SoftcoverText(text = model.cancelLabel)
+                SoftcoverText(text = "Cancel")
             }
         },
     ) {

@@ -1,10 +1,12 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -104,6 +106,30 @@ class OnShowProgressSheetClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
+        }
+
+        @Test
+        fun `resets a leftover backdate to just now`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(
+                readAt = LocalDateTime(
+                    2020,
+                    1,
+                    2,
+                    9,
+                    15,
+                ),
+            )
+            val action = OnShowProgressSheetClickAction(book = stubBook())
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.readAt.shouldBeNull()
         }
     }
 }

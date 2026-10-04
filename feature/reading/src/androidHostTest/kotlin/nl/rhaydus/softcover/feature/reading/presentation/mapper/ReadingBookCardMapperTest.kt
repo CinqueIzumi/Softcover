@@ -304,7 +304,7 @@ class ReadingBookCardMapperTest {
 
             // ----- Assert -----
             val progress = progressValue(card)
-            progress.bar.fraction shouldBe 0.25f
+            progress.fraction shouldBe 0.25f
             progress.label shouldBe "25%"
         }
 
@@ -330,7 +330,7 @@ class ReadingBookCardMapperTest {
 
             // ----- Assert -----
             val progress = progressValue(card)
-            progress.bar.fraction shouldBe 0f
+            progress.fraction shouldBe 0f
             progress.label shouldBe "0%"
         }
 
@@ -343,7 +343,7 @@ class ReadingBookCardMapperTest {
             val card = alsoReading(book = book)
 
             // ----- Assert -----
-            progressValue(card).bar.fraction shouldBe 1.5f
+            progressValue(card).fraction shouldBe 1.5f
         }
 
         @Test
@@ -356,7 +356,7 @@ class ReadingBookCardMapperTest {
 
             // ----- Assert -----
             val progress = progressValue(card)
-            progress.bar.fraction shouldBe 1.5f
+            progress.fraction shouldBe 1.5f
             progress.label shouldBe "100%"
         }
 
@@ -370,7 +370,7 @@ class ReadingBookCardMapperTest {
 
             // ----- Assert -----
             val progress = progressValue(card)
-            progress.bar.fraction shouldBe -0.05f
+            progress.fraction shouldBe -0.05f
             progress.label shouldBe "0%"
         }
 
@@ -415,7 +415,7 @@ class ReadingBookCardMapperTest {
 
             // ----- Assert -----
             val summary = card.row().deadline.shouldNotBeNull()
-            summary.paceText shouldBe "10 pages/day"
+            summary.text.substringAfter(" • ") shouldBe "10 pages/day"
             summary.tone shouldBe DeadlineSummaryTone.OnSurface
         }
 

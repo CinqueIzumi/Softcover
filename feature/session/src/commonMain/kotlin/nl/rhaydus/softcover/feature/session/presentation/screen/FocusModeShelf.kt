@@ -217,7 +217,7 @@ private fun FocusPageEditor(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        ProgressBar(model = pageEditor.bar)
+        ProgressBar(fraction = pageEditor.fraction)
 
         return
     }
@@ -241,5 +241,5 @@ private fun FocusPageEditor(
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    ProgressBar(model = pageEditor.bar)
+    ProgressBar(fraction = pageEditor.fraction)
 }

@@ -43,11 +43,11 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 | SS-2 | `header`, `topbar`, `chrome`, `sidebar`; explore `HiddenGroupHeaderUiModel` — ~1.8k | [x] |
 | SS-3 | `bookcard`; uibinding `book` — ~1.8k | [x] |
 | SS-4 | `cover`, `lists`; uibinding `cover` (all platforms), `lists`; library `ArrangeMakeOrderedUiModel` — ~2.1k | [x] |
-| SS-5 | `sheet`, `dialog`, `callout`, `state`; explore `ContinueSeriesEntryUiModel`, orchestration `ReAuthSheetUiModel` — ~2.2k | [ ] |
-| SS-6 | `control`, `button`; book_detail `ExternalLinksUiModel`, `ShareSheetBodyUiModel`; settings `SettingsToggleRowUiModel`, `SettingsChoiceRowUiModel` — ~1.9k | [ ] |
+| SS-5 | `sheet`, `dialog`, `callout`, `state`; explore `ContinueSeriesEntryUiModel`, orchestration `ReAuthSheetUiModel` — ~2.2k | [x] |
+| SS-6 | `control`, `button`; book_detail `ExternalLinksUiModel`, `ShareSheetBodyUiModel`; settings `SettingsToggleRowUiModel`, `SettingsChoiceRowUiModel` — ~1.9k | [x] |
 | SS-7 | `field`, `richtext`; uibinding `richtext`; book_detail `BookReviewUiModel` — ~1.8k | [ ] |
-| SS-8 | `progress`, `deadline`, `mood`, `celebration`; uibinding `progress`, `deadline`; book_detail `InProgressUiModel`, reading `FeaturedProgressUiModel`, session `FocusPageEditorUiModel` — ~2.3k | [ ] |
-| SS-9 | `statistic`, `chart`; profile `ReadingAtlasUiModel` — ~1.2k | [ ] |
+| SS-8 | `progress`, `deadline`, `mood`, `celebration`; uibinding `progress`, `deadline`; book_detail `InProgressUiModel`, reading `FeaturedProgressUiModel`, session `FocusPageEditorUiModel` — ~2.3k | [x] |
+| SS-9 | `statistic`, `chart`; profile `ReadingAtlasUiModel` — ~1.2k | [x] |
 | SS-10 | `share`, `verdict`; uibinding `verdict`; book_detail `ShareCardVariant` — ~2.5k | [ ] |
 | SS-11 | `gallery`; uibinding `date`, `format`, `theme` — ~1.5k | [ ] |
 
@@ -97,3 +97,20 @@ SS-4:
 - `lists`: `ChooseListsUiModel.emptyState` defaulted, `chooseListsEmptyState()` goes; `onClick` pending guard goes; `NewListRow` → `CircleShape`.
 - library: `ArrangeMakeOrderedUiModel` → `arrangeMakeOrderedListId: Int?`, label in the composable; make-ordered link moves into the sheet body; one private chip FlowRow replaces `LayoutChipRow` / `SortChipRow`.
 - Kept: `CoverSource`, `resolveCoverSource`, `LocalImageSource` actuals, `MonogramCoverMetrics`, `ListMembership`, both choose-lists mappers. Deferred: chip FlowRow → `ChipSet`, `ToggleRow(titleStyle)` (SS-6); fixture pruning, Reading preview cover builds (SS-11).
+
+SS-5–SS-11 (audited together; built in rounds SS-5 + SS-9, SS-6 + SS-8, SS-7 + SS-10, SS-11):
+- SS-5 `sheet`: `SheetLayoutSpec` + `spec()` go; `busyDescription` goes; `SheetDismissal` folds into `SheetChrome`; default-arg `rememberSheetChrome()` + "SheetFooter" gallery entry go, `SheetFooter` private; footer buttons → one `FooterButton(button, primary)`; `dismissesSheetOnSelect` goes; `LoadingSheetContent` inlines; `SheetRow` internal.
+- SS-5 `dialog` / `callout` / `state`: date picker labels → literals; `BannerTone` / `BannerStyle` / `icon` / `dismissible` → `BannerVariant { Status, Editorial }`; `CalloutTone` + `CalloutLead` + `title` → `sealed CalloutVariant { Neutral(icon?), Highlight(title) }`, `CalloutStyle` → private `when`; `CalloutUiModel.action` → `callToAction`; `EmptyStateStyle` → private Centered / Inline bodies; `OfflineCopy.banner` loses `visible`.
+- SS-5 features: explore `ContinueSeriesEntryUiModel` → `continueSeriesMenuSheets` map, the `isEmpty()` loading derivation and the up-next width vals go; orchestration `reAuthSheet` nullable, `reAuthState` public goes, `toScaffoldUiModel` inlines.
+- SS-9: `StatNumber` loses `maxLines` / `color` (debug counter colour shift accepted); `StatPulseText`, `TileEyebrow` inline; `StatNumberFormat.Decimal` → `data object`; tile bodies take `model`; `RankedBarUiModel` + `ProportionSegmentUiModel` → `ChartSliceUiModel`; `ChartLegendRow(slice, isLoading, swatch)`; `ChartTone.ranked` goes; `ReadingAtlasUiModel` kept.
+- SS-6 `control`: `ToggleVariant.Switch` goes, `ToggleVariant { Filled, Bare }` with `on` / `off` on the model; `IconToggleStyle`, `SegmentColors`, `ProseWordColors` → private `when` / `if`; `ToggleRow` style params → `ToggleRowVariant { Plain, Inset }` (verdict + library type shift accepted); keyed `ToggleRowUiModel<K>` / theme + palette tiles — `SettingsToggleRowUiModel`, `ThemeChoice`, `PaletteChoice` go.
+- SS-6 `shape` / `button`: `PillShape`, `TrackShape`, package → `CircleShape`; `PillButtonDimensions` / `PillButtonStyle` go; `PillButtonInteraction` → `enabled`; `PillButtonSet` + `ExternalLinksUiModel` go; library arrange chips → `ChipSet`; `SetProgress.labelled` loses `label`; `ChromeIconButton.modifier` goes.
+- SS-6 settings: one `DisplayToggleRowsCollector`; the toggle feeder fields, `useDynamicColorChecked`, `userDateStyle`, `uiScale` go. Kept: `ChipSet`, `MastheadRefreshAction`, book card wrappers, `SettingsChoiceRowUiModel`, `ShareSheetBodyUiModel`.
+- SS-8 `progress`: `ProgressBarUiModel` → `ProgressBar(fraction, isLoading)`; `bar` → `fraction` on book card / InProgress / FeaturedProgress / FocusPageEditor, `maskedBar` goes; `actionButtonSize` goes; Page + Percentage tabs share one body, all tabs one footer; `readAt` to UiState, mapper builds `whenRead`; `withTimeDraft` goes, actions write only `progressTimeDraft` (check fast typing on device).
+- SS-8 others: deadline `dateText` + `paceText` → `text`, fixtures 5 → 3; `MoodTileDimensions` goes, `isLoading` on model, explore stand-ins from the collector, crossfade goes (accepted); `MarkAsReadBurstUiModel` → `MarkAsReadBurst(triggerKey, scale)`.
+- SS-7 `field`: `TextFieldPillDimensions` / `TextFieldPillTone` → private `when`s; one `submittable`; `TextFieldKeyboard` → `numeric`; `placeholderInk` inlines; scan auto-focus seam → `internal expect val`.
+- SS-7 `richtext` / reviews: `ClickableText` + model + event → `LinkAnnotation.Url`; formatting toolbar private in `VerdictSheet.kt`; `plainText()` goes; `revealedSpoilerReviewIds` + `loadingReviews` go (mapper stand-ins, no details gate — accepted); rating formatted in mapper.
+- SS-10 `share`: Stat / Quote / YearRecap kept; `ShareCardDimensions` → private `when`; `ShareCardNumerals.kt` goes; Book + Update share one header; `quote` goes; `ReadingUpdateKind` + nullables → sealed `Finished` / `Reading`; month normaliser goes; `ShareCard(model =)`; fix: rating uses the ×2 verdict score.
+- SS-10 `verdict` / book_detail: `VerdictBlockUiModel` → sealed `Empty` / `Filled`; one `VerdictScoreLine`; `reviewLabel` goes; `verdictReview` state goes; `ShareSheetCollector` merges into `ShareCardsCollector`, one `shareCard` field.
+- SS-11: `UiModelPreviews.previews` → label → fixture map, label functions and `*_FLOOR` consts go; masthead entry uses fixtures; registry filter goes; entry files renamed; duplicate fixtures pruned; unread previews deleted, R5 → "rendered or tested"; `formatCompactDate` private; Reading / Explore previews built through mappers.
+- Left over: `ShareBookBottomSheet`'s eight callbacks; `VerdictSheet` spoilers model built in composition.

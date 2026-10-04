@@ -164,7 +164,7 @@ class DeadlineMapperTest {
     @Nested
     inner class ToDeadlineSummaryUiModelTest {
         @Test
-        fun `dateText respects the passed DateStyle`() {
+        fun `text opens with the deadline date formatted in the passed DateStyle`() {
             // ----- Arrange -----
             val subject = progress(
                 deadline = LocalDate(
@@ -185,8 +185,8 @@ class DeadlineMapperTest {
             )
 
             // ----- Assert -----
-            dayMonthYear.dateText shouldBe "02/09/2026"
-            monthDayYear.dateText shouldBe "09/02/2026"
+            dayMonthYear.text shouldBe "02/09/2026 • 10 pages/day"
+            monthDayYear.text shouldBe "09/02/2026 • 10 pages/day"
         }
 
         @Test
@@ -234,7 +234,7 @@ class DeadlineMapperTest {
             )
 
             // ----- Assert -----
-            result.paceText shouldBe "1 page/day"
+            result.text shouldBe "02/09/2026 • 1 page/day"
         }
 
         @Test
@@ -252,7 +252,7 @@ class DeadlineMapperTest {
             )
 
             // ----- Assert -----
-            result.paceText shouldBe "2 pages/day"
+            result.text shouldBe "02/09/2026 • 2 pages/day"
         }
 
         @Test
@@ -270,7 +270,7 @@ class DeadlineMapperTest {
             )
 
             // ----- Assert -----
-            result.paceText shouldBe "18 pages/day"
+            result.text shouldBe "02/09/2026 • 18 pages/day"
         }
 
         @Test
@@ -288,7 +288,7 @@ class DeadlineMapperTest {
             )
 
             // ----- Assert -----
-            result.paceText shouldBe "19 pages/day"
+            result.text shouldBe "02/09/2026 • 19 pages/day"
         }
 
         @Test
@@ -306,7 +306,7 @@ class DeadlineMapperTest {
             )
 
             // ----- Assert -----
-            result.paceText shouldBe "0 pages/day"
+            result.text shouldBe "02/09/2026 • 0 pages/day"
         }
 
         @Test
@@ -324,7 +324,7 @@ class DeadlineMapperTest {
             )
 
             // ----- Assert -----
-            result.paceText shouldBe "1h 30m/day"
+            result.text shouldBe "02/09/2026 • 1h 30m/day"
         }
 
         @Test
@@ -344,7 +344,7 @@ class DeadlineMapperTest {
             )
 
             // ----- Assert -----
-            result.paceText shouldBe "Expired"
+            result.text shouldBe "02/09/2026 • Expired"
         }
     }
 }

@@ -101,7 +101,7 @@ class FocusPageEditorMapperTest {
             // ----- Assert -----
             editor.caption shouldBe "of 200 pages"
             editor.isEditable shouldBe true
-            editor.bar.fraction shouldBe 0.25f
+            editor.fraction shouldBe 0.25f
         }
 
         @Test
@@ -114,7 +114,7 @@ class FocusPageEditorMapperTest {
 
             // ----- Assert -----
             editor.caption shouldBe "of 100 pages"
-            editor.bar.fraction shouldBe 0.1f
+            editor.fraction shouldBe 0.1f
         }
 
         @Test
@@ -126,7 +126,7 @@ class FocusPageEditorMapperTest {
             val editor = book.toFocusPageEditor(draft = "abc")
 
             // ----- Assert -----
-            editor.bar.fraction shouldBe 0f
+            editor.fraction shouldBe 0f
             editor.isEditable shouldBe true
         }
 
@@ -139,7 +139,7 @@ class FocusPageEditorMapperTest {
             val editor = book.toFocusPageEditor(draft = "")
 
             // ----- Assert -----
-            editor.bar.fraction shouldBe 0f
+            editor.fraction shouldBe 0f
         }
 
         @Test
@@ -151,7 +151,7 @@ class FocusPageEditorMapperTest {
             val editor = book.toFocusPageEditor(draft = "500")
 
             // ----- Assert -----
-            editor.bar.fraction shouldBe 2.5f
+            editor.fraction shouldBe 2.5f
         }
 
         @Test
@@ -163,7 +163,7 @@ class FocusPageEditorMapperTest {
             val editor = book.toFocusPageEditor(draft = "-5")
 
             // ----- Assert -----
-            editor.bar.fraction shouldBe -0.025f
+            editor.fraction shouldBe -0.025f
         }
 
         @Test
@@ -177,7 +177,7 @@ class FocusPageEditorMapperTest {
             // ----- Assert -----
             editor.caption shouldBe "43% complete"
             editor.isEditable shouldBe false
-            editor.bar.fraction shouldBe 0.426f
+            editor.fraction shouldBe 0.426f
         }
 
         @Test
@@ -189,7 +189,7 @@ class FocusPageEditorMapperTest {
             val editor = book.toFocusPageEditor(draft = "150")
 
             // ----- Assert -----
-            editor.bar.fraction shouldBe 0.1f
+            editor.fraction shouldBe 0.1f
         }
 
         @Test
@@ -202,7 +202,7 @@ class FocusPageEditorMapperTest {
 
             // ----- Assert -----
             editor.caption shouldBe "0% complete"
-            editor.bar.fraction shouldBe 0f
+            editor.fraction shouldBe 0f
         }
 
         @Test
@@ -214,7 +214,7 @@ class FocusPageEditorMapperTest {
             val editor = book.toFocusPageEditor(draft = "")
 
             // ----- Assert -----
-            editor.bar.fraction shouldBe 1.4f
+            editor.fraction shouldBe 1.4f
         }
     }
 }

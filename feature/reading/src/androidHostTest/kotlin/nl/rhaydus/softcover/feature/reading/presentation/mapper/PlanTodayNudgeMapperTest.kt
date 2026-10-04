@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
-import nl.rhaydus.softcover.core.component.callout.BannerTone
 import nl.rhaydus.softcover.core.component.callout.BannerVariant
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
@@ -282,7 +281,6 @@ class PlanTodayNudgeMapperTest {
             ).shouldNotBeNull()
 
             // ----- Assert -----
-            result.tone shouldBe BannerTone.Highlight
             result.variant shouldBe BannerVariant.Editorial
         }
     }

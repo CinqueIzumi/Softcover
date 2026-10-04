@@ -54,9 +54,9 @@ private val DIAGONAL_LOWER_HALF: Shape = GenericShape { size, _ ->
  * theme as a bare colour swatch or a radio row.
  */
 @Composable
-fun ThemePreviewTile(
-    model: ThemePreviewTileUiModel,
-    onEvent: (ThemePreviewTileEvent) -> Unit,
+fun <K> ThemePreviewTile(
+    model: ThemePreviewTileUiModel<K>,
+    onEvent: (ThemePreviewTileEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lightScheme = dynamicColorSchemeOrNull(
@@ -84,7 +84,7 @@ fun ThemePreviewTile(
     PreviewTileFrame(
         label = model.label,
         selected = model.selected,
-        onClick = { onEvent(ThemePreviewTileEvent.Clicked) },
+        onClick = { onEvent(ThemePreviewTileEvent.Clicked(key = model.key)) },
         modifier = modifier,
     ) {
         ThemeMiniature(

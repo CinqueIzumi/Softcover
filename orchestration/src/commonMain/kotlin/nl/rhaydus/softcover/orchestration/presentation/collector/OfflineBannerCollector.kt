@@ -12,7 +12,7 @@ internal class OfflineBannerCollector : RootCollector {
         scope: ActionScope<RootUiState, RootEvent, RootLocalVariables>,
         dependencies: RootDependencies,
     ) {
-        val offlineBanner = dependencies.offlineCopy.banner(visible = true)
+        val offlineBanner = dependencies.offlineCopy.banner()
 
         dependencies.networkAvailabilityProvider.isOnline.collectLatest { isOnline ->
             scope.setState { it.copy(offlineBanner = offlineBanner.copy(visible = isOnline.not())) }

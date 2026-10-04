@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.action
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -14,13 +15,14 @@ internal data class OnUpdateTimeProgressClickAction(
     val hours: String,
     val minutes: String,
     val seconds: String,
-    val actionAt: String? = null,
 ) : ReadingAction {
     override suspend fun execute(
         dependencies: ReadingScreenDependencies,
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
         val bookToUpdate: Book = scope.currentState.bookToUpdate ?: return
+
+        val actionAt = scope.currentState.readAt.toActionAt()
 
         val h = hours.toIntOrNull() ?: 0
         val m = minutes.toIntOrNull() ?: 0

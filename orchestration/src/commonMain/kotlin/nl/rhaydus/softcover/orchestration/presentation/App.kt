@@ -58,7 +58,6 @@ internal fun App() {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val themeConfig by viewModel.themeState.collectAsStateWithLifecycle()
     val spinePalette by viewModel.spinePalette.collectAsStateWithLifecycle()
-    val reAuthState by viewModel.reAuthState.collectAsStateWithLifecycle()
     val reAuthSheet by viewModel.reAuthSheet.collectAsStateWithLifecycle()
     val snackBarState by SnackBarManager.snackBarState.collectAsStateWithLifecycle()
 
@@ -170,9 +169,9 @@ internal fun App() {
 
                         // Show the re-auth overlay only during an authenticated session — if the user
                         // is already on onboarding they can enter a token through the normal flow.
-                        if (reAuthState.visible && state.authenticated) {
+                        reAuthSheet?.takeIf { state.authenticated }?.let { sheet ->
                             ReAuthSheet(
-                                model = reAuthSheet,
+                                model = sheet,
                                 onEvent = { event ->
                                     when (event) {
                                         is ReAuthSheetEvent.ApiKeyChanged ->

@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  * and cased by the mapper.
  *
  * @property key Identifies the mood in [MoodTileEvent.Clicked].
+ * @property isLoading Masks the tile's leaves in place and ignores presses.
  */
 @Immutable
 data class MoodTileUiModel(
@@ -17,6 +18,7 @@ data class MoodTileUiModel(
     val title: String,
     val countLabel: String,
     val ink: MoodTileInk,
+    val isLoading: Boolean = false,
 ) {
     companion object : UiModelPreviews<MoodTileUiModel> {
         override val previews: ImmutableList<MoodTileUiModel> = persistentListOf(
@@ -43,6 +45,13 @@ data class MoodTileUiModel(
                 title = "Heartbreaking",
                 countLabel = "640 books",
                 ink = MoodTileInk.HeartWrench,
+            ),
+            MoodTileUiModel(
+                key = 1,
+                title = "Cosy & Comforting",
+                countLabel = "820 books",
+                ink = MoodTileInk.Neutral,
+                isLoading = true,
             ),
         )
     }

@@ -77,19 +77,18 @@ internal fun SheetScaffoldContent(
     val chrome = rememberSheetChrome(model = model)
     val currentOnDismissStarted by rememberUpdatedState(onDismissStarted)
 
-    LaunchedEffect(chrome.dismissal.started) {
-        if (chrome.dismissal.started) {
+    LaunchedEffect(chrome.dismissStarted) {
+        if (chrome.dismissStarted) {
             currentOnDismissStarted()
         }
     }
 
     LaunchedEffect(model.closeRequested) {
         if (model.closeRequested) {
-            chrome.dismissal.start()
+            chrome.close()
         }
     }
 
-    val spec = model.layout.spec()
     val scrollState = rememberScrollState()
     val paneTitle = model.header.section.headlineText ?: model.header.section.eyebrow
 
@@ -97,7 +96,7 @@ internal fun SheetScaffoldContent(
         modifier = modifier
             .fillMaxWidth()
             .imePadding()
-            .then(if (spec.wholeSheetScrolls) Modifier.verticalScroll(state = scrollState) else Modifier)
+            .then(if (model.layout == SheetLayout.Scrolling) Modifier.verticalScroll(state = scrollState) else Modifier)
             .padding(horizontal = 24.dp)
             .padding(
                 top = 8.dp,
@@ -111,14 +110,14 @@ internal fun SheetScaffoldContent(
             onEvent = onEvent,
         )
 
-        if (spec.bodyWrapped) {
+        if (model.layout != SheetLayout.Scrolling) {
             Column(
                 modifier = Modifier
                     .weight(
                         weight = 1f,
                         fill = false,
                     )
-                    .then(if (spec.bodyScrolls) Modifier.verticalScroll(state = scrollState) else Modifier),
+                    .then(if (model.layout == SheetLayout.Pinned) Modifier.verticalScroll(state = scrollState) else Modifier),
                 content = content,
             )
         } else {
@@ -126,7 +125,7 @@ internal fun SheetScaffoldContent(
         }
 
         if (model.footer != null) {
-            if (spec.footerSeparated) {
+            if (model.layout != SheetLayout.Scrolling) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Divider()
@@ -143,37 +142,6 @@ internal fun SheetScaffoldContent(
             )
         }
     }
-}
-
-/** Where a [SheetLayout] places the scroll and the footer divider. */
-private data class SheetLayoutSpec(
-    val wholeSheetScrolls: Boolean,
-    val bodyWrapped: Boolean,
-    val bodyScrolls: Boolean,
-    val footerSeparated: Boolean,
-)
-
-private fun SheetLayout.spec(): SheetLayoutSpec = when (this) {
-    SheetLayout.Scrolling -> SheetLayoutSpec(
-        wholeSheetScrolls = true,
-        bodyWrapped = false,
-        bodyScrolls = false,
-        footerSeparated = false,
-    )
-
-    SheetLayout.Pinned -> SheetLayoutSpec(
-        wholeSheetScrolls = false,
-        bodyWrapped = true,
-        bodyScrolls = true,
-        footerSeparated = true,
-    )
-
-    SheetLayout.PinnedLazy -> SheetLayoutSpec(
-        wholeSheetScrolls = false,
-        bodyWrapped = true,
-        bodyScrolls = false,
-        footerSeparated = true,
-    )
 }
 
 @Composable
@@ -280,22 +248,21 @@ private fun JacketStack(trailing: SheetHeaderTrailing.JacketStack) {
 /** Fan side per jacket index: the first upright in front, then one behind on each side. */
 private val JACKET_FAN = listOf(0, -1, 1)
 
-/** Internal so the gallery can show the footer on its own. */
 @Composable
-internal fun SheetFooter(
+private fun SheetFooter(
     model: SheetFooterUiModel,
     onEvent: (SheetScaffoldEvent) -> Unit,
-    modifier: Modifier = Modifier,
-    chrome: SheetChrome = rememberSheetChrome(),
+    chrome: SheetChrome,
 ) {
     when (model) {
         is SheetFooterUiModel.Stacked -> Column(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             if (model.primary != null) {
-                PrimaryFooterButton(
+                FooterButton(
                     button = model.primary,
+                    primary = true,
                     chrome = chrome,
                     onEvent = onEvent,
                     modifier = Modifier.fillMaxWidth(),
@@ -303,8 +270,9 @@ internal fun SheetFooter(
             }
 
             if (model.secondary != null) {
-                SecondaryFooterButton(
+                FooterButton(
                     button = model.secondary,
+                    primary = false,
                     chrome = chrome,
                     onEvent = onEvent,
                     modifier = Modifier.fillMaxWidth(),
@@ -313,18 +281,20 @@ internal fun SheetFooter(
         }
 
         is SheetFooterUiModel.Inline -> Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SecondaryFooterButton(
+            FooterButton(
                 button = model.secondary,
+                primary = false,
                 chrome = chrome,
                 onEvent = onEvent,
             )
 
-            PrimaryFooterButton(
+            FooterButton(
                 button = model.primary,
+                primary = true,
                 chrome = chrome,
                 onEvent = onEvent,
                 modifier = Modifier.weight(1f),
@@ -333,54 +303,21 @@ internal fun SheetFooter(
     }
 }
 
-@Composable
-private fun PrimaryFooterButton(
-    button: SheetFooterButton,
-    chrome: SheetChrome,
-    onEvent: (SheetScaffoldEvent) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    SheetFooterButtonView(
-        button = button,
-        style = ButtonStyle.FILLED,
-        chrome = chrome,
-        loading = chrome.busy,
-        onClick = { onEvent(SheetScaffoldEvent.PrimaryClicked) },
-        modifier = modifier,
-    )
-}
-
-@Composable
-private fun SecondaryFooterButton(
-    button: SheetFooterButton,
-    chrome: SheetChrome,
-    onEvent: (SheetScaffoldEvent) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    SheetFooterButtonView(
-        button = button,
-        style = ButtonStyle.TEXT,
-        chrome = chrome,
-        loading = false,
-        onClick = { onEvent(SheetScaffoldEvent.SecondaryClicked) },
-        modifier = modifier,
-    )
-}
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SheetFooterButtonView(
+private fun FooterButton(
     button: SheetFooterButton,
-    style: ButtonStyle,
+    primary: Boolean,
     chrome: SheetChrome,
-    loading: Boolean,
-    onClick: () -> Unit,
+    onEvent: (SheetScaffoldEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val loading = primary && chrome.busy
+
     Box(
         modifier = modifier.then(
             if (loading) {
-                Modifier.semantics { stateDescription = chrome.busyDescription }
+                Modifier.semantics { stateDescription = "Loading" }
             } else {
                 Modifier
             },
@@ -389,9 +326,9 @@ private fun SheetFooterButtonView(
     ) {
         RhaydusButton(
             label = button.label,
-            style = style,
+            style = if (primary) ButtonStyle.FILLED else ButtonStyle.TEXT,
             onClick = {
-                onClick()
+                onEvent(if (primary) SheetScaffoldEvent.PrimaryClicked else SheetScaffoldEvent.SecondaryClicked)
 
                 if (button.dismissesSheet) {
                     chrome.dismiss()

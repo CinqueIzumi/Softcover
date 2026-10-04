@@ -2,8 +2,8 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
 import nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutEvent
-import nl.rhaydus.softcover.core.component.callout.CalloutTone
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
+import nl.rhaydus.softcover.core.component.callout.CalloutVariant
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissScanEditionBannerClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnUpdateToScannedEditionClickAction
@@ -24,10 +24,10 @@ internal fun scanEditionCallout(
     if (dismissed || shelvedEditionId == scannedEditionId) return null
 
     return CalloutUiModel(
-        tone = CalloutTone.Neutral,
+        variant = CalloutVariant.Neutral(),
         eyebrow = SCAN_EDITION_EYEBROW,
         body = SCAN_EDITION_BODY,
-        action = if (isUpdating) {
+        callToAction = if (isUpdating) {
             CalloutActionUiModel.Busy(label = UPDATING_EDITION_LABEL)
         } else {
             CalloutActionUiModel.Button(label = UPDATE_EDITION_LABEL)

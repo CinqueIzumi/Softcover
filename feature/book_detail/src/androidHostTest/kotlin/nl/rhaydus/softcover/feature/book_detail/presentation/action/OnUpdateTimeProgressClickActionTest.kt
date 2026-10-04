@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
+import kotlinx.datetime.LocalDateTime
+import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -11,11 +13,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
+import nl.rhaydus.softcover.core.uibinding.progress.toActionAt
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -212,8 +214,18 @@ class OnUpdateTimeProgressClickActionTest {
         @Test
         fun `invokes updateBookProgress with the provided actionAt`() = runTest {
             // ----- Arrange -----
+            val readAt = LocalDateTime(
+                2026,
+                7,
+                21,
+                21,
+                0,
+            )
             val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = BookDetailUiState(book = book)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                readAt = readAt,
+            )
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -228,7 +240,6 @@ class OnUpdateTimeProgressClickActionTest {
                 hours = "1",
                 minutes = "0",
                 seconds = "0",
-                actionAt = "2026-07-21T21:00:00Z",
             )
 
             // ----- Act -----
@@ -242,7 +253,7 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3600,
-                    actionAt = "2026-07-21T21:00:00Z",
+                    actionAt = readAt.toActionAt(),
                 )
             }
         }

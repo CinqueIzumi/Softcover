@@ -9,13 +9,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.ThemeConfiguration
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetThemeConfigurationUseCase
 import nl.rhaydus.softcover.feature.settings.presentation.event.SettingsScreenEvent
-import nl.rhaydus.softcover.feature.settings.presentation.model.DisplayToggle
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.SettingsScreenDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
@@ -56,121 +54,6 @@ class ThemeConfigurationCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets useFloatingBarChecked to true when FLOATING configuration emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ThemeConfigurationCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.FLOATING))
-
-            // ----- Assert -----
-            stateFlow.value.useFloatingBarChecked shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `sets useFloatingBarChecked to false when DOCKED configuration emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ThemeConfigurationCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.DOCKED))
-
-            // ----- Assert -----
-            stateFlow.value.useFloatingBarChecked shouldBe false
-            job.cancel()
-        }
-
-        @Test
-        fun `updates useFloatingBarChecked to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ThemeConfigurationCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.FLOATING))
-            themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.DOCKED))
-
-            // ----- Assert -----
-            stateFlow.value.useFloatingBarChecked shouldBe false
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change useFloatingBarChecked before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ThemeConfigurationCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act & Assert -----
-            stateFlow.value.useFloatingBarChecked shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves other state fields when updating useFloatingBarChecked`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = SettingsScreenUiState(
-                useFloatingBarChecked = true,
-                dropDownExpanded = true,
-            )
-            val collector = ThemeConfigurationCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.DOCKED))
-
-            // ----- Assert -----
-            stateFlow.value.dropDownExpanded shouldBe true
-            stateFlow.value.useFloatingBarChecked shouldBe false
-            job.cancel()
-        }
-
-        @Test
-        fun `retains last emitted useFloatingBarChecked after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ThemeConfigurationCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.DOCKED))
-            job.cancel()
-
-            // ----- Act & Assert -----
-            stateFlow.value.useFloatingBarChecked shouldBe false
-        }
-
-        @Test
         fun `sets themeMode to the emitted configuration's themeMode`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
@@ -209,28 +92,6 @@ class ThemeConfigurationCollectorTest {
         }
 
         @Test
-        fun `recomputes displayToggleRows so the floating-bar row's checked value follows the emitted style`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = ThemeConfigurationCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.FLOATING))
-
-                // ----- Assert -----
-                stateFlow.value.displayToggleRows
-                    .first { it.key == DisplayToggle.FLOATING_BOTTOM_BAR }
-                    .row.checked shouldBe true
-                job.cancel()
-            }
-
-        @Test
         fun `recomputes dynamicColorToggleRow so its checked value follows the emitted configuration`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
@@ -246,7 +107,7 @@ class ThemeConfigurationCollectorTest {
                 themeConfigFlow.emit(ThemeConfiguration(useDynamicColor = true))
 
                 // ----- Assert -----
-                stateFlow.value.dynamicColorToggleRow.row.checked shouldBe true
+                stateFlow.value.dynamicColorToggleRow.checked shouldBe true
                 job.cancel()
             }
     }

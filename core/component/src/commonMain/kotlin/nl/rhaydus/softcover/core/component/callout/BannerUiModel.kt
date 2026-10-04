@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
  * The content of a [Banner] and whether it is currently showing.
@@ -16,27 +15,20 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 @Immutable
 data class BannerUiModel(
     val message: String,
-    val tone: BannerTone,
     val variant: BannerVariant,
     val visible: Boolean,
-    val icon: SoftcoverIcon? = null,
-    val dismissible: Boolean = false,
 ) {
     companion object : UiModelPreviews<BannerUiModel> {
         override val previews: ImmutableList<BannerUiModel> = persistentListOf(
             BannerUiModel(
                 message = "You're offline. Progress changes are saved and will sync when you reconnect.",
-                tone = BannerTone.Warning,
                 variant = BannerVariant.Status,
                 visible = true,
             ),
             BannerUiModel(
                 message = "Read 24 pages today to stay on pace.",
-                tone = BannerTone.Highlight,
                 variant = BannerVariant.Editorial,
                 visible = true,
-                icon = SoftcoverIcon.Info,
-                dismissible = true,
             ),
         )
     }

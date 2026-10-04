@@ -31,7 +31,6 @@ internal class BecauseYouReadGenreSheetCollector : ExploreCollector {
                     it.copy(
                         becauseYouReadGenreGroup = SheetRowGroupUiModel(
                             rows = rows,
-                            dismissesSheetOnSelect = true,
                         ),
                     )
                 }

@@ -36,7 +36,6 @@ internal class ShelvesSheetCollector : LibraryCollector {
                     it.copy(
                         shelvesSheetGroup = SheetRowGroupUiModel(
                             rows = rows,
-                            dismissesSheetOnSelect = true,
                         ),
                     )
                 }

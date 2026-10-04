@@ -135,7 +135,7 @@ class OnUiScaleSelectedActionTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             stateFlow.value = SettingsScreenUiState(
-                uiScale = UiScale.DEFAULT,
+                appVersionName = "1.2.3",
                 dropDownExpanded = true,
             )
 
@@ -152,7 +152,7 @@ class OnUiScaleSelectedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.uiScale shouldBe UiScale.DEFAULT
+            stateFlow.value.appVersionName shouldBe "1.2.3"
             stateFlow.value.dropDownExpanded shouldBe true
         }
     }

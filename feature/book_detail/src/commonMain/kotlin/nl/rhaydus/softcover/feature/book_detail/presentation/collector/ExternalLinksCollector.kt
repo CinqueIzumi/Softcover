@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
-import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toExternalLinksUiModel
+import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.toExternalLinkPills
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -24,7 +24,7 @@ internal class ExternalLinksCollector : BookDetailCollector {
             .distinctUntilChanged()
             .collectLatest {
                 scope.setState { state ->
-                    state.copy(externalLinks = state.displayedEdition.toExternalLinksUiModel())
+                    state.copy(externalLinks = state.displayedEdition.toExternalLinkPills())
                 }
             }
     }

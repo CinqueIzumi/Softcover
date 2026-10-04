@@ -40,9 +40,9 @@ it never builds a fresh `onClick = { … }` per item. The shipped example is `Pr
 ```kotlin
 sealed interface ProgressSheetEvent {
     data class TabSelected(val tab: ProgressSheetTab) : ProgressSheetEvent
-    data class PagesSubmitted(val page: String, val actionAt: String?) : ProgressSheetEvent
+    data class PagesSubmitted(val page: String) : ProgressSheetEvent
     …
-    data class MarkAsReadRequested(val actionAt: String?) : ProgressSheetEvent
+    data object MarkAsReadRequested : ProgressSheetEvent
     data object Dismissed : ProgressSheetEvent
 }
 ```
@@ -83,15 +83,15 @@ layout.
 `ImmutableSet` / `ImmutableMap` (`kotlinx-collections-immutable`). There is no
 `stabilityConfigurationFile` in this build and none is to be added. A lambda field
 (`formatter: (Int) -> String`) is forbidden too: replace it with a sealed descriptor the component resolves
-internally, sized to what call sites need (`StatNumberFormat`'s `Grouped` / `Plain` / `Decimal(digits)`).
+internally, sized to what call sites need (`StatNumberFormat`'s `Grouped` / `Plain` / `Decimal`).
 
 **R4 — Presentation-ready values only.** A UI model holds formatted strings, resolved icon tokens and
 computed fractions — no domain type, no `Instant`, no `Duration`, no enum from `:core:domain`.
 `DeadlineBadge(status: DeadlineStatus)` becomes `Badge(model: BadgeUiModel)`, with the label and tone
 decided by the feature. When a component seems to need a domain type, give it a library-owned model of the
 same shape (`RichTextUiModel` in place of `ReviewDocument`). R4 governs `:core:component`, not a feature's
-own presentation models: a feature-local model may carry a domain enum as an event payload (`PaletteChoice`
-carries a `ColorPalette`) as long as R9 holds — the render neither maps nor labels it, only forwards it.
+own presentation models: a feature-local model may carry a domain enum as an event payload (a `ColorPalettePreviewTileUiModel<ColorPalette>`
+keyed by its `ColorPalette`) as long as R9 holds — the render neither maps nor labels it, only forwards it.
 `kotlinx.datetime.LocalDate` is an allowed value type: a plain calendar day carries no domain vocabulary
 (`DatePickerUiModel.initialDate`).
 

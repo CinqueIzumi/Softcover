@@ -1,14 +1,17 @@
 package nl.rhaydus.softcover.core.component.state
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonStyle
@@ -30,66 +33,109 @@ fun EmptyState(
     onEvent: (EmptyStateEvent) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val style = emptyStateStyle(
-        variant = model.variant,
-        editorialTypography = MaterialTheme.editorialTypography,
-    )
+    when (val variant = model.variant) {
+        is EmptyStateVariant.Centered -> CenteredEmptyState(
+            model = model,
+            button = variant.button,
+            onEvent = onEvent,
+            modifier = modifier,
+        )
 
+        EmptyStateVariant.Inline -> InlineEmptyState(
+            model = model,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun CenteredEmptyState(
+    model: EmptyStateUiModel,
+    button: EmptyStateButtonUiModel?,
+    onEvent: (EmptyStateEvent) -> Unit,
+    modifier: Modifier,
+) {
     Column(
         modifier = modifier,
-        verticalArrangement = style.verticalArrangement,
-        horizontalAlignment = style.horizontalAlignment,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (style.showsGlyph) {
-            SoftcoverText(
-                text = "“",
-                style = MaterialTheme.editorialTypography.quoteGlyph,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                    alpha = if (LocalDarkTheme.current) 0.15f else 0.3f,
-                ),
-                modifier = Modifier
-                    .quoteGlyphSway()
-                    .clearAndSetSemantics {},
-            )
+        SoftcoverText(
+            text = "“",
+            style = MaterialTheme.editorialTypography.quoteGlyph,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                alpha = if (LocalDarkTheme.current) 0.15f else 0.3f,
+            ),
+            modifier = Modifier
+                .quoteGlyphSway()
+                .clearAndSetSemantics {},
+        )
 
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+        Spacer(modifier = Modifier.height(8.dp))
 
         SoftcoverText(
             text = model.title,
-            style = style.titleStyle,
+            style = MaterialTheme.editorialTypography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
-            textAlign = style.textAlign,
+            textAlign = TextAlign.Center,
             modifier = Modifier.semantics { heading() },
         )
 
         model.body?.let { body ->
-            Spacer(modifier = Modifier.height(style.bodyGap))
+            Spacer(modifier = Modifier.height(12.dp))
 
             SoftcoverText(
                 text = body,
-                style = style.bodyStyle,
+                style = MaterialTheme.editorialTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = style.textAlign,
+                textAlign = TextAlign.Center,
             )
         }
 
-        when (val variant = model.variant) {
-            is EmptyStateVariant.Centered -> variant.button
-            EmptyStateVariant.Inline -> null
-        }?.let { button ->
+        button?.let {
             Spacer(modifier = Modifier.height(24.dp))
 
             RhaydusButton(
-                label = button.label,
+                label = it.label,
                 style = ButtonStyle.FILLED,
-                icon = button.icon?.let { icon ->
+                icon = it.icon?.let { icon ->
                     drawableIconResource(
                         icon = icon,
                         contentDescription = "",
                     )
                 },
                 onClick = { onEvent(EmptyStateEvent.ButtonClicked) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun InlineEmptyState(
+    model: EmptyStateUiModel,
+    modifier: Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start,
+    ) {
+        SoftcoverText(
+            text = model.title,
+            style = MaterialTheme.editorialTypography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.semantics { heading() },
+        )
+
+        model.body?.let { body ->
+            Spacer(modifier = Modifier.height(4.dp))
+
+            SoftcoverText(
+                text = body,
+                style = MaterialTheme.editorialTypography.body,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Start,
             )
         }
     }

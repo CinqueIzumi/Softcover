@@ -30,9 +30,9 @@ fun RankedBars(
         model.rows.forEach { row ->
             Column {
                 ChartLegendRow(
-                    label = row.label,
-                    share = row.share,
+                    slice = row,
                     isLoading = model.isLoading,
+                    swatch = false,
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))

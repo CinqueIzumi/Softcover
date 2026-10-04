@@ -1,8 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
-import nl.rhaydus.softcover.core.component.callout.CalloutLead
-import nl.rhaydus.softcover.core.component.callout.CalloutTone
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
+import nl.rhaydus.softcover.core.component.callout.CalloutVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -56,8 +55,7 @@ private fun statusCallout(
     icon: SoftcoverIcon,
     body: String,
 ): CalloutUiModel = CalloutUiModel(
-    tone = CalloutTone.Neutral,
+    variant = CalloutVariant.Neutral(icon = icon),
     eyebrow = eyebrow,
-    lead = CalloutLead.Icon(icon = icon),
     body = body,
 )

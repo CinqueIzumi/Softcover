@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.button.PillButton
-import nl.rhaydus.softcover.core.component.shape.PillShape
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -70,7 +70,7 @@ internal fun PillTextField(
         modifier = modifier
             .fillMaxWidth()
             .height(dimensions.height)
-            .clip(PillShape)
+            .clip(CircleShape)
             .background(variant.tone.container(MaterialTheme.colorScheme)),
         decorationBox = { innerTextField ->
             Row(

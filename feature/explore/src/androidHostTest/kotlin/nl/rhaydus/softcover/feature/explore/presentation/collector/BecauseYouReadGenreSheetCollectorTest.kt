@@ -163,7 +163,6 @@ class BecauseYouReadGenreSheetCollectorTest {
                 stateFlow.value = stateFlow.value.copy(becauseYouReadGenreOptions = listOf("Horror"))
 
                 // ----- Assert -----
-                stateFlow.value.becauseYouReadGenreGroup.dismissesSheetOnSelect shouldBe true
                 job.cancel()
             }
 

@@ -31,11 +31,10 @@ sealed interface ProgressSheetMedium {
 
     /**
      * Audiobook: progress is a position out of [totalSeconds]. The three fields hold the reader's
-     * in-progress entry, seeded from [currentSeconds] until they edit it.
+     * in-progress entry.
      */
     data class Timed(
         val totalSeconds: Int,
-        val currentSeconds: Int,
         val hours: TextFieldUiModel,
         val minutes: TextFieldUiModel,
         val seconds: TextFieldUiModel,

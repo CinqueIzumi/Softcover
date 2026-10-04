@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
+import kotlin.math.ceil
 
 /**
  * A deadline's progress as the badge that should represent it — the status label as the badge's
@@ -44,20 +45,20 @@ fun DeadlineProgress.toCoverOverlayUiModel(): CoverOverlayUiModel =
     )
 
 /**
- * A deadline's progress as the summary line's date and pace strings, in [dateStyle]'s date format
- * and rendered for [tone]. The pace text is lifted verbatim from `DeadlineSummaryLine`: the status
- * label once the deadline is expired, otherwise the required pace rounded up to a whole unit.
+ * A deadline's progress as the summary line's text, in [dateStyle]'s date format and rendered for
+ * [tone]. The pace is the status label once the deadline is expired, otherwise the required pace
+ * rounded up to a whole unit.
  */
 fun DeadlineProgress.toDeadlineSummaryUiModel(
     dateStyle: DateStyle,
-    tone: DeadlineSummaryTone,
+    tone: DeadlineSummaryTone = DeadlineSummaryTone.OnSurface,
 ): DeadlineSummaryUiModel {
     val dateText = dateStyle.formatter.format(deadline)
 
     val paceText = if (status == DeadlineStatus.Expired) {
         status.label
     } else {
-        val pace = ceilToInt(requiredPerDay)
+        val pace = ceil(requiredPerDay).toInt()
         when (unit) {
             DeadlineUnit.PAGES -> {
                 val pageLabel = if (pace == 1) "page" else "pages"
@@ -69,14 +70,7 @@ fun DeadlineProgress.toDeadlineSummaryUiModel(
     }
 
     return DeadlineSummaryUiModel(
-        dateText = dateText,
-        paceText = paceText,
+        text = "$dateText • $paceText",
         tone = tone,
     )
-}
-
-private fun ceilToInt(value: Float): Int {
-    val rounded = value.toInt()
-
-    return if (value > rounded) rounded + 1 else rounded
 }

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.component.state
 
-import nl.rhaydus.softcover.core.component.callout.BannerTone
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.callout.BannerVariant
 import nl.rhaydus.softcover.core.component.generated.resources.Res
@@ -15,10 +14,9 @@ class ResourceOfflineCopy : OfflineCopy {
         body = getString(Res.string.connectivity_offline_screen_body),
     )
 
-    override suspend fun banner(visible: Boolean): BannerUiModel = BannerUiModel(
+    override suspend fun banner(): BannerUiModel = BannerUiModel(
         message = getString(Res.string.connectivity_offline_banner),
-        tone = BannerTone.Warning,
         variant = BannerVariant.Status,
-        visible = visible,
+        visible = true,
     )
 }
