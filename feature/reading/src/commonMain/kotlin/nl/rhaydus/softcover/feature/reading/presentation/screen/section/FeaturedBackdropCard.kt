@@ -56,6 +56,7 @@ import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.collector.greetingForNow
+import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 
 /**
  * The single full-card blurred-cover backdrop, restored to the pre-redesign treatment: ONE
@@ -70,6 +71,7 @@ internal fun FeaturedBackdropCard(
     book: Book,
     backdropCover: CoverUiModel?,
     heroCover: CoverUiModel?,
+    progress: FeaturedProgressUiModel,
     deadlineCoverOverlay: CoverOverlayUiModel?,
     deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
@@ -179,9 +181,8 @@ internal fun FeaturedBackdropCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             FeaturedProgressStat(
-                book = book,
+                model = progress,
                 foreground = foreground,
-                isLoading = isLoading,
             )
 
             // The deadline readout arrives from its own collector, independently of the progress block

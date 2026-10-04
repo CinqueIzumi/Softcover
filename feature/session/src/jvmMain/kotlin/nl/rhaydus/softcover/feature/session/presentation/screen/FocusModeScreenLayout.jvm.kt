@@ -23,6 +23,8 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
+import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
+import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
 
 // Keeps the reading panel at a comfortable column measure rather than stretching the hero across a
 // maximized window.
@@ -43,7 +45,8 @@ internal actual fun FocusModeScreenLayout(
     active: ActiveSession,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
-    onUpdatePage: (Int) -> Unit,
+    state: FocusModeUiState,
+    runAction: (FocusModeAction) -> Unit,
     onClose: () -> Unit,
 ) {
     Surface(
@@ -62,7 +65,8 @@ internal actual fun FocusModeScreenLayout(
                 active = active,
                 onPauseResume = onPauseResume,
                 onStop = onStop,
-                onUpdatePage = onUpdatePage,
+                state = state,
+                runAction = runAction,
                 coverWidth = DESKTOP_COVER_WIDTH,
                 modifier = Modifier
                     .fillMaxWidth()

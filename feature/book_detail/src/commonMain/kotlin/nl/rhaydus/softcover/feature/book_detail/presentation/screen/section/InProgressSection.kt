@@ -17,9 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -37,6 +35,7 @@ import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -47,7 +46,6 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import kotlin.math.roundToInt
 
 /**
  * The "In progress" section (Yours lens, `status == Reading`). Section-opener bar + eyebrow, a
@@ -56,17 +54,12 @@ import kotlin.math.roundToInt
  * "wavy always" rule), the `p. x of y` / `n pages to go` counts row, the reading-pace forecast line
  * (hidden when unavailable), and the existing [DeadlineRow] when a deadline is set.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun InProgressSection(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
-    val book = state.book ?: return
-    val read = book.userBookRead ?: return
-    val edition = book.currentEdition ?: return
-    val progress = read.progress
-    val isAudiobook = edition.isAudiobook
+    val inProgress = state.inProgress ?: return
 
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         SectionHeader(model = state.inProgressSectionHeader) {
@@ -79,57 +72,29 @@ internal fun InProgressSection(
         Spacer(modifier = Modifier.height(6.dp))
 
         SoftcoverText(
-            text = "${progress.roundToInt()}%",
+            text = inProgress.percent,
             style = MaterialTheme.editorialTypography.statHero,
             color = MaterialTheme.colorScheme.onSurface,
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        LinearWavyProgressIndicator(
-            progress = {
-                (progress / 100f).coerceIn(
-                    0f,
-                    1f,
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(14.dp),
-        )
+        ProgressBar(model = inProgress.bar)
 
         Spacer(modifier = Modifier.height(10.dp))
-
-        val summaryLeft: String
-        val summaryRight: String
-
-        if (isAudiobook) {
-            val totalSeconds = edition.audioSeconds ?: 0
-            val currentSeconds = read.currentSeconds ?: 0
-            val remainingSeconds = (totalSeconds - currentSeconds).coerceAtLeast(0)
-
-            summaryLeft = "${secondsToHm(currentSeconds)} of ${secondsToHm(totalSeconds)}"
-            summaryRight = "${secondsToHm(remainingSeconds)} left"
-        } else {
-            val pageProgress = read.currentPage ?: 0
-            val left = edition.pages?.minus(pageProgress) ?: 0
-
-            summaryLeft = "p. $pageProgress of ${edition.pages ?: 0}"
-            summaryRight = "$left pages to go"
-        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             SoftcoverText(
-                text = summaryLeft,
+                text = inProgress.summaryStart,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             SoftcoverText(
-                text = summaryRight,
+                text = inProgress.summaryEnd,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

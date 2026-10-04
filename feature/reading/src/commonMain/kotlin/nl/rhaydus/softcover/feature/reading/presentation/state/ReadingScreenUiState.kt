@@ -120,6 +120,12 @@ internal data class ReadingScreenUiState(
     val deadlineCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
 
     /**
+     * The featured card's progress readout, mapped by `FeaturedProgressCollector` from the featured
+     * book ([books] `.firstOrNull()`); the masked stand-in while there is none.
+     */
+    val featuredProgress: FeaturedProgressUiModel = FeaturedProgressUiModel.Loading,
+
+    /**
      * The featured book's ([books] `.firstOrNull()`) deadline summary line, in the
      * [nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone.OnHeroBackdrop] ink for the
      * blurred-cover hero backdrop, where the book cards' summaries take

@@ -116,6 +116,9 @@ internal data class BookDetailUiState(
     val deadlineBadge: BadgeUiModel? = null,
     val readingPaceForecast: ReadingPaceForecast? = null,
 
+    /** [book]'s reading progress, mapped by `InProgressCollector`; null while the book has no read. */
+    val inProgress: InProgressUiModel? = null,
+
     /** Non-null exactly while the deadline picker is open; built by `OnOpenDeadlinePickerAction`. */
     val deadlinePicker: DatePickerUiModel? = null,
 

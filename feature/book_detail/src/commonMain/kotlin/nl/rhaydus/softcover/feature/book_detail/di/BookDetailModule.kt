@@ -44,6 +44,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionCa
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.InProgressCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LensToggleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
@@ -106,6 +107,7 @@ val bookDetailModule = module {
     factory { TagVocabularySyncCollector() } bind BookDetailCollector::class
     factory { VerdictReviewCollector() } bind BookDetailCollector::class
     factory { VerdictSheetCollector() } bind BookDetailCollector::class
+    factory { InProgressCollector() } bind BookDetailCollector::class
     factory { ShareCardsCollector() } bind BookDetailCollector::class
     factory { ShareSheetCollector() } bind BookDetailCollector::class
     factory { TagEditorSheetCollector() } bind BookDetailCollector::class

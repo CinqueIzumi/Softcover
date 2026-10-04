@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,51 +16,44 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.common.secondsToHm
-import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.Book
-import kotlin.math.roundToInt
+import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 
 /**
- * "Page {x} of {y}" (or the audiobook time equivalent) beside the "NN%" stat, then a wavy bar — set
- * in [foreground] (rather than a `onSurface`/`onSurfaceVariant` theme pair) since this now sits over
- * the featured card's single full-card blurred-cover backdrop, not a flat surface below it.
+ * The page position beside the "NN%" stat, then a wavy bar — set in [foreground] (rather than a
+ * `onSurface`/`onSurfaceVariant` theme pair) since this sits over the featured card's single
+ * full-card blurred-cover backdrop, not a flat surface below it.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun FeaturedProgressStat(
-    book: Book,
+    model: FeaturedProgressUiModel,
     foreground: Color,
-    isLoading: Boolean = false,
 ) {
-    val progressFraction = (book.userBookRead?.progress ?: 0f) / 100f
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
     ) {
-        val pageCount = pageCountLabel(
-            book = book,
+        val pageLabel = pageLabel(
+            lead = model.pageLead,
+            tail = model.pageTail,
             foreground = foreground,
         )
 
         SoftcoverText(
-            text = pageCount,
-            isLoading = isLoading,
-            standIn = pageCount.text,
+            text = pageLabel,
+            isLoading = model.isLoading,
+            standIn = pageLabel.text,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             color = foreground,
         )
 
-        val percentage = "${(book.userBookRead?.progress ?: 0f).roundToInt()}%"
-
         SoftcoverText(
-            text = percentage,
-            isLoading = isLoading,
-            standIn = percentage,
+            text = model.percent,
+            isLoading = model.isLoading,
+            standIn = model.percent,
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = foreground,
         )
@@ -70,45 +61,24 @@ internal fun FeaturedProgressStat(
 
     Spacer(modifier = Modifier.height(9.dp))
 
-    LinearWavyProgressIndicator(
-        progress = {
-            progressFraction.coerceIn(
-                0f,
-                1f,
-            )
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(10.dp)
-            .skeletonMask(visible = isLoading),
-    )
+    ProgressBar(model = model.bar)
 }
 
-/** "Page 348" at full [foreground] alpha followed by " of 512" demoted to 0.6 alpha, in one line. */
+/** [lead] at full [foreground] alpha followed by [tail] demoted to 0.6 alpha, in one line. */
 @Composable
-private fun pageCountLabel(
-    book: Book,
+private fun pageLabel(
+    lead: String,
+    tail: String?,
     foreground: Color,
 ): AnnotatedString {
-    val edition = book.currentEdition
     val dimColor = foreground.copy(alpha = 0.6f)
 
     return buildAnnotatedString {
-        if (edition?.isAudiobook == true) {
-            val current = book.userBookRead?.currentSeconds ?: 0
-            val total = edition.audioSeconds ?: 0
+        append(lead)
 
-            append(secondsToHm(current))
+        if (tail != null) {
             withStyle(SpanStyle(color = dimColor)) {
-                append(" of ${secondsToHm(total)}")
-            }
-        } else {
-            val currentPage = book.userBookRead?.currentPage ?: 0
-            val totalPages = edition?.pages ?: book.defaultEdition?.pages
-
-            append("Page $currentPage")
-            withStyle(SpanStyle(color = dimColor)) {
-                append(" of $totalPages")
+                append(tail)
             }
         }
     }

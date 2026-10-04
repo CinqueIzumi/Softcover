@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,14 +32,19 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.cover.Cover
+import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
-import kotlin.math.min
-import kotlin.math.roundToInt
+import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
+import nl.rhaydus.softcover.feature.session.presentation.action.OnPageDraftChangedAction
+import nl.rhaydus.softcover.feature.session.presentation.action.OnPageFocusGainedAction
+import nl.rhaydus.softcover.feature.session.presentation.action.OnPageFocusLostAction
+import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
+import nl.rhaydus.softcover.feature.session.presentation.state.FocusPageEditorUiModel
 
 /**
  * The distraction-free reading hero shared by both platforms: eyebrow → cover → title/author → the
@@ -57,7 +59,8 @@ internal fun FocusReadingPanel(
     active: ActiveSession,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
-    onUpdatePage: (Int) -> Unit,
+    state: FocusModeUiState,
+    runAction: (FocusModeAction) -> Unit,
     coverWidth: Dp,
     modifier: Modifier = Modifier,
 ) {
@@ -143,14 +146,13 @@ internal fun FocusReadingPanel(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        FocusPageEditor(
-            active = active,
-            onCommit = { page ->
-                haptics.commit()
-
-                onUpdatePage(page)
-            },
-        )
+        state.pageEditor?.let { pageEditor ->
+            FocusPageEditor(
+                pageEditor = pageEditor,
+                pageDraft = state.pageDraft,
+                runAction = runAction,
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -200,110 +202,44 @@ internal fun FocusReadingPanel(
 /**
  * The reading position rendered as an editable hero stat (DS §5) — the same treatment as the
  * progress sheet's page tab: a borderless [HeroStatNumberField] in the stat face over an editorial
- * "of N pages" caption and a progress bar. Tapping it opens the keyboard; the new page commits when
- * the field loses focus (keyboard "Done" or tapping away), and only when it actually changed. Books
- * without a page count (audiobooks / unknown) fall back to a read-only "% complete" line.
+ * caption and a progress bar. Tapping it opens the keyboard; the new page commits when the field
+ * loses focus (keyboard "Done" or tapping away). Books without a page count (audiobooks / unknown)
+ * show a read-only caption instead of the field.
  */
 @Composable
 private fun FocusPageEditor(
-    active: ActiveSession,
-    onCommit: (Int) -> Unit,
+    pageEditor: FocusPageEditorUiModel,
+    pageDraft: TextFieldValue,
+    runAction: (FocusModeAction) -> Unit,
 ) {
-    val percent = active.book.userBookRead?.progress ?: 0f
-    val totalPages = active.book.currentEdition?.pages ?: active.book.defaultEdition?.pages ?: 0
-
-    if (totalPages <= 0) {
-        EditorialSuffix(text = "${percent.roundToInt()}% complete")
+    if (pageEditor.isEditable.not()) {
+        EditorialSuffix(text = pageEditor.caption)
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        FocusProgressBar(fraction = percent / 100f)
+        ProgressBar(model = pageEditor.bar)
 
         return
     }
-
-    val initialPage = active.book.userBookRead?.currentPage ?: 0
-
-    var number by remember { mutableStateOf(TextFieldValue(text = initialPage.toString())) }
-
-    var firstTimeFocusGained by remember { mutableStateOf(true) }
-
-    val parsed = number.text.toIntOrNull() ?: 0
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
     ) {
         HeroStatNumberField(
-            value = number,
+            value = pageDraft,
             charCount = 4,
-            onValueChange = { newValue ->
-                if (firstTimeFocusGained.not()) {
-                    number = number.copy(selection = newValue.selection)
-                } else {
-                    firstTimeFocusGained = false
-                }
-
-                if (newValue.text == number.text) return@HeroStatNumberField
-
-                if (newValue.text.isEmpty()) {
-                    number = newValue
-
-                    return@HeroStatNumberField
-                }
-
-                val newNumber = newValue.text.toIntOrNull() ?: run {
-                    number = number.copy(
-                        text = "",
-                        selection = newValue.selection,
-                    )
-
-                    return@HeroStatNumberField
-                }
-
-                number = newValue.copy(text = min(
-                    newNumber,
-                    totalPages,
-                ).toString(),)
-            },
-            onFocusReset = {
-                firstTimeFocusGained = true
-
-                number = number.copy(selection = TextRange.Zero)
-
-                number.text.toIntOrNull()?.takeIf { it != initialPage }?.let(onCommit)
-            },
-            onFocusGained = {
-                number = number.copy(selection = TextRange(
-                    start = 0,
-                    end = number.text.length,
-                ),)
-            },
+            onValueChange = { runAction(OnPageDraftChangedAction(newValue = it)) },
+            onFocusReset = { runAction(OnPageFocusLostAction) },
+            onFocusGained = { runAction(OnPageFocusGainedAction) },
         )
     }
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    EditorialSuffix(text = "of $totalPages pages")
+    EditorialSuffix(text = pageEditor.caption)
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    FocusProgressBar(fraction = (parsed.toFloat() / totalPages).coerceIn(
-        0f,
-        1f,
-    ),)
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun FocusProgressBar(fraction: Float) {
-    LinearWavyProgressIndicator(
-        progress = { fraction.coerceIn(
-            0f,
-            1f,
-        ) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(12.dp),
-    )
+    ProgressBar(model = pageEditor.bar)
 }

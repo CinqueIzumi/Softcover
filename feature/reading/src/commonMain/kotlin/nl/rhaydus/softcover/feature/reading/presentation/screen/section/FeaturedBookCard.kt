@@ -26,6 +26,7 @@ import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
+import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 
 /**
  * The Reading screen's emotional centre (design-system.md §5 "Reading featured-hero card"): a
@@ -40,6 +41,7 @@ internal fun FeaturedBookCard(
     book: Book,
     backdropCover: CoverUiModel?,
     heroCover: CoverUiModel?,
+    progress: FeaturedProgressUiModel,
     deadlineCoverOverlay: CoverOverlayUiModel?,
     deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
@@ -97,6 +99,7 @@ internal fun FeaturedBookCard(
                 book = book,
                 backdropCover = backdropCover,
                 heroCover = heroCover,
+                progress = progress,
                 deadlineCoverOverlay = deadlineCoverOverlay,
                 deadlineSummary = deadlineSummary,
                 mutationFailed = mutationFailed,

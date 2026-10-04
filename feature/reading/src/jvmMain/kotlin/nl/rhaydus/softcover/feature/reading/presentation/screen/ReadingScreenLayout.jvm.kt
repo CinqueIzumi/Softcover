@@ -203,6 +203,7 @@ private fun DesktopReadingContent(
                     book = featured,
                     backdropCover = state.featuredBackdropCover,
                     heroCover = state.featuredCover,
+                    progress = state.featuredProgress,
                     deadlineCoverOverlay = state.deadlineCoverOverlays[featured.id],
                     deadlineSummary = state.featuredDeadlineSummary,
                     mutationFailed = featured.id in state.failedMutationBookIds,

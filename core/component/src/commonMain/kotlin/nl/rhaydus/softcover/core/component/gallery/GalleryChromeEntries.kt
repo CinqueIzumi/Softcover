@@ -39,6 +39,8 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.progress.ProgressBar
+import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -278,6 +280,20 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         },
     ),
     galleryEntry(
+        name = "ProgressBar",
+        family = GalleryFamily.PROGRESS,
+        blurb = "A determinate wavy bar for reading progress; it animates to each new fraction " +
+            "and masks while loading.",
+        previews = ProgressBarUiModel,
+        label = ::progressBarFixtureLabel,
+        content = { model, modifier ->
+            ProgressBar(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
         name = "StatNumber",
         family = GalleryFamily.STATISTIC,
         blurb = "A number bound to live state: it tweens between values, holds tabular figures " +
@@ -422,6 +438,13 @@ private fun statNumberFixtureLabel(model: StatNumberUiModel): String {
         StatNumberFormat.Plain -> "Plain integer"
         is StatNumberFormat.Decimal -> "One decimal"
     }
+}
+
+private fun progressBarFixtureLabel(model: ProgressBarUiModel): String = when {
+    model.isLoading -> "Loading"
+    model.fraction <= 0f -> "Empty"
+    model.fraction >= 1f -> "Full"
+    else -> "Partial"
 }
 
 private fun statTileFixtureLabel(model: StatTileUiModel): String {

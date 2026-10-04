@@ -130,7 +130,7 @@ component/
 +              ChooseListsEvent  ListMembership
 + progress/    UpdateProgressBottomSheet  ProgressSheetUiModel
 +              ProgressSheetEvent  ProgressSheetTab  ProgressSheetMedium
-+              · ProgressIndicator                                           S9
++              ProgressBar  ProgressBarUiModel
 + richtext/    RichText  RichTextUiModel  RichTextRun/Mark/Paragraph
 +              RichTextEditing  RichTextEditorBuffer  ClickableText(+UiModel)
 +              RichTextFormattingToolbar(+UiModel/Event)

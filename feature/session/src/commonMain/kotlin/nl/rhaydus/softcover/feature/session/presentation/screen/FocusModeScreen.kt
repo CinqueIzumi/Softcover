@@ -4,10 +4,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.haptics.rememberHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
+import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
+import nl.rhaydus.softcover.feature.session.presentation.event.FocusModeEvent
+import nl.rhaydus.softcover.feature.session.presentation.screenmodel.FocusModeScreenModel
+import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
 import org.koin.compose.koinInject
 
 /**
@@ -26,6 +33,15 @@ object FocusModeScreen : Screen {
         val controller = koinInject<ActiveSessionController>()
         val navigator = LocalNavigator.currentOrThrow
         val active by controller.activeSession.collectAsStateWithLifecycle()
+        val screenModel = koinScreenModel<FocusModeScreenModel>()
+        val state by screenModel.state.collectAsStateWithLifecycle()
+        val haptics = rememberHaptics()
+
+        ObserveAsEvents(flow = screenModel.events) { event ->
+            when (event) {
+                is FocusModeEvent.PageCommittedEvent -> haptics.commit()
+            }
+        }
 
         val current = active
 
@@ -45,7 +61,8 @@ object FocusModeScreen : Screen {
 
                 navigator.pop()
             },
-            onUpdatePage = { controller.updatePage(newPage = it) },
+            state = state,
+            runAction = screenModel::runAction,
             onClose = { navigator.pop() },
         )
     }
@@ -60,6 +77,7 @@ internal expect fun FocusModeScreenLayout(
     active: ActiveSession,
     onPauseResume: () -> Unit,
     onStop: () -> Unit,
-    onUpdatePage: (Int) -> Unit,
+    state: FocusModeUiState,
+    runAction: (FocusModeAction) -> Unit,
     onClose: () -> Unit,
 )

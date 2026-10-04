@@ -17,10 +17,12 @@ kotlin {
             implementation(libs.rhaydus.coreCommon)
             implementation(libs.rhaydus.designsystemCore)
             implementation(libs.rhaydus.designsystemEditorial)
+            implementation(libs.rhaydus.toad)
 
             implementation(libs.koin.compose.multiplatform)
 
             implementation(libs.voyager.navigator)
+            implementation(libs.voyager.koin)
         }
 
         androidMain.dependencies {

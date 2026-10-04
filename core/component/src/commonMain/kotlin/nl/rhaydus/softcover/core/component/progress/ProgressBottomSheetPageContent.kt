@@ -148,7 +148,7 @@ internal fun ColumnScope.ProgressBottomSheetPageContent(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        EditorialProgressIndicator(fraction = fraction)
+        ProgressBarBody(fraction = fraction)
     }
 
     Spacer(modifier = Modifier.height(28.dp))

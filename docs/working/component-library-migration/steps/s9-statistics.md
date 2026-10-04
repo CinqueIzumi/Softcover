@@ -15,7 +15,7 @@ both themes in the gallery.
 | S9-1 | Stat tiles | [x] |
 | S9-2 | `ChartTone`, `RankedBars`, `ProportionChart` | [x] |
 | S9-3 | `ColumnChart`, the ratings stat model | [x] |
-| S9-4 | Progress | [ ] |
+| S9-4 | Progress | [x] |
 | S9-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## Approved shape
@@ -44,6 +44,17 @@ S9-2 / S9-3 chart model (approved 2026-10-05):
 - Mappers feature-local in profile (one feature); all percentages, peak and metric selection move out of composition. New `ProfileUiState` fields `genreRanking`, `genderChart`, `bipocChart`, `lgbtqChart` (S9-2), the year and ratings `ColumnChartUiModel`s (S9-3); each rebuilt wherever `readingLife`, the hide-untagged switch or the year-metric toggle changes — one writer per field.
 - `/dataviz`: text in text tokens, legend on the stack, 2 dp segment gaps, bars ≤ 24 dp — already met; no hover/tap layer (none today, mobile). User checks chart colours in both themes in the gallery.
 - Split: S9-2 = `ChartTone`, `RankedBars`, `ProportionChart` (genres, gender, BIPOC, LGBTQ+). S9-3 = `ColumnChart` (years, ratings), `RatingsAverageRow`'s stat model, the `RATING_FRACTION_DIGITS` move.
+
+S9-4 (approved 2026-10-05, one sub-step):
+
+- `ProgressBar(model, modifier)` + `ProgressBarUiModel(fraction: Float, isLoading: Boolean = false)` in `core/component/progress/`; inert. Wavy linear, M3 default colours, full width, one 12 dp height, always animates the fraction, `skeletonMask` while loading. Mappers clamp. No variant.
+- Accepted shifts: featured-card bar 10 → 12 dp, book-detail in-progress bar 14 → 12 dp; Focus and featured / in-progress bars now animate on change.
+- `EditorialProgressIndicator` deleted; the progress sheet's three tab bodies draw through `ProgressBar`'s internal body from their own typed text (component-owned input state, stays in the sheet).
+- Focus mode: `FocusProgressBar` deleted; the typed page text moves into the session ScreenModel (S8 `TextFieldUiModel.text` precedent); a collector builds feature-local `FocusPageEditorUiModel` (caption, bar, "% complete" fallback); `FocusPageEditor` stops reading `Book`.
+- `FeaturedProgressStat` stays reading-local and takes `FeaturedProgressUiModel(percent, pageLabel as two strings with a dimmed tail, bar)` from a reading mapper instead of `Book`; fixes "of null".
+- `InProgressSection` (book detail) joins the scope: stays local; a collector builds `InProgressUiModel(percent, bar, summaryStart, summaryEnd)`.
+- Out: onboarding `WavyConnector` / `WavySineLine` (decoration); indeterminate waits (direct M3); `BookCardProgressBar` (S9-C decides whether it renders through `ProgressBar`).
+- Mappers feature-local (reading, book detail and session map differently).
 
 ## S9-1 — Stat tiles (7 → `StatTile` + `StatTileUiModel`)
 
