@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S9 closed (step file deleted). SL-3b blocked on F34; SL-12 unblocked; F33 open.
-- **Next:** `steps/ss-simplicity-audit.md`, first open sub-step (SS-0).
+- **State:** S9 closed. SS-0 done (scope now 11 rows). SL-3b blocked on F34; SL-12 unblocked; F33 open.
+- **Next:** `steps/ss-simplicity-audit.md`, first open sub-step (SS-1).
 - **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `Color.LightGray` / `White`, not theme roles, so network-latency shimmers are a light-grey block on the dark theme — foundation upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
 - **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile`, charts, `ProgressBar`, 12 dp card bars unchecked in gallery. Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
 - **Verification:** JDK 21: tests of the 7 touched modules + `styleCheck` pass; reviewer no blockers.
-- **Uncommitted:** S9-C — core component/uibinding, 5 features' mappers + tests, docs; S9 step file deleted.
+- **Uncommitted:** SS-0 — the regenerated SS table and this block.
 
 ## Local verification
 
@@ -70,7 +70,7 @@ every sub-step's Verify.
 | S8 | — (screen states) | S8-1–S8-3, S8-C-a–C-c | [x] |
 | S8 | — (controls) | S8-4–S8-6, S8-C-controls | [x] |
 | S9 | — (statistics & progress) | S9-1–S9-4, S9-C | [x] |
-| SS | [steps/ss-simplicity-audit.md](steps/ss-simplicity-audit.md) | SS-0–SS-7; after S9, before PF / S10 | [ ] |
+| SS | [steps/ss-simplicity-audit.md](steps/ss-simplicity-audit.md) | SS-0–SS-11; after S9, before PF / S10 | [ ] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
 | SP | [steps/sp-spacing-scale.md](steps/sp-spacing-scale.md) | SP-1–SP-5, SP-C; after S10, before S11 | [ ] |

@@ -27,7 +27,7 @@ minimal-shape audit. Stages after SS are held to the same smells by the README's
 package under `:core:component` and `:core:uibinding`, and every `*UiModel` / `*Variant` / `*Style` type
 in any module (`git grep -nE "(class|interface|object) \w+(UiModel|Variant|Style)\b"`, main source sets).
 Assign each to a row below; add rows for anything new (packages, feature-local models) and rebalance so
-each row fits one session. The table below is the 2026-10-05 snapshot only.
+each row fits one session. SS-0 regenerated the table below on 2026-10-05.
 
 Per sub-step: list each package's files and line counts, name every smell above by symbol, and propose
 the cuts with an expected before/after line count. Stop for approval. Build per
@@ -36,13 +36,19 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 
 ## Sub-steps
 
-| Sub | Scope (`:core:component` packages + their mappers, state and call sites) | Status |
+| Sub | Scope (`:core:component` packages + their mappers, state and call sites; ~lines) | Status |
 |---|---|---|
-| SS-0 | Regenerate this table from the code (Procedure) | [ ] |
-| SS-1 | `chip`, `badge`, `divider`, `selection`, `shape`, `text` | [ ] |
-| SS-2 | `header`, `topbar`, `chrome`, `sidebar` | [ ] |
-| SS-3 | `bookcard`, `cover`, `lists` | [ ] |
-| SS-4 | `sheet`, `dialog`, `callout`, `state` | [ ] |
-| SS-5 | `control`, `field`, `button` | [ ] |
-| SS-6 | `statistic`, `progress`, `deadline`, `mood`, `celebration` | [ ] |
-| SS-7 | `share`, `richtext`, `verdict`, `gallery`, and `:core:uibinding` as a whole | [ ] |
+| SS-0 | Regenerate this table from the code (Procedure) | [x] |
+| SS-1 | `chip`, `badge`, `divider`, `selection`, `shape`, `text`, `ComponentAlpha.kt`; uibinding `release` (`UnreleasedBadgeStyle`) — ~1.6k | [ ] |
+| SS-2 | `header`, `topbar`, `chrome`, `sidebar`; explore `HiddenGroupHeaderUiModel` — ~1.8k | [ ] |
+| SS-3 | `bookcard`; uibinding `book` — ~1.8k | [ ] |
+| SS-4 | `cover`, `lists`; uibinding `cover` (all platforms), `lists`; library `ArrangeMakeOrderedUiModel` — ~2.1k | [ ] |
+| SS-5 | `sheet`, `dialog`, `callout`, `state`; explore `ContinueSeriesEntryUiModel`, orchestration `ReAuthSheetUiModel` — ~2.2k | [ ] |
+| SS-6 | `control`, `button`; book_detail `ExternalLinksUiModel`, `ShareSheetBodyUiModel`; settings `SettingsToggleRowUiModel`, `SettingsChoiceRowUiModel` — ~1.9k | [ ] |
+| SS-7 | `field`, `richtext`; uibinding `richtext`; book_detail `BookReviewUiModel` — ~1.8k | [ ] |
+| SS-8 | `progress`, `deadline`, `mood`, `celebration`; uibinding `progress`, `deadline`; book_detail `InProgressUiModel`, reading `FeaturedProgressUiModel`, session `FocusPageEditorUiModel` — ~2.3k | [ ] |
+| SS-9 | `statistic`, `chart`; profile `ReadingAtlasUiModel` — ~1.2k | [ ] |
+| SS-10 | `share`, `verdict`; uibinding `verdict`; book_detail `ShareCardVariant` — ~2.5k | [ ] |
+| SS-11 | `gallery`; uibinding `date`, `format`, `theme` — ~1.5k | [ ] |
+
+Out of scope: `core/domain` `BottomBarStyle` and `DateStyle` are stored preferences, not UI types.
