@@ -46,18 +46,18 @@ internal class CoverModelsCollector : BookDetailCollector {
                         verdictCover = edition.toCoverUiModel(
                             defaultEdition = edition,
                             coverlessTitle = title,
-                            variant = CoverVariant.SheetHeaderJacket,
+                            variant = CoverVariant.Jacket,
                             fallbackCoverUrl = fallbackCoverUrl,
                         ),
                         editionSheetHeaderCover = edition.toCoverUiModel(
                             defaultEdition = fallbackEdition,
                             coverlessTitle = title,
-                            variant = CoverVariant.SheetHeaderJacket,
+                            variant = CoverVariant.Jacket,
                         ),
                         tagEditorCover = edition.toCoverUiModel(
                             defaultEdition = fallbackEdition,
                             coverlessTitle = title,
-                            variant = CoverVariant.SheetHeaderJacket,
+                            variant = CoverVariant.Jacket,
                         ),
                     )
                 }

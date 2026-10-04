@@ -36,22 +36,13 @@ internal data class ExploreScreenUiState(
     // § 7.2 R9).
     val recentSearchChips: ChipSet<String> = ChipSet(),
     val queriedBooks: List<Book> = emptyList(),
-    // Cover UI models, keyed by book id, mapped off composition by CoverModelsCollector
-    // (`component-contract.md` § 7.2 R9). Five separate maps rather than one keyed by book id:
-    // the same book can appear in more than one rail at once (e.g. trending *and* because-you-
-    // read), each rail stamping a different `sharedTransitionKey` surface — see ExploreShelf.kt's
-    // SURFACE_* constants — and a collapsed map would hand the wrong transition key to one of the
-    // two rails.
+    // The featured hero's cover, mapped off composition by CoverModelsCollector
+    // (`component-contract.md` § 7.2 R9).
     val featuredCover: CoverUiModel? = null,
-    val trendingCovers: Map<Int, CoverUiModel> = emptyMap(),
-    val becauseYouReadCovers: Map<Int, CoverUiModel> = emptyMap(),
-    val continueSeriesCovers: Map<Int, CoverUiModel> = emptyMap(),
-    val queriedBookCovers: Map<Int, CoverUiModel> = emptyMap(),
     // Unreleased-cover-overlay UI models, mapped off composition by UnreleasedCoverOverlaysCollector
-    // (`component-contract.md` § 7.2 R9). One map keyed by book id, unlike the five cover maps
-    // above: an overlay carries no per-rail `sharedTransitionKey` surface, so the same book yields
-    // an identical overlay everywhere it appears, and one id-keyed map is the single source of
-    // truth. `featuredReleaseBadge` does not gate on `isUnreleased` - the featured hero is by
+    // (`component-contract.md` § 7.2 R9). One map keyed by book id: an overlay carries no per-rail
+    // `sharedTransitionKey` surface, so the same book yields an identical overlay everywhere it
+    // appears. `featuredReleaseBadge` does not gate on `isUnreleased` - the featured hero is by
     // construction the upcoming-release card, so it badges on `effectiveReleaseDate` alone,
     // reproducing today's ExploreShelf.kt:202,236 behaviour.
     val unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),

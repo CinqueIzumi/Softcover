@@ -38,7 +38,8 @@ private val ALSO_READING_STAND_IN_TEMPLATE = BookCardUiModel(
                 model = CoverUiModel(
                     source = null,
                     coverlessTitle = null,
-                    variant = CoverVariant.ReadingRowThumb,
+                    variant = CoverVariant.Tile,
+                    isLoading = true,
                 ),
             ),
         ),
@@ -75,7 +76,8 @@ private val PICK_UP_NEXT_STAND_IN_TEMPLATE = BookCardUiModel(
             model = CoverUiModel(
                 source = null,
                 coverlessTitle = null,
-                variant = CoverVariant.ReadingPickUpNextTile,
+                variant = CoverVariant.Tile,
+                isLoading = true,
             ),
         ),
         text = BookCardContent(title = "The Name of the Wind"),

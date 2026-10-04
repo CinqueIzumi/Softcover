@@ -283,7 +283,7 @@ private val previewEmptyWithTrendingState = ReadingScreenUiState(
     isLoading = false,
     trendingBooks = listOf(previewBooks.first()),
     trendingTileCover = previewBooks.first()
-        .toCoverUiModel(variant = CoverVariant.ReadingTrendingTile),
+        .toCoverUiModel(variant = CoverVariant.Tile),
 )
 
 @StandardPreview

@@ -27,7 +27,7 @@ class ChooseListsMapperTest {
     private fun coverUiModel(): CoverUiModel = CoverUiModel(
         source = null,
         coverlessTitle = "Cover",
-        variant = CoverVariant.ChooseListsStackJacket,
+        variant = CoverVariant.StackedJacket,
     )
 
     private fun listBook(
@@ -580,7 +580,7 @@ class ChooseListsMapperTest {
             trailing.cover shouldBe CoverUiModel(
                 source = null,
                 coverlessTitle = "1 book",
-                variant = CoverVariant.ChooseListsStackJacket,
+                variant = CoverVariant.StackedJacket,
             )
         }
 

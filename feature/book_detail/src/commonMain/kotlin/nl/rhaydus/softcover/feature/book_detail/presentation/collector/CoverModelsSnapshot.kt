@@ -46,7 +46,7 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
     val hero = edition.toCoverUiModel(
         defaultEdition = fallbackEdition,
         coverlessTitle = book?.title,
-        variant = CoverVariant.BookDetailHero,
+        variant = CoverVariant.Rounded,
         fallbackCoverUrl = fallbackCoverUrl,
         isLoading = coverIsLoading,
         sharedTransitionKey = bookCoverTransitionKey(
@@ -61,7 +61,7 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
     val backdrop = edition.toCoverUiModel(
         defaultEdition = fallbackEdition,
         coverlessTitle = null,
-        variant = CoverVariant.BookDetailBackdrop,
+        variant = CoverVariant.Flat,
         fallbackCoverUrl = fallbackCoverUrl,
         isLoading = coverIsLoading,
     )
@@ -69,7 +69,7 @@ internal fun CoverModelsSnapshot.toCoverModels(): CoverModels {
     val fullScreen = edition.toCoverUiModel(
         defaultEdition = fallbackEdition,
         coverlessTitle = book?.title,
-        variant = CoverVariant.FullScreenViewer,
+        variant = CoverVariant.Flat,
         fallbackCoverUrl = fallbackCoverUrl,
     )
 

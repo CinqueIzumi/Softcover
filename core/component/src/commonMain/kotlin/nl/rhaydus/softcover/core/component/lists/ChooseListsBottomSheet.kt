@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.triStateToggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -108,14 +109,12 @@ fun ChooseListsBottomSheet(
                     ChooseListsRow(
                         row = row,
                         onClick = {
-                            if (row.isPending.not()) {
-                                onEvent(
-                                    ChooseListsEvent.MembershipToggled(
-                                        listId = row.listId,
-                                        membership = row.membership,
-                                    ),
-                                )
-                            }
+                            onEvent(
+                                ChooseListsEvent.MembershipToggled(
+                                    listId = row.listId,
+                                    membership = row.membership,
+                                ),
+                            )
                         },
                     )
                 }
@@ -278,7 +277,7 @@ private fun NewListRow(
         Box(
             modifier = Modifier
                 .size(26.dp)
-                .clip(RoundedCornerShape(percent = 50))
+                .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center,
         ) {

@@ -97,7 +97,6 @@ private fun BookCardCoverScaffold(
             BookCardCoverLayout(
                 cover = cover,
                 selection = model.decorations.selection,
-                isLoading = isLoading,
                 modifier = Modifier.fillMaxWidth(),
             )
 

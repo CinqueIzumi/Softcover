@@ -51,7 +51,7 @@ internal fun Book.toAlsoReadingCard(
             size = BookCardVariant.Row.Size.Standard,
             lead = BookCardLead.Cover(
                 cover = BookCardCover(
-                    model = toTransitionCover(variant = CoverVariant.ReadingRowThumb),
+                    model = toTransitionCover(variant = CoverVariant.Tile),
                     badge = coverBadge,
                 ),
             ),
@@ -82,7 +82,7 @@ internal fun Book.toAlsoReadingCard(
 internal fun Book.toPickUpNextCard(): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = id),
     variant = BookCardVariant.Column(
-        cover = BookCardCover(model = toTransitionCover(variant = CoverVariant.ReadingPickUpNextTile)),
+        cover = BookCardCover(model = toTransitionCover(variant = CoverVariant.Tile)),
         text = BookCardContent(title = title),
     ),
 )

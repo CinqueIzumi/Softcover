@@ -18,7 +18,7 @@ class VerdictSheetMapperTest {
     private val cover = CoverUiModel(
         source = null,
         coverlessTitle = book.title,
-        variant = CoverVariant.SheetHeaderJacket,
+        variant = CoverVariant.Jacket,
     )
 
     @Nested

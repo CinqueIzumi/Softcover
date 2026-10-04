@@ -20,8 +20,6 @@ import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
-import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 
@@ -37,7 +35,6 @@ fun List<BookList>.toChooseListsUiModel(
     cover: CoverUiModel,
     listsBeingMutated: Set<Int>,
 ): ChooseListsUiModel = ChooseListsUiModel(
-    emptyState = chooseListsEmptyState(),
     rows = rowsFor(
         bookIds = setOf(bookId),
         listsBeingMutated = listsBeingMutated,
@@ -69,8 +66,7 @@ fun List<BookList>.toBulkChooseListsUiModel(
     val stackCovers = covers.take(SheetHeaderTrailing.JacketStack.MAX_COVERS)
 
     return ChooseListsUiModel(
-        emptyState = chooseListsEmptyState(),
-        rows = rowsFor(
+            rows = rowsFor(
             bookIds = bookIds,
             listsBeingMutated = listsBeingMutated,
             isBulk = true,
@@ -83,7 +79,7 @@ fun List<BookList>.toBulkChooseListsUiModel(
                     cover = CoverUiModel(
                         source = null,
                         coverlessTitle = name,
-                        variant = CoverVariant.ChooseListsStackJacket,
+                        variant = CoverVariant.StackedJacket,
                     ),
                 )
             } else {
@@ -218,9 +214,3 @@ private fun membershipChipLabelFor(
         ListMembership.NONE -> if (isPlural) "Add all $totalCount" else "Add"
     }
 }
-
-private fun chooseListsEmptyState(): EmptyStateUiModel = EmptyStateUiModel(
-    title = "No custom lists yet",
-    body = "Create your first list below.",
-    variant = EmptyStateVariant.Inline,
-)

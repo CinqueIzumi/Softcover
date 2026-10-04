@@ -47,7 +47,7 @@ data class SheetScaffoldUiModel(
                         cover = CoverUiModel(
                             source = null,
                             coverlessTitle = "Piranesi",
-                            variant = CoverVariant.ChooseListsSingleJacket,
+                            variant = CoverVariant.Jacket,
                         ),
                     ),
                 ),
@@ -64,7 +64,7 @@ data class SheetScaffoldUiModel(
                             CoverUiModel(
                                 source = null,
                                 coverlessTitle = title,
-                                variant = CoverVariant.ChooseListsStackJacket,
+                                variant = CoverVariant.StackedJacket,
                             )
                         }.toImmutableList(),
                     ),

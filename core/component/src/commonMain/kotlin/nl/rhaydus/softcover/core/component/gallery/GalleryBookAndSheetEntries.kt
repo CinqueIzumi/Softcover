@@ -56,7 +56,7 @@ internal val bookAndSheetEntries: ImmutableList<GalleryEntry> = persistentListOf
         previews = CoverUiModel,
         label = ::coverFixtureLabel,
         content = { model, modifier ->
-            val width = if (model.variant == CoverVariant.EditionListRow) 48.dp else 140.dp
+            val width = if (model.variant == CoverVariant.Flat) 48.dp else 140.dp
 
             Cover(
                 model = model,
@@ -223,7 +223,7 @@ internal val bookAndSheetEntries: ImmutableList<GalleryEntry> = persistentListOf
 private fun coverFixtureLabel(model: CoverUiModel): String = when {
     model.isLoading -> "Loading"
     model.source != null -> "With cover art"
-    model.variant == CoverVariant.EditionListRow -> "Coverless, thumbnail-sized"
+    model.variant == CoverVariant.Flat -> "Coverless, thumbnail-sized"
     model.coverlessTitle.orEmpty().length > COVERLESS_LONG_TITLE_LABEL_FLOOR -> "Coverless, long title"
     else -> "Coverless, short title"
 }

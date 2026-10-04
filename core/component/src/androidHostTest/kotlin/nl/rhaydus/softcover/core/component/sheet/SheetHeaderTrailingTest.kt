@@ -14,7 +14,7 @@ class SheetHeaderTrailingTest {
         CoverUiModel(
             source = null,
             coverlessTitle = "Book $it",
-            variant = CoverVariant.ChooseListsStackJacket,
+            variant = CoverVariant.StackedJacket,
         )
     }.toImmutableList()
 

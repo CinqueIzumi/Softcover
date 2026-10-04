@@ -32,7 +32,7 @@ internal fun LovedBook.toRecentlyLovedCard(): BookCardUiModel = BookCardUiModel(
                         )
                     },
                 coverlessTitle = title,
-                variant = CoverVariant.ProfileLovedBook,
+                variant = CoverVariant.Raised,
                 sharedTransitionKey = bookCoverTransitionKey(
                     editionId = null,
                     bookId = bookId,
@@ -59,7 +59,8 @@ private val RECENTLY_LOVED_STAND_IN_TEMPLATE = BookCardUiModel(
             model = CoverUiModel(
                 source = null,
                 coverlessTitle = null,
-                variant = CoverVariant.ProfileLovedBook,
+                variant = CoverVariant.Raised,
+                isLoading = true,
             ),
         ),
         text = BookCardContent(

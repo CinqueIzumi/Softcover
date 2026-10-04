@@ -48,8 +48,8 @@ internal class ActiveSessionControllerImpl(
                     ActiveSession(
                         session = session,
                         book = book,
-                        peekBarCover = book.toCoverUiModel(variant = CoverVariant.SessionPeekBar),
-                        focusCover = book.toCoverUiModel(variant = CoverVariant.SessionFocus),
+                        peekBarCover = book.toCoverUiModel(variant = CoverVariant.Flat),
+                        focusCover = book.toCoverUiModel(variant = CoverVariant.Spotlight),
                     )
                 }
         }.stateIn(

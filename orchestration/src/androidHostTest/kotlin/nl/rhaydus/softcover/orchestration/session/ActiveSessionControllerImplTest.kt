@@ -180,8 +180,8 @@ class ActiveSessionControllerImplTest {
 
             active?.session shouldBe session
             active?.book shouldBe book
-            active?.peekBarCover?.variant shouldBe CoverVariant.SessionPeekBar
-            active?.focusCover?.variant shouldBe CoverVariant.SessionFocus
+            active?.peekBarCover?.variant shouldBe CoverVariant.Flat
+            active?.focusCover?.variant shouldBe CoverVariant.Spotlight
         }
 
         @Test

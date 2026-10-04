@@ -1,58 +1,39 @@
 package nl.rhaydus.softcover.core.component.cover
 
 /**
- * Every surface that renders a book cover, one `data object` per surface. [Cover] does not branch on
- * this directly — it reads treatment (elevation, corner radius, shadow tint, decode cap) from
- * [CoverDimensions.forVariant], keyed off the variant, following the `ShareCardDimensions.forContent`
- * pattern.
- *
- * Two variants — [ReadingHeroBackdrop] and [FullScreenViewer] — are never passed to [Cover] itself;
- * both surfaces render through [rememberCoverImageRequest] directly because their anatomy (a
- * `Crop` + `blur` backdrop, and a zoom/pan full-bleed viewer) doesn't fit [Cover]'s shimmer /
- * coverless / fit-image body. They still carry an entry here because a decode cap is still a
- * per-surface decision, and keeping every surface in one enum is what lets [CoverDimensions] stay a
- * single exhaustive table instead of two.
+ * The distinct cover treatments, each named after its look: shadow depth, corner radius, shadow tint
+ * and decode cap. [Flat] is the default for any surface that wants no shadow and a 4 dp corner,
+ * including the backdrop and full-screen viewer surfaces that render through
+ * [rememberCoverImageRequest] rather than [Cover].
  */
 sealed interface CoverVariant {
-    data object LibraryShelfItem : CoverVariant
+    /** Library grid cover: 6 dp shadow, 10 dp corner, decoded at no more than 600 px. */
+    data object Shelf : CoverVariant
 
-    data object ExploreRail : CoverVariant
+    /** 6 dp shadow, 4 dp corner. */
+    data object Raised : CoverVariant
 
-    data object ExploreSeriesCard : CoverVariant
+    /** 4 dp shadow, 4 dp corner. */
+    data object Lifted : CoverVariant
 
-    data object ExploreSearchRow : CoverVariant
+    /** 12 dp shadow in a dark tint, 4 dp corner. */
+    data object Floating : CoverVariant
 
-    data object HiddenBookRow : CoverVariant
+    /** 4 dp shadow, 8 dp corner. */
+    data object Tile : CoverVariant
 
-    data object HiddenSeriesStack : CoverVariant
+    /** No shadow, 16 dp corner. */
+    data object Rounded : CoverVariant
 
-    data object ReadingFeaturedHero : CoverVariant
+    /** 4 dp shadow in a dark tint, 4 dp corner. */
+    data object Jacket : CoverVariant
 
-    data object ReadingRowThumb : CoverVariant
+    /** 3 dp shadow in a lighter dark tint, 4 dp corner, for covers stacked on each other. */
+    data object StackedJacket : CoverVariant
 
-    data object ReadingPickUpNextTile : CoverVariant
+    /** 20 dp shadow in a dark tint, 8 dp corner. */
+    data object Spotlight : CoverVariant
 
-    data object ReadingTrendingTile : CoverVariant
-
-    data object ProfileLovedBook : CoverVariant
-
-    data object ReadingHeroBackdrop : CoverVariant
-
-    data object BookDetailHero : CoverVariant
-
-    data object BookDetailBackdrop : CoverVariant
-
-    data object SheetHeaderJacket : CoverVariant
-
-    data object EditionListRow : CoverVariant
-
-    data object ChooseListsSingleJacket : CoverVariant
-
-    data object ChooseListsStackJacket : CoverVariant
-
-    data object SessionPeekBar : CoverVariant
-
-    data object SessionFocus : CoverVariant
-
-    data object FullScreenViewer : CoverVariant
+    /** No shadow, 4 dp corner. */
+    data object Flat : CoverVariant
 }

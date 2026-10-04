@@ -28,7 +28,6 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeLayoutC
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSortChipClickedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeTitlesToggleChangedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSetListRankedAction
-import nl.rhaydus.softcover.feature.library.presentation.state.ArrangeMakeOrderedUiModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 /**
@@ -73,7 +72,7 @@ internal fun LibraryArrangeSheet(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        LayoutChipRow(
+        ChipFlowRow(
             chips = state.arrangeLayoutChips,
             onChipEvent = { key -> runAction(OnArrangeLayoutChipClickedAction(key = key)) },
         )
@@ -98,25 +97,39 @@ internal fun LibraryArrangeSheet(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        SortChipRow(
+        ChipFlowRow(
             chips = state.arrangeSortChips,
-            makeOrdered = state.arrangeMakeOrdered,
             onChipEvent = { key -> runAction(OnArrangeSortChipClickedAction(key = key)) },
-            onMakeListOrdered = { listId ->
-                runAction(
-                    OnSetListRankedAction(
-                        listId = listId,
-                        ranked = true,
-                    ),
-                )
-            },
         )
+
+        state.arrangeMakeOrderedListId?.let { listId ->
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SoftcoverText(
+                text = "✶ Make this list ordered",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .pointerHandCursor()
+                    .pressScaleClickable(
+                        onClick = {
+                            runAction(
+                                OnSetListRankedAction(
+                                    listId = listId,
+                                    ranked = true,
+                                ),
+                            )
+                        },
+                    )
+                    .padding(vertical = 4.dp),
+            )
+        }
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LayoutChipRow(
+private fun ChipFlowRow(
     chips: List<ChipUiModel>,
     onChipEvent: (key: String) -> Unit,
 ) {
@@ -130,40 +143,5 @@ private fun LayoutChipRow(
                 onEvent = { event -> if (event is ChipEvent.Clicked) onChipEvent(event.key) },
             )
         }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun SortChipRow(
-    chips: List<ChipUiModel>,
-    makeOrdered: ArrangeMakeOrderedUiModel?,
-    onChipEvent: (key: String) -> Unit,
-    onMakeListOrdered: (listId: Int) -> Unit,
-) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        chips.forEach { chip ->
-            Chip(
-                model = chip,
-                onEvent = { event -> if (event is ChipEvent.Clicked) onChipEvent(event.key) },
-            )
-        }
-    }
-
-    if (makeOrdered != null) {
-        Spacer(modifier = Modifier.height(12.dp))
-
-        SoftcoverText(
-            text = makeOrdered.label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .pointerHandCursor()
-                .pressScaleClickable(onClick = { onMakeListOrdered(makeOrdered.listId) })
-                .padding(vertical = 4.dp),
-        )
     }
 }

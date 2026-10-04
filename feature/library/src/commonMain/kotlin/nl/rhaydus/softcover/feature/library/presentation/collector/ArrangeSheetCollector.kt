@@ -28,7 +28,7 @@ internal class ArrangeSheetCollector : LibraryCollector {
                     it.copy(
                         arrangeSheet = arrangeSheetScaffoldFor(resultCount = snapshot.resultCount),
                         arrangeTitlesToggle = snapshot.titlesToggle,
-                        arrangeMakeOrdered = snapshot.makeOrdered,
+                        arrangeMakeOrderedListId = snapshot.makeOrderedListId,
                     )
                 }
             }

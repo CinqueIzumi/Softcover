@@ -105,7 +105,7 @@ class ArrangeSheetSnapshotTest {
             val snapshot = ArrangeSheetSnapshot.from(state = state)
 
             // ----- Assert -----
-            snapshot.makeOrdered.shouldNotBeNull().listId shouldBe 7
+            snapshot.makeOrderedListId shouldBe 7
         }
 
         @Test
@@ -125,7 +125,7 @@ class ArrangeSheetSnapshotTest {
             val snapshot = ArrangeSheetSnapshot.from(state = state)
 
             // ----- Assert -----
-            snapshot.makeOrdered.shouldBeNull()
+            snapshot.makeOrderedListId.shouldBeNull()
         }
 
         @Test
@@ -145,7 +145,7 @@ class ArrangeSheetSnapshotTest {
             val snapshot = ArrangeSheetSnapshot.from(state = state)
 
             // ----- Assert -----
-            snapshot.makeOrdered.shouldBeNull()
+            snapshot.makeOrderedListId.shouldBeNull()
         }
 
         @Test
@@ -169,7 +169,7 @@ class ArrangeSheetSnapshotTest {
             val snapshot = ArrangeSheetSnapshot.from(state = state)
 
             // ----- Assert -----
-            snapshot.makeOrdered.shouldBeNull()
+            snapshot.makeOrderedListId.shouldBeNull()
         }
     }
 }

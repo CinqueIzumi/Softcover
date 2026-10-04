@@ -116,7 +116,7 @@ component/
 +              Toggle  ToggleUiModel/Variant/Event
 +              SegmentedControl  SegmentedControlUiModel/Variant/Event
 + cover/       Cover  CoverUiModel  CoverVariant  CoverSource
-+              CoverDimensions  CoverlessTitleCover  MonogramCoverMetrics
++              CoverlessTitleCover  MonogramCoverMetrics
 + deadline/    DeadlineSummaryLine(+UiModel, +Tone)
 + dialog/      SoftcoverDatePickerDialog  DatePickerUiModel  DatePickerEvent
 +              PickerDates (internal)

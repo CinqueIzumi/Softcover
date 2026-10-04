@@ -18,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.isSpecified
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -46,15 +48,12 @@ private const val COVER_ASPECT_RATIO = 2f / 3f
  * [rememberCoverImageRequest] instead. Rendered as: a shimmer while [CoverUiModel.isLoading] and
  * nothing has resolved yet, [CoverlessTitleCover] (or a blank box, for purely decorative surfaces)
  * when [CoverUiModel.source] is `null` or fails to decode, or the loaded image otherwise. Treatment —
- * elevation, corner radius, shadow tint, decode cap — comes from [CoverDimensions.forVariant], keyed
- * off [CoverUiModel.variant]; `Cover` itself never branches on the variant directly, and no call site
- * hand-tunes a cover: tuning one surface's treatment can never move another's, and widths stay in the
- * caller's [modifier] rather than in [CoverVariant].
+ * elevation, corner radius, shadow tint, decode cap — comes from [CoverUiModel.variant]; no call site
+ * hand-tunes a cover, and widths stay in the caller's [modifier] rather than in [CoverVariant].
  *
- * [ReadingHeroBackdrop][CoverVariant.ReadingHeroBackdrop] and
- * [FullScreenViewer][CoverVariant.FullScreenViewer] do not render through `Cover` — a `Crop` + `blur`
- * backdrop and a zoom/pan full-bleed viewer need their own composition, so those two surfaces call
- * [rememberCoverImageRequest] directly instead.
+ * The reading hero backdrop and the full-screen viewer do not render through `Cover` — a `Crop` +
+ * `blur` backdrop and a zoom/pan full-bleed viewer need their own composition, so those two surfaces
+ * call [rememberCoverImageRequest] directly instead.
  *
  * **[model] is nullable, and that is the whole point.** Because mapping happens in a collector
  * (§7.2 R9), a cover model lands one state emission after the book it belongs to, so every caller —
@@ -80,19 +79,19 @@ fun Cover(
     }
 
     val request = rememberCoverImageRequest(model = model)
-    val dimensions = CoverDimensions.forVariant(variant = model.variant)
+    val metrics = model.variant.metrics()
 
     val coverlessFallback = model.coverlessTitle?.takeIf { it.isNotBlank() }
 
-    val shape = RoundedCornerShape(dimensions.cornerRadius)
-    val imageModifier = if (dimensions.elevation > 0.dp) {
+    val shape = RoundedCornerShape(metrics.cornerRadius)
+    val imageModifier = if (metrics.elevation > 0.dp) {
         Modifier
             .shadow(
-                elevation = dimensions.elevation,
+                elevation = metrics.elevation,
                 shape = shape,
                 clip = false,
-                ambientColor = dimensions.shadowColor,
-                spotColor = dimensions.shadowColor,
+                ambientColor = metrics.shadowColor,
+                spotColor = metrics.shadowColor,
             )
             .clip(shape)
     } else {
@@ -168,7 +167,7 @@ fun Cover(
                     val ratio = if (intrinsic.isSpecified && intrinsic.height > 0f) {
                         intrinsic.width / intrinsic.height
                     } else {
-                        2f / 3f
+                        COVER_ASPECT_RATIO
                     }
                     BoxWithConstraints(
                         modifier = Modifier.fillMaxSize(),
@@ -215,16 +214,16 @@ val LocalCoverImagePersister = staticCompositionLocalOf<CoverImagePersister?> { 
 /**
  * Builds the [ImageRequest] for [model], or `null` when [CoverUiModel.source] is `null` — the caller
  * then renders the coverless rung. Public because two surfaces render a cover image without going
- * through [Cover] itself: [ReadingHeroBackdrop][CoverVariant.ReadingHeroBackdrop] applies its own
- * `Crop` + `blur(64.dp)` with no shimmer and no coverless rung, and
- * [FullScreenViewer][CoverVariant.FullScreenViewer] fills the screen with a zoom/pan `graphicsLayer`.
+ * through [Cover] itself: the reading hero backdrop applies its own `Crop` + `blur(64.dp)` with no
+ * shimmer and no coverless rung, and the full-screen viewer fills the screen with a zoom/pan
+ * `graphicsLayer`.
  */
 @Composable
 fun rememberCoverImageRequest(model: CoverUiModel): ImageRequest? {
     val context = LocalPlatformContext.current
     val persister = LocalCoverImagePersister.current
     val coroutineScope = rememberCoroutineScope()
-    val maxDecodePx = CoverDimensions.forVariant(variant = model.variant).maxDecodePx
+    val maxDecodePx = model.variant.metrics().maxDecodePx
 
     val source = model.source ?: return null
 
@@ -273,6 +272,65 @@ fun rememberCoverImageRequest(model: CoverUiModel): ImageRequest? {
 
         builder.build()
     }
+}
+
+internal fun CoverVariant.cornerRadius(): Dp = metrics().cornerRadius
+
+private fun CoverVariant.metrics(): CoverMetrics = when (this) {
+    CoverVariant.Shelf -> CoverMetrics(
+        elevation = 6.dp,
+        cornerRadius = 10.dp,
+        maxDecodePx = 600,
+    )
+
+    CoverVariant.Raised -> CoverMetrics(
+        elevation = 6.dp,
+        cornerRadius = 4.dp,
+    )
+
+    CoverVariant.Lifted -> CoverMetrics(
+        elevation = 4.dp,
+        cornerRadius = 4.dp,
+    )
+
+    CoverVariant.Floating -> CoverMetrics(
+        elevation = 12.dp,
+        cornerRadius = 4.dp,
+        shadowColor = Color.Black.copy(alpha = 0.6f),
+    )
+
+    CoverVariant.Tile -> CoverMetrics(
+        elevation = 4.dp,
+        cornerRadius = 8.dp,
+    )
+
+    CoverVariant.Rounded -> CoverMetrics(
+        elevation = 0.dp,
+        cornerRadius = 16.dp,
+    )
+
+    CoverVariant.Jacket -> CoverMetrics(
+        elevation = 4.dp,
+        cornerRadius = 4.dp,
+        shadowColor = Color.Black.copy(alpha = 0.5f),
+    )
+
+    CoverVariant.StackedJacket -> CoverMetrics(
+        elevation = 3.dp,
+        cornerRadius = 4.dp,
+        shadowColor = Color.Black.copy(alpha = 0.35f),
+    )
+
+    CoverVariant.Spotlight -> CoverMetrics(
+        elevation = 20.dp,
+        cornerRadius = 8.dp,
+        shadowColor = Color.Black.copy(alpha = 0.5f),
+    )
+
+    CoverVariant.Flat -> CoverMetrics(
+        elevation = 0.dp,
+        cornerRadius = 4.dp,
+    )
 }
 
 @OptIn(ExperimentalCoilApi::class)
@@ -335,7 +393,7 @@ private const val COVERLESS_LONG_TITLE_FLOOR = 30
 private fun CoverCoverlessThumbnailPreview() {
     SoftcoverTheme {
         Cover(
-            model = CoverUiModel.previews.first { it.variant == CoverVariant.EditionListRow },
+            model = CoverUiModel.previews.first { it.variant == CoverVariant.Flat },
             modifier = Modifier.width(48.dp),
         )
     }

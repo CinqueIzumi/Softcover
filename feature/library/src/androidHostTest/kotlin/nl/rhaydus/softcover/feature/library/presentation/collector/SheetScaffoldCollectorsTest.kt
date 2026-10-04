@@ -188,7 +188,7 @@ class SheetScaffoldCollectorsTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.arrangeMakeOrdered.shouldNotBeNull().listId shouldBe 3
+            stateFlow.value.arrangeMakeOrderedListId shouldBe 3
         }
 
         @Test
@@ -211,7 +211,7 @@ class SheetScaffoldCollectorsTest {
             stateFlow.value = stateFlow.value.copy(customLists = listOf(unranked.copy(ranked = true)))
 
             // ----- Assert -----
-            stateFlow.value.arrangeMakeOrdered.shouldBeNull()
+            stateFlow.value.arrangeMakeOrderedListId.shouldBeNull()
         }
     }
 

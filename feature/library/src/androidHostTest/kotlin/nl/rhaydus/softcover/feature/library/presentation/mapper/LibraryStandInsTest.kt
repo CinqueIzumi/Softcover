@@ -1,8 +1,13 @@
 package nl.rhaydus.softcover.feature.library.presentation.mapper
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -27,6 +32,27 @@ class LibraryStandInsTest {
                 layout.standInCards().forEach { card ->
                     card.isLoading shouldBe true
                 }
+            }
+        }
+
+        @Test
+        fun `every covered stand-in card's cover is loading and has no source`() {
+            // ----- Act & Assert -----
+            LibraryGridLayout.entries.filterNot { it == LibraryGridLayout.LIST_COMPACT }.forEach { layout ->
+                layout.standInCards().forEach { card ->
+                    val cover = card.standInCover().shouldNotBeNull()
+
+                    cover.isLoading shouldBe true
+                    cover.source.shouldBeNull()
+                }
+            }
+        }
+
+        @Test
+        fun `the compact list stand-ins are coverless rows`() {
+            // ----- Act & Assert -----
+            LibraryGridLayout.LIST_COMPACT.standInCards().forEach { card ->
+                card.standInCover().shouldBeNull()
             }
         }
 
@@ -61,4 +87,13 @@ class LibraryStandInsTest {
             }
         }
     }
+
+    private fun BookCardUiModel.standInCover(): CoverUiModel? =
+        when (val variant = variant) {
+            is BookCardVariant.Column -> variant.cover?.model
+
+            is BookCardVariant.CoverOnly -> variant.cover.model
+
+            is BookCardVariant.Row -> variant.lead?.shouldBeInstanceOf<BookCardLead.Cover>()?.cover?.model
+        }
 }

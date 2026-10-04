@@ -74,10 +74,10 @@ data class BookCardUiModel(
 
 The component does `when (model.variant)` and dispatches to private per-variant layout composables; the
 public surface stays one symbol. Variant-specific data rides on the variant, so illegal states are
-unrepresentable (`CoverOnly` cannot carry a subtitle). A variant that needs its own metrics gets a lookup
-keyed off the variant, never a branch inside the layout: `ShareCardDimensions.forContent(content)` and
-`CoverDimensions.forVariant` (one surface-named `CoverVariant` entry per surface). Entries that share a
-metric tuple **stay separate**, so tuning one surface cannot move another.
+unrepresentable (`CoverOnly` cannot carry a subtitle). There is one variant per distinct treatment, named
+after the look, not the surface: surfaces that share a look share a variant (`CoverVariant.Flat`). A
+variant's metrics are a private `when` beside the component, never a public table or a branch inside the
+layout.
 
 **R3 — Stability is a hard requirement.** Every collection in a UI model is `ImmutableList` /
 `ImmutableSet` / `ImmutableMap` (`kotlinx-collections-immutable`). There is no
@@ -333,8 +333,8 @@ Read this only when a rule looks arbitrary; each note prevents a wrong turn that
 
 - **R1 is a performance rule.** A per-item lambda allocates on every recomposition and defeats skipping
   across a 500-item grid; one hoisted lambda plus a key does not.
-- **R2's per-surface table is also the audit.** Loose metric parameters drift apart across call sites
-  unseen; as entries in one table, every surface's metrics are one readable list.
+- **R2 names variants after looks.** A variant per call site multiplies identical tuples and lets them
+  drift apart unseen; one variant per look keeps the looks a short, readable list.
 - **R3 is compiler-checked on purpose.** A stability config file drifts silently; an `ImmutableList`
   parameter does not. A `List` field makes the whole model unstable, so every card in a grid recomposes
   every frame; a lambda field is never equal to itself and does the same.

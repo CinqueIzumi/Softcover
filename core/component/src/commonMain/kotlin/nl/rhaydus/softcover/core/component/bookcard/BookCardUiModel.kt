@@ -40,7 +40,7 @@ data class BookCardUiModel(
     companion object : UiModelPreviews<BookCardUiModel> {
         private val LOADING_COVER_ONLY = BookCardUiModel(
             key = BookCardKey.Book(bookId = 31),
-            variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Loading")),
+            variant = BookCardVariant.CoverOnly(cover = BookCardCover(model = loadingCover())),
             decorations = BookCardDecorations(
                 progress = BookCardProgress.Value(
                     bar = ProgressBarUiModel(fraction = 0.5f),
@@ -53,7 +53,7 @@ data class BookCardUiModel(
         private val LOADING_COLUMN = BookCardUiModel(
             key = BookCardKey.Book(bookId = 32),
             variant = BookCardVariant.Column(
-                cover = bookCover(title = "Loading"),
+                cover = BookCardCover(model = loadingCover()),
                 text = BookCardContent(
                     title = "Loading title",
                     eyebrow = BookCardEyebrow(text = "SERIES NAME"),
@@ -67,7 +67,7 @@ data class BookCardUiModel(
             key = BookCardKey.Book(bookId = 33),
             variant = BookCardVariant.Row(
                 size = BookCardVariant.Row.Size.Standard,
-                lead = BookCardLead.Cover(cover = bookCover(title = "Loading")),
+                lead = BookCardLead.Cover(cover = BookCardCover(model = loadingCover())),
                 text = BookCardContent(
                     title = "Loading title",
                     byline = "By Author Name",
@@ -80,7 +80,7 @@ data class BookCardUiModel(
             key = BookCardKey.Series(seriesId = 34),
             variant = BookCardVariant.Row(
                 size = BookCardVariant.Row.Size.Standard,
-                lead = BookCardLead.SeriesStack(front = cover(title = "Loading")),
+                lead = BookCardLead.SeriesStack(front = loadingCover()),
                 text = BookCardContent(
                     title = "Loading series",
                     byline = "By Author Name",
@@ -317,13 +317,20 @@ data class BookCardUiModel(
             badge = badge,
         )
 
+        private fun loadingCover() = CoverUiModel(
+            source = null,
+            coverlessTitle = null,
+            variant = CoverVariant.Raised,
+            isLoading = true,
+        )
+
         private fun cover(title: String) = CoverUiModel(
             source = CoverSource.Local(
                 path = "/fixtures/cover.jpg",
                 cacheKey = null,
             ),
             coverlessTitle = title,
-            variant = CoverVariant.ExploreRail,
+            variant = CoverVariant.Raised,
         )
     }
 }

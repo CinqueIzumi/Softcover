@@ -60,7 +60,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * back here.
  */
 @Composable
-fun CoverlessTitleCover(
+internal fun CoverlessTitleCover(
     title: String,
     modifier: Modifier = Modifier,
 ) {

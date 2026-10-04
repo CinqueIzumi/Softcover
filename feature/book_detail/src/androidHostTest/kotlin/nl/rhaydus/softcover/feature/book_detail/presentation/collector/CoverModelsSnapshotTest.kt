@@ -48,8 +48,8 @@ class CoverModelsSnapshotTest {
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
-            hero.variant shouldBe CoverVariant.BookDetailHero
-            backdrop.variant shouldBe CoverVariant.BookDetailBackdrop
+            hero.variant shouldBe CoverVariant.Rounded
+            backdrop.variant shouldBe CoverVariant.Flat
             hero.source shouldBe CoverSource.Remote(
                 url = COVER_URL,
                 persistEditionId = null,
@@ -72,7 +72,7 @@ class CoverModelsSnapshotTest {
             // ----- Assert -----
             val fullScreen = result.fullScreenCover.shouldNotBeNull()
 
-            fullScreen.variant shouldBe CoverVariant.FullScreenViewer
+            fullScreen.variant shouldBe CoverVariant.Flat
             fullScreen.source shouldBe result.heroCover.shouldNotBeNull().source
         }
 
@@ -257,7 +257,7 @@ class CoverModelsSnapshotTest {
             val covers = snapshot.toCoverModels()
 
             // ----- Assert -----
-            covers.fullScreen.variant shouldBe CoverVariant.FullScreenViewer
+            covers.fullScreen.variant shouldBe CoverVariant.Flat
             covers.fullScreen.source shouldBe covers.hero.source
             covers.fullScreen.coverlessTitle shouldBe "Piranesi"
         }

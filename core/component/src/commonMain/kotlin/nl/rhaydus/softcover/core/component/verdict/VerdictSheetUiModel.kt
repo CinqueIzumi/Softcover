@@ -61,7 +61,7 @@ data class VerdictSheetUiModel(
         private val fixtureCover = CoverUiModel(
             source = null,
             coverlessTitle = "Piranesi",
-            variant = CoverVariant.SheetHeaderJacket,
+            variant = CoverVariant.Jacket,
         )
 
         /** One fixture per anatomy: the empty finished prompt, and an edit with a verdict and a Delete action. */

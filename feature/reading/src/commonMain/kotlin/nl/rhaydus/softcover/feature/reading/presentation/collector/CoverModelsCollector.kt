@@ -37,11 +37,11 @@ internal class CoverModelsCollector : ReadingCollector {
                 scope.setState {
                     it.copy(
                         featuredBackdropCover = snapshot.featuredBook?.toCoverUiModel(
-                            variant = CoverVariant.ReadingHeroBackdrop,
+                            variant = CoverVariant.Flat,
                         ),
                         featuredCover = snapshot.featuredBook?.let { book ->
                             book.toCoverUiModel(
-                                variant = CoverVariant.ReadingFeaturedHero,
+                                variant = CoverVariant.Floating,
                                 sharedTransitionKey = bookCoverTransitionKey(
                                     editionId = book.currentEdition?.id,
                                     bookId = book.id,
@@ -50,7 +50,7 @@ internal class CoverModelsCollector : ReadingCollector {
                         },
                         trendingTileCover = snapshot.trendingBook?.let { book ->
                             book.toCoverUiModel(
-                                variant = CoverVariant.ReadingTrendingTile,
+                                variant = CoverVariant.Tile,
                                 sharedTransitionKey = bookCoverTransitionKey(
                                     editionId = book.currentEdition?.id,
                                     bookId = book.id,
@@ -66,7 +66,7 @@ internal class CoverModelsCollector : ReadingCollector {
                             book.currentEdition.toCoverUiModel(
                                 defaultEdition = book.currentEdition,
                                 coverlessTitle = book.title,
-                                variant = CoverVariant.SheetHeaderJacket,
+                                variant = CoverVariant.Jacket,
                                 fallbackCoverUrl = book.coverUrl,
                             )
                         },

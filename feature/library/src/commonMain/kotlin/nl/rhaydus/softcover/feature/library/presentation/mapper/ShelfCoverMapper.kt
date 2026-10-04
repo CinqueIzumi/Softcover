@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 
 internal fun Book.toShelfBookCover(): CoverUiModel = toCoverUiModel(
-    variant = CoverVariant.LibraryShelfItem,
+    variant = CoverVariant.Shelf,
     sharedTransitionKey = bookCoverTransitionKey(
         editionId = currentEdition?.id,
         bookId = id,
@@ -18,7 +18,7 @@ internal fun Book.toShelfBookCover(): CoverUiModel = toCoverUiModel(
 internal fun BookEdition.toShelfEditionCover(): CoverUiModel = toCoverUiModel(
     defaultEdition = this,
     coverlessTitle = title.orEmpty(),
-    variant = CoverVariant.LibraryShelfItem,
+    variant = CoverVariant.Shelf,
     sharedTransitionKey = bookCoverTransitionKey(
         editionId = id,
         bookId = bookId,

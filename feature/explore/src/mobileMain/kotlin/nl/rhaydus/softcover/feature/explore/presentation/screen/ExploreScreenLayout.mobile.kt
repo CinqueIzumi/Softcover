@@ -16,7 +16,6 @@ import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBar
@@ -144,29 +143,10 @@ internal actual fun ExploreScreenLayout(
     }
 }
 
-/**
- * Builds preview-only cover UI models off the composition, mirroring what `CoverModelsCollector`
- * does at runtime (component-contract.md § 7.2 R9) — a top-level `val`/`private fun`, never called
- * from inside a `@Composable`.
- */
-private fun List<Book>.toPreviewCoverModels(
-    variant: CoverVariant,
-    surface: String? = null,
-): Map<Int, CoverUiModel> = associate { book ->
-    book.id to book.toCoverUiModel(
-        variant = variant,
-        sharedTransitionKey = bookCoverTransitionKey(
-            editionId = book.currentEdition?.id,
-            bookId = book.id,
-            surface = surface,
-        ),
-    )
-}
-
 private fun List<Book>.toPreviewTrendingCards(): ImmutableList<BookCardUiModel> = map { book ->
     book.toTrendingCard(
         cover = book.toCoverUiModel(
-            variant = CoverVariant.ExploreRail,
+            variant = CoverVariant.Raised,
             sharedTransitionKey = bookCoverTransitionKey(
                 editionId = book.currentEdition?.id,
                 bookId = book.id,
@@ -204,17 +184,9 @@ private val previewMockState = ExploreScreenUiState(
     previousSearchQueries = previewRecentSearchQueries,
     recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = previewRecentSearchQueries).compute(),
     trendingBooks = ExploreMockData.trending,
-    trendingCovers = ExploreMockData.trending.toPreviewCoverModels(
-        CoverVariant.ExploreRail,
-        SURFACE_TRENDING,
-    ),
     trendingCards = ExploreMockData.trending.toPreviewTrendingCards(),
     loadingTrendingBooks = false,
     continueSeriesBooks = ExploreMockData.continueSeries,
-    continueSeriesCovers = ExploreMockData.continueSeries.toPreviewCoverModels(
-        CoverVariant.ExploreSeriesCard,
-        SURFACE_UP_NEXT,
-    ),
     loadingContinueSeriesBooks = false,
     loadingFeaturedUpcomingRelease = false,
     loadingBecauseYouReadBooks = false,
@@ -246,10 +218,6 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
-                trendingCovers = ExploreMockData.trending.toPreviewCoverModels(
-                    CoverVariant.ExploreRail,
-                    SURFACE_TRENDING,
-                ),
                 trendingCards = ExploreMockData.trending.toPreviewTrendingCards(),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = emptyList(),
@@ -276,10 +244,6 @@ private fun LoadingTrendingExploreScreenPreview() {
                 trendingBooks = emptyList(),
                 loadingTrendingBooks = true,
                 continueSeriesBooks = ExploreMockData.continueSeries,
-                continueSeriesCovers = ExploreMockData.continueSeries.toPreviewCoverModels(
-                    CoverVariant.ExploreSeriesCard,
-                    SURFACE_UP_NEXT,
-                ),
                 loadingContinueSeriesBooks = false,
                 previousSearchQueries = listOf("Bubblegum", "Earthlings"),
                 recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = listOf("Bubblegum", "Earthlings")).compute(),
@@ -302,10 +266,6 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
-                trendingCovers = ExploreMockData.trending.toPreviewCoverModels(
-                    CoverVariant.ExploreRail,
-                    SURFACE_TRENDING,
-                ),
                 trendingCards = ExploreMockData.trending.toPreviewTrendingCards(),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = emptyList(),
@@ -392,8 +352,6 @@ private fun ActiveExploreScreenPreview() {
         ),
     )
 
-    val queriedBookCovers = queriedBooks.toPreviewCoverModels(CoverVariant.ExploreSearchRow)
-
     SoftcoverTheme {
         ExploreScreenLayout(
             runAction = {},
@@ -403,9 +361,17 @@ private fun ActiveExploreScreenPreview() {
             state = ExploreScreenUiState(
                 searchText = "Last to leave",
                 queriedBooks = queriedBooks,
-                queriedBookCovers = queriedBookCovers,
                 queriedBookCards = queriedBooks.map { book ->
-                    book.toSearchResultCard(cover = queriedBookCovers.getValue(book.id))
+                    book.toSearchResultCard(
+                        cover = book.toCoverUiModel(
+                            variant = CoverVariant.Flat,
+                            sharedTransitionKey = bookCoverTransitionKey(
+                                editionId = book.currentEdition?.id,
+                                bookId = book.id,
+                                surface = null,
+                            ),
+                        ),
+                    )
                 }.toImmutableList(),
             ),
         )

@@ -22,12 +22,15 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.railStandInCount
+import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
+import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
+import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -40,10 +43,6 @@ class BookCardModelsCollectorTest {
     private lateinit var dependencies: ExploreDependencies
     private lateinit var stateFlow: MutableStateFlow<ExploreScreenUiState>
     private lateinit var scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>
-
-    private val trendingCover = mockk<CoverUiModel>()
-    private val becauseCover = mockk<CoverUiModel>()
-    private val upNextCover = mockk<CoverUiModel>()
 
     private val overlay = CoverOverlayUiModel(
         badge = BadgeUiModel(
@@ -78,7 +77,7 @@ class BookCardModelsCollectorTest {
         rating = 0.0,
         description = "",
         releaseYear = 2020,
-        coverUrl = "",
+        coverUrl = "https://covers.test/$id.jpg",
         authors = authors,
         usersCount = 0,
         ratingsCount = 0,
@@ -143,7 +142,7 @@ class BookCardModelsCollectorTest {
         }
 
         @Test
-        fun `gives each rail its own cover for the same book`() = runTest(UnconfinedTestDispatcher()) {
+        fun `builds each rail's cover from the book with that rail's variant and transition key`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val job = launch {
                 BookCardModelsCollector().onLaunch(
@@ -158,38 +157,24 @@ class BookCardModelsCollectorTest {
                 trendingBooks = listOf(shared),
                 becauseYouReadBooks = listOf(shared),
                 continueSeriesBooks = listOf(shared),
-                trendingCovers = mapOf(1 to trendingCover),
-                becauseYouReadCovers = mapOf(1 to becauseCover),
-                continueSeriesCovers = mapOf(1 to upNextCover),
             )
 
             // ----- Assert -----
-            columnOf(stateFlow.value.trendingCards.shouldNotBeNull().single()).cover.shouldNotBeNull().model shouldBe
-                trendingCover
-            columnOf(stateFlow.value.becauseYouReadCards.shouldNotBeNull().single()).cover.shouldNotBeNull().model shouldBe
-                becauseCover
-            columnOf(stateFlow.value.upNextCards.shouldNotBeNull().single()).cover.shouldNotBeNull().model shouldBe
-                upNextCover
-            job.cancel()
-        }
-
-        @Test
-        fun `leaves the cover null when a book has no cover model`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val job = launch {
-                BookCardModelsCollector().onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
+            columnOf(stateFlow.value.trendingCards.single()).cover.shouldNotBeNull().model shouldBe
+                shared.toCoverModel(
+                    variant = CoverVariant.Raised,
+                    surface = SURFACE_TRENDING,
                 )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                trendingBooks = listOf(book(id = 1)),
-            )
-
-            // ----- Assert -----
-            columnOf(stateFlow.value.trendingCards.shouldNotBeNull().single()).cover.shouldBeNull()
+            columnOf(stateFlow.value.becauseYouReadCards.single()).cover.shouldNotBeNull().model shouldBe
+                shared.toCoverModel(
+                    variant = CoverVariant.Raised,
+                    surface = SURFACE_BECAUSE_YOU_READ,
+                )
+            columnOf(stateFlow.value.upNextCards.single()).cover.shouldNotBeNull().model shouldBe
+                shared.toCoverModel(
+                    variant = CoverVariant.Lifted,
+                    surface = SURFACE_UP_NEXT,
+                )
             job.cancel()
         }
 
@@ -211,11 +196,6 @@ class BookCardModelsCollectorTest {
                         book(id = 2),
                     ),
                     continueSeriesBooks = listOf(book(id = 1)),
-                    trendingCovers = mapOf(
-                        1 to trendingCover,
-                        2 to trendingCover,
-                    ),
-                    continueSeriesCovers = mapOf(1 to upNextCover),
                     unreleasedCoverOverlays = mapOf(1 to overlay),
                 )
 
@@ -227,30 +207,6 @@ class BookCardModelsCollectorTest {
                     overlay
                 job.cancel()
             }
-
-        @Test
-        fun `recomputes when covers arrive after the books`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val job = launch {
-                BookCardModelsCollector().onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            stateFlow.value = stateFlow.value.copy(
-                trendingBooks = listOf(book(id = 1)),
-            )
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                trendingCovers = mapOf(1 to trendingCover),
-            )
-
-            // ----- Assert -----
-            columnOf(stateFlow.value.trendingCards.shouldNotBeNull().single()).cover.shouldNotBeNull().model shouldBe
-                trendingCover
-            job.cancel()
-        }
 
         @Test
         fun `empties the card lists when the books are cleared and loading is done`() = runTest(UnconfinedTestDispatcher()) {
@@ -419,7 +375,6 @@ class BookCardModelsCollectorTest {
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
                 queriedBooks = listOf(book(id = 1)),
-                queriedBookCovers = mapOf(1 to mockk<CoverUiModel>()),
                 isLoading = true,
             )
 
@@ -432,8 +387,15 @@ class BookCardModelsCollectorTest {
         }
 
         @Test
-        fun `emits search stand-ins while the first result has no cover yet`() = runTest(UnconfinedTestDispatcher()) {
+        fun `maps covers on the first emission without an extra wait emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(
+                trendingBooks = listOf(book(id = 1)),
+                queriedBooks = listOf(book(id = 2)),
+                isLoading = false,
+            )
+
+            // ----- Act -----
             val job = launch {
                 BookCardModelsCollector().onLaunch(
                     scope = scope,
@@ -441,20 +403,13 @@ class BookCardModelsCollectorTest {
                 )
             }
 
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                queriedBooks = listOf(
-                    book(id = 1),
-                    book(id = 2),
-                ),
-                queriedBookCovers = mapOf(2 to mockk<CoverUiModel>()),
-                isLoading = false,
-            )
-
             // ----- Assert -----
-            val cards = stateFlow.value.queriedBookCards
-            cards shouldHaveSize 6
-            cards.all { it.isLoading } shouldBe true
+            val trending = columnOf(stateFlow.value.trendingCards.single())
+            trending.cover.shouldNotBeNull().model.isLoading shouldBe false
+            val searched = stateFlow.value.queriedBookCards.single()
+            searched.isLoading shouldBe false
+            searched.variant.shouldBeInstanceOf<BookCardVariant.Row>().lead
+                .shouldBeInstanceOf<BookCardLead.Cover>().cover.model.isLoading shouldBe false
             job.cancel()
         }
 
@@ -481,7 +436,7 @@ class BookCardModelsCollectorTest {
         }
 
         @Test
-        fun `builds search result cards in source order with each book's own cover`() =
+        fun `builds search result cards in source order, each with its own book's cover`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val job = launch {
@@ -490,18 +445,14 @@ class BookCardModelsCollectorTest {
                         dependencies = dependencies,
                     )
                 }
-                val firstCover = mockk<CoverUiModel>()
-                val secondCover = mockk<CoverUiModel>()
+                val first = book(id = 1)
+                val second = book(id = 2)
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
                     queriedBooks = listOf(
-                        book(id = 1),
-                        book(id = 2),
-                    ),
-                    queriedBookCovers = mapOf(
-                        1 to firstCover,
-                        2 to secondCover,
+                        first,
+                        second,
                     ),
                 )
 
@@ -511,36 +462,24 @@ class BookCardModelsCollectorTest {
                     BookCardKey.Book(bookId = 1),
                     BookCardKey.Book(bookId = 2),
                 )
-                val first = cards[0].variant.shouldBeInstanceOf<BookCardVariant.Row>()
-                val second = cards[1].variant.shouldBeInstanceOf<BookCardVariant.Row>()
-                first.lead shouldBe BookCardLead.Cover(cover = BookCardCover(model = firstCover))
-                second.lead shouldBe BookCardLead.Cover(cover = BookCardCover(model = secondCover))
-                job.cancel()
-            }
-
-        @Test
-        fun `omits a queried book that has no mapped cover from the search result cards`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    BookCardModelsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    queriedBooks = listOf(
-                        book(id = 1),
-                        book(id = 2),
+                val firstRow = cards[0].variant.shouldBeInstanceOf<BookCardVariant.Row>()
+                val secondRow = cards[1].variant.shouldBeInstanceOf<BookCardVariant.Row>()
+                firstRow.lead shouldBe BookCardLead.Cover(
+                    cover = BookCardCover(
+                        model = first.toCoverModel(
+                            variant = CoverVariant.Flat,
+                            surface = null,
+                        ),
                     ),
-                    queriedBookCovers = mapOf(1 to mockk<CoverUiModel>()),
                 )
-
-                // ----- Assert -----
-                stateFlow.value.queriedBookCards.shouldNotBeNull().map { it.key } shouldBe
-                    listOf(BookCardKey.Book(bookId = 1))
+                secondRow.lead shouldBe BookCardLead.Cover(
+                    cover = BookCardCover(
+                        model = second.toCoverModel(
+                            variant = CoverVariant.Flat,
+                            surface = null,
+                        ),
+                    ),
+                )
                 job.cancel()
             }
 

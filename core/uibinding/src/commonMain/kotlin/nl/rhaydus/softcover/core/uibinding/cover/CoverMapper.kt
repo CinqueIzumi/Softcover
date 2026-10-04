@@ -41,13 +41,11 @@ fun BookEdition?.toCoverUiModel(
  */
 fun Book.toCoverUiModel(
     variant: CoverVariant,
-    isLoading: Boolean = false,
     sharedTransitionKey: String? = null,
 ): CoverUiModel = currentEdition.toCoverUiModel(
     defaultEdition = defaultEdition,
     coverlessTitle = title,
     variant = variant,
     fallbackCoverUrl = coverUrl,
-    isLoading = isLoading,
     sharedTransitionKey = sharedTransitionKey,
 )

@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.cover.Cover
-import nl.rhaydus.softcover.core.component.cover.CoverDimensions
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.cornerRadius
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.progress.ProgressBarHeight
 import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
@@ -41,7 +41,6 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 internal fun BookCardCoverLayout(
     cover: BookCardCover?,
     selection: BookCardSelection?,
-    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val selected = selection?.selected == true
@@ -53,7 +52,7 @@ internal fun BookCardCoverLayout(
     val shape = if (coverModel == null) {
         RectangleShape
     } else {
-        RoundedCornerShape(CoverDimensions.forVariant(variant = coverModel.variant).cornerRadius)
+        RoundedCornerShape(coverModel.variant.cornerRadius())
     }
 
     Box(modifier = modifier) {
@@ -64,10 +63,7 @@ internal fun BookCardCoverLayout(
         ) {
             CoverOverlay(model = badge) {
                 Cover(
-                    model = maskedCover(
-                        cover = coverModel,
-                        isLoading = isLoading,
-                    ),
+                    model = coverModel,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -107,7 +103,7 @@ internal fun BookCardSeriesStack(
     isLoading: Boolean,
 ) {
     val frontWidth = width - 12.dp
-    val plateShape = RoundedCornerShape(CoverDimensions.forVariant(variant = front.variant).cornerRadius)
+    val plateShape = RoundedCornerShape(front.variant.cornerRadius())
 
     Box(modifier = Modifier.width(width)) {
         SeriesStackPlate(
@@ -127,26 +123,10 @@ internal fun BookCardSeriesStack(
         )
 
         Cover(
-            model = maskedCover(
-                cover = front,
-                isLoading = isLoading,
-            ),
+            model = front,
             modifier = Modifier.width(frontWidth),
         )
     }
-}
-
-internal fun maskedCover(
-    cover: CoverUiModel?,
-    isLoading: Boolean,
-): CoverUiModel? = when {
-    isLoading.not() -> cover
-    cover == null -> null
-    else -> cover.copy(
-        source = null,
-        isLoading = true,
-        sharedTransitionKey = null,
-    )
 }
 
 @Composable

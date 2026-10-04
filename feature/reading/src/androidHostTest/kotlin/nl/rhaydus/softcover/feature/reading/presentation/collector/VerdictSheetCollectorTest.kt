@@ -41,7 +41,7 @@ class VerdictSheetCollectorTest {
     private fun cover(): CoverUiModel = CoverUiModel(
         source = null,
         coverlessTitle = PreviewData.baseBook.title,
-        variant = CoverVariant.ReadingRowThumb,
+        variant = CoverVariant.Tile,
     )
 
     @Nested

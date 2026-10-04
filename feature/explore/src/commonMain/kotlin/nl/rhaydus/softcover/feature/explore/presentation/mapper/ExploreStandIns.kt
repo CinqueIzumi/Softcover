@@ -28,7 +28,7 @@ private const val HIDDEN_STAND_IN_COUNT = 2
 internal val TRENDING_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(railStandInCount) { index ->
     columnStandInCard(
         bookId = -(index + 1),
-        coverVariant = CoverVariant.ExploreRail,
+        coverVariant = CoverVariant.Raised,
         text = BookCardContent(
             title = "The Name of the Wind",
             supportingLines = persistentListOf(
@@ -41,7 +41,7 @@ internal val TRENDING_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(rail
 internal val BECAUSE_YOU_READ_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(railStandInCount) { index ->
     columnStandInCard(
         bookId = -(index + 1),
-        coverVariant = CoverVariant.ExploreRail,
+        coverVariant = CoverVariant.Raised,
         text = BookCardContent(
             title = "The Name of the Wind",
             byline = "By Patrick Rothfuss",
@@ -52,7 +52,7 @@ internal val BECAUSE_YOU_READ_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = L
 internal val UP_NEXT_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(railStandInCount) { index ->
     columnStandInCard(
         bookId = -(index + 1),
-        coverVariant = CoverVariant.ExploreSeriesCard,
+        coverVariant = CoverVariant.Lifted,
         text = BookCardContent(
             title = "The Wise Man's Fear",
             eyebrow = BookCardEyebrow(text = "The Kingkiller Chronicle"),
@@ -74,7 +74,8 @@ internal val SEARCH_RESULT_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List
                     model = CoverUiModel(
                         source = null,
                         coverlessTitle = null,
-                        variant = CoverVariant.ExploreSearchRow,
+                        variant = CoverVariant.Flat,
+                        isLoading = true,
                     ),
                 ),
             ),
@@ -106,7 +107,8 @@ internal val HIDDEN_BOOK_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(H
                     model = CoverUiModel(
                         source = null,
                         coverlessTitle = null,
-                        variant = CoverVariant.HiddenBookRow,
+                        variant = CoverVariant.Flat,
+                        isLoading = true,
                     ),
                 ),
             ),
@@ -129,7 +131,8 @@ internal val HIDDEN_SERIES_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List
                 front = CoverUiModel(
                     source = null,
                     coverlessTitle = null,
-                    variant = CoverVariant.HiddenSeriesStack,
+                    variant = CoverVariant.Flat,
+                    isLoading = true,
                 ),
             ),
             text = BookCardContent(
@@ -157,6 +160,7 @@ private fun columnStandInCard(
                 source = null,
                 coverlessTitle = null,
                 variant = coverVariant,
+                isLoading = true,
             ),
         ),
         text = text,

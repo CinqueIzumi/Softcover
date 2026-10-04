@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_STAND_IN_CARDS
@@ -18,6 +19,9 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.toBecauseYouRead
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSearchResultCard
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toTrendingCard
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toUpNextCard
+import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
+import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
+import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -28,8 +32,8 @@ import nl.rhaydus.toad.ActionScope
  * the composition (`component-contract.md` § 7.2 R9), one list per surface: the same book
  * can sit on several surfaces, each stamping its own cover transition key.
  *
- * Derives from the books, [CoverModelsCollector]'s covers and [UnreleasedCoverOverlaysCollector]'s
- * overlays, so it re-runs whenever any of them changes.
+ * Derives from the books and [UnreleasedCoverOverlaysCollector]'s overlays, so it re-runs whenever
+ * either changes.
  */
 internal class BookCardModelsCollector : ExploreCollector {
     override suspend fun onLaunch(
@@ -43,10 +47,6 @@ internal class BookCardModelsCollector : ExploreCollector {
                     becauseYouReadBooks = it.becauseYouReadBooks,
                     continueSeriesBooks = it.continueSeriesBooks,
                     queriedBooks = it.queriedBooks,
-                    trendingCovers = it.trendingCovers,
-                    becauseYouReadCovers = it.becauseYouReadCovers,
-                    continueSeriesCovers = it.continueSeriesCovers,
-                    queriedBookCovers = it.queriedBookCovers,
                     unreleasedCoverOverlays = it.unreleasedCoverOverlays,
                     loadingTrendingBooks = it.loadingTrendingBooks,
                     loadingBecauseYouReadBooks = it.loadingBecauseYouReadBooks,
@@ -60,31 +60,37 @@ internal class BookCardModelsCollector : ExploreCollector {
                     it.copy(
                         trendingCards = snapshot.trendingBooks.toCards(
                             loading = snapshot.loadingTrendingBooks,
-                            covers = snapshot.trendingCovers,
+                            coverVariant = CoverVariant.Raised,
+                            coverSurface = SURFACE_TRENDING,
                             overlays = snapshot.unreleasedCoverOverlays,
                             standIns = TRENDING_STAND_IN_CARDS,
                             map = Book::toTrendingCard,
                         ),
                         becauseYouReadCards = snapshot.becauseYouReadBooks.toCards(
                             loading = snapshot.loadingBecauseYouReadBooks,
-                            covers = snapshot.becauseYouReadCovers,
+                            coverVariant = CoverVariant.Raised,
+                            coverSurface = SURFACE_BECAUSE_YOU_READ,
                             overlays = snapshot.unreleasedCoverOverlays,
                             standIns = BECAUSE_YOU_READ_STAND_IN_CARDS,
                             map = Book::toBecauseYouReadCard,
                         ),
                         upNextCards = snapshot.continueSeriesBooks.toCards(
                             loading = snapshot.loadingContinueSeriesBooks,
-                            covers = snapshot.continueSeriesCovers,
+                            coverVariant = CoverVariant.Lifted,
+                            coverSurface = SURFACE_UP_NEXT,
                             overlays = snapshot.unreleasedCoverOverlays,
                             standIns = UP_NEXT_STAND_IN_CARDS,
                             map = Book::toUpNextCard,
                         ),
                         queriedBookCards = snapshot.queriedBooks
-                            .takeUnless { snapshot.isLoading || snapshot.firstResultLacksCover }
-                            ?.mapNotNull { book ->
-                                snapshot.queriedBookCovers[book.id]?.let { cover ->
-                                    book.toSearchResultCard(cover = cover)
-                                }
+                            .takeUnless { snapshot.isLoading }
+                            ?.map { book ->
+                                book.toSearchResultCard(
+                                    cover = book.toCoverModel(
+                                        variant = CoverVariant.Flat,
+                                        surface = null,
+                                    ),
+                                )
                             }
                             ?.toImmutableList()
                             ?: SEARCH_RESULT_STAND_IN_CARDS,
@@ -94,14 +100,10 @@ internal class BookCardModelsCollector : ExploreCollector {
     }
 }
 
-// Only the first row is checked so a load-more page does not swap the list back to stand-ins while its
-// covers catch up.
-private val BookCardModelsSnapshot.firstResultLacksCover: Boolean
-    get() = queriedBooks.firstOrNull()?.let { it.id !in queriedBookCovers } == true
-
 private inline fun List<Book>.toCards(
     loading: Boolean,
-    covers: Map<Int, CoverUiModel>,
+    coverVariant: CoverVariant,
+    coverSurface: String,
     overlays: Map<Int, CoverOverlayUiModel>,
     standIns: ImmutableList<BookCardUiModel>,
     map: (Book, CoverUiModel?, CoverOverlayUiModel?) -> BookCardUiModel,
@@ -111,7 +113,10 @@ private inline fun List<Book>.toCards(
     map { book ->
         map(
             book,
-            covers[book.id],
+            book.toCoverModel(
+                variant = coverVariant,
+                surface = coverSurface,
+            ),
             overlays[book.id],
         )
     }.toImmutableList()

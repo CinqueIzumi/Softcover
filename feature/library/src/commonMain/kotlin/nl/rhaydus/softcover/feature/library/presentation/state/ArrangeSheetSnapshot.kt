@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 internal data class ArrangeSheetSnapshot(
     val resultCount: Int,
     val titlesToggle: ToggleRowUiModel?,
-    val makeOrdered: ArrangeMakeOrderedUiModel?,
+    val makeOrderedListId: Int?,
 ) {
     companion object {
         fun from(state: LibraryUiState): ArrangeSheetSnapshot {
@@ -34,12 +34,7 @@ internal data class ArrangeSheetSnapshot(
                             checked = layout.showsTitles,
                         )
                     },
-                makeOrdered = unrankedList?.let { list ->
-                    ArrangeMakeOrderedUiModel(
-                        label = "✶ Make this list ordered",
-                        listId = list.id,
-                    )
-                },
+                makeOrderedListId = unrankedList?.id,
             )
         }
     }

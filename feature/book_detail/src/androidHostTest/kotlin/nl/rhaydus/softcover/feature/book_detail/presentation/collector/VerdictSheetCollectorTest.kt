@@ -54,7 +54,7 @@ class VerdictSheetCollectorTest {
     private fun buildCover() = CoverUiModel(
         source = null,
         coverlessTitle = "Piranesi",
-        variant = CoverVariant.SheetHeaderJacket,
+        variant = CoverVariant.Jacket,
     )
 
     @Nested

@@ -73,7 +73,6 @@ internal fun BookCardRowLayout(
                     is BookCardLead.Cover -> BookCardCoverLayout(
                         cover = lead.cover,
                         selection = selection,
-                        isLoading = isLoading,
                         modifier = Modifier.width(leadWidth),
                     )
 

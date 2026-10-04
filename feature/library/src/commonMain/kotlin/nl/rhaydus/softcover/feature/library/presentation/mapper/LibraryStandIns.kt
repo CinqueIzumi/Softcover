@@ -92,6 +92,7 @@ private fun standInCover() = BookCardCover(
     model = CoverUiModel(
         source = null,
         coverlessTitle = null,
-        variant = CoverVariant.LibraryShelfItem,
+        variant = CoverVariant.Shelf,
+        isLoading = true,
     ),
 )

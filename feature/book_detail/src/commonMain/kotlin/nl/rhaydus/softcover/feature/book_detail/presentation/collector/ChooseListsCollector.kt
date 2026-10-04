@@ -41,7 +41,7 @@ internal class ChooseListsCollector : BookDetailCollector {
                         .toChooseListsUiModel(
                             bookId = book.id,
                             bookTitle = book.title,
-                            cover = book.toCoverUiModel(variant = CoverVariant.ChooseListsSingleJacket),
+                            cover = book.toCoverUiModel(variant = CoverVariant.Jacket),
                             listsBeingMutated = snapshot.listsBeingMutated,
                         )
                 } else {

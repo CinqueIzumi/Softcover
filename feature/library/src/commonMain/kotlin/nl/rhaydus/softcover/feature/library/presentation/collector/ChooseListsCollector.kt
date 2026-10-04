@@ -42,7 +42,7 @@ internal class ChooseListsCollector : LibraryCollector {
                     null
                 } else {
                     val covers = snapshot.jacketBooks.map { book ->
-                        book.toCoverUiModel(variant = CoverVariant.ChooseListsStackJacket)
+                        book.toCoverUiModel(variant = CoverVariant.StackedJacket)
                     }
 
                     snapshot.customLists

@@ -42,7 +42,7 @@ internal fun BookEdition.toEditionCard(
                 model = toCoverUiModel(
                     defaultEdition = fallbackEdition,
                     coverlessTitle = title,
-                    variant = CoverVariant.EditionListRow,
+                    variant = CoverVariant.Flat,
                 ),
                 badge = OWNED_COVER_BADGE.takeIf { owned },
             ),

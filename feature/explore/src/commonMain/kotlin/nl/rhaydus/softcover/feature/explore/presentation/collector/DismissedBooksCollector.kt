@@ -37,6 +37,6 @@ internal class DismissedBooksCollector : HiddenSuggestionsCollector {
 private fun DismissedSeriesBook.toCoverUiModel() = (null as BookEdition?).toCoverUiModel(
     defaultEdition = null,
     coverlessTitle = title ?: "Hidden book",
-    variant = CoverVariant.HiddenBookRow,
+    variant = CoverVariant.Flat,
     fallbackCoverUrl = coverUrl,
 )

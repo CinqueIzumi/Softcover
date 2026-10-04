@@ -46,7 +46,7 @@ private val FEATURED_BADGE_STAND_IN = BadgeUiModel(
 private val FEATURED_COVER_STAND_IN = CoverUiModel(
     source = null,
     coverlessTitle = null,
-    variant = CoverVariant.ExploreRail,
+    variant = CoverVariant.Raised,
     isLoading = true,
 )
 

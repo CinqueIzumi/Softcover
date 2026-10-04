@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
 /**
  * Everything [Cover] renders: what to load, what to fall back to when nothing loads, and which
- * surface's treatment ([CoverDimensions.forVariant]) applies.
+ * look ([CoverVariant]) applies.
  *
  * @property source Where to load the cover from, already resolved — a local file or a remote URL.
  * `null` means the resolution ladder (the mapper's job, not this component's) found nothing to load,
@@ -49,27 +49,27 @@ data class CoverUiModel(
                     cacheKey = null,
                 ),
                 coverlessTitle = "Piranesi",
-                variant = CoverVariant.LibraryShelfItem,
+                variant = CoverVariant.Shelf,
             ),
             CoverUiModel(
                 source = null,
                 coverlessTitle = "It",
-                variant = CoverVariant.LibraryShelfItem,
+                variant = CoverVariant.Shelf,
             ),
             CoverUiModel(
                 source = null,
                 coverlessTitle = "The Very Long and Overwrought Title of a Book That Will Not Fit",
-                variant = CoverVariant.LibraryShelfItem,
+                variant = CoverVariant.Shelf,
             ),
             CoverUiModel(
                 source = null,
                 coverlessTitle = "The Name of the Wind",
-                variant = CoverVariant.EditionListRow,
+                variant = CoverVariant.Flat,
             ),
             CoverUiModel(
                 source = null,
                 coverlessTitle = "The Dungeon Anarchist's Cookbook",
-                variant = CoverVariant.LibraryShelfItem,
+                variant = CoverVariant.Shelf,
                 isLoading = true,
             ),
         )

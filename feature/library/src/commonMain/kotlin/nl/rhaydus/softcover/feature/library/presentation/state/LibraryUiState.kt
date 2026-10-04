@@ -117,8 +117,8 @@ internal data class LibraryUiState(
     /** The Arrange sheet's titles toggle; null when the layout is a list. */
     val arrangeTitlesToggle: ToggleRowUiModel? = null,
 
-    /** The Arrange sheet's "make ordered" affordance; null unless the shelf is an unranked custom list. */
-    val arrangeMakeOrdered: ArrangeMakeOrderedUiModel? = null,
+    /** The unranked custom list the Arrange sheet offers to make ordered; null on any other shelf. */
+    val arrangeMakeOrderedListId: Int? = null,
 
     /** The Shelves sheet — the tab switcher on mobile; desktop keeps its permanent sidebar. */
     val isShelvesSheetExpanded: Boolean = false,

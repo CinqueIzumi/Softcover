@@ -34,15 +34,13 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 data class ChooseListsUiModel(
     val rows: ImmutableList<ChooseListsRowUiModel>,
     val scaffold: SheetScaffoldUiModel,
-    val emptyState: EmptyStateUiModel,
+    val emptyState: EmptyStateUiModel = EmptyStateUiModel(
+        title = "No custom lists yet",
+        body = "Create your first list below.",
+        variant = EmptyStateVariant.Inline,
+    ),
 ) {
     companion object : UiModelPreviews<ChooseListsUiModel> {
-        private val fixtureEmptyState = EmptyStateUiModel(
-            title = "No custom lists yet",
-            body = "Create your first list below.",
-            variant = EmptyStateVariant.Inline,
-        )
-
         private fun fixtureScaffold(
             name: String,
             description: String,
@@ -69,7 +67,7 @@ data class ChooseListsUiModel(
                 cover = CoverUiModel(
                     source = null,
                     coverlessTitle = name,
-                    variant = CoverVariant.ChooseListsSingleJacket,
+                    variant = CoverVariant.Jacket,
                 ),
             ),
         )
@@ -82,7 +80,6 @@ data class ChooseListsUiModel(
          */
         override val previews: ImmutableList<ChooseListsUiModel> = persistentListOf(
             ChooseListsUiModel(
-                emptyState = fixtureEmptyState,
                 scaffold = singleBookScaffold(name = "Piranesi"),
                 rows = persistentListOf(
                     ChooseListsRowUiModel(
@@ -136,7 +133,6 @@ data class ChooseListsUiModel(
                 ),
             ),
             ChooseListsUiModel(
-                emptyState = fixtureEmptyState,
                 scaffold = fixtureScaffold(
                     name = "5 books",
                     description = "A part-filled list adds the rest first — then a second tap takes all 5 off.",
@@ -145,7 +141,7 @@ data class ChooseListsUiModel(
                             CoverUiModel(
                                 source = null,
                                 coverlessTitle = title,
-                                variant = CoverVariant.ChooseListsStackJacket,
+                                variant = CoverVariant.StackedJacket,
                             )
                         }.toImmutableList(),
                     ),
@@ -202,7 +198,6 @@ data class ChooseListsUiModel(
                 ),
             ),
             ChooseListsUiModel(
-                emptyState = fixtureEmptyState,
                 scaffold = singleBookScaffold(name = "The Name of the Wind"),
                 rows = persistentListOf(),
             ),

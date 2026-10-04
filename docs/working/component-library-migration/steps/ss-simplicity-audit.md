@@ -42,7 +42,7 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 | SS-1 | `chip`, `badge`, `divider`, `selection`, `shape`, `text`, `ComponentAlpha.kt`; uibinding `release` (`UnreleasedBadgeStyle`) — ~1.6k | [x] |
 | SS-2 | `header`, `topbar`, `chrome`, `sidebar`; explore `HiddenGroupHeaderUiModel` — ~1.8k | [x] |
 | SS-3 | `bookcard`; uibinding `book` — ~1.8k | [x] |
-| SS-4 | `cover`, `lists`; uibinding `cover` (all platforms), `lists`; library `ArrangeMakeOrderedUiModel` — ~2.1k | [ ] |
+| SS-4 | `cover`, `lists`; uibinding `cover` (all platforms), `lists`; library `ArrangeMakeOrderedUiModel` — ~2.1k | [x] |
 | SS-5 | `sheet`, `dialog`, `callout`, `state`; explore `ContinueSeriesEntryUiModel`, orchestration `ReAuthSheetUiModel` — ~2.2k | [ ] |
 | SS-6 | `control`, `button`; book_detail `ExternalLinksUiModel`, `ShareSheetBodyUiModel`; settings `SettingsToggleRowUiModel`, `SettingsChoiceRowUiModel` — ~1.9k | [ ] |
 | SS-7 | `field`, `richtext`; uibinding `richtext`; book_detail `BookReviewUiModel` — ~1.8k | [ ] |
@@ -86,3 +86,14 @@ SS-3:
 - Fixes: `BookCardUiModel` size KDoc; search stand-in eyebrow uppercased; gallery coverless `Edition` fixture on Surface (accepted shift).
 - Later: non-book-card stand-ins still in render files — explore `FeaturedCard` badge / cover, `MoodGrid` tile, settings `RoadmapContent`.
 - Kept: `BookCardSemantics`, `rememberBookCardEventHandler`, Row's body and insets. Deferred: `maskedCover`, series stack (SS-4); `Bookmark` / `SetProgress` wrappers, menu button (SS-6); `Progress.Value.bar`, `maskedBar` (SS-8); fixture pruning (SS-11).
+
+SS-4:
+- Contract R2: one variant per distinct look, named after the look; metrics a private `when` beside the component.
+- `cover`: `CoverVariant` → one variant per look (`Flat` default for the seven shared surfaces; `ReadingHeroBackdrop` / `FullScreenViewer` go and use `Flat`; ExploreRail + ProfileLovedBook merge; SheetHeaderJacket + ChooseListsSingleJacket merge); drift merges (HiddenSeriesStack 3 → 4 dp joins `Flat`; Reading tiles 6/8/10 → 8 dp, one variant); ~10 variants.
+- `CoverDimensions` → private `when` beside `Cover`, decode cap 600 px on the shelf variant only, `BlackAlpha*` inline; `Cover.kt:171` uses `COVER_ASPECT_RATIO`; `CoverlessTitleCover` → `internal`.
+- `bookcard`: `maskedCover` goes; stand-in covers carry `isLoading = true` from their mapper; loading preview fixtures get a loading cover.
+- uibinding `cover`: `Book.toCoverUiModel` loses `isLoading`.
+- explore: `BookCardModelsCollector` maps covers inline; `trendingCovers` / `becauseYouReadCovers` / `continueSeriesCovers` / `queriedBookCovers`, their snapshot fields, `firstResultLacksCover` and `toPreviewCoverModels` go; `CoverModelsCollector` keeps only `featuredCover`.
+- `lists`: `ChooseListsUiModel.emptyState` defaulted, `chooseListsEmptyState()` goes; `onClick` pending guard goes; `NewListRow` → `CircleShape`.
+- library: `ArrangeMakeOrderedUiModel` → `arrangeMakeOrderedListId: Int?`, label in the composable; make-ordered link moves into the sheet body; one private chip FlowRow replaces `LayoutChipRow` / `SortChipRow`.
+- Kept: `CoverSource`, `resolveCoverSource`, `LocalImageSource` actuals, `MonogramCoverMetrics`, `ListMembership`, both choose-lists mappers. Deferred: chip FlowRow → `ChipSet`, `ToggleRow(titleStyle)` (SS-6); fixture pruning, Reading preview cover builds (SS-11).
