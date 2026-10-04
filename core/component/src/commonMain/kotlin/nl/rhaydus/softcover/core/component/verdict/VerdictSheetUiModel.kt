@@ -30,7 +30,6 @@ data class VerdictSheetUiModel(
     val initialRating: Double?,
     val initialReview: RichTextUiModel,
     val spoilers: ToggleRowUiModel<String>,
-    val reviewLabel: SectionHeaderUiModel.Label = SectionHeaderUiModel.Label(eyebrow = "In your words"),
 ) {
     companion object : UiModelPreviews<VerdictSheetUiModel> {
         private fun fixtureScaffold(

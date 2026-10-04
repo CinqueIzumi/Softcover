@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 
 /**
  * The content behind [ShareCard]'s six variants: [BookShareCardUiModel] (the plain editorial book
- * card — cover, title, byline, optional rating, optional pulled quote), [ReadingUpdateShareCardUiModel]
+ * card — cover, title, byline, optional rating), [ReadingUpdateShareCardUiModel]
  * (a personalised card attributing the book to the reader), [StatShareCardUiModel] (a `primary`-filled
  * hero numeral), [QuoteShareCardUiModel] (an oversize pulled quote), [YearRecapShareCardUiModel] (a
  * year-in-review recap), and [ReadingLifeShareCardUiModel] (a whole-history recap). [ShareCard]
@@ -38,7 +38,6 @@ sealed interface ShareCardUiModel {
                 description = "Merricat Blackwood lives with her sister Constance and their uncle Julian in the family " +
                     "mansion outside the village. A quiet gothic tale of isolation, ritual, and the slow-burning " +
                     "aftermath of a single, devastating poisoning.",
-                quote = "Merricat, said Connie, would you like a cup of tea?",
             ),
             BookShareCardUiModel(
                 coverUrl = null,
@@ -49,15 +48,14 @@ sealed interface ShareCardUiModel {
                 releaseYear = null,
                 pageCount = null,
                 description = null,
-                quote = null,
             ),
-            ReadingUpdateShareCardUiModel(
+            ReadingUpdateShareCardUiModel.Finished(
                 username = "cinque",
                 avatarUrl = null,
                 coverUrl = null,
                 title = "The Name of the Wind",
                 author = "Patrick Rothfuss",
-                kind = ReadingUpdateKind.FINISHED,
+                tags = persistentListOf(),
                 ratingStars = 4.5,
                 review = RichTextUiModel(
                     paragraphs = persistentListOf(
@@ -73,17 +71,14 @@ sealed interface ShareCardUiModel {
                         ),
                     ),
                 ),
-                progressLabel = null,
             ),
-            ReadingUpdateShareCardUiModel(
+            ReadingUpdateShareCardUiModel.Reading(
                 username = "cinque",
                 avatarUrl = null,
                 coverUrl = null,
                 title = "The Name of the Wind",
                 author = "Patrick Rothfuss",
-                kind = ReadingUpdateKind.READING,
-                ratingStars = null,
-                review = null,
+                tags = persistentListOf(),
                 progressLabel = "page 212 / 662 · 32%",
             ),
             StatShareCardUiModel(

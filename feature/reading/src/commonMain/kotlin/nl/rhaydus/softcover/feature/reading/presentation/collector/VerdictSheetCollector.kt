@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.uibinding.verdict.toVerdictSheetUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -12,8 +13,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiSt
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps the book the verdict prompt is open for, its review and its verdict cover to the sheet's UI
- * model off the composition (R9), where the three converge.
+ * Maps the book the verdict prompt is open for, with its review, and its verdict cover to the sheet's UI
+ * model off the composition (R9), where the two converge.
  *
  * Deriving it here means `verdictSheet` is null exactly when `verdictPromptBook` is, without the
  * actions that clear the prompt having to remember the model too. Reading only ever raises the prompt
@@ -28,17 +29,18 @@ internal class VerdictSheetCollector : ReadingCollector {
             .map {
                 VerdictSheetSnapshot(
                     book = it.verdictPromptBook,
-                    review = it.verdictReview,
                     cover = it.verdictCover,
                 )
             }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
+                val book = snapshot.book
+
                 scope.setState {
                     it.copy(
-                        verdictSheet = snapshot.book?.toVerdictSheetUiModel(
+                        verdictSheet = book?.toVerdictSheetUiModel(
                             context = VerdictSheetContext.FINISHED,
-                            review = snapshot.review,
+                            review = book.userBook?.reviewDocument?.toRichTextUiModel(),
                             cover = snapshot.cover,
                         ),
                     )

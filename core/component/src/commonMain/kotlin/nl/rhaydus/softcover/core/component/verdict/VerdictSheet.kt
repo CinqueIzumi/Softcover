@@ -31,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
@@ -54,7 +56,6 @@ import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.control.ToggleRow
-import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichTextMark
 import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
 import nl.rhaydus.softcover.core.component.richtext.applyEditToMarks
@@ -189,7 +190,12 @@ fun VerdictSheet(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            SectionHeader(model = model.reviewLabel)
+            SoftcoverText(
+                text = "In your words".uppercase(),
+                style = MaterialTheme.editorialTypography.eyebrowSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.semantics(mergeDescendants = true) { heading() },
+            )
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -322,15 +328,7 @@ private fun VerdictScoreAndCaption(
             label = "VerdictScoreCaption",
         ) { animatedScore ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                SoftcoverText(
-                    text = verdictScoreLineFor(score = animatedScore).uppercase(),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.6.sp,
-                        fontFeatureSettings = "tnum",
-                    ),
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                VerdictScoreLine(score = animatedScore)
 
                 Spacer(modifier = Modifier.height(6.dp))
 
@@ -346,15 +344,29 @@ private fun VerdictScoreAndCaption(
 }
 
 /** The 0..10 score a 0.5-stepped 0..5 star [rating] reads out as, or `null` before a rating exists. */
-internal fun verdictScoreOf(rating: Double?): Int? = rating?.let { (it * 2).roundToInt() }
+fun verdictScoreOf(rating: Double?): Int? = rating?.let { (it * 2).roundToInt() }
 
 /** One of the ten hand-written margin-note captions for [score], or the pre-rating prompt. */
 internal fun verdictCaptionFor(score: Int?): String =
     score?.let { VERDICT_CAPTIONS.getOrNull(it - 1) } ?: "How was it?"
 
-/** "Your {score} / 10", or the pre-rating "Tap the stars" prompt. */
-internal fun verdictScoreLineFor(score: Int?): String =
-    score?.let { "Your $it / 10" } ?: "Tap the stars"
+/** "YOUR {score} / 10", or the pre-rating "TAP THE STARS" prompt, in the verdict's accent label style. */
+@Composable
+internal fun VerdictScoreLine(
+    score: Int?,
+    modifier: Modifier = Modifier,
+) {
+    SoftcoverText(
+        text = (score?.let { "Your $it / 10" } ?: "Tap the stars").uppercase(),
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 1.6.sp,
+            fontFeatureSettings = "tnum",
+        ),
+        color = MaterialTheme.colorScheme.primary,
+        modifier = modifier,
+    )
+}
 
 private fun buildEditorAnnotatedString(
     text: String,

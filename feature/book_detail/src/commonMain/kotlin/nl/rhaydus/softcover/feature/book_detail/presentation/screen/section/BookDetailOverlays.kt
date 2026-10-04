@@ -69,14 +69,13 @@ internal fun BookDetailOverlays(
     onCreateNewListClick: () -> Unit,
     shareCaptureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
 ) {
-    val shareBookCard = state.shareBookCard
+    val shareCard = state.shareCard
     val shareSheet = state.shareSheet
     val shareSheetBody = state.shareSheetBody
-    if (state.isShareSheetVisible && shareBookCard != null && shareSheet != null && shareSheetBody != null) {
+    if (state.isShareSheetVisible && shareCard != null && shareSheet != null && shareSheetBody != null) {
         ShareBookBottomSheet(
             model = shareSheet,
-            shareBookCard = shareBookCard,
-            shareUpdateCard = state.shareUpdateCard,
+            shareCard = shareCard,
             body = shareSheetBody,
             onVariantSelected = { runAction(OnShareVariantSelectedAction(variant = it)) },
             captureEvents = shareCaptureEvents,

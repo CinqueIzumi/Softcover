@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
+import nl.rhaydus.softcover.core.domain.model.isBlank
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
@@ -13,9 +14,8 @@ import nl.rhaydus.toad.ActionScope
 
 /**
  * Maps the current user's rating and review document off the composition (R9), so the verdict block
- * and the verdict sheet only ever forward `BookDetailUiState.verdictBlock` and `verdictSheet` — never a
- * `ReviewDocument` for a composable to convert itself. Also writes `verdictReview`, the rich-text
- * review `VerdictSheetCollector` feeds the sheet mapper.
+ * only ever forwards `BookDetailUiState.verdictBlock` — never a `ReviewDocument` for a composable to
+ * convert itself. The block is `null` while the book has no user data.
  */
 internal class VerdictReviewCollector : BookDetailCollector {
     override suspend fun onLaunch(
@@ -26,16 +26,20 @@ internal class VerdictReviewCollector : BookDetailCollector {
             .map { it.book?.userBook }
             .distinctUntilChanged()
             .collectLatest { userBook ->
-                val review = userBook?.reviewDocument?.toRichTextUiModel()
+                val rating = userBook?.rating?.takeIf { it > 0.0 }
+                val review = userBook?.reviewDocument?.takeUnless { it.isBlank() }?.toRichTextUiModel()
 
                 scope.setState {
                     it.copy(
-                        verdictReview = review,
-                        verdictBlock = userBook?.let { book ->
-                            VerdictBlockUiModel(
-                                rating = book.rating?.takeIf { rating -> rating > 0.0 },
+                        verdictBlock = when {
+                            userBook == null -> null
+
+                            rating == null && review == null -> VerdictBlockUiModel.Empty
+
+                            else -> VerdictBlockUiModel.Filled(
+                                rating = rating,
                                 review = review,
-                                hasSpoilers = book.reviewHasSpoilers,
+                                hasSpoilers = userBook.reviewHasSpoilers,
                             )
                         },
                     )

@@ -59,6 +59,6 @@ internal fun QuoteShareCardBody(content: QuoteShareCardUiModel) {
 @Composable
 private fun QuoteShareCardPreview() {
     SoftcoverTheme {
-        ShareCard(content = ShareCardUiModel.previews.filterIsInstance<QuoteShareCardUiModel>().single())
+        ShareCard(model = ShareCardUiModel.previews.filterIsInstance<QuoteShareCardUiModel>().single())
     }
 }

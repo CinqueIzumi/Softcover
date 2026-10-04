@@ -245,14 +245,12 @@ private fun MiniScallopPortrait(
 /**
  * The pages-by-month sparkline: a polyline over its own translucent area fill, drawn against the
  * card's [LocalContentColor] (always `onPrimary`, since the card is `primary`-filled) so it reads
- * correctly in both themes without a hex value. [monthlyPages] is normalized to twelve entries first
- * (see [normalizedReadingLifeMonths]) so a partial or empty history still renders a flat baseline
- * instead of a malformed chart.
+ * correctly in both themes without a hex value. [monthlyPages] is the twelve months of
+ * [ReadingLifeShareCardUiModel.pagesByMonth].
  */
 @Composable
 private fun ReadingLifeRidgeline(monthlyPages: List<Int>) {
-    val values = normalizedReadingLifeMonths(monthlyPages = monthlyPages)
-    val maxValue = values.max().coerceAtLeast(1)
+    val maxValue = monthlyPages.max().coerceAtLeast(1)
     val lineColor = LocalContentColor.current.copy(alpha = 0.9f)
     val areaColor = LocalContentColor.current.copy(alpha = 0.22f)
 
@@ -264,9 +262,9 @@ private fun ReadingLifeRidgeline(monthlyPages: List<Int>) {
         ) {
             val topInset = size.height * 0.12f
             val plotHeight = size.height - topInset
-            val lastIndex = values.lastIndex
+            val lastIndex = monthlyPages.lastIndex
 
-            val points = values.mapIndexed { index, value ->
+            val points = monthlyPages.mapIndexed { index, value ->
                 val x = size.width * index / lastIndex
                 val fraction = value / maxValue.toFloat()
                 val y = size.height - (fraction * plotHeight)
@@ -431,7 +429,7 @@ private fun ReadingLifeFooterStat(
             style = MaterialTheme.editorialTypography.headlineSmall.copy(
                 fontSize = 22.sp,
                 lineHeight = 24.sp,
-                fontFeatureSettings = TABULAR_NUMS,
+                fontFeatureSettings = "tnum",
             ),
             color = LocalContentColor.current,
         )
@@ -452,16 +450,6 @@ private fun ReadingLifeFooterStat(
     }
 }
 
-private fun normalizedReadingLifeMonths(monthlyPages: List<Int>): List<Int> {
-    val twelve = monthlyPages.take(READING_LIFE_MONTHS_IN_YEAR)
-
-    return if (twelve.size == READING_LIFE_MONTHS_IN_YEAR) {
-        twelve
-    } else {
-        twelve + List(READING_LIFE_MONTHS_IN_YEAR - twelve.size) { 0 }
-    }
-}
-
 private fun readingLifeInitials(readerName: String): String {
     val letters = readerName
         .trim()
@@ -475,15 +463,13 @@ private fun readingLifeInitials(readerName: String): String {
     }
 }
 
-private const val READING_LIFE_MONTHS_IN_YEAR = 12
-
 private val ReadingLifePreviewContent = ShareCardUiModel.previews.filterIsInstance<ReadingLifeShareCardUiModel>().single()
 
 @StandardPreview
 @Composable
 private fun ReadingLifeShareCardLightPreview() {
     SoftcoverTheme(darkTheme = false) {
-        ShareCard(content = ReadingLifePreviewContent)
+        ShareCard(model = ReadingLifePreviewContent)
     }
 }
 
@@ -491,6 +477,6 @@ private fun ReadingLifeShareCardLightPreview() {
 @Composable
 private fun ReadingLifeShareCardDarkPreview() {
     SoftcoverTheme(darkTheme = true) {
-        ShareCard(content = ReadingLifePreviewContent)
+        ShareCard(model = ReadingLifePreviewContent)
     }
 }

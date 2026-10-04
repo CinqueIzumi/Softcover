@@ -51,3 +51,4 @@ shift; tick each during S12.
 - [ ] SS-6: verdict sheet and Library `ToggleRow` titles take the `Plain` / `Inset` variant's type instead of a per-call style.
 - [ ] SS-8: Explore mood grid tiles no longer crossfade from loading to loaded.
 - [ ] SS-7: book detail reviews show their stand-ins and load independently of the book details (no longer held behind the details fetch).
+- [ ] SS-10: book share card's rating now shows the ×2 verdict score, matching the verdict block.

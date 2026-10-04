@@ -10,8 +10,8 @@ import kotlinx.collections.immutable.persistentListOf
  * here in `core:designsystem`, matching the other [ShareCardUiModel] variants.
  *
  * Every field a sparse reader might not have yet is nullable or list-shaped so [ShareCard] can render
- * without special-casing at the call site: [avatarUrl] falls back to initials, [pagesByMonth] is
- * padded/truncated to twelve months, and [topGenres] simply omits its section when empty.
+ * without special-casing at the call site: [avatarUrl] falls back to initials, [pagesByMonth] carries
+ * exactly twelve months, and [topGenres] simply omits its section when empty.
  *
  * [topGenres] arrives already ranked, highest share first — the card renders the leading entry larger
  * than the rest rather than re-sorting.

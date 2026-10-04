@@ -1,11 +1,12 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.richtext.RichTextParagraph
 import nl.rhaydus.softcover.core.component.richtext.RichTextRun
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
-import nl.rhaydus.softcover.core.component.share.ReadingUpdateKind
+import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -105,10 +106,12 @@ class ReadingUpdateShareCardMapperTest {
     private fun buildBook(
         title: String = "Test Book",
         coverUrl: String = "https://book.cover/img.jpg",
-        authors: List<Author> = listOf(Author(
-            id = 1,
-            name = "Jane Austen",
-        ),),
+        authors: List<Author> = listOf(
+            Author(
+                id = 1,
+                name = "Jane Austen",
+            ),
+        ),
         defaultEdition: BookEdition? = null,
         userBook: UserBook? = buildUserBook(),
         userBookRead: UserBookRead? = null,
@@ -244,7 +247,7 @@ class ReadingUpdateShareCardMapperTest {
     @Nested
     inner class FinishedBook {
         @Test
-        fun `kind is FINISHED when status is Read`() {
+        fun `is Finished when status is Read`() {
             // ----- Arrange -----
             val book = buildBook(userBook = buildUserBook(status = BookStatus.Read))
 
@@ -256,7 +259,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.kind shouldBe ReadingUpdateKind.FINISHED
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>()
         }
 
         @Test
@@ -272,7 +275,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.ratingStars shouldBe 4.5
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>().ratingStars shouldBe 4.5
         }
 
         @Test
@@ -288,7 +291,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.ratingStars shouldBe null
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>().ratingStars shouldBe null
         }
 
         @Test
@@ -304,23 +307,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.ratingStars shouldBe null
-        }
-
-        @Test
-        fun `progressLabel is null for finished book`() {
-            // ----- Arrange -----
-            val book = buildBook(userBook = buildUserBook(status = BookStatus.Read))
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result?.progressLabel shouldBe null
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>().ratingStars shouldBe null
         }
     }
 
@@ -329,7 +316,7 @@ class ReadingUpdateShareCardMapperTest {
     @Nested
     inner class ReadingBook {
         @Test
-        fun `kind is READING when status is Reading`() {
+        fun `is Reading when status is Reading`() {
             // ----- Arrange -----
             val book = buildBook(userBook = buildUserBook(status = BookStatus.Reading))
 
@@ -341,46 +328,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.kind shouldBe ReadingUpdateKind.READING
-        }
-
-        @Test
-        fun `ratingStars is null for reading book`() {
-            // ----- Arrange -----
-            val book = buildBook(userBook = buildUserBook(
-                status = BookStatus.Reading,
-                rating = 3.0,
-            ),)
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result?.ratingStars shouldBe null
-        }
-
-        @Test
-        fun `review is null for reading book`() {
-            // ----- Arrange -----
-            val review = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Great so far")))))
-            val book = buildBook(userBook = buildUserBook(
-                status = BookStatus.Reading,
-                reviewDocument = review,
-            ),)
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result?.review shouldBe null
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>()
         }
 
         @Test
@@ -403,7 +351,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "page 100 / 400 · 25%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "page 100 / 400 · 25%"
         }
 
         @Test
@@ -426,7 +374,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "page 150 / 300 · 50%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "page 150 / 300 · 50%"
         }
 
         @Test
@@ -449,7 +397,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "page 61 / 195 · 31%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "page 61 / 195 · 31%"
         }
 
         @Test
@@ -472,7 +420,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "31%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "31%"
         }
 
         @Test
@@ -495,7 +443,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "40%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "40%"
         }
 
         @Test
@@ -517,7 +465,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "10%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "10%"
         }
 
         @Test
@@ -539,7 +487,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "100%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "100%"
         }
 
         @Test
@@ -562,7 +510,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "page 33 / 100 · 33%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "page 33 / 100 · 33%"
         }
 
         @Test
@@ -582,7 +530,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "1h 0m / 2h 0m · 50%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "1h 0m / 2h 0m · 50%"
         }
 
         @Test
@@ -605,7 +553,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe "40%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "40%"
         }
 
         @Test
@@ -624,7 +572,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.progressLabel shouldBe null
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe null
         }
     }
 
@@ -646,7 +594,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.review shouldBe RichTextUiModel(
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>().review shouldBe RichTextUiModel(
                 paragraphs = persistentListOf(
                     RichTextParagraph(runs = persistentListOf(RichTextRun(text = "A great read"))),
                 ),
@@ -656,16 +604,20 @@ class ReadingUpdateShareCardMapperTest {
         @Test
         fun `inline spoiler runs are preserved in the rich text — masking happens at render time`() {
             // ----- Arrange -----
-            val reviewDoc = ReviewDocument(listOf(
-                ReviewParagraph(listOf(
-                    ReviewRun("Great story"),
-                    ReviewRun(
-                        " — spoiler here",
-                        spoiler = true,
+            val reviewDoc = ReviewDocument(
+                listOf(
+                    ReviewParagraph(
+                        listOf(
+                            ReviewRun("Great story"),
+                            ReviewRun(
+                                " — spoiler here",
+                                spoiler = true,
+                            ),
+                            ReviewRun(" with a lovely ending"),
+                        ),
                     ),
-                    ReviewRun(" with a lovely ending"),
-                ),),
-            ),)
+                ),
+            )
             val book = buildBook(
                 userBook = buildUserBook(
                     reviewDocument = reviewDoc,
@@ -681,7 +633,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.review shouldBe RichTextUiModel(
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>().review shouldBe RichTextUiModel(
                 paragraphs = persistentListOf(
                     RichTextParagraph(
                         runs = persistentListOf(
@@ -716,7 +668,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.review shouldBe RichTextUiModel(
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>().review shouldBe RichTextUiModel(
                 paragraphs = persistentListOf(
                     RichTextParagraph(runs = persistentListOf(RichTextRun(text = "A great read"))),
                 ),
@@ -736,7 +688,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.review shouldBe null
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>().review shouldBe null
         }
 
         @Test
@@ -753,7 +705,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result?.review shouldBe null
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>().review shouldBe null
         }
     }
 

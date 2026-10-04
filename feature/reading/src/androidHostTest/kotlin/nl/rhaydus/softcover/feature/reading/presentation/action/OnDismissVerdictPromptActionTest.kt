@@ -41,7 +41,6 @@ class OnDismissVerdictPromptActionTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
                 verdictPromptBook = stubBook(),
-                verdictReview = RichTextUiModel.EMPTY,
             )
 
             // ----- Act -----
@@ -52,7 +51,6 @@ class OnDismissVerdictPromptActionTest {
 
             // ----- Assert -----
             stateFlow.value.verdictPromptBook shouldBe null
-            stateFlow.value.verdictReview shouldBe null
         }
 
         @Test

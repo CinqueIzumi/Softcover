@@ -14,7 +14,6 @@ internal class OnDismissVerdictPromptAction : ReadingAction {
         scope.setState {
             it.copy(
                 verdictPromptBook = null,
-                verdictReview = null,
             )
         }
     }

@@ -26,8 +26,6 @@ import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.control.SegmentedControl
 import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
-import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
-import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ScaledShareCardPreview
 import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
@@ -42,8 +40,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetBod
 @Composable
 internal fun ShareBookBottomSheet(
     model: SheetScaffoldUiModel,
-    shareBookCard: BookShareCardUiModel,
-    shareUpdateCard: ReadingUpdateShareCardUiModel?,
+    shareCard: ShareCardUiModel,
     body: ShareSheetBodyUiModel,
     onVariantSelected: (ShareCardVariant) -> Unit,
     captureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
@@ -54,11 +51,6 @@ internal fun ShareBookBottomSheet(
     onDismissRequest: () -> Unit,
 ) {
     val capture = rememberShareCardCapture(config = softcoverShareCardCaptureConfig)
-
-    val displayedContent: ShareCardUiModel = when (body.variant) {
-        ShareCardVariant.MY_UPDATE -> shareUpdateCard ?: shareBookCard
-        ShareCardVariant.BOOK -> shareBookCard
-    }
 
     SheetScaffold(
         model = model,
@@ -75,7 +67,7 @@ internal fun ShareBookBottomSheet(
         val dismiss = LocalModalSheetDismiss.current
 
         val currentCapture by rememberUpdatedState(capture)
-        val currentTitle by rememberUpdatedState(shareBookCard.title)
+        val currentTitle by rememberUpdatedState(body.displayName)
         val currentDismiss by rememberUpdatedState(dismiss)
         val currentOnShareFinished by rememberUpdatedState(onShareFinished)
         val currentOnSaveToGalleryFinished by rememberUpdatedState(onSaveToGalleryFinished)
@@ -147,7 +139,7 @@ internal fun ShareBookBottomSheet(
             ScaledShareCardPreview(
                 capture = capture,
             ) {
-                ShareCard(content = displayedContent)
+                ShareCard(model = shareCard)
             }
 
             Spacer(modifier = Modifier.height(24.dp))

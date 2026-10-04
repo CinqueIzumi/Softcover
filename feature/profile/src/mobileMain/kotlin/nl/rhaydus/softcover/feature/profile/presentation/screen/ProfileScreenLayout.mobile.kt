@@ -211,7 +211,7 @@ internal actual fun ProfileScreenLayout(
 
     if (showShareSheet && shareContent != null) {
         ProfileShareBottomSheet(
-            content = shareContent,
+            model = shareContent,
             scaffold = state.shareSheetScaffold,
             onDismissRequest = { showShareSheet = false },
         )

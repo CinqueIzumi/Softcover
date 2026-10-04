@@ -6,35 +6,37 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 
-/**
- * Everything [VerdictBlock] renders. [rating] and [review] are independent: the block draws whichever
- * has content, and the empty invitation when neither does. A blank [review] counts as none.
- */
+/** What [VerdictBlock] renders: the invitation to rate ([Empty]) or the reader's verdict ([Filled]). */
 @Immutable
-data class VerdictBlockUiModel(
-    val rating: Double?,
-    val review: RichTextUiModel?,
-    val hasSpoilers: Boolean,
-) {
+sealed interface VerdictBlockUiModel {
+    /** No rating and no review yet. */
+    data object Empty : VerdictBlockUiModel
+
+    /**
+     * A verdict with content. At least one of [rating] and [review] is non-null, and a non-null
+     * [review] is never blank — the mapper returns [Empty] otherwise.
+     */
+    data class Filled(
+        val rating: Double?,
+        val review: RichTextUiModel?,
+        val hasSpoilers: Boolean,
+    ) : VerdictBlockUiModel
+
     companion object : UiModelPreviews<VerdictBlockUiModel> {
         /** One fixture per branch the block renders: empty, rating only, review only, and both with the spoiler note. */
         override val previews: ImmutableList<VerdictBlockUiModel> = persistentListOf(
-            VerdictBlockUiModel(
-                rating = null,
-                review = null,
-                hasSpoilers = false,
-            ),
-            VerdictBlockUiModel(
+            Empty,
+            Filled(
                 rating = 4.0,
                 review = null,
                 hasSpoilers = false,
             ),
-            VerdictBlockUiModel(
+            Filled(
                 rating = null,
                 review = RichTextUiModel.previews.first(),
                 hasSpoilers = false,
             ),
-            VerdictBlockUiModel(
+            Filled(
                 rating = 4.5,
                 review = RichTextUiModel.previews[2],
                 hasSpoilers = true,

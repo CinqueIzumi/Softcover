@@ -58,7 +58,6 @@ class OnSaveVerdictActionTest {
             val book = stubBook()
             stateFlow.value = ReadingScreenUiState(
                 verdictPromptBook = book,
-                verdictReview = RichTextUiModel.EMPTY,
             )
 
             coEvery {
@@ -85,7 +84,6 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.verdictPromptBook shouldBe book
-            stateFlow.value.verdictReview shouldBe RichTextUiModel.EMPTY
         }
 
         @Test
@@ -94,7 +92,6 @@ class OnSaveVerdictActionTest {
             val book = stubBook()
             stateFlow.value = ReadingScreenUiState(
                 verdictPromptBook = book,
-                verdictReview = RichTextUiModel.EMPTY,
             )
 
             coEvery {
@@ -121,7 +118,6 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.verdictPromptBook shouldBe book
-            stateFlow.value.verdictReview shouldBe RichTextUiModel.EMPTY
         }
 
         @Test

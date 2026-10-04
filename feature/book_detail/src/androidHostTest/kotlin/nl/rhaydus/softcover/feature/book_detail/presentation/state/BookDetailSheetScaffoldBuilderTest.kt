@@ -289,12 +289,13 @@ class BookDetailSheetScaffoldBuilderTest {
     @Nested
     inner class ShareSheetBodyFor {
         @Test
-        fun `passes the variant through`() {
+        fun `passes the display name through`() {
             // ----- Arrange -----
             val variant = ShareCardVariant.MY_UPDATE
 
             // ----- Act -----
             val result = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = variant,
                 hasUpdateCard = true,
                 isSharing = false,
@@ -302,7 +303,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.variant shouldBe variant
+            result.displayName shouldBe "Dune"
         }
 
         @Test
@@ -312,12 +313,14 @@ class BookDetailSheetScaffoldBuilderTest {
 
             // ----- Act -----
             val withUpdateCard = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = variant,
                 hasUpdateCard = true,
                 isSharing = false,
                 isSavingToGallery = false,
             )
             val withoutUpdateCard = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = variant,
                 hasUpdateCard = false,
                 isSharing = false,
@@ -336,6 +339,7 @@ class BookDetailSheetScaffoldBuilderTest {
 
             // ----- Act -----
             val result = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = variant,
                 hasUpdateCard = false,
                 isSharing = false,
@@ -351,6 +355,7 @@ class BookDetailSheetScaffoldBuilderTest {
             // ----- Arrange -----
             val variant = ShareCardVariant.BOOK
             val idle = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = variant,
                 hasUpdateCard = false,
                 isSharing = false,
@@ -359,6 +364,7 @@ class BookDetailSheetScaffoldBuilderTest {
 
             // ----- Act -----
             val result = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = variant,
                 hasUpdateCard = false,
                 isSharing = true,
@@ -376,6 +382,7 @@ class BookDetailSheetScaffoldBuilderTest {
             // ----- Arrange -----
             val variant = ShareCardVariant.BOOK
             val idle = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = variant,
                 hasUpdateCard = false,
                 isSharing = false,
@@ -384,6 +391,7 @@ class BookDetailSheetScaffoldBuilderTest {
 
             // ----- Act -----
             val result = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = variant,
                 hasUpdateCard = false,
                 isSharing = false,
@@ -400,6 +408,7 @@ class BookDetailSheetScaffoldBuilderTest {
         fun `variant toggle offers every variant and selects the current one`() {
             // ----- Arrange & Act -----
             val result = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = ShareCardVariant.MY_UPDATE,
                 hasUpdateCard = true,
                 isSharing = false,
@@ -415,6 +424,7 @@ class BookDetailSheetScaffoldBuilderTest {
         fun `variant toggle labels each option with its variant label`() {
             // ----- Arrange & Act -----
             val result = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = ShareCardVariant.BOOK,
                 hasUpdateCard = true,
                 isSharing = false,
@@ -429,6 +439,7 @@ class BookDetailSheetScaffoldBuilderTest {
         fun `variant toggle is enabled when idle`() {
             // ----- Arrange & Act -----
             val result = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = ShareCardVariant.BOOK,
                 hasUpdateCard = true,
                 isSharing = false,
@@ -443,6 +454,7 @@ class BookDetailSheetScaffoldBuilderTest {
         fun `variant toggle is disabled while sharing`() {
             // ----- Arrange & Act -----
             val result = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = ShareCardVariant.BOOK,
                 hasUpdateCard = true,
                 isSharing = true,
@@ -457,6 +469,7 @@ class BookDetailSheetScaffoldBuilderTest {
         fun `variant toggle is disabled while saving to gallery`() {
             // ----- Arrange & Act -----
             val result = shareSheetBodyFor(
+                displayName = "Dune",
                 variant = ShareCardVariant.BOOK,
                 hasUpdateCard = true,
                 isSharing = false,

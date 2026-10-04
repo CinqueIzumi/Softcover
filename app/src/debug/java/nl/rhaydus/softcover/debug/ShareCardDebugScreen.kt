@@ -242,7 +242,7 @@ object ShareCardDebugScreen : Screen {
                 contentAlignment = Alignment.Center,
             ) {
                 CapturableShareCard(capture = capture) {
-                    ShareCard(content = content)
+                    ShareCard(model = content)
                 }
             }
 
@@ -267,7 +267,6 @@ object ShareCardDebugScreen : Screen {
         pageCount = 945,
         description = "A sprawling cattle drive from the dust of Texas to the high grass of Montana, " +
             "told as one of the great American friendships and one of the longest goodbyes in the genre.",
-        quote = "It's a fine world, though rich in hardships at times.",
     )
 
     private val SampleStat = StatShareCardUiModel(

@@ -232,11 +232,11 @@ data class BookShareCardUiModel(
 
 // ONE public symbol; `when` dispatch to private per-variant bodies
 @Composable
-fun ShareCard(content: ShareCardUiModel, modifier: Modifier = Modifier) { … }
+fun ShareCard(model: ShareCardUiModel, modifier: Modifier = Modifier) { … }
 ```
 
 It shows R1 (no callbacks — a share card is inert), R2 (sealed variant, one public symbol, private bodies,
-per-variant sizing table), R3, R4 (`RichTextUiModel` on the reading-update card), R5 (its
+private per-variant sizing `when`), R3, R4 (`RichTextUiModel` on the reading-update card), R5 (its
 `UiModelPreviews` companion feeds both the gallery and its `@Preview` functions) and R8. A share card sets
 its own width, because it is an export artefact at fixed dimensions. When a component genuinely owns its
 metrics, put them in a per-variant table and let the surrounding surface adapt (the gallery pans it); never

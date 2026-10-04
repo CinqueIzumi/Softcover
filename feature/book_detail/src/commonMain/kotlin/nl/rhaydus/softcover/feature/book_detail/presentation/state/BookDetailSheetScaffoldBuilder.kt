@@ -66,13 +66,14 @@ internal fun editionSheetScaffoldFor(
     )
 
 internal fun shareSheetBodyFor(
+    displayName: String,
     variant: ShareCardVariant,
     hasUpdateCard: Boolean,
     isSharing: Boolean,
     isSavingToGallery: Boolean,
 ): ShareSheetBodyUiModel =
     ShareSheetBodyUiModel(
-        variant = variant,
+        displayName = displayName,
         shareLabel = if (isSharing) "Sharing…" else "Share",
         saveToGalleryLabel = if (isSavingToGallery) "Saving to gallery…" else "Save to gallery",
         isBusy = isSharing || isSavingToGallery,

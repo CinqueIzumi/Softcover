@@ -628,57 +628,6 @@ class OnUpdateTimeProgressClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.verdictPromptBook shouldBe book
-            stateFlow.value.verdictReview shouldBe null
-        }
-
-        @Test
-        fun `sets verdictReview to the mapped review document when updateBookProgress outcome is Applied`() = runTest {
-            // ----- Arrange -----
-            val reviewDocument = ReviewDocument(
-                paragraphs = listOf(
-                    ReviewParagraph(
-                        runs = listOf(
-                            ReviewRun(text = "Loved it."),
-                        ),
-                    ),
-                ),
-            )
-            val userBook = mockk<UserBook>().also { mock ->
-                every {
-                    mock.reviewDocument
-                } returns reviewDocument
-            }
-            val book = stubBookWithAudioSeconds(
-                audioSeconds = 7200,
-                id = 5,
-            )
-            every {
-                book.userBook
-            } returns userBook
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = book)
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = any(),
-                )
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "0",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.verdictReview shouldBe reviewDocument.toRichTextUiModel()
         }
 
         @Test

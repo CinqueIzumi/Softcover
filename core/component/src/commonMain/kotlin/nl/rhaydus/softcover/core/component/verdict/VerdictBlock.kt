@@ -24,8 +24,6 @@ import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.richtext.RichText
-import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
-import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -40,9 +38,9 @@ private const val VERDICT_BLOCK_REVIEW_COLLAPSED_LINES = 8
  * [VerdictSheet]; rating and review are only ever changed inside that sheet, never inline on the book
  * page.
  *
- * Renders **empty** (outline stars + an invitation) when neither rating nor review carries content,
- * or **filled** — whichever of a gold star row / score line and a rendered review paragraph actually
- * has content, separated by a hairline when both are present — followed by a "Tap to edit" hint.
+ * Renders **empty** (outline stars + an invitation) for [VerdictBlockUiModel.Empty], or **filled** —
+ * whichever of a gold star row / score line and a rendered review paragraph the model carries,
+ * separated by a hairline when both are present — followed by a "Tap to edit" hint.
  */
 @Composable
 fun VerdictBlock(
@@ -50,11 +48,7 @@ fun VerdictBlock(
     onEvent: (VerdictBlockEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val rating = model.rating
-    val hasSpoilers = model.hasSpoilers
     val onEditClick = { onEvent(VerdictBlockEvent.EditRequested) }
-    val displayedReview = model.review?.takeIf { it.isBlank().not() }
-    val hasVerdict = rating != null || displayedReview != null
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -68,7 +62,7 @@ fun VerdictBlock(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            if (hasVerdict) {
+            if (model is VerdictBlockUiModel.Filled) {
                 SoftcoverText(
                     text = "Edit",
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
@@ -90,109 +84,122 @@ fun VerdictBlock(
             color = MaterialTheme.colorScheme.surfaceContainer,
             onClick = onEditClick,
         ) {
-            Column(modifier = Modifier.padding(if (hasVerdict) 18.dp else 20.dp)) {
-                if (hasVerdict) {
-                    if (rating != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            StarRatingInput(
-                                rating = rating,
-                                onRatingChange = {},
-                                enabled = false,
-                                starIcon = drawableIconResource(
-                                    icon = SoftcoverIcon.StarFilled,
-                                    contentDescription = "",
-                                ),
-                                filledColor = RatingGold,
-                                emptyColor = MaterialTheme.colorScheme.outlineVariant,
-                                starSize = 22.dp,
-                            )
+            when (model) {
+                is VerdictBlockUiModel.Filled -> FilledVerdict(
+                    model = model,
+                    onEditClick = onEditClick,
+                )
 
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            SoftcoverText(
-                                text = verdictScoreLineFor(score = verdictScoreOf(rating = rating)).uppercase(),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 1.6.sp,
-                                    fontFeatureSettings = "tnum",
-                                ),
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-
-                        if (displayedReview != null) {
-                            Spacer(modifier = Modifier.height(14.dp))
-
-                            Divider()
-
-                            Spacer(modifier = Modifier.height(14.dp))
-                        }
-                    }
-
-                    if (displayedReview != null) {
-                        RichText(
-                            model = displayedReview,
-                            style = MaterialTheme.editorialTypography.bodyLarge.copy(
-                                fontStyle = FontStyle.Normal,
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = VERDICT_BLOCK_REVIEW_COLLAPSED_LINES,
-                            overflow = TextOverflow.Ellipsis,
-                            onClick = onEditClick,
-                        )
-
-                        if (hasSpoilers) {
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            SoftcoverText(
-                                text = "Marked as containing spoilers",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    SoftcoverText(
-                        text = "Tap to edit".uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 1.2.sp,
-                        ),
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                } else {
-                    StarRatingInput(
-                        rating = null,
-                        onRatingChange = {},
-                        enabled = false,
-                        starIcon = drawableIconResource(
-                            icon = SoftcoverIcon.StarFilled,
-                            contentDescription = "",
-                        ),
-                        filledColor = RatingGold,
-                        emptyColor = MaterialTheme.colorScheme.outlineVariant,
-                        starSize = 30.dp,
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    SoftcoverText(
-                        text = "Rate it and say a few words…",
-                        style = MaterialTheme.editorialTypography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    SoftcoverText(
-                        text = "Out of ten, your ten — spoilers optional.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                VerdictBlockUiModel.Empty -> EmptyVerdict()
             }
         }
+    }
+}
+
+@Composable
+private fun FilledVerdict(
+    model: VerdictBlockUiModel.Filled,
+    onEditClick: () -> Unit,
+) {
+    val rating = model.rating
+    val review = model.review
+
+    Column(modifier = Modifier.padding(18.dp)) {
+        if (rating != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                StarRatingInput(
+                    rating = rating,
+                    onRatingChange = {},
+                    enabled = false,
+                    starIcon = drawableIconResource(
+                        icon = SoftcoverIcon.StarFilled,
+                        contentDescription = "",
+                    ),
+                    filledColor = RatingGold,
+                    emptyColor = MaterialTheme.colorScheme.outlineVariant,
+                    starSize = 22.dp,
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                VerdictScoreLine(score = verdictScoreOf(rating = rating))
+            }
+
+            if (review != null) {
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Divider()
+
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+        }
+
+        if (review != null) {
+            RichText(
+                model = review,
+                style = MaterialTheme.editorialTypography.bodyLarge.copy(
+                    fontStyle = FontStyle.Normal,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = VERDICT_BLOCK_REVIEW_COLLAPSED_LINES,
+                overflow = TextOverflow.Ellipsis,
+                onClick = onEditClick,
+            )
+
+            if (model.hasSpoilers) {
+                Spacer(modifier = Modifier.height(10.dp))
+
+                SoftcoverText(
+                    text = "Marked as containing spoilers",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        SoftcoverText(
+            text = "Tap to edit".uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.2.sp,
+            ),
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
+private fun EmptyVerdict() {
+    Column(modifier = Modifier.padding(20.dp)) {
+        StarRatingInput(
+            rating = null,
+            onRatingChange = {},
+            enabled = false,
+            starIcon = drawableIconResource(
+                icon = SoftcoverIcon.StarFilled,
+                contentDescription = "",
+            ),
+            filledColor = RatingGold,
+            emptyColor = MaterialTheme.colorScheme.outlineVariant,
+            starSize = 30.dp,
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        SoftcoverText(
+            text = "Rate it and say a few words…",
+            style = MaterialTheme.editorialTypography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        SoftcoverText(
+            text = "Out of ten, your ten — spoilers optional.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

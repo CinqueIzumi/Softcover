@@ -1,15 +1,23 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import io.kotest.matchers.shouldBe
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.model.UserBook
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
+import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.uibinding.verdict.toVerdictSheetUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -44,34 +52,60 @@ class VerdictSheetCollectorTest {
         variant = CoverVariant.Tile,
     )
 
+    private fun TestScope.launchCollector() {
+        backgroundScope.launch {
+            VerdictSheetCollector().onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            )
+        }
+    }
+
+    private fun bookReviewing(reviewDocument: ReviewDocument?): Book {
+        val userBook = mockk<UserBook> {
+            every {
+                this@mockk.reviewDocument
+            } returns reviewDocument
+
+            every {
+                this@mockk.rating
+            } returns null
+
+            every {
+                this@mockk.reviewHasSpoilers
+            } returns false
+        }
+
+        return mockk {
+            every {
+                this@mockk.title
+            } returns "Piranesi"
+
+            every {
+                this@mockk.userBook
+            } returns userBook
+        }
+    }
+
     @Nested
     inner class OnLaunch {
         @Test
         fun `verdictSheet stays null while there is no prompt book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(verdictCover = cover())
 
             // ----- Assert -----
             stateFlow.value.verdictSheet shouldBe null
-            job.cancel()
         }
 
         @Test
         fun `builds the FINISHED model when the prompt book is set even without a cover`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
-            val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
@@ -82,7 +116,6 @@ class VerdictSheetCollectorTest {
                 review = null,
                 cover = null,
             )
-            job.cancel()
         }
 
         @Test
@@ -90,11 +123,7 @@ class VerdictSheetCollectorTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             val cover = cover()
-            val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            launchCollector()
             stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
 
             // ----- Act -----
@@ -106,17 +135,12 @@ class VerdictSheetCollectorTest {
                 review = null,
                 cover = cover,
             )
-            job.cancel()
         }
 
         @Test
         fun `clears the model when the prompt book is cleared`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            launchCollector()
             stateFlow.value = stateFlow.value.copy(verdictPromptBook = PreviewData.baseBook)
 
             // ----- Act -----
@@ -124,24 +148,61 @@ class VerdictSheetCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.verdictSheet shouldBe null
-            job.cancel()
         }
 
         @Test
         fun `never offers a delete secondary action`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = VerdictSheetCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(verdictPromptBook = PreviewData.baseBook)
 
             // ----- Assert -----
             stateFlow.value.verdictSheet?.scaffold?.footer?.secondary shouldBe null
-            job.cancel()
+        }
+
+        @Test
+        fun `carries the book's review into the model`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val reviewDocument = ReviewDocument(
+                paragraphs = listOf(
+                    ReviewParagraph(
+                        runs = listOf(
+                            ReviewRun(text = "Loved it."),
+                        ),
+                    ),
+                ),
+            )
+            val book = bookReviewing(reviewDocument = reviewDocument)
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
+
+            // ----- Assert -----
+            stateFlow.value.verdictSheet shouldBe book.toVerdictSheetUiModel(
+                context = VerdictSheetContext.FINISHED,
+                review = reviewDocument.toRichTextUiModel(),
+                cover = null,
+            )
+        }
+
+        @Test
+        fun `builds the model without a review when the book has none`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = bookReviewing(reviewDocument = null)
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
+
+            // ----- Assert -----
+            stateFlow.value.verdictSheet shouldBe book.toVerdictSheetUiModel(
+                context = VerdictSheetContext.FINISHED,
+                review = null,
+                cover = null,
+            )
         }
     }
 }

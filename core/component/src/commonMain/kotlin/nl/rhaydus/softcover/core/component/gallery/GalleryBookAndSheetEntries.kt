@@ -26,7 +26,6 @@ import nl.rhaydus.softcover.core.component.mood.MoodTileUiModel
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.QuoteShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
-import nl.rhaydus.softcover.core.component.share.ReadingUpdateKind
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ShareCard
 import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
@@ -172,15 +171,13 @@ internal val bookAndSheetEntries: ImmutableList<GalleryEntry> = persistentListOf
         previews = ShareCardUiModel,
         label = ::shareCardFixtureLabel,
         content = { model, modifier ->
-            // A share card sets its own fixed export width (`ShareCardDimensions`, 300-420dp),
+            // A share card sets its own fixed export width (300-420dp),
             // wider than the gallery's fixture tile on a phone. Render it at its true size and
             // let it be panned rather than clipping or squashing an artifact meant for export.
             Box(
                 modifier = modifier.horizontalScroll(rememberScrollState()),
             ) {
-                ShareCard(
-                    content = model,
-                )
+                ShareCard(model = model)
             }
         },
     ),
@@ -219,21 +216,21 @@ private fun sidebarFixtureLabel(model: SidebarUiModel<String>): String =
 /** Names which [ShareCardUiModel] variant a fixture is, distinguishing the two anatomy outliers. */
 private fun shareCardFixtureLabel(model: ShareCardUiModel): String = when (model) {
     is BookShareCardUiModel -> if (model.description != null) "Book" else "Book (minimal)"
-    is ReadingUpdateShareCardUiModel -> when (model.kind) {
-        ReadingUpdateKind.FINISHED -> "Reading update (finished)"
-        ReadingUpdateKind.READING -> "Reading update (in progress)"
-    }
+    is ReadingUpdateShareCardUiModel.Finished -> "Reading update (finished)"
+    is ReadingUpdateShareCardUiModel.Reading -> "Reading update (in progress)"
     is StatShareCardUiModel -> "Stat"
     is QuoteShareCardUiModel -> "Quote"
     is YearRecapShareCardUiModel -> "Year recap"
     is ReadingLifeShareCardUiModel -> "Reading life"
 }
 
-private fun verdictBlockFixtureLabel(model: VerdictBlockUiModel): String = when {
-    model.rating == null && model.review == null -> "Empty"
-    model.review == null -> "Rating only"
-    model.rating == null -> "Review only"
-    else -> "Rating and review"
+private fun verdictBlockFixtureLabel(model: VerdictBlockUiModel): String = when (model) {
+    VerdictBlockUiModel.Empty -> "Empty"
+    is VerdictBlockUiModel.Filled -> when {
+        model.review == null -> "Rating only"
+        model.rating == null -> "Review only"
+        else -> "Rating and review"
+    }
 }
 
 private fun bookCardGallerySize(model: BookCardUiModel): Modifier = if (model.variant is BookCardVariant.Row) {

@@ -170,7 +170,7 @@ private fun ProfileContent(
 
     if (showShareSheet && shareContent != null) {
         ProfileShareBottomSheet(
-            content = shareContent,
+            model = shareContent,
             scaffold = state.shareSheetScaffold,
             onDismissRequest = { showShareSheet = false },
         )

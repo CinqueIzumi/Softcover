@@ -24,7 +24,7 @@ internal fun StatShareCardBody(content: StatShareCardUiModel) {
 
     SoftcoverText(
         text = content.value.toString(),
-        style = MaterialTheme.editorialTypography.statHero.copy(fontFeatureSettings = TABULAR_NUMS),
+        style = MaterialTheme.editorialTypography.statHero.copy(fontFeatureSettings = "tnum"),
         color = LocalContentColor.current,
     )
 
@@ -41,6 +41,6 @@ internal fun StatShareCardBody(content: StatShareCardUiModel) {
 @Composable
 private fun StatShareCardPreview() {
     SoftcoverTheme {
-        ShareCard(content = ShareCardUiModel.previews.filterIsInstance<StatShareCardUiModel>().single())
+        ShareCard(model = ShareCardUiModel.previews.filterIsInstance<StatShareCardUiModel>().single())
     }
 }

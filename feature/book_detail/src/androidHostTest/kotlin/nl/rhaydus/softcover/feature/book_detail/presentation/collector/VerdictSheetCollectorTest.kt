@@ -7,12 +7,17 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.domain.model.ReviewDocument
+import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
+import nl.rhaydus.softcover.core.domain.model.ReviewRun
+import nl.rhaydus.softcover.core.domain.model.UserBook
+import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.core.uibinding.verdict.toVerdictSheetUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
@@ -41,15 +46,56 @@ class VerdictSheetCollectorTest {
         dependencies = mockk<BookDetailDependencies>(relaxed = true)
     }
 
-    private fun stubBook(title: String = "Piranesi"): Book = mockk {
-        every {
-            this@mockk.title
-        } returns title
-
-        every {
-            this@mockk.userBook
-        } returns null
+    private fun TestScope.launchCollector() {
+        backgroundScope.launch {
+            VerdictSheetCollector().onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            )
+        }
     }
+
+    private fun stubBook(
+        title: String = "Piranesi",
+        reviewDocument: ReviewDocument? = null,
+        hasUserBook: Boolean = reviewDocument != null,
+    ): Book {
+        val stubbedUserBook = if (hasUserBook) {
+            mockk<UserBook> {
+                every {
+                    this@mockk.reviewDocument
+                } returns reviewDocument
+
+                every {
+                    this@mockk.rating
+                } returns null
+
+                every {
+                    this@mockk.reviewHasSpoilers
+                } returns false
+            }
+        } else {
+            null
+        }
+
+        return mockk {
+            every {
+                this@mockk.title
+            } returns title
+
+            every {
+                this@mockk.userBook
+            } returns stubbedUserBook
+        }
+    }
+
+    private fun buildReviewDocument(text: String) = ReviewDocument(
+        paragraphs = listOf(
+            ReviewParagraph(
+                runs = listOf(ReviewRun(text = text)),
+            ),
+        ),
+    )
 
     private fun buildCover() = CoverUiModel(
         source = null,
@@ -62,13 +108,7 @@ class VerdictSheetCollectorTest {
         @Test
         fun `verdictSheet is null when the context is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = VerdictSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -78,19 +118,12 @@ class VerdictSheetCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.verdictSheet shouldBe null
-            job.cancel()
         }
 
         @Test
         fun `verdictSheet is null when the context is set but the book is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = VerdictSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -100,27 +133,19 @@ class VerdictSheetCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.verdictSheet shouldBe null
-            job.cancel()
         }
 
         @Test
         fun `verdictSheet is built from the book context review and cover`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val book = stubBook()
+            val reviewDocument = buildReviewDocument(text = "A gorgeous read.")
+            val book = stubBook(reviewDocument = reviewDocument)
             val cover = buildCover()
-            val review = RichTextUiModel.previews.first()
-            val collector = VerdictSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
                 book = book,
-                verdictReview = review,
                 verdictCover = cover,
                 verdictSheetContext = VerdictSheetContext.EDIT,
             )
@@ -128,22 +153,15 @@ class VerdictSheetCollectorTest {
             // ----- Assert -----
             stateFlow.value.verdictSheet shouldBe book.toVerdictSheetUiModel(
                 context = VerdictSheetContext.EDIT,
-                review = review,
+                review = reviewDocument.toRichTextUiModel(),
                 cover = cover,
             )
-            job.cancel()
         }
 
         @Test
         fun `verdictSheet closes when the context is cleared`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = VerdictSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
+            launchCollector()
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
                 verdictSheetContext = VerdictSheetContext.FINISHED,
@@ -155,20 +173,13 @@ class VerdictSheetCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.verdictSheet shouldBe null
-            job.cancel()
         }
 
         @Test
         fun `verdictSheet follows the context when it switches`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook()
-            val collector = VerdictSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
+            launchCollector()
             stateFlow.value = stateFlow.value.copy(
                 book = book,
                 verdictSheetContext = VerdictSheetContext.FINISHED,
@@ -183,7 +194,6 @@ class VerdictSheetCollectorTest {
                 review = null,
                 cover = null,
             )
-            job.cancel()
         }
 
         @Test
@@ -191,13 +201,7 @@ class VerdictSheetCollectorTest {
             // ----- Arrange -----
             val book = stubBook()
             val cover = buildCover()
-            val collector = VerdictSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
+            launchCollector()
             stateFlow.value = stateFlow.value.copy(
                 book = book,
                 verdictSheetContext = VerdictSheetContext.FINISHED,
@@ -212,7 +216,29 @@ class VerdictSheetCollectorTest {
                 review = null,
                 cover = cover,
             )
-            job.cancel()
+        }
+
+        @Test
+        fun `verdictSheet picks up a review that changes while the sheet is open`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val firstDocument = buildReviewDocument(text = "First impression.")
+            val secondDocument = buildReviewDocument(text = "Revised after a reread.")
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(reviewDocument = firstDocument),
+                verdictSheetContext = VerdictSheetContext.EDIT,
+            )
+            launchCollector()
+            val revisedBook = stubBook(reviewDocument = secondDocument)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = revisedBook)
+
+            // ----- Assert -----
+            stateFlow.value.verdictSheet shouldBe revisedBook.toVerdictSheetUiModel(
+                context = VerdictSheetContext.EDIT,
+                review = secondDocument.toRichTextUiModel(),
+                cover = null,
+            )
         }
     }
 }

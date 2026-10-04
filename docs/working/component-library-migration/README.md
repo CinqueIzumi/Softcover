@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SS-1–SS-9 done; SS-10/11 approved (step file § Approved shape). SL-3b blocked on F34; F33 open.
-- **Next:** build SS-10 (approved bullets) per family-procedure Phase 2, then SS-11.
+- **State:** SS-1–SS-10 done; SS-11 approved (step file § Approved shape). SL-3b blocked on F34; F33 open.
+- **Next:** build SS-11 (approved bullet) per family-procedure Phase 2.
 - **Follow-ups (user to schedule):** foundation `shimmer` paints fixed `LightGray` / `White` — light block on dark theme; upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
 - **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile`, charts, `ProgressBar`, 12 dp card bars unchecked in gallery. Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** SS-7: tests (component, domain, book_detail, scan) + `styleCheck` + projectHealth pass, review fixed. Device: fast typing in time fields; scan manual-entry focus (desktop focuses, mobile not).
-- **Uncommitted:** SS-7.
+- **Verification:** SS-10: tests + `styleCheck` + projectHealth pass, review fixed. Device: fast typing in time fields; scan manual-entry focus (desktop only); share card rating.
+- **Uncommitted:** SS-10.
 
 ## Local verification
 

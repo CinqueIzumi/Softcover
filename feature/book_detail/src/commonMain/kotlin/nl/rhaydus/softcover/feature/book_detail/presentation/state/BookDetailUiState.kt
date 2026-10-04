@@ -21,9 +21,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
-import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
-import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
-import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
@@ -157,14 +155,13 @@ internal data class BookDetailUiState(
 
     /** Which caller opened the verdict sheet — the open flag; `null` while it is closed. */
     val verdictSheetContext: VerdictSheetContext? = null,
-    val verdictReview: RichTextUiModel? = null,
 
     /** The "Your verdict" card, mapped by `VerdictReviewCollector` (R9) off the book's user data. */
     val verdictBlock: VerdictBlockUiModel? = null,
 
     /**
-     * The verdict sheet, mapped by `VerdictSheetCollector` (R9) off [book], [verdictReview],
-     * [verdictCover] and [verdictSheetContext]; `null` whenever [verdictSheetContext] is.
+     * The verdict sheet, mapped by `VerdictSheetCollector` (R9) off [book], [verdictCover] and
+     * [verdictSheetContext]; `null` whenever [verdictSheetContext] is.
      */
     val verdictSheet: VerdictSheetUiModel? = null,
 
@@ -174,8 +171,9 @@ internal data class BookDetailUiState(
     val isShareSheetVisible: Boolean = false,
     val currentUsername: String? = null,
     val currentUserAvatarUrl: String? = null,
-    val shareBookCard: BookShareCardUiModel? = null,
-    val shareUpdateCard: ReadingUpdateShareCardUiModel? = null,
+
+    /** The card the share sheet previews, mapped by `ShareCardsCollector` (R9) for the chosen variant. */
+    val shareCard: ShareCardUiModel? = null,
 
     val shareSheet: SheetScaffoldUiModel? = null,
 

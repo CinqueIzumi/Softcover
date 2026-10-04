@@ -1,11 +1,13 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
@@ -41,6 +43,15 @@ class VerdictReviewCollectorTest {
         dependencies = mockk<BookDetailDependencies>(relaxed = true)
     }
 
+    private fun TestScope.launchCollector() {
+        backgroundScope.launch {
+            VerdictReviewCollector().onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            )
+        }
+    }
+
     private fun stubBook(userBook: UserBook?): Book = mockk {
         every {
             this@mockk.userBook
@@ -66,117 +77,69 @@ class VerdictReviewCollectorTest {
     }
 
     private fun buildReviewDocument(text: String) = ReviewDocument(
-        paragraphs = listOf(ReviewParagraph(
-            runs = listOf(ReviewRun(text = text)),
-        ),),
+        paragraphs = listOf(
+            ReviewParagraph(
+                runs = listOf(ReviewRun(text = text)),
+            ),
+        ),
     )
 
     @Nested
-    inner class OnLaunch {
+    inner class Empty {
         @Test
-        fun `sets verdictReview to the mapped rich text when the book has a review document`() = runTest(UnconfinedTestDispatcher()) {
+        fun `is Empty when the user book has neither a rating nor a review`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val reviewDocument = buildReviewDocument(text = "A gorgeous read.")
-            val userBook = stubUserBook(reviewDocument = reviewDocument)
-            val book = stubBook(userBook = userBook)
-
-            val collector = VerdictReviewCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val book = stubBook(userBook = stubUserBook(reviewDocument = null))
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            stateFlow.value.verdictReview shouldBe reviewDocument.toRichTextUiModel()
-            job.cancel()
+            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Empty
         }
 
         @Test
-        fun `verdictReview is null when the book has no review document`() = runTest(UnconfinedTestDispatcher()) {
+        fun `is Empty when the rating is zero and there is no review`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val userBook = stubUserBook(reviewDocument = null)
-            val book = stubBook(userBook = userBook)
-
-            val collector = VerdictReviewCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val book = stubBook(
+                userBook = stubUserBook(
+                    reviewDocument = null,
+                    rating = 0.0,
+                ),
+            )
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            stateFlow.value.verdictReview shouldBe null
-            job.cancel()
+            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Empty
         }
 
         @Test
-        fun `verdictReview is null when the book has no userBook`() = runTest(UnconfinedTestDispatcher()) {
+        fun `is Empty when the rating is zero and the review is blank`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val book = stubBook(userBook = null)
-
-            val collector = VerdictReviewCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val book = stubBook(
+                userBook = stubUserBook(
+                    reviewDocument = buildReviewDocument(text = "   "),
+                    rating = 0.0,
+                ),
+            )
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            stateFlow.value.verdictReview shouldBe null
-            job.cancel()
+            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Empty
         }
+    }
 
+    @Nested
+    inner class Filled {
         @Test
-        fun `verdictReview is null when book is null`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = VerdictReviewCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = null)
-
-            // ----- Assert -----
-            stateFlow.value.verdictReview shouldBe null
-            job.cancel()
-        }
-
-        @Test
-        fun `verdictReview updates when the review document changes on a later book emission`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val firstDocument = buildReviewDocument(text = "First impression.")
-            val secondDocument = buildReviewDocument(text = "Revised after a reread.")
-            val bookA = stubBook(userBook = stubUserBook(reviewDocument = firstDocument))
-            val bookB = stubBook(userBook = stubUserBook(reviewDocument = secondDocument))
-
-            val collector = VerdictReviewCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-
-            stateFlow.value = stateFlow.value.copy(book = bookA)
-            stateFlow.value.verdictReview shouldBe firstDocument.toRichTextUiModel()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = bookB)
-
-            // ----- Assert -----
-            stateFlow.value.verdictReview shouldBe secondDocument.toRichTextUiModel()
-            job.cancel()
-        }
-
-        @Test
-        fun `verdictBlock carries the rating review and spoiler flag`() = runTest(UnconfinedTestDispatcher()) {
+        fun `carries the rating, review and spoiler flag`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val reviewDocument = buildReviewDocument(text = "A gorgeous read.")
             val book = stubBook(
@@ -186,83 +149,168 @@ class VerdictReviewCollectorTest {
                     reviewHasSpoilers = true,
                 ),
             )
-            val collector = VerdictReviewCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel(
+            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
                 rating = 4.5,
                 review = reviewDocument.toRichTextUiModel(),
                 hasSpoilers = true,
             )
-            job.cancel()
         }
 
         @Test
-        fun `verdictBlock treats a zero rating as unrated`() = runTest(UnconfinedTestDispatcher()) {
+        fun `has no review when only a rating is given`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val book = stubBook(userBook = stubUserBook(
-                reviewDocument = null,
-                rating = 0.0,
-            ),)
-            val collector = VerdictReviewCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val book = stubBook(
+                userBook = stubUserBook(
+                    reviewDocument = null,
+                    rating = 3.0,
+                ),
+            )
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
 
             // ----- Assert -----
-            stateFlow.value.verdictBlock?.rating shouldBe null
-            job.cancel()
+            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
+                rating = 3.0,
+                review = null,
+                hasSpoilers = false,
+            )
         }
 
         @Test
-        fun `verdictBlock is null when the book has no userBook`() = runTest(UnconfinedTestDispatcher()) {
+        fun `has no rating when only a review is given`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = VerdictReviewCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val reviewDocument = buildReviewDocument(text = "Words only.")
+            val book = stubBook(userBook = stubUserBook(reviewDocument = reviewDocument))
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = book)
+
+            // ----- Assert -----
+            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
+                rating = null,
+                review = reviewDocument.toRichTextUiModel(),
+                hasSpoilers = false,
+            )
+        }
+
+        @Test
+        fun `treats a zero rating as unrated when a review is present`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val reviewDocument = buildReviewDocument(text = "Unrated but reviewed.")
+            val book = stubBook(
+                userBook = stubUserBook(
+                    reviewDocument = reviewDocument,
+                    rating = 0.0,
+                ),
+            )
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = book)
+
+            // ----- Assert -----
+            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
+                rating = null,
+                review = reviewDocument.toRichTextUiModel(),
+                hasSpoilers = false,
+            )
+        }
+
+        @Test
+        fun `drops a blank review and keeps the rating`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = stubUserBook(
+                    reviewDocument = buildReviewDocument(text = " "),
+                    rating = 2.5,
+                ),
+            )
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = book)
+
+            // ----- Assert -----
+            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
+                rating = 2.5,
+                review = null,
+                hasSpoilers = false,
+            )
+        }
+
+        @Test
+        fun `updates when the review changes on a later book emission`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val firstDocument = buildReviewDocument(text = "First impression.")
+            val secondDocument = buildReviewDocument(text = "Revised after a reread.")
+            stateFlow.value = stateFlow.value.copy(book = stubBook(userBook = stubUserBook(reviewDocument = firstDocument)))
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = stubBook(userBook = stubUserBook(reviewDocument = secondDocument)))
+
+            // ----- Assert -----
+            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
+                rating = null,
+                review = secondDocument.toRichTextUiModel(),
+                hasSpoilers = false,
+            )
+        }
+    }
+
+    @Nested
+    inner class NoUserData {
+        @Test
+        fun `is null when the book has no user book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = stubBook(userBook = null))
 
             // ----- Assert -----
-            stateFlow.value.verdictBlock shouldBe null
-            job.cancel()
+            stateFlow.value.verdictBlock.shouldBeNull()
         }
 
         @Test
-        fun `verdictBlock clears when the book is removed`() = runTest(UnconfinedTestDispatcher()) {
+        fun `is null when there is no book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val collector = VerdictReviewCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
-            stateFlow.value = stateFlow.value.copy(
-                book = stubBook(userBook = stubUserBook(
-                    reviewDocument = null,
-                    rating = 3.0,
-                ),),
-            )
+            launchCollector()
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = null)
 
             // ----- Assert -----
-            stateFlow.value.verdictBlock shouldBe null
-            job.cancel()
+            stateFlow.value.verdictBlock.shouldBeNull()
+        }
+
+        @Test
+        fun `clears when the book is removed`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(
+                book = stubBook(
+                    userBook = stubUserBook(
+                        reviewDocument = null,
+                        rating = 3.0,
+                    ),
+                ),
+            )
+            launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(book = null)
+
+            // ----- Assert -----
+            stateFlow.value.verdictBlock.shouldBeNull()
         }
     }
 }

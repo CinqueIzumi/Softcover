@@ -13,7 +13,6 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
-import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateButtonUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
@@ -92,11 +91,10 @@ internal data class ReadingScreenUiState(
     val featuredBookPace: ReadingPaceForecast? = null,
 
     val verdictPromptBook: Book? = null,
-    val verdictReview: RichTextUiModel? = null,
 
     /**
-     * The verdict prompt, mapped by `VerdictSheetCollector` (R9) from [verdictPromptBook],
-     * [verdictReview] and [verdictCover]; `null` exactly when [verdictPromptBook] is.
+     * The verdict prompt, mapped by `VerdictSheetCollector` (R9) from [verdictPromptBook] and
+     * [verdictCover]; `null` exactly when [verdictPromptBook] is.
      */
     val verdictSheet: VerdictSheetUiModel? = null,
 

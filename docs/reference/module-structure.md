@@ -134,8 +134,8 @@ component/
 + richtext/    RichText  RichTextUiModel  RichTextRun/Mark/Paragraph
 +              RichTextEditing  RichTextEditorBuffer
 + selection/   SelectionMark  SelectionMarkBackdrop
-+ share/       ShareCard  ShareCardUiModel  ShareCardDimensions
-+              one file per card body  ShareCardNumerals
++ share/       ShareCard  ShareCardUiModel
++              one file per card body (Book and ReadingUpdate share one)
 + sheet/       LoadingSheet  LoadingSheetUiModel  LoadingSheetEvent
 +              SheetScaffold(+UiModel, +Event, +Layout)  SheetHeaderUiModel/Trailing
 +              SheetFooterUiModel/Button/Layout  SheetRowUiModel, SheetRowEvent

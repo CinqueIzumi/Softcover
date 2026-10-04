@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.common.secondsToHm
-import nl.rhaydus.softcover.core.component.share.ReadingUpdateKind
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -30,49 +29,43 @@ internal fun Book.toReadingUpdateShareCardUiModel(
 
     val currentUserBook = userBook ?: return null
 
-    val kind = when (currentUserBook.status) {
-        BookStatus.Read -> ReadingUpdateKind.FINISHED
-        BookStatus.Reading -> ReadingUpdateKind.READING
-        else -> return null
-    }
-
     val resolvedEdition = edition ?: defaultEdition
 
     val resolvedCover = resolvedEdition?.localImagePath
         ?: resolvedEdition?.url
         ?: coverUrl
 
-    return ReadingUpdateShareCardUiModel(
-        username = resolvedUsername,
-        avatarUrl = avatarUrl?.takeIf { it.isNotBlank() },
-        coverUrl = resolvedCover,
-        title = title,
-        author = authors.firstOrNull()?.name.orEmpty(),
-        kind = kind,
+    val resolvedAvatarUrl = avatarUrl?.takeIf { it.isNotBlank() }
+    val resolvedAuthor = authors.firstOrNull()?.name.orEmpty()
+    val resolvedTags = userTags.filterNot { it.spoiler }.map { it.name }.toImmutableList()
 
-        ratingStars = if (kind == ReadingUpdateKind.FINISHED) {
-            currentUserBook.rating?.takeIf { it > 0.0 }
-        } else {
-            null
-        },
+    return when (currentUserBook.status) {
+        BookStatus.Read -> ReadingUpdateShareCardUiModel.Finished(
+            username = resolvedUsername,
+            avatarUrl = resolvedAvatarUrl,
+            coverUrl = resolvedCover,
+            title = title,
+            author = resolvedAuthor,
+            tags = resolvedTags,
+            ratingStars = currentUserBook.rating?.takeIf { it > 0.0 },
+            review = currentUserBook.reviewDocument?.takeUnless { it.isBlank() }?.toRichTextUiModel(),
+        )
 
-        review = if (kind == ReadingUpdateKind.FINISHED) {
-            currentUserBook.reviewDocument?.takeUnless { it.isBlank() }?.toRichTextUiModel()
-        } else {
-            null
-        },
-
-        progressLabel = if (kind == ReadingUpdateKind.READING) {
-            buildProgressLabel(
+        BookStatus.Reading -> ReadingUpdateShareCardUiModel.Reading(
+            username = resolvedUsername,
+            avatarUrl = resolvedAvatarUrl,
+            coverUrl = resolvedCover,
+            title = title,
+            author = resolvedAuthor,
+            tags = resolvedTags,
+            progressLabel = buildProgressLabel(
                 userBookRead = userBookRead,
                 edition = resolvedEdition,
-            )
-        } else {
-            null
-        },
+            ),
+        )
 
-        tags = userTags.filterNot { it.spoiler }.map { it.name }.toImmutableList(),
-    )
+        else -> null
+    }
 }
 
 // Mirrors the book-detail progress block: audiobooks are tracked in time (listened / total), print

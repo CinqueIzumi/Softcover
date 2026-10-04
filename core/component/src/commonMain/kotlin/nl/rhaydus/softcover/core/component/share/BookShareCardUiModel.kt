@@ -14,5 +14,4 @@ data class BookShareCardUiModel(
     val releaseYear: Int?,
     val pageCount: Int?,
     val description: String?,
-    val quote: String?,
 ) : ShareCardUiModel

@@ -48,7 +48,7 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 | SS-7 | `field`, `richtext`; uibinding `richtext`; book_detail `BookReviewUiModel` — ~1.8k | [x] |
 | SS-8 | `progress`, `deadline`, `mood`, `celebration`; uibinding `progress`, `deadline`; book_detail `InProgressUiModel`, reading `FeaturedProgressUiModel`, session `FocusPageEditorUiModel` — ~2.3k | [x] |
 | SS-9 | `statistic`, `chart`; profile `ReadingAtlasUiModel` — ~1.2k | [x] |
-| SS-10 | `share`, `verdict`; uibinding `verdict`; book_detail `ShareCardVariant` — ~2.5k | [ ] |
+| SS-10 | `share`, `verdict`; uibinding `verdict`; book_detail `ShareCardVariant` — ~2.5k | [x] |
 | SS-11 | `gallery`; uibinding `date`, `format`, `theme` — ~1.5k | [ ] |
 
 Out of scope: `core/domain` `BottomBarStyle` and `DateStyle` are stored preferences, not UI types.

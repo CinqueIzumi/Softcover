@@ -46,7 +46,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 
 @Composable
 internal fun ProfileShareBottomSheet(
-    content: ReadingLifeShareCardUiModel,
+    model: ReadingLifeShareCardUiModel,
     scaffold: SheetScaffoldUiModel,
     onDismissRequest: () -> Unit,
 ) {
@@ -78,7 +78,7 @@ internal fun ProfileShareBottomSheet(
                 maxWidth = 240.dp,
                 maxHeight = 420.dp,
             ) {
-                ShareCard(content = content)
+                ShareCard(model = model)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -96,7 +96,7 @@ internal fun ProfileShareBottomSheet(
 
                         coroutineScope.launch {
                             val saved = runCatching {
-                                capture.saveToGallery(displayName = "${content.readerName}-reading-life")
+                                capture.saveToGallery(displayName = "${model.readerName}-reading-life")
                             }.onFailure {
                                 AppLog.e("$it")
                             }.getOrNull()
@@ -126,7 +126,7 @@ internal fun ProfileShareBottomSheet(
                             isSharing = true
 
                             coroutineScope.launch {
-                                val displayName = "${content.readerName}-reading-life"
+                                val displayName = "${model.readerName}-reading-life"
 
                                 when (val outcome = capture.share(displayName = displayName)) {
                                     is ShareOutcome.Shared -> Unit
