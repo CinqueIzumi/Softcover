@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
+import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
@@ -39,6 +40,7 @@ import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.core.uibinding.verdict.VerdictSheetContext
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.editionCountHeaderFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiModel
@@ -75,6 +77,9 @@ internal data class BookDetailUiState(
     val isUpdatingScannedEdition: Boolean = false,
     val showUpdateProgressSheet: Boolean = false,
     val selectedProgressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
+
+    /** The reader's uncommitted time entry; `null` seeds the sheet's fields from the book. */
+    val progressTimeDraft: ProgressTimeDraft? = null,
 
     /**
      * What the progress sheet renders, mapped off the composition by `ProgressSheetCollector`
@@ -225,6 +230,13 @@ internal data class BookDetailUiState(
     val showTagEditorSheet: Boolean = false,
     val tagEditorCategory: TagCategory = TagCategory.TAG,
     val tagEditorInput: String = "",
+
+    /** The naming pill, mapped by `TagNamingFieldCollector` (R9) off [tagEditorInput] and [tagEditorCategory]. */
+    val tagNamingField: TextFieldUiModel = tagNamingFieldFor(
+        input = "",
+        category = TagCategory.TAG,
+        addPill = tagAddPill,
+    ),
     val tagSuggestions: List<UserTag> = emptyList(),
 
     /** "Your tags" (`UserTagsSection`), mapped by `TagChipModelsCollector` (R9) off [userTags]. Read-only. */

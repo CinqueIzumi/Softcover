@@ -14,13 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
-
-// Keeps the ISBN panel at a readable modal width rather than stretching the field across a maximized
-// window.
-private val PANEL_MAX_WIDTH = 460.dp
 
 /**
  * Desktop barcode scanner. Desktop has no camera (the permission stub reports none), so this opens
@@ -34,6 +31,8 @@ internal actual fun BarcodeScannerScreenLayout(
     manualMode: Boolean,
     cameraGranted: Boolean,
     onIsbnSubmit: (String) -> Unit,
+    onIsbnFieldEvent: (TextFieldEvent) -> Unit,
+    onAutoFocusRequested: () -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
@@ -59,7 +58,7 @@ internal actual fun BarcodeScannerScreenLayout(
                 contentAlignment = Alignment.Center,
             ) {
                 Surface(
-                    modifier = Modifier.widthIn(max = PANEL_MAX_WIDTH),
+                    modifier = Modifier.widthIn(max = 460.dp),
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surface,
                     border = BorderStroke(
@@ -68,10 +67,13 @@ internal actual fun BarcodeScannerScreenLayout(
                     ),
                 ) {
                     ManualEntryContent(
+                        field = state.isbnField,
                         isResolving = state.isResolving,
                         isAddingBook = state.isAddingBook,
                         header = state.manualEntryHeader,
+                        onFieldEvent = onIsbnFieldEvent,
                         onIsbnSubmit = onIsbnSubmit,
+                        onAutoFocusRequested = onAutoFocusRequested,
                         autoFocus = true,
                         modifier = Modifier
                             .fillMaxWidth()

@@ -137,16 +137,56 @@ class OnFilterSheetExpandedChangeActionTest {
         }
 
         @Test
+        fun `opening clears any stale tag search text`() = runTest {
+            // ----- Arrange -----
+            val initial = LibraryUiState()
+            stateFlow.value = initial.copy(
+                tagSearchField = initial.tagSearchField.copy(text = "stale"),
+            )
+            val action = OnFilterSheetExpandedChangeAction(expanded = true)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.tagSearchField.text shouldBe ""
+        }
+
+        @Test
+        fun `closing clears the tag search text`() = runTest {
+            // ----- Arrange -----
+            val initial = LibraryUiState()
+            stateFlow.value = initial.copy(
+                tagSearchField = initial.tagSearchField.copy(text = "stale"),
+            )
+            val action = OnFilterSheetExpandedChangeAction(expanded = false)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.tagSearchField.text shouldBe ""
+        }
+
+        @Test
         fun `opening seeds filterSheet from the tab's item count and committed filters`() = runTest {
             // ----- Arrange -----
             val tabId = "list-42"
             stateFlow.value = LibraryUiState(
                 selectedTabId = tabId,
                 filtersByTab = mapOf(tabId to LibraryFilters(formats = setOf("ebook"))),
-                tabStatsByTab = mapOf(tabId to LibraryTabStats(
-                    itemCount = 11,
-                    totalPages = 0,
-                ),),
+                tabStatsByTab = mapOf(
+                    tabId to LibraryTabStats(
+                        itemCount = 11,
+                        totalPages = 0,
+                    ),
+                ),
             )
             val action = OnFilterSheetExpandedChangeAction(expanded = true)
 

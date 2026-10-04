@@ -45,6 +45,10 @@ class OnApiKeySaveClickActionTest {
         )
     }
 
+    private fun stateWithApiKey(text: String): OnboardingUiState = OnboardingUiState().let {
+        it.copy(apiKeyField = it.apiKeyField.copy(text = text))
+    }
+
     private fun stubDependencies(testScope: TestScope): OnboardingDependencies {
         val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
         return mockk<OnboardingDependencies>(relaxed = true).also { mock ->
@@ -79,10 +83,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `sets saveApiKeyButtonEnabled to false and isLoading to true on entry`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(
-                apiKeyValue = "my-key",
-                submissionError = "previous error",
-            )
+            stateFlow.value = stateWithApiKey(text = "my-key").copy(submissionError = "previous error")
             dependencies = stubDependencies(this)
 
             var stateAtReset: OnboardingUiState? = null
@@ -119,7 +120,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `trims leading and trailing whitespace from the api key before passing to updateApiKeyUseCase`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "  my-key  ")
+            stateFlow.value = stateWithApiKey(text = "  my-key  ")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -151,7 +152,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `removes Bearer prefix and trims whitespace when key is prefixed with bearer and extra spaces`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "Bearer  my-key  ")
+            stateFlow.value = stateWithApiKey(text = "Bearer  my-key  ")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -183,7 +184,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `passes key unmodified when it has no Bearer prefix and no surrounding whitespace`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "plain-key")
+            stateFlow.value = stateWithApiKey(text = "plain-key")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -215,7 +216,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `passes empty string to updateApiKeyUseCase when api key is blank`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "")
+            stateFlow.value = stateWithApiKey(text = "")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -247,7 +248,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `removes Bearer prefix from api key before passing to updateApiKeyUseCase`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "Bearer my-key")
+            stateFlow.value = stateWithApiKey(text = "Bearer my-key")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -279,7 +280,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `sets progress to 0_1f after resetUserDataUseCase succeeds`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+            stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -313,7 +314,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `sets progress to 0_2f after updateApiKeyUseCase succeeds`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+            stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -347,7 +348,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `sets progress to 1f and submissionError to null when all three use cases succeed`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+            stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -379,7 +380,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `sets submissionError to offline message when resetUserDataUseCase fails with OfflineException`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+            stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -406,7 +407,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `does not invoke updateApiKeyUseCase when resetUserDataUseCase fails`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+            stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -430,7 +431,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `sets submissionError to key-rejected message when updateApiKeyUseCase fails with InvalidTokenException`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+            stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -461,7 +462,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `does not invoke initializeUserIdAndBooksUseCase when updateApiKeyUseCase fails`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+            stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
 
             coEvery {
@@ -490,7 +491,7 @@ class OnApiKeySaveClickActionTest {
         fun `sets submissionError to key-rejected message when initializeUserIdAndBooksUseCase fails with InvalidTokenException`() =
             runTest {
                 // ----- Arrange -----
-                stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+                stateFlow.value = stateWithApiKey(text = "my-key")
                 dependencies = stubDependencies(this)
 
                 coEvery {
@@ -525,7 +526,7 @@ class OnApiKeySaveClickActionTest {
         @Test
         fun `sets submissionError to fallback message when initializeUserIdAndBooksUseCase fails with generic exception`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = OnboardingUiState(apiKeyValue = "my-key")
+            stateFlow.value = stateWithApiKey(text = "my-key")
             dependencies = stubDependencies(this)
 
             coEvery {

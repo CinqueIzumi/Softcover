@@ -75,7 +75,7 @@ class MainActivityViewModelTest {
 
             // ----- Assert -----
             viewModel.reAuthState.value.apiKey shouldBe "abc"
-            viewModel.reAuthSheet.value.apiKey shouldBe "abc"
+            viewModel.reAuthSheet.value.apiKeyField.text shouldBe "abc"
             viewModel.reAuthSheet.value.scaffold.footer?.primary?.enabled shouldBe true
         }
     }

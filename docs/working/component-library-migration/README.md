@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8 Phase 1 done for S8-4–S8-6 together (`steps/s8-controls.md` § Approved shape). S8-6 (`PillButton`) done: reviewed, fixed, tests pass. S8-4 (`SegmentedControl` + `Toggle` + toolbar → `richtext/`) built, glommed closers fixed, not yet tested or reviewed. They share files, so they commit together once S8-4 is green. SL-3b blocked on F34, SL-12 on S9-3; F33 open.
-- **Next:** S8-4 test round per `steps/s8-controls.md` § S8-4 open, then its fix round, reviewer, commit; then S8-5.
+- **State:** S8-4–S8-6 committed. SL-3b blocked on F34, SL-12 on S9-3; F33 open.
+- **Next:** S8-C-controls.
 - **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `Color.LightGray` / `White`, not theme roles, so network-latency shimmers are a light-grey block on the dark theme — foundation upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
-- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
+- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified.
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** S8-6 all gates, tests, review ✅. S8-4: main compile, ktlint, detekt, module graph green; `styleCheck` red on `compileAndroidHostTest` (explore/library/lists/settings) until its test round.
-- **Uncommitted:** new `core/component/button/`, `control/` segmented + toggle, `richtext/` toolbar, gallery entries; ~75 call-site/state/collector/action files across seven features + uibinding; `TabSwitcher.kt`, old toolbar, `OnPrivacyToggledAction.kt` deleted; S8-6 tests; reference docs; tracker docs.
+- **Verification:** `styleCheck`, `checkModuleGraph` (JDK 21) and `testAndroidHostTest` for :core:{component,uibinding}, :orchestration, :feature:{book_detail,reading,onboarding,library,lists,scan} pass.
+- **Uncommitted:** nothing.
 
 ## Local verification
 

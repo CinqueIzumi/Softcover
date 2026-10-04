@@ -62,5 +62,20 @@ class OnTagDraftChangeActionTest {
             // ----- Assert -----
             stateFlow.value.tagEditorInput shouldBe "thrill"
         }
+
+        @Test
+        fun `writes the input onto the naming field text immediately`() = runTest {
+            // ----- Arrange -----
+            val action = OnTagDraftChangeAction(input = "thri")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.tagNamingField.text shouldBe "thri"
+        }
     }
 }

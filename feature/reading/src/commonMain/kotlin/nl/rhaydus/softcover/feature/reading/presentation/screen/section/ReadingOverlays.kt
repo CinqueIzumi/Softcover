@@ -10,7 +10,9 @@ import nl.rhaydus.softcover.core.component.verdict.VerdictSheet
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetEvent
 import nl.rhaydus.softcover.feature.reading.presentation.action.DismissProgressSheetAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissVerdictPromptAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressMinutesSteppedAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTabClickAction
+import nl.rhaydus.softcover.feature.reading.presentation.action.OnProgressTimeChangedAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnSaveVerdictAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePageProgressClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnUpdatePercentageProgressClickAction
@@ -62,6 +64,15 @@ internal fun ReadingOverlays(
                             actionAt = event.actionAt,
                         ),
                     )
+
+                    is ProgressSheetEvent.TimeChanged -> runAction(
+                        OnProgressTimeChangedAction(
+                            unit = event.unit,
+                            text = event.text,
+                        ),
+                    )
+
+                    is ProgressSheetEvent.MinutesStepped -> runAction(OnProgressMinutesSteppedAction(delta = event.delta))
 
                     is ProgressSheetEvent.TimeSubmitted -> runAction(
                         OnUpdateTimeProgressClickAction(

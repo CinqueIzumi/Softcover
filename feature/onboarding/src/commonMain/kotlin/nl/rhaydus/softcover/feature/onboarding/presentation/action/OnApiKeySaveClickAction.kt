@@ -34,7 +34,7 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
             )
         }
 
-        val updatedKey = scope.currentState.apiKeyValue
+        val updatedKey = scope.currentState.apiKeyField.text
             .removePrefix("Bearer")
             .trim()
 

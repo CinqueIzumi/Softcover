@@ -9,20 +9,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.toHoursMinutesSeconds
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.softcover.core.component.field.TextField
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -33,18 +30,13 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
     actionAt: String?,
     onEvent: (ProgressSheetEvent) -> Unit,
 ) {
-    val initial = medium.currentSeconds.toHoursMinutesSeconds()
     val totalSeconds = medium.totalSeconds
     val hasTotal = medium.hasKnownTotal
     val totalHms = totalSeconds.toHoursMinutesSeconds()
 
-    var hours by remember { mutableStateOf(TextFieldValue(text = initial.hours.toString())) }
-    var minutes by remember { mutableStateOf(TextFieldValue(text = initial.minutes.toString())) }
-    var seconds by remember { mutableStateOf(TextFieldValue(text = initial.seconds.toString())) }
-
-    val currentSeconds = (hours.text.toIntOrNull() ?: 0) * 3600 +
-        (minutes.text.toIntOrNull() ?: 0) * 60 +
-        (seconds.text.toIntOrNull() ?: 0)
+    val currentSeconds = (medium.hours.text.toIntOrNull() ?: 0) * 3600 +
+        (medium.minutes.text.toIntOrNull() ?: 0) * 60 +
+        (medium.seconds.text.toIntOrNull() ?: 0)
 
     val fraction = if (hasTotal) {
         (currentSeconds.toFloat() / totalSeconds).coerceIn(
@@ -62,18 +54,12 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TimeField(
-            value = hours,
-            charCount = 2,
-            textStyle = timeStyle,
-            onValueChange = { newValue ->
-                val parsed = newValue.text.toIntOrNull()
-                hours = when {
-                    newValue.text.isEmpty() -> newValue
-                    parsed == null -> hours
-                    else -> newValue.copy(text = parsed.coerceAtLeast(minimumValue = 0).toString())
-                }
-            },
+        TextField(
+            model = medium.hours,
+            onEvent = timeFieldEventHandler(
+                unit = ProgressTimeUnit.HOURS,
+                onEvent = onEvent,
+            ),
         )
 
         TimeColon(textStyle = timeStyle)
@@ -81,67 +67,33 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
         StepperCircle(
             symbol = "−",
             contentDescription = "Decrease minutes",
-            onClick = {
-                val next = ((minutes.text.toIntOrNull() ?: 0) - 1).coerceIn(
-                    0,
-                    59,
-                )
-                minutes = minutes.copy(text = next.toString())
-            },
+            onClick = { onEvent(ProgressSheetEvent.MinutesStepped(delta = -1)) },
             modifier = Modifier.padding(end = 6.dp),
         )
 
-        TimeField(
-            value = minutes,
-            charCount = 2,
-            textStyle = timeStyle,
-            onValueChange = { newValue ->
-                val parsed = newValue.text.toIntOrNull()
-                minutes = when {
-                    newValue.text.isEmpty() -> newValue
-                    parsed == null -> minutes
-                    else -> newValue.copy(
-                        text = parsed.coerceIn(
-                            minimumValue = 0,
-                            maximumValue = 59,
-                        ).toString(),
-                    )
-                }
-            },
+        TextField(
+            model = medium.minutes,
+            onEvent = timeFieldEventHandler(
+                unit = ProgressTimeUnit.MINUTES,
+                onEvent = onEvent,
+            ),
         )
 
         StepperCircle(
             symbol = "+",
             contentDescription = "Increase minutes",
-            onClick = {
-                val next = ((minutes.text.toIntOrNull() ?: 0) + 1).coerceIn(
-                    0,
-                    59,
-                )
-                minutes = minutes.copy(text = next.toString())
-            },
+            onClick = { onEvent(ProgressSheetEvent.MinutesStepped(delta = 1)) },
             modifier = Modifier.padding(start = 6.dp),
         )
 
         TimeColon(textStyle = timeStyle)
 
-        TimeField(
-            value = seconds,
-            charCount = 2,
-            textStyle = timeStyle,
-            onValueChange = { newValue ->
-                val parsed = newValue.text.toIntOrNull()
-                seconds = when {
-                    newValue.text.isEmpty() -> newValue
-                    parsed == null -> seconds
-                    else -> newValue.copy(
-                        text = parsed.coerceIn(
-                            minimumValue = 0,
-                            maximumValue = 59,
-                        ).toString(),
-                    )
-                }
-            },
+        TextField(
+            model = medium.seconds,
+            onEvent = timeFieldEventHandler(
+                unit = ProgressTimeUnit.SECONDS,
+                onEvent = onEvent,
+            ),
         )
     }
 
@@ -176,9 +128,9 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
         onClick = {
             onEvent(
                 ProgressSheetEvent.TimeSubmitted(
-                    hours = hours.text,
-                    minutes = minutes.text,
-                    seconds = seconds.text,
+                    hours = medium.hours.text,
+                    minutes = medium.minutes.text,
+                    seconds = medium.seconds.text,
                     actionAt = actionAt,
                 ),
             )
@@ -199,4 +151,21 @@ private fun TimeColon(textStyle: TextStyle) {
         style = textStyle,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+}
+
+private fun timeFieldEventHandler(
+    unit: ProgressTimeUnit,
+    onEvent: (ProgressSheetEvent) -> Unit,
+): (TextFieldEvent) -> Unit = { event ->
+    when (event) {
+        is TextFieldEvent.ValueChanged -> onEvent(
+            ProgressSheetEvent.TimeChanged(
+                unit = unit,
+                text = event.text,
+            ),
+        )
+
+        is TextFieldEvent.Submitted,
+        is TextFieldEvent.TrailingClicked -> Unit
+    }
 }

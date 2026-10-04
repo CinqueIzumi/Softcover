@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -57,7 +59,7 @@ class ReAuthSheetMapperTest {
 
             // ----- Assert -----
             result.scaffold.busy shouldBe true
-            result.fieldEnabled shouldBe false
+            result.apiKeyField.enabled shouldBe false
         }
 
         @Test
@@ -73,7 +75,7 @@ class ReAuthSheetMapperTest {
 
             // ----- Assert -----
             result.scaffold.busy shouldBe false
-            result.fieldEnabled shouldBe true
+            result.apiKeyField.enabled shouldBe true
         }
 
         @Test
@@ -88,7 +90,7 @@ class ReAuthSheetMapperTest {
             val result = state.toSheetUiModel()
 
             // ----- Assert -----
-            result.apiKey shouldBe "abc"
+            result.apiKeyField.text shouldBe "abc"
             result.errorMessage shouldBe "bad"
         }
 
@@ -151,6 +153,24 @@ class ReAuthSheetMapperTest {
 
             // ----- Assert -----
             result.scaffold.dismissible shouldBe false
+        }
+
+        @Test
+        fun `api key field is an outlined text input`() {
+            // ----- Act -----
+            val result = ReAuthState().toSheetUiModel()
+
+            // ----- Assert -----
+            result.apiKeyField.variant.shouldBeInstanceOf<TextFieldVariant.Outlined>()
+        }
+
+        @Test
+        fun `api key field text is empty for a fresh state`() {
+            // ----- Act -----
+            val result = ReAuthState().toSheetUiModel()
+
+            // ----- Assert -----
+            result.apiKeyField.text shouldBe ""
         }
     }
 }

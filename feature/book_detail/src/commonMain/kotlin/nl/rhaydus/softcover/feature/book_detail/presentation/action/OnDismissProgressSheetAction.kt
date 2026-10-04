@@ -12,7 +12,10 @@ internal class OnDismissProgressSheetAction : BookDetailAction {
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
         scope.setState {
-            it.copy(showUpdateProgressSheet = false)
+            it.copy(
+                showUpdateProgressSheet = false,
+                progressTimeDraft = null,
+            )
         }
     }
 }

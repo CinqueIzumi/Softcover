@@ -22,15 +22,9 @@ internal data class OnUpdateTimeProgressClickAction(
     ) {
         val bookToUpdate: Book = scope.currentState.bookToUpdate ?: return
 
-        val h = hours.toIntOrNull()?.coerceAtLeast(0) ?: 0
-        val m = minutes.toIntOrNull()?.coerceIn(
-            0,
-            59,
-        ) ?: 0
-        val s = seconds.toIntOrNull()?.coerceIn(
-            0,
-            59,
-        ) ?: 0
+        val h = hours.toIntOrNull() ?: 0
+        val m = minutes.toIntOrNull() ?: 0
+        val s = seconds.toIntOrNull() ?: 0
 
         val total = bookToUpdate.currentEdition?.audioSeconds ?: 0
         val entered = h * 3600 + m * 60 + s
@@ -83,6 +77,7 @@ internal data class OnUpdateTimeProgressClickAction(
             it.copy(
                 showProgressSheet = false,
                 bookToUpdate = null,
+                progressTimeDraft = null,
             )
         }
     }

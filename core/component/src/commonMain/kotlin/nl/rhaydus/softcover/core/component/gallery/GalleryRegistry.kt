@@ -10,8 +10,9 @@ import kotlinx.collections.immutable.toImmutableList
  * screens belong to features and `:core:component` is banned from Voyager.
  */
 object GalleryRegistry {
-    val entries: ImmutableList<GalleryEntry> = (headerEntries + chromeEntries + bookAndSheetEntries + controlEntries)
-        .toImmutableList()
+    val entries: ImmutableList<GalleryEntry> = (
+        headerEntries + chromeEntries + bookAndSheetEntries + controlEntries + fieldEntries
+    ).toImmutableList()
 
     val families: ImmutableList<GalleryFamily> = GalleryFamily.entries
         .filter { family -> entries.any { it.family == family } }

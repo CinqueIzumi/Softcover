@@ -3,13 +3,54 @@ package nl.rhaydus.softcover.core.uibinding.progress
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
+import nl.rhaydus.softcover.core.component.progress.ProgressTimeUnit
+import nl.rhaydus.softcover.core.component.progress.progressTimeField
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ProgressSheetMapperTest {
+    private fun expectedTimed(
+        totalSeconds: Int,
+        currentSeconds: Int,
+        hours: String = "0",
+        minutes: String = "0",
+        seconds: String = "0",
+    ): ProgressSheetMedium.Timed = ProgressSheetMedium.Timed(
+        totalSeconds = totalSeconds,
+        currentSeconds = currentSeconds,
+        hours = progressTimeField(
+            unit = ProgressTimeUnit.HOURS,
+            text = hours,
+        ),
+        minutes = progressTimeField(
+            unit = ProgressTimeUnit.MINUTES,
+            text = minutes,
+        ),
+        seconds = progressTimeField(
+            unit = ProgressTimeUnit.SECONDS,
+            text = seconds,
+        ),
+    )
+
+    private fun audioBook(currentSeconds: Int?): Book {
+        val audioEdition = PreviewData.baseEdition.copy(
+            id = 50,
+            pages = null,
+            audioSeconds = 20_000,
+            readingFormat = ReadingFormat.Audio,
+        )
+
+        return PreviewData.baseBook.copy(
+            editions = listOf(audioEdition),
+            userBook = PreviewData.baseBook.userBook?.copy(editionId = audioEdition.id),
+            userBookRead = PreviewData.baseBook.userBookRead?.copy(currentSeconds = currentSeconds),
+        )
+    }
+
     @Nested
     inner class MediumSelection {
         @Test
@@ -31,7 +72,7 @@ class ProgressSheetMapperTest {
 
             // ----- Assert -----
             book.currentEdition shouldBe audioEdition
-            result.medium shouldBe ProgressSheetMedium.Timed(
+            result.medium shouldBe expectedTimed(
                 totalSeconds = 5_400,
                 currentSeconds = 0,
             )
@@ -116,7 +157,7 @@ class ProgressSheetMapperTest {
 
             // ----- Assert -----
             book.currentEdition shouldBe currentEd
-            result.medium shouldBe ProgressSheetMedium.Timed(
+            result.medium shouldBe expectedTimed(
                 totalSeconds = 0,
                 currentSeconds = 0,
             )
@@ -171,7 +212,7 @@ class ProgressSheetMapperTest {
 
             // ----- Assert -----
             book.currentEdition shouldBe currentEd
-            result.medium shouldBe ProgressSheetMedium.Timed(
+            result.medium shouldBe expectedTimed(
                 totalSeconds = 0,
                 currentSeconds = 0,
             )
@@ -286,10 +327,145 @@ class ProgressSheetMapperTest {
             val book = PreviewData.baseBook
 
             // ----- Act -----
+            val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PERCENTAGE)
+
+            // ----- Assert -----
+            result.selectedTab shouldBe ProgressSheetTab.PERCENTAGE
+        }
+    }
+
+    @Nested
+    inner class TimedFields {
+        @Test
+        fun `seeds the three fields from the book's listening position`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = 3_725)
+
+            // ----- Act -----
             val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.TIME)
 
             // ----- Assert -----
-            result.selectedTab shouldBe ProgressSheetTab.TIME
+            result.medium shouldBe expectedTimed(
+                totalSeconds = 20_000,
+                currentSeconds = 3_725,
+                hours = "1",
+                minutes = "2",
+                seconds = "5",
+            )
+        }
+
+        @Test
+        fun `uses a draft that was seeded from the current position`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = 600)
+            val draft = ProgressTimeDraft(
+                forSeconds = 600,
+                hours = "7",
+                minutes = "8",
+                seconds = "9",
+            )
+
+            // ----- Act -----
+            val result = book.toProgressSheetUiModel(
+                selectedTab = ProgressSheetTab.TIME,
+                timeDraft = draft,
+            )
+
+            // ----- Assert -----
+            result.medium shouldBe expectedTimed(
+                totalSeconds = 20_000,
+                currentSeconds = 600,
+                hours = "7",
+                minutes = "8",
+                seconds = "9",
+            )
+        }
+
+        @Test
+        fun `discards a draft seeded from a position the book has moved past`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = 3_600)
+            val draft = ProgressTimeDraft(
+                forSeconds = 600,
+                hours = "7",
+                minutes = "8",
+                seconds = "9",
+            )
+
+            // ----- Act -----
+            val result = book.toProgressSheetUiModel(
+                selectedTab = ProgressSheetTab.TIME,
+                timeDraft = draft,
+            )
+
+            // ----- Assert -----
+            result.medium shouldBe expectedTimed(
+                totalSeconds = 20_000,
+                currentSeconds = 3_600,
+                hours = "1",
+            )
+        }
+
+        @Test
+        fun `ignores a draft on a paged book`() {
+            // ----- Arrange -----
+            val draft = ProgressTimeDraft(
+                forSeconds = 0,
+                hours = "7",
+                minutes = "8",
+                seconds = "9",
+            )
+
+            // ----- Act -----
+            val result = PreviewData.baseBook.toProgressSheetUiModel(
+                selectedTab = ProgressSheetTab.PAGE,
+                timeDraft = draft,
+            )
+
+            // ----- Assert -----
+            result.medium shouldBe ProgressSheetMedium.Paged(
+                totalPages = 100,
+                currentPage = 0,
+            )
+        }
+    }
+
+    @Nested
+    inner class ProgressCurrentSecondsProperty {
+        @Test
+        fun `is zero without a read`() {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook.copy(userBookRead = null)
+
+            // ----- Act -----
+            val result = book.progressCurrentSeconds
+
+            // ----- Assert -----
+            result shouldBe 0
+        }
+
+        @Test
+        fun `is zero when the read has no seconds`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = null)
+
+            // ----- Act -----
+            val result = book.progressCurrentSeconds
+
+            // ----- Assert -----
+            result shouldBe 0
+        }
+
+        @Test
+        fun `is the read's seconds`() {
+            // ----- Arrange -----
+            val book = audioBook(currentSeconds = 90)
+
+            // ----- Act -----
+            val result = book.progressCurrentSeconds
+
+            // ----- Assert -----
+            result shouldBe 90
         }
     }
 }

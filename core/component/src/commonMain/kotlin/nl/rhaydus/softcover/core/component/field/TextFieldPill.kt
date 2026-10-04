@@ -1,4 +1,4 @@
-package nl.rhaydus.softcover.feature.book_detail.presentation.component
+package nl.rhaydus.softcover.core.component.field
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -18,95 +18,107 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.button.PillButton
-import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
-/**
- * The naming pill: a tone-on-tone `surfaceContainerHigh` field with a leading edit glyph and a
- * borderless inline field — reads as naming, not a form box. `EditorialSearchField` hardwires a search
- * glyph and a trailing clear button and has no leading-edit / trailing-commit slot, so this is composed
- * from the same primitives instead of bending that component.
- */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun TagNamingField(
-    draft: String,
-    placeholder: String,
-    addPill: PillButtonUiModel,
-    onDraftChange: (String) -> Unit,
-    onCommit: () -> Unit,
+internal fun PillTextField(
+    model: TextFieldUiModel,
+    variant: TextFieldVariant.Pill,
+    onEvent: (TextFieldEvent) -> Unit,
+    focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
     val playMotion = playDecorativeMotion()
-    val canCommit = draft.trim().isNotEmpty()
+    val dimensions = variant.size.dimensions()
+
+    // The exit animation needs the pill after the model has already dropped it.
+    var retainedTrailing by remember { mutableStateOf(variant.trailing) }
+
+    LaunchedEffect(variant.trailing) {
+        if (variant.trailing != null) retainedTrailing = variant.trailing
+    }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(dimensions.height)
             .clip(RoundedCornerShape(percent = 50))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .background(dimensions.container())
             .padding(
-                start = 14.dp,
-                end = 8.dp,
+                start = dimensions.horizontalPadding,
+                end = if (variant.trailing == null) dimensions.horizontalPadding else 8.dp,
             ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        val editIcon = drawableIconResource(
-            contentDescription = "",
-            icon = SoftcoverIcon.Edit,
-        )
+        variant.leadingIcon?.let { icon ->
+            val leading = drawableIconResource(
+                contentDescription = "",
+                icon = icon,
+            )
 
-        Icon(
-            painter = editIcon.getIconPainter(),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-        )
+            Icon(
+                painter = leading.getIconPainter(),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(dimensions.iconSize),
+            )
+        }
 
         Box(modifier = Modifier.weight(1f)) {
-            if (draft.isEmpty()) {
+            if (model.text.isEmpty()) {
                 SoftcoverText(
-                    text = placeholder,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    text = model.placeholder,
+                    style = dimensions.textStyle(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = dimensions.placeholderAlpha),
                 )
             }
 
             BasicTextField(
-                value = draft,
-                onValueChange = onDraftChange,
+                value = model.text,
+                onValueChange = { text ->
+                    onEvent(
+                        TextFieldEvent.ValueChanged(
+                            key = model.key,
+                            text = text,
+                        ),
+                    )
+                },
+                enabled = model.enabled,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
+                textStyle = dimensions.textStyle().copy(color = MaterialTheme.colorScheme.onSurface),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { onCommit() }),
-                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = model.keyboardOptions(),
+                keyboardActions = KeyboardActions(onDone = { onEvent(TextFieldEvent.Submitted(key = model.key)) }),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
             )
         }
 
         AnimatedVisibility(
-            visible = canCommit,
+            visible = variant.trailing != null,
             enter = if (playMotion) {
                 fadeIn(animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()) +
                     scaleIn(
@@ -126,10 +138,12 @@ internal fun TagNamingField(
                 ExitTransition.None
             },
         ) {
-            PillButton(
-                model = addPill,
-                onEvent = { onCommit() },
-            )
+            (variant.trailing ?: retainedTrailing)?.let { trailing ->
+                PillButton(
+                    model = trailing,
+                    onEvent = { onEvent(TextFieldEvent.TrailingClicked(key = model.key)) },
+                )
+            }
         }
     }
 }

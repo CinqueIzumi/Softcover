@@ -23,6 +23,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Button** — [detail](components/buttons-controls.md#button) — five styles/sizes; filled is one primary per region.
 - **Pill button** — `core:component/button` — fixed-height action pill or icon-only circle in five tones, with an optional active dot.
 - **Toggle** — `core:component/control` — two-state control: filled or bare icon toggle (the bookmark and the library-tab eye), the platform switch, or a display-only switch inside a row that owns the tap.
+- **Text field** — `core:component/field` — single-line input as a tonal pill (compact, regular or large; optional glyph and trailing action), the Material outlined box (label optional), a display-size hero, or a centred numeral.
 - **Segmented control** — `core:component/control` — one-of-N choice as a pill track (lens, share variant, year metric, progress tabs) or as words in a sentence.
 - **Split button** — [detail](components/buttons-controls.md#split-button) — primary action with a chevron menu of variants.
 - **Theme preview tile** — `core:component/control` — mini-page theme choice.

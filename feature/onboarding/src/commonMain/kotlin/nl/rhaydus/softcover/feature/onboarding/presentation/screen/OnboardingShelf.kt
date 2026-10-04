@@ -42,6 +42,8 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.field.TextField
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableTextUiModel
@@ -129,9 +131,16 @@ internal fun ApiKeyEntryContent(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        KeyField(
-            value = state.apiKeyValue,
-            onValueChange = { runAction(OnApiKeyValueChangeAction(newValue = it)) },
+        TextField(
+            model = state.apiKeyField,
+            onEvent = { event ->
+                when (event) {
+                    is TextFieldEvent.ValueChanged -> runAction(OnApiKeyValueChangeAction(newValue = event.text))
+
+                    is TextFieldEvent.Submitted,
+                    is TextFieldEvent.TrailingClicked -> Unit
+                }
+            },
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -233,46 +242,6 @@ private fun PasteFromClipboardRow(onClick: () -> Unit) {
             contentDescription = arrowIcon.contentDescription,
             modifier = Modifier.size(20.dp),
             tint = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
-    }
-}
-
-@Composable
-private fun KeyField(
-    value: String,
-    onValueChange: (String) -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .clip(RoundedCornerShape(percent = 50))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(horizontal = 18.dp),
-        contentAlignment = Alignment.CenterStart,
-    ) {
-        if (value.isEmpty()) {
-            // Matches the placeholder register EditorialSearchField uses (plain Material bodyLarge,
-            // onSurfaceVariant) — this is key entry, not search, so there is no leading glyph or clear
-            // button, just the tonal pill and the primary caret.
-            SoftcoverText(
-                text = "Enter your key",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            textStyle = LocalTextStyle.current.merge(
-                MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
-            ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

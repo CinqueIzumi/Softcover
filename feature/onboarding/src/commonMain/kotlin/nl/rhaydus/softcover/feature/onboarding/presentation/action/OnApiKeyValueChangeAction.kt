@@ -13,7 +13,7 @@ internal data class OnApiKeyValueChangeAction(val newValue: String) : Onboarding
     ) {
         scope.setState {
             it.copy(
-                apiKeyValue = newValue,
+                apiKeyField = it.apiKeyField.copy(text = newValue),
                 submissionError = null,
             )
         }

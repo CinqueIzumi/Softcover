@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
+import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadEyebrowFor
 import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadRefreshFor
 import nl.rhaydus.toad.UiState
@@ -42,6 +43,9 @@ internal data class ReadingScreenUiState(
     ),
     val bookToUpdate: Book? = null,
     val progressSheetTab: ProgressSheetTab = ProgressSheetTab.PAGE,
+
+    /** The reader's uncommitted time entry; `null` seeds the sheet's fields from the book. */
+    val progressTimeDraft: ProgressTimeDraft? = null,
     val showProgressSheet: Boolean = false,
 
     /**

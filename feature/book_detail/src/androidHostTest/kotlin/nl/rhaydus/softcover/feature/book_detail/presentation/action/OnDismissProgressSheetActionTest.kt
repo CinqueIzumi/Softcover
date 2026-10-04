@@ -5,6 +5,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -79,6 +80,31 @@ class OnDismissProgressSheetActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe initialState.copy(showUpdateProgressSheet = false)
+        }
+
+
+        @Test
+        fun `discards the time draft so the next open reseeds from the book`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(
+                showUpdateProgressSheet = true,
+                progressTimeDraft = ProgressTimeDraft(
+                    forSeconds = 3725,
+                    hours = "1",
+                    minutes = "2",
+                    seconds = "5",
+                ),
+            )
+            val action = OnDismissProgressSheetAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.progressTimeDraft shouldBe null
         }
     }
 }

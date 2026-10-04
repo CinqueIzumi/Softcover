@@ -29,7 +29,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSea
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnEditionSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnNewEditionSaveClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressMinutesSteppedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTimeChangedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveToGalleryFinishedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveToGalleryStartedAction
@@ -93,8 +95,7 @@ internal fun BookDetailOverlays(
             categoryChips = state.tagEditorCategoryChips,
             suggestions = state.tagSuggestionChips,
             selectedCategory = state.tagEditorCategory,
-            draft = state.tagEditorInput,
-            addPill = state.tagAddPill,
+            namingField = state.tagNamingField,
             onCategorySelected = { runAction(OnTagEditorCategoryChangeAction(category = it)) },
             onDraftChange = { runAction(OnTagDraftChangeAction(input = it)) },
             onAddTag = { name, category ->
@@ -240,6 +241,15 @@ internal fun BookDetailOverlays(
                             actionAt = event.actionAt,
                         ),
                     )
+
+                    is ProgressSheetEvent.TimeChanged -> runAction(
+                        OnProgressTimeChangedAction(
+                            unit = event.unit,
+                            text = event.text,
+                        ),
+                    )
+
+                    is ProgressSheetEvent.MinutesStepped -> runAction(OnProgressMinutesSteppedAction(delta = event.delta))
 
                     is ProgressSheetEvent.TimeSubmitted -> runAction(
                         OnUpdateTimeProgressClickAction(

@@ -19,7 +19,7 @@ internal class OnSubmitAction : CreateListAction {
 
         val privacy = scope.currentState.privacy
 
-        scope.setState { it.copy(isSubmitting = true) }
+        scope.setState { it.withSubmitting(submitting = true) }
 
         runCatching {
             dependencies.createListUseCase(
@@ -27,7 +27,7 @@ internal class OnSubmitAction : CreateListAction {
                 privacy = privacy,
             )
         }.onSuccess { created ->
-            scope.setState { it.copy(isSubmitting = false) }
+            scope.setState { it.withSubmitting(submitting = false) }
 
             scope.sendEvent(
                 event = CreateListEvent.ListCreatedEvent(
@@ -41,7 +41,7 @@ internal class OnSubmitAction : CreateListAction {
                 "Failed to create list $error",
             )
 
-            scope.setState { it.copy(isSubmitting = false) }
+            scope.setState { it.withSubmitting(submitting = false) }
 
             val event: CreateListEvent = when (error) {
                 is ListNameTakenException -> CreateListEvent.ListNameTakenEvent(name = error.name)

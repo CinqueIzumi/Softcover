@@ -103,7 +103,7 @@ class CreateListScreenModelTest {
         @Test
         fun `overwrites a previously set name`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "Old Name")
+            stateFlow.value = CreateListUiState().withName(newName = "Old Name")
 
             val action = OnNameChangedAction(
                 newName = "New Name",
@@ -122,7 +122,7 @@ class CreateListScreenModelTest {
         @Test
         fun `accepts empty string as a valid new name`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "Non-empty")
+            stateFlow.value = CreateListUiState().withName(newName = "Non-empty")
 
             val action = OnNameChangedAction(
                 newName = "",
@@ -144,7 +144,7 @@ class CreateListScreenModelTest {
         @Test
         fun `does not invoke use case when name is empty`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "")
+            stateFlow.value = CreateListUiState().withName(newName = "")
             val dependencies = stubDependencies(this)
             val action = OnSubmitAction()
 
@@ -161,7 +161,7 @@ class CreateListScreenModelTest {
         @Test
         fun `does not invoke use case when name is whitespace only`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "   ")
+            stateFlow.value = CreateListUiState().withName(newName = "   ")
             val dependencies = stubDependencies(this)
             val action = OnSubmitAction()
 
@@ -178,10 +178,9 @@ class CreateListScreenModelTest {
         @Test
         fun `does not invoke use case when already submitting`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(
-                name = "My List",
-                isSubmitting = true,
-            )
+            stateFlow.value = CreateListUiState()
+                .withName(newName = "My List")
+                .withSubmitting(submitting = true)
             val dependencies = stubDependencies(this)
             val action = OnSubmitAction()
 
@@ -198,7 +197,7 @@ class CreateListScreenModelTest {
         @Test
         fun `sends ListCreatedEvent with correct id and name on success`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "Favourites")
+            stateFlow.value = CreateListUiState().withName(newName = "Favourites")
             val dependencies = stubDependencies(this)
             val created = stubBookList(
                 id = 42,
@@ -227,7 +226,7 @@ class CreateListScreenModelTest {
         @Test
         fun `clears isSubmitting after successful creation`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "Classics")
+            stateFlow.value = CreateListUiState().withName(newName = "Classics")
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -249,7 +248,7 @@ class CreateListScreenModelTest {
         @Test
         fun `trims name before passing it to the use case`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "  Trimmed  ")
+            stateFlow.value = CreateListUiState().withName(newName = "  Trimmed  ")
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -271,7 +270,7 @@ class CreateListScreenModelTest {
         @Test
         fun `sends ListCreationFailedEvent when use case throws`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "Bad List")
+            stateFlow.value = CreateListUiState().withName(newName = "Bad List")
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -294,7 +293,7 @@ class CreateListScreenModelTest {
         @Test
         fun `sends ListNameTakenEvent with correct name when use case throws ListNameTakenException`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "Favourites")
+            stateFlow.value = CreateListUiState().withName(newName = "Favourites")
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -318,7 +317,7 @@ class CreateListScreenModelTest {
         @Test
         fun `clears isSubmitting after use case throws`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "Bad List")
+            stateFlow.value = CreateListUiState().withName(newName = "Bad List")
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -340,7 +339,7 @@ class CreateListScreenModelTest {
         @Test
         fun `passes default PUBLIC privacy through to the use case`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "Favourites")
+            stateFlow.value = CreateListUiState().withName(newName = "Favourites")
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -370,7 +369,7 @@ class CreateListScreenModelTest {
         @Test
         fun `passes PRIVATE privacy through to the use case after selecting it`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState(name = "Favourites")
+            stateFlow.value = CreateListUiState().withName(newName = "Favourites")
             val dependencies = stubDependencies(this)
 
             OnPrivacySelectedAction(privacy = PrivacySetting.PRIVATE).execute(
@@ -478,10 +477,9 @@ class CreateListScreenModelTest {
         @Test
         fun `is false when name is empty`() {
             // ----- Arrange & Act -----
-            val state = CreateListUiState(
-                name = "",
-                isSubmitting = false,
-            )
+            val state = CreateListUiState()
+                .withName(newName = "")
+                .withSubmitting(submitting = false)
 
             // ----- Assert -----
             state.canSubmit shouldBe false
@@ -490,10 +488,9 @@ class CreateListScreenModelTest {
         @Test
         fun `is false when name is whitespace only`() {
             // ----- Arrange & Act -----
-            val state = CreateListUiState(
-                name = "   ",
-                isSubmitting = false,
-            )
+            val state = CreateListUiState()
+                .withName(newName = "   ")
+                .withSubmitting(submitting = false)
 
             // ----- Assert -----
             state.canSubmit shouldBe false
@@ -502,10 +499,9 @@ class CreateListScreenModelTest {
         @Test
         fun `is false when isSubmitting is true`() {
             // ----- Arrange & Act -----
-            val state = CreateListUiState(
-                name = "My List",
-                isSubmitting = true,
-            )
+            val state = CreateListUiState()
+                .withName(newName = "My List")
+                .withSubmitting(submitting = true)
 
             // ----- Assert -----
             state.canSubmit shouldBe false
@@ -514,10 +510,9 @@ class CreateListScreenModelTest {
         @Test
         fun `is true when name is non-blank and not submitting`() {
             // ----- Arrange & Act -----
-            val state = CreateListUiState(
-                name = "My List",
-                isSubmitting = false,
-            )
+            val state = CreateListUiState()
+                .withName(newName = "My List")
+                .withSubmitting(submitting = false)
 
             // ----- Assert -----
             state.canSubmit shouldBe true

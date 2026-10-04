@@ -13,12 +13,15 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnConfirmedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnAddUnknownIsbnDismissedAction
+import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnChangedAction
 import nl.rhaydus.softcover.feature.scan.presentation.action.OnIsbnSubmittedAction
+import nl.rhaydus.softcover.feature.scan.presentation.action.OnManualEntryAutoFocusRequestedAction
 import nl.rhaydus.softcover.feature.scan.presentation.component.UnknownIsbnSheet
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.permission.isCameraAvailable
@@ -90,6 +93,15 @@ class BarcodeScannerScreen : Screen {
             manualMode = manualMode,
             cameraGranted = cameraGranted,
             onIsbnSubmit = { isbn -> screenModel.runAction(OnIsbnSubmittedAction(isbn = isbn)) },
+            onIsbnFieldEvent = { event ->
+                when (event) {
+                    is TextFieldEvent.ValueChanged -> screenModel.runAction(OnIsbnChangedAction(text = event.text))
+
+                    is TextFieldEvent.Submitted,
+                    is TextFieldEvent.TrailingClicked -> Unit
+                }
+            },
+            onAutoFocusRequested = { screenModel.runAction(OnManualEntryAutoFocusRequestedAction()) },
             onEnterManually = { manualMode = true },
             onNavigateBack = navigator::pop,
         )
@@ -116,6 +128,8 @@ internal expect fun BarcodeScannerScreenLayout(
     manualMode: Boolean,
     cameraGranted: Boolean,
     onIsbnSubmit: (String) -> Unit,
+    onIsbnFieldEvent: (TextFieldEvent) -> Unit,
+    onAutoFocusRequested: () -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,
 )

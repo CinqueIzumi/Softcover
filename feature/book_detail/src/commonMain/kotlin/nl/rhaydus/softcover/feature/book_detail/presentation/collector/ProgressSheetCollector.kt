@@ -28,13 +28,17 @@ internal class ProgressSheetCollector : BookDetailCollector {
                 ProgressSheetSnapshot(
                     book = it.book,
                     selectedTab = it.selectedProgressSheetTab,
+                    hasTimeDraft = it.progressTimeDraft != null,
                 )
             }
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 scope.setState {
                     it.copy(
-                        progressSheet = snapshot.book?.toProgressSheetUiModel(selectedTab = snapshot.selectedTab),
+                        progressSheet = snapshot.book?.toProgressSheetUiModel(
+                            selectedTab = snapshot.selectedTab,
+                            timeDraft = it.progressTimeDraft,
+                        ),
                     )
                 }
             }

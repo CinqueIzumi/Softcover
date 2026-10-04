@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -91,6 +92,36 @@ class OnUpdateTimeProgressClickActionTest {
 
     @Nested
     inner class Execute {
+        @Test
+        fun `discards the time draft once the entered time is submitted`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = BookDetailUiState(
+                book = stubBookWithAudioSeconds(audioSeconds = 7200),
+                progressTimeDraft = ProgressTimeDraft(
+                    forSeconds = 3725,
+                    hours = "1",
+                    minutes = "2",
+                    seconds = "5",
+                ),
+            )
+            dependencies = stubDependencies(this)
+
+            val action = OnUpdateTimeProgressClickAction(
+                hours = "1",
+                minutes = "2",
+                seconds = "5",
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.progressTimeDraft shouldBe null
+        }
+
         @Test
         fun `hides the update progress sheet after execution`() = runTest {
             // ----- Arrange -----
@@ -332,71 +363,11 @@ class OnUpdateTimeProgressClickActionTest {
         }
 
         @Test
-        fun `coerces minutes greater than 59 to 59`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            // 0*3600 + 59*60 + 0 = 3540
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "0",
-                minutes = "90",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3540,
-                )
-            }
-        }
-
-        @Test
-        fun `coerces seconds greater than 59 to 59`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            // 0*3600 + 0*60 + 59 = 59
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "0",
-                minutes = "0",
-                seconds = "90",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 59,
-                )
-            }
-        }
-
-        @Test
-        fun `treats negative hours as 0 via coerceAtLeast`() = runTest {
+        fun `clamps a negative entered time to zero`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(audioSeconds = 3600)
             stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            // 0*3600 + 30*60 + 0 = 1800
+            val dependencies = stubDependencies(this)
             val action = OnUpdateTimeProgressClickAction(
                 hours = "-2",
                 minutes = "30",
@@ -413,7 +384,7 @@ class OnUpdateTimeProgressClickActionTest {
             coVerify {
                 updateBookProgress(
                     book = book,
-                    newSeconds = 1800,
+                    newSeconds = 0,
                 )
             }
         }
@@ -501,64 +472,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 7200,
-                )
-            }
-        }
-
-        @Test
-        fun `coerces minutes below 0 to 0 via coerceIn`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "-10",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3600,
-                )
-            }
-        }
-
-        @Test
-        fun `coerces seconds below 0 to 0 via coerceIn`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 3600)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            // 1*3600 + 0 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "0",
-                seconds = "-30",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3600,
                 )
             }
         }

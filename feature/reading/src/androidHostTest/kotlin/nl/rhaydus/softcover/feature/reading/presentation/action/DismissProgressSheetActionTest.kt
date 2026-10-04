@@ -6,6 +6,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -104,6 +105,30 @@ class DismissProgressSheetActionTest {
             // ----- Assert -----
             stateFlow.value.books shouldBe existingBooks
             stateFlow.value.isLoading shouldBe false
+        }
+
+
+        @Test
+        fun `discards the time draft so the next open reseeds from the book`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(
+                showProgressSheet = true,
+                progressTimeDraft = ProgressTimeDraft(
+                    forSeconds = 3725,
+                    hours = "1",
+                    minutes = "2",
+                    seconds = "5",
+                ),
+            )
+
+            // ----- Act -----
+            DismissProgressSheetAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.progressTimeDraft shouldBe null
         }
     }
 }

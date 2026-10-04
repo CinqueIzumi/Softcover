@@ -92,6 +92,41 @@ class OnFilterDraftTagSearchChangedActionTest {
         }
 
         @Test
+        fun `writes the query into the tag search field`() = runTest {
+            // ----- Arrange -----
+            val draft = LibraryFilterDraft(
+                tabId = tabId,
+                filters = LibraryFilters(),
+                tagSearch = "",
+            )
+            stateFlow.value = LibraryUiState(filterDraft = draft)
+
+            // ----- Act -----
+            OnFilterDraftTagSearchChangedAction(query = "kotlin").execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.tagSearchField.text shouldBe "kotlin"
+        }
+
+        @Test
+        fun `leaves the tag search field untouched when no draft is open`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(filterDraft = null)
+
+            // ----- Act -----
+            OnFilterDraftTagSearchChangedAction(query = "kotlin").execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.tagSearchField.text shouldBe ""
+        }
+
+        @Test
         fun `leaves filters and tabId untouched`() = runTest {
             // ----- Arrange -----
             val filters = LibraryFilters(formats = setOf("Hardcover"))

@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.feature.scan.presentation.component.BarcodeScanner
@@ -27,6 +28,8 @@ internal actual fun BarcodeScannerScreenLayout(
     manualMode: Boolean,
     cameraGranted: Boolean,
     onIsbnSubmit: (String) -> Unit,
+    onIsbnFieldEvent: (TextFieldEvent) -> Unit,
+    onAutoFocusRequested: () -> Unit,
     onEnterManually: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
@@ -49,10 +52,13 @@ internal actual fun BarcodeScannerScreenLayout(
         ) {
             when {
                 manualMode -> ManualEntryContent(
+                    field = state.isbnField,
                     isResolving = state.isResolving,
                     isAddingBook = state.isAddingBook,
                     header = state.manualEntryHeader,
+                    onFieldEvent = onIsbnFieldEvent,
                     onIsbnSubmit = onIsbnSubmit,
+                    onAutoFocusRequested = onAutoFocusRequested,
                     autoFocus = false,
                     modifier = Modifier
                         .fillMaxSize()

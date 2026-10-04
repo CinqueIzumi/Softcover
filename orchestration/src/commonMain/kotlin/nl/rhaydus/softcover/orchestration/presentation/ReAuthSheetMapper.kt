@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
+import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
+import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
@@ -9,9 +11,14 @@ import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 
 internal fun ReAuthState.toSheetUiModel(): ReAuthSheetUiModel = ReAuthSheetUiModel(
     scaffold = toScaffoldUiModel(),
-    apiKey = apiKey,
+    apiKeyField = TextFieldUiModel(
+        key = "api-token",
+        text = apiKey,
+        placeholder = "Paste your Hardcover API token",
+        variant = TextFieldVariant.Outlined(label = "API token"),
+        enabled = isSubmitting.not(),
+    ),
     errorMessage = errorMessage,
-    fieldEnabled = isSubmitting.not(),
 )
 
 private fun ReAuthState.toScaffoldUiModel(): SheetScaffoldUiModel = SheetScaffoldUiModel(

@@ -17,7 +17,10 @@ internal class OnFilterDraftTagSearchChangedAction(
         scope.setState { state ->
             val draft = state.filterDraft ?: return@setState state
 
-            state.copy(filterDraft = draft.copy(tagSearch = query))
+            state.copy(
+                filterDraft = draft.copy(tagSearch = query),
+                tagSearchField = state.tagSearchField.copy(text = query),
+            )
         }
     }
 }

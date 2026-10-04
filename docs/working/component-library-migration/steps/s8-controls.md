@@ -12,8 +12,8 @@ next build).
 | Sub | Scope | Status |
 |---|---|---|
 | S8-6 | `PillButton` and the pill-button call sites (built first — S8-4 and S8-5 consume it) | [x] |
-| S8-4 | `SegmentedControl` + `Toggle`, their call sites, and the rich-text toolbar | [ ] |
-| S8-5 | `TextField` and its call sites | [ ] |
+| S8-4 | `SegmentedControl` + `Toggle`, their call sites, and the rich-text toolbar | [x] |
+| S8-5 | `TextField` and its call sites | [x] |
 | S8-C-controls | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## Approved shape
@@ -31,24 +31,17 @@ Approved 2026-10-04.
 - The lists privacy sentence is the `Prose` variant (same single choice, radio semantics).
 - Profile's year metric moves from `remember` to `ProfileUiState` with an action; Lens's "Yours" enabled flag becomes the option's `enabled`.
 - No loading state: a segment that is not ready is a disabled option.
-- **`Toggle`** (`core/component/control/`): `ToggleUiModel(key, checked, enabled, description, variant)`; `variant` = `Icon(on, off, style: Filled | Bare)` | `Switch`; `ToggleEvent.Toggled(key, checked)`. Every toggle carries switch semantics.
+- **`Toggle`** (`core/component/control/`): `ToggleUiModel(key, checked, enabled, description, variant)`; `variant` = `Icon(on, off, style: Filled | Bare)` | `Switch` | `DisplaySwitch` (no input, no semantics — for a row that owns the tap); `ToggleEvent.Toggled(key, checked)`. Every interactive toggle carries switch semantics.
 - **`RichTextFormattingToolbar`** moves to `richtext/` (its only consumer is the verdict editor, and it works on `RichTextMarkType`): `RichTextFormattingToolbarUiModel(activeMarks: ImmutableSet<RichTextMarkType>, enabled)`, `RichTextFormattingToolbarEvent.MarkToggled(mark)`. `FormatChip` becomes `Chip` (Tonal, selected, Bold/Italic face); `Chip` gains selected semantics. The verdict editor builds the toolbar model from its own text selection — the contract's unsettled composition-only-value edge, recorded as such.
 - **`TextField`** (`core/component/field/`): `TextFieldUiModel(key, text, placeholder, variant, keyboard: Text | Number, enabled, autoFocus)`; `variant` = `Pill(leadingIcon?, trailing: PillButtonUiModel?)` | `Outlined(label)` | `Hero` (display, auto-fit) | `Numeral(charCount)`; `TextFieldEvent.ValueChanged(key, text)` | `Submitted(key)` | `TrailingClicked(key)`.
-- `Outlined(label)` keeps the scanner manual entry and the re-auth token field's current Material outlined look and floating label.
+- `Outlined(label)` keeps the scanner manual entry and the re-auth token field's current Material outlined look and floating label; `label` is nullable so the scanner stays label-less.
+- `Pill` carries a size/tone axis so every migrated site keeps its existing look (onboarding key 52dp, tag naming 48dp, library tag search 42dp `surfaceContainer`); no accepted shifts.
 - `TagNamingField`'s Add pill is the `Pill` trailing slot, present only when the draft is non-blank (decided by the mapper).
 - `NameHeroField`'s `FocusRequester` plumbing becomes `autoFocus`; `TimeField`'s select-all-on-focus is internal to `Numeral`.
 - The progress sheet's hours/minutes/seconds drafts move from `remember` into the feature state; clamping moves into the action.
 - No loading state: a field holds user input; submitting disables it via `enabled`.
 - **Stays out:** `BecauseYouReadGenreControl` (one-off eyebrow sheet trigger with its own loading — stays in explore); the search top bar's input (its own focus contract, § 7.6); the verdict editor's body (multiline rich-text editor).
 - **Dropped from the inventory:** `UpdatePillButton` — deleted in `1c89151e`; the update card is a `Callout` with a `RhaydusButton`.
-
-## S8-4 open
-
-- Gates: main compile, ktlint, detekt, module graph, projectHealth green; `styleCheck` red only on `compileAndroidHostTest` in explore/library/lists/settings (old tests vs changed models).
-- Test-writer: fix those (`Bookmark.labelled`, `.checked` → `.toggle`, `OnPrivacySelectedAction`); cover `lensToggleFor` + `LensToggleCollector`, `yearMetricToggleFor` + `YearMetricToggleCollector`, `OnYearMetricSelectedAction`, `privacyToggleFor`, `hideUntaggedAuthorsToggleFor`, `libraryVisibilityToggleFor`, `ProgressSheetUiModel.tabsFor`, `shareSheetBodyFor.variantToggle`.
-- Fix round: `LibraryTabEntry.visibilityToggle` is built in the `orderedEntries` getter (store it); `SettingsToggleRow`'s row `toggleable` and its Switch both toggle (one target).
-- `VerdictSheet` builds its toolbar and spoiler-switch models from local editor state — the approved composition-only edge; reviewer confirms only.
-- Then reviewer, then S8-5.
 
 ## S8-6 — `PillButton`
 

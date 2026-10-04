@@ -30,6 +30,15 @@ sealed interface ProgressSheetEvent {
         val actionAt: String?,
     ) : ProgressSheetEvent
 
+    /** The reader edited one unit of the time entry; the host clamps it into the draft. */
+    data class TimeChanged(
+        val unit: ProgressTimeUnit,
+        val text: String,
+    ) : ProgressSheetEvent
+
+    /** The reader pressed a minutes stepper; [delta] is -1 or +1. */
+    data class MinutesStepped(val delta: Int) : ProgressSheetEvent
+
     /**
      * The sheet's own "Mark as read" action — the same transition the Shelve control's "Read" row
      * fires. The host is responsible for dismissing the sheet as well as recording the finish; the

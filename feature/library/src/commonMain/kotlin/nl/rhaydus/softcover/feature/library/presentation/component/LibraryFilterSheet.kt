@@ -28,6 +28,9 @@ import nl.rhaydus.designsystem.model.ModalSheetForm
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.field.TextField
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
+import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
@@ -90,7 +93,7 @@ internal fun LibraryFilterSheet(
                 FacetSections(
                     chips = chips,
                     selection = selection,
-                    tagSearch = state.filterDraft?.tagSearch.orEmpty(),
+                    tagSearchField = state.tagSearchField,
                     onChipEvent = { event ->
                         when (event) {
                             is ChipEvent.Clicked -> runAction(OnFilterDraftChipToggledAction(key = event.key))
@@ -98,7 +101,14 @@ internal fun LibraryFilterSheet(
                             is ChipEvent.SpoilerToggled -> Unit
                         }
                     },
-                    onTagSearchChanged = { query -> runAction(OnFilterDraftTagSearchChangedAction(query = query)) },
+                    onTagSearchEvent = { event ->
+                        when (event) {
+                            is TextFieldEvent.ValueChanged -> runAction(OnFilterDraftTagSearchChangedAction(query = event.text))
+
+                            is TextFieldEvent.Submitted,
+                            is TextFieldEvent.TrailingClicked -> Unit
+                        }
+                    },
                 )
             }
         }
@@ -109,9 +119,9 @@ internal fun LibraryFilterSheet(
 private fun FacetSections(
     chips: LibraryFilterChips,
     selection: LibraryFilterSheetSelection,
-    tagSearch: String,
+    tagSearchField: TextFieldUiModel,
     onChipEvent: (ChipEvent) -> Unit,
-    onTagSearchChanged: (String) -> Unit,
+    onTagSearchEvent: (TextFieldEvent) -> Unit,
 ) {
     if (chips.ownershipChips.isEmpty.not() || chips.formatChips.isEmpty.not()) {
         FacetSection(label = selection.ownershipFormatHeader) {
@@ -156,10 +166,10 @@ private fun FacetSections(
         TagsFacetSection(
             header = selection.tagsHeader,
             availableLabel = selection.tagsAvailableLabel,
-            tagSearch = tagSearch,
+            tagSearchField = tagSearchField,
             visibleChips = selection.tagChips,
             onChipEvent = onChipEvent,
-            onTagSearchChanged = onTagSearchChanged,
+            onTagSearchEvent = onTagSearchEvent,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -188,10 +198,10 @@ private fun FacetSections(
 private fun TagsFacetSection(
     header: SectionHeaderUiModel,
     availableLabel: String,
-    tagSearch: String,
+    tagSearchField: TextFieldUiModel,
     visibleChips: List<ChipUiModel>,
     onChipEvent: (ChipEvent) -> Unit,
-    onTagSearchChanged: (String) -> Unit,
+    onTagSearchEvent: (TextFieldEvent) -> Unit,
 ) {
     Column {
         SectionHeader(
@@ -207,9 +217,9 @@ private fun TagsFacetSection(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        TagSearchField(
-            query = tagSearch,
-            onQueryChange = onTagSearchChanged,
+        TextField(
+            model = tagSearchField,
+            onEvent = onTagSearchEvent,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -236,67 +246,6 @@ private fun TagsFacetSection(
                     )
                 }
             }
-        }
-    }
-}
-
-/**
- * Not the foundation `EditorialSearchField`: that component hardcodes its own 24dp horizontal
- * padding and a taller (~56dp) field to sit directly on a page, which — nested inside this sheet's
- * already-24dp-padded facet column — would both double-inset the pill past the other facets' left
- * edge and blow past the spec's 42dp search-your-tags pill height. Composed from the same
- * leading-icon + `BasicTextField` + placeholder primitives instead, sized to fit this sheet. Fully
- * controlled by [query] — the field itself holds no state, since [query] backs
- * `LibraryFilterDraft.tagSearch` on [LibraryUiState].
- */
-@Composable
-private fun TagSearchField(
-    query: String,
-    onQueryChange: (String) -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(42.dp)
-            .background(
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(percent = 50),
-            )
-            .padding(horizontal = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        val searchIcon = drawableIconResource(
-            icon = SoftcoverIcon.Search,
-            contentDescription = "",
-        )
-
-        Icon(
-            painter = searchIcon.getIconPainter(),
-            contentDescription = searchIcon.contentDescription,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(18.dp),
-        )
-
-        Box(modifier = Modifier.weight(1f)) {
-            if (query.isEmpty()) {
-                SoftcoverText(
-                    text = "Search your tags",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            BasicTextField(
-                value = query,
-                onValueChange = onQueryChange,
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.fillMaxWidth(),
-            )
         }
     }
 }

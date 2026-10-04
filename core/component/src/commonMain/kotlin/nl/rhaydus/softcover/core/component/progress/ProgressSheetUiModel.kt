@@ -129,6 +129,18 @@ data class ProgressSheetUiModel(
                 medium = ProgressSheetMedium.Timed(
                     totalSeconds = 100_320,
                     currentSeconds = 12_045,
+                    hours = progressTimeField(
+                        unit = ProgressTimeUnit.HOURS,
+                        text = "3",
+                    ),
+                    minutes = progressTimeField(
+                        unit = ProgressTimeUnit.MINUTES,
+                        text = "20",
+                    ),
+                    seconds = progressTimeField(
+                        unit = ProgressTimeUnit.SECONDS,
+                        text = "45",
+                    ),
                 ),
                 progressPercent = 12,
                 selectedTab = ProgressSheetTab.TIME,
@@ -138,6 +150,18 @@ data class ProgressSheetUiModel(
                 medium = ProgressSheetMedium.Timed(
                     totalSeconds = 0,
                     currentSeconds = 3_600,
+                    hours = progressTimeField(
+                        unit = ProgressTimeUnit.HOURS,
+                        text = "1",
+                    ),
+                    minutes = progressTimeField(
+                        unit = ProgressTimeUnit.MINUTES,
+                        text = "0",
+                    ),
+                    seconds = progressTimeField(
+                        unit = ProgressTimeUnit.SECONDS,
+                        text = "0",
+                    ),
                 ),
                 progressPercent = 0,
                 selectedTab = ProgressSheetTab.TIME,

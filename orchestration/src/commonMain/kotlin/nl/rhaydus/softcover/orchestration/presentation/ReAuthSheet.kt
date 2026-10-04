@@ -4,13 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.field.TextField
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -38,19 +37,16 @@ internal fun ReAuthSheet(
         },
     ) {
         Column {
-            OutlinedTextField(
-                value = model.apiKey,
-                onValueChange = { onEvent(ReAuthSheetEvent.ApiKeyChanged(it)) },
-                label = { SoftcoverText(text = "API token") },
-                placeholder = { SoftcoverText(text = "Paste your Hardcover API token") },
-                enabled = model.fieldEnabled,
-                singleLine = true,
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors().copy(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                ),
-                modifier = Modifier.fillMaxWidth(),
+            TextField(
+                model = model.apiKeyField,
+                onEvent = { event ->
+                    when (event) {
+                        is TextFieldEvent.ValueChanged -> onEvent(ReAuthSheetEvent.ApiKeyChanged(event.text))
+
+                        is TextFieldEvent.Submitted,
+                        is TextFieldEvent.TrailingClicked -> Unit
+                    }
+                },
             )
 
             if (model.errorMessage != null) {

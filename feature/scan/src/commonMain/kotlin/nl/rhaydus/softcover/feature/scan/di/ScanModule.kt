@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.scan.di
 import nl.rhaydus.softcover.core.book.di.bookModule
 import nl.rhaydus.softcover.core.domain.di.dispatcherModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
+import nl.rhaydus.softcover.feature.scan.presentation.collector.IsbnFieldCollector
 import nl.rhaydus.softcover.feature.scan.presentation.collector.ScanCollector
 import nl.rhaydus.softcover.feature.scan.presentation.collector.UnknownIsbnSheetCollector
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanScreenModel
@@ -17,6 +18,7 @@ val scanModule = module {
     )
 
     factory { UnknownIsbnSheetCollector() } bind ScanCollector::class
+    factory { IsbnFieldCollector() } bind ScanCollector::class
 
     factory {
         ScanScreenModel(

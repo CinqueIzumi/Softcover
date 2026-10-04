@@ -15,6 +15,7 @@ internal data object DismissProgressSheetAction : ReadingAction {
             it.copy(
                 bookToUpdate = null,
                 showProgressSheet = false,
+                progressTimeDraft = null,
             )
         }
     }

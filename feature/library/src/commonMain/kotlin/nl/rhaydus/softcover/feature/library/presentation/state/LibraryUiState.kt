@@ -8,6 +8,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -140,6 +141,9 @@ internal data class LibraryUiState(
      * [filterDraft]. Null whenever the sheet is closed.
      */
     val filterSheetSelection: LibraryFilterSheetSelection? = null,
+
+    /** The Filter sheet's tag search pill, written with [filterDraft]'s `tagSearch` by the draft actions. */
+    val tagSearchField: TextFieldUiModel = tagSearchFieldFor(query = ""),
 
     /**
      * Filter picker options per tab, precomputed off the main thread by `FilterOptionsCollector`

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.core.component.progress
 
+import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
+
 /**
  * What a book's progress is measured in, and where it currently stands.
  *
@@ -27,10 +29,16 @@ sealed interface ProgressSheetMedium {
             get() = totalPages > 0
     }
 
-    /** Audiobook: progress is a position out of [totalSeconds]. */
+    /**
+     * Audiobook: progress is a position out of [totalSeconds]. The three fields hold the reader's
+     * in-progress entry, seeded from [currentSeconds] until they edit it.
+     */
     data class Timed(
         val totalSeconds: Int,
         val currentSeconds: Int,
+        val hours: TextFieldUiModel,
+        val minutes: TextFieldUiModel,
+        val seconds: TextFieldUiModel,
     ) : ProgressSheetMedium {
         override val hasKnownTotal: Boolean
             get() = totalSeconds > 0

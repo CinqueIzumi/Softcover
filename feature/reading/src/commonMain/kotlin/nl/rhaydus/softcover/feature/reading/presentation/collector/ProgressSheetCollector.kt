@@ -28,6 +28,7 @@ internal class ProgressSheetCollector : ReadingCollector {
                 ProgressSheetSnapshot(
                     bookToUpdate = it.bookToUpdate,
                     selectedTab = it.progressSheetTab,
+                    hasTimeDraft = it.progressTimeDraft != null,
                 )
             }
             .distinctUntilChanged()
@@ -35,7 +36,10 @@ internal class ProgressSheetCollector : ReadingCollector {
                 scope.setState {
                     it.copy(
                         progressSheet = snapshot.bookToUpdate
-                            ?.toProgressSheetUiModel(selectedTab = snapshot.selectedTab),
+                            ?.toProgressSheetUiModel(
+                                selectedTab = snapshot.selectedTab,
+                                timeDraft = it.progressTimeDraft,
+                            ),
                     )
                 }
             }

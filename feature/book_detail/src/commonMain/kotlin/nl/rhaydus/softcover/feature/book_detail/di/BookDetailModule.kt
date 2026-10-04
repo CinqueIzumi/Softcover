@@ -55,6 +55,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveCon
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagNamingFieldCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagSuggestionsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagVocabularySyncCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.UnreleasedBadgeCollector
@@ -101,6 +102,7 @@ val bookDetailModule = module {
     factory { TagSuggestionsCollector() } bind BookDetailCollector::class
     factory { TagChipModelsCollector() } bind BookDetailCollector::class
     factory { TagEditorChipModelsCollector() } bind BookDetailCollector::class
+    factory { TagNamingFieldCollector() } bind BookDetailCollector::class
     factory { TagVocabularySyncCollector() } bind BookDetailCollector::class
     factory { VerdictReviewCollector() } bind BookDetailCollector::class
     factory { VerdictSheetCollector() } bind BookDetailCollector::class

@@ -6,10 +6,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.field.TextFieldEvent
+import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
@@ -41,8 +42,7 @@ internal fun TagEditorBottomSheet(
     categoryChips: List<ChipUiModel>,
     suggestions: ChipSet<UserTag>,
     selectedCategory: TagCategory,
-    draft: String,
-    addPill: PillButtonUiModel,
+    namingField: TextFieldUiModel,
     onCategorySelected: (TagCategory) -> Unit,
     onDraftChange: (String) -> Unit,
     onAddTag: (String, TagCategory) -> Unit,
@@ -52,9 +52,18 @@ internal fun TagEditorBottomSheet(
 ) {
     val commitDraft = {
         onAddTag(
-            draft,
+            namingField.text,
             selectedCategory,
         )
+    }
+
+    val onNamingFieldEvent: (TextFieldEvent) -> Unit = { event ->
+        when (event) {
+            is TextFieldEvent.ValueChanged -> onDraftChange(event.text)
+
+            is TextFieldEvent.Submitted,
+            is TextFieldEvent.TrailingClicked -> commitDraft()
+        }
     }
 
     val onCategoryChipEvent: (ChipEvent) -> Unit = { event ->
@@ -83,12 +92,10 @@ internal fun TagEditorBottomSheet(
             TagEditorAddBlock(
                 selectedCategory = selectedCategory,
                 categoryChips = categoryChips,
-                draft = draft,
-                addPill = addPill,
+                namingField = namingField,
                 suggestionChips = suggestions.chips,
                 onCategoryChipEvent = onCategoryChipEvent,
-                onDraftChange = onDraftChange,
-                onCommit = commitDraft,
+                onNamingFieldEvent = onNamingFieldEvent,
                 onSuggestionChipEvent = onSuggestionChipEvent,
                 modifier = Modifier.fillMaxWidth(),
             )
