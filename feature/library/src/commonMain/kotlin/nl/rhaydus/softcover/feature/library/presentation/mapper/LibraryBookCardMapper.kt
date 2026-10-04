@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -23,10 +24,10 @@ import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.uibinding.book.bookStatsLine
 import nl.rhaydus.softcover.core.uibinding.book.byline
-import nl.rhaydus.softcover.core.uibinding.book.percentLabel
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
 import nl.rhaydus.softcover.core.uibinding.deadline.toBadgeUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 
 /**
  * The book's card for [layout]: column or cover-only on the grids, a compact or large row on the
@@ -200,7 +201,7 @@ private fun Book.gridDecorations(
     return BookCardDecorations(
         progress = if (status == BookStatus.Reading && progress != null) {
             BookCardProgress.Value(
-                fraction = progress / 100f,
+                bar = ProgressBarUiModel(fraction = progress / 100f),
                 label = null,
             )
         } else {
@@ -219,7 +220,7 @@ private fun Book.labelledProgress(): BookCardProgress.Value? {
     val fraction = progress / 100f
 
     return BookCardProgress.Value(
-        fraction = fraction,
+        bar = ProgressBarUiModel(fraction = fraction),
         label = percentLabel(fraction = fraction),
     )
 }

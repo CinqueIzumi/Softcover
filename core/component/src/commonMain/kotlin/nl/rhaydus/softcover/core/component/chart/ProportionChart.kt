@@ -13,16 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.state.skeletonMask
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
 @Composable
 fun ProportionChart(
@@ -59,42 +56,26 @@ fun ProportionChart(
         model.segments.forEach { segment ->
             Divider(model = DividerUiModel.Horizontal())
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 7.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(11.dp)
-                        .clip(swatchShape)
-                        .background(segment.tone.color())
-                        .skeletonMask(
-                            visible = model.isLoading,
-                            shape = swatchShape,
-                        ),
-                )
+            ChartLegendRow(
+                label = segment.label,
+                share = segment.share,
+                isLoading = model.isLoading,
+                modifier = Modifier.padding(vertical = 7.dp),
+                leading = {
+                    Box(
+                        modifier = Modifier
+                            .size(11.dp)
+                            .clip(swatchShape)
+                            .background(segment.tone.color())
+                            .skeletonMask(
+                                visible = model.isLoading,
+                                shape = swatchShape,
+                            ),
+                    )
 
-                Spacer(modifier = Modifier.width(10.dp))
-
-                SoftcoverText(
-                    text = segment.label,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    isLoading = model.isLoading,
-                    standIn = "Segment",
-                    modifier = Modifier.weight(1f),
-                )
-
-                SoftcoverText(
-                    text = segment.share,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    isLoading = model.isLoading,
-                    standIn = "00%",
-                )
-            }
+                    Spacer(modifier = Modifier.width(10.dp))
+                },
+            )
         }
     }
 }

@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.state.skeletonMask
@@ -27,7 +29,6 @@ fun ColumnChart(
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(3.dp)
-    val hasValues = model.columns.any { it.value != null }
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -37,10 +38,18 @@ fun ColumnChart(
             val isLead = column.tone == ChartTone.Lead
 
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .then(
+                        if (model.isLoading) {
+                            Modifier
+                        } else {
+                            Modifier.clearAndSetSemantics { contentDescription = column.contentDescription }
+                        },
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if (hasValues) {
+                if (model.showsValues) {
                     Box(
                         modifier = Modifier.height(16.dp),
                         contentAlignment = Alignment.BottomCenter,

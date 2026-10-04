@@ -114,7 +114,7 @@ class InProgressMapperTest {
         }
 
         @Test
-        fun `bar fraction is clamped to one when progress exceeds 100`() {
+        fun `bar fraction passes progress above 100 through unclamped`() {
             // ----- Arrange -----
             val book = stubBook(
                 read = buildRead(progress = 130f),
@@ -125,11 +125,11 @@ class InProgressMapperTest {
             val result = book.toInProgress()
 
             // ----- Assert -----
-            result.shouldNotBeNull().bar.fraction shouldBe 1f
+            result.shouldNotBeNull().bar.fraction shouldBe 1.3f
         }
 
         @Test
-        fun `bar fraction is clamped to zero when progress is negative`() {
+        fun `bar fraction passes negative progress through unclamped`() {
             // ----- Arrange -----
             val book = stubBook(
                 read = buildRead(progress = -5f),
@@ -140,7 +140,7 @@ class InProgressMapperTest {
             val result = book.toInProgress()
 
             // ----- Assert -----
-            result.shouldNotBeNull().bar.fraction shouldBe 0f
+            result.shouldNotBeNull().bar.fraction shouldBe -0.05f
         }
 
         @Test

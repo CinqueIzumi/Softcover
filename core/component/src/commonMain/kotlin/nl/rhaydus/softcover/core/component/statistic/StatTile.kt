@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,7 +67,7 @@ private fun HeroTile(
     val typography = MaterialTheme.editorialTypography
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {},
         color = MaterialTheme.colorScheme.primary,
         shape = RoundedCornerShape(28.dp),
     ) {
@@ -117,7 +118,7 @@ private fun StandardTile(
     val typography = MaterialTheme.editorialTypography
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {},
         color = colors.surfaceContainerHigh,
         shape = RoundedCornerShape(24.dp),
     ) {
@@ -158,7 +159,7 @@ private fun CompactTile(
     val typography = MaterialTheme.editorialTypography
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {},
         color = colors.surfaceContainer,
         shape = RoundedCornerShape(20.dp),
     ) {

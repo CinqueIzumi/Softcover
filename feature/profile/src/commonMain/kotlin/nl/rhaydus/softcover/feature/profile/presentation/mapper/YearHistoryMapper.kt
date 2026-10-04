@@ -19,7 +19,10 @@ private const val COMPACT_COUNT_ROUNDS_TO_MILLION = 999_950
 private const val EMPTY_CAPTION = "Your reading years will chart themselves in as books finish."
 
 /** The first busiest year leads; a null [series] yields the loading columns. */
-internal fun yearHistoryChartUiModel(series: List<YearCount>?): ColumnChartUiModel {
+internal fun yearHistoryChartUiModel(
+    series: List<YearCount>?,
+    metric: YearMetric,
+): ColumnChartUiModel {
     if (series == null) {
         return ColumnChartUiModel(
             columns = List(LOADING_COLUMN_COUNT) {
@@ -28,8 +31,10 @@ internal fun yearHistoryChartUiModel(series: List<YearCount>?): ColumnChartUiMod
                     tone = ChartTone.Second,
                     label = "",
                     value = "",
+                    contentDescription = "",
                 )
             }.toImmutableList(),
+            showsValues = true,
             isLoading = true,
         )
     }
@@ -52,10 +57,27 @@ internal fun yearHistoryChartUiModel(series: List<YearCount>?): ColumnChartUiMod
                         padChar = '0',
                     ),
                     value = if (yearCount.count > 0) formatCompactCount(yearCount.count) else null,
+                    contentDescription = yearColumnDescription(
+                        yearCount = yearCount,
+                        metric = metric,
+                    ),
                 )
             }
             .toImmutableList(),
+        showsValues = true,
     )
+}
+
+private fun yearColumnDescription(
+    yearCount: YearCount,
+    metric: YearMetric,
+): String {
+    val unit = when (metric) {
+        YearMetric.BOOKS -> if (yearCount.count == 1) "book" else "books"
+        YearMetric.PAGES -> if (yearCount.count == 1) "page" else "pages"
+    }
+
+    return "${yearCount.year}, ${formatGroupedNumber(yearCount.count)} $unit"
 }
 
 internal fun yearHistoryCaption(

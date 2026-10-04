@@ -95,6 +95,61 @@ class RatingsHistogramMapperTest {
             loaded.map { it.value }.distinct() shouldBe listOf(null)
             loading.map { it.value }.distinct() shouldBe listOf(null)
         }
+
+        @Test
+        fun `description of the first bucket is singular one star`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(halfStarBuckets = listOf(1, 0, 0, 0, 0, 0, 0, 0, 0))
+
+            // ----- Act -----
+            val columns = ratingsChartUiModel(ratings).columns
+
+            // ----- Assert -----
+            columns[0].contentDescription shouldBe "1 star, 1 book"
+        }
+
+        @Test
+        fun `description of a half step carries the half and plural books`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(halfStarBuckets = listOf(0, 3, 0, 0, 0, 0, 0, 0, 0))
+
+            // ----- Act -----
+            val columns = ratingsChartUiModel(ratings).columns
+
+            // ----- Assert -----
+            columns[1].contentDescription shouldBe "1½ stars, 3 books"
+        }
+
+        @Test
+        fun `description of the last bucket is five stars and zero books is plural`() {
+            // ----- Arrange & Act -----
+            val columns = ratingsChartUiModel(RatingsDistribution()).columns
+
+            // ----- Assert -----
+            columns.last().contentDescription shouldBe "5 stars, 0 books"
+            columns[2].contentDescription shouldBe "2 stars, 0 books"
+            columns[7].contentDescription shouldBe "4½ stars, 0 books"
+        }
+
+        @Test
+        fun `loading columns have an empty description`() {
+            // ----- Arrange & Act -----
+            val columns = ratingsChartUiModel(null).columns
+
+            // ----- Assert -----
+            columns.map { it.contentDescription }.distinct() shouldBe listOf("")
+        }
+
+        @Test
+        fun `values are not shown when loaded or loading`() {
+            // ----- Arrange & Act -----
+            val loaded = ratingsChartUiModel(RatingsDistribution(halfStarBuckets = List(9) { 2 }))
+            val loading = ratingsChartUiModel(null)
+
+            // ----- Assert -----
+            loaded.showsValues shouldBe false
+            loading.showsValues shouldBe false
+        }
     }
 
     @Nested

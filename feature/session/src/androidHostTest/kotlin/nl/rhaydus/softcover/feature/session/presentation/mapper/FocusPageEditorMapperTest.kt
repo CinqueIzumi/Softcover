@@ -143,7 +143,7 @@ class FocusPageEditorMapperTest {
         }
 
         @Test
-        fun `bar is clamped to full when the draft exceeds the total`() {
+        fun `bar passes an over-total draft through unclamped`() {
             // ----- Arrange -----
             val book = stubBook(currentPages = 200)
 
@@ -151,11 +151,11 @@ class FocusPageEditorMapperTest {
             val editor = book.toFocusPageEditor(draft = "500")
 
             // ----- Assert -----
-            editor.bar.fraction shouldBe 1f
+            editor.bar.fraction shouldBe 2.5f
         }
 
         @Test
-        fun `bar is clamped to empty for a negative draft`() {
+        fun `bar passes a negative draft through unclamped`() {
             // ----- Arrange -----
             val book = stubBook(currentPages = 200)
 
@@ -163,7 +163,7 @@ class FocusPageEditorMapperTest {
             val editor = book.toFocusPageEditor(draft = "-5")
 
             // ----- Assert -----
-            editor.bar.fraction shouldBe 0f
+            editor.bar.fraction shouldBe -0.025f
         }
 
         @Test
@@ -206,7 +206,7 @@ class FocusPageEditorMapperTest {
         }
 
         @Test
-        fun `without a page count the stored percentage is clamped to full`() {
+        fun `without a page count the stored percentage passes through unclamped`() {
             // ----- Arrange -----
             val book = stubBook(storedProgress = 140f)
 
@@ -214,7 +214,7 @@ class FocusPageEditorMapperTest {
             val editor = book.toFocusPageEditor(draft = "")
 
             // ----- Assert -----
-            editor.bar.fraction shouldBe 1f
+            editor.bar.fraction shouldBe 1.4f
         }
     }
 }

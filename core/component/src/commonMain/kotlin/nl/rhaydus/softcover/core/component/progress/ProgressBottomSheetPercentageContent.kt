@@ -43,10 +43,7 @@ internal fun ColumnScope.ProgressBottomSheetPercentageContent(
 
     val parsed = number.text.toIntOrNull() ?: 0
 
-    val fraction = (parsed.toFloat() / 100f).coerceIn(
-        minimumValue = 0f,
-        maximumValue = 1f,
-    )
+    val fraction = parsed.toFloat() / 100f
 
     fun stepPercentageBy(delta: Int) {
         val next = (parsed + delta).coerceIn(

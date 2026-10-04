@@ -24,8 +24,10 @@ internal fun ratingsChartUiModel(ratings: RatingsDistribution?): ColumnChartUiMo
                     tone = if (index % 2 == 0) ChartTone.Lead else ChartTone.Fourth,
                     label = if (index % 2 == 0) "" else null,
                     value = null,
+                    contentDescription = "",
                 )
             }.toImmutableList(),
+            showsValues = false,
             isLoading = true,
         )
     }
@@ -47,10 +49,27 @@ internal fun ratingsChartUiModel(ratings: RatingsDistribution?): ColumnChartUiMo
                     },
                     label = if (isWholeStep) "${index / 2 + 1}★" else null,
                     value = null,
+                    contentDescription = ratingColumnDescription(
+                        index = index,
+                        count = count,
+                    ),
                 )
             }
             .toImmutableList(),
+        showsValues = false,
     )
+}
+
+private fun ratingColumnDescription(
+    index: Int,
+    count: Int,
+): String {
+    val half = if (index % 2 == 1) "½" else ""
+    val stars = "${index / 2 + 1}$half"
+    val starUnit = if (index == 0) "star" else "stars"
+    val bookUnit = if (count == 1) "book" else "books"
+
+    return "$stars $starUnit, $count $bookUnit"
 }
 
 internal fun ratingsAverageUiModel(ratings: RatingsDistribution?): StatNumberUiModel = StatNumberUiModel(

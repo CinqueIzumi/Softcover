@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
@@ -520,7 +521,7 @@ class BookCardModelsCollectorTest {
             // ----- Assert -----
             val progress = stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.progress
             progress shouldBe BookCardProgress.Value(
-                fraction = 0.5f,
+                bar = ProgressBarUiModel(fraction = 0.5f),
                 label = null,
             )
             job.cancel()
@@ -1233,7 +1234,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.card().decorations.progress shouldBe BookCardProgress.Value(
-                fraction = 0.4f,
+                bar = ProgressBarUiModel(fraction = 0.4f),
                 label = "40%",
             )
             job.cancel()

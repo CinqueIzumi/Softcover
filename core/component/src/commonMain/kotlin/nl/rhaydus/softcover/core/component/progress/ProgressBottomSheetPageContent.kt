@@ -43,10 +43,7 @@ internal fun ColumnScope.ProgressBottomSheetPageContent(
     val parsed = number.text.toIntOrNull() ?: 0
 
     val fraction = if (hasTotal) {
-        (parsed.toFloat() / totalPages).coerceIn(
-            minimumValue = 0f,
-            maximumValue = 1f,
-        )
+        (parsed.toFloat() / totalPages)
     } else {
         0f
     }

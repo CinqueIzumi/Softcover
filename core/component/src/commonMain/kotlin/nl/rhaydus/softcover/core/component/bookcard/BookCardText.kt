@@ -91,10 +91,10 @@ internal fun BookCardTextBlock(
         if (progress != null) {
             BookCardProgressBar(
                 progress = progress,
+                isLoading = isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
-                isLoading = isLoading,
             )
         }
     }

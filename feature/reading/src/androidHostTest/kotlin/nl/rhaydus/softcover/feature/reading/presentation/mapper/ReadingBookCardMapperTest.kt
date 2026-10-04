@@ -304,7 +304,7 @@ class ReadingBookCardMapperTest {
 
             // ----- Assert -----
             val progress = progressValue(card)
-            progress.fraction shouldBe 0.25f
+            progress.bar.fraction shouldBe 0.25f
             progress.label shouldBe "25%"
         }
 
@@ -330,12 +330,12 @@ class ReadingBookCardMapperTest {
 
             // ----- Assert -----
             val progress = progressValue(card)
-            progress.fraction shouldBe 0f
+            progress.bar.fraction shouldBe 0f
             progress.label shouldBe "0%"
         }
 
         @Test
-        fun `clamps the fraction to one when progress exceeds one hundred`() {
+        fun `passes the raw fraction through when progress exceeds one hundred`() {
             // ----- Arrange -----
             val book = book(userBookRead = read(progress = 150f))
 
@@ -343,7 +343,7 @@ class ReadingBookCardMapperTest {
             val card = alsoReading(book = book)
 
             // ----- Assert -----
-            progressValue(card).fraction shouldBe 1f
+            progressValue(card).bar.fraction shouldBe 1.5f
         }
 
         @Test
@@ -356,12 +356,12 @@ class ReadingBookCardMapperTest {
 
             // ----- Assert -----
             val progress = progressValue(card)
-            progress.fraction shouldBe 1f
+            progress.bar.fraction shouldBe 1.5f
             progress.label shouldBe "100%"
         }
 
         @Test
-        fun `clamps the fraction to zero when progress is negative`() {
+        fun `passes the raw fraction through and floors the label when progress is negative`() {
             // ----- Arrange -----
             val book = book(userBookRead = read(progress = -5f))
 
@@ -369,7 +369,9 @@ class ReadingBookCardMapperTest {
             val card = alsoReading(book = book)
 
             // ----- Assert -----
-            progressValue(card).fraction shouldBe 0f
+            val progress = progressValue(card)
+            progress.bar.fraction shouldBe -0.05f
+            progress.label shouldBe "0%"
         }
 
         @Test

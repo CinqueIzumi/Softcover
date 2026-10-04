@@ -91,9 +91,8 @@ private fun BookCardCoverScaffold(
         if (progress != null) {
             BookCardProgressBar(
                 progress = progress,
-                modifier = Modifier.padding(top = 9.dp),
-                barHeight = 8.dp,
                 isLoading = isLoading,
+                modifier = Modifier.padding(top = 9.dp),
             )
         }
 

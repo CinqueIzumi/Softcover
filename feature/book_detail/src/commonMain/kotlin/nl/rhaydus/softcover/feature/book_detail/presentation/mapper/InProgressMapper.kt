@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.InProgressUiModel
-import kotlin.math.roundToInt
 
 /** Null when the book has no read or no current edition, which is when the section has nothing to show. */
 internal fun Book.toInProgress(): InProgressUiModel? {
@@ -30,12 +30,9 @@ internal fun Book.toInProgress(): InProgressUiModel? {
     }
 
     return InProgressUiModel(
-        percent = "${read.progress.roundToInt()}%",
+        percent = percentLabel(fraction = read.progress / 100f),
         bar = ProgressBarUiModel(
-            fraction = (read.progress / 100f).coerceIn(
-                minimumValue = 0f,
-                maximumValue = 1f,
-            ),
+            fraction = (read.progress / 100f),
         ),
         summaryStart = summaryStart,
         summaryEnd = summaryEnd,

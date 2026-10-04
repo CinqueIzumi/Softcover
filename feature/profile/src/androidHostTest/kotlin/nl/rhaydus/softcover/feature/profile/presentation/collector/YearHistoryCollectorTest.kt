@@ -88,7 +88,10 @@ class YearHistoryCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(null)
+            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(
+                series = null,
+                metric = YearMetric.BOOKS,
+            )
             stateFlow.value.yearHistoryChart.isLoading shouldBe true
             job.cancel()
         }
@@ -110,7 +113,10 @@ class YearHistoryCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(null)
+            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(
+                series = null,
+                metric = YearMetric.BOOKS,
+            )
             job.cancel()
         }
 
@@ -131,7 +137,10 @@ class YearHistoryCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(books)
+            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(
+                series = books,
+                metric = YearMetric.BOOKS,
+            )
             stateFlow.value.yearHistoryCaption shouldBe yearHistoryCaption(
                 series = books,
                 metric = YearMetric.BOOKS,
@@ -157,7 +166,10 @@ class YearHistoryCollectorTest {
             stateFlow.value = stateFlow.value.copy(selectedYearMetric = YearMetric.PAGES)
 
             // ----- Assert -----
-            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(pages)
+            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(
+                series = pages,
+                metric = YearMetric.PAGES,
+            )
             stateFlow.value.yearHistoryCaption shouldBe yearHistoryCaption(
                 series = pages,
                 metric = YearMetric.PAGES,
@@ -186,7 +198,10 @@ class YearHistoryCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(books)
+            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(
+                series = books,
+                metric = YearMetric.BOOKS,
+            )
             job.cancel()
         }
     }

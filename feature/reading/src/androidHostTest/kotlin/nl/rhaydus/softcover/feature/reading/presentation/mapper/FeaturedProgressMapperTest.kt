@@ -112,7 +112,7 @@ class FeaturedProgressMapperTest {
         }
 
         @Test
-        fun `fraction is clamped to one above 100 percent`() {
+        fun `fraction passes progress above 100 percent through unclamped`() {
             // ----- Arrange -----
             val subject = book(userBookRead = read(progress = 140f))
 
@@ -120,11 +120,11 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.bar.fraction shouldBe 1f
+            result.bar.fraction shouldBe 1.4f
         }
 
         @Test
-        fun `fraction is clamped to zero below 0 percent`() {
+        fun `fraction passes progress below 0 percent through unclamped`() {
             // ----- Arrange -----
             val subject = book(userBookRead = read(progress = -10f))
 
@@ -132,7 +132,7 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.bar.fraction shouldBe 0f
+            result.bar.fraction shouldBe -0.1f
         }
 
         @Test

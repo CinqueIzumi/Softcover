@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.feature.reading.presentation.mapper
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
-import kotlin.math.roundToInt
 
 internal fun Book.toFeaturedProgress(): FeaturedProgressUiModel {
     val progress = userBookRead?.progress ?: 0f
@@ -22,14 +22,11 @@ internal fun Book.toFeaturedProgress(): FeaturedProgressUiModel {
     }
 
     return FeaturedProgressUiModel(
-        percent = "${progress.roundToInt()}%",
+        percent = percentLabel(fraction = progress / 100f),
         pageLead = pageLead,
         pageTail = pageTail,
         bar = ProgressBarUiModel(
-            fraction = (progress / 100f).coerceIn(
-                minimumValue = 0f,
-                maximumValue = 1f,
-            ),
+            fraction = (progress / 100f),
         ),
     )
 }

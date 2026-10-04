@@ -209,7 +209,7 @@ class LibraryBookCardMapperTest {
             // ----- Assert -----
             val value = progress.shouldBeInstanceOf<BookCardProgress.Value>()
             value.label shouldBe "42%"
-            value.fraction shouldBe 0.42f
+            value.bar.fraction shouldBe 0.42f
         }
 
         @Test
@@ -240,6 +240,53 @@ class LibraryBookCardMapperTest {
 
             // ----- Assert -----
             progress.shouldBeInstanceOf<BookCardProgress.Value>().label.shouldBeNull()
+        }
+
+        @Test
+        fun `the large row passes out-of-range progress through raw while the label is capped`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                status = BookStatus.Reading,
+                progress = 150f,
+            )
+
+            // ----- Act -----
+            val progress = book.card(LibraryGridLayout.LIST_LARGE).decorations.progress
+
+            // ----- Assert -----
+            val value = progress.shouldBeInstanceOf<BookCardProgress.Value>()
+            value.bar.fraction shouldBe 1.5f
+            value.label shouldBe "100%"
+        }
+
+        @Test
+        fun `grid progress carries the stored progress as the bar fraction`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                status = BookStatus.Reading,
+                progress = 42f,
+            )
+
+            // ----- Act -----
+            val progress = book.card(LibraryGridLayout.GRID_TWO_COLUMNS).decorations.progress
+
+            // ----- Assert -----
+            progress.shouldBeInstanceOf<BookCardProgress.Value>().bar.fraction shouldBe 0.42f
+        }
+
+        @Test
+        fun `grid progress passes out-of-range progress through raw`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                status = BookStatus.Reading,
+                progress = -5f,
+            )
+
+            // ----- Act -----
+            val progress = book.card(LibraryGridLayout.GRID_TWO_COLUMNS).decorations.progress
+
+            // ----- Assert -----
+            progress.shouldBeInstanceOf<BookCardProgress.Value>().bar.fraction shouldBe -0.05f
         }
     }
 }

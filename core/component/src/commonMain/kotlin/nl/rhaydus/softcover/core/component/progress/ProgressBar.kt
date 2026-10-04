@@ -8,8 +8,11 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.state.skeletonMask
+
+internal val ProgressBarHeight: Dp = 12.dp
 
 @Composable
 fun ProgressBar(
@@ -34,7 +37,10 @@ internal fun ProgressBarBody(
     isLoading: Boolean = false,
 ) {
     val animatedFraction by animateFloatAsState(
-        targetValue = fraction,
+        targetValue = fraction.coerceIn(
+            minimumValue = 0f,
+            maximumValue = 1f,
+        ),
         label = "progressFraction",
     )
 
@@ -42,7 +48,7 @@ internal fun ProgressBarBody(
         progress = { animatedFraction },
         modifier = modifier
             .fillMaxWidth()
-            .height(height = 12.dp)
+            .height(height = ProgressBarHeight)
             .skeletonMask(visible = isLoading),
     )
 }

@@ -5,7 +5,7 @@ import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.chart.RankedBarUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import kotlin.math.roundToInt
+import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 
 private const val RANKED_GENRE_COUNT = 5
 private const val LOADING_ROW_COUNT = 3
@@ -32,7 +32,7 @@ internal fun genreRankingUiModel(genres: GenreBreakdown?): RankedBarsUiModel {
             .mapIndexed { index, slice ->
                 RankedBarUiModel(
                     label = slice.name,
-                    share = "${(slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
+                    share = percentLabel(fraction = slice.fraction.toFloat()),
                     fraction = slice.fraction.toFloat(),
                     tone = ChartTone.forRank(index),
                 )

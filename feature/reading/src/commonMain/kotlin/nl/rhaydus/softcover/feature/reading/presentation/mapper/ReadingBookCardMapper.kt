@@ -14,15 +14,16 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
+import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.uibinding.book.byline
-import nl.rhaydus.softcover.core.uibinding.book.percentLabel
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 
 /** An "Also reading" row; a failed save replaces the series eyebrow and shakes the row. */
 internal fun Book.toAlsoReadingCard(
@@ -33,10 +34,7 @@ internal fun Book.toAlsoReadingCard(
 ): BookCardUiModel {
     val progress = userBookRead?.progress ?: 0f
 
-    val fraction = (progress / 100f).coerceIn(
-        minimumValue = 0f,
-        maximumValue = 1f,
-    )
+    val fraction = progress / 100f
 
     val eyebrow = if (mutationFailed) {
         BookCardEyebrow(
@@ -72,7 +70,7 @@ internal fun Book.toAlsoReadingCard(
         ),
         decorations = BookCardDecorations(
             progress = BookCardProgress.Value(
-                fraction = fraction,
+                bar = ProgressBarUiModel(fraction = fraction),
                 label = percentLabel(fraction = fraction),
             ),
             shakeOnError = mutationFailed,

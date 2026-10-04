@@ -8,7 +8,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 /**
  * A determinate progress bar.
  *
- * [fraction] is drawn as given; the mapper clamps it to 0..1.
+ * A [fraction] outside 0..1 is clamped when drawn.
  */
 @Immutable
 data class ProgressBarUiModel(

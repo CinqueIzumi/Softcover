@@ -16,10 +16,7 @@ internal fun Book.toFocusPageEditor(draft: String): FocusPageEditorUiModel {
         return FocusPageEditorUiModel(
             caption = "${percent.roundToInt()}% complete",
             bar = ProgressBarUiModel(
-                fraction = (percent / 100f).coerceIn(
-                    minimumValue = 0f,
-                    maximumValue = 1f,
-                ),
+                fraction = (percent / 100f),
             ),
             isEditable = false,
         )
@@ -30,10 +27,7 @@ internal fun Book.toFocusPageEditor(draft: String): FocusPageEditorUiModel {
     return FocusPageEditorUiModel(
         caption = "of $totalPages pages",
         bar = ProgressBarUiModel(
-            fraction = (page.toFloat() / totalPages).coerceIn(
-                minimumValue = 0f,
-                maximumValue = 1f,
-            ),
+            fraction = (page.toFloat() / totalPages),
         ),
         isEditable = true,
     )

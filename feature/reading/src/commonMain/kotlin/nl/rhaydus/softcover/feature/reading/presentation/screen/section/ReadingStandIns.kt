@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.button.PillButtonInteraction
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -51,7 +52,10 @@ internal val ALSO_READING_STAND_IN_CARD = BookCardUiModel(
     ),
     decorations = BookCardDecorations(
         progress = BookCardProgress.Value(
-            fraction = 0.5f,
+            bar = ProgressBarUiModel(
+                fraction = 0.5f,
+                isLoading = true,
+            ),
             label = "50%",
         ),
     ),

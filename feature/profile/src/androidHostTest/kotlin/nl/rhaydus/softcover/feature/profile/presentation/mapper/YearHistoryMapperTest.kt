@@ -15,12 +15,20 @@ class YearHistoryMapperTest {
         metric = YearMetric.BOOKS,
     )
 
+    private fun chartOf(
+        series: List<YearCount>?,
+        metric: YearMetric = YearMetric.BOOKS,
+    ) = yearHistoryChartUiModel(
+        series = series,
+        metric = metric,
+    )
+
     @Nested
     inner class YearHistoryChartUiModel {
         @Test
         fun `null series yields a loading model with eight columns`() {
             // ----- Arrange & Act -----
-            val result = yearHistoryChartUiModel(null)
+            val result = chartOf(null)
 
             // ----- Assert -----
             result.isLoading shouldBe true
@@ -30,7 +38,7 @@ class YearHistoryMapperTest {
         @Test
         fun `loaded series is not loading`() {
             // ----- Arrange & Act -----
-            val result = yearHistoryChartUiModel(
+            val result = chartOf(
                 listOf(
                     YearCount(
                         year = 2024,
@@ -62,7 +70,7 @@ class YearHistoryMapperTest {
             )
 
             // ----- Act -----
-            val columns = yearHistoryChartUiModel(series).columns
+            val columns = chartOf(series).columns
 
             // ----- Assert -----
             columns.map { it.tone } shouldBe listOf(ChartTone.Second, ChartTone.Lead, ChartTone.Fifth)
@@ -85,7 +93,7 @@ class YearHistoryMapperTest {
             )
 
             // ----- Act -----
-            val columns = yearHistoryChartUiModel(series).columns
+            val columns = chartOf(series).columns
 
             // ----- Assert -----
             columns.map { it.tone } shouldBe listOf(ChartTone.Lead, ChartTone.Second)
@@ -106,7 +114,7 @@ class YearHistoryMapperTest {
             )
 
             // ----- Act -----
-            val columns = yearHistoryChartUiModel(series).columns
+            val columns = chartOf(series).columns
 
             // ----- Assert -----
             columns.map { it.tone } shouldBe listOf(ChartTone.Fifth, ChartTone.Fifth)
@@ -116,7 +124,7 @@ class YearHistoryMapperTest {
         @Test
         fun `empty series yields no columns`() {
             // ----- Arrange & Act -----
-            val result = yearHistoryChartUiModel(emptyList())
+            val result = chartOf(emptyList())
 
             // ----- Assert -----
             result.columns shouldHaveSize 0
@@ -138,7 +146,7 @@ class YearHistoryMapperTest {
             )
 
             // ----- Act -----
-            val columns = yearHistoryChartUiModel(series).columns
+            val columns = chartOf(series).columns
 
             // ----- Assert -----
             columns.map { it.fraction } shouldBe listOf(0.25f, 1f)
@@ -163,7 +171,7 @@ class YearHistoryMapperTest {
             )
 
             // ----- Act -----
-            val columns = yearHistoryChartUiModel(series).columns
+            val columns = chartOf(series).columns
 
             // ----- Assert -----
             columns.map { it.label } shouldBe listOf("'05", "'24", "'99")
@@ -172,7 +180,7 @@ class YearHistoryMapperTest {
         @Test
         fun `value stays plain at 999`() {
             // ----- Arrange & Act -----
-            val result = yearHistoryChartUiModel(
+            val result = chartOf(
                 listOf(
                     YearCount(
                         year = 2024,
@@ -188,7 +196,7 @@ class YearHistoryMapperTest {
         @Test
         fun `value becomes thousands at 1000`() {
             // ----- Arrange & Act -----
-            val result = yearHistoryChartUiModel(
+            val result = chartOf(
                 listOf(
                     YearCount(
                         year = 2024,
@@ -204,7 +212,7 @@ class YearHistoryMapperTest {
         @Test
         fun `value stays in thousands at 999949`() {
             // ----- Arrange & Act -----
-            val result = yearHistoryChartUiModel(
+            val result = chartOf(
                 listOf(
                     YearCount(
                         year = 2024,
@@ -220,7 +228,7 @@ class YearHistoryMapperTest {
         @Test
         fun `value rolls over to millions at 999999`() {
             // ----- Arrange & Act -----
-            val result = yearHistoryChartUiModel(
+            val result = chartOf(
                 listOf(
                     YearCount(
                         year = 2024,
@@ -236,7 +244,7 @@ class YearHistoryMapperTest {
         @Test
         fun `value becomes millions at 1000000`() {
             // ----- Arrange & Act -----
-            val result = yearHistoryChartUiModel(
+            val result = chartOf(
                 listOf(
                     YearCount(
                         year = 2024,
@@ -247,6 +255,124 @@ class YearHistoryMapperTest {
 
             // ----- Assert -----
             result.columns.single().value shouldBe "1.0M"
+        }
+
+        @Test
+        fun `description names the year and the books count`() {
+            // ----- Arrange -----
+            val series = listOf(
+                YearCount(
+                    year = 2023,
+                    count = 12,
+                ),
+            )
+
+            // ----- Act -----
+            val columns = chartOf(
+                series = series,
+                metric = YearMetric.BOOKS,
+            ).columns
+
+            // ----- Assert -----
+            columns.single().contentDescription shouldBe "2023, 12 books"
+        }
+
+        @Test
+        fun `description uses the singular unit for a count of one`() {
+            // ----- Arrange -----
+            val series = listOf(
+                YearCount(
+                    year = 2023,
+                    count = 1,
+                ),
+            )
+
+            // ----- Act -----
+            val books = chartOf(
+                series = series,
+                metric = YearMetric.BOOKS,
+            ).columns
+            val pages = chartOf(
+                series = series,
+                metric = YearMetric.PAGES,
+            ).columns
+
+            // ----- Assert -----
+            books.single().contentDescription shouldBe "2023, 1 book"
+            pages.single().contentDescription shouldBe "2023, 1 page"
+        }
+
+        @Test
+        fun `description uses grouped pages for the pages metric`() {
+            // ----- Arrange -----
+            val series = listOf(
+                YearCount(
+                    year = 2021,
+                    count = 12_345,
+                ),
+            )
+
+            // ----- Act -----
+            val columns = chartOf(
+                series = series,
+                metric = YearMetric.PAGES,
+            ).columns
+
+            // ----- Assert -----
+            columns.single().contentDescription shouldBe "2021, ${formatGroupedNumber(12_345)} pages"
+        }
+
+        @Test
+        fun `description of a zero year is plural`() {
+            // ----- Arrange -----
+            val series = listOf(
+                YearCount(
+                    year = 2020,
+                    count = 0,
+                ),
+            )
+
+            // ----- Act -----
+            val columns = chartOf(series).columns
+
+            // ----- Assert -----
+            columns.single().contentDescription shouldBe "2020, 0 books"
+        }
+
+        @Test
+        fun `loading columns have an empty description`() {
+            // ----- Arrange & Act -----
+            val columns = chartOf(null).columns
+
+            // ----- Assert -----
+            columns.map { it.contentDescription }.distinct() shouldBe listOf("")
+        }
+
+        @Test
+        fun `values are shown when loaded, loading and all-zero`() {
+            // ----- Arrange -----
+            val allZero = listOf(
+                YearCount(
+                    year = 2023,
+                    count = 0,
+                ),
+            )
+            val loaded = listOf(
+                YearCount(
+                    year = 2023,
+                    count = 4,
+                ),
+            )
+
+            // ----- Act -----
+            val loadedChart = chartOf(loaded)
+            val loadingChart = chartOf(null)
+            val allZeroChart = chartOf(allZero)
+
+            // ----- Assert -----
+            loadedChart.showsValues shouldBe true
+            loadingChart.showsValues shouldBe true
+            allZeroChart.showsValues shouldBe true
         }
     }
 

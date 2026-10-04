@@ -34,7 +34,10 @@ internal class YearHistoryCollector : ProfileCollector {
             .collectLatest { (series, metric) ->
                 scope.setState {
                     it.copy(
-                        yearHistoryChart = yearHistoryChartUiModel(series),
+                        yearHistoryChart = yearHistoryChartUiModel(
+                            series = series,
+                            metric = metric,
+                        ),
                         yearHistoryCaption = yearHistoryCaption(
                             series = series,
                             metric = metric,

@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
+import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -44,7 +45,10 @@ data class BookCardUiModel(
             variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Loading")),
             decorations = BookCardDecorations(
                 progress = BookCardProgress.Value(
-                    fraction = 0.5f,
+                    bar = ProgressBarUiModel(
+                        fraction = 0.5f,
+                        isLoading = true,
+                    ),
                     label = "50%",
                 ),
                 pressBehaviour = BookCardDecorations.Press.None,
@@ -100,7 +104,7 @@ data class BookCardUiModel(
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Piranesi")),
                 decorations = BookCardDecorations(
                     progress = BookCardProgress.Value(
-                        fraction = 0.42f,
+                        bar = ProgressBarUiModel(fraction = 0.42f),
                         label = "42%",
                     ),
                 ),
@@ -115,7 +119,7 @@ data class BookCardUiModel(
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Kindred")),
                 decorations = BookCardDecorations(
                     progress = BookCardProgress.Value(
-                        fraction = 0.7f,
+                        bar = ProgressBarUiModel(fraction = 0.7f),
                         label = null,
                     ),
                 ),
@@ -172,7 +176,7 @@ data class BookCardUiModel(
                 ),
                 decorations = BookCardDecorations(
                     progress = BookCardProgress.Value(
-                        fraction = 0.6f,
+                        bar = ProgressBarUiModel(fraction = 0.6f),
                         label = "60%",
                     ),
                 ),
@@ -224,7 +228,7 @@ data class BookCardUiModel(
                 ),
                 decorations = BookCardDecorations(
                     progress = BookCardProgress.Value(
-                        fraction = 0.3f,
+                        bar = ProgressBarUiModel(fraction = 0.3f),
                         label = "30%",
                     ),
                     shakeOnError = true,

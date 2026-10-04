@@ -12,10 +12,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,6 +31,9 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverDimensions
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.progress.ProgressBar
+import nl.rhaydus.softcover.core.component.progress.ProgressBarHeight
+import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -170,59 +170,56 @@ private fun SeriesStackPlate(
     )
 }
 
-/**
- * @param barHeight Fixes the bar's height; `null` keeps the indicator's own height. A
- * [BookCardProgress.Reserved] slot takes the same height as a drawn bar.
- */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun BookCardProgressBar(
     progress: BookCardProgress,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
-    barHeight: Dp? = null,
-    isLoading: Boolean = false,
 ) {
     when (progress) {
         is BookCardProgress.Reserved -> Box(
             modifier = modifier
                 .fillMaxWidth()
-                .height(barHeight ?: WavyProgressIndicatorDefaults.LinearContainerHeight),
+                .height(ProgressBarHeight),
         )
 
         is BookCardProgress.Value -> {
-            val fraction = progress.fraction.coerceIn(
-                0f,
-                1f,
-            )
-
             val label = progress.label
 
             Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .skeletonMask(visible = isLoading),
+                modifier = modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                LinearWavyProgressIndicator(
-                    progress = { fraction },
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.outlineVariant,
-                    modifier = Modifier.weight(1f).then(
-                        if (barHeight != null) Modifier.height(barHeight) else Modifier,
+                ProgressBar(
+                    model = maskedBar(
+                        bar = progress.bar,
+                        isLoading = isLoading,
                     ),
+                    modifier = Modifier.weight(1f),
                 )
 
                 if (label != null) {
-                    ProgressLabel(label = label)
+                    ProgressLabel(
+                        label = label,
+                        isLoading = isLoading,
+                    )
                 }
             }
         }
     }
 }
 
+private fun maskedBar(
+    bar: ProgressBarUiModel,
+    isLoading: Boolean,
+): ProgressBarUiModel = if (isLoading) bar.copy(isLoading = true) else bar
+
 @Composable
-private fun ProgressLabel(label: String) {
+private fun ProgressLabel(
+    label: String,
+    isLoading: Boolean,
+) {
     val style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum")
     val color = MaterialTheme.colorScheme.onSurfaceVariant
     val density = LocalDensity.current
@@ -244,6 +241,8 @@ private fun ProgressLabel(label: String) {
         color = color,
         maxLines = 1,
         softWrap = false,
-        modifier = Modifier.width(reservedWidth),
+        modifier = Modifier
+            .width(reservedWidth)
+            .skeletonMask(visible = isLoading),
     )
 }

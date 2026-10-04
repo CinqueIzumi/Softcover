@@ -31,9 +31,7 @@ private const val PULSE_DURATION_MS = 220
 /**
  * The canonical way to render a numeric stat that can change in place — profile stats, pages-read
  * counters, deadline pacing. Raw `Text` for a number that can change should be treated as a bug.
- * Tweens between values when [StatNumberUiModel.value] changes; pair it with the wavy progress
- * indicator under the Hero stat pattern (`docs/reference/design-system/patterns/editorial.md`) so bar
- * and number move as one motion.
+ * Tweens between values when [StatNumberUiModel.value] changes.
  *
  * The display is locked to tabular figures so individual digits don't shift width mid-tween. When the
  * user has disabled system animations the number snaps — tweening here is decorative, the value
@@ -46,10 +44,8 @@ private const val PULSE_DURATION_MS = 220
  *
  * It takes the `Text`-shaped render parameters after the model, the same way `RichText` does: a
  * number is type, and which face it is set in belongs to the surface rather than to the datum.
- * [style] / [color] / [autoSize] / [maxLines] as loose parameters is a known departure from R11 (a
- * component takes only its model, its event lambda and a modifier) rather than a pattern to copy —
- * scheduled to fold into model properties (a surface-named variant plus a metrics table, as
- * `CoverDimensions.forVariant` does) in the contract retrofit.
+ * [style] / [color] / [autoSize] / [maxLines] as loose parameters are an exception to components
+ * taking only their model, event lambda and modifier, not a pattern to copy.
  */
 @Composable
 fun StatNumber(

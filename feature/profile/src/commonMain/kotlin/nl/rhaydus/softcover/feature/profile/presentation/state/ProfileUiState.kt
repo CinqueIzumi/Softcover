@@ -47,7 +47,10 @@ internal data class ProfileUiState(
         enabled = false,
     ),
 
-    val yearHistoryChart: ColumnChartUiModel = yearHistoryChartUiModel(null),
+    val yearHistoryChart: ColumnChartUiModel = yearHistoryChartUiModel(
+        series = null,
+        metric = YearMetric.BOOKS,
+    ),
     val yearHistoryCaption: String = yearHistoryCaption(
         series = null,
         metric = YearMetric.BOOKS,

@@ -40,10 +40,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
         (medium.seconds.text.toIntOrNull() ?: 0)
 
     val fraction = if (hasTotal) {
-        (currentSeconds.toFloat() / totalSeconds).coerceIn(
-            minimumValue = 0f,
-            maximumValue = 1f,
-        )
+        (currentSeconds.toFloat() / totalSeconds)
     } else {
         0f
     }

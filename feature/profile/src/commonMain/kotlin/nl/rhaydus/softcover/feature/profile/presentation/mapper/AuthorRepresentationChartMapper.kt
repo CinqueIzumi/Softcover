@@ -7,7 +7,7 @@ import nl.rhaydus.softcover.core.component.chart.ProportionSegmentUiModel
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
-import kotlin.math.roundToInt
+import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 
 private const val LOADING_SEGMENT_COUNT = 3
 
@@ -25,7 +25,7 @@ internal fun genderChartUiModel(slices: List<GenderSlice>?): ProportionChartUiMo
             .map { slice ->
                 ProportionSegmentUiModel(
                     label = slice.gender.toDisplayLabel(),
-                    share = "${(slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
+                    share = percentLabel(fraction = slice.fraction.toFloat()),
                     fraction = slice.fraction.toFloat(),
                     tone = when (slice.gender) {
                         Gender.Unknown -> ChartTone.Unknown
@@ -80,7 +80,7 @@ private fun demographicSegment(
 
     return ProportionSegmentUiModel(
         label = label,
-        share = "${(fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
+        share = percentLabel(fraction = fraction.toFloat()),
         fraction = fraction.toFloat(),
         tone = tone,
     )
