@@ -232,11 +232,16 @@ private fun ProseWord(
         animationSpec = colorSpec,
         label = "ProseWordUnderline",
     )
+    val disabledAlpha by animateFloatAsState(
+        targetValue = if (enabled) 1f else DISABLED_ALPHA,
+        animationSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap(),
+        label = "ProseWordEnabledAlpha",
+    )
 
     Box(
         modifier = Modifier
             .minimumInteractiveComponentSize()
-            .alpha(if (enabled) 1f else DISABLED_ALPHA)
+            .alpha(disabledAlpha)
             .pointerHandCursor()
             .pressScale(interactionSource)
             .clickable(

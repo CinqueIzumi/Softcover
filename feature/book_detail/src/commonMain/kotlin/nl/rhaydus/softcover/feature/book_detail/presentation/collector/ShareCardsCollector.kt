@@ -11,15 +11,12 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardVariant
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.shareSheetBodyFor
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.shareSheetScaffoldFor
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.shareSheetFor
 import nl.rhaydus.toad.ActionScope
 
 /**
  * Maps the book, the currently-displayed edition, the reader's identity and the chosen variant to the
- * card the share sheet shows, plus the sheet's scaffold and body, off the composition (R9), so
- * `ShareBookBottomSheet` only ever forwards `BookDetailUiState.shareCard`, `shareSheet` and
- * `shareSheetBody`.
+ * share sheet.
  *
  * The reading-update card is offered only when the reader has something personal to share; without it
  * the book card is the only variant and no toggle is shown.
@@ -38,8 +35,6 @@ internal class ShareCardsCollector : BookDetailCollector {
                     avatarUrl = it.currentUserAvatarUrl,
                     userTags = it.userTags,
                     chosenVariant = it.chosenShareVariant,
-                    isSharing = it.isSharing,
-                    isSavingToGallery = it.isSavingToGallery,
                 )
             }
             .distinctUntilChanged()
@@ -48,11 +43,7 @@ internal class ShareCardsCollector : BookDetailCollector {
 
                 if (book == null) {
                     scope.setState {
-                        it.copy(
-                            shareCard = null,
-                            shareSheet = null,
-                            shareSheetBody = null,
-                        )
+                        it.copy(shareSheet = null)
                     }
 
                     return@collectLatest
@@ -76,17 +67,11 @@ internal class ShareCardsCollector : BookDetailCollector {
 
                 scope.setState {
                     it.copy(
-                        shareCard = card,
-                        shareSheet = shareSheetScaffoldFor(
+                        shareSheet = shareSheetFor(
+                            card = card,
                             bookTitle = book.title,
                             variant = variant,
-                        ),
-                        shareSheetBody = shareSheetBodyFor(
-                            displayName = book.title,
-                            variant = variant,
                             hasUpdateCard = updateCard != null,
-                            isSharing = snapshot.isSharing,
-                            isSavingToGallery = snapshot.isSavingToGallery,
                         ),
                     )
                 }

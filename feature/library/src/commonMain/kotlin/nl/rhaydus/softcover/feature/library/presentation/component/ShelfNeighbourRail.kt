@@ -26,18 +26,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
- * The rail's own height, reserved whether or not both neighbours exist. 48dp rather than the ~36dp
- * the labels need: each half of the row *is* the tap target, and a navigation control has to clear
- * the minimum touch target.
- */
-private val RAIL_HEIGHT = 48.dp
-
-/**
  * Names the shelves either side of the current one, so a swipe is never blind: with the pill tab row
  * retired, nothing else on the Library screen says what the next shelf is. Hairline-bounded, one
  * eyebrow-caps label per end, each end its own tap target that moves one shelf over.
  *
- * The row keeps [RAIL_HEIGHT] regardless of how many neighbours exist, and a missing neighbour
+ * The row keeps its height regardless of how many neighbours exist, and a missing neighbour
  * leaves its end empty rather than letting the other label drift towards the middle — so reaching
  * the first or last shelf never shifts the grid below.
  *
@@ -57,7 +50,8 @@ internal fun ShelfNeighbourRail(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(RAIL_HEIGHT)
+                // Not the ~36dp the labels need: each half of the row is a navigation tap target.
+                .height(48.dp)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {

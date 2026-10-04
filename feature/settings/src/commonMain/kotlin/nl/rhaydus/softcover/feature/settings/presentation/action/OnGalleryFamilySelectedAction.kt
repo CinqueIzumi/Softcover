@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.action
 
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.feature.settings.presentation.event.ComponentGalleryEvent
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.galleryFamilyChips
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentGalleryDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState
@@ -18,7 +19,12 @@ internal class OnGalleryFamilySelectedAction(val family: GalleryFamily) : Compon
         scope: ActionScope<ComponentGalleryUiState, ComponentGalleryEvent, ComponentGalleryLocalVariables>,
     ) {
         scope.setState {
-            it.copy(selectedFamily = if (it.selectedFamily == family) null else family)
+            val nextFamily = if (it.selectedFamily == family) null else family
+
+            it.copy(
+                selectedFamily = nextFamily,
+                familyChips = galleryFamilyChips(selected = nextFamily),
+            )
         }
     }
 }

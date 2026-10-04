@@ -121,10 +121,12 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(booksByTab = mapOf(tabId to listOf(book)))
@@ -147,10 +149,12 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
@@ -178,10 +182,12 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(booksByTab = mapOf(tabId to listOf(book1, book2)))
@@ -207,10 +213,12 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
@@ -240,10 +248,12 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
@@ -278,10 +288,12 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = LibraryUiState(
@@ -304,10 +316,12 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = LibraryUiState(booksByTab = mapOf(tabId to listOf(book)))
             val refAfterFirstEmit = stateFlow.value.displayBooksByTab[tabId]
@@ -333,10 +347,12 @@ class DisplayListsCollectorTest {
             )
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // First emission: empty query, one book → computed list stored as prev
             stateFlow.value = LibraryUiState(
@@ -362,10 +378,12 @@ class DisplayListsCollectorTest {
             // ----- Arrange -----
             val collector = DisplayListsCollector()
 
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             // No action — asserting on initial state.

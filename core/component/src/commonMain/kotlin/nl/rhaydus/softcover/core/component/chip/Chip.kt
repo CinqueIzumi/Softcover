@@ -27,6 +27,10 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
@@ -44,10 +48,10 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 
 /**
- * The pill-shaped chip family (`component-contract.md` § 7.2 R2): one label on a fully-rounded
+ * The pill-shaped chip family: one label on a fully-rounded
  * surface, its colours resolved from [ChipUiModel.tone] and [ChipUiModel.selected] through one
  * [ChipScaffold]. [ChipUiModel.interaction] gates the tap affordance independently of the tone.
- * Every clickable pill reports through this one [ChipEvent] lambda (R1) using the same press-scale +
+ * Every clickable pill reports through this one [ChipEvent] lambda using the same press-scale +
  * hand-cursor affordance, never a `Surface(onClick)` ripple.
  */
 @Composable
@@ -103,6 +107,16 @@ private fun ChipScaffold(
         .chipInteraction(interaction = model.interaction) {
             onEvent(ChipEvent.Clicked(key = model.key))
         }
+        .then(
+            if (model.tone == ChipTone.Spoiler) {
+                Modifier.clearAndSetSemantics {
+                    contentDescription = "Spoiler, tap to reveal"
+                    role = Role.Button
+                }
+            } else {
+                Modifier
+            },
+        )
         .padding(
             when (model.size) {
                 ChipSize.Regular -> PaddingValues(
@@ -184,7 +198,7 @@ private fun ChipLeadingSlot(
             ChipIconSlot(
                 icon = leading.icon,
                 contentDescription = null,
-                tint = style.mutedInk,
+                tint = style.ink,
                 size = 18.dp,
                 onClick = null,
             )
@@ -195,7 +209,7 @@ private fun ChipLeadingSlot(
             ChipIconSlot(
                 icon = if (leading.marked) SoftcoverIcon.VisibilityOff else SoftcoverIcon.Visibility,
                 contentDescription = leading.label,
-                tint = if (leading.marked) MaterialTheme.colorScheme.primary else style.mutedInk,
+                tint = if (leading.marked) MaterialTheme.colorScheme.primary else style.ink,
                 size = 18.dp,
                 onClick = onToggle,
             )
@@ -249,7 +263,7 @@ private fun ChipTrailingSlot(
             ChipIconSlot(
                 icon = trailing.icon,
                 contentDescription = trailing.description,
-                tint = style.mutedInk,
+                tint = style.ink,
                 size = 18.dp,
                 onClick = null,
             )
@@ -260,7 +274,7 @@ private fun ChipTrailingSlot(
             ChipIconSlot(
                 icon = SoftcoverIcon.Close,
                 contentDescription = trailing.label,
-                tint = style.mutedInk,
+                tint = style.ink,
                 size = 16.dp,
                 onClick = onDismiss,
             )

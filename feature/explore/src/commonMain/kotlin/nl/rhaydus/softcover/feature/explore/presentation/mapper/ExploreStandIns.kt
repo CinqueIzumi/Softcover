@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.uibinding.book.ratingPart
 internal val BECAUSE_YOU_READ_HEADER_STAND_IN = SectionHeaderUiModel.Section(
     eyebrow = "Because you read",
     headline = "Fantasy",
+    isLoading = true,
 )
 
 private const val SEARCH_RESULT_STAND_IN_COUNT = 6
@@ -52,7 +53,7 @@ internal val BECAUSE_YOU_READ_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = L
 internal val UP_NEXT_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(railStandInCount) { index ->
     columnStandInCard(
         bookId = -(index + 1),
-        coverVariant = CoverVariant.Lifted,
+        coverVariant = CoverVariant.Raised,
         text = BookCardContent(
             title = "The Wise Man's Fear",
             eyebrow = BookCardEyebrow(text = "The Kingkiller Chronicle"),
@@ -60,7 +61,7 @@ internal val UP_NEXT_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(railS
                 persistentListOf(BookCardLinePart.Text(text = "Book #2")),
             ),
         ),
-        menuLabel = "More options",
+        hasMenu = true,
     )
 }.toImmutableList()
 
@@ -116,7 +117,7 @@ internal val HIDDEN_BOOK_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List(H
                 title = "The Name of the Wind",
                 byline = "By Patrick Rothfuss",
             ),
-            trailing = BookCardTrailing.Restore(label = "Restore"),
+            trailing = BookCardTrailing.Restore,
         ),
         isLoading = true,
     )
@@ -141,7 +142,7 @@ internal val HIDDEN_SERIES_STAND_IN_CARDS: ImmutableList<BookCardUiModel> = List
                     persistentListOf(BookCardLinePart.Text(text = "Patrick Rothfuss · 3 books")),
                 ),
             ),
-            trailing = BookCardTrailing.Restore(label = "Restore"),
+            trailing = BookCardTrailing.Restore,
         ),
         isLoading = true,
     )
@@ -151,7 +152,7 @@ private fun columnStandInCard(
     bookId: Int,
     coverVariant: CoverVariant,
     text: BookCardContent,
-    menuLabel: String? = null,
+    hasMenu: Boolean = false,
 ) = BookCardUiModel(
     key = BookCardKey.Book(bookId = bookId),
     variant = BookCardVariant.Column(
@@ -164,7 +165,7 @@ private fun columnStandInCard(
             ),
         ),
         text = text,
-        menuLabel = menuLabel,
+        hasMenu = hasMenu,
     ),
     isLoading = true,
 )

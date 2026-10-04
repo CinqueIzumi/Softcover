@@ -15,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +23,6 @@ import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -75,7 +73,7 @@ internal fun ActiveSearchContent(
 
         val resultsListState = rememberLazyListState()
 
-        val cards = state.queriedBookCards
+        val cards = state.searchResults.cards
 
         val showsStandIns = cards.any(BookCardUiModel::isLoading)
 
@@ -98,12 +96,8 @@ internal fun ActiveSearchContent(
                 }
         }
 
-        val booksByKey = remember(state.queriedBooks) {
-            state.queriedBooks.associateBy { BookCardKey.Book(it.id) }
-        }
-
         val onSearchResultEvent = rememberPrefetchingBookCardEventHandler(
-            resolve = booksByKey::get,
+            set = state.searchResults,
         ) { event, book ->
             when (event) {
                 is BookCardEvent.Clicked -> onBookClick(

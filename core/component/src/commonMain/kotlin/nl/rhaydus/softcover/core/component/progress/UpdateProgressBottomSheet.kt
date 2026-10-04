@@ -130,7 +130,7 @@ private fun ProgressBottomSheetContent(
             size = ButtonSize.M,
             icon = drawableIconResource(
                 icon = SoftcoverIcon.Check,
-                contentDescription = "Mark as read icon",
+                contentDescription = "",
             ),
             onClick = { onEvent(ProgressSheetEvent.MarkAsReadRequested) },
             modifier = Modifier.fillMaxWidth(),

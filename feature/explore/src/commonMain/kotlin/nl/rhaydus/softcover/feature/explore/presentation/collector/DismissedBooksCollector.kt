@@ -1,11 +1,10 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
-import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
+import nl.rhaydus.softcover.core.uibinding.cover.coverUiModelFromUrl
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockBookAction
 import nl.rhaydus.softcover.feature.explore.presentation.event.HiddenSuggestionsEvent
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toHiddenBookCard
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsDependencies
@@ -21,22 +20,18 @@ internal class DismissedBooksCollector : HiddenSuggestionsCollector {
         dependencies.getDismissedContinueSeriesBooksUseCase().collectLatest { books ->
             scope.setState {
                 it.copy(
-                    hiddenBooks = books,
-                    hiddenBookCards = books.map { book ->
-                        book.toHiddenBookCard(cover = book.toCoverUiModel())
-                    }.toImmutableList(),
+                    hiddenBooks = books.map { book ->
+                        val cover = coverUiModelFromUrl(
+                            url = book.coverUrl,
+                            title = book.title ?: "Hidden book",
+                            variant = CoverVariant.Flat,
+                        )
+
+                        book.toHiddenBookCard(cover = cover) to OnUnblockBookAction(book = book)
+                    }.toBookCardSet(),
                     hiddenBooksGroupHeader = it.hiddenBooksGroupHeader.copy(count = books.size.toString()),
                 )
             }
         }
     }
 }
-
-// No edition to resolve against — a hidden row is URL-only (component-contract.md § 7.2 R9's mapper
-// call, kept here since [DismissedSeriesBook] has no edition of its own).
-private fun DismissedSeriesBook.toCoverUiModel() = (null as BookEdition?).toCoverUiModel(
-    defaultEdition = null,
-    coverlessTitle = title ?: "Hidden book",
-    variant = CoverVariant.Flat,
-    fallbackCoverUrl = coverUrl,
-)

@@ -50,7 +50,8 @@ class MarkReadingActivityTodayUseCaseTest {
                     2026,
                     6,
                     19,
-                ),)
+                ),
+                )
             }
         }
 

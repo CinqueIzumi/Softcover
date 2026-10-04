@@ -20,7 +20,6 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +28,6 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -66,7 +64,7 @@ internal fun DesktopSearchResults(
 
         // Feedback item 7: same append-on-scroll-near-end trigger as mobile's LazyColumn, driven off
         // this grid's own `searchResultsGridState` instead of a per-composition list state.
-        val cards = state.queriedBookCards
+        val cards = state.searchResults.cards
 
         val showsStandIns = cards.any(BookCardUiModel::isLoading)
 
@@ -90,12 +88,8 @@ internal fun DesktopSearchResults(
                 .weight(1f)
                 .fillMaxWidth(),
         ) {
-            val booksByKey = remember(state.queriedBooks) {
-                state.queriedBooks.associateBy { BookCardKey.Book(it.id) }
-            }
-
             val onSearchResultEvent = rememberPrefetchingBookCardEventHandler(
-                resolve = booksByKey::get,
+                set = state.searchResults,
             ) { event, book ->
                 when (event) {
                     is BookCardEvent.Clicked -> onBookClick(

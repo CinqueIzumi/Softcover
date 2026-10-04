@@ -8,8 +8,8 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 /**
  * A number that can change in place, and how it should read.
  *
- * One `Double` rather than the Int/Float overload pair this replaced — the tween always ran on a
- * float anyway, and [format] is what decides whether the reader ever sees a fraction.
+ * One `Double`, because the tween runs on a float anyway; [format] decides whether the reader ever
+ * sees a fraction.
  */
 @Immutable
 data class StatNumberUiModel(

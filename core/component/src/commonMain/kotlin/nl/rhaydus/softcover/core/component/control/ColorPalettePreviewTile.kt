@@ -1,19 +1,7 @@
 package nl.rhaydus.softcover.core.component.control
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorScheme
 
@@ -39,7 +27,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorS
 @Composable
 fun <K> ColorPalettePreviewTile(
     model: ColorPalettePreviewTileUiModel<K>,
-    onEvent: (ColorPalettePreviewTileEvent<K>) -> Unit,
+    onEvent: (PreviewTileEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scheme = softcoverColorScheme(
@@ -50,89 +38,13 @@ fun <K> ColorPalettePreviewTile(
     PreviewTileFrame(
         label = model.palette.label,
         selected = model.selected,
-        onClick = { onEvent(ColorPalettePreviewTileEvent.Clicked(key = model.key)) },
+        onClick = { onEvent(PreviewTileEvent.Clicked(key = model.key)) },
         modifier = modifier,
     ) {
-        AccentMiniature(
+        PageMiniature(
             scheme = scheme,
+            accentLed = true,
             modifier = Modifier.matchParentSize(),
         )
-    }
-}
-
-/**
- * The accent-forward page miniature: the palette's paper under the section accent bar, a headline,
- * one line of body copy, a `primary`-filled hero card, and a `tertiaryContainer` badge — the roles a
- * palette leads with, in the relationship the app actually paints them in.
- */
-@Composable
-private fun AccentMiniature(
-    scheme: ColorScheme,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .background(scheme.background)
-            .padding(
-                horizontal = 10.dp,
-                vertical = 12.dp,
-            ),
-    ) {
-        MiniBar(
-            widthFraction = 0.18f,
-            height = 3.dp,
-            color = scheme.primary,
-        )
-
-        Spacer(modifier = Modifier.height(9.dp))
-
-        MiniBar(
-            widthFraction = 0.82f,
-            height = 6.dp,
-            color = scheme.onSurface,
-        )
-
-        Spacer(modifier = Modifier.height(7.dp))
-
-        MiniBar(
-            widthFraction = 1f,
-            height = 3.dp,
-            color = scheme.onSurfaceVariant,
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(34.dp)
-                .clip(RoundedCornerShape(7.dp))
-                .background(scheme.primary)
-                .padding(7.dp),
-            contentAlignment = Alignment.BottomStart,
-        ) {
-            MiniBar(
-                widthFraction = 0.5f,
-                height = 4.dp,
-                color = scheme.onPrimary,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.44f)
-                .height(14.dp)
-                .clip(RoundedCornerShape(7.dp))
-                .background(scheme.tertiaryContainer),
-            contentAlignment = Alignment.Center,
-        ) {
-            MiniBar(
-                widthFraction = 0.55f,
-                height = 3.dp,
-                color = scheme.onTertiaryContainer,
-            )
-        }
     }
 }

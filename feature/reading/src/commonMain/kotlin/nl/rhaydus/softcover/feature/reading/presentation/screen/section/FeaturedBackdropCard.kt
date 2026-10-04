@@ -1,12 +1,5 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen.section
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -37,7 +28,6 @@ import nl.rhaydus.common.currentLocalDateTime
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.Cover
@@ -45,6 +35,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.rememberCoverImageRequest
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -52,7 +43,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.collector.greetingForNow
@@ -75,13 +65,13 @@ internal fun FeaturedBackdropCard(
     deadlineCoverOverlay: CoverOverlayUiModel?,
     deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
-    paceForecast: ReadingPaceForecast?,
+    paceForecast: String?,
     cardColor: Color,
     runAction: (ReadingAction) -> Unit,
     isLoading: Boolean = false,
 ) {
     val isInspection = LocalInspectionMode.current
-    // ReadingHeroBackdrop never renders through Cover (component-contract.md's note on
+    // The backdrop never renders through Cover (component-contract.md's note on
     // rememberCoverImageRequest) — it needs Crop + blur with no shimmer and no coverless rung.
     val backdropRequest = if (backdropCover != null) {
         rememberCoverImageRequest(model = backdropCover)
@@ -185,31 +175,11 @@ internal fun FeaturedBackdropCard(
                 foreground = foreground,
             )
 
-            // The deadline readout arrives from its own collector, independently of the progress block
-            // above — and a book may never carry a deadline at all — so it reveals in place rather
-            // than reserving height (the same register as the pace row above; design-system.md §5
-            // "Book-detail in-progress stat").
-            val playMotion = playDecorativeMotion()
-            val revealEnter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None
-            val revealExit = if (playMotion) shrinkVertically() + fadeOut() else ExitTransition.None
+            RevealedWhenPresent(value = deadlineSummary) { summary ->
+                Column {
+                    Spacer(modifier = Modifier.height(15.dp))
 
-            var lastDeadlineSummary by remember { mutableStateOf(deadlineSummary) }
-
-            if (deadlineSummary != null) {
-                lastDeadlineSummary = deadlineSummary
-            }
-
-            AnimatedVisibility(
-                visible = deadlineSummary != null,
-                enter = revealEnter,
-                exit = revealExit,
-            ) {
-                lastDeadlineSummary?.let { summary ->
-                    Column {
-                        Spacer(modifier = Modifier.height(15.dp))
-
-                        DeadlineSummaryLine(model = summary)
-                    }
+                    DeadlineSummaryLine(model = summary)
                 }
             }
 

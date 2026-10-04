@@ -120,7 +120,8 @@ class OnAddUserTagActionTest {
                 userTags = listOf(UserTag(
                     name = "Horror",
                     category = TagCategory.GENRE,
-                ),),
+                ),
+                ),
             )
             val initialTags = stateFlow.value.userTags
             val action = OnAddUserTagAction(
@@ -147,7 +148,8 @@ class OnAddUserTagActionTest {
                 userTags = listOf(UserTag(
                     name = "horror",
                     category = TagCategory.GENRE,
-                ),),
+                ),
+                ),
             )
             val initialTags = stateFlow.value.userTags
             val action = OnAddUserTagAction(
@@ -180,7 +182,8 @@ class OnAddUserTagActionTest {
             val savedResult = listOf(existingTag, UserTag(
                 name = "cozy",
                 category = TagCategory.MOOD,
-            ),)
+            ),
+            )
 
             coEvery {
                 saveUserTagsUseCase(
@@ -212,7 +215,8 @@ class OnAddUserTagActionTest {
             val savedResult = listOf(UserTag(
                 name = "epic",
                 category = TagCategory.TAG,
-            ),)
+            ),
+            )
 
             coEvery {
                 saveUserTagsUseCase(
@@ -304,7 +308,8 @@ class OnAddUserTagActionTest {
                 userTags = listOf(UserTag(
                     name = "Horror",
                     category = TagCategory.GENRE,
-                ),),
+                ),
+                ),
                 newlyAddedTagKey = null,
             )
             val action = OnAddUserTagAction(
@@ -364,7 +369,8 @@ class OnAddUserTagActionTest {
             val originalTags = listOf(UserTag(
                 name = "sci-fi",
                 category = TagCategory.GENRE,
-            ),)
+            ),
+            )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
                 userTags = originalTags,

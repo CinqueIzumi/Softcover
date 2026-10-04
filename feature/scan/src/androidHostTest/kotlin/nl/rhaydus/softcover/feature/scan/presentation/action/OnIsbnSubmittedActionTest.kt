@@ -139,7 +139,8 @@ class OnIsbnSubmittedActionTest {
             } returns Result.success(IsbnLookupResult.Found(
                 book = book,
                 editionId = editionId,
-            ),)
+            ),
+            )
 
             val action = OnIsbnSubmittedAction(isbn = "9780451524935")
 
@@ -169,7 +170,8 @@ class OnIsbnSubmittedActionTest {
             } returns Result.success(IsbnLookupResult.Found(
                 book = book,
                 editionId = null,
-            ),)
+            ),
+            )
 
             val action = OnIsbnSubmittedAction(isbn = "9780451524935")
 

@@ -105,9 +105,8 @@ internal actual fun ReadingScreenLayout(
                     }
 
                     else -> EmptyCurrentlyReadingScreen(
-                        wantToReadBooks = state.wantToReadBooks.orEmpty(),
                         trendingBooks = state.trendingBooks,
-                        pickUpNextCards = state.pickUpNextCards,
+                        pickUpNext = state.pickUpNext,
                         trendingTileCover = state.trendingTileCover,
                         pickUpNextHeader = state.pickUpNextHeader,
                         trendingHeader = state.trendingHeader,
@@ -154,17 +153,14 @@ private fun DesktopReadingContent(
 ) {
     val featured = state.featuredBook
     val isLoading = state.isLoadingFeatured
-    val rest = state.books.drop(1)
 
     val isInspection = LocalInspectionMode.current
     val prefetcher = if (isInspection) null else rememberBookDetailPrefetcher()
 
     Box(modifier = modifier) {
         CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
-            val booksByKey = remember(rest) { rest.associateBy { BookCardKey.Book(it.id) } }
-
             val onCardEvent = rememberPrefetchingBookCardEventHandler(
-                resolve = booksByKey::get,
+                set = state.alsoReading,
             ) { event, book ->
                 when (event) {
                     is BookCardEvent.Clicked -> onBookClick(book)
@@ -205,7 +201,7 @@ private fun DesktopReadingContent(
                     isLoading = isLoading,
                 )
 
-                if (isLoading || rest.isNotEmpty()) {
+                if (state.alsoReading.isEmpty.not()) {
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Box(modifier = Modifier.padding(horizontal = 24.dp)) {
@@ -214,7 +210,7 @@ private fun DesktopReadingContent(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    state.alsoReadingCards.forEach { card ->
+                    state.alsoReading.cards.forEach { card ->
                         val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@forEach
 
                         BookCard(

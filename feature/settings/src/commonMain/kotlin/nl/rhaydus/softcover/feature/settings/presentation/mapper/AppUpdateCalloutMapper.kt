@@ -71,5 +71,4 @@ private fun appUpdateCallout(
     eyebrow = eyebrow,
     body = body,
     callToAction = callToAction,
-    dismissible = false,
 )

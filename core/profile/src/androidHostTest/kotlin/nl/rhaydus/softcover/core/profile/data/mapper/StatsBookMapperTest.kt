@@ -67,17 +67,20 @@ class StatsBookMapperTest {
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2026,
                     7,
                     1,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2025,
                     1,
                     1,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -99,11 +102,16 @@ class StatsBookMapperTest {
         @Test
         fun `books with no finish date are excluded`() {
             // ----- Arrange -----
-            val books = listOf(book(finishDate = LocalDate(
-                2026,
-                3,
-                10,
-            ),), book(finishDate = null),)
+            val books = listOf(
+                book(
+                    finishDate = LocalDate(
+                        2026,
+                        3,
+                        10,
+                    ),
+                ),
+                book(finishDate = null),
+            )
 
             // ----- Act -----
             val result = books.toBooksByYear(currentYear = 2026)
@@ -125,12 +133,14 @@ class StatsBookMapperTest {
                     2010,
                     1,
                     1,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -217,7 +227,8 @@ class StatsBookMapperTest {
             ), book(
                 finishDate = null,
                 pages = 999,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = books.toPagesByYear(currentYear = 2026)
@@ -324,7 +335,8 @@ class StatsBookMapperTest {
             val books = listOf(book(
                 finishDate = null,
                 pages = 999,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = books.toPagesByMonth(currentYear = 2026)
@@ -637,12 +649,14 @@ class StatsBookMapperTest {
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2026,
                     7,
                     1,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act & Assert -----
@@ -657,12 +671,14 @@ class StatsBookMapperTest {
                     2015,
                     1,
                     1,
-                ),),
+                ),
+                ),
                 book(finishDate = LocalDate(
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act & Assert -----
@@ -677,7 +693,8 @@ class StatsBookMapperTest {
                     2026,
                     3,
                     10,
-                ),),
+                ),
+                ),
                 book(finishDate = null),
             )
 
@@ -768,11 +785,15 @@ class StatsBookMapperTest {
                 book(authors = listOf(statsAuthor(
                     id = 1,
                     gender = Gender.Male,
-                ),),),
+                ),
+                ),
+                ),
                 book(authors = listOf(statsAuthor(
                     id = 1,
                     gender = Gender.Female,
-                ),),),
+                ),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -806,7 +827,8 @@ class StatsBookMapperTest {
                         id = 3,
                         gender = Gender.Unknown,
                     ),
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -843,7 +865,8 @@ class StatsBookMapperTest {
                         id = 2,
                         gender = Gender.Unknown,
                     ),
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -900,7 +923,8 @@ class StatsBookMapperTest {
                         id = 7,
                         gender = Gender.Unknown,
                     ),
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -956,7 +980,8 @@ class StatsBookMapperTest {
                         id = 6,
                         gender = Gender.Unknown,
                     ),
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -1005,7 +1030,8 @@ class StatsBookMapperTest {
                         isBipoc = null,
                         isLgbtq = false,
                     ),
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -1039,7 +1065,8 @@ class StatsBookMapperTest {
                         id = 2,
                         isBipoc = null,
                     ),
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----

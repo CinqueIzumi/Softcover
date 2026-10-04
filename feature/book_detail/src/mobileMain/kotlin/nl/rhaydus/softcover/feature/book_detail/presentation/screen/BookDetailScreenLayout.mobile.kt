@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,9 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -26,21 +22,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
-import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
-import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -49,7 +37,6 @@ import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.bookDetailActionFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
@@ -69,32 +56,12 @@ internal actual fun BookDetailScreenLayout(
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
     celebrationKey: Int,
-    shareCaptureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val lazyListState = rememberLazyListState()
 
     val shouldBeExpanded by remember {
         derivedStateOf { lazyListState.firstVisibleItemIndex >= 1 }
-    }
-
-    val title = remember(shouldBeExpanded) {
-        if (shouldBeExpanded.not()) {
-            null
-        } else {
-            state.book?.title
-        }
-    }
-
-    // Until the hero has scrolled away the bar sits *over* the cover art, so it goes transparent and
-    // its controls take a scrim. `TopBar` derives all of that from this one field — before the
-    // component library the bar's fill, the back button's ink and the overflow menu's ink were three
-    // separate derivations of this same flag, any one of which could have been forgotten.
-    val topBar = remember(title, shouldBeExpanded) {
-        TopBarUiModel(
-            title = title,
-            surface = if (shouldBeExpanded) TopBarSurface.OPAQUE else TopBarSurface.OVER_MEDIA,
-        )
     }
 
     val showOfflinePlaceholder =
@@ -114,7 +81,7 @@ internal actual fun BookDetailScreenLayout(
             }
 
             TopBar(
-                model = state.offlineTopBar,
+                model = state.topBar,
                 onEvent = { event ->
                     when (event) {
                         TopBarEvent.BackClicked -> onNavigateBack()
@@ -156,7 +123,7 @@ internal actual fun BookDetailScreenLayout(
                         heroCover = state.heroCover,
                         backdropCover = state.heroBackdropCover,
                         isLoading = state.loadingBookDetails && state.book == null,
-                        isExpired = state.deadlineProgress?.isExpired == true,
+                        isExpired = state.deadlineRow?.isExpired == true,
                         rating = state.heroRating,
                         title = state.heroTitle,
                         seriesText = state.heroSeriesText,
@@ -216,7 +183,7 @@ internal actual fun BookDetailScreenLayout(
         }
 
         TopBar(
-            model = topBar,
+            model = if (shouldBeExpanded) state.topBar else state.overMediaTopBar,
             onEvent = { event ->
                 when (event) {
                     TopBarEvent.BackClicked -> onNavigateBack()
@@ -236,7 +203,6 @@ internal actual fun BookDetailScreenLayout(
             state = state,
             runAction = runAction,
             onCreateNewListClick = onCreateNewListClick,
-            shareCaptureEvents = shareCaptureEvents,
         )
     }
 }
@@ -273,7 +239,6 @@ private fun BookDetailScreenReadingPreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
-                shareCaptureEvents = emptyFlow(),
             )
         }
     }
@@ -303,7 +268,6 @@ private fun BookDetailScreenNonePreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
-                shareCaptureEvents = emptyFlow(),
             )
         }
     }
@@ -333,7 +297,6 @@ private fun BookDetailScreenDnfPreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
-                shareCaptureEvents = emptyFlow(),
             )
         }
     }
@@ -363,7 +326,6 @@ private fun BookDetailScreenWantToReadPreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
-                shareCaptureEvents = emptyFlow(),
             )
         }
     }
@@ -393,7 +355,6 @@ private fun BookDetailScreenReadPreview() {
                 onCreateNewListClick = {},
                 isOnline = true,
                 celebrationKey = 0,
-                shareCaptureEvents = emptyFlow(),
             )
         }
     }

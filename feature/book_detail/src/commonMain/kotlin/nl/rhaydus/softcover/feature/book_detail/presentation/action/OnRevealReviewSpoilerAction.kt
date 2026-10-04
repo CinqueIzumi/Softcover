@@ -18,7 +18,7 @@ internal class OnRevealReviewSpoilerAction(
             state.copy(
                 reviews = state.reviews
                     .map { review ->
-                        if (review.id == reviewId) review.copy(spoilerRevealed = true) else review
+                        if (review.id == reviewId) review.copy(isSpoilerGated = false) else review
                     }
                     .toImmutableList(),
             )

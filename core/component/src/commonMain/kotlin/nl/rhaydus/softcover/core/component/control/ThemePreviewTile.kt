@@ -1,21 +1,10 @@
 package nl.rhaydus.softcover.core.component.control
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.GenericShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.dynamicColorSchemeOrNull
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.softcoverColorScheme
 
@@ -56,7 +45,7 @@ private val DIAGONAL_LOWER_HALF: Shape = GenericShape { size, _ ->
 @Composable
 fun <K> ThemePreviewTile(
     model: ThemePreviewTileUiModel<K>,
-    onEvent: (ThemePreviewTileEvent<K>) -> Unit,
+    onEvent: (PreviewTileEvent<K>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lightScheme = dynamicColorSchemeOrNull(
@@ -84,88 +73,22 @@ fun <K> ThemePreviewTile(
     PreviewTileFrame(
         label = model.label,
         selected = model.selected,
-        onClick = { onEvent(ThemePreviewTileEvent.Clicked(key = model.key)) },
+        onClick = { onEvent(PreviewTileEvent.Clicked(key = model.key)) },
         modifier = modifier,
     ) {
-        ThemeMiniature(
+        PageMiniature(
             scheme = baseScheme,
+            accentLed = false,
             modifier = Modifier.matchParentSize(),
         )
 
         if (model.painting == ThemeTilePainting.SPLIT) {
-            ThemeMiniature(
+            PageMiniature(
                 scheme = darkScheme,
+                accentLed = false,
                 modifier = Modifier
                     .matchParentSize()
                     .clip(DIAGONAL_LOWER_HALF),
-            )
-        }
-    }
-}
-
-/**
- * The page in miniature, painted from [scheme] rather than from the surrounding theme: the section
- * accent bar, a headline, two lines of body copy, and a card — the app's own editorial rhythm shrunk
- * to a tile, so the reader recognises what they're picking rather than reading a colour swatch.
- */
-@Composable
-private fun ThemeMiniature(
-    scheme: ColorScheme,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .background(scheme.background)
-            .padding(
-                horizontal = 10.dp,
-                vertical = 12.dp,
-            ),
-    ) {
-        MiniBar(
-            widthFraction = 0.18f,
-            height = 3.dp,
-            color = scheme.primary,
-        )
-
-        Spacer(modifier = Modifier.height(9.dp))
-
-        MiniBar(
-            widthFraction = 0.82f,
-            height = 6.dp,
-            color = scheme.onSurface,
-        )
-
-        Spacer(modifier = Modifier.height(7.dp))
-
-        MiniBar(
-            widthFraction = 1f,
-            height = 3.dp,
-            color = scheme.onSurfaceVariant,
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        MiniBar(
-            widthFraction = 0.62f,
-            height = 3.dp,
-            color = scheme.onSurfaceVariant,
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(30.dp)
-                .clip(RoundedCornerShape(7.dp))
-                .background(scheme.surfaceContainerHigh)
-                .padding(7.dp),
-            contentAlignment = Alignment.BottomStart,
-        ) {
-            MiniBar(
-                widthFraction = 0.55f,
-                height = 3.dp,
-                color = scheme.primary,
             )
         }
     }

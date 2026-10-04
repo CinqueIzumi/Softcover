@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.library.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
-import nl.rhaydus.softcover.feature.library.presentation.mapper.standInCards
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -16,10 +15,7 @@ internal class GridLayoutCollector : LibraryCollector {
     ) {
         dependencies.getLibraryGridLayoutAsFlowUseCase().collectLatest { layout: LibraryGridLayout ->
             scope.setState {
-                it.copy(
-                    gridLayout = layout,
-                    loadingCards = layout.standInCards(),
-                )
+                it.copy(gridLayout = layout)
             }
         }
     }

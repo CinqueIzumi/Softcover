@@ -30,9 +30,7 @@ internal fun UiScaleSection(
             state.uiScaleRows.forEach { uiScaleRow ->
                 row {
                     SettingsSelectableRow(
-                        label = uiScaleRow.label,
-                        example = uiScaleRow.example,
-                        isSelected = uiScaleRow.selected,
+                        model = uiScaleRow,
                         onClick = { runAction(OnUiScaleSelectedAction(scale = uiScaleRow.key)) },
                     )
                 }

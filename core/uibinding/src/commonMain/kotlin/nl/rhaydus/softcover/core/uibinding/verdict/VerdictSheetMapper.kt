@@ -1,8 +1,12 @@
 package nl.rhaydus.softcover.core.uibinding.verdict
 
+import kotlinx.collections.immutable.toImmutableMap
+import nl.rhaydus.softcover.core.component.chip.ChipFace
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
@@ -82,5 +86,22 @@ fun Book.toVerdictSheetUiModel(
             gloss = "Readers will need to tap to reveal the whole review.",
             checked = userBook?.reviewHasSpoilers == true,
         ),
+        markChips = RichTextMarkType.entries
+            .associateWith { mark ->
+                ChipUiModel(
+                    key = mark.name,
+                    label = when (mark) {
+                        RichTextMarkType.BOLD -> "Bold"
+                        RichTextMarkType.ITALIC -> "Italic"
+                        RichTextMarkType.SPOILER -> "Spoiler"
+                    },
+                    face = when (mark) {
+                        RichTextMarkType.BOLD -> ChipFace.Bold
+                        RichTextMarkType.ITALIC -> ChipFace.Italic
+                        RichTextMarkType.SPOILER -> ChipFace.Plain
+                    },
+                )
+            }
+            .toImmutableMap(),
     )
 }

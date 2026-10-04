@@ -13,14 +13,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -89,13 +87,9 @@ fun Banner(
             )
 
             if (editorial) {
-                ChromeIconButton(
-                    icon = SoftcoverIcon.Close,
-                    contentDescription = "Dismiss",
-                    tooltip = "Dismiss",
+                DismissButton(
+                    contentColor = content.copy(alpha = 0.8f),
                     onClick = { onEvent(BannerEvent.DismissClicked) },
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = content.copy(alpha = 0.8f)),
-                    iconSize = 16.dp,
                 )
             }
         }

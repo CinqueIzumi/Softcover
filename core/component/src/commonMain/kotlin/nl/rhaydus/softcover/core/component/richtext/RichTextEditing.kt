@@ -12,7 +12,7 @@ import kotlinx.collections.immutable.toImmutableList
  */
 
 /** Drop empty marks and merge overlapping or touching marks of the same type into the fewest ranges. */
-fun normalizeMarks(marks: List<RichTextMark>): ImmutableList<RichTextMark> = marks
+internal fun normalizeMarks(marks: List<RichTextMark>): ImmutableList<RichTextMark> = marks
     .filter { it.start < it.end }
     .groupBy { it.type }
     .flatMap { (type, group) ->
@@ -22,10 +22,12 @@ fun normalizeMarks(marks: List<RichTextMark>): ImmutableList<RichTextMark> = mar
             val last = merged.lastOrNull()
 
             if (last != null && mark.start <= last.end) {
-                merged[merged.lastIndex] = last.copy(end = maxOf(
+                val end = maxOf(
                     last.end,
                     mark.end,
-                ),)
+                )
+
+                merged[merged.lastIndex] = last.copy(end = end)
             } else {
                 merged.add(mark.copy(type = type))
             }
@@ -48,7 +50,7 @@ fun normalizeMarks(marks: List<RichTextMark>): ImmutableList<RichTextMark> = mar
  * that strictly straddles a pure insertion grows to cover the inserted text, while one ending exactly
  * at the insertion point does not — so typing just after a bold word stays unbolded.
  */
-fun applyEditToMarks(
+internal fun applyEditToMarks(
     marks: List<RichTextMark>,
     oldText: String,
     newText: String,
@@ -94,7 +96,7 @@ fun applyEditToMarks(
 }
 
 /** Whether the whole selection [[start], [end]) is already covered by a mark of [type]. */
-fun isRangeMarked(
+internal fun isRangeMarked(
     marks: List<RichTextMark>,
     start: Int,
     end: Int,
@@ -109,7 +111,7 @@ fun isRangeMarked(
  * Toggle [type] over the selection [[start], [end]): when the selection is already fully marked the
  * mark is cleared across it (splitting any straddling mark), otherwise a mark is added over it.
  */
-fun toggleMark(
+internal fun toggleMark(
     marks: List<RichTextMark>,
     start: Int,
     end: Int,
@@ -149,7 +151,7 @@ fun toggleMark(
 }
 
 /** Build the structured [RichTextUiModel] from the editor's plain text and marks. */
-fun editorBufferToDocument(
+internal fun editorBufferToDocument(
     text: String,
     marks: List<RichTextMark>,
 ): RichTextUiModel {
@@ -182,11 +184,11 @@ fun editorBufferToDocument(
         lineStart = newline + 1
     }
 
-    return RichTextUiModel(paragraphs = paragraphs.toImmutableList()).canonical()
+    return RichTextUiModel(paragraphs = paragraphs.toImmutableList())
 }
 
 /** Build the editor's plain text and marks from a structured [RichTextUiModel]. */
-fun documentToEditorBuffer(document: RichTextUiModel): RichTextEditorBuffer {
+internal fun documentToEditorBuffer(document: RichTextUiModel): RichTextEditorBuffer {
     val builder = StringBuilder()
     val marks = mutableListOf<RichTextMark>()
 
@@ -200,23 +202,35 @@ fun documentToEditorBuffer(document: RichTextUiModel): RichTextEditorBuffer {
 
             val end = builder.length
 
-            if (run.bold) marks.add(RichTextMark(
-                start = start,
-                end = end,
-                type = RichTextMarkType.BOLD,
-            ),)
+            if (run.bold) {
+                marks.add(
+                    RichTextMark(
+                        start = start,
+                        end = end,
+                        type = RichTextMarkType.BOLD,
+                    ),
+                )
+            }
 
-            if (run.italic) marks.add(RichTextMark(
-                start = start,
-                end = end,
-                type = RichTextMarkType.ITALIC,
-            ),)
+            if (run.italic) {
+                marks.add(
+                    RichTextMark(
+                        start = start,
+                        end = end,
+                        type = RichTextMarkType.ITALIC,
+                    ),
+                )
+            }
 
-            if (run.spoiler) marks.add(RichTextMark(
-                start = start,
-                end = end,
-                type = RichTextMarkType.SPOILER,
-            ),)
+            if (run.spoiler) {
+                marks.add(
+                    RichTextMark(
+                        start = start,
+                        end = end,
+                        type = RichTextMarkType.SPOILER,
+                    ),
+                )
+            }
         }
     }
 
@@ -238,14 +252,18 @@ private fun runsForLine(
 
     marks.forEach { mark ->
         if (mark.end > lineStart && mark.start < lineEnd) {
-            boundaries.add(mark.start.coerceIn(
+            val markStart = mark.start.coerceIn(
                 lineStart,
                 lineEnd,
-            ),)
-            boundaries.add(mark.end.coerceIn(
+            )
+
+            val markEnd = mark.end.coerceIn(
                 lineStart,
                 lineEnd,
-            ),)
+            )
+
+            boundaries.add(markStart)
+            boundaries.add(markEnd)
         }
     }
 

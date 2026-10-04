@@ -34,7 +34,7 @@ internal fun ReAuthState.toSheetUiModel(): ReAuthSheetUiModel = ReAuthSheetUiMod
         key = "api-token",
         text = apiKey,
         placeholder = "Paste your Hardcover API token",
-        variant = TextFieldVariant.Outlined(label = "API token"),
+        variant = TextFieldVariant.Pill(),
         enabled = isSubmitting.not(),
     ),
     errorMessage = errorMessage,

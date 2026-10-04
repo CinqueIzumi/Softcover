@@ -59,10 +59,12 @@ class MastheadCollectorTest {
                 isLoading = false,
             )
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.masthead.eyebrow shouldBe "Now reading"
@@ -77,10 +79,12 @@ class MastheadCollectorTest {
                 isLoading = true,
             )
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.masthead.eyebrow shouldBe "Catching up on your reading…"
@@ -91,10 +95,12 @@ class MastheadCollectorTest {
         fun `title is the current time-of-day greeting`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.masthead.title shouldBe greetingForNow()
@@ -106,10 +112,12 @@ class MastheadCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = emptyList())
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.masthead.subtitle shouldBe "0 titles in motion"
@@ -121,10 +129,12 @@ class MastheadCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = listOf(stubBook()))
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.masthead.subtitle shouldBe "One title in motion"
@@ -136,10 +146,12 @@ class MastheadCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = listOf(stubBook(), stubBook(), stubBook()))
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.masthead.subtitle shouldBe "3 titles in motion"
@@ -151,10 +163,12 @@ class MastheadCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = listOf(stubBook(userBookRead = null)))
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.masthead.subtitle shouldBe "One title in motion"
@@ -170,10 +184,12 @@ class MastheadCollectorTest {
             )
             stateFlow.value = ReadingScreenUiState(books = books)
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.masthead.subtitle shouldBe "2 titles in motion · 60% along, on average"
@@ -189,10 +205,12 @@ class MastheadCollectorTest {
             )
             stateFlow.value = ReadingScreenUiState(books = books)
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.masthead.subtitle shouldBe "2 titles in motion · 45% along, on average"
@@ -207,10 +225,12 @@ class MastheadCollectorTest {
                 isLoading = true,
             )
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -231,10 +251,12 @@ class MastheadCollectorTest {
         fun `has no eyebrow`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.compactMasthead.eyebrow shouldBe null
@@ -245,10 +267,12 @@ class MastheadCollectorTest {
         fun `is sized Compact`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.compactMasthead.size shouldBe PageMastheadSize.Compact
@@ -263,10 +287,12 @@ class MastheadCollectorTest {
                 isLoading = false,
             )
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.compactMasthead.title shouldBe stateFlow.value.masthead.title
@@ -282,10 +308,12 @@ class MastheadCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(isLoading = false)
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.mastheadRefresh shouldBe MastheadRefreshUiModel(
@@ -300,10 +328,12 @@ class MastheadCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val collector = MastheadCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.mastheadRefresh shouldBe MastheadRefreshUiModel(
@@ -324,10 +354,12 @@ class MastheadCollectorTest {
                 val defaults = ReadingScreenUiState()
 
                 // ----- Act -----
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Assert -----
                 stateFlow.value.masthead.eyebrow shouldBe "Catching up on your reading…"

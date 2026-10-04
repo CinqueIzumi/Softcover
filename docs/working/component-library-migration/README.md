@@ -14,11 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SS-1–SS-11 done (SS-11 uncommitted). SL-3b blocked on F34; F33 open.
-- **Next:** SS-C Phase 1 — `steps/ss-simplicity-audit.md` SS-C row, per `family-procedure.md` § Phase 3; covers § Approved shape "Left over" / "Undecided" and SS-3 "Later". Stop for approval.
-- **Open questions:** Foundation `shimmer` fixed `LightGray` / `White` (upstream?); book detail hero `Cover` jumps on fetch; `BookDetailUiState` KDoc cites "(R9)" (S11 sweep). ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile`, charts, `ProgressBar`, 12 dp card bars unchecked in gallery. Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
-- **Verification:** SS-11: tests + `styleCheck` + projectHealth passed, review fixed. On device, unchecked: fast typing in time fields; scan manual-entry focus (desktop only); share card rating.
-- **Uncommitted:** SS-11 (component models, gallery, tests, uibinding date, explore preview, R5, tracker docs); roadmap header link.
+- **State:** SS done: `DeadlineRow` fixtures + gallery entry added, SS-C shifts in `visual-checks.md`, step file deleted, its smells list now `component-contract.md` § 7.6a. SL-3b blocked on F34.
+- **Next:** commit SS-C (awaiting the user's go-ahead), then TP-0 (`steps/tp-test-prune.md`).
+- **Open questions:** `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
+- **On device, unchecked:** lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
+- **Verification:** `testAndroidHostTest --continue` passed before the fixtures; `styleCheck` passed (JDK 21) after them.
+- **Uncommitted:** SS-C + review fixes — `core/component`, `core/uibinding`, all features (session: dp-inlining only), `orchestration`, `app` debug share screen; tests across those plus bracket-only edits in `core/{book,profile,network,domain,database}`, `feature/scan`; `docs/reference/design-system/`; tracker docs.
 
 ## Local verification
 
@@ -67,7 +68,7 @@ every sub-step's Verify.
 | S8 | — (screen states) | S8-1–S8-3, S8-C-a–C-c | [x] |
 | S8 | — (controls) | S8-4–S8-6, S8-C-controls | [x] |
 | S9 | — (statistics & progress) | S9-1–S9-4, S9-C | [x] |
-| SS | [steps/ss-simplicity-audit.md](steps/ss-simplicity-audit.md) | SS-0–SS-11, SS-C; after S9, before PF / S10 | [ ] |
+| SS | — (simplicity audit) | SS-0–SS-11, SS-C; after S9, before PF / S10 | [x] |
 | TP | [steps/tp-test-prune.md](steps/tp-test-prune.md) | TP-0 timings, then per module group; after SS | [ ] |
 | SD | [steps/sd-screen-dedup.md](steps/sd-screen-dedup.md) | SD-0 inventory, then per screen group; after TP, before PF / S10 | [ ] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |

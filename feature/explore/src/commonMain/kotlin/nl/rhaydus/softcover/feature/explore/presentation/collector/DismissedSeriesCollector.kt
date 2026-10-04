@@ -1,11 +1,11 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
+import nl.rhaydus.softcover.core.uibinding.cover.coverUiModelFromUrl
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockSeriesAction
 import nl.rhaydus.softcover.feature.explore.presentation.event.HiddenSuggestionsEvent
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toHiddenSeriesCard
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsDependencies
@@ -21,10 +21,15 @@ internal class DismissedSeriesCollector : HiddenSuggestionsCollector {
         dependencies.getDismissedContinueSeriesUseCase().collectLatest { series ->
             scope.setState {
                 it.copy(
-                    hiddenSeries = series,
-                    hiddenSeriesCards = series.map { entry ->
-                        entry.toHiddenSeriesCard(cover = entry.toCoverUiModel())
-                    }.toImmutableList(),
+                    hiddenSeries = series.map { entry ->
+                        val cover = coverUiModelFromUrl(
+                            url = entry.coverUrl,
+                            title = entry.seriesName ?: "Hidden series",
+                            variant = CoverVariant.Flat,
+                        )
+
+                        entry.toHiddenSeriesCard(cover = cover) to entry.toUnblockAction()
+                    }.toBookCardSet(),
                     hiddenSeriesGroupHeader = it.hiddenSeriesGroupHeader.copy(count = series.size.toString()),
                 )
             }
@@ -32,12 +37,10 @@ internal class DismissedSeriesCollector : HiddenSuggestionsCollector {
     }
 }
 
-// No edition to resolve against — a hidden row is URL-only (component-contract.md § 7.2 R9's mapper
-// call, kept here since [DismissedSeries] has no edition of its own). 3dp radius, not the usual 4 —
-// today's behaviour (CoverDimensions.forVariant), preserved deliberately.
-private fun DismissedSeries.toCoverUiModel() = (null as BookEdition?).toCoverUiModel(
-    defaultEdition = null,
-    coverlessTitle = seriesName ?: "Hidden series",
-    variant = CoverVariant.Flat,
-    fallbackCoverUrl = coverUrl,
+private fun DismissedSeries.toUnblockAction() = OnUnblockSeriesAction(
+    seriesId = seriesId,
+    seriesName = seriesName,
+    coverUrl = coverUrl,
+    authorText = authorText,
+    bookCount = bookCount,
 )

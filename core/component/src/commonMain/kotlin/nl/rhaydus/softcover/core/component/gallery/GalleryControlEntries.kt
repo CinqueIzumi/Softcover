@@ -62,7 +62,7 @@ internal val controlEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "Toggle",
         family = GalleryFamily.CONTROL,
-        blurb = "A two-state control: a filled or bare icon that swaps glyphs, or the platform switch.",
+        blurb = "A two-state control: a filled or bare icon that swaps glyphs.",
         previews = ToggleUiModel,
         content = { model, modifier ->
             Toggle(

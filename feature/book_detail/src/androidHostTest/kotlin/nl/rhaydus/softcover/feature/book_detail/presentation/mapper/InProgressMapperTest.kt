@@ -26,6 +26,10 @@ class InProgressMapperTest {
         every {
             currentEdition
         } returns edition
+
+        every {
+            defaultEdition
+        } returns null
     }
 
     private fun buildRead(

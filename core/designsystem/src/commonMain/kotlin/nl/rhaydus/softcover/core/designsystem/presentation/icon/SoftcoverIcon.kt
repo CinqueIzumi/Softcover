@@ -37,6 +37,7 @@ import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_pause
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_pin
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_play
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_reading
+import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_remove
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_search
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_settings
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_share
@@ -94,6 +95,7 @@ enum class SoftcoverIcon(internal val resource: DrawableResource) {
     Pin(Res.drawable.ic_pin),
     Play(Res.drawable.ic_play),
     Reading(Res.drawable.ic_reading),
+    Remove(Res.drawable.ic_remove),
     Search(Res.drawable.ic_search),
     Settings(Res.drawable.ic_settings),
     Share(Res.drawable.ic_share),

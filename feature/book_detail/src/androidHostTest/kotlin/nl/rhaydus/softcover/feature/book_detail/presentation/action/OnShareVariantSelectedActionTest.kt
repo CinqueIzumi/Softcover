@@ -70,8 +70,7 @@ class OnShareVariantSelectedActionTest {
         fun `does not mutate any other state field`() = runTest {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(
-                isSharing = true,
-                isSavingToGallery = true,
+                isShareSheetVisible = true,
             )
             val initialState = stateFlow.value
             val action = OnShareVariantSelectedAction(variant = ShareCardVariant.BOOK)

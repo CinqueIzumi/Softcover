@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.sheet.SheetRowCount
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -57,8 +58,10 @@ internal fun shelvesSheetRowsFor(
                 label = tab.label,
                 selected = tab.id == selectedTabId,
                 leadingIcon = if (tab is LibraryTab.CustomList) SoftcoverIcon.LibraryBooks else SoftcoverIcon.Shelf,
-                count = itemCount.toString(),
-                countDescription = formatBookCount(count = itemCount),
+                count = SheetRowCount(
+                    text = itemCount.toString(),
+                    description = formatBookCount(count = itemCount),
+                ),
             )
         }
         .toImmutableList()

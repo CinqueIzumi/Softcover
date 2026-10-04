@@ -24,13 +24,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import nl.rhaydus.common.currentLocalDate
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
@@ -116,9 +116,8 @@ internal actual fun ReadingScreenLayout(
                         }
 
                         else -> EmptyCurrentlyReadingScreen(
-                            wantToReadBooks = state.wantToReadBooks.orEmpty(),
                             trendingBooks = state.trendingBooks,
-                            pickUpNextCards = state.pickUpNextCards,
+                            pickUpNext = state.pickUpNext,
                             trendingTileCover = state.trendingTileCover,
                             pickUpNextHeader = state.pickUpNextHeader,
                             trendingHeader = state.trendingHeader,
@@ -256,9 +255,8 @@ private fun ReadingScreenEmptyPreview() {
 
 /**
  * The two empty-screen preview states, built as top-level `val`s so the cover mapping a
- * `CoverModelsCollector` performs at runtime happens off the composition here too
- * (component-contract.md § 7.2 R9) — mirroring `ExploreScreenLayout.mobile.kt`'s
- * `toPreviewCoverModels`. Without the covers the tiles would render blank placeholders.
+ * `CoverModelsCollector` performs at runtime happens off the composition here too. Without the
+ * covers the tiles would render blank placeholders.
  *
  * Declared **after** [previewBooks]: top-level properties initialise in file order, so reading it
  * from above would see an uninitialised list.
@@ -266,7 +264,7 @@ private fun ReadingScreenEmptyPreview() {
 private val previewEmptyWithPickUpNextState = ReadingScreenUiState(
     isLoading = false,
     wantToReadBooks = previewBooks.take(3),
-    pickUpNextCards = previewBooks.take(3).map { it.toPickUpNextCard() }.toImmutableList(),
+    pickUpNext = previewBooks.take(3).map { it.toPickUpNextCard() to it }.toBookCardSet(),
 )
 
 private val previewEmptyWithTrendingState = ReadingScreenUiState(

@@ -79,14 +79,10 @@ internal fun <K> SheetRow(
 
             if (model.count != null) {
                 SoftcoverText(
-                    text = model.count,
+                    text = model.count.text,
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = if (model.countDescription != null) {
-                        Modifier.semantics { contentDescription = model.countDescription }
-                    } else {
-                        Modifier
-                    },
+                    modifier = Modifier.semantics { contentDescription = model.count.description },
                 )
             }
 

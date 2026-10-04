@@ -392,7 +392,7 @@ private fun ReadingLifeContent(
         Spacer(modifier = Modifier.height(40.dp))
 
         RecentlyLovedSection(
-            cards = state.recentlyLovedCards,
+            cards = state.recentlyLoved.cards,
             hasRecentlyLoved = state.hasRecentlyLoved,
             isLoading = state.isReadingLifeLoading,
             header = state.recentlyLovedHeader,

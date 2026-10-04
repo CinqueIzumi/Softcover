@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
@@ -20,9 +18,8 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.mood.MoodTile
 import nl.rhaydus.softcover.core.component.mood.MoodTileEvent
 import nl.rhaydus.softcover.core.component.mood.MoodTileUiModel
-import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodChipClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodTileClickedAction
 
 /**
  * The 2-column "Browse by mood" grid. Each row is measured at
@@ -31,21 +28,14 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodChipClickA
  */
 @Composable
 internal fun MoodGrid(
-    moods: List<MoodTag>,
     tiles: ImmutableList<MoodTileUiModel>,
     header: SectionHeaderUiModel,
     runAction: (ExploreAction) -> Unit,
 ) {
     if (tiles.isEmpty()) return
 
-    val currentMoods by rememberUpdatedState(moods)
-
     val onTileEvent: (MoodTileEvent) -> Unit = remember(runAction) {
-        { event ->
-            currentMoods
-                .firstOrNull { it.id == event.key }
-                ?.let { runAction(OnMoodChipClickAction(mood = it)) }
-        }
+        { event -> runAction(OnMoodTileClickedAction(key = event.key)) }
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {

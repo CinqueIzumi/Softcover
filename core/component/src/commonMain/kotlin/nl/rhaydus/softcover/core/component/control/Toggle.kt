@@ -34,7 +34,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 @Composable
 fun Toggle(
     model: ToggleUiModel,
-    onEvent: (ToggleEvent<String>) -> Unit,
+    onEvent: (ToggleEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -71,7 +71,7 @@ fun Toggle(
         contentDescription = model.description,
     )
 
-    val tile: @Composable () -> Unit = {
+    DesktopTooltip(text = model.description) {
         Box(
             modifier = modifier
                 .minimumInteractiveComponentSize()
@@ -88,12 +88,7 @@ fun Toggle(
                     enabled = model.enabled,
                     role = Role.Switch,
                     onValueChange = { checked ->
-                        onEvent(
-                            ToggleEvent.Toggled(
-                                key = model.key,
-                                checked = checked,
-                            ),
-                        )
+                        onEvent(ToggleEvent.Toggled(checked = checked))
                     },
                 ),
             contentAlignment = Alignment.Center,
@@ -104,14 +99,6 @@ fun Toggle(
                 tint = tint,
                 modifier = Modifier.size(iconSize),
             )
-        }
-    }
-
-    if (filled) {
-        tile()
-    } else {
-        DesktopTooltip(text = model.description) {
-            tile()
         }
     }
 }

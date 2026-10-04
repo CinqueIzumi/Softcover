@@ -150,7 +150,8 @@ class RetryTransientFailuresTest {
                 headers = listOf(HttpHeader(
                     "Retry-After",
                     "5",
-                ),),
+                ),
+                ),
             )
             every {
                 apolloCall.toFlow()

@@ -55,10 +55,12 @@ class DateStyleCollectorTest {
         fun `updates dateStyle when flow emits a value`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DateStyleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             dateStyleFlow.emit(DateStyle.MONTH_DAY_YEAR)
@@ -72,10 +74,12 @@ class DateStyleCollectorTest {
         fun `updates dateStyle to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DateStyleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             dateStyleFlow.emit(DateStyle.DAY_MONTH_YEAR)
@@ -90,10 +94,12 @@ class DateStyleCollectorTest {
         fun `does not change dateStyle before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DateStyleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.dateStyle shouldBe DateStyle.DAY_MONTH_YEAR
@@ -104,10 +110,12 @@ class DateStyleCollectorTest {
         fun `retains the last emitted DateStyle after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DateStyleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             dateStyleFlow.emit(DateStyle.MONTH_DAY_YEAR)
             job.cancel()
 
@@ -124,10 +132,12 @@ class DateStyleCollectorTest {
                 fabMenuExpanded = true,
             )
             val collector = DateStyleCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             dateStyleFlow.emit(DateStyle.MONTH_DAY_YEAR)

@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_CARD_COUNT
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
@@ -33,13 +33,13 @@ internal class RecentlyLovedCardsCollector : ProfileCollector {
             .collect { snapshot ->
                 scope.setState {
                     it.copy(
-                        recentlyLovedCards = if (snapshot.isLoading && snapshot.books.isEmpty()) {
-                            RECENTLY_LOVED_STAND_IN_CARDS
+                        recentlyLoved = if (snapshot.isLoading && snapshot.books.isEmpty()) {
+                            BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS)
                         } else {
                             snapshot.books
                                 .take(RECENTLY_LOVED_CARD_COUNT)
-                                .map(LovedBook::toRecentlyLovedCard)
-                                .toImmutableList()
+                                .map { book -> book.toRecentlyLovedCard() to book }
+                                .toBookCardSet()
                         },
                     )
                 }

@@ -72,19 +72,24 @@ class ContinueSeriesBooksCollectorTest {
         id: Int,
         title: String = "Book $id",
         bookSeries: BookSeries? = null,
-    ): Book = mockk {
-        every {
-            this@mockk.id
-        } returns id
-
-        every {
-            this@mockk.title
-        } returns title
-
-        every {
-            this@mockk.bookSeries
-        } returns bookSeries
-    }
+    ): Book = Book(
+        id = id,
+        title = title,
+        editions = emptyList(),
+        defaultEdition = null,
+        rating = 0.0,
+        description = "",
+        releaseYear = 2020,
+        coverUrl = "https://covers.test/$id.jpg",
+        authors = emptyList(),
+        usersCount = 0,
+        ratingsCount = 0,
+        bookSeries = bookSeries,
+        positionsInSeries = emptyList(),
+        isCompilation = false,
+        userBook = null,
+        userBookRead = null,
+    )
 
     // ----- OnLaunch -----
 
@@ -268,7 +273,7 @@ class ContinueSeriesBooksCollectorTest {
             // ----- Assert -----
             val menuSheets = stateFlow.value.continueSeriesMenuSheets
             menuSheets.keys.toList() shouldBe listOf(1, 2)
-            menuSheets.values.map { it.header.section } shouldBe listOf(
+            menuSheets.values.map { it.scaffold.header.section } shouldBe listOf(
                 SectionHeaderUiModel.Section(
                     eyebrow = "Mistborn Era",
                     headline = "Mistborn",

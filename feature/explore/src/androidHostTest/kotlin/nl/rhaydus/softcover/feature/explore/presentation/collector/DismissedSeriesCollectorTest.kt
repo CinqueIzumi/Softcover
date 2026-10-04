@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -13,6 +14,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetDismissedContinueSeriesUseCase
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockSeriesAction
 import nl.rhaydus.softcover.feature.explore.presentation.event.HiddenSuggestionsEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.HiddenSuggestionsDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsLocalVariables
@@ -67,7 +69,7 @@ class DismissedSeriesCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates hiddenSeries and cards on emission`() = runTest(UnconfinedTestDispatcher()) {
+        fun `maps each emitted series to a card whose payload restores that series`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val series = stubDismissedSeries(seriesId = 1)
             val collector = DismissedSeriesCollector()
@@ -82,13 +84,16 @@ class DismissedSeriesCollectorTest {
             dismissedSeriesFlow.emit(listOf(series))
 
             // ----- Assert -----
-            stateFlow.value.hiddenSeries shouldBe listOf(series)
-            stateFlow.value.hiddenSeriesCards.map { it.key } shouldBe listOf(BookCardKey.Series(seriesId = 1))
+            val hidden = stateFlow.value.hiddenSeries
+            hidden.cards.map { it.key } shouldBe listOf(BookCardKey.Series(seriesId = 1))
+            val action = hidden[BookCardKey.Series(seriesId = 1)].shouldBeInstanceOf<OnUnblockSeriesAction>()
+            action.seriesId shouldBe 1
+            action.seriesName shouldBe series.seriesName
             job.cancel()
         }
 
         @Test
-        fun `leaves the hiddenBookCards stand-ins in place when only series are emitted`() = runTest(UnconfinedTestDispatcher()) {
+        fun `leaves the hiddenBooks stand-ins in place when only series are emitted`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DismissedSeriesCollector()
             val job = launch {
@@ -123,7 +128,7 @@ class DismissedSeriesCollectorTest {
                 dismissedSeriesFlow.emit(emptyList())
 
                 // ----- Assert -----
-                stateFlow.value.hiddenSeriesCards.shouldBeEmpty()
+                stateFlow.value.hiddenSeries.cards.shouldBeEmpty()
                 job.cancel()
             }
 

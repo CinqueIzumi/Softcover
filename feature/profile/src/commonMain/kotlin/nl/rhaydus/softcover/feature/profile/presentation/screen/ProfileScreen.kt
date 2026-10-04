@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.profile.presentation.screen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -13,7 +12,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
@@ -85,14 +83,8 @@ private fun rememberRecentlyLovedEventHandler(
     val appNavigator = koinInject<AppNavigator>()
     val currentNavigator by rememberUpdatedState(navigator)
 
-    val lovedByKey = remember(state.readingLife?.recentlyLoved) {
-        state.readingLife?.recentlyLoved
-            .orEmpty()
-            .associateBy { BookCardKey.Book(it.bookId) }
-    }
-
     return rememberPrefetchingBookCardEventHandler(
-        resolve = lovedByKey::get,
+        set = state.recentlyLoved,
     ) { event, loved ->
         if (event is BookCardEvent.Clicked) {
             val destination = ScreenDestination.BookDetail(

@@ -3,10 +3,9 @@ package nl.rhaydus.softcover.core.component.chip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 
-/** What [Chip] paints for a [ChipTone] × [ChipUiModel.selected] — the R2 lookup every chip resolves once. */
+/** What [Chip] paints for a [ChipTone] × [ChipUiModel.selected]. */
 internal data class ChipStyle(
     val container: Color,
     val ink: Color,
     val weight: FontWeight,
-    val mutedInk: Color = ink,
 )

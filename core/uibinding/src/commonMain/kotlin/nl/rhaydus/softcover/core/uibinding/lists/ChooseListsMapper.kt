@@ -3,12 +3,6 @@ package nl.rhaydus.softcover.core.uibinding.lists
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import nl.rhaydus.softcover.core.component.chip.ChipInteraction
-import nl.rhaydus.softcover.core.component.chip.ChipLeading
-import nl.rhaydus.softcover.core.component.chip.ChipSize
-import nl.rhaydus.softcover.core.component.chip.ChipTone
-import nl.rhaydus.softcover.core.component.chip.ChipTrailing
-import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
@@ -20,14 +14,13 @@ import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 
 /**
  * Maps the reader's custom lists onto the choose-lists sheet for a **single** book.
  *
- * The receiver is exactly the lists to offer, in the order to offer them — filtering (e.g. dropping
- * the built-in "Owned" list) is the host's call, not the mapping's.
+ * The receiver is the reader's lists in the order to offer them; the built-in "Owned" list is dropped
+ * here, since it is not one the reader files books onto.
  */
 fun List<BookList>.toChooseListsUiModel(
     bookId: Int,
@@ -66,7 +59,7 @@ fun List<BookList>.toBulkChooseListsUiModel(
     val stackCovers = covers.take(SheetHeaderTrailing.JacketStack.MAX_COVERS)
 
     return ChooseListsUiModel(
-            rows = rowsFor(
+        rows = rowsFor(
             bookIds = bookIds,
             listsBeingMutated = listsBeingMutated,
             isBulk = true,
@@ -112,7 +105,7 @@ private fun List<BookList>.rowsFor(
     bookIds: Set<Int>,
     listsBeingMutated: Set<Int>,
     isBulk: Boolean,
-): ImmutableList<ChooseListsRowUiModel> = map { list ->
+): ImmutableList<ChooseListsRowUiModel> = filter { it.isOwned.not() }.map { list ->
     val listBookIds = list.books.mapTo(mutableSetOf()) { it.bookId }
     val matchingCount = bookIds.count { it in listBookIds }
 
@@ -134,46 +127,19 @@ private fun List<BookList>.rowsFor(
             totalCount = bookIds.size,
             isBulk = isBulk,
         ),
-        membershipChip = ChipUiModel(
-            key = list.id.toString(),
-            label = membershipChipLabelFor(
-                membership = membership,
-                matchingCount = matchingCount,
-                totalCount = bookIds.size,
-                isBulk = isBulk,
-            ),
-            tone = membership.toMembershipChipTone(),
-            leading = membership.toMembershipChipLeading(),
-            trailing = membership.toMembershipChipTrailing(),
-            interaction = ChipInteraction.Inert,
-            size = ChipSize.Compact,
+        chipLabel = membershipChipLabelFor(
+            membership = membership,
+            matchingCount = matchingCount,
+            totalCount = bookIds.size,
+            isBulk = isBulk,
         ),
         membership = membership,
         isPending = list.id in listsBeingMutated,
     )
 }.toImmutableList()
 
-private fun ListMembership.toMembershipChipTone(): ChipTone = when (this) {
-    ListMembership.ALL -> ChipTone.Container
-    ListMembership.PARTIAL -> ChipTone.Filled
-    ListMembership.NONE -> ChipTone.Outlined
-}
-
-private fun ListMembership.toMembershipChipLeading(): ChipLeading? = when (this) {
-    ListMembership.ALL -> null
-    ListMembership.PARTIAL, ListMembership.NONE -> ChipLeading.Icon(icon = SoftcoverIcon.Add)
-}
-
-private fun ListMembership.toMembershipChipTrailing(): ChipTrailing? = when (this) {
-    ListMembership.ALL -> ChipTrailing.Icon(
-        icon = SoftcoverIcon.Close,
-        description = "Remove from list",
-    )
-    ListMembership.PARTIAL, ListMembership.NONE -> null
-}
-
 /**
- * "12 BOOKS" on its own for a single book; in bulk it appends the membership phrase — `ALL` → "ALL
+ * "12 BOOKS" ("1 BOOK" for one) on its own for a single book; in bulk it appends the membership phrase — `ALL` → "ALL
  * {totalCount} HERE", `PARTIAL` → "{matchingCount} OF {totalCount} HERE", `NONE` → "NONE YET" — e.g.
  * "12 BOOKS · 3 OF 5 HERE".
  */
@@ -184,7 +150,7 @@ private fun captionFor(
     totalCount: Int,
     isBulk: Boolean,
 ): String {
-    val booksCount = "$bookCount BOOKS"
+    val booksCount = if (bookCount == 1) "1 BOOK" else "$bookCount BOOKS"
 
     if (isBulk.not()) return booksCount
 

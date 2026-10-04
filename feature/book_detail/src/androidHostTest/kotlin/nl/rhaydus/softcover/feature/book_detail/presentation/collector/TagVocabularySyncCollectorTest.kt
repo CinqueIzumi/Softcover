@@ -70,10 +70,12 @@ class TagVocabularySyncCollectorTest {
             } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val collector = TagVocabularySyncCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             // (showTagEditorSheet stays at its default false)
@@ -92,10 +94,12 @@ class TagVocabularySyncCollectorTest {
             } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val collector = TagVocabularySyncCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(showTagEditorSheet = true)
@@ -114,10 +118,12 @@ class TagVocabularySyncCollectorTest {
             } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val collector = TagVocabularySyncCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(showTagEditorSheet = true)
             coVerify(exactly = 1) { syncUserTagVocabularyUseCase() }
@@ -139,10 +145,12 @@ class TagVocabularySyncCollectorTest {
             } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val collector = TagVocabularySyncCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(showTagEditorSheet = false)

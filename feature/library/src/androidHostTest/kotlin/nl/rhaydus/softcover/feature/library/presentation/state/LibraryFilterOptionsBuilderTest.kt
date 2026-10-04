@@ -72,10 +72,12 @@ class LibraryFilterOptionsBuilderTest {
             )
             val book2 = buildBook(
                 id = 2,
-                editions = listOf(buildEdition(
-                    id = 3,
-                    format = "paperback",
-                ),),
+                editions = listOf(
+                    buildEdition(
+                        id = 3,
+                        format = "paperback",
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -160,10 +162,12 @@ class LibraryFilterOptionsBuilderTest {
             // ----- Arrange -----
             val book = buildBook(
                 id = 1,
-                editions = listOf(buildEdition(
-                    id = 1,
-                    owned = true,
-                ),),
+                editions = listOf(
+                    buildEdition(
+                        id = 1,
+                        owned = true,
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -178,10 +182,12 @@ class LibraryFilterOptionsBuilderTest {
             // ----- Arrange -----
             val book = buildBook(
                 id = 1,
-                editions = listOf(buildEdition(
-                    id = 1,
-                    owned = false,
-                ),),
+                editions = listOf(
+                    buildEdition(
+                        id = 1,
+                        owned = false,
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -462,10 +468,12 @@ class LibraryFilterOptionsBuilderTest {
     private fun buildBook(
         id: Int,
         tags: List<Tag> = emptyList(),
-        editions: List<BookEdition> = listOf(buildEdition(
-            id = id,
-            bookId = id,
-        ),),
+        editions: List<BookEdition> = listOf(
+            buildEdition(
+                id = id,
+                bookId = id,
+            ),
+        ),
         releaseYear: Int = 2020,
         rating: Double = 0.0,
         finishedYear: Int? = null,
@@ -478,10 +486,12 @@ class LibraryFilterOptionsBuilderTest {
         description = "",
         releaseYear = releaseYear,
         coverUrl = "",
-        authors = listOf(Author(
-            id = id,
-            name = "Author $id",
-        ),),
+        authors = listOf(
+            Author(
+                id = id,
+                name = "Author $id",
+            ),
+        ),
         usersCount = 0,
         ratingsCount = 0,
         bookSeries = null,

@@ -11,7 +11,7 @@ import kotlinx.collections.immutable.ImmutableList
  * both cheap on ranges and awkward on a tree. `RichTextEditing.kt` converts between the two.
  */
 @Immutable
-data class RichTextEditorBuffer(
+internal data class RichTextEditorBuffer(
     val text: String,
     val marks: ImmutableList<RichTextMark>,
 )

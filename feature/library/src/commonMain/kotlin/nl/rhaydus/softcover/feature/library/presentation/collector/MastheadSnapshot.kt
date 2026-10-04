@@ -1,9 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.collections.immutable.toImmutableSet
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -35,6 +33,7 @@ internal data class MastheadSnapshot(
                     totalPages = stats.totalPages,
                 )
             },
+            isLoading = stats == null,
         )
     }.toImmutableMap()
 
@@ -42,12 +41,8 @@ internal data class MastheadSnapshot(
         eyebrow = eyebrow(),
         title = "Library",
         subtitle = MASTHEAD_SUBTITLE_STAND_IN,
+        isLoading = true,
     )
-
-    fun loadingTabIds(): ImmutableSet<String> = visibleTabs
-        .map { it.id }
-        .filter { it !in tabStatsByTab }
-        .toImmutableSet()
 
     fun refresh(): MastheadRefreshUiModel = mastheadRefreshFor(isLoading = isLoading)
 

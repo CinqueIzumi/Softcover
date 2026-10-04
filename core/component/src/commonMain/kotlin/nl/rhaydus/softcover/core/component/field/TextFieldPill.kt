@@ -51,19 +51,16 @@ internal fun PillTextField(
     val height = when (variant.size) {
         TextFieldPillSize.Compact -> 42.dp
         TextFieldPillSize.Regular -> 48.dp
-        TextFieldPillSize.Large -> 52.dp
     }
-    val horizontalPadding = if (variant.size == TextFieldPillSize.Large) 18.dp else 14.dp
+    val horizontalPadding = 14.dp
     val iconSize = if (variant.size == TextFieldPillSize.Compact) 18.dp else 20.dp
     val textStyle = when (variant.size) {
         TextFieldPillSize.Compact -> MaterialTheme.typography.bodyMedium
         TextFieldPillSize.Regular -> MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
-        TextFieldPillSize.Large -> MaterialTheme.typography.bodyLarge
     }
     val container = when (variant.size) {
         TextFieldPillSize.Compact -> MaterialTheme.colorScheme.surfaceContainer
-        TextFieldPillSize.Regular,
-        TextFieldPillSize.Large -> MaterialTheme.colorScheme.surfaceContainerHigh
+        TextFieldPillSize.Regular -> MaterialTheme.colorScheme.surfaceContainerHigh
     }
 
     // The exit animation needs the pill after the model has already dropped it.

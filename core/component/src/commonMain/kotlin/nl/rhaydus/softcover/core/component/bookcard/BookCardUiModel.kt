@@ -144,7 +144,7 @@ data class BookCardUiModel(
                         eyebrow = BookCardEyebrow(text = "THE KINGKILLER CHRONICLE"),
                         byline = "By Patrick Rothfuss",
                     ),
-                    menuLabel = "More options",
+                    hasMenu = true,
                 ),
             ),
             "Column, progress" to BookCardUiModel(
@@ -260,7 +260,7 @@ data class BookCardUiModel(
                         title = "The Stormlight Archive",
                         byline = "By Brandon Sanderson",
                     ),
-                    trailing = BookCardTrailing.Restore(label = "Restore"),
+                    trailing = BookCardTrailing.Restore,
                 ),
             ),
             "Row Compact, selected, coverless" to BookCardUiModel(

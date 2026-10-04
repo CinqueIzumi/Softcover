@@ -24,4 +24,5 @@ internal data class BookCardModelsSnapshot(
     val isRearranging: Boolean,
     val sortModeByTab: Map<String, LibrarySortMode>,
     val customLists: List<BookList>,
+    val isLoading: Boolean,
 )

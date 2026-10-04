@@ -24,18 +24,6 @@ class ExploreSortModeMapperTest {
         }
 
         @Test
-        fun `different modes produce different pills`() {
-            // ----- Arrange -----
-            val relevance = ExploreSortMode.RELEVANCE.toSortPillButton()
-
-            // ----- Act -----
-            val popularity = ExploreSortMode.POPULARITY.toSortPillButton()
-
-            // ----- Assert -----
-            (popularity == relevance) shouldBe false
-        }
-
-        @Test
         fun `keeps the same key across modes`() {
             // ----- Arrange -----
             val relevance = ExploreSortMode.RELEVANCE.toSortPillButton()

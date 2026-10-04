@@ -56,7 +56,7 @@ fun RankedBars(
                                 .fillMaxWidth(fill)
                                 .fillMaxHeight()
                                 .clip(shape)
-                                .background(row.tone.color()),
+                                .background(row.tone.color(colors = MaterialTheme.colorScheme)),
                         )
                     }
                 }

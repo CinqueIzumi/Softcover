@@ -1,10 +1,11 @@
 package nl.rhaydus.softcover.core.component.chip
 
-/** `component-contract.md` § 7.2 R1 — one sealed event lambda, never a loose `onClick`. */
 sealed interface ChipEvent {
-    data class Clicked(val key: String) : ChipEvent
-    data class Dismissed(val key: String) : ChipEvent
+    val key: String
+
+    data class Clicked(override val key: String) : ChipEvent
+    data class Dismissed(override val key: String) : ChipEvent
 
     /** [ChipLeading.SpoilerToggle]'s eye, tapped independently of the chip's own [Clicked] or [Dismissed]. */
-    data class SpoilerToggled(val key: String) : ChipEvent
+    data class SpoilerToggled(override val key: String) : ChipEvent
 }

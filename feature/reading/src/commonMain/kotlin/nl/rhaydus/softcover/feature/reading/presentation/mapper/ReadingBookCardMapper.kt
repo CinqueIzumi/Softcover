@@ -13,7 +13,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
@@ -49,7 +48,10 @@ internal fun Book.toAlsoReadingCard(
             size = BookCardVariant.Row.Size.Standard,
             lead = BookCardLead.Cover(
                 cover = BookCardCover(
-                    model = toTransitionCover(variant = CoverVariant.Tile),
+                    model = toCoverUiModel(
+                        variant = CoverVariant.Tile,
+                        shareTransition = true,
+                    ),
                     badge = coverBadge,
                 ),
             ),
@@ -79,15 +81,12 @@ internal fun Book.toAlsoReadingCard(
 internal fun Book.toPickUpNextCard(): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = id),
     variant = BookCardVariant.Column(
-        cover = BookCardCover(model = toTransitionCover(variant = CoverVariant.Tile)),
+        cover = BookCardCover(
+            model = toCoverUiModel(
+                variant = CoverVariant.Tile,
+                shareTransition = true,
+            ),
+        ),
         text = BookCardContent(title = title),
-    ),
-)
-
-private fun Book.toTransitionCover(variant: CoverVariant) = toCoverUiModel(
-    variant = variant,
-    sharedTransitionKey = bookCoverTransitionKey(
-        editionId = currentEdition?.id,
-        bookId = id,
     ),
 )

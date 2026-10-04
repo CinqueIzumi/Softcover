@@ -3,10 +3,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_FEATURED
@@ -30,24 +27,13 @@ internal class CoverModelsCollector : ExploreCollector {
             .collectLatest { featured ->
                 scope.setState {
                     it.copy(
-                        featuredCover = featured?.toCoverModel(
+                        featuredCover = featured?.toCoverUiModel(
                             variant = CoverVariant.Raised,
-                            surface = SURFACE_FEATURED,
+                            shareTransition = true,
+                            transitionSurface = SURFACE_FEATURED,
                         ),
                     )
                 }
             }
     }
 }
-
-internal fun Book.toCoverModel(
-    variant: CoverVariant,
-    surface: String?,
-): CoverUiModel = toCoverUiModel(
-    variant = variant,
-    sharedTransitionKey = bookCoverTransitionKey(
-        editionId = currentEdition?.id,
-        bookId = id,
-        surface = surface,
-    ),
-)

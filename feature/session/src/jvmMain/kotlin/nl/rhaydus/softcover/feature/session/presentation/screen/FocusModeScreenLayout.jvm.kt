@@ -26,13 +26,6 @@ import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
 import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
 
-// Keeps the reading panel at a comfortable column measure rather than stretching the hero across a
-// maximized window.
-private val PANEL_MAX_WIDTH = 440.dp
-
-// A larger cover than the phone hero — the desktop window has the room for it.
-private val DESKTOP_COVER_WIDTH = 180.dp
-
 /**
  * Desktop focus mode. The same distraction-free reading hero ([FocusReadingPanel]) as mobile, centred
  * in the window at a comfortable column measure with a larger cover, a persistent desktop scrollbar
@@ -67,10 +60,10 @@ internal actual fun FocusModeScreenLayout(
                 onStop = onStop,
                 state = state,
                 runAction = runAction,
-                coverWidth = DESKTOP_COVER_WIDTH,
+                coverWidth = 180.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = PANEL_MAX_WIDTH)
+                    .widthIn(max = 440.dp)
                     .verticalScroll(scrollState)
                     .padding(horizontal = 24.dp, vertical = 32.dp),
             )

@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.PICK_UP_NEXT_STAND_IN_CARDS
@@ -18,8 +18,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiSt
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps the "Also reading" rows and the empty-state "Pick up next" tiles to book cards off the
- * composition (`component-contract.md` § 7.2 R9).
+ * Maps the "Also reading" rows and the empty-state "Pick up next" tiles to book cards.
  *
  * The first book is the featured card and has no row here. Derives from the books, the deadlines, the
  * cover overlays [DeadlineModelsCollector] writes and the failed-save ids, so it re-runs whenever any
@@ -46,8 +45,8 @@ internal class BookCardModelsCollector : ReadingCollector {
             .collectLatest { snapshot ->
                 scope.setState {
                     it.copy(
-                        alsoReadingCards = if (snapshot.isLoadingFeatured) {
-                            ALSO_READING_STAND_IN_CARDS
+                        alsoReading = if (snapshot.isLoadingFeatured) {
+                            BookCardSet.standIns(ALSO_READING_STAND_IN_CARDS)
                         } else {
                             snapshot.alsoReadingBooks.map { book ->
                                 book.toAlsoReadingCard(
@@ -55,13 +54,13 @@ internal class BookCardModelsCollector : ReadingCollector {
                                     coverBadge = snapshot.deadlineCoverOverlays[book.id],
                                     dateStyle = snapshot.dateStyle,
                                     mutationFailed = book.id in snapshot.failedMutationBookIds,
-                                )
-                            }.toImmutableList()
+                                ) to book
+                            }.toBookCardSet()
                         },
-                        pickUpNextCards = snapshot.pickUpNextBooks
-                            ?.map(Book::toPickUpNextCard)
-                            ?.toImmutableList()
-                            ?: PICK_UP_NEXT_STAND_IN_CARDS,
+                        pickUpNext = snapshot.pickUpNextBooks
+                            ?.map { book -> book.toPickUpNextCard() to book }
+                            ?.toBookCardSet()
+                            ?: BookCardSet.standIns(PICK_UP_NEXT_STAND_IN_CARDS),
                     )
                 }
             }

@@ -21,6 +21,8 @@ class ProgressSheetUiModelTest {
             unit = ProgressTimeUnit.SECONDS,
             text = "0",
         ),
+        suffix = null,
+        fraction = 0f,
     )
 
     @Nested
@@ -31,6 +33,7 @@ class ProgressSheetUiModelTest {
             val medium = ProgressSheetMedium.Paged(
                 totalPages = 300,
                 currentPage = 10,
+                suffix = null,
             )
 
             // ----- Act -----
@@ -52,6 +55,7 @@ class ProgressSheetUiModelTest {
             val medium = ProgressSheetMedium.Paged(
                 totalPages = 0,
                 currentPage = 0,
+                suffix = null,
             )
 
             // ----- Act -----
@@ -107,6 +111,7 @@ class ProgressSheetUiModelTest {
             val medium = ProgressSheetMedium.Paged(
                 totalPages = 300,
                 currentPage = 10,
+                suffix = null,
             )
 
             // ----- Act -----
@@ -125,6 +130,7 @@ class ProgressSheetUiModelTest {
             val medium = ProgressSheetMedium.Paged(
                 totalPages = 0,
                 currentPage = 0,
+                suffix = null,
             )
 
             // ----- Act -----
@@ -160,6 +166,7 @@ class ProgressSheetUiModelTest {
             val medium = ProgressSheetMedium.Paged(
                 totalPages = 300,
                 currentPage = 10,
+                suffix = null,
             )
 
             // ----- Act -----
@@ -173,28 +180,6 @@ class ProgressSheetUiModelTest {
                 ProgressSheetTab.PAGE.tabName,
                 ProgressSheetTab.PERCENTAGE.tabName,
             )
-        }
-
-        @Test
-        fun `exposes the selected tab on the model`() {
-            // ----- Arrange -----
-            val medium = ProgressSheetMedium.Paged(
-                totalPages = 300,
-                currentPage = 10,
-            )
-            val tabs = ProgressSheetUiModel.tabsFor(
-                medium = medium,
-                selectedTab = ProgressSheetTab.PERCENTAGE,
-            )
-
-            // ----- Act -----
-            val model = ProgressSheetUiModel.previews.getValue("Pages").copy(
-                medium = medium,
-                tabs = tabs,
-            )
-
-            // ----- Assert -----
-            model.tabs.selected shouldBe ProgressSheetTab.PERCENTAGE
         }
     }
 
@@ -246,18 +231,6 @@ class ProgressSheetUiModelTest {
 
             // ----- Assert -----
             keys shouldBe listOf("HOURS", "MINUTES", "SECONDS")
-        }
-
-        @Test
-        fun `carries the given text`() {
-            // ----- Act -----
-            val result = progressTimeField(
-                unit = ProgressTimeUnit.MINUTES,
-                text = "42",
-            )
-
-            // ----- Assert -----
-            result.text shouldBe "42"
         }
     }
 

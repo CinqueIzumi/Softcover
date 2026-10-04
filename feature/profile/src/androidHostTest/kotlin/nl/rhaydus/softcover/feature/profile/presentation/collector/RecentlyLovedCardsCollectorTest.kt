@@ -2,6 +2,8 @@ package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -75,8 +77,8 @@ class RecentlyLovedCardsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.recentlyLovedCards.shouldNotBeEmpty()
-            stateFlow.value.recentlyLovedCards.forEach { it.isLoading shouldBe true }
+            stateFlow.value.recentlyLoved.cards.shouldNotBeEmpty()
+            stateFlow.value.recentlyLoved.cards.forEach { it.isLoading shouldBe true }
             job.cancel()
         }
 
@@ -98,7 +100,7 @@ class RecentlyLovedCardsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.recentlyLovedCards.shouldBeEmpty()
+            stateFlow.value.recentlyLoved.cards.shouldBeEmpty()
             job.cancel()
         }
 
@@ -117,7 +119,7 @@ class RecentlyLovedCardsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.recentlyLovedCards.map { it.key } shouldBe listOf(
+            stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
                 BookCardKey.Book(bookId = 1),
                 BookCardKey.Book(bookId = 2),
             )
@@ -139,7 +141,7 @@ class RecentlyLovedCardsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.recentlyLovedCards.map { it.key } shouldBe listOf(
+            stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
                 BookCardKey.Book(bookId = 1),
                 BookCardKey.Book(bookId = 2),
                 BookCardKey.Book(bookId = 3),
@@ -165,7 +167,7 @@ class RecentlyLovedCardsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.recentlyLovedCards.map { it.key } shouldBe listOf(
+            stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
                 BookCardKey.Book(bookId = 2),
                 BookCardKey.Book(bookId = 3),
             )
@@ -188,8 +190,48 @@ class RecentlyLovedCardsCollectorTest {
             stateFlow.value = stateFlow.value.copy(readingLife = null)
 
             // ----- Assert -----
-            stateFlow.value.recentlyLovedCards.shouldNotBeEmpty()
-            stateFlow.value.recentlyLovedCards.forEach { it.isLoading shouldBe true }
+            stateFlow.value.recentlyLoved.cards.shouldNotBeEmpty()
+            stateFlow.value.recentlyLoved.cards.forEach { it.isLoading shouldBe true }
+            job.cancel()
+        }
+
+        @Test
+        fun `resolves each card key back to the loved book it was built from`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val books = lovedBooks(5)
+            stateFlow.value = ProfileUiState(readingLife = readingLife(books))
+            val collector = RecentlyLovedCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = mockk<ProfileDependencies>(relaxed = true),
+                )
+            }
+
+            // ----- Assert -----
+            val recentlyLoved = stateFlow.value.recentlyLoved
+            recentlyLoved[BookCardKey.Book(bookId = 2)] shouldBe books[1]
+            recentlyLoved[BookCardKey.Book(bookId = 4)].shouldBeNull()
+            job.cancel()
+        }
+
+        @Test
+        fun `carries no payload for the loading stand-ins`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = RecentlyLovedCardsCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = mockk<ProfileDependencies>(relaxed = true),
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.recentlyLoved.payloadByKey.shouldBeEmpty()
             job.cancel()
         }
 
@@ -212,11 +254,11 @@ class RecentlyLovedCardsCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.recentlyLovedCards.map { it.key } shouldBe listOf(
+                stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
                     BookCardKey.Book(bookId = 1),
                     BookCardKey.Book(bookId = 2),
                 )
-                stateFlow.value.recentlyLovedCards.forEach { it.isLoading shouldBe false }
+                stateFlow.value.recentlyLoved.cards.forEach { it.isLoading shouldBe false }
                 job.cancel()
             }
     }

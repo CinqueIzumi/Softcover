@@ -26,27 +26,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
-import nl.rhaydus.softcover.core.component.cover.Cover
-import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipLeading
+import nl.rhaydus.softcover.core.component.chip.ChipSize
+import nl.rhaydus.softcover.core.component.chip.ChipTone
+import nl.rhaydus.softcover.core.component.chip.ChipTrailing
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
@@ -185,14 +182,43 @@ private fun ChooseListsRow(
                 )
             }
 
-            if (row.isPending) {
-                CircularWavyProgressIndicator(modifier = Modifier.size(20.dp))
-            } else {
-                Chip(model = row.membershipChip)
+            // The chip stays laid out while a change is pending, so the row's text does not reflow.
+            Box(contentAlignment = Alignment.Center) {
+                Chip(
+                    model = membershipChipFor(row = row),
+                    modifier = Modifier.alpha(if (row.isPending) 0f else 1f),
+                )
+
+                if (row.isPending) {
+                    CircularWavyProgressIndicator(modifier = Modifier.size(20.dp))
+                }
             }
         }
     }
 }
+
+/** The chip's look is a function of membership alone; it is decorative, so the row's toggle announces state. */
+private fun membershipChipFor(row: ChooseListsRowUiModel): ChipUiModel = ChipUiModel(
+    key = row.listId.toString(),
+    label = row.chipLabel,
+    tone = when (row.membership) {
+        ListMembership.ALL -> ChipTone.Container
+        ListMembership.PARTIAL -> ChipTone.Filled
+        ListMembership.NONE -> ChipTone.Outlined
+    },
+    leading = when (row.membership) {
+        ListMembership.ALL -> null
+        ListMembership.PARTIAL,
+        ListMembership.NONE -> ChipLeading.Icon(icon = SoftcoverIcon.Add)
+    },
+    trailing = when (row.membership) {
+        ListMembership.ALL -> ChipTrailing.Icon(icon = SoftcoverIcon.Close)
+        ListMembership.PARTIAL,
+        ListMembership.NONE -> null
+    },
+    interaction = ChipInteraction.Inert,
+    size = ChipSize.Compact,
+)
 
 private fun ListMembership.toToggleableState(): ToggleableState = when (this) {
     ListMembership.ALL -> ToggleableState.On
@@ -206,7 +232,7 @@ private fun BookmarkGlyph(membership: ListMembership) {
         ListMembership.ALL -> {
             val icon = drawableIconResource(
                 icon = SoftcoverIcon.BookmarkCheck,
-                contentDescription = "On this list",
+                contentDescription = "",
             )
 
             Icon(
@@ -222,7 +248,7 @@ private fun BookmarkGlyph(membership: ListMembership) {
         ListMembership.NONE -> {
             val icon = drawableIconResource(
                 icon = SoftcoverIcon.Bookmark,
-                contentDescription = "Not on this list",
+                contentDescription = "",
             )
 
             Icon(

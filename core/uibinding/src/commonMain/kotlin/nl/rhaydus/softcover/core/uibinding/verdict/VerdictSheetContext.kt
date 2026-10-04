@@ -6,7 +6,10 @@ package nl.rhaydus.softcover.core.uibinding.verdict
  * deletion is offered. The sheet's anatomy is identical either way.
  */
 enum class VerdictSheetContext {
-    /** `feature/reading` raising the sheet once, on a genuine mark-as-read transition. */
+    /**
+     * Raised once on a genuine mark-as-read transition — by `feature/reading`, and by `feature/book_detail`
+     * when the book page marks the book as read.
+     */
     FINISHED,
 
     /** `feature/book_detail` reopening the sheet from the book page to change an existing verdict. */

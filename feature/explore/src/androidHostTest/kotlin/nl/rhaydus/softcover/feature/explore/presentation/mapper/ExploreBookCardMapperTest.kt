@@ -150,7 +150,7 @@ class ExploreBookCardMapperTest {
             card.stacked().cover.shouldBeNull()
             card.stacked().text.byline.shouldBeNull()
             card.stacked().text.eyebrow.shouldBeNull()
-            card.stacked().menuLabel.shouldBeNull()
+            card.stacked().hasMenu shouldBe false
         }
     }
 
@@ -201,7 +201,7 @@ class ExploreBookCardMapperTest {
             // ----- Assert -----
             card.stacked().text.byline.shouldBeNull()
             card.stacked().text.supportingLines shouldBe persistentListOf()
-            card.stacked().menuLabel.shouldBeNull()
+            card.stacked().hasMenu shouldBe false
         }
     }
 
@@ -269,7 +269,7 @@ class ExploreBookCardMapperTest {
         }
 
         @Test
-        fun `labels the overflow menu and tracks the overlay as cover badge with a tap and no progress`() {
+        fun `shows the overflow menu and tracks the overlay as cover badge with a tap and no progress`() {
             // ----- Arrange -----
             val input = book()
 
@@ -280,7 +280,7 @@ class ExploreBookCardMapperTest {
             )
 
             // ----- Assert -----
-            card.stacked().menuLabel shouldBe "More options"
+            card.stacked().hasMenu shouldBe true
             card.stacked().cover.shouldNotBeNull().badge shouldBe overlay
             card.decorations.pressBehaviour shouldBe BookCardDecorations.Press.Tap
             card.decorations.progress.shouldBeNull()

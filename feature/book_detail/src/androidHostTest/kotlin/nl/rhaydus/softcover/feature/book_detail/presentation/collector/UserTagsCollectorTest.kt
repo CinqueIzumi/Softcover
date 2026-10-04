@@ -73,17 +73,20 @@ class UserTagsCollectorTest {
             val tags = listOf(UserTag(
                 name = "fantasy",
                 category = TagCategory.GENRE,
-            ),)
+            ),
+            )
 
             coEvery {
                 getUserTagsUseCase(bookId = 10)
             } returns Result.success(tags)
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
@@ -98,10 +101,12 @@ class UserTagsCollectorTest {
             // ----- Arrange -----
             val book = stubUnshelvedBook(id = 5)
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
@@ -115,10 +120,12 @@ class UserTagsCollectorTest {
         fun `does not load userTags when book is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = null)
@@ -135,7 +142,8 @@ class UserTagsCollectorTest {
             val existingTags = listOf(UserTag(
                 name = "sci-fi",
                 category = TagCategory.GENRE,
-            ),)
+            ),
+            )
             stateFlow.value = stateFlow.value.copy(userTags = existingTags)
 
             coEvery {
@@ -143,10 +151,12 @@ class UserTagsCollectorTest {
             } returns Result.failure(RuntimeException("network error"))
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = book)
@@ -164,11 +174,13 @@ class UserTagsCollectorTest {
             val tagsA = listOf(UserTag(
                 name = "horror",
                 category = TagCategory.GENRE,
-            ),)
+            ),
+            )
             val tagsB = listOf(UserTag(
                 name = "comedy",
                 category = TagCategory.GENRE,
-            ),)
+            ),
+            )
 
             coEvery {
                 getUserTagsUseCase(bookId = 1)
@@ -178,10 +190,12 @@ class UserTagsCollectorTest {
             } returns Result.success(tagsB)
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(book = bookA)
             stateFlow.value.userTags shouldBe tagsA
@@ -201,17 +215,20 @@ class UserTagsCollectorTest {
             val tags = listOf(UserTag(
                 name = "mystery",
                 category = TagCategory.GENRE,
-            ),)
+            ),
+            )
 
             coEvery {
                 getUserTagsUseCase(bookId = 1)
             } returns Result.success(tags)
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(book = book)
             stateFlow.value.userTags shouldBe tags
@@ -233,17 +250,20 @@ class UserTagsCollectorTest {
             val tags = listOf(UserTag(
                 name = "romance",
                 category = TagCategory.GENRE,
-            ),)
+            ),
+            )
 
             coEvery {
                 getUserTagsUseCase(bookId = 1)
             } returns Result.success(tags)
 
             val collector = UserTagsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(book = book)
             stateFlow.value.userTags shouldBe tags

@@ -28,7 +28,7 @@ sealed interface TextFieldVariant {
     /**
      * A centred numeric entry sized for [charCount] glyphs. Input is limited to digits and its text is
      * selected when it gains focus. It always uses the number keyboard, and Done dismisses focus and
-     * submits whatever [TextFieldUiModel.submittable] says. Its placeholder shows while empty.
+     * always submits, whatever [TextFieldUiModel.submittable] says. Its placeholder shows while empty.
      */
     data class Numeral(val charCount: Int) : TextFieldVariant
 }

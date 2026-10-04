@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
@@ -13,7 +12,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiSt
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps every cover surface on the Reading screen off the composition (R9): the featured hero and its
+ * Maps every cover surface on the Reading screen: the featured hero and its
  * blurred backdrop, the empty-state trending tile, and the verdict sheet jacket.
  *
  * One collector rather than a patch at each write site: its inputs have several writers each, and a derived
@@ -42,19 +41,13 @@ internal class CoverModelsCollector : ReadingCollector {
                         featuredCover = snapshot.featuredBook?.let { book ->
                             book.toCoverUiModel(
                                 variant = CoverVariant.Floating,
-                                sharedTransitionKey = bookCoverTransitionKey(
-                                    editionId = book.currentEdition?.id,
-                                    bookId = book.id,
-                                ),
+                                shareTransition = true,
                             )
                         },
                         trendingTileCover = snapshot.trendingBook?.let { book ->
                             book.toCoverUiModel(
                                 variant = CoverVariant.Tile,
-                                sharedTransitionKey = bookCoverTransitionKey(
-                                    editionId = book.currentEdition?.id,
-                                    bookId = book.id,
-                                ),
+                                shareTransition = true,
                             )
                         },
                         // The verdict sheet's cover has never actually fallen back to a different

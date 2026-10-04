@@ -392,10 +392,12 @@ class OnSaveLibraryVisibilityActionTest {
             val action = OnSaveLibraryVisibilityAction()
 
             // ----- Act -----
-            val result = runCatching { action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            ) }
+            val result = runCatching {
+                action.execute(
+                    dependencies = dependencies,
+                    scope = scope,
+                )
+            }
 
             // ----- Assert -----
             result.isSuccess shouldBe true

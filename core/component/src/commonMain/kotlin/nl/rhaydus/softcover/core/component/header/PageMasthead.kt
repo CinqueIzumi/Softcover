@@ -24,13 +24,12 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * [PageMastheadUiModel.size] picks the type scale for the surface — [PageMastheadSize.Regular] for a
  * page's own masthead, [PageMastheadSize.Compact] where it shares space with other chrome. The
  * masthead text itself is inert — it is read, never tapped; [actions] is the only interactive part,
- * trailing the title column (e.g. [MastheadRefreshAction]). While [isLoading] only the subtitle masks.
+ * trailing the title column (e.g. [MastheadRefreshAction]).
  */
 @Composable
 fun PageMasthead(
     model: PageMastheadUiModel,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
@@ -69,7 +68,7 @@ fun PageMasthead(
 
                 SoftcoverText(
                     text = model.subtitle,
-                    isLoading = isLoading,
+                    isLoading = model.isLoading,
                     standIn = model.subtitle,
                     style = when (model.size) {
                         PageMastheadSize.Regular -> MaterialTheme.editorialTypography.body

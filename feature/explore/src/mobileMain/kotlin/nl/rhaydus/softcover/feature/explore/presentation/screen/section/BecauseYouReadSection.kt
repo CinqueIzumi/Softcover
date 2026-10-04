@@ -9,16 +9,13 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -31,8 +28,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_
 
 private val becauseYouReadListState = LazyListState()
 
-private val BECAUSE_YOU_READ_CARD_WIDTH = 118.dp
-
 @Composable
 internal fun BecauseYouReadSection(
     genre: String?,
@@ -40,23 +35,20 @@ internal fun BecauseYouReadSection(
     genreOptions: List<String>,
     genreSheet: SheetScaffoldUiModel,
     genreGroup: SheetRowGroupUiModel<String?>,
-    books: List<Book>,
-    cards: ImmutableList<BookCardUiModel>,
+    set: BookCardSet<Book>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
     // Collapses only once the fetch is done and there is nothing to show; any loading state keeps the
     // header and rail footprint reserved.
-    if (isLoading.not() && (genre == null || books.isEmpty())) return
+    if (isLoading.not() && (genre == null || set.isEmpty)) return
 
     // Stamped on mount - see TrendingSection's comment for why.
     val entry = rememberStaggeredEntryCoordinator(key = "explore:because_you_read")
 
-    val booksByKey = remember(books) { books.associateBy { BookCardKey.Book(it.id) } }
-
     val onCardEvent = rememberPrefetchingBookCardEventHandler(
-        resolve = booksByKey::get,
+        set = set,
     ) { event, book ->
         if (event is BookCardEvent.Clicked) {
             onBookClick(
@@ -69,7 +61,6 @@ internal fun BecauseYouReadSection(
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
             model = header,
-            isLoading = isLoading,
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 
@@ -88,12 +79,12 @@ internal fun BecauseYouReadSection(
             contentPadding = PaddingValues(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            itemsIndexed(cards, key = { _, card -> card.key.lazyKey }) { index, card ->
+            itemsIndexed(set.cards, key = { _, card -> card.key.lazyKey }) { index, card ->
                 BookCard(
                     model = card,
                     onEvent = onCardEvent,
                     modifier = Modifier
-                        .width(BECAUSE_YOU_READ_CARD_WIDTH)
+                        .width(118.dp)
                         .let {
                             if (card.isLoading) {
                                 it

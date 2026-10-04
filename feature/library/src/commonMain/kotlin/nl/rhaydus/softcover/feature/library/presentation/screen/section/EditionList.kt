@@ -44,18 +44,7 @@ internal fun EditionList(
 ) {
     val rawEditions = state.editionsByTab[tab.id]
 
-    if (rawEditions == null || (rawEditions.isEmpty() && state.isLoading)) {
-        LibraryLoadingGrid(
-            layout = state.gridLayout,
-            cards = state.loadingCards,
-            gridState = gridState,
-            columnsOverride = columnsOverride,
-        )
-
-        return
-    }
-
-    if (rawEditions.isEmpty()) {
+    if (rawEditions != null && rawEditions.isEmpty() && state.isLoading.not()) {
         state.emptyStatesByTab[tab.id]?.let { emptyState ->
             EmptyState(
                 model = emptyState,
@@ -69,28 +58,16 @@ internal fun EditionList(
         return
     }
 
-    val tabCards = state.editionCardsByTab[tab.id]
+    val tabCards = state.editionCardsByTab[tab.id] ?: state.loadingCards
 
-    if (tabCards == null) {
-        LibraryLoadingGrid(
-            layout = state.gridLayout,
-            cards = state.loadingCards,
-            gridState = gridState,
-            columnsOverride = columnsOverride,
-        )
-
-        return
-    }
-
-    val cards = tabCards.cards
+    val cardSet = tabCards.set
+    val cards = cardSet.cards
 
     // Custom-list editions still sort in memory — the dataset is small (dozens, not
     // thousands) so the sort is cheap and the SQL-sort refactor is books-only.
     // BookCardModelsCollector builds the cards from the searched/sorted list. The cards carry the
     // order and their own editions, so a card's event resolves to the edition it was built from
     // even while the live lists are ahead of the cards.
-    val editionsByKey = tabCards.payloads
-
     val visibleKeys = remember(cards) { cards.map { it.key.lazyKey } }
 
     val editionIdByLazyKey = remember(cards) {
@@ -111,7 +88,7 @@ internal fun EditionList(
         sortMode = sortMode,
         isRanked = isRanked,
         isRearranging = state.isRearranging,
-    )
+    ) && cards.none { it.isLoading }
 
     val animator = rememberLazyItemMutationAnimator(keys = visibleKeys)
 
@@ -144,7 +121,7 @@ internal fun EditionList(
 
     // One handler for the whole grid; the cards route their events here by key.
     val onCardEvent = rememberBookCardEventHandler(
-        resolve = editionsByKey::get,
+        set = cardSet,
     ) { event, edition ->
         when (event) {
             is BookCardEvent.Clicked -> onEditionClick(edition)

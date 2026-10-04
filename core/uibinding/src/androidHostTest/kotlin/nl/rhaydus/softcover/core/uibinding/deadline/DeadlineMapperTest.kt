@@ -347,4 +347,147 @@ class DeadlineMapperTest {
             result.text shouldBe "02/09/2026 • Expired"
         }
     }
+
+    @Nested
+    inner class ToDeadlineRowUiModelTest {
+        private fun rowOf(subject: DeadlineProgress) = subject.toDeadlineRowUiModel(dateStyle = DateStyle.DAY_MONTH_YEAR)
+
+        @Test
+        fun `title is Finish by the date in the passed DateStyle`() {
+            // ----- Arrange -----
+            val subject = progress()
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.title shouldBe "Finish by 02/09/2026"
+        }
+
+        @Test
+        fun `an on-track pages deadline states the pace and no behind prefix`() {
+            // ----- Arrange -----
+            val subject = progress(
+                daysRemaining = 10,
+                requiredPerDay = 9.2f,
+            )
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.goal shouldBe "Read 10 pages/day for the next 10 days to finish on time."
+            result.isExpired shouldBe false
+        }
+
+        @Test
+        fun `a single day remaining is singular`() {
+            // ----- Arrange -----
+            val subject = progress(
+                daysRemaining = 1,
+                requiredPerDay = 1f,
+            )
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.goal shouldBe "Read 1 page/day for the next 1 day to finish on time."
+        }
+
+        @Test
+        fun `an audiobook deadline says Listen to with a time pace`() {
+            // ----- Arrange -----
+            val subject = progress(
+                daysRemaining = 3,
+                requiredPerDay = 3_900f,
+                unit = DeadlineUnit.SECONDS,
+            )
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.goal shouldBe "Listen to 1h 5m/day for the next 3 days to finish on time."
+        }
+
+        @Test
+        fun `a deadline that is behind prefixes how far behind schedule the reader is`() {
+            // ----- Arrange -----
+            val subject = progress(
+                daysRemaining = 4,
+                requiredPerDay = 20f,
+                isOnTrack = false,
+                unitsBehindSchedule = 30,
+            )
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.goal shouldBe "You're 30 pages behind schedule — Read 20 pages/day for the next 4 days to finish on time."
+        }
+
+        @Test
+        fun `not on track with nothing behind schedule omits the prefix`() {
+            // ----- Arrange -----
+            val subject = progress(
+                daysRemaining = 4,
+                requiredPerDay = 20f,
+                isOnTrack = false,
+                unitsBehindSchedule = 0,
+            )
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.goal shouldBe "Read 20 pages/day for the next 4 days to finish on time."
+        }
+
+        @Test
+        fun `an expired deadline says how many days ago it passed`() {
+            // ----- Arrange -----
+            val subject = progress(
+                daysRemaining = -3,
+                isExpired = true,
+                isOnTrack = false,
+            )
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.goal shouldBe "Deadline passed 3 days ago."
+            result.isExpired shouldBe true
+        }
+
+        @Test
+        fun `a deadline that passed yesterday is singular`() {
+            // ----- Arrange -----
+            val subject = progress(
+                daysRemaining = -1,
+                isExpired = true,
+                isOnTrack = false,
+            )
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.goal shouldBe "Deadline passed 1 day ago."
+        }
+
+        @Test
+        fun `badge is the status badge`() {
+            // ----- Arrange -----
+            val subject = progress(isOnTrack = false)
+
+            // ----- Act -----
+            val result = rowOf(subject)
+
+            // ----- Assert -----
+            result.badge shouldBe subject.toBadgeUiModel()
+        }
+    }
 }

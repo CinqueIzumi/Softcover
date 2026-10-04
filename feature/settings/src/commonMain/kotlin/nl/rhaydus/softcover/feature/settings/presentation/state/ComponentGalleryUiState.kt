@@ -1,16 +1,17 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toPersistentMap
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
-import nl.rhaydus.softcover.feature.settings.presentation.mapper.galleryPaletteChoicesFor
-import nl.rhaydus.softcover.feature.settings.presentation.model.GalleryPaletteChoice
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.galleryFamilyChips
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.galleryPaletteChips
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.galleryThemeModeChips
 import nl.rhaydus.toad.UiState
 
 private const val COMPONENT_GALLERY_TITLE = "Component gallery"
@@ -24,9 +25,7 @@ private const val COMPONENT_GALLERY_TITLE = "Component gallery"
  * [nl.rhaydus.softcover.feature.settings.presentation.collector.GalleryThemeConfigurationCollector] —
  * and [resolvedPalette] is [paletteOverride] mapped, or [currentPalette] when there is no override:
  * the value [nl.rhaydus.softcover.feature.settings.presentation.screen.ComponentGalleryContent]'s
- * themed region actually paints. Both are mapped off the composition (`component-contract.md` R9),
- * so the render never calls `toSpinePalette()` itself. [paletteChipOptions] is the spine-colour
- * override row's chip list, mapped the same way.
+ * themed region actually paints.
  */
 internal data class ComponentGalleryUiState(
     val previewControlsHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
@@ -47,7 +46,9 @@ internal data class ComponentGalleryUiState(
     val paletteOverride: ColorPalette? = null,
     val currentPalette: SpinePalette = SpinePalette.DEFAULT,
     val resolvedPalette: SpinePalette = SpinePalette.DEFAULT,
-    val paletteChipOptions: ImmutableList<GalleryPaletteChoice> = galleryPaletteChoicesFor(selected = null),
+    val themeModeChips: ChipSet<ThemeMode> = galleryThemeModeChips(selected = null),
+    val paletteChips: ChipSet<ColorPalette> = galleryPaletteChips(selected = null),
+    val familyChips: ChipSet<GalleryFamily> = galleryFamilyChips(selected = null),
     val topBar: TopBarUiModel = TopBarUiModel(
         title = COMPONENT_GALLERY_TITLE,
     ),

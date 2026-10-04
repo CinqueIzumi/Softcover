@@ -59,10 +59,12 @@ class CurrentlyReadingBooksCollectorTest {
             // ----- Arrange -----
             val books = listOf(stubBook(), stubBook())
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             booksFlow.emit(books)
@@ -77,10 +79,12 @@ class CurrentlyReadingBooksCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(isLoading = true)
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             booksFlow.emit(emptyList())
@@ -96,10 +100,12 @@ class CurrentlyReadingBooksCollectorTest {
             val firstBooks = listOf(stubBook())
             val secondBooks = listOf(stubBook(), stubBook(), stubBook())
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             booksFlow.emit(firstBooks)
@@ -115,10 +121,12 @@ class CurrentlyReadingBooksCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = listOf(stubBook()))
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             booksFlow.emit(emptyList())
@@ -134,10 +142,12 @@ class CurrentlyReadingBooksCollectorTest {
             val initialBooks = listOf(stubBook())
             stateFlow.value = ReadingScreenUiState(books = initialBooks)
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.books shouldBe initialBooks
@@ -149,10 +159,12 @@ class CurrentlyReadingBooksCollectorTest {
             // ----- Arrange -----
             val books = listOf(stubBook(), stubBook())
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             booksFlow.emit(books)
             job.cancel()
 
@@ -169,10 +181,12 @@ class CurrentlyReadingBooksCollectorTest {
             )
             val books = listOf(stubBook())
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             booksFlow.emit(books)
@@ -190,10 +204,12 @@ class CurrentlyReadingBooksCollectorTest {
         fun `eyebrow reads "0 more in motion" when the flow emits an empty list`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             booksFlow.emit(emptyList())
@@ -210,10 +226,12 @@ class CurrentlyReadingBooksCollectorTest {
         fun `eyebrow reads "0 more in motion" when the flow emits a single book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             booksFlow.emit(listOf(stubBook()))
@@ -231,10 +249,12 @@ class CurrentlyReadingBooksCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val collector = CurrentlyReadingBooksCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 booksFlow.emit(listOf(stubBook(), stubBook()))
@@ -251,10 +271,12 @@ class CurrentlyReadingBooksCollectorTest {
         fun `eyebrow reads the count when the flow emits more than two books`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             booksFlow.emit(listOf(stubBook(), stubBook(), stubBook(), stubBook()))
@@ -271,10 +293,12 @@ class CurrentlyReadingBooksCollectorTest {
         fun `recomputes the eyebrow off the latest emission's count`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             booksFlow.emit(listOf(stubBook(), stubBook(), stubBook()))
 
             // ----- Act -----

@@ -52,7 +52,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 3,
                 end = 3,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = normalizeMarks(marks = marks)
@@ -67,7 +68,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 5,
                 end = 2,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = normalizeMarks(marks = marks)
@@ -82,7 +84,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 4,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = normalizeMarks(marks = marks)
@@ -91,7 +94,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 4,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -103,7 +107,8 @@ class RichTextEditingTest {
             ), bold(
                 start = 3,
                 end = 8,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = normalizeMarks(marks = marks)
@@ -112,7 +117,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 8,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -124,7 +130,8 @@ class RichTextEditingTest {
             ), bold(
                 start = 4,
                 end = 8,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = normalizeMarks(marks = marks)
@@ -133,7 +140,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 8,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -145,7 +153,8 @@ class RichTextEditingTest {
             ), italic(
                 start = 0,
                 end = 4,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = normalizeMarks(marks = marks)
@@ -157,7 +166,8 @@ class RichTextEditingTest {
             ), italic(
                 start = 0,
                 end = 4,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -223,7 +233,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 10,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -244,7 +255,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 2,
                 end = 6,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = applyEditToMarks(
@@ -257,7 +269,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 2,
                 end = 6,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -267,7 +280,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 6,
                 end = 11,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = applyEditToMarks(
@@ -280,7 +294,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 9,
                 end = 14,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -290,7 +305,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 5,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = applyEditToMarks(
@@ -303,7 +319,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 5,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -313,7 +330,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 5,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = applyEditToMarks(
@@ -326,7 +344,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 8,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -336,7 +355,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 11,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = applyEditToMarks(
@@ -349,7 +369,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 9,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -359,7 +380,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 3,
                 end = 9,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = applyEditToMarks(
@@ -373,7 +395,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 3,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -383,7 +406,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 2,
                 end = 8,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = applyEditToMarks(
@@ -403,7 +427,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 3,
                 end = 7,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = applyEditToMarks(
@@ -416,7 +441,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 3,
                 end = 9,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -426,7 +452,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 5,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = applyEditToMarks(
@@ -439,7 +466,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 3,
-            ),)
+            ),
+            )
         }
     }
 
@@ -451,7 +479,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 2,
                 end = 7,
-            ),)
+            ),
+            )
 
             // ----- Act & Assert -----
             isRangeMarked(
@@ -468,7 +497,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 10,
-            ),)
+            ),
+            )
 
             // ----- Act & Assert -----
             isRangeMarked(
@@ -485,7 +515,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 5,
-            ),)
+            ),
+            )
 
             // ----- Act & Assert -----
             isRangeMarked(
@@ -502,7 +533,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 10,
-            ),)
+            ),
+            )
 
             // ----- Act & Assert -----
             isRangeMarked(
@@ -519,7 +551,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 5,
-            ),)
+            ),
+            )
 
             // ----- Act & Assert -----
             isRangeMarked(
@@ -561,7 +594,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 2,
                 end = 6,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -570,7 +604,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 10,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = toggleMark(
@@ -587,7 +622,8 @@ class RichTextEditingTest {
             ), bold(
                 start = 7,
                 end = 10,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -596,7 +632,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 3,
                 end = 8,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = toggleMark(
@@ -616,7 +653,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 5,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = toggleMark(
@@ -630,7 +668,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 5,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -640,7 +679,8 @@ class RichTextEditingTest {
             val marks = listOf(bold(
                 start = 0,
                 end = 4,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = toggleMark(
@@ -654,7 +694,8 @@ class RichTextEditingTest {
             result shouldBe listOf(bold(
                 start = 0,
                 end = 7,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -666,7 +707,8 @@ class RichTextEditingTest {
             ), italic(
                 start = 2,
                 end = 6,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = toggleMark(
@@ -680,14 +722,15 @@ class RichTextEditingTest {
             result shouldBe listOf(italic(
                 start = 2,
                 end = 6,
-            ),)
+            ),
+            )
         }
     }
 
     @Nested
     inner class RoundTrip {
         @Test
-        fun `documentToEditorBuffer then editorBufferToDocument returns canonical-equal document`() {
+        fun `documentToEditorBuffer then editorBufferToDocument returns an equal document`() {
             // ----- Arrange -----
             val document = RichTextUiModel(
                 paragraphs = persistentListOf(
@@ -735,7 +778,7 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            recovered shouldBe document.canonical()
+            recovered shouldBe document
         }
 
         @Test
@@ -823,7 +866,7 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            recovered shouldBe document.canonical()
+            recovered shouldBe document
         }
 
         @Test
@@ -852,7 +895,7 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            recovered shouldBe document.canonical()
+            recovered shouldBe document
         }
 
         @Test

@@ -11,17 +11,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBar
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
-import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
@@ -143,19 +141,16 @@ internal actual fun ExploreScreenLayout(
     }
 }
 
-private fun List<Book>.toPreviewTrendingCards(): ImmutableList<BookCardUiModel> = map { book ->
+private fun List<Book>.toPreviewTrendingSet(): BookCardSet<Book> = map { book ->
     book.toTrendingCard(
         cover = book.toCoverUiModel(
             variant = CoverVariant.Raised,
-            sharedTransitionKey = bookCoverTransitionKey(
-                editionId = book.currentEdition?.id,
-                bookId = book.id,
-                surface = SURFACE_TRENDING,
-            ),
+            shareTransition = true,
+            transitionSurface = SURFACE_TRENDING,
         ),
         coverBadge = null,
-    )
-}.toImmutableList()
+    ) to book
+}.toBookCardSet()
 
 private val previewSearchFocusMoodTags = listOf(
     MoodTag(
@@ -184,7 +179,7 @@ private val previewMockState = ExploreScreenUiState(
     previousSearchQueries = previewRecentSearchQueries,
     recentSearchChips = RecentSearchChipsSnapshot(previousSearchQueries = previewRecentSearchQueries).compute(),
     trendingBooks = ExploreMockData.trending,
-    trendingCards = ExploreMockData.trending.toPreviewTrendingCards(),
+    trending = ExploreMockData.trending.toPreviewTrendingSet(),
     loadingTrendingBooks = false,
     continueSeriesBooks = ExploreMockData.continueSeries,
     loadingContinueSeriesBooks = false,
@@ -218,7 +213,7 @@ private fun EmptyFirstLaunchExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
-                trendingCards = ExploreMockData.trending.toPreviewTrendingCards(),
+                trending = ExploreMockData.trending.toPreviewTrendingSet(),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = emptyList(),
                 loadingContinueSeriesBooks = false,
@@ -266,7 +261,7 @@ private fun LoadingContinueSeriesExploreScreenPreview() {
             isOnline = true,
             state = ExploreScreenUiState(
                 trendingBooks = ExploreMockData.trending,
-                trendingCards = ExploreMockData.trending.toPreviewTrendingCards(),
+                trending = ExploreMockData.trending.toPreviewTrendingSet(),
                 loadingTrendingBooks = false,
                 continueSeriesBooks = emptyList(),
                 loadingContinueSeriesBooks = true,
@@ -355,18 +350,14 @@ private fun ActiveExploreScreenPreview() {
     val state = ExploreScreenUiState(
         searchText = "Last to leave",
         queriedBooks = queriedBooks,
-        queriedBookCards = queriedBooks.map { book ->
+        searchResults = queriedBooks.map { book ->
             book.toSearchResultCard(
                 cover = book.toCoverUiModel(
                     variant = CoverVariant.Flat,
-                    sharedTransitionKey = bookCoverTransitionKey(
-                        editionId = book.currentEdition?.id,
-                        bookId = book.id,
-                        surface = null,
-                    ),
+                    shareTransition = true,
                 ),
-            )
-        }.toImmutableList(),
+            ) to book
+        }.toBookCardSet(),
     )
 
     SoftcoverTheme {

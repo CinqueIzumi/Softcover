@@ -273,7 +273,9 @@ class RoadmapMarkdownMapperTest {
                 RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(
                     text = "bold text",
                     bold = true,
-                ),),),
+                ),
+                ),
+                ),
             )
         }
 
@@ -290,7 +292,9 @@ class RoadmapMarkdownMapperTest {
                 RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(
                     text = "italic text",
                     italic = true,
-                ),),),
+                ),
+                ),
+                ),
             )
         }
 
@@ -307,7 +311,9 @@ class RoadmapMarkdownMapperTest {
                 RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(
                     text = "italic text",
                     italic = true,
-                ),),),
+                ),
+                ),
+                ),
             )
         }
 
@@ -324,7 +330,9 @@ class RoadmapMarkdownMapperTest {
                 RoadmapBlock.Paragraph(spans = listOf(RoadmapSpan(
                     text = "code text",
                     code = true,
-                ),),),
+                ),
+                ),
+                ),
             )
         }
 
@@ -342,7 +350,8 @@ class RoadmapMarkdownMapperTest {
                     spans = listOf(RoadmapSpan(
                         text = "Click here",
                         url = "https://example.com",
-                    ),),
+                    ),
+                    ),
                 ),
             )
         }

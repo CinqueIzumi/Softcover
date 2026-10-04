@@ -1,10 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,8 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.component.chip.Chip
-import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.component.chip.ChipFlow
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.gallery.GalleryEntry
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.component.gallery.GalleryFixture
@@ -30,7 +28,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSw
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.theme.isDark
 import nl.rhaydus.softcover.feature.settings.presentation.action.ComponentGalleryAction
@@ -78,7 +75,7 @@ internal fun ComponentGalleryContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         GalleryFamilyFilterRow(
-            selectedFamily = state.selectedFamily,
+            familyChips = state.familyChips,
             runAction = runAction,
         )
 
@@ -99,11 +96,11 @@ private fun GalleryOverrideControls(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        GalleryChipRow(
-            options = ThemeMode.entries,
-            label = { it.label },
-            isSelected = { it == state.themeModeOverride },
-            onSelect = { mode -> runAction(OnGalleryThemeModeSelectedAction(mode = mode)) },
+        ChipFlow(
+            set = state.themeModeChips,
+            onEvent = { event, mode ->
+                if (event is ChipEvent.Clicked) runAction(OnGalleryThemeModeSelectedAction(mode = mode))
+            },
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -112,11 +109,11 @@ private fun GalleryOverrideControls(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        GalleryChipRow(
-            options = state.paletteChipOptions,
-            label = { it.label },
-            isSelected = { it.selected },
-            onSelect = { choice -> runAction(OnGalleryPaletteSelectedAction(palette = choice.palette)) },
+        ChipFlow(
+            set = state.paletteChips,
+            onEvent = { event, palette ->
+                if (event is ChipEvent.Clicked) runAction(OnGalleryPaletteSelectedAction(palette = palette))
+            },
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -132,7 +129,7 @@ private fun GalleryOverrideControls(
 
 @Composable
 private fun GalleryFamilyFilterRow(
-    selectedFamily: GalleryFamily?,
+    familyChips: ChipSet<GalleryFamily>,
     runAction: (ComponentGalleryAction) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -140,11 +137,11 @@ private fun GalleryFamilyFilterRow(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        GalleryChipRow(
-            options = GalleryFamily.entries,
-            label = { it.label },
-            isSelected = { it == selectedFamily },
-            onSelect = { family -> runAction(OnGalleryFamilySelectedAction(family = family)) },
+        ChipFlow(
+            set = familyChips,
+            onEvent = { event, family ->
+                if (event is ChipEvent.Clicked) runAction(OnGalleryFamilySelectedAction(family = family))
+            },
         )
     }
 }
@@ -160,31 +157,6 @@ private fun GalleryControlLabel(text: String) {
         style = MaterialTheme.editorialTypography.eyebrowSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun <T> GalleryChipRow(
-    options: List<T>,
-    label: (T) -> String,
-    isSelected: (T) -> Boolean,
-    onSelect: (T) -> Unit,
-) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        options.forEachIndexed { index, option ->
-            Chip(
-                model = ChipUiModel(
-                    key = index.toString(),
-                    label = label(option),
-                    selected = isSelected(option),
-                ),
-                onEvent = { onSelect(option) },
-            )
-        }
-    }
 }
 // endregion
 // region Themed region

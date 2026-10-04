@@ -157,19 +157,26 @@ private fun SearchChromeField(
                 modifier = Modifier.weight(1f),
             )
 
-            when {
-                model.isLoading -> CircularWavyProgressIndicator(modifier = Modifier.size(18.dp))
-
-                model.active -> ChromeIconButton(
-                    icon = SoftcoverIcon.Close,
-                    contentDescription = "Clear search",
-                    tooltip = "Clear",
-                    onClick = { onEvent(SearchTopBarEvent.SearchCleared) },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-                    iconSize = 18.dp,
-                )
+            if (model.isLoading || model.active) {
+                Box(
+                    modifier = Modifier.size(48.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (model.isLoading) {
+                        CircularWavyProgressIndicator(modifier = Modifier.size(18.dp))
+                    } else {
+                        ChromeIconButton(
+                            icon = SoftcoverIcon.Close,
+                            contentDescription = "Clear search",
+                            tooltip = "Clear",
+                            onClick = { onEvent(SearchTopBarEvent.SearchCleared) },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
+                            iconSize = 18.dp,
+                        )
+                    }
+                }
             }
         }
     }

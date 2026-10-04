@@ -18,6 +18,8 @@ class ProgressSheetMapperTest {
         hours: String = "0",
         minutes: String = "0",
         seconds: String = "0",
+        suffix: String?,
+        fraction: Float = 0f,
     ): ProgressSheetMedium.Timed = ProgressSheetMedium.Timed(
         totalSeconds = totalSeconds,
         hours = progressTimeField(
@@ -32,6 +34,8 @@ class ProgressSheetMapperTest {
             unit = ProgressTimeUnit.SECONDS,
             text = seconds,
         ),
+        suffix = suffix,
+        fraction = fraction,
     )
 
     private fun audioBook(currentSeconds: Int?): Book {
@@ -72,6 +76,7 @@ class ProgressSheetMapperTest {
             book.currentEdition shouldBe audioEdition
             result.medium shouldBe expectedTimed(
                 totalSeconds = 5_400,
+                suffix = "of 01:30:00",
             )
         }
 
@@ -88,6 +93,7 @@ class ProgressSheetMapperTest {
             result.medium shouldBe ProgressSheetMedium.Paged(
                 totalPages = 100,
                 currentPage = 0,
+                suffix = "of 100 pages",
             )
         }
     }
@@ -126,6 +132,7 @@ class ProgressSheetMapperTest {
             result.medium shouldBe ProgressSheetMedium.Paged(
                 totalPages = 250,
                 currentPage = 0,
+                suffix = "of 250 pages",
             )
         }
 
@@ -156,6 +163,7 @@ class ProgressSheetMapperTest {
             book.currentEdition shouldBe currentEd
             result.medium shouldBe expectedTimed(
                 totalSeconds = 0,
+                suffix = null,
             )
             (result.medium as ProgressSheetMedium.Timed).hasKnownTotal shouldBe false
         }
@@ -185,6 +193,7 @@ class ProgressSheetMapperTest {
             result.medium shouldBe ProgressSheetMedium.Paged(
                 totalPages = 0,
                 currentPage = 0,
+                suffix = null,
             )
             (result.medium as ProgressSheetMedium.Paged).hasKnownTotal shouldBe false
         }
@@ -210,6 +219,7 @@ class ProgressSheetMapperTest {
             book.currentEdition shouldBe currentEd
             result.medium shouldBe expectedTimed(
                 totalSeconds = 0,
+                suffix = null,
             )
             (result.medium as ProgressSheetMedium.Timed).hasKnownTotal shouldBe false
         }
@@ -344,6 +354,8 @@ class ProgressSheetMapperTest {
                 hours = "1",
                 minutes = "2",
                 seconds = "5",
+                suffix = "of 05:33:20",
+                fraction = 3_725f / 20_000,
             )
         }
 
@@ -370,6 +382,8 @@ class ProgressSheetMapperTest {
                 hours = "7",
                 minutes = "8",
                 seconds = "9",
+                suffix = "of 05:33:20",
+                fraction = 25_689f / 20_000,
             )
         }
 
@@ -396,6 +410,8 @@ class ProgressSheetMapperTest {
                 hours = "",
                 minutes = "8",
                 seconds = "9",
+                suffix = "of 05:33:20",
+                fraction = 489f / 20_000,
             )
         }
 
@@ -420,6 +436,8 @@ class ProgressSheetMapperTest {
             result.medium shouldBe expectedTimed(
                 totalSeconds = 20_000,
                 hours = "1",
+                suffix = "of 05:33:20",
+                fraction = 3_600f / 20_000,
             )
         }
 
@@ -443,6 +461,7 @@ class ProgressSheetMapperTest {
             result.medium shouldBe ProgressSheetMedium.Paged(
                 totalPages = 100,
                 currentPage = 0,
+                suffix = "of 100 pages",
             )
         }
     }

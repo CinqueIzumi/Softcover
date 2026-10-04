@@ -74,7 +74,7 @@ class HiddenSuggestionsBookCardMapperTest {
             card.key shouldBe BookCardKey.Book(bookId = 5)
             card.row().size shouldBe BookCardVariant.Row.Size.Compact
             card.row().lead shouldBe BookCardLead.Cover(cover = BookCardCover(model = cover))
-            card.row().trailing shouldBe BookCardTrailing.Restore(label = "Restore")
+            card.row().trailing shouldBe BookCardTrailing.Restore
         }
 
         @Test
@@ -134,7 +134,7 @@ class HiddenSuggestionsBookCardMapperTest {
             card.key shouldBe BookCardKey.Series(seriesId = 8)
             card.row().size shouldBe BookCardVariant.Row.Size.Compact
             card.row().lead shouldBe BookCardLead.SeriesStack(front = cover)
-            card.row().trailing shouldBe BookCardTrailing.Restore(label = "Restore")
+            card.row().trailing shouldBe BookCardTrailing.Restore
         }
 
         @Test

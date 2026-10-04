@@ -10,7 +10,6 @@ import nl.rhaydus.softcover.core.identity.di.identityModule
 import nl.rhaydus.softcover.core.lists.di.listsModule
 import nl.rhaydus.softcover.core.network.di.apolloModule
 import nl.rhaydus.softcover.core.personal.di.personalModule
-import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
 import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -50,6 +49,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LensToggl
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReviewsSummaryCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveControlHeaderCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagChipModelsCollector
@@ -89,6 +89,7 @@ val bookDetailModule = module {
     factory { DateStyleCollector() } bind BookDetailCollector::class
     factory { OfflineStateCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class
+    factory { ReviewsSummaryCollector() } bind BookDetailCollector::class
     factory { UnreleasedBadgeCollector() } bind BookDetailCollector::class
     factory { ExternalLinksCollector() } bind BookDetailCollector::class
     factory { CalloutsCollector() } bind BookDetailCollector::class

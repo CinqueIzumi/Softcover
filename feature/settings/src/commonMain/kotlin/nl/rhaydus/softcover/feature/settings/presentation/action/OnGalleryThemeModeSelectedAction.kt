@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.action
 
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.feature.settings.presentation.event.ComponentGalleryEvent
+import nl.rhaydus.softcover.feature.settings.presentation.mapper.galleryThemeModeChips
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentGalleryDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState
@@ -19,7 +20,12 @@ internal class OnGalleryThemeModeSelectedAction(val mode: ThemeMode) : Component
         scope: ActionScope<ComponentGalleryUiState, ComponentGalleryEvent, ComponentGalleryLocalVariables>,
     ) {
         scope.setState {
-            it.copy(themeModeOverride = if (it.themeModeOverride == mode) null else mode)
+            val nextOverride = if (it.themeModeOverride == mode) null else mode
+
+            it.copy(
+                themeModeOverride = nextOverride,
+                themeModeChips = galleryThemeModeChips(selected = nextOverride),
+            )
         }
     }
 }

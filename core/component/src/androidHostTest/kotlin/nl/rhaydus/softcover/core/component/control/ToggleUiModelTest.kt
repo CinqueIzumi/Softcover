@@ -8,15 +8,6 @@ class ToggleUiModelTest {
     @Nested
     inner class Previews {
         @Test
-        fun `every fixture has a unique key`() {
-            // ----- Act -----
-            val keys = ToggleUiModel.previews.values.map { it.key }
-
-            // ----- Assert -----
-            keys.distinct() shouldBe keys
-        }
-
-        @Test
         fun `fixtures cover both variants`() {
             // ----- Act -----
             val variants = ToggleUiModel.previews.values.map { it.variant }

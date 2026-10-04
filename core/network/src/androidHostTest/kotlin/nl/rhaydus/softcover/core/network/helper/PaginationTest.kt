@@ -27,13 +27,17 @@ class PaginationTest {
         // ----- Arrange -----
         val calls = mutableListOf<Pair<Int, Int>>()
         val rows = (1..6).map { "row$it" }
-        val pages = listOf(rows.subList(
-            0,
-            3,
-        ), rows.subList(
-            3,
-            6,
-        ), emptyList(),)
+        val pages = listOf(
+            rows.subList(
+                0,
+                3,
+            ),
+            rows.subList(
+                3,
+                6,
+            ),
+            emptyList(),
+        )
         var callIndex = 0
 
         // ----- Act -----
@@ -61,7 +65,8 @@ class PaginationTest {
         ), rows.subList(
             6,
             7,
-        ),)
+        ),
+        )
         var callIndex = 0
 
         // ----- Act -----

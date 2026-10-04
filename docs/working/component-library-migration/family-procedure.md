@@ -21,8 +21,9 @@ Everywhere else, cite symbols (`fun Name(`), never line numbers.
      promote when two features converge on it);
    - the render structure: per-variant private bodies when anatomies differ, one scaffold plus a small
      style only when they are near-identical; every internal type and helper the build will add.
-   Default to the simplest shape; the smells in [`steps/ss-simplicity-audit.md`](steps/ss-simplicity-audit.md)
-   § What counts as over-engineering are rejected at design time, in briefs, and in review.
+   Default to the simplest shape; the smells in
+   [`component-contract.md`](../../reference/design-system/component-contract.md) § 7.6a are rejected
+   at design time, in briefs, and in review.
 4. Stop for approval. Record the approved shape in the step file's `## Approved shape`, one line per
    point, before Phase 2 starts. It is deleted with the step file; once built, the code and its KDoc are
    the record. Decisions go in the README only when they bind every step.

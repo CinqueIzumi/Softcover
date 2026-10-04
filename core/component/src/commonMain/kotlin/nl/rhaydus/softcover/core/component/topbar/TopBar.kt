@@ -46,19 +46,19 @@ fun TopBar(
 
     val containerColor by animateColorAsState(
         targetValue = when (model.surface) {
-            TopBarSurface.OPAQUE -> scheme.surface
-            TopBarSurface.OVER_MEDIA -> Color.Transparent
+            TopBarSurface.Opaque -> scheme.surface
+            TopBarSurface.OverMedia -> Color.Transparent
         },
         label = "TopBarContainer",
     )
 
     val controlColors = when (model.surface) {
-        TopBarSurface.OPAQUE -> IconButtonDefaults.iconButtonColors(
+        TopBarSurface.Opaque -> IconButtonDefaults.iconButtonColors(
             containerColor = Color.Transparent,
             contentColor = scheme.onSurface,
         )
 
-        TopBarSurface.OVER_MEDIA -> IconButtonDefaults.iconButtonColors(
+        TopBarSurface.OverMedia -> IconButtonDefaults.iconButtonColors(
             containerColor = Color.Black.copy(alpha = 0.35f),
             contentColor = Color.White,
         )

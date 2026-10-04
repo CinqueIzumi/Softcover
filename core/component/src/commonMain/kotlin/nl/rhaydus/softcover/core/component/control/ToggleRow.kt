@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
@@ -36,17 +35,18 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 @Composable
 fun <K> ToggleRow(
     model: ToggleRowUiModel<K>,
-    onEvent: (ToggleEvent<K>) -> Unit,
+    onEvent: (ToggleEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val playMotion = playDecorativeMotion()
     val wash by animateColorAsState(
-        targetValue = toggleRowWash(
-            scheme = MaterialTheme.colorScheme,
-            pressed = isPressed && playMotion,
-        ),
+        targetValue = if (isPressed && playMotion) {
+            MaterialTheme.colorScheme.surfaceContainer
+        } else {
+            Color.Transparent
+        },
         label = "ToggleRowWash",
     )
 
@@ -61,12 +61,7 @@ fun <K> ToggleRow(
                 enabled = model.enabled,
                 role = Role.Switch,
                 onValueChange = { checked ->
-                    onEvent(
-                        ToggleEvent.Toggled(
-                            key = model.key,
-                            checked = checked,
-                        ),
-                    )
+                    onEvent(ToggleEvent.Toggled(checked = checked))
                 },
             )
             .background(wash)
@@ -109,8 +104,3 @@ fun <K> ToggleRow(
         )
     }
 }
-
-private fun toggleRowWash(
-    scheme: ColorScheme,
-    pressed: Boolean,
-): Color = if (pressed) scheme.surfaceContainer else Color.Transparent

@@ -9,7 +9,6 @@ internal fun libraryVisibilityToggleFor(
     label: String,
     visible: Boolean,
 ): ToggleUiModel = ToggleUiModel(
-    key = "library-tab-visibility",
     checked = visible,
     description = if (visible) "Hide $label from the library tabs" else "Show $label on the library tabs",
     variant = ToggleVariant.Bare,

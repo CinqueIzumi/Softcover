@@ -32,10 +32,8 @@ import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.state.skeletonMask
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
 
@@ -55,14 +53,13 @@ private const val COVER_ASPECT_RATIO = 2f / 3f
  * `blur` backdrop and a zoom/pan full-bleed viewer need their own composition, so those two surfaces
  * call [rememberCoverImageRequest] directly instead.
  *
- * **[model] is nullable, and that is the whole point.** Because mapping happens in a collector
- * (§7.2 R9), a cover model lands one state emission after the book it belongs to, so every caller —
+ * **[model] is nullable, and that is the whole point.** Because mapping happens in a collector,
+ * a cover model lands one state emission after the book it belongs to, so every caller —
  * a lazy grid resolving `covers[id]`, a sheet whose model is still null — has a frame where it has
  * an item but no cover. `Cover` answers that centrally by reserving the footprint [modifier] gives
  * it and drawing nothing, so the surrounding layout never moves. Callers pass the nullable value
  * straight through: they must not skip the item (the list then renders empty and pops in) and they
- * must not re-invent a local placeholder, which is how four features grew four copies of the same
- * `CoverOrPlaceholder` before this was centralised.
+ * must not re-invent a local placeholder.
  */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -79,19 +76,19 @@ fun Cover(
     }
 
     val request = rememberCoverImageRequest(model = model)
-    val metrics = model.variant.metrics()
 
     val coverlessFallback = model.coverlessTitle?.takeIf { it.isNotBlank() }
+    val contentDescription = coverlessFallback?.let { "Cover of $it" }
 
-    val shape = RoundedCornerShape(metrics.cornerRadius)
-    val imageModifier = if (metrics.elevation > 0.dp) {
+    val shape = RoundedCornerShape(model.variant.cornerRadius())
+    val imageModifier = if (model.variant.elevation() > 0.dp) {
         Modifier
             .shadow(
-                elevation = metrics.elevation,
+                elevation = model.variant.elevation(),
                 shape = shape,
                 clip = false,
-                ambientColor = metrics.shadowColor,
-                spotColor = metrics.shadowColor,
+                ambientColor = model.variant.shadowColor(),
+                spotColor = model.variant.shadowColor(),
             )
             .clip(shape)
     } else {
@@ -139,7 +136,7 @@ fun Cover(
         } else {
             SubcomposeAsyncImage(
                 model = request,
-                contentDescription = "Book cover image",
+                contentDescription = contentDescription,
                 modifier = Modifier.fillMaxSize(),
                 loading = { state ->
                     val placeholder = state.painter
@@ -147,7 +144,7 @@ fun Cover(
                     if (placeholder != null) {
                         Image(
                             painter = placeholder,
-                            contentDescription = "Book cover image",
+                            contentDescription = contentDescription,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Fit,
                         )
@@ -176,7 +173,7 @@ fun Cover(
                         val width = maxWidth
                         Image(
                             painter = state.painter,
-                            contentDescription = "Book cover image",
+                            contentDescription = contentDescription,
                             modifier = imageModifier
                                 .width(width)
                                 .requiredHeight(width / ratio),
@@ -193,7 +190,7 @@ fun Cover(
 /**
  * Persists a successfully-loaded remote cover's bytes against an edition, read back out of Coil's own
  * disk cache once the load completes. This is the persistence seam [rememberCoverImageRequest] calls
- * through — `:core:component` may not depend on Koin or on a domain use case (§ 7.4), so the feature
+ * through — `:core:component` may not depend on Koin or on a domain use case, so the feature
  * wiring the persister supplies it via [LocalCoverImagePersister] instead.
  */
 fun interface CoverImagePersister {
@@ -223,7 +220,7 @@ fun rememberCoverImageRequest(model: CoverUiModel): ImageRequest? {
     val context = LocalPlatformContext.current
     val persister = LocalCoverImagePersister.current
     val coroutineScope = rememberCoroutineScope()
-    val maxDecodePx = model.variant.metrics().maxDecodePx
+    val maxDecodePx = if (model.variant == CoverVariant.Shelf) 600 else null
 
     val source = model.source ?: return null
 
@@ -274,63 +271,52 @@ fun rememberCoverImageRequest(model: CoverUiModel): ImageRequest? {
     }
 }
 
-internal fun CoverVariant.cornerRadius(): Dp = metrics().cornerRadius
+internal fun CoverVariant.cornerRadius(): Dp = when (this) {
+    CoverVariant.Shelf -> 10.dp
+    CoverVariant.Rounded -> 16.dp
+    CoverVariant.Tile,
+    CoverVariant.Spotlight,
+    -> 8.dp
 
-private fun CoverVariant.metrics(): CoverMetrics = when (this) {
-    CoverVariant.Shelf -> CoverMetrics(
-        elevation = 6.dp,
-        cornerRadius = 10.dp,
-        maxDecodePx = 600,
-    )
+    CoverVariant.Raised,
+    CoverVariant.Floating,
+    CoverVariant.Jacket,
+    CoverVariant.StackedJacket,
+    CoverVariant.Flat,
+    -> 4.dp
+}
 
-    CoverVariant.Raised -> CoverMetrics(
-        elevation = 6.dp,
-        cornerRadius = 4.dp,
-    )
+private fun CoverVariant.elevation(): Dp = when (this) {
+    CoverVariant.Flat,
+    CoverVariant.Rounded,
+    -> 0.dp
 
-    CoverVariant.Lifted -> CoverMetrics(
-        elevation = 4.dp,
-        cornerRadius = 4.dp,
-    )
+    CoverVariant.StackedJacket -> 3.dp
+    CoverVariant.Tile,
+    CoverVariant.Jacket,
+    -> 4.dp
 
-    CoverVariant.Floating -> CoverMetrics(
-        elevation = 12.dp,
-        cornerRadius = 4.dp,
-        shadowColor = Color.Black.copy(alpha = 0.6f),
-    )
+    CoverVariant.Shelf,
+    CoverVariant.Raised,
+    -> 6.dp
 
-    CoverVariant.Tile -> CoverMetrics(
-        elevation = 4.dp,
-        cornerRadius = 8.dp,
-    )
+    CoverVariant.Floating -> 12.dp
+    CoverVariant.Spotlight -> 20.dp
+}
 
-    CoverVariant.Rounded -> CoverMetrics(
-        elevation = 0.dp,
-        cornerRadius = 16.dp,
-    )
+private fun CoverVariant.shadowColor(): Color = when (this) {
+    CoverVariant.Floating -> Color.Black.copy(alpha = 0.6f)
+    CoverVariant.Jacket,
+    CoverVariant.Spotlight,
+    -> Color.Black.copy(alpha = 0.5f)
 
-    CoverVariant.Jacket -> CoverMetrics(
-        elevation = 4.dp,
-        cornerRadius = 4.dp,
-        shadowColor = Color.Black.copy(alpha = 0.5f),
-    )
-
-    CoverVariant.StackedJacket -> CoverMetrics(
-        elevation = 3.dp,
-        cornerRadius = 4.dp,
-        shadowColor = Color.Black.copy(alpha = 0.35f),
-    )
-
-    CoverVariant.Spotlight -> CoverMetrics(
-        elevation = 20.dp,
-        cornerRadius = 8.dp,
-        shadowColor = Color.Black.copy(alpha = 0.5f),
-    )
-
-    CoverVariant.Flat -> CoverMetrics(
-        elevation = 0.dp,
-        cornerRadius = 4.dp,
-    )
+    CoverVariant.StackedJacket -> Color.Black.copy(alpha = 0.35f)
+    CoverVariant.Shelf,
+    CoverVariant.Raised,
+    CoverVariant.Tile,
+    CoverVariant.Rounded,
+    CoverVariant.Flat,
+    -> Color.Unspecified
 }
 
 @OptIn(ExperimentalCoilApi::class)
@@ -352,55 +338,6 @@ private fun persistFromDiskCache(
                 bytes = diskCache.fileSystem.read(it.data) { readByteArray() },
             )
         }
-    }
-}
-
-/**
- * The previews render [CoverUiModel.previews] rather than re-declaring their own values, so the
- * preview set and the Component Gallery's fixture set are one list and cannot drift (R5).
- */
-@StandardPreview
-@Composable
-private fun CoverWithArtPreview() {
-    SoftcoverTheme {
-        Cover(
-            model = CoverUiModel.previews.getValue("With cover art"),
-            modifier = Modifier.width(140.dp),
-        )
-    }
-}
-
-@StandardPreview
-@Composable
-private fun CoverCoverlessLongTitlePreview() {
-    SoftcoverTheme {
-        Cover(
-            model = CoverUiModel.previews.getValue("Coverless, long title"),
-            modifier = Modifier.width(140.dp),
-        )
-    }
-}
-
-/** A thumbnail-sized tile: the coverless jacket degrades to a single initial at this width. */
-@StandardPreview
-@Composable
-private fun CoverCoverlessThumbnailPreview() {
-    SoftcoverTheme {
-        Cover(
-            model = CoverUiModel.previews.getValue("Coverless, thumbnail-sized"),
-            modifier = Modifier.width(48.dp),
-        )
-    }
-}
-
-@StandardPreview
-@Composable
-private fun CoverLoadingPreview() {
-    SoftcoverTheme {
-        Cover(
-            model = CoverUiModel.previews.getValue("Loading"),
-            modifier = Modifier.width(140.dp),
-        )
     }
 }
 

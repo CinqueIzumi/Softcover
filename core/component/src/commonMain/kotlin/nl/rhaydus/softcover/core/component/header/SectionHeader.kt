@@ -42,20 +42,16 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
  * Without [trailing], the register sizes itself under [modifier] alone — a [SectionHeaderUiModel.Section]
  * still fills the width, an [SectionHeaderUiModel.Inline] or [SectionHeaderUiModel.Label] shrink-wraps.
  * Passing [trailing] switches the whole header to a fill-width row with the register weighted against it.
- *
- * While [isLoading] the header's text masks in place; the model's own text sizes the mask.
  */
 @Composable
 fun SectionHeader(
     model: SectionHeaderUiModel,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
     trailing: (@Composable RowScope.() -> Unit)? = null,
 ) {
     if (trailing == null) {
         SectionHeaderRegister(
             model = model,
-            isLoading = isLoading,
             modifier = modifier,
         )
         return
@@ -64,7 +60,6 @@ fun SectionHeader(
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         SectionHeaderRegister(
             model = model,
-            isLoading = isLoading,
             modifier = Modifier.weight(1f),
         )
 
@@ -77,13 +72,11 @@ fun SectionHeader(
 @Composable
 private fun SectionHeaderRegister(
     model: SectionHeaderUiModel,
-    isLoading: Boolean,
     modifier: Modifier,
 ) {
     when (model) {
         is SectionHeaderUiModel.Section -> SectionHeaderRegion(
             model = model,
-            isLoading = isLoading,
             modifier = modifier,
         )
         is SectionHeaderUiModel.Inline -> SectionHeaderInlineEyebrow(
@@ -92,12 +85,11 @@ private fun SectionHeaderRegister(
                 tone = model.tone,
                 colorScheme = MaterialTheme.colorScheme,
             ),
-            isLoading = isLoading,
+            isLoading = model.isLoading,
             modifier = modifier,
         )
         is SectionHeaderUiModel.Label -> SectionHeaderLabel(
             model = model,
-            isLoading = isLoading,
             modifier = modifier,
         )
     }
@@ -106,7 +98,6 @@ private fun SectionHeaderRegister(
 @Composable
 private fun SectionHeaderRegion(
     model: SectionHeaderUiModel.Section,
-    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -118,7 +109,7 @@ private fun SectionHeaderRegion(
             gap = 12.dp,
             textStyle = MaterialTheme.editorialTypography.eyebrow,
             color = MaterialTheme.colorScheme.primary,
-            isLoading = isLoading,
+            isLoading = model.isLoading,
             isHeading = model.headline == null,
         )
 
@@ -130,7 +121,7 @@ private fun SectionHeaderRegion(
                     segments = model.headline,
                     colorScheme = MaterialTheme.colorScheme,
                 ),
-                isLoading = isLoading,
+                isLoading = model.isLoading,
                 standIn = model.headlineText.orEmpty(),
                 style = MaterialTheme.editorialTypography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -146,7 +137,7 @@ private fun SectionHeaderRegion(
                     segments = model.description,
                     colorScheme = MaterialTheme.colorScheme,
                 ),
-                isLoading = isLoading,
+                isLoading = model.isLoading,
                 standIn = model.description.joinToString(separator = "") { it.text },
                 style = MaterialTheme.editorialTypography.body,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -202,7 +193,6 @@ internal fun SectionHeaderInlineEyebrow(
 @Composable
 private fun SectionHeaderLabel(
     model: SectionHeaderUiModel.Label,
-    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     SectionHeaderEyebrowText(
@@ -212,7 +202,7 @@ private fun SectionHeaderLabel(
             tone = model.tone,
             colorScheme = MaterialTheme.colorScheme,
         ),
-        isLoading = isLoading,
+        isLoading = model.isLoading,
         modifier = modifier.semantics(mergeDescendants = true) { heading() },
     )
 }

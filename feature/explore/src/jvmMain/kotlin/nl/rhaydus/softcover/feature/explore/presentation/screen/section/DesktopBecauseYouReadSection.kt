@@ -9,14 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -35,20 +32,17 @@ internal fun DesktopBecauseYouReadSection(
     genreOptions: List<String>,
     genreSheet: SheetScaffoldUiModel,
     genreGroup: SheetRowGroupUiModel<String?>,
-    books: List<Book>,
-    cards: ImmutableList<BookCardUiModel>,
+    set: BookCardSet<Book>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
     // Collapses only once the fetch is done and there is nothing to show; any loading state keeps the
     // header and rail footprint reserved.
-    if (isLoading.not() && (genre == null || books.isEmpty())) return
-
-    val booksByKey = remember(books) { books.associateBy { BookCardKey.Book(it.id) } }
+    if (isLoading.not() && (genre == null || set.isEmpty)) return
 
     val onCardEvent = rememberPrefetchingBookCardEventHandler(
-        resolve = booksByKey::get,
+        set = set,
     ) { event, book ->
         if (event is BookCardEvent.Clicked) {
             onBookClick(
@@ -61,7 +55,6 @@ internal fun DesktopBecauseYouReadSection(
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
             model = header,
-            isLoading = isLoading,
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 
@@ -82,7 +75,7 @@ internal fun DesktopBecauseYouReadSection(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            cards.forEach { card ->
+            set.cards.forEach { card ->
                 key(card.key.lazyKey) {
                     BookCard(
                         model = card,

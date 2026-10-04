@@ -19,8 +19,6 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  * — and always leave a comment at the *mapper's* call site explaining why a blank fallback is
  * acceptable there.
  * @property sharedTransitionKey The resolved shared-element key, or `null` for no transition.
- * Resolved by the mapper (`component-contract.md` § 7.2 R7) — [Cover] never computes one, because a
- * component does not know which surface it is on.
  */
 @Immutable
 data class CoverUiModel(
@@ -32,12 +30,6 @@ data class CoverUiModel(
 ) {
     companion object : UiModelPreviews<CoverUiModel> {
         /**
-         * Per R5, one fixture per anatomy branch rather than per variant — 21 near-identical tiles
-         * would be noise in the gallery. This covers: a resolved [source] (the `SubcomposeAsyncImage`
-         * rung), a coverless short title, a coverless title long enough that `TextAutoSize` must
-         * shrink it, a coverless cover at a thumbnail-sized variant (so the single-initial degrade is
-         * visible beside the full-title case), and the loading shimmer.
-         *
          * The [source]-present fixture uses [CoverSource.Local] rather than [CoverSource.Remote] —
          * per the gallery's network-independence rule, no fixture in this library may carry a live
          * URL, and a local path exercises the same success-rung anatomy without one.
@@ -49,11 +41,6 @@ data class CoverUiModel(
                     cacheKey = null,
                 ),
                 coverlessTitle = "Piranesi",
-                variant = CoverVariant.Shelf,
-            ),
-            "Coverless, short title" to CoverUiModel(
-                source = null,
-                coverlessTitle = "It",
                 variant = CoverVariant.Shelf,
             ),
             "Coverless, long title" to CoverUiModel(

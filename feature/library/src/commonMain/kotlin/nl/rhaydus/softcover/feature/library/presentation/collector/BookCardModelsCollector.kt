@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -8,12 +7,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.mapper.standInCards
 import nl.rhaydus.softcover.feature.library.presentation.mapper.toBookCard
 import nl.rhaydus.softcover.feature.library.presentation.mapper.toEditionCard
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
@@ -26,10 +28,12 @@ import nl.rhaydus.softcover.feature.library.presentation.state.resolveSortMode
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps every book and edition a tab shows to a [BookCardUiModel] off the composition
- * (`component-contract.md` § 7.2 R9), in display order and keyed by tab id into
+ * Maps every book and edition a tab shows to a [BookCardUiModel], in display order and keyed by tab id into
  * [LibraryUiState.bookCardsByTab] and [LibraryUiState.editionCardsByTab]. Each tab carries the layout
  * its cards were built for.
+ *
+ * A tab whose list has not landed, or is empty while [LibraryUiState.isLoading], gets stand-in cards
+ * in the tab's real layout instead (`isLoading = true`, no payloads).
  *
  * The cards follow the search and filter results in [LibraryUiState.displayBooksByTab] and
  * [LibraryUiState.displayEditionsByTab], falling back to the raw list until those land. Only tabs in
@@ -63,6 +67,7 @@ internal class BookCardModelsCollector : LibraryCollector {
                     isRearranging = state.isRearranging,
                     sortModeByTab = state.sortModeByTab,
                     customLists = state.customLists,
+                    isLoading = state.isLoading,
                 )
             }
             .distinctUntilChanged()
@@ -79,6 +84,10 @@ internal class BookCardModelsCollector : LibraryCollector {
                     it.copy(
                         bookCardsByTab = books.mapValues { (_, tab) -> tab.cards }.toImmutableMap(),
                         editionCardsByTab = editions.mapValues { (_, tab) -> tab.cards }.toImmutableMap(),
+                        loadingCards = LibraryTabCards(
+                            layout = snapshot.gridLayout,
+                            set = BookCardSet.standIns(snapshot.gridLayout.standInCards()),
+                        ),
                     )
                 }
             }
@@ -100,8 +109,7 @@ private inline fun <I, T : Any> cachedTab(
         inputs = inputs,
         cards = LibraryTabCards(
             layout = layout,
-            cards = built.map { (_, card) -> card }.toImmutableList(),
-            payloads = built.associate { (payload, card) -> card.key to payload }.toImmutableMap(),
+            set = built.map { (payload, card) -> card to payload }.toBookCardSet(),
         ),
     )
 }
@@ -110,6 +118,8 @@ private fun BookCardModelsSnapshot.toBookCards(
     previous: Map<String, CachedTab<BookTabInputs, Book>>,
 ): Map<String, CachedTab<BookTabInputs, Book>> = buildMap {
     visibleTabs.forEach { tab ->
+        if (booksByTab[tab.id]?.isEmpty() == true && isLoading) return@forEach
+
         val books = booksByTab[tab.id]?.let { displayBooksByTab[tab.id] ?: it } ?: return@forEach
 
         val rearranging = bookReorderStatusFor(
@@ -168,6 +178,8 @@ private fun BookCardModelsSnapshot.toEditionCards(
     previous: Map<String, CachedTab<EditionTabInputs, BookEdition>>,
 ): Map<String, CachedTab<EditionTabInputs, BookEdition>> = buildMap {
     visibleTabs.forEach { tab ->
+        if (editionsByTab[tab.id]?.isEmpty() == true && isLoading) return@forEach
+
         val editions = editionsByTab[tab.id]?.let { displayEditionsByTab[tab.id] ?: it } ?: return@forEach
         val listId = (tab as? LibraryTab.CustomList)?.listId
 

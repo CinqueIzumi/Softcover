@@ -298,7 +298,7 @@ class MastheadCollectorTest {
             }
 
         @Test
-        fun `loadingMastheadTabIds holds exactly the visible tabs whose stats have not landed`() =
+        fun `only the visible tabs whose stats have not landed are loading`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
@@ -321,7 +321,11 @@ class MastheadCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.loadingMastheadTabIds shouldBe setOf(LibraryTab.All.id, wantToReadTab.id)
+                stateFlow.value.mastheads.mapValues { it.value.isLoading } shouldBe mapOf(
+                    LibraryTab.All.id to true,
+                    readTab.id to false,
+                    wantToReadTab.id to true,
+                )
                 job.cancel()
             }
 
@@ -349,13 +353,13 @@ class MastheadCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.loadingMastheadTabIds shouldBe emptySet()
+                stateFlow.value.mastheads.getValue(readTab.id).isLoading shouldBe false
                 stateFlow.value.mastheads.getValue(readTab.id).subtitle shouldBe "Nothing finished yet — the page is still open."
                 job.cancel()
             }
 
         @Test
-        fun `a tab leaves loadingMastheadTabIds once its stats land`() = runTest(UnconfinedTestDispatcher()) {
+        fun `a tab stops loading once its stats land`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 visibleTabs = listOf(readTab),
@@ -368,7 +372,7 @@ class MastheadCollectorTest {
                     dependencies = dependencies,
                 )
             }
-            stateFlow.value.loadingMastheadTabIds shouldBe setOf(readTab.id)
+            stateFlow.value.mastheads.getValue(readTab.id).isLoading shouldBe true
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -381,7 +385,7 @@ class MastheadCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.loadingMastheadTabIds shouldBe emptySet()
+            stateFlow.value.mastheads.getValue(readTab.id).isLoading shouldBe false
             stateFlow.value.mastheads.getValue(readTab.id).subtitle shouldBe "4 titles"
             job.cancel()
         }

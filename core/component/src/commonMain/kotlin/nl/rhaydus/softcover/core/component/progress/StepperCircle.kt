@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.component.progress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -13,21 +14,17 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 /**
- * A −/+ stepper flanking a hero number field: a 44dp circle, `surfaceContainerHigh` fill, primary
- * glyph. On the Page and Percentage tabs it steps the value by 1, reusing the same clamp bounds
- * (`[0, total]` / `[0, 100]`) the typed-entry path already enforces; on the Time tab it flanks only
- * the minutes field, stepping by 1 minute (hours and seconds stay typed-entry only). A tap writes
- * straight into the tab's existing `TextFieldValue` state, so it composes with typed entry rather
- * than branching around it.
+ * A 44dp circle button flanking a hero number field: `surfaceContainerHigh` fill, primary [icon].
+ * A tap calls [onClick], which sends a step event to the host; the circle holds no value of its own.
  */
 @Composable
 internal fun StepperCircle(
-    symbol: String,
+    icon: SoftcoverIcon,
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -35,7 +32,7 @@ internal fun StepperCircle(
     Surface(
         modifier = modifier
             .size(44.dp)
-            // The visible "−"/"+" glyph would otherwise merge into the announced label alongside
+            // The visible glyph would otherwise merge into the announced label alongside
             // the content description; clear it and re-declare only what a screen reader should
             // say — the description plus the button role/action Surface's own onClick provides.
             .clearAndSetSemantics {
@@ -52,9 +49,15 @@ internal fun StepperCircle(
         onClick = onClick,
     ) {
         Box(contentAlignment = Alignment.Center) {
-            SoftcoverText(
-                text = symbol,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+            val resource = drawableIconResource(
+                icon = icon,
+                contentDescription = "",
+            )
+
+            Icon(
+                painter = resource.getIconPainter(),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
             )
         }
     }

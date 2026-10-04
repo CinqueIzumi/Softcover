@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.component.verdict
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.StarRatingInput
@@ -67,9 +65,6 @@ fun VerdictBlock(
                     text = "Edit",
                     style = MaterialTheme.editorialTypography.eyebrowSmall,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .pointerHandCursor()
-                        .clickable(onClick = onEditClick),
                 )
             }
         }
@@ -142,7 +137,6 @@ private fun FilledVerdict(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = VERDICT_BLOCK_REVIEW_COLLAPSED_LINES,
-                overflow = TextOverflow.Ellipsis,
                 onClick = onEditClick,
             )
 

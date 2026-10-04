@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.uibinding.progress
 
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.common.currentLocalDateTime
+import nl.rhaydus.common.toHoursMinutesSeconds
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
@@ -41,8 +42,14 @@ fun Book.toProgressSheetUiModel(
             currentSeconds = progressCurrentSeconds,
         )
 
+        val totalSeconds = edition.audioSeconds ?: 0
+
+        val enteredSeconds = (draft.hours.toIntOrNull() ?: 0) * 3600 +
+            (draft.minutes.toIntOrNull() ?: 0) * 60 +
+            (draft.seconds.toIntOrNull() ?: 0)
+
         ProgressSheetMedium.Timed(
-            totalSeconds = edition.audioSeconds ?: 0,
+            totalSeconds = totalSeconds,
             hours = progressTimeField(
                 unit = ProgressTimeUnit.HOURS,
                 text = draft.hours,
@@ -55,11 +62,16 @@ fun Book.toProgressSheetUiModel(
                 unit = ProgressTimeUnit.SECONDS,
                 text = draft.seconds,
             ),
+            suffix = if (totalSeconds > 0) "of ${totalSeconds.toClockText()}" else null,
+            fraction = if (totalSeconds > 0) enteredSeconds.toFloat() / totalSeconds else 0f,
         )
     } else {
+        val totalPages = edition?.pages ?: defaultEdition?.pages ?: 0
+
         ProgressSheetMedium.Paged(
-            totalPages = edition?.pages ?: defaultEdition?.pages ?: 0,
+            totalPages = totalPages,
             currentPage = userBookRead?.currentPage ?: 0,
+            suffix = if (totalPages > 0) "of $totalPages pages" else null,
         )
     }
 
@@ -80,6 +92,27 @@ fun Book.toProgressSheetUiModel(
             ),
         ),
     )
+}
+
+private fun Int.toClockText(): String {
+    val hms = toHoursMinutesSeconds()
+
+    val hours = hms.hours.toString().padStart(
+        length = 2,
+        padChar = '0',
+    )
+
+    val minutes = hms.minutes.toString().padStart(
+        length = 2,
+        padChar = '0',
+    )
+
+    val seconds = hms.seconds.toString().padStart(
+        length = 2,
+        padChar = '0',
+    )
+
+    return "$hours:$minutes:$seconds"
 }
 
 /** Where the book's listening position currently stands, the seed for a fresh [ProgressTimeDraft]. */

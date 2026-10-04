@@ -59,7 +59,8 @@ class ProfileLocalDataSourceImplTest {
                 2026,
                 6,
                 19,
-            ),)
+            ),
+            )
 
             // ----- Assert -----
             result.profile.shouldNotBeNull().recentReadingDays shouldBe listOf("2026-06-17", "2026-06-19")
@@ -84,7 +85,8 @@ class ProfileLocalDataSourceImplTest {
                 2026,
                 6,
                 19,
-            ),)
+            ),
+            )
 
             // ----- Assert -----
             result.profile.shouldNotBeNull().recentReadingDays shouldBe listOf("2026-06-19")
@@ -107,7 +109,8 @@ class ProfileLocalDataSourceImplTest {
                 2026,
                 6,
                 19,
-            ),)
+            ),
+            )
 
             // ----- Assert -----
             result shouldBe seed

@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
-import nl.rhaydus.softcover.core.component.chip.ChipInteraction
 import nl.rhaydus.softcover.core.component.chip.ChipLeading
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentUiModel
@@ -89,7 +88,6 @@ data class ProgressSheetUiModel(
                 chip = ChipUiModel(
                     key = "when-read",
                     label = "Just now",
-                    interaction = ChipInteraction.Clickable,
                     leading = ChipLeading.Icon(icon = SoftcoverIcon.DateRange),
                 ),
                 dayLabel = "Today",
@@ -117,6 +115,7 @@ data class ProgressSheetUiModel(
                 medium = ProgressSheetMedium.Paged(
                     totalPages = 534,
                     currentPage = 80,
+                    suffix = "of 534 pages",
                 ),
                 progressPercent = 15,
                 selectedTab = ProgressSheetTab.PAGE,
@@ -126,6 +125,7 @@ data class ProgressSheetUiModel(
                 medium = ProgressSheetMedium.Paged(
                     totalPages = 534,
                     currentPage = 187,
+                    suffix = "of 534 pages",
                 ),
                 progressPercent = 35,
                 selectedTab = ProgressSheetTab.PERCENTAGE,
@@ -135,6 +135,7 @@ data class ProgressSheetUiModel(
                 medium = ProgressSheetMedium.Paged(
                     totalPages = 0,
                     currentPage = 42,
+                    suffix = null,
                 ),
                 progressPercent = 0,
                 selectedTab = ProgressSheetTab.PAGE,
@@ -155,6 +156,8 @@ data class ProgressSheetUiModel(
                         unit = ProgressTimeUnit.SECONDS,
                         text = "45",
                     ),
+                    suffix = "of 27:52:00",
+                    fraction = 0.12f,
                 ),
                 progressPercent = 12,
                 selectedTab = ProgressSheetTab.TIME,
@@ -175,6 +178,8 @@ data class ProgressSheetUiModel(
                         unit = ProgressTimeUnit.SECONDS,
                         text = "0",
                     ),
+                    suffix = null,
+                    fraction = 0f,
                 ),
                 progressPercent = 0,
                 selectedTab = ProgressSheetTab.TIME,

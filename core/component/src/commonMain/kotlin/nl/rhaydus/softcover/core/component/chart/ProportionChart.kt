@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +43,7 @@ fun ProportionChart(
                     modifier = Modifier
                         .weight(segment.fraction.coerceAtLeast(0.01f))
                         .fillMaxHeight()
-                        .background(segment.tone.color()),
+                        .background(segment.tone.color(colors = MaterialTheme.colorScheme)),
                 )
             }
         }

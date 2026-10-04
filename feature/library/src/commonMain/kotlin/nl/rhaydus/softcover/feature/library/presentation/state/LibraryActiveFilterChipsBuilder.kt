@@ -69,7 +69,6 @@ internal fun buildLibraryActiveFilterChips(
         ChipUiModel(
             key = LIBRARY_CLEAR_ALL_CHIP_KEY,
             label = "Clear all",
-            tone = ChipTone.Tonal,
         )
     } else {
         null

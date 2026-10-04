@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -39,7 +40,7 @@ internal fun WhenReadEditor(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             StepperCircle(
-                symbol = "−",
+                icon = SoftcoverIcon.Remove,
                 contentDescription = "Earlier day",
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -1440)) },
             )
@@ -55,7 +56,7 @@ internal fun WhenReadEditor(
             Spacer(modifier = Modifier.width(18.dp))
 
             StepperCircle(
-                symbol = "+",
+                icon = SoftcoverIcon.Add,
                 contentDescription = "Later day",
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 1440)) },
             )
@@ -69,7 +70,7 @@ internal fun WhenReadEditor(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             StepperCircle(
-                symbol = "−",
+                icon = SoftcoverIcon.Remove,
                 contentDescription = "Earlier hour",
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -60)) },
             )
@@ -77,7 +78,7 @@ internal fun WhenReadEditor(
             Spacer(modifier = Modifier.width(8.dp))
 
             StepperCircle(
-                symbol = "−",
+                icon = SoftcoverIcon.Remove,
                 contentDescription = "Earlier 15 minutes",
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -15)) },
             )
@@ -93,7 +94,7 @@ internal fun WhenReadEditor(
             Spacer(modifier = Modifier.width(14.dp))
 
             StepperCircle(
-                symbol = "+",
+                icon = SoftcoverIcon.Add,
                 contentDescription = "Later 15 minutes",
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 15)) },
             )
@@ -101,7 +102,7 @@ internal fun WhenReadEditor(
             Spacer(modifier = Modifier.width(8.dp))
 
             StepperCircle(
-                symbol = "+",
+                icon = SoftcoverIcon.Add,
                 contentDescription = "Later hour",
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 60)) },
             )

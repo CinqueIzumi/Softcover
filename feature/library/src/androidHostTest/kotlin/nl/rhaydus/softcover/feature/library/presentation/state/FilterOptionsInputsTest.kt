@@ -43,19 +43,23 @@ class FilterOptionsInputsTest {
     ) = Book(
         id = id,
         title = "Book $id",
-        editions = listOf(buildEdition(
-            id = id,
-            bookId = id,
-        ),),
+        editions = listOf(
+            buildEdition(
+                id = id,
+                bookId = id,
+            ),
+        ),
         defaultEdition = null,
         rating = 0.0,
         description = "",
         releaseYear = 2020,
         coverUrl = "",
-        authors = listOf(Author(
-            id = id,
-            name = "Author $id",
-        ),),
+        authors = listOf(
+            Author(
+                id = id,
+                name = "Author $id",
+            ),
+        ),
         usersCount = 0,
         ratingsCount = 0,
         bookSeries = null,

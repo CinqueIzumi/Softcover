@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
@@ -17,6 +16,8 @@ import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverlessTitleCover
+import nl.rhaydus.softcover.core.component.deadline.DeadlineRow
+import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
@@ -47,8 +48,8 @@ internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "Chip",
         family = GalleryFamily.CHIP,
-        blurb = "The pill-shaped chip family: tonal, spoiler, add, add-outlined, remove, " +
-            "quiet, format, choice, dashed, and editable variants.",
+        blurb = "The pill-shaped chip family: tonal, choice, filled, container, outlined, " +
+            "dashed and spoiler tones, with optional leading and trailing icons.",
         previews = ChipUiModel,
         content = { model, modifier ->
             Chip(
@@ -140,6 +141,19 @@ internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
         },
     ),
     galleryEntry(
+        name = "DeadlineRow",
+        family = GalleryFamily.BADGE,
+        blurb = "Book detail's deadline card: the finish-by date and status badge over the goal " +
+            "sentence.",
+        previews = DeadlineRowUiModel,
+        content = { model, modifier ->
+            DeadlineRow(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
         name = "SectionHeader",
         family = GalleryFamily.HEADER,
         blurb = "Opens a region within a page or sheet: an accent bar in one of three weights, " +
@@ -152,43 +166,28 @@ internal val primitiveEntries: ImmutableList<GalleryEntry> = persistentListOf(
             )
         },
     ),
-    GalleryEntry(
+    galleryEntry(
         name = "PageMasthead",
         family = GalleryFamily.HEADER,
         blurb = "Names the page, once per page: an optional eyebrow, the title, and an optional " +
             "subtitle, sized for the surface that hosts it.",
-        fixtures = (
-            galleryFixtures(
-                previews = PageMastheadUiModel,
-                content = { model, modifier ->
-                    PageMasthead(
-                        model = model,
-                        modifier = modifier,
-                    ) {
-                        if (model.eyebrow == null && model.size == PageMastheadSize.Regular) {
-                            MastheadRefreshAction(
-                                model = MastheadRefreshUiModel(
-                                    label = "Refresh",
-                                    enabled = true,
-                                ),
-                                onEvent = {},
-                            )
-                        }
-                    }
-                },
-            ) + PageMastheadUiModel.previews.getValue("Regular, with eyebrow").let { model ->
-                GalleryFixture(
-                    label = "Loading subtitle",
-                    render = { modifier ->
-                        PageMasthead(
-                            model = model,
-                            modifier = modifier,
-                            isLoading = true,
-                        )
-                    },
-                )
+        previews = PageMastheadUiModel,
+        content = { model, modifier ->
+            PageMasthead(
+                model = model,
+                modifier = modifier,
+            ) {
+                if (model.eyebrow == null && model.size == PageMastheadSize.Regular) {
+                    MastheadRefreshAction(
+                        model = MastheadRefreshUiModel(
+                            label = "Refresh",
+                            enabled = true,
+                        ),
+                        onEvent = {},
+                    )
+                }
             }
-            ).toImmutableList(),
+        },
     ),
     galleryEntry(
         name = "MastheadRefreshAction",

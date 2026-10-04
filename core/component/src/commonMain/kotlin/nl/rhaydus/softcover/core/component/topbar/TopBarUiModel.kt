@@ -15,16 +15,16 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 @Immutable
 data class TopBarUiModel(
     val title: String? = null,
-    val surface: TopBarSurface = TopBarSurface.OPAQUE,
+    val surface: TopBarSurface = TopBarSurface.Opaque,
 ) {
     companion object : UiModelPreviews<TopBarUiModel> {
         override val previews: ImmutableMap<String, TopBarUiModel> = persistentMapOf(
-            "With back" to TopBarUiModel(title = "Appearance"),
+            "Titled" to TopBarUiModel(title = "Appearance"),
             "Long title, autosized" to TopBarUiModel(
                 title = "A Title Long Enough That The Bar Has To Shrink It Across Two Lines",
             ),
             "Over cover art" to TopBarUiModel(
-                surface = TopBarSurface.OVER_MEDIA,
+                surface = TopBarSurface.OverMedia,
             ),
         )
     }

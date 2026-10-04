@@ -356,10 +356,12 @@ class LibraryFiltersTest {
                 // ----- Arrange -----
                 val book = buildBook(
                     tags = listOf(tagFiction),
-                    editions = listOf(buildEdition(
-                        format = "paperback",
-                        owned = true,
-                    ),),
+                    editions = listOf(
+                        buildEdition(
+                            format = "paperback",
+                            owned = true,
+                        ),
+                    ),
                     rating = 4.0,
                     releaseYear = 2020,
                     finishedYear = 2021,
@@ -383,10 +385,12 @@ class LibraryFiltersTest {
                 // ----- Arrange -----
                 val book = buildBook(
                     tags = listOf(tagFiction),
-                    editions = listOf(buildEdition(
-                        format = "paperback",
-                        owned = true,
-                    ),),
+                    editions = listOf(
+                        buildEdition(
+                            format = "paperback",
+                            owned = true,
+                        ),
+                    ),
                     rating = 4.5,
                     releaseYear = 2020,
                     finishedYear = 2021,

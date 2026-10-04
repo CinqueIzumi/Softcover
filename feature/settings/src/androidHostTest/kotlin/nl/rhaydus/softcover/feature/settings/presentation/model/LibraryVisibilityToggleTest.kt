@@ -56,21 +56,5 @@ class LibraryVisibilityToggleTest {
             result.description shouldContain "Favourites"
             result.description shouldBe "Show Favourites on the library tabs"
         }
-
-        @Test
-        fun `keeps one key for visible and hidden so the event can be routed`() {
-            // ----- Arrange & Act -----
-            val visible = libraryVisibilityToggleFor(
-                label = "Reading",
-                visible = true,
-            )
-            val hidden = libraryVisibilityToggleFor(
-                label = "Reading",
-                visible = false,
-            )
-
-            // ----- Assert -----
-            visible.key shouldBe hidden.key
-        }
     }
 }

@@ -1,15 +1,17 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.toBookCardSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.SEARCH_RESULT_STAND_IN_CARDS
@@ -28,8 +30,8 @@ import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiSt
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Maps the trending, because-you-read and up-next rails and the search results to [BookCardUiModel]s off
- * the composition (`component-contract.md` § 7.2 R9), one list per surface: the same book
+ * Maps the trending, because-you-read and up-next rails and the search results to [BookCardUiModel]s,
+ * one list per surface: the same book
  * can sit on several surfaces, each stamping its own cover transition key.
  *
  * Derives from the books and [UnreleasedCoverOverlaysCollector]'s overlays, so it re-runs whenever
@@ -58,7 +60,7 @@ internal class BookCardModelsCollector : ExploreCollector {
             .collectLatest { snapshot ->
                 scope.setState {
                     it.copy(
-                        trendingCards = snapshot.trendingBooks.toCards(
+                        trending = snapshot.trendingBooks.toCardSet(
                             loading = snapshot.loadingTrendingBooks,
                             coverVariant = CoverVariant.Raised,
                             coverSurface = SURFACE_TRENDING,
@@ -66,7 +68,7 @@ internal class BookCardModelsCollector : ExploreCollector {
                             standIns = TRENDING_STAND_IN_CARDS,
                             map = Book::toTrendingCard,
                         ),
-                        becauseYouReadCards = snapshot.becauseYouReadBooks.toCards(
+                        becauseYouRead = snapshot.becauseYouReadBooks.toCardSet(
                             loading = snapshot.loadingBecauseYouReadBooks,
                             coverVariant = CoverVariant.Raised,
                             coverSurface = SURFACE_BECAUSE_YOU_READ,
@@ -74,50 +76,51 @@ internal class BookCardModelsCollector : ExploreCollector {
                             standIns = BECAUSE_YOU_READ_STAND_IN_CARDS,
                             map = Book::toBecauseYouReadCard,
                         ),
-                        upNextCards = snapshot.continueSeriesBooks.toCards(
+                        upNext = snapshot.continueSeriesBooks.toCardSet(
                             loading = snapshot.loadingContinueSeriesBooks,
-                            coverVariant = CoverVariant.Lifted,
+                            coverVariant = CoverVariant.Raised,
                             coverSurface = SURFACE_UP_NEXT,
                             overlays = snapshot.unreleasedCoverOverlays,
                             standIns = UP_NEXT_STAND_IN_CARDS,
                             map = Book::toUpNextCard,
                         ),
-                        queriedBookCards = snapshot.queriedBooks
-                            .takeUnless { snapshot.isLoading }
-                            ?.map { book ->
+                        searchResults = if (snapshot.isLoading) {
+                            BookCardSet.standIns(SEARCH_RESULT_STAND_IN_CARDS)
+                        } else {
+                            snapshot.queriedBooks.map { book ->
                                 book.toSearchResultCard(
-                                    cover = book.toCoverModel(
+                                    cover = book.toCoverUiModel(
                                         variant = CoverVariant.Flat,
-                                        surface = null,
+                                        shareTransition = true,
                                     ),
-                                )
-                            }
-                            ?.toImmutableList()
-                            ?: SEARCH_RESULT_STAND_IN_CARDS,
+                                ) to book
+                            }.toBookCardSet()
+                        },
                     )
                 }
             }
     }
 }
 
-private inline fun List<Book>.toCards(
+private inline fun List<Book>.toCardSet(
     loading: Boolean,
     coverVariant: CoverVariant,
     coverSurface: String,
     overlays: Map<Int, CoverOverlayUiModel>,
     standIns: ImmutableList<BookCardUiModel>,
     map: (Book, CoverUiModel?, CoverOverlayUiModel?) -> BookCardUiModel,
-): ImmutableList<BookCardUiModel> = if (loading && isEmpty()) {
-    standIns
+): BookCardSet<Book> = if (loading && isEmpty()) {
+    BookCardSet.standIns(standIns)
 } else {
     map { book ->
         map(
             book,
-            book.toCoverModel(
+            book.toCoverUiModel(
                 variant = coverVariant,
-                surface = coverSurface,
+                shareTransition = true,
+                transitionSurface = coverSurface,
             ),
             overlays[book.id],
-        )
-    }.toImmutableList()
+        ) to book
+    }.toBookCardSet()
 }

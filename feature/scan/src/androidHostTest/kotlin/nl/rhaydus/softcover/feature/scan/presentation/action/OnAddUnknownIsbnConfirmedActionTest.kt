@@ -159,7 +159,8 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 Result.success(IsbnLookupResult.Found(
                     book = PreviewData.baseBook,
                     editionId = null,
-                ),)
+                ),
+                )
             }
 
             val action = OnAddUnknownIsbnConfirmedAction()
@@ -187,7 +188,8 @@ class OnAddUnknownIsbnConfirmedActionTest {
             } returns Result.success(IsbnLookupResult.Found(
                 book = book,
                 editionId = editionId,
-            ),)
+            ),
+            )
 
             val action = OnAddUnknownIsbnConfirmedAction()
 
@@ -219,7 +221,8 @@ class OnAddUnknownIsbnConfirmedActionTest {
             } returns Result.success(IsbnLookupResult.Found(
                 book = PreviewData.baseBook,
                 editionId = null,
-            ),)
+            ),
+            )
 
             val action = OnAddUnknownIsbnConfirmedAction()
 

@@ -9,6 +9,7 @@ import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.feature.book_detail.presentation.buildEdition
@@ -287,44 +288,66 @@ class BookDetailSheetScaffoldBuilderTest {
     }
 
     @Nested
-    inner class ShareSheetBodyFor {
-        @Test
-        fun `passes the display name through`() {
-            // ----- Arrange -----
-            val variant = ShareCardVariant.MY_UPDATE
+    inner class ShareSheetFor {
+        private val card = BookShareCardUiModel(
+            coverUrl = null,
+            title = "Dune",
+            author = "Frank Herbert",
+            statsLine = null,
+            description = null,
+        )
 
+        @Test
+        fun `carries the card and uses the book title as the display name`() {
             // ----- Act -----
-            val result = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = variant,
-                hasUpdateCard = true,
-                isSharing = false,
-                isSavingToGallery = false,
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = false,
             )
 
             // ----- Assert -----
+            result.card shouldBe card
             result.displayName shouldBe "Dune"
         }
 
         @Test
-        fun `exposes the variant toggle only when an update card exists`() {
-            // ----- Arrange -----
-            val variant = ShareCardVariant.BOOK
-
+        fun `names the book in the scaffold description for each variant`() {
             // ----- Act -----
-            val withUpdateCard = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = variant,
+            val book = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
                 hasUpdateCard = true,
-                isSharing = false,
-                isSavingToGallery = false,
             )
-            val withoutUpdateCard = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = variant,
+            val update = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.MY_UPDATE,
+                hasUpdateCard = true,
+            )
+
+            // ----- Assert -----
+            book.scaffold.header.section.descriptionText().shouldNotBeNull() shouldContain "Dune"
+            update.scaffold.header.section.descriptionText().shouldNotBeNull() shouldContain "Dune"
+            book.scaffold.header.section.descriptionText() shouldNotBe update.scaffold.header.section.descriptionText()
+        }
+
+        @Test
+        fun `exposes the variant toggle only when an update card exists`() {
+            // ----- Act -----
+            val withUpdateCard = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = true,
+            )
+            val withoutUpdateCard = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
+                variant = ShareCardVariant.BOOK,
                 hasUpdateCard = false,
-                isSharing = false,
-                isSavingToGallery = false,
             )
 
             // ----- Assert -----
@@ -333,151 +356,34 @@ class BookDetailSheetScaffoldBuilderTest {
         }
 
         @Test
-        fun `is idle when neither operation is running`() {
-            // ----- Arrange -----
-            val variant = ShareCardVariant.BOOK
-
-            // ----- Act -----
-            val result = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = variant,
-                hasUpdateCard = false,
-                isSharing = false,
-                isSavingToGallery = false,
-            )
-
-            // ----- Assert -----
-            result.isBusy shouldBe false
-        }
-
-        @Test
-        fun `is busy and relabels only the share button while sharing`() {
-            // ----- Arrange -----
-            val variant = ShareCardVariant.BOOK
-            val idle = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = variant,
-                hasUpdateCard = false,
-                isSharing = false,
-                isSavingToGallery = false,
-            )
-
-            // ----- Act -----
-            val result = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = variant,
-                hasUpdateCard = false,
-                isSharing = true,
-                isSavingToGallery = false,
-            )
-
-            // ----- Assert -----
-            result.isBusy shouldBe true
-            result.shareLabel shouldNotBe idle.shareLabel
-            result.saveToGalleryLabel shouldBe idle.saveToGalleryLabel
-        }
-
-        @Test
-        fun `is busy and relabels only the save button while saving to gallery`() {
-            // ----- Arrange -----
-            val variant = ShareCardVariant.BOOK
-            val idle = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = variant,
-                hasUpdateCard = false,
-                isSharing = false,
-                isSavingToGallery = false,
-            )
-
-            // ----- Act -----
-            val result = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = variant,
-                hasUpdateCard = false,
-                isSharing = false,
-                isSavingToGallery = true,
-            )
-
-            // ----- Assert -----
-            result.isBusy shouldBe true
-            result.saveToGalleryLabel shouldNotBe idle.saveToGalleryLabel
-            result.shareLabel shouldBe idle.shareLabel
-        }
-
-        @Test
         fun `variant toggle offers every variant and selects the current one`() {
-            // ----- Arrange & Act -----
-            val result = shareSheetBodyFor(
-                displayName = "Dune",
+            // ----- Act -----
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
                 variant = ShareCardVariant.MY_UPDATE,
                 hasUpdateCard = true,
-                isSharing = false,
-                isSavingToGallery = false,
             )
 
             // ----- Assert -----
-            result.variantToggle.shouldNotBeNull().options.map { it.key } shouldBe ShareCardVariant.entries.toList()
-            result.variantToggle.shouldNotBeNull().selected shouldBe ShareCardVariant.MY_UPDATE
+            val toggle = result.variantToggle.shouldNotBeNull()
+            toggle.options.map { it.key } shouldBe ShareCardVariant.entries.toList()
+            toggle.selected shouldBe ShareCardVariant.MY_UPDATE
         }
 
         @Test
         fun `variant toggle labels each option with its variant label`() {
-            // ----- Arrange & Act -----
-            val result = shareSheetBodyFor(
-                displayName = "Dune",
+            // ----- Act -----
+            val result = shareSheetFor(
+                card = card,
+                bookTitle = "Dune",
                 variant = ShareCardVariant.BOOK,
                 hasUpdateCard = true,
-                isSharing = false,
-                isSavingToGallery = false,
             )
 
             // ----- Assert -----
-            result.variantToggle.shouldNotBeNull().options.map { it.label } shouldBe ShareCardVariant.entries.map { it.label }
-        }
-
-        @Test
-        fun `variant toggle is enabled when idle`() {
-            // ----- Arrange & Act -----
-            val result = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = ShareCardVariant.BOOK,
-                hasUpdateCard = true,
-                isSharing = false,
-                isSavingToGallery = false,
-            )
-
-            // ----- Assert -----
-            result.variantToggle.shouldNotBeNull().options.all { it.enabled } shouldBe true
-        }
-
-        @Test
-        fun `variant toggle is disabled while sharing`() {
-            // ----- Arrange & Act -----
-            val result = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = ShareCardVariant.BOOK,
-                hasUpdateCard = true,
-                isSharing = true,
-                isSavingToGallery = false,
-            )
-
-            // ----- Assert -----
-            result.variantToggle.shouldNotBeNull().options.none { it.enabled } shouldBe true
-        }
-
-        @Test
-        fun `variant toggle is disabled while saving to gallery`() {
-            // ----- Arrange & Act -----
-            val result = shareSheetBodyFor(
-                displayName = "Dune",
-                variant = ShareCardVariant.BOOK,
-                hasUpdateCard = true,
-                isSharing = false,
-                isSavingToGallery = true,
-            )
-
-            // ----- Assert -----
-            result.variantToggle.shouldNotBeNull().options.none { it.enabled } shouldBe true
+            val toggle = result.variantToggle.shouldNotBeNull()
+            toggle.options.map { it.label } shouldBe ShareCardVariant.entries.map { it.label }
         }
     }
 }

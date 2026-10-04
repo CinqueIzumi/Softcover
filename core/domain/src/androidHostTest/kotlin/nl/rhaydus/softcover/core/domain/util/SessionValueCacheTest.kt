@@ -49,10 +49,12 @@ class SessionValueCacheTest {
             val failingLoad: suspend () -> String = { throw error }
 
             // ----- Act -----
-            val thrown = runCatching { cache.getOrPut(
-                key = "key",
-                load = failingLoad,
-            ) }.exceptionOrNull()
+            val thrown = runCatching {
+                cache.getOrPut(
+                    key = "key",
+                    load = failingLoad,
+                )
+            }.exceptionOrNull()
 
             // ----- Assert -----
             thrown shouldBe error
@@ -68,10 +70,12 @@ class SessionValueCacheTest {
                 if (attempt == 1) throw RuntimeException("load failed")
                 "recovered"
             }
-            runCatching { cache.getOrPut(
-                key = "key",
-                load = load,
-            ) }
+            runCatching {
+                cache.getOrPut(
+                    key = "key",
+                    load = load,
+                )
+            }
 
             // ----- Act -----
             val result = cache.getOrPut(
@@ -165,14 +169,18 @@ class SessionValueCacheTest {
             }
 
             // ----- Act -----
-            val first = launch { cache.getOrPut(
-                key = "key",
-                load = load,
-            ) }
-            val second = launch { cache.getOrPut(
-                key = "key",
-                load = load,
-            ) }
+            val first = launch {
+                cache.getOrPut(
+                    key = "key",
+                    load = load,
+                )
+            }
+            val second = launch {
+                cache.getOrPut(
+                    key = "key",
+                    load = load,
+                )
+            }
             readyToProceed.complete(Unit)
             first.join()
             second.join()

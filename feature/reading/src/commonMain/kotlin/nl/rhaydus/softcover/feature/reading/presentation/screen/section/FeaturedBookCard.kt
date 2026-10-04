@@ -22,7 +22,6 @@ import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
@@ -45,7 +44,7 @@ internal fun FeaturedBookCard(
     deadlineCoverOverlay: CoverOverlayUiModel?,
     deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
-    paceForecast: ReadingPaceForecast?,
+    paceForecast: String?,
     paceNudge: BannerUiModel?,
     onDismissPlanToday: () -> Unit,
     runAction: (ReadingAction) -> Unit,

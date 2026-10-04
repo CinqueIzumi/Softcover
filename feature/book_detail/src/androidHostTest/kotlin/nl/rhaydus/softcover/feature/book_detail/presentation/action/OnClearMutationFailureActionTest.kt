@@ -1,8 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,30 +15,44 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class OnSaveToGalleryStartedActionTest {
+class OnClearMutationFailureActionTest {
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
-    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         dependencies = mockk(relaxed = true)
-        stateFlow = MutableStateFlow(BookDetailUiState())
-        eventChannel = Channel(Channel.BUFFERED)
+        stateFlow = MutableStateFlow(
+            BookDetailUiState(
+                failedMutationBookIds = setOf(1, 2),
+                failedMutationEditionIds = setOf(10, 20),
+            ),
+        )
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
-            eventChannel = eventChannel,
+            eventChannel = Channel(Channel.BUFFERED),
         )
+    }
+
+    @Nested
+    inner class Init {
+        @Test
+        fun `rejects an action with neither a book id nor an edition id`() {
+            // ----- Act & Assert -----
+            shouldThrow<IllegalArgumentException> {
+                OnClearMutationFailureAction()
+            }
+        }
     }
 
     @Nested
     inner class Execute {
         @Test
-        fun `marks saving to gallery as in progress`() = runTest {
+        fun `clears only the given book id`() = runTest {
             // ----- Arrange -----
-            val action = OnSaveToGalleryStartedAction()
+            val action = OnClearMutationFailureAction(bookId = 1)
 
             // ----- Act -----
             action.execute(
@@ -48,13 +61,14 @@ class OnSaveToGalleryStartedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.isSavingToGallery shouldBe true
+            stateFlow.value.failedMutationBookIds shouldBe setOf(2)
+            stateFlow.value.failedMutationEditionIds shouldBe setOf(10, 20)
         }
 
         @Test
-        fun `requests the capture when idle`() = runTest {
+        fun `clears only the given edition id`() = runTest {
             // ----- Arrange -----
-            val action = OnSaveToGalleryStartedAction()
+            val action = OnClearMutationFailureAction(editionId = 10)
 
             // ----- Act -----
             action.execute(
@@ -63,18 +77,17 @@ class OnSaveToGalleryStartedActionTest {
             )
 
             // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<BookDetailEvent.SaveToGalleryCaptureRequestedEvent>()
+            stateFlow.value.failedMutationBookIds shouldBe setOf(1, 2)
+            stateFlow.value.failedMutationEditionIds shouldBe setOf(20)
         }
 
         @Test
-        fun `leaves state unchanged and sends no event when already in progress`() = runTest {
+        fun `clears both ids when both are given`() = runTest {
             // ----- Arrange -----
-            val busyState = BookDetailUiState(
-                isSavingToGallery = true,
+            val action = OnClearMutationFailureAction(
+                bookId = 2,
+                editionId = 20,
             )
-            stateFlow.value = busyState
-            val action = OnSaveToGalleryStartedAction()
 
             // ----- Act -----
             action.execute(
@@ -83,18 +96,14 @@ class OnSaveToGalleryStartedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value shouldBe busyState
-            eventChannel.tryReceive().getOrNull().shouldBeNull()
+            stateFlow.value.failedMutationBookIds shouldBe setOf(1)
+            stateFlow.value.failedMutationEditionIds shouldBe setOf(10)
         }
 
         @Test
-        fun `leaves state unchanged and sends no event when the other operation is in progress`() = runTest {
+        fun `leaves the failures untouched for an id that was not failing`() = runTest {
             // ----- Arrange -----
-            val busyState = BookDetailUiState(
-                isSharing = true,
-            )
-            stateFlow.value = busyState
-            val action = OnSaveToGalleryStartedAction()
+            val action = OnClearMutationFailureAction(bookId = 99)
 
             // ----- Act -----
             action.execute(
@@ -103,8 +112,7 @@ class OnSaveToGalleryStartedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value shouldBe busyState
-            eventChannel.tryReceive().getOrNull().shouldBeNull()
+            stateFlow.value.failedMutationBookIds shouldBe setOf(1, 2)
         }
     }
 }

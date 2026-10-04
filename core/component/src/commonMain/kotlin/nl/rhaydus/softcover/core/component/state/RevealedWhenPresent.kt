@@ -1,0 +1,50 @@
+package nl.rhaydus.softcover.core.component.state
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
+
+/**
+ * Reveals [content] vertically while [value] is non-null, for rows that arrive on their own timer
+ * and may never arrive at all, so they take no height until they do.
+ *
+ * [content] renders the last non-null value, so an exit animation keeps drawing the row it shrinks
+ * instead of collapsing the frame [value] turns null. Both transitions are no-ops when decorative
+ * motion is off.
+ */
+@Composable
+fun <T : Any> RevealedWhenPresent(
+    value: T?,
+    modifier: Modifier = Modifier,
+    content: @Composable (T) -> Unit,
+) {
+    val playMotion = playDecorativeMotion()
+
+    var lastValue by remember { mutableStateOf(value) }
+
+    if (value != null) {
+        lastValue = value
+    }
+
+    AnimatedVisibility(
+        visible = value != null,
+        modifier = modifier,
+        enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
+        exit = if (playMotion) shrinkVertically() + fadeOut() else ExitTransition.None,
+    ) {
+        lastValue?.let { shown ->
+            content(shown)
+        }
+    }
+}

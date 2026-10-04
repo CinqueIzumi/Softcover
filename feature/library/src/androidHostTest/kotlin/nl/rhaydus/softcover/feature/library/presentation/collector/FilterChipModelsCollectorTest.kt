@@ -65,10 +65,12 @@ class FilterChipModelsCollectorTest {
             }
 
             // ----- Act -----
-            stateFlow.value = LibraryUiState(filterOptionsByTab = mapOf(
-                "all" to allOptions,
-                "read" to readOptions,
-            ),)
+            stateFlow.value = LibraryUiState(
+                filterOptionsByTab = mapOf(
+                    "all" to allOptions,
+                    "read" to readOptions,
+                ),
+            )
 
             // ----- Assert -----
             stateFlow.value.filterChipsFor("all").formatChips.chips.map { it.key } shouldBe

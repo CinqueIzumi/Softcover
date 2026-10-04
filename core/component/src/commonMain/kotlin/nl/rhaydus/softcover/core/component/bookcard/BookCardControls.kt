@@ -37,7 +37,7 @@ internal fun BookCardTrailingControl(
         when (trailing) {
             is BookCardTrailing.Badge -> Badge(model = trailing.model)
 
-            is BookCardTrailing.Restore -> RestoreLabel(label = trailing.label)
+            is BookCardTrailing.Restore -> RestoreLabel(label = "Restore")
 
             is BookCardTrailing.Bookmark -> Toggle(
                 model = trailing.toggle,

@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -28,7 +27,6 @@ internal class UserInformationCollector : ProfileCollector {
                         userProfileData = profileData,
                         isLoading = false,
                         readingAtlas = readingAtlasUiModel(profileData),
-                        readingLifeShareCard = it.readingLife?.toReadingLifeShareCardUiModel(profileData),
                     )
                 }
             }

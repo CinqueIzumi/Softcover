@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen.section
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
-import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.dialog.DatePickerEvent
 import nl.rhaydus.softcover.core.component.dialog.SoftcoverDatePickerDialog
@@ -34,11 +33,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressMi
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTimeChangedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveToGalleryFinishedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveToGalleryStartedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareFinishedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareStartedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareVariantSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagDraftChangeAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnTagEditorCategoryChangeAction
@@ -52,8 +47,8 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnWhenReadSh
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.EditionBottomSheetSelector
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.ShareBookBottomSheet
 import nl.rhaydus.softcover.feature.book_detail.presentation.component.TagEditorBottomSheet
-import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetEvent
 
 /**
  * Every modal surface the Book Detail screen can raise — share, tag editor, choose-lists, review
@@ -67,23 +62,20 @@ internal fun BookDetailOverlays(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
     onCreateNewListClick: () -> Unit,
-    shareCaptureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
 ) {
-    val shareCard = state.shareCard
     val shareSheet = state.shareSheet
-    val shareSheetBody = state.shareSheetBody
-    if (state.isShareSheetVisible && shareCard != null && shareSheet != null && shareSheetBody != null) {
+    if (state.isShareSheetVisible && shareSheet != null) {
         ShareBookBottomSheet(
             model = shareSheet,
-            shareCard = shareCard,
-            body = shareSheetBody,
-            onVariantSelected = { runAction(OnShareVariantSelectedAction(variant = it)) },
-            captureEvents = shareCaptureEvents,
-            onShareClick = { runAction(OnShareStartedAction()) },
-            onShareFinished = { runAction(OnShareFinishedAction()) },
-            onSaveToGalleryClick = { runAction(OnSaveToGalleryStartedAction()) },
-            onSaveToGalleryFinished = { runAction(OnSaveToGalleryFinishedAction()) },
-            onDismissRequest = { runAction(OnDismissShareSheetAction()) },
+            onEvent = { event ->
+                when (event) {
+                    is ShareSheetEvent.VariantSelected -> runAction(
+                        OnShareVariantSelectedAction(variant = event.variant),
+                    )
+
+                    ShareSheetEvent.Dismissed -> runAction(OnDismissShareSheetAction())
+                }
+            },
         )
     }
 
@@ -189,7 +181,6 @@ internal fun BookDetailOverlays(
             model = editionSheet,
             editionCards = state.editionCards,
             editionCountHeader = state.editionCountHeader,
-            isLoading = state.loadingEditions,
             searchQuery = state.editionSearchQuery,
             onSearchQueryChange = {
                 runAction(OnEditionSearchQueryChangeAction(query = it))

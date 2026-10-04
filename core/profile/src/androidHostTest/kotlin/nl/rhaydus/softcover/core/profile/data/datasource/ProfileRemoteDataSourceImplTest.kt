@@ -322,7 +322,8 @@ class ProfileRemoteDataSourceImplTest {
                 bio = null,
                 name = null,
                 username = null,
-            ),)
+            ),
+            )
             mockEmptyStatsQuery()
 
             // ----- Act -----
@@ -354,7 +355,8 @@ class ProfileRemoteDataSourceImplTest {
                 me(image = GetUserProfileDataQuery.Data.Me.Image(
                     __typename = "images",
                     url = null,
-                ),),
+                ),
+                ),
             )
             mockEmptyStatsQuery()
 
@@ -633,7 +635,8 @@ class ProfileRemoteDataSourceImplTest {
                     lastReadDate = null,
                     finishedJournalUpdatedAt = null,
                     bookPages = 150,
-                ),)
+                ),
+                )
 
                 // ----- Act -----
                 val result = dataSource.getUserProfileSnapshot()
@@ -665,7 +668,8 @@ class ProfileRemoteDataSourceImplTest {
                 } returns statsPage(statsUserBook(
                     lastReadDate = "2010-01-01",
                     bookPages = 150,
-                ),)
+                ),
+                )
 
                 // ----- Act -----
                 val result = dataSource.getUserProfileSnapshot()
@@ -696,7 +700,8 @@ class ProfileRemoteDataSourceImplTest {
                 lastReadDate = "2026-01-01",
                 editionPages = 300,
                 bookPages = 999,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = dataSource.getUserProfileSnapshot()
@@ -715,7 +720,8 @@ class ProfileRemoteDataSourceImplTest {
                 lastReadDate = "2026-01-01",
                 editionPages = null,
                 bookPages = 280,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = dataSource.getUserProfileSnapshot()
@@ -734,7 +740,8 @@ class ProfileRemoteDataSourceImplTest {
                 lastReadDate = "2026-01-01",
                 editionPages = null,
                 bookPages = null,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = dataSource.getUserProfileSnapshot()
@@ -1147,13 +1154,15 @@ class ProfileRemoteDataSourceImplTest {
                 2026,
                 5,
                 3,
-            ),)
+            ),
+            )
             coVerify {
                 apolloClient.safeQuery(query = GetReadingActivityDaysQuery(
                     userId = 42,
                     limit = 100,
                     offset = 3,
-                ),)
+                ),
+                )
             }
         }
 
@@ -1194,7 +1203,8 @@ class ProfileRemoteDataSourceImplTest {
                 2026,
                 5,
                 2,
-            ),)
+            ),
+            )
         }
 
         @Test

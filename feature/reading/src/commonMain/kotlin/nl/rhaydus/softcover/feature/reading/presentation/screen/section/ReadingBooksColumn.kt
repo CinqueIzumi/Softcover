@@ -61,13 +61,10 @@ internal fun ReadingBooksColumn(
 ) {
     val featured = state.featuredBook
     val isLoading = state.isLoadingFeatured
-    val rest = state.books.drop(1)
-
-    val alsoReadingCards = state.alsoReadingCards
 
     val animator = rememberLazyItemMutationAnimator(
-        keys = remember(alsoReadingCards) {
-            alsoReadingCards.filterNot(BookCardUiModel::isLoading).map { it.key.lazyKey }
+        keys = remember(state.alsoReading) {
+            state.alsoReading.cards.filterNot(BookCardUiModel::isLoading).map { it.key.lazyKey }
         },
     )
 
@@ -77,10 +74,8 @@ internal fun ReadingBooksColumn(
     val prefetcher = if (isInspection) null else rememberBookDetailPrefetcher()
 
     CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
-        val booksByKey = remember(rest) { rest.associateBy { BookCardKey.Book(it.id) } }
-
         val onCardEvent = rememberPrefetchingBookCardEventHandler(
-            resolve = booksByKey::get,
+            set = state.alsoReading,
         ) { event, book ->
             when (event) {
                 is BookCardEvent.Clicked -> onBookClick(book)
@@ -126,7 +121,7 @@ internal fun ReadingBooksColumn(
                 )
             }
 
-            if (isLoading || rest.isNotEmpty()) {
+            if (state.alsoReading.isEmpty.not()) {
                 item(key = "also-reading-label") {
                     Spacer(modifier = Modifier.height(32.dp))
 
@@ -138,7 +133,7 @@ internal fun ReadingBooksColumn(
                 }
 
                 itemsIndexed(
-                    alsoReadingCards,
+                    state.alsoReading.cards,
                     key = { _, card -> card.key.lazyKey },
                 ) { index, card ->
                     val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@itemsIndexed

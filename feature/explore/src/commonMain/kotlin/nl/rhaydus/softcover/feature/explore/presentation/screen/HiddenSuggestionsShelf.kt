@@ -8,14 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -23,8 +20,6 @@ import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockBookAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockSeriesAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.HiddenGroupHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
 
@@ -43,38 +38,6 @@ internal fun HiddenSuggestionsContent(
     runAction: (HiddenSuggestionsAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val unblockActions = remember(state.hiddenBooks, state.hiddenSeries) {
-        buildMap<BookCardKey, HiddenSuggestionsAction> {
-            state.hiddenBooks.forEach { book ->
-                put(
-                    BookCardKey.Book(book.bookId),
-                    OnUnblockBookAction(book = book),
-                )
-            }
-
-            state.hiddenSeries.forEach { series ->
-                put(
-                    BookCardKey.Series(series.seriesId),
-                    OnUnblockSeriesAction(
-                        seriesId = series.seriesId,
-                        seriesName = series.seriesName,
-                        coverUrl = series.coverUrl,
-                        authorText = series.authorText,
-                        bookCount = series.bookCount,
-                    ),
-                )
-            }
-        }
-    }
-
-    val onEvent = rememberBookCardEventHandler(
-        resolve = unblockActions::get,
-    ) { event, action ->
-        if (event is BookCardEvent.Clicked) {
-            runAction(action)
-        }
-    }
-
     Column(modifier = modifier) {
         if (state.isEmpty) {
             EmptyState(
@@ -93,23 +56,23 @@ internal fun HiddenSuggestionsContent(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (state.isLoadingBooks || state.hiddenBooks.isNotEmpty()) {
+            if (state.isLoadingBooks || state.hiddenBooks.isEmpty.not()) {
                 HiddenGroupSection(
                     header = state.hiddenBooksGroupHeader,
-                    cards = state.hiddenBookCards,
+                    set = state.hiddenBooks,
                     isLoading = state.isLoadingBooks,
-                    onEvent = onEvent,
+                    runAction = runAction,
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
             }
 
-            if (state.isLoadingSeries || state.hiddenSeries.isNotEmpty()) {
+            if (state.isLoadingSeries || state.hiddenSeries.isEmpty.not()) {
                 HiddenGroupSection(
                     header = state.hiddenSeriesGroupHeader,
-                    cards = state.hiddenSeriesCards,
+                    set = state.hiddenSeries,
                     isLoading = state.isLoadingSeries,
-                    onEvent = onEvent,
+                    runAction = runAction,
                 )
             }
         }
@@ -121,10 +84,18 @@ internal fun HiddenSuggestionsContent(
 @Composable
 private fun HiddenGroupSection(
     header: HiddenGroupHeaderUiModel,
-    cards: ImmutableList<BookCardUiModel>,
+    set: BookCardSet<HiddenSuggestionsAction>,
     isLoading: Boolean,
-    onEvent: (BookCardEvent) -> Unit,
+    runAction: (HiddenSuggestionsAction) -> Unit,
 ) {
+    val onEvent = rememberBookCardEventHandler(
+        set = set,
+    ) { event, action ->
+        if (event is BookCardEvent.Clicked) {
+            runAction(action)
+        }
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         HiddenSuggestionsGroupHeader(
             model = header,
@@ -133,7 +104,7 @@ private fun HiddenGroupSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        cards.forEach { card ->
+        set.cards.forEach { card ->
             key(card.key.lazyKey) {
                 BookCard(
                     model = card,

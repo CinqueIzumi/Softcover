@@ -28,18 +28,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
-import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.chip.Chip
-import nl.rhaydus.softcover.core.component.chip.ChipInteraction
-import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import kotlin.math.roundToInt
 
 @Composable
 internal fun BookShareCardBody(model: BookShareCardUiModel) {
@@ -54,13 +49,11 @@ internal fun BookShareCardBody(model: BookShareCardUiModel) {
             author = model.author,
         )
 
-        val statsLine = buildBookStatsLine(model = model)
-
-        if (statsLine != null) {
+        if (model.statsLine != null) {
             Spacer(modifier = Modifier.height(12.dp))
 
             SoftcoverText(
-                text = statsLine,
+                text = model.statsLine,
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -117,13 +110,7 @@ internal fun ReadingUpdateShareCardBody(model: ReadingUpdateShareCardUiModel) {
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 model.tags.forEach { tag ->
-                    Chip(
-                        model = ChipUiModel(
-                            key = tag,
-                            label = tag,
-                            interaction = ChipInteraction.Inert,
-                        ),
-                    )
+                    Chip(model = tag)
                 }
             }
         }
@@ -157,7 +144,6 @@ internal fun ReadingUpdateShareCardBody(model: ReadingUpdateShareCardUiModel) {
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 5,
-                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -241,21 +227,6 @@ private fun BookShareCardHeader(
     }
 }
 
-private fun buildBookStatsLine(model: BookShareCardUiModel): String? {
-    val parts = buildList {
-        model.communityRating?.takeIf { it > 0.0 }?.let {
-            val tenths = (it * 10).roundToInt()
-
-            add("★ ${tenths / 10}.${tenths % 10}")
-        }
-        model.userRating?.let { add("Your $it/10") }
-        model.releaseYear?.takeIf { it != -1 }?.let { add(it.toString()) }
-        model.pageCount?.takeIf { it > 0 }?.let { add("$it pages") }
-    }
-
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(separator = " · ")
-}
-
 @Composable
 private fun ReadingUpdateReaderIdentity(
     username: String,
@@ -284,37 +255,5 @@ private fun ReadingUpdateReaderIdentity(
             style = MaterialTheme.editorialTypography.eyebrowSmall,
             color = LocalContentColor.current,
         )
-    }
-}
-
-@StandardPreview
-@Composable
-private fun BookShareCardPreview() {
-    SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.getValue("Book"))
-    }
-}
-
-@StandardPreview
-@Composable
-private fun BookShareCardMinimalPreview() {
-    SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.getValue("Book (minimal)"))
-    }
-}
-
-@StandardPreview
-@Composable
-private fun ReadingUpdateFinishedShareCardPreview() {
-    SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.getValue("Reading update (finished)"))
-    }
-}
-
-@StandardPreview
-@Composable
-private fun ReadingUpdateReadingShareCardPreview() {
-    SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.getValue("Reading update (in progress)"))
     }
 }

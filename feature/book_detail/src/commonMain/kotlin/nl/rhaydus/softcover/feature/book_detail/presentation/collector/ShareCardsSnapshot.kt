@@ -12,6 +12,4 @@ internal data class ShareCardsSnapshot(
     val avatarUrl: String?,
     val userTags: List<UserTag>,
     val chosenVariant: ShareCardVariant?,
-    val isSharing: Boolean,
-    val isSavingToGallery: Boolean,
 )

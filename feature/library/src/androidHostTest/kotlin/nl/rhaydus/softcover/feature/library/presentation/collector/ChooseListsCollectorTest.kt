@@ -88,10 +88,12 @@ class ChooseListsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(
                     booksByTab = mapOf("all" to listOf(book1, book2)),
                     selectedBookIds = setOf(1, 2),
-                    customLists = listOf(customList(
-                        id = 10,
-                        name = "Winter reading",
-                    ),),
+                    customLists = listOf(
+                        customList(
+                            id = 10,
+                            name = "Winter reading",
+                        ),
+                    ),
                 )
 
                 // ----- Assert -----
@@ -116,10 +118,12 @@ class ChooseListsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(
-                    customLists = listOf(customList(
-                        id = 10,
-                        name = "Winter reading",
-                    ),),
+                    customLists = listOf(
+                        customList(
+                            id = 10,
+                            name = "Winter reading",
+                        ),
+                    ),
                     selectedBookIds = emptySet(),
                 )
 

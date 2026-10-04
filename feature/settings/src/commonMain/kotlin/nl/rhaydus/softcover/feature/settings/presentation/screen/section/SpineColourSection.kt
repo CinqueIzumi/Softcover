@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTile
-import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileEvent
+import nl.rhaydus.softcover.core.component.control.PreviewTileEvent
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.divider.Divider
@@ -60,13 +60,13 @@ internal fun SpineColourSection(
         // and end up visibly larger than the three above them.
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val tileWidth = minOf(
-                PREVIEW_TILE_MAX_WIDTH,
-                (maxWidth - PREVIEW_TILE_GAP * (PALETTE_TILES_PER_ROW - 1)) / PALETTE_TILES_PER_ROW,
+                128.dp,
+                (maxWidth - 14.dp * (PALETTE_TILES_PER_ROW - 1)) / PALETTE_TILES_PER_ROW,
             )
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(PREVIEW_TILE_GAP),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp),
                 maxItemsInEachRow = PALETTE_TILES_PER_ROW,
             ) {
@@ -75,7 +75,7 @@ internal fun SpineColourSection(
                         model = tile,
                         onEvent = { event ->
                             when (event) {
-                                is ColorPalettePreviewTileEvent.Clicked ->
+                                is PreviewTileEvent.Clicked ->
                                     runAction(OnColorPaletteSelectedAction(palette = event.key))
                             }
                         },

@@ -17,7 +17,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 sealed interface BookCardTrailing {
     data class Badge(val model: BadgeUiModel) : BookCardTrailing
 
-    data class Restore(val label: String) : BookCardTrailing
+    data object Restore : BookCardTrailing
 
     data class Bookmark(val toggle: ToggleUiModel) : BookCardTrailing {
         companion object {
@@ -27,7 +27,6 @@ sealed interface BookCardTrailing {
                 enabled: Boolean = true,
             ): Bookmark = Bookmark(
                 toggle = ToggleUiModel(
-                    key = "bookmark",
                     checked = saved,
                     description = contentDescription,
                     variant = ToggleVariant.Filled,

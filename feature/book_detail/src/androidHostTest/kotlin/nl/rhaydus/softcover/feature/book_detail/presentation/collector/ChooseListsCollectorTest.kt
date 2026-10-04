@@ -55,7 +55,8 @@ class ChooseListsCollectorTest {
             listId = id,
             bookId = bookId,
             editionId = 1,
-        ),),
+        ),
+        ),
     )
 
     @Nested

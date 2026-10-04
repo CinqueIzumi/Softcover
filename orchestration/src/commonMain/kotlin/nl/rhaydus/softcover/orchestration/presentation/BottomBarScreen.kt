@@ -57,13 +57,9 @@ import org.koin.compose.koinInject
 
 private const val TAB_ROOT_TRANSITION_DURATION_MS = 200
 
-private val TAB_ROOT_DRIFT = 12.dp
-
 // Expanded two-pane list-pane sizing: a fraction of the available body width, clamped so a desktop
 // list surface stays roomy while the detail pane never collapses on a smaller expanded window.
 private const val EXPANDED_LIST_PANE_FRACTION = 0.46f
-private val EXPANDED_LIST_PANE_MIN = 440.dp
-private val EXPANDED_LIST_PANE_MAX = 680.dp
 
 /**
  * The tabbed application shell. All width-adaptive navigation chrome — bottom bar, rail, sidebar,
@@ -157,8 +153,8 @@ internal object BottomBarScreen : Screen {
                             BoxWithConstraints {
                                 val listPaneWidth = (maxWidth * EXPANDED_LIST_PANE_FRACTION)
                                     .coerceIn(
-                                        EXPANDED_LIST_PANE_MIN,
-                                        EXPANDED_LIST_PANE_MAX,
+                                        440.dp,
+                                        680.dp,
                                     )
 
                                 TwoPaneScaffold(
@@ -301,7 +297,7 @@ private fun TabRootHost() {
     val tabNavigator = LocalTabNavigator.current
     val stateHolder = rememberSaveableStateHolder()
     val density = LocalDensity.current
-    val driftPx = remember(density) { with(density) { TAB_ROOT_DRIFT.roundToPx() } }
+    val driftPx = remember(density) { with(density) { 12.dp.roundToPx() } }
 
     if (playDecorativeMotion().not()) {
         CurrentTab()

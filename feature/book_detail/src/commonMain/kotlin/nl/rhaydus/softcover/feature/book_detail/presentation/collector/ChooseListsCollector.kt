@@ -12,12 +12,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLoc
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
 
-/**
- * Maps the reader's custom lists to the choose-lists sheet off the composition (R9).
- *
- * The "Owned" list is filtered out here rather than in the mapper: which lists to offer is this
- * screen's decision, and the mapper renders exactly what it is handed.
- */
 internal class ChooseListsCollector : BookDetailCollector {
     override suspend fun onLaunch(
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
@@ -36,14 +30,12 @@ internal class ChooseListsCollector : BookDetailCollector {
                 val book = snapshot.book
 
                 val model = if (book != null) {
-                    snapshot.userLists
-                        .filter { it.isOwned.not() }
-                        .toChooseListsUiModel(
-                            bookId = book.id,
-                            bookTitle = book.title,
-                            cover = book.toCoverUiModel(variant = CoverVariant.Jacket),
-                            listsBeingMutated = snapshot.listsBeingMutated,
-                        )
+                    snapshot.userLists.toChooseListsUiModel(
+                        bookId = book.id,
+                        bookTitle = book.title,
+                        cover = book.toCoverUiModel(variant = CoverVariant.Jacket),
+                        listsBeingMutated = snapshot.listsBeingMutated,
+                    )
                 } else {
                     null
                 }

@@ -12,15 +12,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
-import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -91,16 +87,6 @@ class UserInformationCollectorTest {
         readingStreak = 7,
     )
 
-    private fun buildReadingLife(trackedYears: Int = 3): ReadingLife = ReadingLife(
-        booksByYear = emptyList(),
-        pagesByYear = emptyList(),
-        pagesByMonth = emptyList(),
-        genres = GenreBreakdown(),
-        ratings = RatingsDistribution(),
-        recentlyLoved = emptyList(),
-        trackedYears = trackedYears,
-    )
-
     @Nested
     inner class OnLaunch {
         @Test
@@ -148,7 +134,6 @@ class UserInformationCollectorTest {
             // ----- Assert -----
             stateFlow.value.userProfileData shouldBe profileData
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.readingLifeShareCard shouldBe null
             job.cancel()
         }
 
@@ -224,61 +209,5 @@ class UserInformationCollectorTest {
             stateFlow.value.isLoading shouldBe false
             job.cancel()
         }
-
-        @Test
-        fun `computes readingLifeShareCard from the already-held readingLife when userProfileData arrives`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                coEvery {
-                    refreshUserProfileDataUseCase()
-                } returns Result.success(Unit)
-                val readingLife = buildReadingLife()
-                val profileData = buildProfileData()
-                stateFlow.value = ProfileUiState(readingLife = readingLife)
-                val dependencies = stubDependencies(this)
-                val initializer = UserInformationCollector()
-                val job = launch {
-                    initializer.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                profileDataFlow.emit(profileData)
-
-                // ----- Assert -----
-                stateFlow.value.readingLifeShareCard shouldBe readingLife.toReadingLifeShareCardUiModel(profileData)
-                job.cancel()
-            }
-
-        @Test
-        fun `recombines readingLifeShareCard using the currently held readingLife when userProfileData emits a second time`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                coEvery {
-                    refreshUserProfileDataUseCase()
-                } returns Result.success(Unit)
-                val readingLife = buildReadingLife()
-                val firstProfileData = buildProfileData()
-                val secondProfileData = buildProfileData().copy(name = "Jane Updated")
-                stateFlow.value = ProfileUiState(readingLife = readingLife)
-                val dependencies = stubDependencies(this)
-                val initializer = UserInformationCollector()
-                val job = launch {
-                    initializer.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                profileDataFlow.emit(firstProfileData)
-                profileDataFlow.emit(secondProfileData)
-
-                // ----- Assert -----
-                stateFlow.value.readingLifeShareCard shouldBe readingLife.toReadingLifeShareCardUiModel(secondProfileData)
-                job.cancel()
-            }
     }
 }

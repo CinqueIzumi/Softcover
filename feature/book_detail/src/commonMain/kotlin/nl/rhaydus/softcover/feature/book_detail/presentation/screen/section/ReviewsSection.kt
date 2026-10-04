@@ -26,11 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.common.formatDecimalNumber
-import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichText
@@ -89,39 +86,32 @@ internal fun ReviewsSection(
                 )
             }
 
-            state.book?.let { book ->
-                if (book.ratingsCount > 0) {
-                    Spacer(modifier = Modifier.height(16.dp))
+            state.reviewsSummary?.let { summary ->
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        val footerStarIcon = drawableIconResource(
-                            icon = SoftcoverIcon.StarFilled,
-                            contentDescription = "",
-                        )
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val footerStarIcon = drawableIconResource(
+                        icon = SoftcoverIcon.StarFilled,
+                        contentDescription = "",
+                    )
 
-                        Icon(
-                            painter = footerStarIcon.getIconPainter(),
-                            contentDescription = footerStarIcon.contentDescription,
-                            tint = RatingGold,
-                            modifier = Modifier.size(14.dp),
-                        )
+                    Icon(
+                        painter = footerStarIcon.getIconPainter(),
+                        contentDescription = footerStarIcon.contentDescription,
+                        tint = RatingGold,
+                        modifier = Modifier.size(14.dp),
+                    )
 
-                        Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                        SoftcoverText(
-                            text = "${
-                                formatDecimalNumber(
-                                    value = book.rating,
-                                    fractionDigits = 1,
-                                )
-                            } across ${formatGroupedNumber(book.ratingsCount)} ratings",
-                            style = MaterialTheme.editorialTypography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                    SoftcoverText(
+                        text = summary,
+                        style = MaterialTheme.editorialTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
@@ -162,7 +152,7 @@ private fun ReviewCard(
                 // Whole-review spoiler gate (HEAD behavior): a review flagged as containing
                 // spoilers withholds its body entirely behind a quiet "Show spoiler" text button —
                 // never rendered underneath, unlike an inline-span reveal.
-                if (review.hasSpoilers && review.spoilerRevealed.not()) {
+                if (review.isSpoilerGated) {
                     TextButton(onClick = onRevealSpoilerClick) {
                         SoftcoverText(text = "Show spoiler")
                     }
@@ -176,7 +166,6 @@ private fun ReviewCard(
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = if (expanded) Int.MAX_VALUE else REVIEW_COLLAPSED_LINES,
                         modifier = Modifier.skeletonMask(visible = review.isLoading),
-                        overflow = TextOverflow.Ellipsis,
                         onTextLayout = { layout ->
                             if (expanded.not() && layout.hasVisualOverflow) {
                                 hasOverflow = true

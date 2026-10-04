@@ -11,14 +11,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 import nl.rhaydus.softcover.core.deadlines.domain.usecase.ObserveBookDeadlineUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
+import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
-import nl.rhaydus.softcover.core.uibinding.deadline.toBadgeUiModel
+import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineRowUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -27,6 +32,7 @@ import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Clock
 
 class BookDeadlineCollectorTest {
     private lateinit var observeBookDeadlineUseCase: ObserveBookDeadlineUseCase
@@ -126,7 +132,7 @@ class BookDeadlineCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets deadlineProgress when book and deadline are present`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sets the deadline and its row when book and deadline are present`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
@@ -151,13 +157,13 @@ class BookDeadlineCollectorTest {
             deadlineFlow.emit(deadline)
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgress shouldNotBe null
+            stateFlow.value.deadlineRow shouldNotBe null
             stateFlow.value.deadline shouldBe deadline
             job.cancel()
         }
 
         @Test
-        fun `deadlineBadge matches deadlineProgress toBadgeUiModel when a deadline computes`() = runTest(UnconfinedTestDispatcher()) {
+        fun `deadlineRow is the computed progress mapped with the date style`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
@@ -182,14 +188,17 @@ class BookDeadlineCollectorTest {
             deadlineFlow.emit(deadline)
 
             // ----- Assert -----
-            val progress = stateFlow.value.deadlineProgress
-            progress shouldNotBe null
-            stateFlow.value.deadlineBadge shouldBe progress.shouldNotBeNull().toBadgeUiModel()
+            val expected = DeadlineProgress.compute(
+                deadline = deadline,
+                current = 0,
+                total = 300,
+            ).toDeadlineRowUiModel(dateStyle = stateFlow.value.dateStyle)
+            stateFlow.value.deadlineRow shouldBe expected
             job.cancel()
         }
 
         @Test
-        fun `deadlineBadge is null when deadlineProgress is null`() = runTest(UnconfinedTestDispatcher()) {
+        fun `deadlineRow is null when the deadline emits null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
@@ -210,13 +219,12 @@ class BookDeadlineCollectorTest {
             deadlineFlow.emit(null)
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgress shouldBe null
-            stateFlow.value.deadlineBadge shouldBe null
+            stateFlow.value.deadlineRow shouldBe null
             job.cancel()
         }
 
         @Test
-        fun `deadlineBadge is null when deadlineProgress is null because the book has no pages`() =
+        fun `deadlineRow is null while the deadline is kept when the book has no pages`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val book = stubBook(
@@ -239,13 +247,13 @@ class BookDeadlineCollectorTest {
                 deadlineFlow.emit(deadline)
 
                 // ----- Assert -----
-                stateFlow.value.deadlineProgress shouldBe null
-                stateFlow.value.deadlineBadge shouldBe null
+                stateFlow.value.deadlineRow shouldBe null
+                stateFlow.value.deadline shouldBe deadline
                 job.cancel()
             }
 
         @Test
-        fun `deadlineProgress is null when deadline emits null`() = runTest(UnconfinedTestDispatcher()) {
+        fun `deadlineRow is null when deadline emits null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
@@ -266,13 +274,13 @@ class BookDeadlineCollectorTest {
             deadlineFlow.emit(null)
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgress shouldBe null
+            stateFlow.value.deadlineRow shouldBe null
             stateFlow.value.deadline shouldBe null
             job.cancel()
         }
 
         @Test
-        fun `deadlineProgress is null when book has no pages`() = runTest(UnconfinedTestDispatcher()) {
+        fun `deadlineRow is null when book has no pages`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
@@ -294,18 +302,18 @@ class BookDeadlineCollectorTest {
             deadlineFlow.emit(deadline)
 
             // ----- Assert -----
-            stateFlow.value.deadlineProgress shouldBe null
+            stateFlow.value.deadlineRow shouldBe null
             stateFlow.value.deadline shouldBe deadline
             job.cancel()
         }
 
         @Test
-        fun `requiredPerDay recomputes when currentPage on the book changes`() = runTest(UnconfinedTestDispatcher()) {
+        fun `goal recomputes when currentPage on the book changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val bookId = 1
             val totalPages = 300
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
-            // First book: currentPage = 0 → 300 pages remaining / 30 days = 10 p/day
             val bookBefore = stubBook(
                 id = bookId,
                 pages = totalPages,
@@ -315,6 +323,7 @@ class BookDeadlineCollectorTest {
 
             val deadline = buildDeadline(
                 bookId = bookId,
+                deadlineDate = today.plus(DatePeriod(days = 30)),
                 initialPerDay = 10f,
             )
 
@@ -327,10 +336,10 @@ class BookDeadlineCollectorTest {
             }
 
             deadlineFlow.emit(deadline)
-            val progressBefore = stateFlow.value.deadlineProgress.shouldNotBeNull().requiredPerDay
+            val goalBefore = stateFlow.value.deadlineRow.shouldNotBeNull().goal
 
             // ----- Act -----
-            // Simulate reading 150 pages → 150 remaining / 30 days = 5 p/day
+            // Simulate reading 150 of 300 pages, halving the required pace
             val bookAfter = stubBook(
                 id = bookId,
                 pages = totalPages,
@@ -339,13 +348,13 @@ class BookDeadlineCollectorTest {
             stateFlow.value = stateFlow.value.copy(book = bookAfter)
 
             // ----- Assert -----
-            val progressAfter = stateFlow.value.deadlineProgress.shouldNotBeNull().requiredPerDay
-            (progressAfter < progressBefore) shouldBe true
+            val goalAfter = stateFlow.value.deadlineRow.shouldNotBeNull().goal
+            goalAfter shouldNotBe goalBefore
             job.cancel()
         }
 
         @Test
-        fun `state deadline and deadlineProgress are both null before any emission`() = runTest(UnconfinedTestDispatcher()) {
+        fun `state deadline and deadlineRow are both null before any emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
                 id = 1,
@@ -364,12 +373,12 @@ class BookDeadlineCollectorTest {
 
             // ----- Act & Assert -----
             stateFlow.value.deadline shouldBe null
-            stateFlow.value.deadlineProgress shouldBe null
+            stateFlow.value.deadlineRow shouldBe null
             job.cancel()
         }
 
         @Test
-        fun `deadlineProgress is null when book is null`() = runTest(UnconfinedTestDispatcher()) {
+        fun `deadlineRow is null when book is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(book = null)
 
@@ -382,7 +391,7 @@ class BookDeadlineCollectorTest {
             }
 
             // ----- Act & Assert -----
-            stateFlow.value.deadlineProgress shouldBe null
+            stateFlow.value.deadlineRow shouldBe null
             job.cancel()
         }
     }

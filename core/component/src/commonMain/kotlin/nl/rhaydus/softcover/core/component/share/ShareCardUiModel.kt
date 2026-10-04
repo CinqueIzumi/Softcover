@@ -18,24 +18,12 @@ import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
  */
 sealed interface ShareCardUiModel {
     companion object : UiModelPreviews<ShareCardUiModel> {
-        /**
-         * Per R5, one fixture per variant branch, plus two that change the card's anatomy rather
-         * than just its strings: a book with almost every optional field null, and the in-progress
-         * reading update, which swaps the rating + review pair for a progress label.
-         *
-         * Every `@Preview` in the family's body files renders off this list rather than
-         * re-declaring sample literals inline, so the preview set and the Component Gallery's set
-         * cannot drift apart.
-         */
         override val previews: ImmutableMap<String, ShareCardUiModel> = persistentMapOf(
             "Book" to BookShareCardUiModel(
                 coverUrl = null,
                 title = "We Have Always Lived in the Castle",
                 author = "Shirley Jackson",
-                communityRating = 4.2,
-                userRating = 9,
-                releaseYear = 1962,
-                pageCount = 214,
+                statsLine = "★ 4.2 · Your 9/10 · 1962 · 214 pages",
                 description = "Merricat Blackwood lives with her sister Constance and their uncle Julian in the family " +
                     "mansion outside the village. A quiet gothic tale of isolation, ritual, and the slow-burning " +
                     "aftermath of a single, devastating poisoning.",
@@ -44,10 +32,7 @@ sealed interface ShareCardUiModel {
                 coverUrl = null,
                 title = "Piranesi",
                 author = "Susanna Clarke",
-                communityRating = null,
-                userRating = null,
-                releaseYear = null,
-                pageCount = null,
+                statsLine = null,
                 description = null,
             ),
             "Reading update (finished)" to ReadingUpdateShareCardUiModel.Finished(
@@ -106,26 +91,28 @@ sealed interface ShareCardUiModel {
             "Reading life" to ReadingLifeShareCardUiModel(
                 readerName = "Elena Marchetti",
                 avatarUrl = null,
-                totalPagesRead = 128_406,
-                totalBooksRead = 214,
+                readerInitials = "EM",
+                totalPagesRead = "128,406",
+                totalBooksLine = "across 214 books",
                 topGenres = persistentListOf(
                     ReadingLifeGenre(
                         name = "Literary fiction",
-                        percentage = 34,
+                        percentLabel = "34%",
                     ),
                     ReadingLifeGenre(
                         name = "Mystery",
-                        percentage = 21,
+                        percentLabel = "21%",
                     ),
                     ReadingLifeGenre(
                         name = "Science fiction",
-                        percentage = 14,
+                        percentLabel = "14%",
                     ),
                 ),
                 pagesByMonth = persistentListOf(3_400, 2_100, 4_200, 3_900, 5_100, 4_800, 3_300, 2_900, 4_600, 5_300, 4_100, 3_800),
                 averageRating = 4.2,
-                dayStreak = 31,
-                trackedYears = 8,
+                averageRatingText = "4.2",
+                dayStreak = "31",
+                trackedYears = "8",
             ),
         )
     }

@@ -32,17 +32,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.common.formatDecimalNumber
-import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
-import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -70,6 +66,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         MiniScallopPortrait(
             avatarUrl = content.avatarUrl,
             readerName = content.readerName,
+            readerInitials = content.readerInitials,
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -104,7 +101,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         Spacer(modifier = Modifier.height(6.dp))
 
         SoftcoverText(
-            text = formatGroupedNumber(content.totalPagesRead),
+            text = content.totalPagesRead,
             style = MaterialTheme.editorialTypography.statHero.copy(
                 fontSize = 58.sp,
                 lineHeight = 58.sp,
@@ -116,7 +113,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         Spacer(modifier = Modifier.height(8.dp))
 
         SoftcoverText(
-            text = "across ${content.totalBooksRead} books",
+            text = content.totalBooksLine,
             style = MaterialTheme.editorialTypography.bodySmall,
             color = LocalContentColor.current.copy(alpha = 0.78f),
             textAlign = TextAlign.Center,
@@ -169,10 +166,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         ) {
             ReadingLifeFooterStat(
                 label = "Avg rating",
-                value = formatDecimalNumber(
-                    value = content.averageRating,
-                    fractionDigits = 1,
-                ),
+                value = content.averageRatingText,
                 accessory = {
                     // The share-card exception: on the primary-filled pink card, a gold star reads poorly,
                     // so this tints with the card's own content colour instead — the on-screen profile
@@ -193,12 +187,12 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
             ReadingLifeFooterStat(
                 label = "Day streak",
-                value = content.dayStreak.toString(),
+                value = content.dayStreak,
             )
 
             ReadingLifeFooterStat(
                 label = "Tracked yrs",
-                value = content.trackedYears.toString(),
+                value = content.trackedYears,
             )
         }
     }
@@ -209,6 +203,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 private fun MiniScallopPortrait(
     avatarUrl: String?,
     readerName: String,
+    readerInitials: String,
 ) {
     val shape = MaterialShapes.Cookie12Sided.toShape()
     val rimColor = LocalContentColor.current
@@ -234,7 +229,7 @@ private fun MiniScallopPortrait(
             )
         } else {
             SoftcoverText(
-                text = readingLifeInitials(readerName = readerName),
+                text = readerInitials,
                 style = MaterialTheme.editorialTypography.titleSmall,
                 color = rimColor,
             )
@@ -406,7 +401,7 @@ private fun ReadingLifeGenreRow(
         Spacer(modifier = Modifier.width(12.dp))
 
         SoftcoverText(
-            text = "${genre.percentage}%",
+            text = genre.percentLabel,
             style = nameStyle,
             color = LocalContentColor.current.copy(alpha = contentAlpha),
         )
@@ -447,36 +442,5 @@ private fun ReadingLifeFooterStat(
             style = MaterialTheme.editorialTypography.eyebrowSmall.copy(fontSize = 9.sp),
             color = LocalContentColor.current.copy(alpha = 0.75f),
         )
-    }
-}
-
-private fun readingLifeInitials(readerName: String): String {
-    val letters = readerName
-        .trim()
-        .split(" ")
-        .mapNotNull { word -> word.firstOrNull()?.uppercaseChar() }
-
-    return when {
-        letters.isEmpty() -> "?"
-        letters.size == 1 -> letters.first().toString()
-        else -> "${letters.first()}${letters.last()}"
-    }
-}
-
-private val ReadingLifePreviewContent = ShareCardUiModel.previews.getValue("Reading life")
-
-@StandardPreview
-@Composable
-private fun ReadingLifeShareCardLightPreview() {
-    SoftcoverTheme(darkTheme = false) {
-        ShareCard(model = ReadingLifePreviewContent)
-    }
-}
-
-@StandardPreview
-@Composable
-private fun ReadingLifeShareCardDarkPreview() {
-    SoftcoverTheme(darkTheme = true) {
-        ShareCard(model = ReadingLifePreviewContent)
     }
 }

@@ -184,7 +184,7 @@ class RecentlyLovedCardMapperTest {
             val result = book.toRecentlyLovedCard()
 
             // ----- Assert -----
-            result.column().menuLabel.shouldBeNull()
+            result.column().hasMenu shouldBe false
             result.decorations.progress.shouldBeNull()
             result.decorations.pressBehaviour shouldBe BookCardDecorations.Press.Tap
         }

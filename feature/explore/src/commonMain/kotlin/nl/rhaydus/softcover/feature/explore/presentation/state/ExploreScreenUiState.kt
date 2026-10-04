@@ -6,7 +6,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -21,42 +21,39 @@ import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
-import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_HEADER_STAND_IN
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.FEATURED_CARD_STAND_IN
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.FEATURED_HEADER
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.SEARCH_RESULT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.TRENDING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.UP_NEXT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSortPillButton
+import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
+import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class ExploreScreenUiState(
     val previousSearchQueries: List<String> = emptyList(),
-    // Built off `previousSearchQueries` by `RecentSearchChipsCollector` (`component-contract.md`
-    // § 7.2 R9).
     val recentSearchChips: ChipSet<String> = ChipSet(),
     val queriedBooks: List<Book> = emptyList(),
-    // The featured hero's cover, mapped off composition by CoverModelsCollector
-    // (`component-contract.md` § 7.2 R9).
     val featuredCover: CoverUiModel? = null,
-    // Unreleased-cover-overlay UI models, mapped off composition by UnreleasedCoverOverlaysCollector
-    // (`component-contract.md` § 7.2 R9). One map keyed by book id: an overlay carries no per-rail
-    // `sharedTransitionKey` surface, so the same book yields an identical overlay everywhere it
-    // appears. `featuredReleaseBadge` does not gate on `isUnreleased` - the featured hero is by
-    // construction the upcoming-release card, so it badges on `effectiveReleaseDate` alone,
-    // reproducing today's ExploreShelf.kt:202,236 behaviour.
+    // One map keyed by book id: an overlay carries no per-rail `sharedTransitionKey` surface, so the
+    // same book yields an identical overlay everywhere it appears. `featuredReleaseBadge` does not
+    // gate on `isUnreleased` - the featured hero is by construction the upcoming-release card, so it
+    // badges on `effectiveReleaseDate` alone.
     val unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
     val featuredReleaseBadge: BadgeUiModel? = null,
     // Loading stand-ins until the surface has loaded.
-    val trendingCards: ImmutableList<BookCardUiModel> = TRENDING_STAND_IN_CARDS,
-    val becauseYouReadCards: ImmutableList<BookCardUiModel> = BECAUSE_YOU_READ_STAND_IN_CARDS,
-    val upNextCards: ImmutableList<BookCardUiModel> = UP_NEXT_STAND_IN_CARDS,
+    val trending: BookCardSet<Book> = BookCardSet.standIns(TRENDING_STAND_IN_CARDS),
+    val becauseYouRead: BookCardSet<Book> = BookCardSet.standIns(BECAUSE_YOU_READ_STAND_IN_CARDS),
+    val upNext: BookCardSet<Book> = BookCardSet.standIns(UP_NEXT_STAND_IN_CARDS),
     // Loading stand-ins while a search runs or its first result's cover is pending.
-    val queriedBookCards: ImmutableList<BookCardUiModel> = SEARCH_RESULT_STAND_IN_CARDS,
-    // Search paging (explore-3a feedback item 7). The Typesense `search` endpoint returns no
-    // total hit count, so `queriedBooksHasMore` is a "maybe more" signal derived from whether the
-    // last fetched page came back full, not an authoritative total. `loadingMoreQueriedBooks` is
+    val searchResults: BookCardSet<Book> = BookCardSet.standIns(SEARCH_RESULT_STAND_IN_CARDS),
+    // The Typesense `search` endpoint returns no total hit count, so `queriedBooksHasMore` is a
+    // "maybe more" signal derived from whether the last fetched page came back full, not an
+    // authoritative total. `loadingMoreQueriedBooks` is
     // the append-spinner flag, kept separate from `isLoading` (the full-screen/replace spinner) so
     // the UI can tell an initial search from a "load more" tail fetch.
     val queriedBooksHasMore: Boolean = true,
@@ -73,10 +70,9 @@ internal data class ExploreScreenUiState(
         eyebrow = "Pick up where you left off",
         headline = "Up next in your series",
     ),
-    val continueSeriesMenuSheets: ImmutableMap<Int, SheetScaffoldUiModel> = persistentMapOf(),
+    val continueSeriesMenuSheets: ImmutableMap<Int, ContinueSeriesMenuSheetUiModel> = persistentMapOf(),
     /** `null` until the library's offline copy has resolved. */
     val offlineEmptyState: EmptyStateUiModel? = null,
-    /** The desktop masthead and its refresh action, derived off [isRefreshing] by `MastheadCollector` (R9). */
     val masthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = "Discover",
         title = "Explore",
@@ -84,7 +80,6 @@ internal data class ExploreScreenUiState(
     ),
     val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = false),
     val searchText: String = "",
-    /** The search chrome, derived off the four fields below by `SearchTopBarCollector` (R9). */
     val searchTopBar: SearchTopBarUiModel = SearchTopBarUiModel(
         query = "",
         active = false,
@@ -94,24 +89,17 @@ internal data class ExploreScreenUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val searchError: String? = null,
-    // Search chrome / focus state (explore-3a §4 "Search chrome" + "Search focus state").
     val searchFocused: Boolean = false,
     val sortMode: ExploreSortMode = ExploreSortMode.RELEVANCE,
     // The sort control, mapped by `SortPillCollector` off [sortMode]; [isSortMenuExpanded] is the menu it anchors.
     val sortPill: PillButtonUiModel = ExploreSortMode.RELEVANCE.toSortPillButton(),
     val isSortMenuExpanded: Boolean = false,
-    // Featured upcoming release card (explore-3a §4 "Featured card").
     val featuredUpcomingRelease: Book? = null,
     val loadingFeaturedUpcomingRelease: Boolean = true,
-    // The eyebrow states the whole pick rule: the window comes from the same domain constant the
-    // query is bounded by, and the "N readers waiting" line on the card below supplies the ranking
-    // basis, so the two together say "the most-shelved book out in the next 30 days" without
-    // spending a sentence on it.
-    val featuredHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(
-        eyebrow = "Most anticipated · next $FEATURED_RELEASE_WINDOW_DAYS days",
-    ),
-    // "Because you read {genre}" rail (explore-3a deviation 2, made user-selectable by feedback
-    // item 10). `becauseYouReadGenre` is the *effective* genre - the user's persisted choice when
+    val featuredHeader: SectionHeaderUiModel = FEATURED_HEADER,
+    // Built off the featured fields above by `FeaturedCardCollector`; `null` collapses the card.
+    val featuredCard: FeaturedCardUiModel? = FEATURED_CARD_STAND_IN,
+    // `becauseYouReadGenre` is the *effective* genre - the user's persisted choice when
     // one exists, otherwise the auto-derived most-read genre - and null hides the section.
     // `becauseYouReadGenreOptions` is the picker's choice list: the distinct Genre-category tags
     // across the user's own books, same derivation as Library's `LibraryFilterOptionsBuilder`.
@@ -125,13 +113,12 @@ internal data class ExploreScreenUiState(
     val becauseYouReadBooks: List<Book> = emptyList(),
     val loadingBecauseYouReadBooks: Boolean = true,
     // Browse-by-mood grid + the active mood filter, when a mood tile/chip drove the current
-    // results (see the "Modelling choice" note on [ExploreSearchPhase]).
+    // results (see [searchPhase]).
     val moodTags: List<MoodTag> = emptyList(),
     val moodGridHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Browse by mood",
         headline = "How do you want to feel?",
     ),
-    // Built off `moodTags` by `MoodChipsCollector` (`component-contract.md` § 7.2 R9).
     val moodChips: ChipSet<MoodTag> = ChipSet(),
     // Built off `moodTags` by `MoodTilesCollector`.
     val moodTiles: ImmutableList<MoodTileUiModel> = persistentListOf(),
@@ -139,12 +126,12 @@ internal data class ExploreScreenUiState(
     val activeMoodFilter: MoodTag? = null,
 ) : UiState {
     /**
-     * Modelling choice (explore-3a §4 "Mood grid" + "Search results"): a mood tap reuses the same
+     * A mood tap reuses the same
      * results surface as a text search rather than a parallel state. [activeMoodFilter] and
      * [searchText] are mutually exclusive - starting a text search or clearing it always resets
      * [activeMoodFilter] to null (see `OnQueryChangeAction`) - so [searchPhase] only ever needs to
      * check "is *a* search active", not which kind. `OnMoodChipClickAction` also writes [searchText]
-     * (the tapped mood's label, feedback item 6) but does so directly and never through
+     * (the tapped mood's label) but does so directly and never through
      * `OnQueryChangeAction`, so that seed can never trip its own mutual-exclusion clearing - see
      * `OnMoodChipClickAction`'s doc for the full mechanism.
      */

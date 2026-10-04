@@ -72,7 +72,7 @@ internal actual fun SettingsScreenLayout(
             onProfileClick = navigateToProfile,
             onHiddenSuggestionsClick = navigateToHiddenSuggestions,
             modifier = Modifier
-                .width(SETTINGS_SIDEBAR_WIDTH)
+                .width(240.dp)
                 .fillMaxHeight(),
         )
 
@@ -120,5 +120,3 @@ internal actual fun SettingsScreenLayout(
         }
     }
 }
-
-private val SETTINGS_SIDEBAR_WIDTH = 240.dp

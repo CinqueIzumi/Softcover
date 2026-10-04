@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
@@ -123,9 +125,9 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingCards.map { it.key } shouldBe
+            stateFlow.value.alsoReading.cards.map { it.key } shouldBe
                 listOf(BookCardKey.Book(bookId = 2), BookCardKey.Book(bookId = 3))
-            stateFlow.value.alsoReadingCards.card(2).key shouldBe BookCardKey.Book(bookId = 2)
+            stateFlow.value.alsoReading.cards.card(2).key shouldBe BookCardKey.Book(bookId = 2)
             job.cancel()
         }
 
@@ -143,8 +145,8 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(books = emptyList())
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingCards.shouldNotBeEmpty()
-            stateFlow.value.alsoReadingCards.forEach { it.isLoading shouldBe true }
+            stateFlow.value.alsoReading.cards.shouldNotBeEmpty()
+            stateFlow.value.alsoReading.cards.forEach { it.isLoading shouldBe true }
             job.cancel()
         }
 
@@ -162,7 +164,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(books = listOf(book(1)))
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingCards shouldBe emptyList()
+            stateFlow.value.alsoReading.cards shouldBe emptyList()
             job.cancel()
         }
 
@@ -187,7 +189,7 @@ class BookCardModelsCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingCards.map { it.key } shouldBe
+            stateFlow.value.alsoReading.cards.map { it.key } shouldBe
                 listOf(
                     BookCardKey.Book(bookId = 5),
                     BookCardKey.Book(bookId = 3),
@@ -211,8 +213,8 @@ class BookCardModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(books = listOf(book(1), book(2)))
 
                 // ----- Assert -----
-                stateFlow.value.alsoReadingCards.size shouldBe 1
-                stateFlow.value.alsoReadingCards.single().isLoading shouldBe false
+                stateFlow.value.alsoReading.cards.size shouldBe 1
+                stateFlow.value.alsoReading.cards.single().isLoading shouldBe false
                 job.cancel()
             }
 
@@ -230,7 +232,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(wantToReadBooks = (1..5).map { book(it) })
 
             // ----- Assert -----
-            stateFlow.value.pickUpNextCards.map { it.key } shouldBe listOf(
+            stateFlow.value.pickUpNext.cards.map { it.key } shouldBe listOf(
                 BookCardKey.Book(bookId = 1),
                 BookCardKey.Book(bookId = 2),
                 BookCardKey.Book(bookId = 3),
@@ -253,8 +255,8 @@ class BookCardModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(books = listOf(book(1), book(2)))
 
                 // ----- Assert -----
-                stateFlow.value.pickUpNextCards.shouldNotBeEmpty()
-                stateFlow.value.pickUpNextCards.forEach { it.isLoading shouldBe true }
+                stateFlow.value.pickUpNext.cards.shouldNotBeEmpty()
+                stateFlow.value.pickUpNext.cards.forEach { it.isLoading shouldBe true }
                 job.cancel()
             }
 
@@ -273,7 +275,7 @@ class BookCardModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(wantToReadBooks = emptyList())
 
                 // ----- Assert -----
-                stateFlow.value.pickUpNextCards shouldBe emptyList()
+                stateFlow.value.pickUpNext.cards shouldBe emptyList()
                 job.cancel()
             }
 
@@ -287,16 +289,16 @@ class BookCardModelsCollectorTest {
                         dependencies = dependencies,
                     )
                 }
-                val loading = stateFlow.value.alsoReadingCards
+                val loading = stateFlow.value.alsoReading.cards
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(books = listOf(book(1), book(2), book(3)))
 
                 // ----- Assert -----
                 loading.forEach { it.isLoading shouldBe true }
-                stateFlow.value.alsoReadingCards.map { it.key } shouldBe
+                stateFlow.value.alsoReading.cards.map { it.key } shouldBe
                     listOf(BookCardKey.Book(bookId = 2), BookCardKey.Book(bookId = 3))
-                stateFlow.value.alsoReadingCards.forEach { it.isLoading shouldBe false }
+                stateFlow.value.alsoReading.cards.forEach { it.isLoading shouldBe false }
                 job.cancel()
             }
 
@@ -314,7 +316,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(wantToReadBooks = listOf(book(1), book(2)))
 
             // ----- Assert -----
-            stateFlow.value.pickUpNextCards.forEach { it.isLoading shouldBe false }
+            stateFlow.value.pickUpNext.cards.forEach { it.isLoading shouldBe false }
             job.cancel()
         }
 
@@ -334,7 +336,7 @@ class BookCardModelsCollectorTest {
                 stateFlow.value = stateFlow.value.copy(wantToReadBooks = emptyList())
 
                 // ----- Assert -----
-                stateFlow.value.pickUpNextCards shouldBe emptyList()
+                stateFlow.value.pickUpNext.cards shouldBe emptyList()
                 job.cancel()
             }
 
@@ -348,14 +350,14 @@ class BookCardModelsCollectorTest {
                         dependencies = dependencies,
                     )
                 }
-                val loading = stateFlow.value.pickUpNextCards
+                val loading = stateFlow.value.pickUpNext.cards
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(wantToReadBooks = listOf(book(7)))
 
                 // ----- Assert -----
                 loading.forEach { it.isLoading shouldBe true }
-                stateFlow.value.pickUpNextCards.map { it.key } shouldBe
+                stateFlow.value.pickUpNext.cards.map { it.key } shouldBe
                     listOf(BookCardKey.Book(bookId = 7))
                 job.cancel()
             }
@@ -374,7 +376,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(wantToReadBooks = listOf(book(1)))
 
             // ----- Assert -----
-            stateFlow.value.pickUpNextCards.size shouldBe 1
+            stateFlow.value.pickUpNext.cards.size shouldBe 1
             job.cancel()
         }
 
@@ -398,16 +400,79 @@ class BookCardModelsCollectorTest {
 
                 // ----- Act -----
                 stateFlow.value = stateFlow.value.copy(failedMutationBookIds = setOf(2))
-                val failed = stateFlow.value.alsoReadingCards
+                val failed = stateFlow.value.alsoReading.cards
                 stateFlow.value = stateFlow.value.copy(failedMutationBookIds = emptySet())
 
                 // ----- Assert -----
                 failed.card(2).decorations.shakeOnError shouldBe true
                 failed.card(2).row().text.eyebrow?.tone shouldBe BookCardEyebrow.Tone.Error
                 failed.card(3).decorations.shakeOnError shouldBe false
-                stateFlow.value.alsoReadingCards.card(2).decorations.shakeOnError shouldBe false
+                stateFlow.value.alsoReading.cards.card(2).decorations.shakeOnError shouldBe false
                 job.cancel()
             }
+
+        @Test
+        fun `resolves each also reading key back to its book and leaves the featured book out`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launch {
+                    BookCardModelsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+                val books = listOf(book(1), book(2), book(3))
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(books = books)
+
+                // ----- Assert -----
+                val alsoReading = stateFlow.value.alsoReading
+                alsoReading[BookCardKey.Book(bookId = 2)] shouldBe books[1]
+                alsoReading[BookCardKey.Book(bookId = 3)] shouldBe books[2]
+                alsoReading[BookCardKey.Book(bookId = 1)].shouldBeNull()
+                job.cancel()
+            }
+
+        @Test
+        fun `resolves each pick up next key back to its book`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            val shelf = listOf(book(7), book(8))
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(wantToReadBooks = shelf)
+
+            // ----- Assert -----
+            val pickUpNext = stateFlow.value.pickUpNext
+            pickUpNext[BookCardKey.Book(bookId = 7)] shouldBe shelf[0]
+            pickUpNext[BookCardKey.Book(bookId = 8)] shouldBe shelf[1]
+            job.cancel()
+        }
+
+        @Test
+        fun `carries no payload for the stand-ins while loading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launch {
+                BookCardModelsCollector().onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            val state = stateFlow.value
+
+            // ----- Assert -----
+            state.alsoReading.payloadByKey.shouldBeEmpty()
+            state.pickUpNext.payloadByKey.shouldBeEmpty()
+            job.cancel()
+        }
 
         @Test
         fun `a deadline change adds the summary to the row`() = runTest(UnconfinedTestDispatcher()) {
@@ -425,7 +490,7 @@ class BookCardModelsCollectorTest {
                     book(2),
                 ),
             )
-            val before = stateFlow.value.alsoReadingCards.card(2).row().deadline
+            val before = stateFlow.value.alsoReading.cards.card(2).row().deadline
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(
@@ -442,7 +507,7 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             before shouldBe null
-            stateFlow.value.alsoReadingCards.card(2).row().deadline?.text?.substringAfter(" • ") shouldBe "10 pages/day"
+            stateFlow.value.alsoReading.cards.card(2).row().deadline?.text?.substringAfter(" • ") shouldBe "10 pages/day"
             job.cancel()
         }
 
@@ -466,7 +531,7 @@ class BookCardModelsCollectorTest {
             stateFlow.value = stateFlow.value.copy(deadlineCoverOverlays = mapOf(2 to overlay))
 
             // ----- Assert -----
-            val lead = stateFlow.value.alsoReadingCards.card(2)
+            val lead = stateFlow.value.alsoReading.cards.card(2)
                 .variant.shouldBeInstanceOf<BookCardVariant.Row>()
                 .lead.shouldBeInstanceOf<BookCardLead.Cover>()
             lead.cover.badge shouldBe overlay

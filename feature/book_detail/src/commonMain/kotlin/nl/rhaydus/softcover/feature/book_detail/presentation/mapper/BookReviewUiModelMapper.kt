@@ -8,8 +8,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.model.BookReviewUiM
 internal fun BookReview.toBookReviewUiModel(): BookReviewUiModel = BookReviewUiModel(
     id = id,
     body = reviewDocument.toRichTextUiModel(),
-    hasSpoilers = hasSpoilers,
-    spoilerRevealed = false,
+    isSpoilerGated = hasSpoilers,
     rating = rating?.let {
         formatDecimalNumber(
             value = it,

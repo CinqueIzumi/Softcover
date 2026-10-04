@@ -46,6 +46,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.DismissedSeri
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichDismissedMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.EnrichMetadataCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.ExploreCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.FeaturedCardCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.FeaturedUpcomingReleaseCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.HiddenSuggestionsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.MastheadCollector
@@ -147,6 +148,8 @@ val exploreModule = module {
     factory { BookCardModelsCollector() } bind ExploreCollector::class
 
     factory { MoodTilesCollector() } bind ExploreCollector::class
+
+    factory { FeaturedCardCollector() } bind ExploreCollector::class
 
     factory {
         HiddenSuggestionsScreenModel(

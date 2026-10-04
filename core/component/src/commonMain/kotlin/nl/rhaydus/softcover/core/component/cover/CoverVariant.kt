@@ -13,9 +13,6 @@ sealed interface CoverVariant {
     /** 6 dp shadow, 4 dp corner. */
     data object Raised : CoverVariant
 
-    /** 4 dp shadow, 4 dp corner. */
-    data object Lifted : CoverVariant
-
     /** 12 dp shadow in a dark tint, 4 dp corner. */
     data object Floating : CoverVariant
 

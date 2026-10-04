@@ -56,10 +56,12 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab when flow emits ProgressUnit TIME`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             progressUnitFlow.emit(ProgressUnit.TIME)
@@ -73,10 +75,12 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab when flow emits ProgressUnit PAGE`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             progressUnitFlow.emit(ProgressUnit.PAGE)
@@ -90,10 +94,12 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab when flow emits ProgressUnit PERCENTAGE`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             progressUnitFlow.emit(ProgressUnit.PERCENTAGE)
@@ -107,10 +113,12 @@ class LastUsedProgressUnitCollectorTest {
         fun `updates selectedProgressSheetTab to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             progressUnitFlow.emit(ProgressUnit.TIME)
@@ -125,10 +133,12 @@ class LastUsedProgressUnitCollectorTest {
         fun `does not change selectedProgressSheetTab before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.selectedProgressSheetTab shouldBe BookDetailUiState().selectedProgressSheetTab
@@ -140,10 +150,12 @@ class LastUsedProgressUnitCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             progressUnitFlow.emit(ProgressUnit.TIME)
             job.cancel()
 
@@ -159,10 +171,12 @@ class LastUsedProgressUnitCollectorTest {
                 fabMenuExpanded = true,
             )
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             progressUnitFlow.emit(ProgressUnit.TIME)

@@ -147,10 +147,12 @@ class SaveUserTagsUseCaseTest {
             } throws IllegalStateException("server error")
 
             // ----- Act -----
-            val result = runCatching { useCase(
-                bookId = bookId,
-                tags = tags,
-            ) }
+            val result = runCatching {
+                useCase(
+                    bookId = bookId,
+                    tags = tags,
+                )
+            }
 
             // ----- Assert -----
             result.isSuccess shouldBe true

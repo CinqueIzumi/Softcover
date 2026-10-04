@@ -10,9 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -56,13 +54,5 @@ internal fun YearRecapShareCardBody(content: YearRecapShareCardUiModel) {
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
-    }
-}
-
-@StandardPreview
-@Composable
-private fun YearRecapShareCardPreview() {
-    SoftcoverTheme {
-        ShareCard(model = ShareCardUiModel.previews.getValue("Year recap"))
     }
 }

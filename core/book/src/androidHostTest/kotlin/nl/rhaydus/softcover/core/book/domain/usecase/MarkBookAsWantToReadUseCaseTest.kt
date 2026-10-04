@@ -49,10 +49,12 @@ class MarkBookAsWantToReadUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
-            coVerify(exactly = 1) { booksRepository.markBookAsWantToRead(
-                book = book,
-                editionId = null,
-            ) }
+            coVerify(exactly = 1) {
+                booksRepository.markBookAsWantToRead(
+                    book = book,
+                    editionId = null,
+                )
+            }
         }
 
         @Test
@@ -80,10 +82,12 @@ class MarkBookAsWantToReadUseCaseTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 1) { booksRepository.markBookAsWantToRead(
-                book = book,
-                editionId = editionId,
-            ) }
+            coVerify(exactly = 1) {
+                booksRepository.markBookAsWantToRead(
+                    book = book,
+                    editionId = editionId,
+                )
+            }
         }
 
         @Test
@@ -107,10 +111,12 @@ class MarkBookAsWantToReadUseCaseTest {
             useCase(book = book)
 
             // ----- Assert -----
-            coVerify(exactly = 1) { booksRepository.markBookAsWantToRead(
-                book = book,
-                editionId = null,
-            ) }
+            coVerify(exactly = 1) {
+                booksRepository.markBookAsWantToRead(
+                    book = book,
+                    editionId = null,
+                )
+            }
         }
 
         @Test
@@ -152,10 +158,12 @@ class MarkBookAsWantToReadUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
-            coVerify(exactly = 0) { booksRepository.markBookAsWantToRead(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                booksRepository.markBookAsWantToRead(
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 }

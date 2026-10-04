@@ -37,12 +37,11 @@ class OnRevealReviewSpoilerActionTest {
 
     private fun review(
         id: Int,
-        spoilerRevealed: Boolean = false,
+        isSpoilerGated: Boolean = true,
     ) = BookReviewUiModel(
         id = id,
         body = RichTextUiModel.EMPTY,
-        hasSpoilers = true,
-        spoilerRevealed = spoilerRevealed,
+        isSpoilerGated = isSpoilerGated,
         rating = null,
         reviewedMonthYear = null,
         reviewerName = "Alice",
@@ -67,7 +66,7 @@ class OnRevealReviewSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.reviews.map { it.spoilerRevealed } shouldBe listOf(false, true, false)
+            stateFlow.value.reviews.map { it.isSpoilerGated } shouldBe listOf(true, false, true)
         }
 
         @Test
@@ -75,7 +74,7 @@ class OnRevealReviewSpoilerActionTest {
             // ----- Arrange -----
             val revealed = review(
                 id = 1,
-                spoilerRevealed = true,
+                isSpoilerGated = false,
             )
             val unrevealed = review(id = 2)
             stateFlow.value = BookDetailUiState(
@@ -93,7 +92,7 @@ class OnRevealReviewSpoilerActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.reviews.map { it.spoilerRevealed } shouldBe listOf(true, true)
+            stateFlow.value.reviews.map { it.isSpoilerGated } shouldBe listOf(false, false)
         }
 
         @Test
@@ -128,7 +127,7 @@ class OnRevealReviewSpoilerActionTest {
             // ----- Assert -----
             val expected = review(
                 id = 5,
-                spoilerRevealed = true,
+                isSpoilerGated = false,
             )
             stateFlow.value.reviews shouldBe listOf(expected)
         }

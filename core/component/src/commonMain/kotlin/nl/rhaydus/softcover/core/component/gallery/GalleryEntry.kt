@@ -34,24 +34,15 @@ fun <M> galleryEntry(
     name = name,
     family = family,
     blurb = blurb,
-    fixtures = galleryFixtures(
-        previews = previews,
-        content = content,
-    ),
+    fixtures = previews.previews.map { (label, model) ->
+        GalleryFixture(
+            label = label,
+            render = { modifier ->
+                content(
+                    model,
+                    modifier,
+                )
+            },
+        )
+    }.toImmutableList(),
 )
-
-/** One [GalleryFixture] per [UiModelPreviews.previews] entry, labelled by its key. */
-fun <M> galleryFixtures(
-    previews: UiModelPreviews<M>,
-    content: @Composable (M, Modifier) -> Unit,
-): ImmutableList<GalleryFixture> = previews.previews.map { (label, model) ->
-    GalleryFixture(
-        label = label,
-        render = { modifier ->
-            content(
-                model,
-                modifier,
-            )
-        },
-    )
-}.toImmutableList()

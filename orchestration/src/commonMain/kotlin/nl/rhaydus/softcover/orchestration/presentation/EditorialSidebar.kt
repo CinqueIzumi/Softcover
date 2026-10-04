@@ -34,7 +34,6 @@ import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-private val SIDEBAR_WIDTH = 240.dp
 private val SIDEBAR_ITEM_SHAPE = RoundedCornerShape(16.dp)
 
 /**
@@ -52,7 +51,7 @@ internal fun EditorialSidebar(modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.surface,
         modifier = modifier
             .fillMaxHeight()
-            .width(SIDEBAR_WIDTH),
+            .width(240.dp),
     ) {
         Column(
             modifier = Modifier

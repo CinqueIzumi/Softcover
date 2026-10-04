@@ -633,7 +633,8 @@ class BookTest {
                 editions = listOf(buildEdition(
                     id = 10,
                     releaseDate = null,
-                ),),
+                ),
+                ),
                 releaseDate = null,
             )
 
@@ -712,7 +713,8 @@ class BookTest {
                 editions = listOf(buildEdition(
                     id = 10,
                     releaseDate = null,
-                ),),
+                ),
+                ),
                 releaseDate = null,
             )
 

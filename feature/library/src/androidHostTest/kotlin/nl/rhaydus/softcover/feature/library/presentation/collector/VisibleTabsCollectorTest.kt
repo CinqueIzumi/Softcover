@@ -109,10 +109,12 @@ class VisibleTabsCollectorTest {
         fun `always starts with All tab first`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             statusCodesFlow.emit(emptySet())
@@ -129,10 +131,12 @@ class VisibleTabsCollectorTest {
         fun `includes CURRENTLY_READING tab even when not in enabled status set`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             statusCodesFlow.emit(emptySet())
@@ -154,10 +158,12 @@ class VisibleTabsCollectorTest {
                 UserBookStatus.DID_NOT_FINISH.code,
             )
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             statusCodesFlow.emit(allStatusCodes)
@@ -182,10 +188,12 @@ class VisibleTabsCollectorTest {
         fun `unknown status code in enabled set produces only CURRENTLY_READING tab`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             // 999 is not a valid UserBookStatus code and must be silently ignored
@@ -216,10 +224,12 @@ class VisibleTabsCollectorTest {
                 name = "Middle",
             )
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             statusCodesFlow.emit(emptySet())
@@ -245,10 +255,12 @@ class VisibleTabsCollectorTest {
                 name = "Wishlist",
             )
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             statusCodesFlow.emit(emptySet())
@@ -270,10 +282,12 @@ class VisibleTabsCollectorTest {
                 name = "Owned",
             )
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             statusCodesFlow.emit(emptySet())
@@ -291,10 +305,12 @@ class VisibleTabsCollectorTest {
             // ----- Arrange -----
             val initialTabs = stateFlow.value.visibleTabs
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.visibleTabs shouldBe initialTabs
@@ -305,10 +321,12 @@ class VisibleTabsCollectorTest {
         fun `tabsLoaded is false before any flows emit and true after first combined emission`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert (before emission) -----
             stateFlow.value.tabsLoaded shouldBe false
@@ -327,10 +345,12 @@ class VisibleTabsCollectorTest {
         fun `reacts to updated status codes flow`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             statusCodesFlow.emit(emptySet())
             enabledListIdsFlow.emit(emptySet())
@@ -359,10 +379,12 @@ class VisibleTabsCollectorTest {
                     name = "Alpha",
                 )
                 val collector = VisibleTabsCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 statusCodesFlow.emit(setOf(UserBookStatus.READ.code))
@@ -395,10 +417,12 @@ class VisibleTabsCollectorTest {
             val listAId = "list-1"
             val listBId = "list-2"
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             statusCodesFlow.emit(setOf(UserBookStatus.READ.code))
@@ -419,10 +443,12 @@ class VisibleTabsCollectorTest {
         fun `persistedOrder with unknown ids ignores them silently`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             statusCodesFlow.emit(emptySet())
@@ -451,10 +477,12 @@ class VisibleTabsCollectorTest {
             )
             val listBId = "list-2"
             val collector = VisibleTabsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // persistedOrder only references listB; listA is a new tab not in the order
             // ----- Act -----

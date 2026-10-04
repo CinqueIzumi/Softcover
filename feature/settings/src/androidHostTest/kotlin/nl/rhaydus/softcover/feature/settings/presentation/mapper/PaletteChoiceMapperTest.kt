@@ -47,16 +47,4 @@ class PaletteChoiceMapperTest {
             }
         }
     }
-
-    @Nested
-    inner class TapPayload {
-        @Test
-        fun `keeps the domain ColorPalette as each choice's tap payload`() {
-            // ----- Act -----
-            val result = paletteChoicesFor(selected = ColorPalette.DEFAULT)
-
-            // ----- Assert -----
-            result.map { it.key }.toSet() shouldBe ColorPalette.entries.toSet()
-        }
-    }
 }

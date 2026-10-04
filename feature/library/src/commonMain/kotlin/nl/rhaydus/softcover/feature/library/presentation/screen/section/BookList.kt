@@ -57,18 +57,7 @@ internal fun BookList(
 ) {
     val rawBooks = state.booksByTab[tab.id]
 
-    if (rawBooks == null || (rawBooks.isEmpty() && state.isLoading)) {
-        LibraryLoadingGrid(
-            layout = state.gridLayout,
-            cards = state.loadingCards,
-            gridState = gridState,
-            columnsOverride = columnsOverride,
-        )
-
-        return
-    }
-
-    if (rawBooks.isEmpty()) {
+    if (rawBooks != null && rawBooks.isEmpty() && state.isLoading.not()) {
         state.emptyStatesByTab[tab.id]?.let { emptyState ->
             EmptyState(
                 model = emptyState,
@@ -82,34 +71,24 @@ internal fun BookList(
         return
     }
 
-    val tabCards = state.bookCardsByTab[tab.id]
+    val tabCards = state.bookCardsByTab[tab.id] ?: state.loadingCards
 
-    if (tabCards == null) {
-        LibraryLoadingGrid(
-            layout = state.gridLayout,
-            cards = state.loadingCards,
-            gridState = gridState,
-            columnsOverride = columnsOverride,
-        )
-
-        return
-    }
-
-    val cards = tabCards.cards
+    val cardSet = tabCards.set
+    val cards = cardSet.cards
 
     // Books arrive pre-sorted from the DAO via SQL ORDER BY; DisplayListsCollector applies the
     // search + Read-tab year filter off the main thread, and BookCardModelsCollector builds the
     // cards from that result. The cards carry the order and their own books, so a card's event or
     // menu resolves to the book it was built from even while the live lists are ahead of the cards.
-    val booksByKey = tabCards.payloads
-
     val visibleKeys = remember(cards) { cards.map { it.key.lazyKey } }
 
     val bookIdByLazyKey = remember(cards) {
         cards.mapNotNull { card ->
-            (card.key as? BookCardKey.Book)?.let { card.key.lazyKey to it.bookId }
+            (card.key as? BookCardKey.Book)?.takeUnless { card.isLoading }?.let { card.key.lazyKey to it.bookId }
         }.toMap()
     }
+
+    val isShowingStandIns = remember(cards) { cards.any { it.isLoading } }
 
     val sortMode = state.sortModeFor(tabId = tab.id)
     val selectionMode = state.selectionMode
@@ -132,7 +111,7 @@ internal fun BookList(
         isRearranging = state.isRearranging,
     )
 
-    val isRearranging = reorderStatus != null
+    val isRearranging = reorderStatus != null && isShowingStandIns.not()
 
     val animator = rememberLazyItemMutationAnimator(keys = visibleKeys)
 
@@ -151,7 +130,7 @@ internal fun BookList(
 
     // One handler for the whole grid; the cards route their events here by key.
     val onCardEvent = rememberPrefetchingBookCardEventHandler(
-        resolve = booksByKey::get,
+        set = cardSet,
         prefetchEnabled = selectionMode.not(),
     ) { event, book ->
         when (event) {
@@ -306,14 +285,14 @@ internal fun BookList(
 
                 // Desktop right-click menu (empty in rearrange mode → pass-through, and a no-op on
                 // touch where selection is reached via long-press instead).
-                val contextMenuItems = if (isRearranging) {
+                val contextMenuItems = if (isRearranging || isShowingStandIns) {
                     emptyList()
                 } else {
                     libraryBookContextMenu(
-                        isRead = booksByKey[card.key]?.status == BookStatus.Read,
+                        isRead = cardSet[card.key]?.status == BookStatus.Read,
                         selectionMode = selectionMode,
                         isSelected = isSelected,
-                        onOpen = { booksByKey[card.key]?.let(onBookClick) },
+                        onOpen = { cardSet[card.key]?.let(onBookClick) },
                         onSelect = onCtrlClick,
                         onToggleSelection = {
                             runAction(OnToggleBookSelectionAction(bookId = bookId))
@@ -359,7 +338,7 @@ internal fun BookList(
                         index = index,
                     )
 
-                val entryModifier = if (isRearranging) {
+                val entryModifier = if (isRearranging || isShowingStandIns) {
                     baseModifier
                 } else {
                     baseModifier.platformModifierClick(
@@ -402,40 +381,52 @@ private fun libraryBookContextMenu(
     onAddToList: () -> Unit,
     onRemove: () -> Unit,
 ): List<DesktopContextMenuItem> = buildList {
-    add(DesktopContextMenuItem(
-        label = "Open",
-        onClick = onOpen,
-    ),)
+    add(
+        DesktopContextMenuItem(
+            label = "Open",
+            onClick = onOpen,
+        ),
+    )
 
     if (selectionMode) {
         val toggleLabel = if (isSelected) "Remove from selection" else "Add to selection"
 
-        add(DesktopContextMenuItem(
-            label = toggleLabel,
-            onClick = onToggleSelection,
-        ),)
+        add(
+            DesktopContextMenuItem(
+                label = toggleLabel,
+                onClick = onToggleSelection,
+            ),
+        )
     } else {
-        add(DesktopContextMenuItem(
-            label = "Select",
-            onClick = onSelect,
-        ),)
+        add(
+            DesktopContextMenuItem(
+                label = "Select",
+                onClick = onSelect,
+            ),
+        )
     }
 
     if (isRead.not()) {
-        add(DesktopContextMenuItem(
-            label = "Mark as read",
-            onClick = onMarkAsRead,
-        ),)
+        add(
+            DesktopContextMenuItem(
+                label = "Mark as read",
+                onClick = onMarkAsRead,
+            ),
+        )
     }
 
-    add(DesktopContextMenuItem(
-        label = "Add to list…",
-        onClick = onAddToList,
-    ),)
-    add(DesktopContextMenuItem(
-        label = "Remove from library",
-        onClick = onRemove,
-    ),)
+    add(
+        DesktopContextMenuItem(
+            label = "Add to list…",
+            onClick = onAddToList,
+        ),
+    )
+    add(
+        DesktopContextMenuItem(
+            label = "Remove from library",
+            onClick = onRemove,
+        ),
+    )
 }
 
 /**

@@ -192,7 +192,8 @@ class OnToggleUserTagSpoilerActionTest {
             val serverCanonical = listOf(tag.copy(
                 spoiler = true,
                 count = 3,
-            ),)
+            ),
+            )
 
             coEvery {
                 saveUserTagsUseCase(

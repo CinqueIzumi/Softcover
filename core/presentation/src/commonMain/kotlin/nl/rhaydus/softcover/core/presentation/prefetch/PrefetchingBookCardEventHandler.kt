@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 
 /**
@@ -15,14 +16,14 @@ import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
  */
 @Composable
 fun <T : Any> rememberPrefetchingBookCardEventHandler(
-    resolve: (BookCardKey) -> T?,
+    set: BookCardSet<T>,
     prefetchEnabled: Boolean = true,
     onEvent: (event: BookCardEvent, payload: T) -> Unit,
 ): (BookCardEvent) -> Unit {
     val prefetcher = LocalBookDetailPrefetcher.current
     val currentPrefetchEnabled by rememberUpdatedState(prefetchEnabled)
     val resolving = rememberBookCardEventHandler(
-        resolve = resolve,
+        set = set,
         onEvent = onEvent,
     )
 

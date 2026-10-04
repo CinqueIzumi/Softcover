@@ -9,17 +9,14 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
-import nl.rhaydus.softcover.core.uibinding.deadline.toBadgeUiModel
+import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineRowUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
 
-/**
- * Also writes [BookDetailUiState.deadlineBadge] in the same `setState` as [BookDetailUiState.deadlineProgress] —
- * one writer for both, so a badge and its progress can never disagree.
- */
+/** Writes [BookDetailUiState.deadline] and the [BookDetailUiState.deadlineRow] mapped from it in one `setState`. */
 internal class BookDeadlineCollector : BookDetailCollector {
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun onLaunch(
@@ -51,7 +48,11 @@ internal class BookDeadlineCollector : BookDetailCollector {
             }
         }
 
-        combine(deadlineFlow, bookProgressFlow) { deadline, snapshot ->
+        val dateStyleFlow = scope.state
+            .map { it.dateStyle }
+            .distinctUntilChanged()
+
+        combine(deadlineFlow, bookProgressFlow, dateStyleFlow) { deadline, snapshot, dateStyle ->
             val total = when (deadline?.unit) {
                 DeadlineUnit.PAGES -> snapshot.totalPages
                 DeadlineUnit.SECONDS -> snapshot.totalSeconds
@@ -73,13 +74,12 @@ internal class BookDeadlineCollector : BookDetailCollector {
                 null
             }
 
-            deadline to computed
-        }.collectLatest { (deadline, computed) ->
+            deadline to computed?.toDeadlineRowUiModel(dateStyle = dateStyle)
+        }.collectLatest { (deadline, row) ->
             scope.setState { state ->
                 state.copy(
                     deadline = deadline,
-                    deadlineProgress = computed,
-                    deadlineBadge = computed?.toBadgeUiModel(),
+                    deadlineRow = row,
                 )
             }
         }

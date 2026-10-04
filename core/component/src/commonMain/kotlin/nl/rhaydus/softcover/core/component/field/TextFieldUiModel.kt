@@ -58,11 +58,11 @@ data class TextFieldUiModel(
                     ),
                 ),
             ),
-            "Pill, large" to TextFieldUiModel(
+            "Pill, plain" to TextFieldUiModel(
                 key = "pill-plain",
                 text = "",
                 placeholder = "Enter your key",
-                variant = TextFieldVariant.Pill(size = TextFieldPillSize.Large),
+                variant = TextFieldVariant.Pill(),
             ),
             "Outlined" to TextFieldUiModel(
                 key = "outlined",

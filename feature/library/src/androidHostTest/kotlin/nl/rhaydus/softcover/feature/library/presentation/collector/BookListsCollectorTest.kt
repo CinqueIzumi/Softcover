@@ -124,10 +124,12 @@ class BookListsCollectorTest {
                 listName = "Owned",
             ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(list))
@@ -153,10 +155,12 @@ class BookListsCollectorTest {
                 listName = "Owned",
             ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(list))
@@ -182,10 +186,12 @@ class BookListsCollectorTest {
                 listName = "Hidden",
             ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(disabledList))
@@ -211,10 +217,12 @@ class BookListsCollectorTest {
                 listName = "Owned",
             ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             listsFlow.emit(listOf(list))
             enabledListIdsFlow.emit(setOf(3))
@@ -232,10 +240,12 @@ class BookListsCollectorTest {
         fun `editionsByTab is not modified before both flows emit`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.editionsByTab shouldBe emptyMap()
@@ -266,10 +276,12 @@ class BookListsCollectorTest {
                 listName = "List B",
             ).id
             val collector = BookListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(list1, list2))

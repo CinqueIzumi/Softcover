@@ -144,7 +144,8 @@ class ObserveRecentReadingActivityUseCaseTest {
             ), today.minus(
                 10,
                 DateTimeUnit.DAY,
-            ),)
+            ),
+            )
 
             every {
                 profileRepository.observeUserProfileData()
@@ -167,10 +168,12 @@ class ObserveRecentReadingActivityUseCaseTest {
                 20,
                 DateTimeUnit.DAY,
             )
-            val activeDates = (0..16).map { windowStart.plus(
-                it,
-                DateTimeUnit.DAY,
-            ) }.toSet() +
+            val activeDates = (0..16).map {
+                windowStart.plus(
+                    it,
+                    DateTimeUnit.DAY,
+                )
+            }.toSet() +
                 setOf(
                     windowStart.plus(
                         18,

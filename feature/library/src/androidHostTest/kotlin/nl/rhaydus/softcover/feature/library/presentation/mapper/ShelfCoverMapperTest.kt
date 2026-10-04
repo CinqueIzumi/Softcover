@@ -3,36 +3,11 @@ package nl.rhaydus.softcover.feature.library.presentation.mapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ShelfCoverMapperTest {
-    private fun stubBook(
-        id: Int,
-        title: String = "Title $id",
-        currentEditionId: Int? = null,
-    ): Book = mockk<Book>(relaxed = true).also { book ->
-        every {
-            book.id
-        } returns id
-
-        every {
-            book.title
-        } returns title
-
-        every {
-            book.currentEdition
-        } returns currentEditionId?.let { editionId ->
-            mockk<BookEdition>(relaxed = true).also { edition ->
-                every {
-                    edition.id
-                } returns editionId
-            }
-        }
-    }
-
     private fun stubEdition(
         id: Int,
         bookId: Int,
@@ -49,53 +24,6 @@ class ShelfCoverMapperTest {
         every {
             edition.title
         } returns title
-    }
-
-    @Nested
-    inner class ToShelfBookCover {
-        @Test
-        fun `the shared transition key names the book`() {
-            // ----- Arrange -----
-            val book = stubBook(id = 12)
-
-            // ----- Act -----
-            val cover = book.toShelfBookCover()
-
-            // ----- Assert -----
-            cover.sharedTransitionKey shouldBe "book-cover-book-12"
-        }
-
-        @Test
-        fun `the key does not depend on the current edition`() {
-            // ----- Arrange -----
-            val withEdition = stubBook(
-                id = 12,
-                currentEditionId = 99,
-            )
-            val withoutEdition = stubBook(id = 12)
-
-            // ----- Act -----
-            val keyWithEdition = withEdition.toShelfBookCover().sharedTransitionKey
-            val keyWithoutEdition = withoutEdition.toShelfBookCover().sharedTransitionKey
-
-            // ----- Assert -----
-            keyWithEdition shouldBe keyWithoutEdition
-        }
-
-        @Test
-        fun `the coverless title is the book title`() {
-            // ----- Arrange -----
-            val book = stubBook(
-                id = 1,
-                title = "Dune",
-            )
-
-            // ----- Act -----
-            val cover = book.toShelfBookCover()
-
-            // ----- Assert -----
-            cover.coverlessTitle shouldBe "Dune"
-        }
     }
 
     @Nested

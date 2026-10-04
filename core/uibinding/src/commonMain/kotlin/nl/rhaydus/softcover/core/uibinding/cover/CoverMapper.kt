@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.uibinding.cover
 
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 
@@ -11,8 +12,7 @@ import nl.rhaydus.softcover.core.domain.model.BookEdition
  * receiver's own local file, then its remote URL, then [fallbackCoverUrl].
  *
  * The shared-element [sharedTransitionKey] travels in as a parameter rather than being computed
- * here — `component-contract.md` § 7.2 R7 keeps key resolution at the mapper's caller, since only
- * the caller knows which surface it is on.
+ * here, since only the caller knows which surface it is on.
  */
 fun BookEdition?.toCoverUiModel(
     defaultEdition: BookEdition?,
@@ -38,14 +38,41 @@ fun BookEdition?.toCoverUiModel(
  * over [Book.defaultEdition] over [Book.coverUrl], titled with [Book.title]. Exists so those call
  * sites cannot diverge on the fallback ladder — each one mapping its own `Book -> CoverUiModel`
  * inline would be a separate chance to pick a different edition or forget the fallback URL.
+ *
+ * When [shareTransition] is set the cover carries the book's shared-element key, scoped by
+ * [transitionSurface] so one book on two rails of a screen keeps two distinct keys.
  */
 fun Book.toCoverUiModel(
     variant: CoverVariant,
-    sharedTransitionKey: String? = null,
+    shareTransition: Boolean = false,
+    transitionSurface: String? = null,
 ): CoverUiModel = currentEdition.toCoverUiModel(
     defaultEdition = defaultEdition,
     coverlessTitle = title,
     variant = variant,
     fallbackCoverUrl = coverUrl,
-    sharedTransitionKey = sharedTransitionKey,
+    sharedTransitionKey = if (shareTransition) {
+        bookCoverTransitionKey(
+            editionId = currentEdition?.id,
+            bookId = id,
+            surface = transitionSurface,
+        )
+    } else {
+        null
+    },
+)
+
+/**
+ * The cover for a row that only knows a [url] and a [title] — no edition to resolve against, so
+ * [CoverUiModel.source] is the remote [url] alone.
+ */
+fun coverUiModelFromUrl(
+    url: String?,
+    title: String,
+    variant: CoverVariant,
+): CoverUiModel = (null as BookEdition?).toCoverUiModel(
+    defaultEdition = null,
+    coverlessTitle = title,
+    variant = variant,
+    fallbackCoverUrl = url,
 )

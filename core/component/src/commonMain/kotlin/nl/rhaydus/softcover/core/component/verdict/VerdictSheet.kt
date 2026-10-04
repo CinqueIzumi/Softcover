@@ -46,13 +46,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableMap
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.component.chip.ChipFace
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
-import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.control.ToggleRow
@@ -117,7 +116,7 @@ fun VerdictSheet(
 
     var marks by remember { mutableStateOf(initialBuffer.marks) }
 
-    var spoilers by remember { mutableStateOf(model.spoilers) }
+    var spoilersChecked by remember { mutableStateOf(model.spoilers.checked) }
 
     var draftRating by remember { mutableStateOf(model.initialRating) }
 
@@ -138,6 +137,8 @@ fun VerdictSheet(
         }
     }
 
+    val spoilersRow = remember(model.spoilers, spoilersChecked) { model.spoilers.copy(checked = spoilersChecked) }
+
     val selection = textFieldValue.selection
     val hasSelection: Boolean = selection.collapsed.not()
     val selectionStart: Int = selection.min
@@ -154,7 +155,7 @@ fun VerdictSheet(
                             text = textFieldValue.text,
                             marks = marks,
                         ),
-                        hasSpoilers = spoilers.checked,
+                        hasSpoilers = spoilersChecked,
                     ),
                 )
 
@@ -249,6 +250,7 @@ fun VerdictSheet(
             Spacer(modifier = Modifier.height(12.dp))
 
             MarkToolbar(
+                chips = model.markChips,
                 activeMarks = RichTextMarkType.entries
                     .filter { type ->
                         isRangeMarked(
@@ -281,10 +283,10 @@ fun VerdictSheet(
             Spacer(modifier = Modifier.height(20.dp))
 
             ToggleRow(
-                model = spoilers,
+                model = spoilersRow,
                 onEvent = { event ->
                     when (event) {
-                        is ToggleEvent.Toggled -> spoilers = spoilers.copy(checked = event.checked)
+                        is ToggleEvent.Toggled -> spoilersChecked = event.checked
                     }
                 },
             )
@@ -404,25 +406,22 @@ private fun buildEditorAnnotatedString(
 }
 
 /**
- * One chip per mark, each selected while the whole selection already carries that mark. The labels are
- * words, the bold and italic ones previewing their own effect. The row is inert while [enabled] is false.
+ * One chip per mark, each selected while the whole selection already carries that mark. The row is inert
+ * while [enabled] is false.
  */
 @Composable
 private fun MarkToolbar(
+    chips: ImmutableMap<RichTextMarkType, ChipUiModel>,
     activeMarks: Set<RichTextMarkType>,
     enabled: Boolean,
     onMarkToggled: (RichTextMarkType) -> Unit,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        RichTextMarkType.entries.forEach { mark ->
+        chips.forEach { (mark, chip) ->
             Chip(
-                model = ChipUiModel(
-                    key = mark.name,
-                    label = mark.chipLabel(),
-                    tone = ChipTone.Tonal,
+                model = chip.copy(
                     selected = mark in activeMarks,
                     interaction = if (enabled) ChipInteraction.Clickable else ChipInteraction.Disabled,
-                    face = mark.chipFace(),
                 ),
                 onEvent = { event ->
                     if (event is ChipEvent.Clicked) {
@@ -432,16 +431,4 @@ private fun MarkToolbar(
             )
         }
     }
-}
-
-private fun RichTextMarkType.chipLabel(): String = when (this) {
-    RichTextMarkType.BOLD -> "Bold"
-    RichTextMarkType.ITALIC -> "Italic"
-    RichTextMarkType.SPOILER -> "Spoiler"
-}
-
-private fun RichTextMarkType.chipFace(): ChipFace = when (this) {
-    RichTextMarkType.BOLD -> ChipFace.Bold
-    RichTextMarkType.ITALIC -> ChipFace.Italic
-    RichTextMarkType.SPOILER -> ChipFace.Plain
 }

@@ -181,7 +181,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 200,
                 afterPosition = 4.0,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -340,7 +341,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 700,
                 afterPosition = 1.0,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -372,7 +374,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 800,
                 afterPosition = 1.5,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -596,7 +599,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 1200,
                 afterPosition = 3.0,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -628,7 +632,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 1300,
                 afterPosition = 3.0,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -667,7 +672,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 1400,
                 afterPosition = 3.0,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -759,7 +765,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 1700,
                 afterPosition = 1.0,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -788,7 +795,8 @@ class GetContinueSeriesBooksUseCaseTest {
                     seeds = listOf(SeriesContinuationSeed(
                         seriesId = 1800,
                         afterPosition = 1.0,
-                    ),),
+                    ),
+                    ),
                 )
             } returns listOf(nextBook)
             coEvery {
@@ -857,7 +865,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 2000,
                 afterPosition = 3.0,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -900,7 +909,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 2100,
                 afterPosition = 2.0,
-            ),)
+            ),
+            )
         }
 
         @Test
@@ -947,7 +957,8 @@ class GetContinueSeriesBooksUseCaseTest {
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 2200,
                 afterPosition = 2.0,
-            ),)
+            ),
+            )
         }
 
         @Test

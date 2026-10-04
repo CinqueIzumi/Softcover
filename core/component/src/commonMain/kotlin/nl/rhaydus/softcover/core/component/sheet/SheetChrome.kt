@@ -1,10 +1,9 @@
 package nl.rhaydus.softcover.core.component.sheet
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 
@@ -32,17 +31,19 @@ internal class SheetChrome(
 }
 
 @Composable
-internal fun rememberSheetChrome(model: SheetScaffoldUiModel): SheetChrome {
+internal fun rememberSheetChrome(
+    model: SheetScaffoldUiModel,
+    dismissStarted: MutableState<Boolean>,
+): SheetChrome {
     val hide by rememberUpdatedState(LocalModalSheetDismiss.current)
-    val started = remember { mutableStateOf(false) }
 
     return SheetChrome(
         busy = model.busy,
         canDismiss = model.dismissible && model.busy.not(),
-        dismissStarted = started.value,
+        dismissStarted = dismissStarted.value,
         close = {
-            if (started.value.not()) {
-                started.value = true
+            if (dismissStarted.value.not()) {
+                dismissStarted.value = true
                 hide()
             }
         },

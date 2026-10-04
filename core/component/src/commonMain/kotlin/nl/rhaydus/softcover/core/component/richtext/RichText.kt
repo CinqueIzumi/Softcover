@@ -37,8 +37,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
  * specific to a review. Reach for it for any displayed review body; never route review content through
  * `htmlToAnnotatedString` (that path is for server HTML, e.g. a book description, not for reviews).
  *
- * [style], [color], [maxLines], [overflow], [onClick] and [onTextLayout] are R11 holdouts on the
- * contract retrofit — they belong on [model], not on this signature.
+ * Text past [maxLines] ends in an ellipsis.
  */
 @Composable
 fun RichText(
@@ -47,7 +46,6 @@ fun RichText(
     style: TextStyle = MaterialTheme.editorialTypography.body.copy(fontStyle = FontStyle.Normal),
     color: Color = LocalContentColor.current,
     maxLines: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Clip,
     onClick: (() -> Unit)? = null,
     onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
@@ -57,10 +55,8 @@ fun RichText(
 
     var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-    val spoilerRanges: List<IntRange> = remember(model) { spoilerRangesOf(model = model) }
-
-    val annotated: AnnotatedString = remember(model, revealed, coverColor) {
-        buildRichTextAnnotatedString(
+    val (annotated: AnnotatedString, spoilerRanges: List<IntRange>) = remember(model, revealed, coverColor) {
+        buildRichText(
             model = model,
             revealed = revealed,
             coverColor = coverColor,
@@ -92,7 +88,7 @@ fun RichText(
         style = style,
         color = color,
         maxLines = maxLines,
-        overflow = overflow,
+        overflow = TextOverflow.Ellipsis,
         onTextLayout = {
             layoutResult = it
 
@@ -102,57 +98,42 @@ fun RichText(
     )
 }
 
-private fun buildRichTextAnnotatedString(
+/** The model's styled text and, in reading order, the range each spoiler run occupies in it. */
+private fun buildRichText(
     model: RichTextUiModel,
     revealed: Set<Int>,
     coverColor: Color,
-): AnnotatedString = buildAnnotatedString {
-    var spoilerIndex = 0
+): Pair<AnnotatedString, List<IntRange>> {
+    val spoilerRanges = mutableListOf<IntRange>()
 
-    model.paragraphs.forEachIndexed { index, paragraph ->
-        if (index > 0) append('\n')
+    val annotated = buildAnnotatedString {
+        model.paragraphs.forEachIndexed { index, paragraph ->
+            if (index > 0) append('\n')
 
-        paragraph.runs.forEach { run ->
-            val start = length
+            paragraph.runs.forEach { run ->
+                val start = length
 
-            append(run.text)
+                append(run.text)
 
-            val isSpoiler: Boolean = run.spoiler && run.text.isNotEmpty()
+                val isSpoiler: Boolean = run.spoiler && run.text.isNotEmpty()
 
-            val hidden: Boolean = isSpoiler && revealed.contains(spoilerIndex).not()
+                val hidden: Boolean = isSpoiler && revealed.contains(spoilerRanges.size).not()
 
-            addStyle(
-                style = SpanStyle(
-                    fontWeight = if (run.bold) FontWeight.Bold else null,
-                    fontStyle = if (run.italic) FontStyle.Italic else null,
-                    color = if (hidden) Color.Transparent else Color.Unspecified,
-                    background = if (hidden) coverColor else Color.Unspecified,
-                ),
-                start = start,
-                end = length,
-            )
+                addStyle(
+                    style = SpanStyle(
+                        fontWeight = if (run.bold) FontWeight.Bold else null,
+                        fontStyle = if (run.italic) FontStyle.Italic else null,
+                        color = if (hidden) Color.Transparent else Color.Unspecified,
+                        background = if (hidden) coverColor else Color.Unspecified,
+                    ),
+                    start = start,
+                    end = length,
+                )
 
-            if (isSpoiler) spoilerIndex += 1
-        }
-    }
-}
-
-private fun spoilerRangesOf(model: RichTextUiModel): List<IntRange> {
-    val ranges = mutableListOf<IntRange>()
-
-    var offset = 0
-
-    model.paragraphs.forEachIndexed { index, paragraph ->
-        if (index > 0) offset += 1
-
-        paragraph.runs.forEach { run ->
-            val end = offset + run.text.length
-
-            if (run.spoiler && run.text.isNotEmpty()) ranges.add(offset until end)
-
-            offset = end
+                if (isSpoiler) spoilerRanges.add(start until length)
+            }
         }
     }
 
-    return ranges
+    return annotated to spoilerRanges
 }

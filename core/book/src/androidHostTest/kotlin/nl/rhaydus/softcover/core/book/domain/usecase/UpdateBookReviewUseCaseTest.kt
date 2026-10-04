@@ -48,11 +48,13 @@ class UpdateBookReviewUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
 
-            coVerify(exactly = 0) { booksRepository.updateBookReview(
-                book = any(),
-                review = any(),
-                hasSpoilers = any(),
-            ) }
+            coVerify(exactly = 0) {
+                booksRepository.updateBookReview(
+                    book = any(),
+                    review = any(),
+                    hasSpoilers = any(),
+                )
+            }
             coVerify(exactly = 0) { booksRepository.cacheBook(book = any()) }
         }
 
@@ -90,11 +92,13 @@ class UpdateBookReviewUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-            coVerify(exactly = 1) { booksRepository.updateBookReview(
-                book = inputBook,
-                review = review,
-                hasSpoilers = hasSpoilers,
-            ) }
+            coVerify(exactly = 1) {
+                booksRepository.updateBookReview(
+                    book = inputBook,
+                    review = review,
+                    hasSpoilers = hasSpoilers,
+                )
+            }
             coVerify(exactly = 1) { booksRepository.cacheBook(book = updatedBook) }
         }
     }

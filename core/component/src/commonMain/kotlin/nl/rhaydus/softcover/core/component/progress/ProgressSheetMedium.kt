@@ -5,13 +5,9 @@ import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 /**
  * What a book's progress is measured in, and where it currently stands.
  *
- * A sealed variant rather than four nullable totals beside an `isAudiobook` flag (R2): an audiobook
- * has no page count and a print edition has no runtime, so carrying both would let a caller build a
- * book that is somehow neither and oblige every reader of the model to remember which pair means
- * anything. The `:core:uibinding` mapper picks the branch once, keyed on the edition's
- * `ReadingFormat` (`BookEdition.isAudiobook`) rather than on whether a duration happens to be
- * present; the sheet only reads it. [Timed] is the primary entry unit on an audiobook, [Paged]
- * everywhere else.
+ * The branch is keyed on the edition's `ReadingFormat` (`BookEdition.isAudiobook`) rather than on
+ * whether a duration happens to be present. [Timed] is the primary entry unit on an audiobook,
+ * [Paged] everywhere else.
  */
 sealed interface ProgressSheetMedium {
     /**
@@ -20,10 +16,14 @@ sealed interface ProgressSheetMedium {
      */
     val hasKnownTotal: Boolean
 
-    /** Print or ebook: progress is a page number out of [totalPages]. */
+    /**
+     * Print or ebook: progress is a page number out of [totalPages]. [suffix] is the "of N pages"
+     * line under the number, `null` when the total is unknown.
+     */
     data class Paged(
         val totalPages: Int,
         val currentPage: Int,
+        val suffix: String?,
     ) : ProgressSheetMedium {
         override val hasKnownTotal: Boolean
             get() = totalPages > 0
@@ -31,13 +31,16 @@ sealed interface ProgressSheetMedium {
 
     /**
      * Audiobook: progress is a position out of [totalSeconds]. The three fields hold the reader's
-     * in-progress entry.
+     * in-progress entry; [fraction] is that entry over the total (0 when the total is unknown) and
+     * [suffix] the "of hh:mm:ss" line, `null` when the total is unknown.
      */
     data class Timed(
         val totalSeconds: Int,
         val hours: TextFieldUiModel,
         val minutes: TextFieldUiModel,
         val seconds: TextFieldUiModel,
+        val suffix: String?,
+        val fraction: Float,
     ) : ProgressSheetMedium {
         override val hasKnownTotal: Boolean
             get() = totalSeconds > 0

@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
 import kotlinx.collections.immutable.toImmutableList
-import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.softcover.core.component.chip.ChipInteraction
+import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -9,6 +10,7 @@ import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.domain.model.isBlank
+import nl.rhaydus.softcover.core.uibinding.progress.toPositionText
 import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import kotlin.math.roundToInt
 
@@ -37,7 +39,16 @@ internal fun Book.toReadingUpdateShareCardUiModel(
 
     val resolvedAvatarUrl = avatarUrl?.takeIf { it.isNotBlank() }
     val resolvedAuthor = authors.firstOrNull()?.name.orEmpty()
-    val resolvedTags = userTags.filterNot { it.spoiler }.map { it.name }.toImmutableList()
+    val resolvedTags = userTags
+        .filterNot { it.spoiler }
+        .map { tag ->
+            ChipUiModel(
+                key = tag.name,
+                label = tag.name,
+                interaction = ChipInteraction.Inert,
+            )
+        }
+        .toImmutableList()
 
     return when (currentUserBook.status) {
         BookStatus.Read -> ReadingUpdateShareCardUiModel.Finished(
@@ -68,45 +79,33 @@ internal fun Book.toReadingUpdateShareCardUiModel(
     }
 }
 
-// Mirrors the book-detail progress block: audiobooks are tracked in time (listened / total), print
-// editions in pages. The percentage is derived from the matching unit counts when both are known so
-// the label is internally consistent (the raw `progress` value can lag the logged position); when
-// the counts are missing it falls back to `progress`, which is already a 0–100 percentage.
+// The position text comes from the shared formatter; the percentage is derived from the matching
+// unit counts when both are known so the label is internally consistent (the raw `progress` value
+// can lag the logged position). When the counts are missing it falls back to `progress`, which is
+// already a 0–100 percentage.
 private fun buildProgressLabel(
     userBookRead: UserBookRead?,
     edition: BookEdition?,
 ): String? {
     userBookRead ?: return null
 
-    if (edition?.isAudiobook == true) {
-        val currentSeconds = userBookRead.currentSeconds?.takeIf { it > 0 }
-        val totalSeconds = edition.audioSeconds?.takeIf { it > 0 }
+    val current = if (edition?.isAudiobook == true) userBookRead.currentSeconds else userBookRead.currentPage
+    val total = if (edition?.isAudiobook == true) edition.audioSeconds else edition?.pages
 
-        if (currentSeconds != null && totalSeconds != null) {
-            val percent = (currentSeconds.toFloat() / totalSeconds * 100).roundToInt().coerceIn(
-                0,
-                100,
-            )
-
-            return "${secondsToHm(currentSeconds)} / ${secondsToHm(totalSeconds)} · $percent%"
-        }
-
+    if (edition == null || current == null || current <= 0 || total == null || total <= 0) {
         return userBookRead.fallbackPercentLabel()
     }
 
-    val currentPage = userBookRead.currentPage?.takeIf { it > 0 }
-    val totalPages = edition?.pages?.takeIf { it > 0 }
+    val percent = (current.toFloat() / total * 100).roundToInt().coerceIn(
+        0,
+        100,
+    )
+    val position = userBookRead.toPositionText(
+        edition = edition,
+        totalPages = edition.pages ?: 0,
+    ).position
 
-    if (currentPage != null && totalPages != null) {
-        val percent = (currentPage.toFloat() / totalPages * 100).roundToInt().coerceIn(
-            0,
-            100,
-        )
-
-        return "page $currentPage / $totalPages · $percent%"
-    }
-
-    return userBookRead.fallbackPercentLabel()
+    return "$position · $percent%"
 }
 
 private fun UserBookRead.fallbackPercentLabel(): String {

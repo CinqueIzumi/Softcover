@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.orchestration.presentation
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
-import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.presentation.state.ReAuthState
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -153,15 +151,6 @@ class ReAuthSheetMapperTest {
 
             // ----- Assert -----
             result.scaffold.dismissible shouldBe false
-        }
-
-        @Test
-        fun `api key field is an outlined text input`() {
-            // ----- Act -----
-            val result = ReAuthState().toSheetUiModel()
-
-            // ----- Assert -----
-            result.apiKeyField.variant.shouldBeInstanceOf<TextFieldVariant.Outlined>()
         }
 
         @Test

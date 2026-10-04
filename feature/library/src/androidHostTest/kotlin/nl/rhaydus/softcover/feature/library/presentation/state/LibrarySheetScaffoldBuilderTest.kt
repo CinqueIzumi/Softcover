@@ -219,14 +219,16 @@ class LibrarySheetScaffoldBuilderTest {
             val rows = shelvesSheetRowsFor(
                 visibleTabs = listOf(allTab, readingTab),
                 selectedTabId = allTab.id,
-                tabStatsByTab = mapOf(allTab.id to LibraryTabStats(
-                    itemCount = 12,
-                    totalPages = 300,
-                ),),
+                tabStatsByTab = mapOf(
+                    allTab.id to LibraryTabStats(
+                        itemCount = 12,
+                        totalPages = 300,
+                    ),
+                ),
             )
 
             // ----- Assert -----
-            rows.map { it.count } shouldBe listOf("12", "0")
+            rows.map { it.count?.text } shouldBe listOf("12", "0")
         }
 
         @Test
@@ -248,7 +250,7 @@ class LibrarySheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            rows.map { it.countDescription } shouldBe listOf("12 titles", "1 title", "0 titles")
+            rows.map { it.count?.description } shouldBe listOf("12 titles", "1 title", "0 titles")
         }
 
         @Test

@@ -25,7 +25,7 @@ internal fun DismissedSeriesBook.toHiddenBookCard(cover: CoverUiModel): BookCard
             title = title ?: "Hidden book",
             byline = byline(author = authorText),
         ),
-        trailing = BookCardTrailing.Restore(label = "Restore"),
+        trailing = BookCardTrailing.Restore,
     ),
 )
 
@@ -38,7 +38,7 @@ internal fun DismissedSeries.toHiddenSeriesCard(cover: CoverUiModel): BookCardUi
             title = seriesName ?: "Hidden series",
             supportingLines = persistentListOf(scopeCaption()),
         ),
-        trailing = BookCardTrailing.Restore(label = "Restore"),
+        trailing = BookCardTrailing.Restore,
     ),
 )
 

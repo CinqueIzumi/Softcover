@@ -675,7 +675,8 @@ class BooksLocalDataSourceImplTest {
                 id = 10,
                 localImagePath = imagePath,
                 localImageUrl = null,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             dataSource.removeUserBooksById(ids = listOf(userBookId))
@@ -705,7 +706,8 @@ class BooksLocalDataSourceImplTest {
                 id = 20,
                 localImagePath = null,
                 localImageUrl = null,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             dataSource.removeUserBooksById(ids = listOf(userBookId))
@@ -795,7 +797,8 @@ class BooksLocalDataSourceImplTest {
                 id = 3,
                 localImagePath = null,
                 localImageUrl = null,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             dataSource.removeAllBooks()

@@ -123,7 +123,7 @@ class BookReviewUiModelMapperTest {
     @Nested
     inner class Passthrough {
         @Test
-        fun `maps a real review as loaded with its spoiler concealed`() {
+        fun `maps a review with spoilers as loaded and spoiler gated`() {
             // ----- Arrange -----
             val review = review(hasSpoilers = true)
 
@@ -133,8 +133,19 @@ class BookReviewUiModelMapperTest {
             // ----- Assert -----
             model.id shouldBe 12
             model.isLoading shouldBe false
-            model.hasSpoilers shouldBe true
-            model.spoilerRevealed shouldBe false
+            model.isSpoilerGated shouldBe true
+        }
+
+        @Test
+        fun `does not gate a review without spoilers`() {
+            // ----- Arrange -----
+            val review = review(hasSpoilers = false)
+
+            // ----- Act -----
+            val model = review.toBookReviewUiModel()
+
+            // ----- Assert -----
+            model.isSpoilerGated shouldBe false
         }
     }
 }

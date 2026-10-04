@@ -89,10 +89,12 @@ class UserListsCollectorTest {
                 name = "Middle",
             )
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(listZ, listA, listM))
@@ -143,10 +145,12 @@ class UserListsCollectorTest {
                 name = "alpha",
             )
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(listUpper, listLower))
@@ -160,10 +164,12 @@ class UserListsCollectorTest {
         fun `sets availableLists to empty list when flow emits empty`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(emptyList())
@@ -177,10 +183,12 @@ class UserListsCollectorTest {
         fun `does not change availableLists before flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.availableLists shouldBe emptyList()
@@ -198,16 +206,20 @@ class UserListsCollectorTest {
                 initialized = true,
             )
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             listsFlow.emit(listOf(stubBookList(
                 id = 5,
                 name = "Owned",
-            ),),)
+            ),
+            ),
+            )
 
             // ----- Assert -----
             stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 2)
@@ -227,10 +239,12 @@ class UserListsCollectorTest {
                 name = "Wishlist",
             )
             val collector = UserListsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             listsFlow.emit(listOf(list1))
 

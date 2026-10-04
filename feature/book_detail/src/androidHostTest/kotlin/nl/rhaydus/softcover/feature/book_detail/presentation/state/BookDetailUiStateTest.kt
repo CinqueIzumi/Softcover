@@ -481,7 +481,8 @@ class BookDetailUiStateTest {
                 userLists = listOf(ownedList(
                     77,
                     88,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----

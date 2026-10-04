@@ -261,10 +261,7 @@ object ShareCardDebugScreen : Screen {
         coverUrl = null,
         title = "Lonesome Dove",
         author = "Larry McMurtry",
-        communityRating = 4.6,
-        userRating = 9,
-        releaseYear = 1985,
-        pageCount = 945,
+        statsLine = "★ 4.6 · Your 9/10 · 1985 · 945 pages",
         description = "A sprawling cattle drive from the dust of Texas to the high grass of Montana, " +
             "told as one of the great American friendships and one of the longest goodbyes in the genre.",
     )

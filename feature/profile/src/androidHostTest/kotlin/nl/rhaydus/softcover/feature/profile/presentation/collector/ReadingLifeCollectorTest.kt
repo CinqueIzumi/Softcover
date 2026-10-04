@@ -14,12 +14,10 @@ import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
-import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveReadingLifeUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
-import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -68,17 +66,6 @@ class ReadingLifeCollectorTest {
             } returns dispatcher
         }
     }
-
-    private fun buildProfileData(): UserProfileData = UserProfileData(
-        profileImageUrl = "https://example.com/avatar.png",
-        name = "Jane Doe",
-        username = "cinque",
-        bio = "Avid reader",
-        booksRead = 42,
-        totalPagesRead = 12000,
-        averageRating = 4.2,
-        readingStreak = 7,
-    )
 
     private fun buildReadingLife(
         trackedYears: Int = 3,
@@ -135,77 +122,6 @@ class ReadingLifeCollectorTest {
             stateFlow.value.readingLife shouldBe null
             job.cancel()
         }
-
-        @Test
-        fun `leaves readingLifeShareCard null when userProfileData has not arrived yet`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val readingLife = buildReadingLife()
-            val dependencies = stubDependencies(this)
-            val collector = ReadingLifeCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            readingLifeFlow.emit(readingLife)
-
-            // ----- Assert -----
-            stateFlow.value.readingLifeShareCard shouldBe null
-            job.cancel()
-        }
-
-        @Test
-        fun `computes readingLifeShareCard from the already-held userProfileData when readingLife arrives`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val profileData = buildProfileData()
-                val readingLife = buildReadingLife()
-                stateFlow.value = ProfileUiState(userProfileData = profileData)
-                val dependencies = stubDependencies(this)
-                val collector = ReadingLifeCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                readingLifeFlow.emit(readingLife)
-
-                // ----- Assert -----
-                stateFlow.value.readingLifeShareCard shouldBe readingLife.toReadingLifeShareCardUiModel(profileData)
-                job.cancel()
-            }
-
-        @Test
-        fun `recombines readingLifeShareCard using the currently held userProfileData when readingLife emits a second time`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val profileData = buildProfileData()
-                val firstReadingLife = buildReadingLife(trackedYears = 3)
-                val secondReadingLife = buildReadingLife(trackedYears = 5)
-                stateFlow.value = ProfileUiState(userProfileData = profileData)
-                val dependencies = stubDependencies(this)
-                val collector = ReadingLifeCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                readingLifeFlow.emit(firstReadingLife)
-                readingLifeFlow.emit(secondReadingLife)
-
-                // ----- Assert -----
-                stateFlow.value.readingLifeShareCard shouldBe secondReadingLife.toReadingLifeShareCardUiModel(profileData)
-                job.cancel()
-            }
 
         @Test
         fun `sets ratingsHistogramHeader and ratingsHistogramCaption from the emitted ratings band`() =

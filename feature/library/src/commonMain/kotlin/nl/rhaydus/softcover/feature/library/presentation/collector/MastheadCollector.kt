@@ -10,8 +10,8 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
 /**
- * The only writer of [LibraryUiState.mastheads], [LibraryUiState.fallbackMasthead],
- * [LibraryUiState.loadingMastheadTabIds] and [LibraryUiState.mastheadRefresh] — one masthead per visible
+ * The only writer of [LibraryUiState.mastheads], [LibraryUiState.fallbackMasthead]
+ * and [LibraryUiState.mastheadRefresh] — one masthead per visible
  * tab, derived from that tab's stats and [LibraryUiState.isLoading]. Both the desktop and mobile mastheads
  * resolve their tab's entry through [LibraryUiState.mastheadFor] rather than building any copy themselves.
  */
@@ -36,7 +36,6 @@ internal class MastheadCollector : LibraryCollector {
                     it.copy(
                         mastheads = snapshot.mastheads(),
                         fallbackMasthead = snapshot.fallbackMasthead(),
-                        loadingMastheadTabIds = snapshot.loadingTabIds(),
                         mastheadRefresh = snapshot.refresh(),
                     )
                 }

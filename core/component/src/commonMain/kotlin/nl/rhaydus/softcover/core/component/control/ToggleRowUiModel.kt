@@ -9,7 +9,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
  * Everything [ToggleRow] renders: a [title] over an optional [gloss], and a switch showing [checked]. The
  * [title] is the row's accessibility label. A row that must not be used yet is built with `enabled = false`.
  *
- * @property key Identity — [ToggleEvent.Toggled] carries it back.
+ * @property key Identity the caller uses to tell rows apart when dispatching.
  * @property variant The row's padding; see [ToggleRowVariant].
  */
 @Immutable

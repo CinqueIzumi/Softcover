@@ -122,17 +122,21 @@ class LibrarySortTest {
                 val editions = listOf(
                     buildEdition(
                         id = 1,
-                        authors = listOf(Author(
-                            id = 1,
-                            name = "Tolkien",
-                        ),),
+                        authors = listOf(
+                            Author(
+                                id = 1,
+                                name = "Tolkien",
+                            ),
+                        ),
                     ),
                     buildEdition(
                         id = 2,
-                        authors = listOf(Author(
-                            id = 2,
-                            name = "Adams",
-                        ),),
+                        authors = listOf(
+                            Author(
+                                id = 2,
+                                name = "Adams",
+                            ),
+                        ),
                     ),
                 )
 
@@ -147,17 +151,21 @@ class LibrarySortTest {
                 val editions = listOf(
                     buildEdition(
                         id = 1,
-                        authors = listOf(Author(
-                            id = 1,
-                            name = "Adams",
-                        ),),
+                        authors = listOf(
+                            Author(
+                                id = 1,
+                                name = "Adams",
+                            ),
+                        ),
                     ),
                     buildEdition(
                         id = 2,
-                        authors = listOf(Author(
-                            id = 2,
-                            name = "Tolkien",
-                        ),),
+                        authors = listOf(
+                            Author(
+                                id = 2,
+                                name = "Tolkien",
+                            ),
+                        ),
                     ),
                 )
 
@@ -225,21 +233,27 @@ class LibrarySortTest {
             @Test
             fun `sorts editions by release date ascending`() {
                 val editions = listOf(
-                    buildEdition(id = 1).copy(releaseDate = LocalDate(
-                        2023,
-                        5,
-                        1,
-                    ),),
-                    buildEdition(id = 2).copy(releaseDate = LocalDate(
-                        2021,
-                        1,
-                        15,
-                    ),),
-                    buildEdition(id = 3).copy(releaseDate = LocalDate(
-                        2022,
-                        9,
-                        30,
-                    ),),
+                    buildEdition(id = 1).copy(
+                        releaseDate = LocalDate(
+                            2023,
+                            5,
+                            1,
+                        ),
+                    ),
+                    buildEdition(id = 2).copy(
+                        releaseDate = LocalDate(
+                            2021,
+                            1,
+                            15,
+                        ),
+                    ),
+                    buildEdition(id = 3).copy(
+                        releaseDate = LocalDate(
+                            2022,
+                            9,
+                            30,
+                        ),
+                    ),
                 )
 
                 val result = editions.applyEditionSort(mode = LibrarySortMode.RELEASE_DATE)
@@ -251,11 +265,13 @@ class LibrarySortTest {
 
             @Test
             fun `edition with null release date sorts last`() {
-                val withDate = buildEdition(id = 1).copy(releaseDate = LocalDate(
-                    2020,
-                    1,
-                    1,
-                ),)
+                val withDate = buildEdition(id = 1).copy(
+                    releaseDate = LocalDate(
+                        2020,
+                        1,
+                        1,
+                    ),
+                )
                 val nullDate = buildEdition(id = 2).copy(releaseDate = null)
 
                 val editions = listOf(nullDate, withDate)
@@ -269,21 +285,27 @@ class LibrarySortTest {
             @Test
             fun `sorts editions by newest release date first when direction is DESCENDING`() {
                 val editions = listOf(
-                    buildEdition(id = 1).copy(releaseDate = LocalDate(
-                        2021,
-                        1,
-                        15,
-                    ),),
-                    buildEdition(id = 2).copy(releaseDate = LocalDate(
-                        2023,
-                        5,
-                        1,
-                    ),),
-                    buildEdition(id = 3).copy(releaseDate = LocalDate(
-                        2022,
-                        9,
-                        30,
-                    ),),
+                    buildEdition(id = 1).copy(
+                        releaseDate = LocalDate(
+                            2021,
+                            1,
+                            15,
+                        ),
+                    ),
+                    buildEdition(id = 2).copy(
+                        releaseDate = LocalDate(
+                            2023,
+                            5,
+                            1,
+                        ),
+                    ),
+                    buildEdition(id = 3).copy(
+                        releaseDate = LocalDate(
+                            2022,
+                            9,
+                            30,
+                        ),
+                    ),
                 )
 
                 val result = editions.applyEditionSort(

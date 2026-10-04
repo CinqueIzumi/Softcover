@@ -2,12 +2,8 @@ package nl.rhaydus.softcover.core.component.cover
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -21,11 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverInk
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -110,59 +104,6 @@ internal fun CoverlessTitleCover(
                 ),
                 color = MonogramCoverForeground,
             )
-        }
-    }
-}
-
-/**
- * Left column (48dp, a real shelf-thumbnail width): below [monogramCoverMetrics]'s full-title width
- * floor, so both a short and a long title degrade to the single-initial treatment. Right column
- * (160dp, a real library grid tile width): at that size the whole title renders, `TextAutoSize`
- * shrinking the long one to fit its line cap before it ellipsizes.
- */
-@StandardPreview
-@Composable
-private fun CoverlessTitleCoverPreview() {
-    SoftcoverTheme {
-        Row(
-            modifier = Modifier.width(400.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                CoverlessTitleCover(
-                    title = "It",
-                    modifier = Modifier
-                        .width(48.dp)
-                        .aspectRatio(2f / 3f),
-                )
-
-                CoverlessTitleCover(
-                    title = "The Very Long and Overwrought Title of a Book That Will Not Fit",
-                    modifier = Modifier
-                        .width(48.dp)
-                        .aspectRatio(2f / 3f),
-                )
-            }
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                CoverlessTitleCover(
-                    title = "It",
-                    modifier = Modifier
-                        .width(160.dp)
-                        .aspectRatio(2f / 3f),
-                )
-
-                CoverlessTitleCover(
-                    title = "The Very Long and Overwrought Title of a Book That Will Not Fit",
-                    modifier = Modifier
-                        .width(160.dp)
-                        .aspectRatio(2f / 3f),
-                )
-            }
         }
     }
 }

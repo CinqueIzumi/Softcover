@@ -75,10 +75,12 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy, horror)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
@@ -96,10 +98,12 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy, horror)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy, horror)
@@ -126,10 +130,12 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(genreTag, moodTag)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
             stateFlow.value.tagSuggestions shouldBe listOf(genreTag)
@@ -149,10 +155,12 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
@@ -173,10 +181,12 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
@@ -198,10 +208,12 @@ class TagSuggestionsCollectorTest {
             vocabularyFlow.value = listOf(fantasy)
 
             val collector = TagSuggestionsCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy)

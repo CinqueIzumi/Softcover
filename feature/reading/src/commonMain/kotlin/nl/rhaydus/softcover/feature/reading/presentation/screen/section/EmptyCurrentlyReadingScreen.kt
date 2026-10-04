@@ -10,16 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -35,9 +31,8 @@ internal fun EmptyCurrentlyReadingScreen(
     pickUpNextHeader: SectionHeaderUiModel,
     trendingHeader: SectionHeaderUiModel,
     emptyState: EmptyStateUiModel,
-    wantToReadBooks: List<Book> = emptyList(),
     trendingBooks: List<Book> = emptyList(),
-    pickUpNextCards: ImmutableList<BookCardUiModel> = persistentListOf(),
+    pickUpNext: BookCardSet<Book> = BookCardSet.empty(),
     trendingTileCover: CoverUiModel? = null,
     streakEnabled: Boolean = false,
     recentReadingActivity: List<ReadingDayActivity> = emptyList(),
@@ -47,13 +42,9 @@ internal fun EmptyCurrentlyReadingScreen(
 ) {
     // Mirrors CoverModelsCollector's own trendingBooks.firstOrNull(): the tile's cover is mapped there.
     val trendingTile = trendingBooks.firstOrNull()
-    val showAdaptive = pickUpNextCards.isNotEmpty() || trendingTile != null
-    val booksByKey = remember(wantToReadBooks) {
-        wantToReadBooks.associateBy { BookCardKey.Book(it.id) }
-    }
-
+    val showAdaptive = pickUpNext.isEmpty.not() || trendingTile != null
     val onPickUpNextEvent = rememberPrefetchingBookCardEventHandler(
-        resolve = booksByKey::get,
+        set = pickUpNext,
     ) { event, book ->
         if (event is BookCardEvent.Clicked) onBookClick(book)
     }
@@ -97,11 +88,11 @@ internal fun EmptyCurrentlyReadingScreen(
             )
         }
 
-        if (pickUpNextCards.isNotEmpty()) {
+        if (pickUpNext.isEmpty.not()) {
             Spacer(modifier = Modifier.height(40.dp))
 
             PickUpNextSection(
-                cards = pickUpNextCards,
+                cards = pickUpNext.cards,
                 header = pickUpNextHeader,
                 onEvent = onPickUpNextEvent,
             )

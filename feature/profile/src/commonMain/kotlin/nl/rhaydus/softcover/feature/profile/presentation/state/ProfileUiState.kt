@@ -1,8 +1,7 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
@@ -14,6 +13,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
+import nl.rhaydus.softcover.core.profile.domain.model.LovedBook
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
@@ -34,7 +34,7 @@ internal data class ProfileUiState(
     val userProfileData: UserProfileData? = null,
     val readingLife: ReadingLife? = null,
     val readingLifeShareCard: ReadingLifeShareCardUiModel? = null,
-    val recentlyLovedCards: ImmutableList<BookCardUiModel> = RECENTLY_LOVED_STAND_IN_CARDS,
+    val recentlyLoved: BookCardSet<LovedBook> = BookCardSet.standIns(RECENTLY_LOVED_STAND_IN_CARDS),
     val hideUntaggedAuthors: Boolean = false,
 
     /** Mapped by \`HideUntaggedAuthorsCollector\` alongside [hideUntaggedAuthors]. */
@@ -111,7 +111,7 @@ internal data class ProfileUiState(
 
     /**
      * Whether the reader has any loved reads to show. Read from [readingLife] rather than the mapped
-     * [recentlyLovedCards], which land a frame later and would flash the empty copy.
+     * [recentlyLoved], which land a frame later and would flash the empty copy.
      */
     val hasRecentlyLoved: Boolean
         get() = readingLife?.recentlyLoved.orEmpty().isNotEmpty()

@@ -1,11 +1,10 @@
 package nl.rhaydus.softcover.core.uibinding.deadline
 
-import nl.rhaydus.common.secondsToHm
-import nl.rhaydus.softcover.core.component.badge.BadgeSize
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -14,11 +13,7 @@ import nl.rhaydus.softcover.core.domain.model.DeadlineStatus
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import kotlin.math.ceil
 
-/**
- * A deadline's progress as the badge that should represent it — the status label as the badge's
- * text, and the tone `DeadlineBadge` used to pick per-status colours before this became a mapper
- * output instead of a `when` inline in the component.
- */
+/** A deadline's progress as a badge: the status label as its text, toned by status. */
 fun DeadlineProgress.toBadgeUiModel(): BadgeUiModel {
     val tone = when (status) {
         DeadlineStatus.OnTrack -> BadgeTone.PrimaryContainer
@@ -29,14 +24,10 @@ fun DeadlineProgress.toBadgeUiModel(): BadgeUiModel {
     return BadgeUiModel(
         label = status.label,
         tone = tone,
-        size = BadgeSize.Compact,
     )
 }
 
-/**
- * A deadline's progress as a cover overlay — greyscaled exactly on [DeadlineStatus.Expired], the
- * same condition `DeadlineCoverOverlay` checked directly.
- */
+/** A deadline's progress as a cover overlay, greyscaled exactly on [DeadlineStatus.Expired]. */
 fun DeadlineProgress.toCoverOverlayUiModel(): CoverOverlayUiModel =
     CoverOverlayUiModel(
         badge = toBadgeUiModel(),
@@ -58,19 +49,52 @@ fun DeadlineProgress.toDeadlineSummaryUiModel(
     val paceText = if (status == DeadlineStatus.Expired) {
         status.label
     } else {
-        val pace = ceil(requiredPerDay).toInt()
-        when (unit) {
-            DeadlineUnit.PAGES -> {
-                val pageLabel = if (pace == 1) "page" else "pages"
-                "$pace $pageLabel/day"
-            }
-
-            DeadlineUnit.SECONDS -> "${secondsToHm(pace)}/day"
-        }
+        formatPacePerDay(
+            amount = ceil(requiredPerDay).toInt(),
+            unit = unit,
+        )
     }
 
     return DeadlineSummaryUiModel(
         text = "$dateText • $paceText",
         tone = tone,
     )
+}
+
+/**
+ * A deadline's progress as the deadline card: the "Finish by" date in [dateStyle], the status badge
+ * and the goal sentence. An expired deadline says how long ago it passed; otherwise the goal states
+ * the pace needed for the remaining days, prefixed by how far behind the reader is when they are.
+ */
+fun DeadlineProgress.toDeadlineRowUiModel(dateStyle: DateStyle): DeadlineRowUiModel =
+    DeadlineRowUiModel(
+        title = "Finish by ${dateStyle.formatter.format(deadline)}",
+        badge = toBadgeUiModel(),
+        goal = goalText(),
+        isExpired = isExpired,
+    )
+
+private fun DeadlineProgress.goalText(): String {
+    if (isExpired) {
+        val daysPast = -daysRemaining
+
+        return "Deadline passed $daysPast ${if (daysPast == 1L) "day" else "days"} ago."
+    }
+
+    val verb = if (unit == DeadlineUnit.SECONDS) "Listen to" else "Read"
+    val dayLabel = if (daysRemaining == 1L) "day" else "days"
+    val pace = formatPacePerDay(
+        amount = ceil(requiredPerDay).toInt(),
+        unit = unit,
+    )
+    val base = "$verb $pace for the next $daysRemaining $dayLabel to finish on time."
+
+    if (isOnTrack || unitsBehindSchedule <= 0) return base
+
+    val behind = formatUnitAmount(
+        amount = unitsBehindSchedule,
+        unit = unit,
+    )
+
+    return "You're $behind behind schedule — $base"
 }

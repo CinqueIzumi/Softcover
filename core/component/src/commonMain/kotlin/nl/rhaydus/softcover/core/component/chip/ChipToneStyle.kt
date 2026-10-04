@@ -72,6 +72,5 @@ private fun tonalStyle(
         container = scheme.surfaceContainerHigh,
         ink = scheme.onSurface,
         weight = FontWeight.Medium,
-        mutedInk = scheme.onSurfaceVariant,
     )
 }

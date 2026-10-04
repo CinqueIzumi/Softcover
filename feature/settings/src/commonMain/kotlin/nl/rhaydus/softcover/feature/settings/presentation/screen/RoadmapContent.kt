@@ -43,21 +43,6 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.RefreshRoadmapA
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.model.RoadmapRenderUnit
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
-
-private val LIST_ITEM_RESTLINE_INDENT = 20.sp
-private val STAND_IN_HEADING = RoadmapRenderUnit.Heading(
-    header = SectionHeaderUiModel.Section(
-        eyebrow = "0.0.0",
-        headline = "Roadmap entry title",
-    ),
-)
-private val STAND_IN_LIST = RoadmapRenderUnit.ListGroup(
-    items = List(3) {
-        RoadmapBlock.BulletListItem(
-            spans = listOf(RoadmapSpan(text = "A roadmap item describing what is coming next")),
-        )
-    },
-)
 // region Roadmap content
 /**
  * The Roadmap screen body, shared by the mobile [RoadmapScreen] page, the desktop standalone
@@ -77,54 +62,10 @@ internal fun RoadmapContent(
     openUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (state.isLoading) {
-        RoadmapLoadingBody(modifier = modifier.fillMaxWidth())
-    } else {
-        RoadmapLoadedBody(
-            state = state,
-            runAction = runAction,
-            openUrl = openUrl,
-            modifier = modifier.fillMaxWidth(),
-        )
-    }
-}
-
-@Composable
-private fun RoadmapLoadingBody(modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
-        repeat(3) { entry ->
-            if (entry > 0) {
-                Spacer(modifier = Modifier.height(STAND_IN_HEADING.leadingSpacing()))
-            }
-
-            RoadmapUnitContent(
-                unit = STAND_IN_HEADING,
-                openUrl = {},
-                isLoading = true,
-            )
-
-            Spacer(modifier = Modifier.height(STAND_IN_LIST.leadingSpacing()))
-
-            RoadmapUnitContent(
-                unit = STAND_IN_LIST,
-                openUrl = {},
-                isLoading = true,
-            )
-        }
-    }
-}
-
-@Composable
-private fun RoadmapLoadedBody(
-    state: RoadmapUiState,
-    runAction: (RoadmapAction) -> Unit,
-    openUrl: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
     val document = state.document
 
-    Column(modifier = modifier) {
-        if (document != null) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        if (document != null || state.isLoading) {
             if (state.roadmapError != null) {
                 RoadmapErrorBanner(
                     message = state.roadmapError,
@@ -135,7 +76,7 @@ private fun RoadmapLoadedBody(
             }
 
             RoadmapDocumentBody(
-                document = document,
+                isBundled = document?.source == RoadmapSource.BUNDLED,
                 renderUnits = state.renderUnits,
                 lastUpdatedText = state.lastUpdatedText,
                 openUrl = openUrl,
@@ -164,13 +105,13 @@ private fun RoadmapErrorBanner(
 
 @Composable
 private fun RoadmapDocumentBody(
-    document: RoadmapDocument,
+    isBundled: Boolean,
     renderUnits: List<RoadmapRenderUnit>,
     lastUpdatedText: String?,
     openUrl: (String) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        if (document.source == RoadmapSource.BUNDLED) {
+        if (isBundled) {
             SoftcoverText(
                 text = "Showing the roadmap that shipped with this build — reconnect to see what's " +
                     "changed since.",
@@ -223,13 +164,9 @@ private fun RoadmapRenderUnit.leadingSpacing() = when (this) {
 private fun RoadmapUnitContent(
     unit: RoadmapRenderUnit,
     openUrl: (String) -> Unit,
-    isLoading: Boolean = false,
 ) {
     when (unit) {
-        is RoadmapRenderUnit.Heading -> SectionHeader(
-            model = unit.header,
-            modifier = Modifier.skeletonMask(visible = isLoading),
-        )
+        is RoadmapRenderUnit.Heading -> SectionHeader(model = unit.header)
 
         is RoadmapRenderUnit.PlainHeading -> SoftcoverText(
             text = unit.text,
@@ -240,7 +177,7 @@ private fun RoadmapUnitContent(
         is RoadmapRenderUnit.ListGroup -> RoadmapList(
             items = unit.items,
             openUrl = openUrl,
-            isLoading = isLoading,
+            isLoading = unit.isLoading,
         )
 
         is RoadmapRenderUnit.Paragraph -> RoadmapParagraph(
@@ -359,7 +296,7 @@ private fun roadmapAnnotatedString(
         if (leadingMarker != null) {
             val hangingIndent = TextIndent(
                 firstLine = 0.sp,
-                restLine = LIST_ITEM_RESTLINE_INDENT,
+                restLine = 20.sp,
             )
 
             pushStyle(style = ParagraphStyle(textIndent = hangingIndent))

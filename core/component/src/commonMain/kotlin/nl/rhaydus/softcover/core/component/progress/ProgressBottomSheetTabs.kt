@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.common.toHoursMinutesSeconds
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
@@ -28,6 +27,7 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import kotlin.math.min
 
@@ -42,7 +42,7 @@ internal fun ColumnScope.ProgressBottomSheetPageContent(
         charCount = 4,
         noun = "page",
         unitSymbol = null,
-        suffix = if (medium.hasKnownTotal) "of ${medium.totalPages} pages" else null,
+        suffix = medium.suffix,
         onSubmit = { page ->
             onEvent(
                 ProgressSheetEvent.PagesSubmitted(
@@ -80,19 +80,6 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
     medium: ProgressSheetMedium.Timed,
     onEvent: (ProgressSheetEvent) -> Unit,
 ) {
-    val totalSeconds = medium.totalSeconds
-    val totalHms = totalSeconds.toHoursMinutesSeconds()
-
-    val currentSeconds = (medium.hours.text.toIntOrNull() ?: 0) * 3600 +
-        (medium.minutes.text.toIntOrNull() ?: 0) * 60 +
-        (medium.seconds.text.toIntOrNull() ?: 0)
-
-    val fraction = if (medium.hasKnownTotal) {
-        currentSeconds.toFloat() / totalSeconds
-    } else {
-        0f
-    }
-
     // Every time field's key is its ProgressTimeUnit name, so one handler serves all three.
     val onTimeFieldEvent: (TextFieldEvent) -> Unit = remember(onEvent) {
         { event ->
@@ -123,7 +110,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
         TimeColon()
 
         StepperCircle(
-            symbol = "−",
+            icon = SoftcoverIcon.Remove,
             contentDescription = "Decrease minutes",
             onClick = { onEvent(ProgressSheetEvent.MinutesStepped(delta = -1)) },
             modifier = Modifier.padding(end = 6.dp),
@@ -135,7 +122,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
         )
 
         StepperCircle(
-            symbol = "+",
+            icon = SoftcoverIcon.Add,
             contentDescription = "Increase minutes",
             onClick = { onEvent(ProgressSheetEvent.MinutesStepped(delta = 1)) },
             modifier = Modifier.padding(start = 6.dp),
@@ -149,22 +136,9 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
         )
     }
 
-    val hours = totalHms.hours.toString().padStart(
-        length = 2,
-        padChar = '0',
-    )
-    val minutes = totalHms.minutes.toString().padStart(
-        length = 2,
-        padChar = '0',
-    )
-    val seconds = totalHms.seconds.toString().padStart(
-        length = 2,
-        padChar = '0',
-    )
-
     ProgressSheetFooter(
-        suffix = if (medium.hasKnownTotal) "of $hours:$minutes:$seconds" else null,
-        fraction = fraction,
+        suffix = medium.suffix,
+        fraction = medium.fraction,
         onSubmit = {
             onEvent(
                 ProgressSheetEvent.TimeSubmitted(
@@ -224,7 +198,7 @@ private fun ColumnScope.SteppedNumberContent(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         StepperCircle(
-            symbol = "−",
+            icon = SoftcoverIcon.Remove,
             contentDescription = "Decrease $noun",
             onClick = { stepBy(-1) },
         )
@@ -291,7 +265,7 @@ private fun ColumnScope.SteppedNumberContent(
         Spacer(modifier = Modifier.width(18.dp))
 
         StepperCircle(
-            symbol = "+",
+            icon = SoftcoverIcon.Add,
             contentDescription = "Increase $noun",
             onClick = { stepBy(1) },
         )

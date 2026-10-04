@@ -107,18 +107,24 @@ class RateLimitInterceptorTest {
         remaining: Int? = null,
         retryAfterSeconds: Long? = null,
     ): List<HttpHeader> = listOfNotNull(
-        limit?.let { HttpHeader(
-            "X-Ratelimit-Limit",
-            it.toString(),
-        ) },
-        remaining?.let { HttpHeader(
-            "X-Ratelimit-Remaining",
-            it.toString(),
-        ) },
-        retryAfterSeconds?.let { HttpHeader(
-            "Retry-After",
-            it.toString(),
-        ) },
+        limit?.let {
+            HttpHeader(
+                "X-Ratelimit-Limit",
+                it.toString(),
+            )
+        },
+        remaining?.let {
+            HttpHeader(
+                "X-Ratelimit-Remaining",
+                it.toString(),
+            )
+        },
+        retryAfterSeconds?.let {
+            HttpHeader(
+                "Retry-After",
+                it.toString(),
+            )
+        },
     )
 
     @Suppress("DEPRECATION")
@@ -483,7 +489,9 @@ class RateLimitInterceptorTest {
             } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
                 limit = 5,
                 remaining = 4,
-            ),),)
+            ),
+            ),
+            )
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -534,14 +542,18 @@ class RateLimitInterceptorTest {
                     emit(successResponseWithHeaders(rateLimitHeaders(
                         limit = 4,
                         remaining = 3,
-                    ),),)
+                    ),
+                    ),
+                    )
                 }
                 val responseB = flow {
                     delay(10.seconds)
                     emit(successResponseWithHeaders(rateLimitHeaders(
                         limit = 4,
                         remaining = 3,
-                    ),),)
+                    ),
+                    ),
+                    )
                 }
                 every {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
@@ -597,7 +609,9 @@ class RateLimitInterceptorTest {
                 } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
                     limit = 10,
                     remaining = 8,
-                ),),)
+                ),
+                ),
+                )
                 // Cold start: exactly one request can go before any response arrives. It is also the
                 // only one outstanding, so its response's higher remaining=8 must be trusted upward.
                 interceptor.intercept(
@@ -639,14 +653,18 @@ class RateLimitInterceptorTest {
                 emit(successResponseWithHeaders(rateLimitHeaders(
                     limit = 8,
                     remaining = 1,
-                ),),)
+                ),
+                ),
+                )
             }
             val responseB = flow {
                 delay(10.seconds)
                 emit(successResponseWithHeaders(rateLimitHeaders(
                     limit = 8,
                     remaining = 1,
-                ),),)
+                ),
+                ),
+                )
             }
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
@@ -718,7 +736,9 @@ class RateLimitInterceptorTest {
                 } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
                     limit = 4,
                     remaining = 4,
-                ),),)
+                ),
+                ),
+                )
                 interceptor.intercept(
                     baseRequest,
                     chain,
@@ -778,7 +798,9 @@ class RateLimitInterceptorTest {
                 } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
                     limit = 4,
                     remaining = 4,
-                ),),)
+                ),
+                ),
+                )
                 interceptor.intercept(
                     baseRequest,
                     chain,
@@ -859,7 +881,9 @@ class RateLimitInterceptorTest {
                 limit = 9,
                 remaining = 9,
                 retryAfterSeconds = 5,
-            ),),)
+            ),
+            ),
+            )
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -897,7 +921,9 @@ class RateLimitInterceptorTest {
             } returns flowOf(tooManyRequestsResponse(rateLimitHeaders(
                 limit = 10,
                 remaining = 8,
-            ),),)
+            ),
+            ),
+            )
             interceptor.intercept(
                 baseRequest,
                 chain,
@@ -931,7 +957,8 @@ class RateLimitInterceptorTest {
                     limit = 5,
                     remaining = 3,
                     retryAfterSeconds = 1,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act — the first call is the one that receives the 429 and its hold -----
@@ -972,7 +999,9 @@ class RateLimitInterceptorTest {
             } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
                 limit = 10,
                 remaining = 1,
-            ),),)
+            ),
+            ),
+            )
             // This is the exact scenario that produced the real 429: the server reports one token left.
             interceptor.intercept(
                 baseRequest,

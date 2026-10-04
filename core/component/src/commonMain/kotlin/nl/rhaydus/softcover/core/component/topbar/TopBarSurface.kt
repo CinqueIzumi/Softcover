@@ -10,11 +10,11 @@ package nl.rhaydus.softcover.core.component.topbar
  */
 enum class TopBarSurface {
     /** The page's own background — the bar fills with the theme's app-bar container. */
-    OPAQUE,
+    Opaque,
 
     /**
      * Cover art or another image scrolling beneath a transparent bar. Controls take a dark scrim and
      * white ink so they read against whatever passes under them.
      */
-    OVER_MEDIA,
+    OverMedia,
 }

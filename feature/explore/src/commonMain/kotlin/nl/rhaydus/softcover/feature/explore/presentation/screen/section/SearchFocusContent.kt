@@ -4,8 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,18 +19,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.chip.ChipFlow
+import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnMoodChipClickedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAction
@@ -48,7 +46,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 internal fun SearchFocusContent(
     queries: List<String>,
-    moodChips: ImmutableList<ChipUiModel>,
+    moodChips: ChipSet<MoodTag>,
     runAction: (ExploreAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -92,16 +90,21 @@ internal fun SearchFocusContent(
             Spacer(modifier = Modifier.height(28.dp))
         }
 
-        if (moodChips.isNotEmpty()) {
+        if (moodChips.isEmpty.not()) {
             SoftcoverText(
                 text = "TRY A MOOD",
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            FlowRowMoodChips(
-                chips = moodChips,
-                runAction = runAction,
+            ChipFlow(
+                set = moodChips,
+                onEvent = { event, _ ->
+                    if (event is ChipEvent.Clicked) {
+                        runAction(OnMoodChipClickedAction(key = event.key))
+                    }
+                },
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -177,26 +180,3 @@ private fun SearchFocusRecentRow(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun FlowRowMoodChips(
-    chips: ImmutableList<ChipUiModel>,
-    runAction: (ExploreAction) -> Unit,
-) {
-    FlowRow(
-        modifier = Modifier.padding(top = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(9.dp),
-        verticalArrangement = Arrangement.spacedBy(9.dp),
-    ) {
-        chips.forEach { chip ->
-            Chip(
-                model = chip,
-                onEvent = { event ->
-                    if (event is ChipEvent.Clicked) {
-                        runAction(OnMoodChipClickedAction(key = event.key))
-                    }
-                },
-            )
-        }
-    }
-}

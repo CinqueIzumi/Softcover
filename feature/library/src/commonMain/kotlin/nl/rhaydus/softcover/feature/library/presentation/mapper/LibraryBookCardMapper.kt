@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -22,6 +23,7 @@ import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.uibinding.book.bookStatsLine
 import nl.rhaydus.softcover.core.uibinding.book.byline
 import nl.rhaydus.softcover.core.uibinding.book.seriesEyebrow
+import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toBadgeUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.uibinding.format.percentLabel
@@ -48,7 +50,10 @@ internal fun Book.toBookCard(
             -> {
             variant = BookCardVariant.CoverOnly(
                 cover = BookCardCover(
-                    model = toShelfBookCover(),
+                    model = toCoverUiModel(
+                        variant = CoverVariant.Shelf,
+                        shareTransition = true,
+                    ),
                     badge = deadlineProgress?.toCountdownCoverOverlayUiModel(),
                 ),
             )
@@ -63,7 +68,10 @@ internal fun Book.toBookCard(
             -> {
             variant = BookCardVariant.Column(
                 cover = BookCardCover(
-                    model = toShelfBookCover(),
+                    model = toCoverUiModel(
+                        variant = CoverVariant.Shelf,
+                        shareTransition = true,
+                    ),
                     badge = deadlineProgress?.toCountdownCoverOverlayUiModel(),
                 ),
                 text = BookCardContent(
@@ -93,7 +101,14 @@ internal fun Book.toBookCard(
 
         LibraryGridLayout.LIST_LARGE -> {
             variant = libraryLargeRow(
-                lead = BookCardLead.Cover(cover = BookCardCover(model = toShelfBookCover())),
+                lead = BookCardLead.Cover(
+                    cover = BookCardCover(
+                        model = toCoverUiModel(
+                            variant = CoverVariant.Shelf,
+                            shareTransition = true,
+                        ),
+                    ),
+                ),
                 text = BookCardContent(
                     title = title,
                     eyebrow = seriesEyebrow(seriesText = seriesText),

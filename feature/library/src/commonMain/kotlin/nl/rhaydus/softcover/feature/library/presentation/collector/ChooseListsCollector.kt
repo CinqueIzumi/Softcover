@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.uibinding.cover.toCoverUiModel
 import nl.rhaydus.softcover.core.uibinding.lists.toBulkChooseListsUiModel
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -12,13 +13,6 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVaria
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
 
-/** How many covers the bulk header's rotated jacket stack shows. */
-private const val STACKED_COVER_COUNT: Int = 3
-
-/**
- * Maps the bulk selection and the reader's custom lists to the choose-lists sheet off the
- * composition (R9).
- */
 internal class ChooseListsCollector : LibraryCollector {
     override suspend fun onLaunch(
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
@@ -30,7 +24,7 @@ internal class ChooseListsCollector : LibraryCollector {
                     selectedBookIds = state.selectedBookIds,
                     customLists = state.customLists,
                     listsBeingMutated = state.listsBeingMutated,
-                    jacketBooks = state.resolveSelectedBooks().take(STACKED_COVER_COUNT),
+                    jacketBooks = state.resolveSelectedBooks().take(SheetHeaderTrailing.JacketStack.MAX_COVERS),
                 )
             }
             .distinctUntilChanged()
@@ -45,13 +39,11 @@ internal class ChooseListsCollector : LibraryCollector {
                         book.toCoverUiModel(variant = CoverVariant.StackedJacket)
                     }
 
-                    snapshot.customLists
-                        .filter { it.isOwned.not() }
-                        .toBulkChooseListsUiModel(
-                            bookIds = snapshot.selectedBookIds,
-                            covers = covers,
-                            listsBeingMutated = snapshot.listsBeingMutated,
-                        )
+                    snapshot.customLists.toBulkChooseListsUiModel(
+                        bookIds = snapshot.selectedBookIds,
+                        covers = covers,
+                        listsBeingMutated = snapshot.listsBeingMutated,
+                    )
                 }
 
                 scope.setState { it.copy(chooseListsSheet = model) }

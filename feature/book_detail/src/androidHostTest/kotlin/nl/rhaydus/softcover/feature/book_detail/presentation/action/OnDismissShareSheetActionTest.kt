@@ -70,33 +70,11 @@ class OnDismissShareSheetActionTest {
         }
 
         @Test
-        fun `clears both busy flags`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
-                isSharing = true,
-                isSavingToGallery = true,
-            )
-            val action = OnDismissShareSheetAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isSharing shouldBe false
-            stateFlow.value.isSavingToGallery shouldBe false
-        }
-
-        @Test
         fun `does not mutate any other state field`() = runTest {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(
                 isShareSheetVisible = true,
                 chosenShareVariant = ShareCardVariant.BOOK,
-                isSharing = true,
-                isSavingToGallery = true,
                 editionSearchQuery = "dune",
             )
             val initialState = stateFlow.value
@@ -112,8 +90,6 @@ class OnDismissShareSheetActionTest {
             stateFlow.value shouldBe initialState.copy(
                 isShareSheetVisible = false,
                 chosenShareVariant = null,
-                isSharing = false,
-                isSavingToGallery = false,
             )
         }
     }

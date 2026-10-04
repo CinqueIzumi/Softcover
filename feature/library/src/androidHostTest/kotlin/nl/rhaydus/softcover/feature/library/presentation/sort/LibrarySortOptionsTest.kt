@@ -93,10 +93,12 @@ class LibrarySortOptionsTest {
                 listName = "TBR",
             )
             val state = LibraryUiState(
-                customLists = listOf(buildBookList(
-                    id = 1,
-                    ranked = false,
-                ),),
+                customLists = listOf(
+                    buildBookList(
+                        id = 1,
+                        ranked = false,
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -123,10 +125,12 @@ class LibrarySortOptionsTest {
                 listName = "Favorites",
             )
             val state = LibraryUiState(
-                customLists = listOf(buildBookList(
-                    id = 1,
-                    ranked = true,
-                ),),
+                customLists = listOf(
+                    buildBookList(
+                        id = 1,
+                        ranked = true,
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -179,14 +183,20 @@ class LibrarySortOptionsTest {
                 listName = "TBR",
             )
             val state = LibraryUiState(
-                customLists = listOf(buildBookList(
-                    id = 1,
-                    ranked = false,
-                ),),
-                booksByTab = mapOf(tab.id to listOf(buildBook(
-                    id = 1,
-                    status = BookStatus.Reading,
-                ),),),
+                customLists = listOf(
+                    buildBookList(
+                        id = 1,
+                        ranked = false,
+                    ),
+                ),
+                booksByTab = mapOf(
+                    tab.id to listOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Reading,
+                        ),
+                    ),
+                ),
             )
 
             // ----- Act -----
@@ -247,10 +257,12 @@ class LibrarySortOptionsTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 booksByTab = mapOf(
-                    LibraryTab.All.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Reading,
-                    ),),
+                    LibraryTab.All.id to listOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Reading,
+                        ),
+                    ),
                 ),
             )
 
@@ -269,10 +281,12 @@ class LibrarySortOptionsTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 booksByTab = mapOf(
-                    LibraryTab.All.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Read,
-                    ),),
+                    LibraryTab.All.id to listOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Read,
+                        ),
+                    ),
                 ),
             )
 
@@ -291,10 +305,12 @@ class LibrarySortOptionsTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 booksByTab = mapOf(
-                    LibraryTab.All.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.WantToRead,
-                    ),),
+                    LibraryTab.All.id to listOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.WantToRead,
+                        ),
+                    ),
                 ),
                 deadlines = mapOf(1 to buildDeadline(bookId = 1)),
             )
@@ -402,10 +418,12 @@ class LibrarySortOptionsTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 booksByTab = mapOf(
-                    tab.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Read,
-                    ),),
+                    tab.id to listOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Read,
+                        ),
+                    ),
                 ),
             )
 
@@ -470,10 +488,12 @@ class LibrarySortOptionsTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 booksByTab = mapOf(
-                    tab.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Reading,
-                    ),),
+                    tab.id to listOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Reading,
+                        ),
+                    ),
                 ),
             )
 
@@ -493,10 +513,12 @@ class LibrarySortOptionsTest {
             // ----- Arrange -----
             val state = LibraryUiState(
                 booksByTab = mapOf(
-                    tab.id to listOf(buildBook(
-                        id = 5,
-                        status = BookStatus.WantToRead,
-                    ),),
+                    tab.id to listOf(
+                        buildBook(
+                            id = 5,
+                            status = BookStatus.WantToRead,
+                        ),
+                    ),
                 ),
                 deadlines = mapOf(5 to buildDeadline(bookId = 5)),
             )
@@ -518,10 +540,12 @@ class LibrarySortOptionsTest {
             val state = LibraryUiState(
                 booksByTab = mapOf(
                     tab.id to emptyList(),
-                    otherTab.id to listOf(buildBook(
-                        id = 1,
-                        status = BookStatus.Reading,
-                    ),),
+                    otherTab.id to listOf(
+                        buildBook(
+                            id = 1,
+                            status = BookStatus.Reading,
+                        ),
+                    ),
                 ),
             )
 

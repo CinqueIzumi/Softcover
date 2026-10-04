@@ -77,10 +77,12 @@ class BookDeadlinesCollectorTest {
             val expectedMap = mapOf(1 to deadline1, 2 to deadline2)
 
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             deadlinesFlow.emit(expectedMap)
@@ -94,10 +96,12 @@ class BookDeadlinesCollectorTest {
         fun `sets state deadlines to empty map when flow emits empty map`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             deadlinesFlow.emit(emptyMap())
@@ -114,10 +118,12 @@ class BookDeadlinesCollectorTest {
             val secondMap = mapOf(2 to buildDeadline(bookId = 2), 3 to buildDeadline(bookId = 3))
 
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             deadlinesFlow.emit(firstMap)
@@ -132,10 +138,12 @@ class BookDeadlinesCollectorTest {
         fun `does not change deadlines before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.deadlines shouldBe emptyMap()
@@ -147,10 +155,12 @@ class BookDeadlinesCollectorTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(isLoading = false)
             val collector = BookDeadlinesCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             deadlinesFlow.emit(mapOf(1 to buildDeadline(bookId = 1)))

@@ -5,19 +5,12 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import kotlinx.collections.immutable.persistentListOf
-import nl.rhaydus.softcover.core.component.chip.ChipInteraction
-import nl.rhaydus.softcover.core.component.chip.ChipLeading
-import nl.rhaydus.softcover.core.component.chip.ChipSize
-import nl.rhaydus.softcover.core.component.chip.ChipTone
-import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
-import nl.rhaydus.softcover.core.component.state.EmptyStateVariant
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import org.junit.jupiter.api.Nested
@@ -60,10 +53,12 @@ class ChooseListsMapperTest {
         @Test
         fun `header shelves the book with the title and a jacket of its cover`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = emptyList(),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = emptyList(),
+                ),
+            )
             val cover = coverUiModel()
 
             // ----- Act -----
@@ -102,10 +97,12 @@ class ChooseListsMapperTest {
         @Test
         fun `caption is just the book count, with no membership suffix`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = (0 until 12).toList(),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = (0 until 12).toList(),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toChooseListsUiModel(
@@ -122,10 +119,12 @@ class ChooseListsMapperTest {
         @Test
         fun `membership chip label is On the list when the book is a member`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(42),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(42),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toChooseListsUiModel(
@@ -136,16 +135,18 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().membershipChip.label shouldBe "On the list"
+            result.rows.single().chipLabel shouldBe "On the list"
         }
 
         @Test
         fun `membership chip label is Add when the book is not a member`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(99),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(99),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toChooseListsUiModel(
@@ -156,7 +157,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().membershipChip.label shouldBe "Add"
+            result.rows.single().chipLabel shouldBe "Add"
         }
     }
 
@@ -165,10 +166,12 @@ class ChooseListsMapperTest {
         @Test
         fun `membership is NONE when none of the selected books are on the list`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(100, 101),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(100, 101),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -184,10 +187,12 @@ class ChooseListsMapperTest {
         @Test
         fun `membership is PARTIAL when some of the selected books are on the list`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(1, 2, 100),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(1, 2, 100),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -203,10 +208,12 @@ class ChooseListsMapperTest {
         @Test
         fun `membership is ALL when every selected book is on the list`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(1, 2, 3, 100),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(1, 2, 3, 100),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -225,10 +232,12 @@ class ChooseListsMapperTest {
         @Test
         fun `caption reads ALL n HERE when every selected book is on the list`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = (0 until 12).toList(),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = (0 until 12).toList(),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -244,10 +253,12 @@ class ChooseListsMapperTest {
         @Test
         fun `caption reads m OF n HERE when some selected books are on the list`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(0, 1, 2, 105),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(0, 1, 2, 105),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -263,10 +274,12 @@ class ChooseListsMapperTest {
         @Test
         fun `caption reads NONE YET when no selected books are on the list`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = (200 until 231).toList(),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = (200 until 231).toList(),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -285,10 +298,12 @@ class ChooseListsMapperTest {
         @Test
         fun `membership chip label is On all n when every selected book is on the list`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(0, 1, 2, 3, 4),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(0, 1, 2, 3, 4),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -298,16 +313,18 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().membershipChip.label shouldBe "On all 5"
+            result.rows.single().chipLabel shouldBe "On all 5"
         }
 
         @Test
         fun `membership chip label is Add the other n when some selected books are on the list`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(0, 1, 2),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(0, 1, 2),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -317,16 +334,18 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().membershipChip.label shouldBe "Add the other 2"
+            result.rows.single().chipLabel shouldBe "Add the other 2"
         }
 
         @Test
         fun `membership chip label is Add all n when no selected books are on the list`() {
             // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(100, 101),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(100, 101),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -336,173 +355,7 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.rows.single().membershipChip.label shouldBe "Add all 5"
-        }
-    }
-
-    @Nested
-    inner class MembershipChipMapping {
-        @Test
-        fun `membership chip is Container-toned with a Close trailing icon when membership is ALL`() {
-            // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(0, 1),
-            ),)
-
-            // ----- Act -----
-            val result = lists.toBulkChooseListsUiModel(
-                bookIds = setOf(0, 1),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            val chip = result.rows.single().membershipChip
-            chip.tone shouldBe ChipTone.Container
-            chip.trailing shouldBe ChipTrailing.Icon(
-                icon = SoftcoverIcon.Close,
-                description = "Remove from list",
-            )
-        }
-
-        @Test
-        fun `membership chip is Filled-toned with an Add leading icon when membership is PARTIAL`() {
-            // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(0),
-            ),)
-
-            // ----- Act -----
-            val result = lists.toBulkChooseListsUiModel(
-                bookIds = setOf(0, 1),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            val chip = result.rows.single().membershipChip
-            chip.tone shouldBe ChipTone.Filled
-            chip.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.Add)
-        }
-
-        @Test
-        fun `membership chip is Outlined-toned with an Add leading icon when membership is NONE`() {
-            // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(100),
-            ),)
-
-            // ----- Act -----
-            val result = lists.toBulkChooseListsUiModel(
-                bookIds = setOf(0, 1),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            val chip = result.rows.single().membershipChip
-            chip.tone shouldBe ChipTone.Outlined
-            chip.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.Add)
-        }
-
-        @Test
-        fun `membership chip interaction is always Inert`() {
-            // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(0),
-            ),)
-
-            // ----- Act -----
-            val result = lists.toChooseListsUiModel(
-                bookId = 0,
-                bookTitle = "Piranesi",
-                cover = coverUiModel(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            result.rows.single().membershipChip.interaction shouldBe ChipInteraction.Inert
-        }
-
-        @Test
-        fun `membership chip size is always Compact`() {
-            // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(0),
-            ),)
-
-            // ----- Act -----
-            val result = lists.toChooseListsUiModel(
-                bookId = 0,
-                bookTitle = "Piranesi",
-                cover = coverUiModel(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            result.rows.single().membershipChip.size shouldBe ChipSize.Compact
-        }
-
-        @Test
-        fun `membership chip trailing is null when membership is PARTIAL`() {
-            // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(0),
-            ),)
-
-            // ----- Act -----
-            val result = lists.toBulkChooseListsUiModel(
-                bookIds = setOf(0, 1),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            result.rows.single().membershipChip.trailing shouldBe null
-        }
-
-        @Test
-        fun `membership chip trailing is null when membership is NONE`() {
-            // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(100),
-            ),)
-
-            // ----- Act -----
-            val result = lists.toBulkChooseListsUiModel(
-                bookIds = setOf(0, 1),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            result.rows.single().membershipChip.trailing shouldBe null
-        }
-
-        @Test
-        fun `membership chip leading is null when membership is ALL`() {
-            // ----- Arrange -----
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = listOf(0, 1),
-            ),)
-
-            // ----- Act -----
-            val result = lists.toBulkChooseListsUiModel(
-                bookIds = setOf(0, 1),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            result.rows.single().membershipChip.leading shouldBe null
+            result.rows.single().chipLabel shouldBe "Add all 5"
         }
     }
 
@@ -540,10 +393,12 @@ class ChooseListsMapperTest {
         fun `covers above 3 are capped down to the first 3`() {
             // ----- Arrange -----
             val covers = List(5) { coverUiModel() }
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = emptyList(),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = emptyList(),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -563,10 +418,12 @@ class ChooseListsMapperTest {
             // Empty is legitimate: the header draws one upright coverless jacket for it. Padding it
             // up to one cover would make the header treat that lone jacket as a tilted stack, which
             // is the regression this test guards against.
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = emptyList(),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = emptyList(),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toBulkChooseListsUiModel(
@@ -652,16 +509,18 @@ class ChooseListsMapperTest {
             selectedCount: Int,
             onListCount: Int,
         ): String {
-            val lists = listOf(bookList(
-                id = 1,
-                bookIds = (1..onListCount).toList(),
-            ),)
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = (1..onListCount).toList(),
+                ),
+            )
 
             return lists.toBulkChooseListsUiModel(
                 bookIds = (1..selectedCount).toSet(),
                 covers = emptyList(),
                 listsBeingMutated = emptySet(),
-            ).rows.single().membershipChip.label
+            ).rows.single().chipLabel
         }
 
         @Test
@@ -839,11 +698,20 @@ class ChooseListsMapperTest {
     }
 
     @Nested
-    inner class EmptyStateMapping {
+    inner class OwnedListFilter {
         @Test
-        fun `single book mapping uses the inline variant with a title`() {
+        fun `the built-in Owned list is dropped from the rows`() {
             // ----- Arrange -----
-            val lists = emptyList<BookList>()
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = emptyList(),
+                ).copy(slug = "owned"),
+                bookList(
+                    id = 2,
+                    bookIds = emptyList(),
+                ),
+            )
 
             // ----- Act -----
             val result = lists.toChooseListsUiModel(
@@ -854,25 +722,32 @@ class ChooseListsMapperTest {
             )
 
             // ----- Assert -----
-            result.emptyState.variant shouldBe EmptyStateVariant.Inline
-            result.emptyState.title.isNotBlank() shouldBe true
+            result.rows.map { it.listId } shouldBe listOf(2)
         }
+    }
 
+    @Nested
+    inner class SingularCaption {
         @Test
-        fun `bulk mapping uses the inline variant with a title`() {
+        fun `a list holding one book reads 1 BOOK`() {
             // ----- Arrange -----
-            val lists = emptyList<BookList>()
+            val lists = listOf(
+                bookList(
+                    id = 1,
+                    bookIds = listOf(9),
+                ),
+            )
 
             // ----- Act -----
-            val result = lists.toBulkChooseListsUiModel(
-                bookIds = setOf(1, 2),
-                covers = emptyList(),
+            val result = lists.toChooseListsUiModel(
+                bookId = 42,
+                bookTitle = "Piranesi",
+                cover = coverUiModel(),
                 listsBeingMutated = emptySet(),
             )
 
             // ----- Assert -----
-            result.emptyState.variant shouldBe EmptyStateVariant.Inline
-            result.emptyState.title.isNotBlank() shouldBe true
+            result.rows.single().caption shouldBe "1 BOOK"
         }
     }
 }

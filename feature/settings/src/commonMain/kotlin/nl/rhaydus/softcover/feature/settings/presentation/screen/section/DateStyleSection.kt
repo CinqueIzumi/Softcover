@@ -26,9 +26,7 @@ internal fun DateStyleSection(
             state.dateStyleRows.forEach { dateStyleRow ->
                 row {
                     SettingsSelectableRow(
-                        label = dateStyleRow.label,
-                        example = dateStyleRow.example,
-                        isSelected = dateStyleRow.selected,
+                        model = dateStyleRow,
                         onClick = { runAction(OnDateStyleClickAction(style = dateStyleRow.key)) },
                     )
                 }

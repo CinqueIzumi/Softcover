@@ -7,11 +7,14 @@ import kotlinx.collections.immutable.persistentListOf
  * their most-read genres, a pages-by-month ridgeline, and a rating / streak / tenure footer). The call
  * site (feature/profile) maps `core:profile`'s `ReadingLife` domain model onto this plain primitive
  * shape; this type deliberately carries no `core:profile` dependency so the card stays self-contained
- * here in `core:designsystem`, matching the other [ShareCardUiModel] variants.
+ * here in `core:component`, matching the other [ShareCardUiModel] variants.
  *
  * Every field a sparse reader might not have yet is nullable or list-shaped so [ShareCard] can render
  * without special-casing at the call site: [avatarUrl] falls back to initials, [pagesByMonth] carries
  * exactly twelve months, and [topGenres] simply omits its section when empty.
+ *
+ * Every count is pre-formatted text ([totalPagesRead] grouped, [averageRatingText] to one decimal,
+ * [readerInitials] shown when [avatarUrl] is absent); [averageRating] stays numeric to fill the stars.
  *
  * [topGenres] arrives already ranked, highest share first — the card renders the leading entry larger
  * than the rest rather than re-sorting.
@@ -19,11 +22,13 @@ import kotlinx.collections.immutable.persistentListOf
 data class ReadingLifeShareCardUiModel(
     val readerName: String,
     val avatarUrl: String?,
-    val totalPagesRead: Int,
-    val totalBooksRead: Int,
+    val readerInitials: String,
+    val totalPagesRead: String,
+    val totalBooksLine: String,
     val topGenres: ImmutableList<ReadingLifeGenre> = persistentListOf(),
     val pagesByMonth: ImmutableList<Int>,
     val averageRating: Double,
-    val dayStreak: Int,
-    val trackedYears: Int,
+    val averageRatingText: String,
+    val dayStreak: String,
+    val trackedYears: String,
 ) : ShareCardUiModel

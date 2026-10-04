@@ -1,9 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.state
 
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.LocalDateTime
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
@@ -23,7 +22,6 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
-import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadEyebrowFor
@@ -36,10 +34,6 @@ internal data class ReadingScreenUiState(
     val books: List<Book> = emptyList(),
     val isLoading: Boolean = true,
 
-    /**
-     * The "also reading" section opener, mapped off the composition by
-     * `CurrentlyReadingBooksCollector` (R9) from [books]`.drop(1)`'s size — never by the render.
-     */
     val alsoReadingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "0 more in motion",
         headline = "Also between your fingers",
@@ -54,10 +48,6 @@ internal data class ReadingScreenUiState(
     /** The reader's backdate for the next logged action; `null` is "just now". */
     val readAt: LocalDateTime? = null,
 
-    /**
-     * What the progress sheet renders, mapped off the composition by `ProgressSheetCollector`
-     * (R9) from [bookToUpdate] and [progressSheetTab] — never by the render.
-     */
     val progressSheet: ProgressSheetUiModel? = null,
 
     val deadlines: Map<Int, BookDeadline> = emptyMap(),
@@ -88,40 +78,26 @@ internal data class ReadingScreenUiState(
 
     val streakSheet: SheetScaffoldUiModel = streakSheetScaffoldFor(activity = emptyList()),
 
-    val featuredBookPace: ReadingPaceForecast? = null,
+    /** The featured book's pace line, mapped by `ReadingPaceForecastCollector`; null while no forecast exists. */
+    val featuredBookPace: String? = null,
 
     val verdictPromptBook: Book? = null,
 
-    /**
-     * The verdict prompt, mapped by `VerdictSheetCollector` (R9) from [verdictPromptBook] and
-     * [verdictCover]; `null` exactly when [verdictPromptBook] is.
-     */
+    /** `null` exactly when [verdictPromptBook] is. */
     val verdictSheet: VerdictSheetUiModel? = null,
 
-    /**
-     * The cover surfaces outside the book cards, mapped off the composition by
-     * `CoverModelsCollector` (R9) from [books], [trendingBooks] and [verdictPromptBook] — never by
-     * the render.
-     */
     val featuredBackdropCover: CoverUiModel? = null,
     val featuredCover: CoverUiModel? = null,
     val trendingTileCover: CoverUiModel? = null,
     val verdictCover: CoverUiModel? = null,
 
     /**
-     * The "Also reading" rows in display order (every book but the featured first), and the empty
-     * screen's "Pick up next" tiles in display order, mapped off the composition by
-     * `BookCardModelsCollector` (R9) from [books], [wantToReadBooks], [deadlines], [dateStyle],
-     * [deadlineCoverOverlays] and [failedMutationBookIds] — never by the render. The rows are loading
-     * stand-ins while [books] is empty and the tiles while [wantToReadBooks] is `null`.
+     * [alsoReading] holds every book but the featured first. Its rows are loading stand-ins while
+     * [books] is empty, and [pickUpNext]'s tiles while [wantToReadBooks] is `null`.
      */
-    val alsoReadingCards: ImmutableList<BookCardUiModel> = ALSO_READING_STAND_IN_CARDS,
-    val pickUpNextCards: ImmutableList<BookCardUiModel> = PICK_UP_NEXT_STAND_IN_CARDS,
+    val alsoReading: BookCardSet<Book> = BookCardSet.standIns(ALSO_READING_STAND_IN_CARDS),
+    val pickUpNext: BookCardSet<Book> = BookCardSet.standIns(PICK_UP_NEXT_STAND_IN_CARDS),
 
-    /**
-     * Each book's deadline cover overlay badge, mapped off the composition by
-     * `DeadlineModelsCollector` (R9) — never by the render.
-     */
     val deadlineCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
 
     /**
@@ -144,10 +120,6 @@ internal data class ReadingScreenUiState(
      */
     val featuredPaceNudge: BannerUiModel? = null,
 
-    /**
-     * The desktop masthead's eyebrow, greeting title and subtitle, mapped off the composition by
-     * `MastheadCollector` (R9/R10) from [books] and [isLoading] — never by the render.
-     */
     val masthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = mastheadEyebrowFor(isLoading = true),
         title = "Good morning.",

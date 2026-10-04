@@ -46,7 +46,7 @@ fun BookCard(
         is BookCardVariant.CoverOnly -> BookCardCoverScaffold(
             model = model,
             cover = variant.cover,
-            menuLabel = null,
+            hasMenu = false,
             text = null,
             onEvent = onEvent,
             modifier = modifier,
@@ -56,7 +56,7 @@ fun BookCard(
         is BookCardVariant.Column -> BookCardCoverScaffold(
             model = model,
             cover = variant.cover,
-            menuLabel = variant.menuLabel,
+            hasMenu = variant.hasMenu,
             text = variant.text,
             onEvent = onEvent,
             modifier = modifier,
@@ -77,7 +77,7 @@ fun BookCard(
 private fun BookCardCoverScaffold(
     model: BookCardUiModel,
     cover: BookCardCover?,
-    menuLabel: String?,
+    hasMenu: Boolean,
     text: BookCardContent?,
     onEvent: (BookCardEvent) -> Unit,
     modifier: Modifier,
@@ -100,11 +100,11 @@ private fun BookCardCoverScaffold(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            if (isLoading.not() && (menuLabel != null || content != null)) {
+            if (isLoading.not() && (hasMenu || content != null)) {
                 Row(modifier = Modifier.align(Alignment.TopEnd)) {
-                    if (menuLabel != null) {
+                    if (hasMenu) {
                         BookCardMenuButton(
-                            contentDescription = menuLabel,
+                            contentDescription = "More options",
                             onClick = { onEvent(BookCardEvent.MenuClicked(key = model.key)) },
                         )
                     }

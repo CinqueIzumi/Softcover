@@ -93,76 +93,139 @@ class BookShareCardMapperTest {
         @Test
         fun `doubles the star rating into the verdict score`() {
             // ----- Arrange -----
-            val book = stubBook(userBook = stubUserBook(rating = 4.5))
+            val book = stubBook(
+                rating = 0.0,
+                releaseYear = -1,
+                userBook = stubUserBook(rating = 4.5),
+            )
 
             // ----- Act -----
             val result = book.toBookShareCardUiModel(edition = null)
 
             // ----- Assert -----
-            result.userRating shouldBe 9
+            result.statsLine shouldBe "Your 9/10"
         }
 
         @Test
-        fun `is null when the rating is zero`() {
+        fun `is left out when the rating is zero`() {
             // ----- Arrange -----
-            val book = stubBook(userBook = stubUserBook(rating = 0.0))
+            val book = stubBook(
+                rating = 0.0,
+                releaseYear = -1,
+                userBook = stubUserBook(rating = 0.0),
+            )
 
             // ----- Act -----
             val result = book.toBookShareCardUiModel(edition = null)
 
             // ----- Assert -----
-            result.userRating shouldBe null
+            result.statsLine shouldBe null
         }
 
         @Test
-        fun `is null when the rating is null`() {
+        fun `is left out when the rating is null`() {
             // ----- Arrange -----
-            val book = stubBook(userBook = stubUserBook(rating = null))
+            val book = stubBook(
+                rating = 0.0,
+                releaseYear = -1,
+                userBook = stubUserBook(rating = null),
+            )
 
             // ----- Act -----
             val result = book.toBookShareCardUiModel(edition = null)
 
             // ----- Assert -----
-            result.userRating shouldBe null
+            result.statsLine shouldBe null
         }
 
         @Test
-        fun `is null when the book is not on a shelf`() {
+        fun `is left out when the book is not on a shelf`() {
             // ----- Arrange -----
-            val book = stubBook(userBook = null)
+            val book = stubBook(
+                rating = 0.0,
+                releaseYear = -1,
+                userBook = null,
+            )
 
             // ----- Act -----
             val result = book.toBookShareCardUiModel(edition = null)
 
             // ----- Assert -----
-            result.userRating shouldBe null
+            result.statsLine shouldBe null
         }
     }
 
     @Nested
     inner class CommunityRating {
         @Test
-        fun `carries the community rating unchanged`() {
+        fun `rounds the community rating to one decimal`() {
             // ----- Arrange -----
-            val book = stubBook(rating = 4.25)
+            val book = stubBook(
+                rating = 4.25,
+                releaseYear = -1,
+            )
 
             // ----- Act -----
             val result = book.toBookShareCardUiModel(edition = null)
 
             // ----- Assert -----
-            result.communityRating shouldBe 4.25
+            result.statsLine shouldBe "★ 4.3"
         }
 
         @Test
-        fun `is null when the community rating is zero`() {
+        fun `is left out when the community rating is zero`() {
             // ----- Arrange -----
-            val book = stubBook(rating = 0.0)
+            val book = stubBook(
+                rating = 0.0,
+                releaseYear = -1,
+            )
 
             // ----- Act -----
             val result = book.toBookShareCardUiModel(edition = null)
 
             // ----- Assert -----
-            result.communityRating shouldBe null
+            result.statsLine shouldBe null
+        }
+    }
+
+    @Nested
+    inner class StatsLine {
+        @Test
+        fun `joins every stat in reading order`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                rating = 4.0,
+                userBook = stubUserBook(rating = 3.0),
+            )
+            val edition = stubEdition(
+                releaseYear = 2019,
+                pages = 640,
+            )
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(edition = edition)
+
+            // ----- Assert -----
+            result.statsLine shouldBe "★ 4.0 · Your 6/10 · 2019 · 640 pages"
+        }
+
+        @Test
+        fun `leaves out a non-positive page count`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                rating = 0.0,
+                releaseYear = -1,
+            )
+            val edition = stubEdition(
+                releaseYear = -1,
+                pages = 0,
+            )
+
+            // ----- Act -----
+            val result = book.toBookShareCardUiModel(edition = edition)
+
+            // ----- Assert -----
+            result.statsLine shouldBe null
         }
     }
 
@@ -223,7 +286,10 @@ class BookShareCardMapperTest {
         @Test
         fun `prefers the given edition over the default edition`() {
             // ----- Arrange -----
-            val book = stubBook(defaultEdition = stubEdition(pages = 100))
+            val book = stubBook(
+                rating = 0.0,
+                defaultEdition = stubEdition(pages = 100),
+            )
             val edition = stubEdition(
                 pages = 640,
                 releaseYear = 2019,
@@ -233,46 +299,60 @@ class BookShareCardMapperTest {
             val result = book.toBookShareCardUiModel(edition = edition)
 
             // ----- Assert -----
-            result.pageCount shouldBe 640
-            result.releaseYear shouldBe 2019
+            result.statsLine shouldBe "2019 · 640 pages"
         }
 
         @Test
         fun `falls back to the default edition when none is given`() {
             // ----- Arrange -----
-            val book = stubBook(defaultEdition = stubEdition(pages = 100))
+            val book = stubBook(
+                rating = 0.0,
+                defaultEdition = stubEdition(pages = 100),
+            )
 
             // ----- Act -----
             val result = book.toBookShareCardUiModel(edition = null)
 
             // ----- Assert -----
-            result.pageCount shouldBe 100
+            result.statsLine shouldBe "2021 · 100 pages"
         }
 
         @Test
-        fun `release year falls back to the book when the edition has the unknown sentinel`() {
+        fun `the release year falls back to the book when the edition has the unknown sentinel`() {
             // ----- Arrange -----
-            val book = stubBook(releaseYear = 2020)
-            val edition = stubEdition(releaseYear = -1)
+            val book = stubBook(
+                rating = 0.0,
+                releaseYear = 2020,
+            )
+            val edition = stubEdition(
+                releaseYear = -1,
+                pages = null,
+            )
 
             // ----- Act -----
             val result = book.toBookShareCardUiModel(edition = edition)
 
             // ----- Assert -----
-            result.releaseYear shouldBe 2020
+            result.statsLine shouldBe "2020"
         }
 
         @Test
-        fun `release year is null when both the edition and the book have the unknown sentinel`() {
+        fun `the year is left out when both the edition and the book have the unknown sentinel`() {
             // ----- Arrange -----
-            val book = stubBook(releaseYear = -1)
-            val edition = stubEdition(releaseYear = -1)
+            val book = stubBook(
+                rating = 0.0,
+                releaseYear = -1,
+            )
+            val edition = stubEdition(
+                releaseYear = -1,
+                pages = null,
+            )
 
             // ----- Act -----
             val result = book.toBookShareCardUiModel(edition = edition)
 
             // ----- Assert -----
-            result.releaseYear shouldBe null
+            result.statsLine shouldBe null
         }
 
         @Test

@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,11 +24,9 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
-import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.header.SectionHeaderEyebrowText
 import nl.rhaydus.softcover.core.component.header.SectionHeaderInlineEyebrow
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -64,13 +61,9 @@ fun Callout(
             )
 
             if (model.dismissible) {
-                ChromeIconButton(
-                    icon = SoftcoverIcon.Close,
-                    contentDescription = "Dismiss",
-                    tooltip = "Dismiss",
+                DismissButton(
+                    contentColor = mutedInk(model.variant),
                     onClick = { onEvent(CalloutEvent.DismissClicked) },
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = mutedInk(model.variant)),
-                    iconSize = 16.dp,
                 )
             }
         }

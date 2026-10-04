@@ -66,19 +66,14 @@ internal fun EditorialContent(
         ) {
             FeaturedSection(
                 book = state.featuredUpcomingRelease,
-                cover = state.featuredCover,
-                releaseBadge = state.featuredReleaseBadge,
-                header = state.featuredHeader,
-                isLoading = state.loadingFeaturedUpcomingRelease && state.featuredUpcomingRelease == null,
+                card = state.featuredCard,
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
 
             ContinueSeriesSection(
-                books = state.continueSeriesBooks,
+                set = state.upNext,
                 menuSheets = state.continueSeriesMenuSheets,
-                cards = state.upNextCards,
-                isLoading = state.loadingContinueSeriesBooks,
                 header = state.upNextHeader,
                 onBookClick = onBookClick,
                 runAction = runAction,
@@ -90,30 +85,26 @@ internal fun EditorialContent(
                 genreOptions = state.becauseYouReadGenreOptions,
                 genreSheet = state.becauseYouReadGenreSheet,
                 genreGroup = state.becauseYouReadGenreGroup,
-                books = state.becauseYouReadBooks,
-                cards = state.becauseYouReadCards,
+                set = state.becauseYouRead,
                 isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
                 onBookClick = onBookClick,
                 runAction = runAction,
             )
 
             TrendingSection(
-                books = state.trendingBooks,
-                cards = state.trendingCards,
-                isLoading = state.loadingTrendingBooks && state.trendingBooks.isEmpty(),
+                set = state.trending,
                 header = state.trendingHeader,
                 onBookClick = onBookClick,
             )
 
             MoodGrid(
-                moods = state.moodTags,
                 tiles = state.moodTiles,
                 header = state.moodGridHeader,
                 runAction = runAction,
             )
 
             RecentSearchesSection(
-                chips = state.recentSearchChips.chips,
+                chips = state.recentSearchChips,
                 runAction = runAction,
             )
         }

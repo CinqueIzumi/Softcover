@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
@@ -77,9 +78,6 @@ internal data class LibraryUiState(
 
     val isLoading: Boolean = true,
     val gridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-
-    /** The loading cards a tab shows until its own cards land, shaped for [gridLayout]: set the two together. */
-    val loadingCards: ImmutableList<BookCardUiModel> = LibraryGridLayout.GRID_TWO_COLUMNS.standInCards(),
 
     /**
      * Whether the mobile shelf pager accepts a horizontal swipe, and with it whether the neighbour
@@ -159,11 +157,6 @@ internal data class LibraryUiState(
      */
     val filterOptionsByTab: Map<String, LibraryFilterOptions> = emptyMap(),
 
-    /**
-     * The Filter sheet's chip models per tab, mapped by `FilterChipModelsCollector` (R9) off
-     * [filterOptionsByTab]. See [LibraryFilterChips]'s KDoc for why none of these chips carry
-     * `selected` — the sheet resolves that against its own local draft.
-     */
     val filterChipsByTab: Map<String, LibraryFilterChips> = emptyMap(),
 
     val activeFilterChipsByTab: Map<String, LibraryActiveFilterChips> = emptyMap(),
@@ -209,13 +202,8 @@ internal data class LibraryUiState(
         eyebrow = "Refreshing your shelf…",
         title = "Library",
         subtitle = MASTHEAD_SUBTITLE_STAND_IN,
+        isLoading = true,
     ),
-
-    /**
-     * Visible tabs whose list has not landed, so their [mastheads] subtitle is the count-shaped stand-in and
-     * renders masked. Resolve through [isMastheadLoadingFor]; mapped by `MastheadCollector`.
-     */
-    val loadingMastheadTabIds: ImmutableSet<String> = persistentSetOf(),
 
     /** The masthead's trailing refresh action, mapped by `MastheadCollector` off [isLoading]. */
     val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = true),
@@ -234,11 +222,16 @@ internal data class LibraryUiState(
     val selectionMode: Boolean = false,
     val selectedBookIds: Set<Int> = emptySet(),
 
-    /** Book cards per tab id in the order the tab shows them, mapped by `BookCardModelsCollector` (R9). */
     val bookCardsByTab: ImmutableMap<String, LibraryTabCards<Book>> = persistentMapOf(),
 
     /** Edition cards per custom-list tab id in the order the tab shows them; same shape as [bookCardsByTab]. */
     val editionCardsByTab: ImmutableMap<String, LibraryTabCards<BookEdition>> = persistentMapOf(),
+
+    /** Stand-in cards in [gridLayout], rendered by a tab with no entry in [bookCardsByTab] or [editionCardsByTab] yet. */
+    val loadingCards: LibraryTabCards<Nothing> = LibraryTabCards(
+        layout = gridLayout,
+        set = BookCardSet.standIns(gridLayout.standInCards()),
+    ),
 
     /**
      * Rearrange mode. A transient editing state entered from the drag-handle icon-button in the
@@ -273,9 +266,6 @@ internal data class LibraryUiState(
     /** List ids whose bulk add/remove mutation is in flight; rows render a spinner instead of the indicator. */
     val listsBeingMutated: Set<Int> = emptySet(),
 
-    /**
-     * The bulk "Add to list" sheet's rows and header, mapped by [ChooseListsCollector] (R9).
-     */
     val chooseListsSheet: ChooseListsUiModel? = null,
 ) : UiState {
     fun sortModeFor(tabId: String): LibrarySortMode =
@@ -342,9 +332,6 @@ internal data class LibraryUiState(
         )
 
     fun mastheadFor(tabId: String?): PageMastheadUiModel = tabId?.let(mastheads::get) ?: fallbackMasthead
-
-    fun isMastheadLoadingFor(tabId: String?): Boolean =
-        tabId == null || tabId !in mastheads || tabId in loadingMastheadTabIds
 
     /**
      * Resolves [bookIds] (defaulting to the current [selectedBookIds]) to the underlying [Book]

@@ -15,9 +15,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.callout.Banner
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.callout.Callout
@@ -41,8 +39,8 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
         name = "TopBar",
         family = GalleryFamily.TOPBAR,
-        blurb = "The page bar: an autosizing centred title, an optional subtitle, an optional " +
-            "back affordance, and a slot for the screen's own actions.",
+        blurb = "The page bar: an autosizing centred title, an always-drawn back button, and a " +
+            "slot for the screen's own actions.",
         previews = TopBarUiModel,
         content = { model, modifier ->
             TopBar(
@@ -57,12 +55,7 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         family = GalleryFamily.TOPBAR,
         blurb = "The desktop page bar: a back button, a start-aligned editorial headline and a " +
             "slot for the screen's own actions.",
-        previews = object : UiModelPreviews<TopBarUiModel> {
-            override val previews: ImmutableMap<String, TopBarUiModel> = persistentMapOf(
-                "Titled" to TopBarUiModel(title = "Appearance"),
-                "Back only" to TopBarUiModel(),
-            )
-        },
+        previews = TopBarUiModel,
         content = { model, modifier ->
             EditorialTopBar(
                 model = model,

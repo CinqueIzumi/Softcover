@@ -50,14 +50,16 @@ class UserProfileDataEntityTest {
         ), YearCount(
             year = 2026,
             count = 5,
-        ),),
+        ),
+        ),
         pagesByYear = listOf(YearCount(
             year = 2025,
             count = 3000,
         ), YearCount(
             year = 2026,
             count = 1500,
-        ),),
+        ),
+        ),
         pagesByMonth = listOf(MonthCount(
             year = 2026,
             month = 1,
@@ -66,7 +68,8 @@ class UserProfileDataEntityTest {
             year = 2026,
             month = 2,
             count = 450,
-        ),),
+        ),
+        ),
         genres = GenreBreakdown(
             slices = listOf(GenreSlice(
                 name = "Fantasy",
@@ -76,7 +79,8 @@ class UserProfileDataEntityTest {
                 name = "Sci-Fi",
                 count = 10,
                 fraction = 0.5,
-            ),),
+            ),
+            ),
             taggedBookCount = 20,
         ),
         ratings = RatingsDistribution(
@@ -644,7 +648,8 @@ class UserProfileDataEntityTest {
                     name = "Fantasy",
                     count = 10,
                     fraction = 0.5,
-                ),),
+                ),
+                ),
             )
 
             // ----- Act -----
@@ -670,7 +675,8 @@ class UserProfileDataEntityTest {
                     name = "Fantasy",
                     count = 10,
                     fraction = 0.5,
-                ),),
+                ),
+                ),
                 genreTaggedBookCount = 20,
             )
 
@@ -683,7 +689,8 @@ class UserProfileDataEntityTest {
                     name = "Fantasy",
                     count = 10,
                     fraction = 0.5,
-                ),),
+                ),
+                ),
                 taggedBookCount = 20,
             )
         }

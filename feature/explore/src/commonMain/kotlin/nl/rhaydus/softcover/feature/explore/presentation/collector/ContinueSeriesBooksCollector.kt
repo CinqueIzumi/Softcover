@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.continueSeriesMenuSheetFor
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
-import nl.rhaydus.softcover.feature.explore.presentation.state.continueSeriesMenuSheetScaffoldFor
 import nl.rhaydus.toad.ActionScope
 
 internal class ContinueSeriesBooksCollector : ExploreCollector {
@@ -40,7 +40,7 @@ internal class ContinueSeriesBooksCollector : ExploreCollector {
             books.map { book -> allUserBooks.find { it.id == book.id } ?: book }
         }.collectLatest { books ->
             val menuSheets = books.associate { book ->
-                book.id to continueSeriesMenuSheetScaffoldFor(book = book)
+                book.id to continueSeriesMenuSheetFor(book = book)
             }
 
             scope.setState {

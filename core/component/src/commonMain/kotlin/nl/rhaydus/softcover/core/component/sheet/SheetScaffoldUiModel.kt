@@ -11,8 +11,8 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 
 /**
  * The chrome around a sheet's feature body. [closeRequested] hides the sheet even when [dismissible] is
- * false; while [busy] the secondary button is disabled and tapping outside or pressing back does not
- * dismiss.
+ * false; while [busy] both footer buttons and the dismiss label are disabled and tapping outside or
+ * pressing back does not dismiss.
  */
 @Immutable
 data class SheetScaffoldUiModel(

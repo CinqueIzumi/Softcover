@@ -142,10 +142,12 @@ class UserBooksFlowCollectorTest {
             val emittedBook = buildBook(id = 3)
             stateFlow.value = BookDetailUiState(book = null)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(emittedBook))
@@ -169,10 +171,12 @@ class UserBooksFlowCollectorTest {
             )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -196,10 +200,12 @@ class UserBooksFlowCollectorTest {
             )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -227,10 +233,12 @@ class UserBooksFlowCollectorTest {
             )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -256,14 +264,17 @@ class UserBooksFlowCollectorTest {
                 editions = listOf(buildEdition(
                     id = 1,
                     owned = true,
-                ),),
+                ),
+                ),
             )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -294,10 +305,12 @@ class UserBooksFlowCollectorTest {
             )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -328,10 +341,12 @@ class UserBooksFlowCollectorTest {
             )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -360,14 +375,17 @@ class UserBooksFlowCollectorTest {
                 editions = listOf(buildEdition(
                     id = 30,
                     owned = false,
-                ),),
+                ),
+                ),
             )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -389,7 +407,8 @@ class UserBooksFlowCollectorTest {
             ), buildEdition(
                 id = unownedId,
                 owned = false,
-            ),)
+            ),
+            )
             val remoteBook = buildBook(
                 id = 4,
                 editions = remoteEditions,
@@ -400,17 +419,20 @@ class UserBooksFlowCollectorTest {
             ), buildEdition(
                 id = unownedId,
                 owned = false,
-            ),)
+            ),
+            )
             val localBook = buildBook(
                 id = 4,
                 editions = localEditions,
             )
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))
@@ -430,10 +452,12 @@ class UserBooksFlowCollectorTest {
             val unrelatedBook = buildBook(id = 99)
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(unrelatedBook))
@@ -449,10 +473,12 @@ class UserBooksFlowCollectorTest {
             val remoteBook = buildBook(id = 5)
             stateFlow.value = BookDetailUiState(book = remoteBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(emptyList())
@@ -476,10 +502,12 @@ class UserBooksFlowCollectorTest {
 
             stateFlow.value = BookDetailUiState(book = firstBook)
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // Emit initial user books list containing both
             userBooksFlow.emit(listOf(localFirstBook, localSecondBook))
@@ -511,10 +539,12 @@ class UserBooksFlowCollectorTest {
                 showEditEditionSheet = true,
             )
             val collector = UserBooksFlowCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             userBooksFlow.emit(listOf(localBook))

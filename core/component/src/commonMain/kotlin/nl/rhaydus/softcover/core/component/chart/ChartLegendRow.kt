@@ -39,7 +39,7 @@ internal fun ChartLegendRow(
                 modifier = Modifier
                     .size(11.dp)
                     .clip(swatchShape)
-                    .background(slice.tone.color())
+                    .background(slice.tone.color(colors = MaterialTheme.colorScheme))
                     .skeletonMask(
                         visible = isLoading,
                         shape = swatchShape,

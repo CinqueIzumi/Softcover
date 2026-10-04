@@ -14,7 +14,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
-import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
 import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistoryUseCase
@@ -158,14 +157,15 @@ class ReadingPaceForecastCollectorTest {
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace?.avgPerReadingDay shouldBe 30f
-            stateFlow.value.featuredBookPace?.forecastReadingDays shouldBe 7
+            stateFlow.value.featuredBookPace shouldBe "30 pages/day — about 7 days to go"
             job.cancel()
         }
 
@@ -204,14 +204,15 @@ class ReadingPaceForecastCollectorTest {
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace?.avgPerReadingDay shouldBe 45f
-            stateFlow.value.featuredBookPace?.forecastReadingDays shouldBe 2
+            stateFlow.value.featuredBookPace shouldBe "45 pages/day — about 2 days to go"
             job.cancel()
         }
 
@@ -234,14 +235,15 @@ class ReadingPaceForecastCollectorTest {
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace?.avgPerReadingDay shouldBe 25f
-            stateFlow.value.featuredBookPace?.forecastReadingDays shouldBe 4
+            stateFlow.value.featuredBookPace shouldBe "25 pages/day — about 4 days to go"
             job.cancel()
         }
 
@@ -268,10 +270,12 @@ class ReadingPaceForecastCollectorTest {
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.featuredBookPace shouldBe null
@@ -291,10 +295,12 @@ class ReadingPaceForecastCollectorTest {
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.featuredBookPace shouldBe null
@@ -328,10 +334,12 @@ class ReadingPaceForecastCollectorTest {
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.featuredBookPace shouldBe null
@@ -365,15 +373,15 @@ class ReadingPaceForecastCollectorTest {
             val collector = ReadingPaceForecastCollector()
 
             // ----- Act -----
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
-            stateFlow.value.featuredBookPace?.unit shouldBe DeadlineUnit.SECONDS
-            stateFlow.value.featuredBookPace?.avgPerReadingDay shouldBe 1800f
-            stateFlow.value.featuredBookPace?.forecastReadingDays shouldBe 2
+            stateFlow.value.featuredBookPace shouldBe "0h 30m/day — about 2 days to go"
             job.cancel()
         }
 
@@ -386,10 +394,12 @@ class ReadingPaceForecastCollectorTest {
                 val collector = ReadingPaceForecastCollector()
 
                 // ----- Act -----
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Assert -----
                 stateFlow.value.featuredBookPace shouldBe null

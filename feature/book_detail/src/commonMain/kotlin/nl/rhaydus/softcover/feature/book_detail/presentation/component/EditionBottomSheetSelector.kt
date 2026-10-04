@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +21,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
-import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
+import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
@@ -44,7 +42,6 @@ internal fun EditionBottomSheetSelector(
     model: SheetScaffoldUiModel,
     editionCards: ImmutableList<BookCardUiModel>,
     editionCountHeader: SectionHeaderUiModel,
-    isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onEditionSelected: (Int) -> Unit,
@@ -64,29 +61,26 @@ internal fun EditionBottomSheetSelector(
             }
         },
     ) {
-        val onCardEvent = rememberBookCardEventHandler(
-            resolve = { key -> key as? BookCardKey.Edition },
-        ) { event, edition ->
-            if (event is BookCardEvent.Clicked) onEditionSelected(edition.editionId)
-        }
-
         EditionBottomSheetContent(
             editionCards = editionCards,
             editionCountHeader = editionCountHeader,
-            isLoading = isLoading,
             searchQuery = searchQuery,
             onSearchQueryChange = onSearchQueryChange,
-            onEvent = onCardEvent,
+            onEvent = { event ->
+                val key = event.key
+
+                if (event is BookCardEvent.Clicked && key is BookCardKey.Edition) {
+                    onEditionSelected(key.editionId)
+                }
+            },
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ColumnScope.EditionBottomSheetContent(
     editionCards: ImmutableList<BookCardUiModel>,
     editionCountHeader: SectionHeaderUiModel,
-    isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onEvent: (BookCardEvent) -> Unit,
@@ -117,16 +111,7 @@ private fun ColumnScope.EditionBottomSheetContent(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        if (isLoading && editionCards.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularWavyProgressIndicator()
-            }
-        } else if (editionCards.isEmpty()) {
+        if (editionCards.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -141,7 +126,7 @@ private fun ColumnScope.EditionBottomSheetContent(
             }
         } else {
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(editionCards, key = { it.key.toString() }) { card ->
+                items(editionCards, key = { it.key.lazyKey }) { card ->
                     BookCard(
                         model = card,
                         onEvent = onEvent,
@@ -233,7 +218,6 @@ private fun EditionBottomSheetContentPreview() {
             EditionBottomSheetContent(
                 editionCards = editionCards,
                 editionCountHeader = editionCountHeaderFor(count = editionCards.size),
-                isLoading = false,
                 searchQuery = "",
                 onSearchQueryChange = {},
                 onEvent = {},

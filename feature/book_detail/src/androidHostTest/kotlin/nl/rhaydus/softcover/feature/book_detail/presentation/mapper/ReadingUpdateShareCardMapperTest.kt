@@ -351,7 +351,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "page 100 / 400 · 25%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "p. 100 of 400 · 25%"
         }
 
         @Test
@@ -374,7 +374,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "page 150 / 300 · 50%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "p. 150 of 300 · 50%"
         }
 
         @Test
@@ -397,7 +397,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "page 61 / 195 · 31%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "p. 61 of 195 · 31%"
         }
 
         @Test
@@ -510,7 +510,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "page 33 / 100 · 33%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "p. 33 of 100 · 33%"
         }
 
         @Test
@@ -530,7 +530,7 @@ class ReadingUpdateShareCardMapperTest {
             )
 
             // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "1h 0m / 2h 0m · 50%"
+            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "1h 0m of 2h 0m · 50%"
         }
 
         @Test

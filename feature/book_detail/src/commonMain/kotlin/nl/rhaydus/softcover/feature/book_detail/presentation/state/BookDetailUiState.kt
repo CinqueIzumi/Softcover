@@ -15,15 +15,16 @@ import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
+import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
 import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetUiModel
-import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
+import nl.rhaydus.softcover.core.component.topbar.TopBarSurface
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
@@ -33,7 +34,6 @@ import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.DateStyle
-import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.domain.model.UserTag
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
@@ -48,9 +48,8 @@ import nl.rhaydus.toad.UiState
 internal data class BookDetailUiState(
     /**
      * The screen's own identity and morph surface, seeded from the screen's constructor. They live on
-     * the state so `CoverModelsCollector` can resolve the hero's shared-element key off the
-     * composition (R7/R9) — a composable must not compute a transition key, and a collector cannot
-     * see a nav argument that only exists as a screen parameter.
+     * the state because the hero's shared-element key is resolved by a collector, which cannot see a
+     * nav argument that only exists as a screen parameter.
      */
     val bookId: Int? = null,
     val transitionSurface: String? = null,
@@ -84,9 +83,8 @@ internal data class BookDetailUiState(
     val readAt: LocalDateTime? = null,
 
     /**
-     * What the progress sheet renders, mapped off the composition by `ProgressSheetCollector`
-     * (R9) from [book] and [selectedProgressSheetTab]. The tab's stored home is
-     * [selectedProgressSheetTab]; this is derived from it, so the two cannot disagree.
+     * What the progress sheet renders, derived from [book] and [selectedProgressSheetTab]. The tab's
+     * stored home is [selectedProgressSheetTab], so the two cannot disagree.
      */
     val progressSheet: ProgressSheetUiModel? = null,
     val dateStyle: DateStyle = DateStyle.DAY_MONTH_YEAR,
@@ -99,10 +97,7 @@ internal data class BookDetailUiState(
     val tagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
     val yourTagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your tags"),
 
-    /**
-     * The "Shelve this book" opener, mapped by `ShelveControlHeaderCollector` (R9) off [book] and
-     * [failedMutationBookIds] — the retry label when the last shelve write for this book failed.
-     */
+    /** The "Shelve this book" opener; the retry label when the last shelve write for this book failed. */
     val shelveControlHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Shelve this book"),
 
     /** The sticky lens switch, mapped by `LensToggleCollector` off [selectedLens] and whether [book] has a user copy. */
@@ -112,10 +107,9 @@ internal data class BookDetailUiState(
     ),
 
     val deadline: BookDeadline? = null,
-    val deadlineProgress: DeadlineProgress? = null,
 
-    /** [deadlineProgress] mapped to a badge by `BookDeadlineCollector` (R9), so badge and progress share one writer and cannot disagree. */
-    val deadlineBadge: BadgeUiModel? = null,
+    /** The deadline card, mapped by `BookDeadlineCollector`; null while the book has no computable deadline. */
+    val deadlineRow: DeadlineRowUiModel? = null,
     val readingPaceForecast: ReadingPaceForecast? = null,
 
     /** [book]'s reading progress, mapped by `InProgressCollector`; null while the book has no read. */
@@ -124,7 +118,6 @@ internal data class BookDetailUiState(
     /** Non-null exactly while the deadline picker is open; built by `OnOpenDeadlinePickerAction`. */
     val deadlinePicker: DatePickerUiModel? = null,
 
-    /** [Book.effectiveReleaseDate] mapped to an unreleased-release badge by `UnreleasedBadgeCollector` (R9), off [book]. */
     val unreleasedBadge: BadgeUiModel? = null,
 
     /** The "Find it" pills, mapped by `ExternalLinksCollector` off [displayedEdition]; null without an ISBN. */
@@ -148,21 +141,20 @@ internal data class BookDetailUiState(
 
     val scanEditionCallout: CalloutUiModel? = null,
 
-    /** Non-null only while `isEditionOwned(displayedEdition)`, mapped by `EditionSelectionCollector` (R9). */
+    /** Non-null only while `isEditionOwned(displayedEdition)`. */
     val ownedCoverBadge: BadgeUiModel? = null,
 
     val reviews: ImmutableList<BookReviewUiModel> = BOOK_REVIEW_STAND_INS,
 
+    /** The reviews footer's "avg across N ratings" line; `null` without ratings. */
+    val reviewsSummary: String? = null,
+
     /** Which caller opened the verdict sheet — the open flag; `null` while it is closed. */
     val verdictSheetContext: VerdictSheetContext? = null,
 
-    /** The "Your verdict" card, mapped by `VerdictReviewCollector` (R9) off the book's user data. */
     val verdictBlock: VerdictBlockUiModel? = null,
 
-    /**
-     * The verdict sheet, mapped by `VerdictSheetCollector` (R9) off [book], [verdictCover] and
-     * [verdictSheetContext]; `null` whenever [verdictSheetContext] is.
-     */
+    /** `null` whenever [verdictSheetContext] is. */
     val verdictSheet: VerdictSheetUiModel? = null,
 
     val failedMutationBookIds: Set<Int> = emptySet(),
@@ -172,20 +164,13 @@ internal data class BookDetailUiState(
     val currentUsername: String? = null,
     val currentUserAvatarUrl: String? = null,
 
-    /** The card the share sheet previews, mapped by `ShareCardsCollector` (R9) for the chosen variant. */
-    val shareCard: ShareCardUiModel? = null,
-
-    val shareSheet: SheetScaffoldUiModel? = null,
-
-    val shareSheetBody: ShareSheetBodyUiModel? = null,
+    /** The share sheet for the chosen variant; `null` while there is no book to share. */
+    val shareSheet: ShareSheetUiModel? = null,
 
     val chosenShareVariant: ShareCardVariant? = null,
-    val isSharing: Boolean = false,
-    val isSavingToGallery: Boolean = false,
 
     /**
-     * The book's covers, mapped by `CoverModelsCollector` (R9) so no composable ever resolves an
-     * edition into a cover. [heroBackdropCover] deliberately carries a null `coverlessTitle`: it is
+     * [heroBackdropCover] deliberately carries a null `coverlessTitle`: it is
      * the blurred decorative layer behind the hero, not a cover the user reads, so a typographic
      * jacket there would only be blurred noise.
      */
@@ -195,20 +180,13 @@ internal data class BookDetailUiState(
     val verdictCover: CoverUiModel? = null,
     val editionSheetHeaderCover: CoverUiModel? = null,
 
-    /** Ordered like `filteredEditions`, mapped by `EditionCardsCollector` (R9). */
+    /** Ordered like `filteredEditions`. */
     val editionCards: ImmutableList<BookCardUiModel> = persistentListOf(),
 
-    /** The selector's "N EDITIONS" label, mapped alongside [editionCards] by `EditionCardsCollector` (R9). */
     val editionCountHeader: SectionHeaderUiModel = editionCountHeaderFor(count = 0),
 
-    /** Desktop only; mobile's bar follows the scroll position and is built by its layout. */
-    val topBar: TopBarUiModel = TopBarUiModel(),
-
-    /**
-     * Opaque and untitled, for the offline placeholder: it has no hero for the scroll-derived bar to
-     * sit over, so that bar would pin to a transparent surface over a plain empty state.
-     */
-    val offlineTopBar: TopBarUiModel = TopBarUiModel(),
+    /** Mobile's bar while it sits over the hero's cover art: untitled and transparent. */
+    val overMediaTopBar: TopBarUiModel = TopBarUiModel(surface = TopBarSurface.OverMedia),
 
     /** `null` until the library's offline copy has resolved. */
     val offlineEmptyState: EmptyStateUiModel? = null,
@@ -216,17 +194,13 @@ internal data class BookDetailUiState(
 
     val tagEditorSheet: SheetScaffoldUiModel? = null,
 
-    /**
-     * The edition selector's chrome, mapped by `EditionSheetCollector` (R9); `null` until [book] and
-     * [displayedEdition] exist.
-     */
+    /** The edition selector's chrome; `null` until [book] and [displayedEdition] exist. */
     val editionSheet: SheetScaffoldUiModel? = null,
 
     val showChooseListsSheet: Boolean = false,
     val userLists: List<BookList> = emptyList(),
     val listsBeingMutated: Set<Int> = emptySet(),
 
-    /** The choose-lists sheet's rows and header, mapped by `ChooseListsCollector` (R9). */
     val chooseListsSheet: ChooseListsUiModel? = null,
 
     val userTags: List<UserTag> = emptyList(),
@@ -234,7 +208,6 @@ internal data class BookDetailUiState(
     val tagEditorCategory: TagCategory = TagCategory.TAG,
     val tagEditorInput: String = "",
 
-    /** The naming pill, mapped by `TagNamingFieldCollector` (R9) off [tagEditorInput] and [tagEditorCategory]. */
     val tagNamingField: TextFieldUiModel = tagNamingFieldFor(
         input = "",
         category = TagCategory.TAG,
@@ -242,39 +215,21 @@ internal data class BookDetailUiState(
     ),
     val tagSuggestions: List<UserTag> = emptyList(),
 
-    /** "Your tags" (`UserTagsSection`), mapped by `TagChipModelsCollector` (R9) off [userTags]. Read-only. */
     val userTagChips: List<ChipUiModel> = emptyList(),
 
-    /**
-     * The community tag block (`TagsSection`, The Book lens), mapped by `TagChipModelsCollector`
-     * (R9) off [book]'s tags and [revealedTagKeys] — grouped by category, top-5 per category,
-     * content-warning tags flagged with [nl.rhaydus.softcover.core.component.chip.ChipTone.Spoiler]
-     * until their key is in [revealedTagKeys], then [nl.rhaydus.softcover.core.component.chip.ChipTone.Tonal].
-     */
     val communityTagGroups: List<TagCategoryChipGroup> = emptyList(),
 
     /** Community content-warning tag keys `OnRevealTagSpoilerAction` has revealed, for the rest of this screen instance. */
     val revealedTagKeys: ImmutableSet<String> = persistentSetOf(),
 
-    /** The "Add tags" / "Edit tags" opener (`UserTagsSection`), mapped by `TagChipModelsCollector` (R9) off [userTags]. */
     val tagEditorOpenerChip: ChipUiModel? = null,
 
-    /**
-     * The tag editor's own collection (`TagEditorBottomSheet` → `TagEditorCollection`), grouped in
-     * [EDITABLE_CATEGORIES] order plus a trailing "Other" group, mapped by `TagChipModelsCollector`
-     * (R9) off [userTags].
-     */
     val userTagEditorGroups: List<UserTagEditorChipGroup> = emptyList(),
     val tagEditorEmptyState: EmptyStateUiModel = EmptyStateUiModel(
         title = "Nothing here yet.",
         body = "Name the first thing this book is to you.",
     ),
 
-    /**
-     * Every [userTagEditorGroups] chip key resolved back to the [UserTag] the remove / spoiler-toggle
-     * actions need — kept beside the models rather than rebuilt in composition, mapped by
-     * `TagChipModelsCollector` (R9).
-     */
     val userTagByEditorChipKey: Map<String, UserTag> = emptyMap(),
 
     /**
@@ -284,15 +239,20 @@ internal data class BookDetailUiState(
      */
     val newlyAddedTagKey: String? = null,
 
-    /**
-     * The tag editor's category picker chips, mapped by `TagEditorChipModelsCollector` (R9) — one
-     * per editable [TagCategory], `selected` following [tagEditorCategory].
-     */
     val tagEditorCategoryChips: List<ChipUiModel> = emptyList(),
 
-    /** [tagSuggestions] mapped to chips by `TagEditorChipModelsCollector` (R9). */
     val tagSuggestionChips: ChipSet<UserTag> = ChipSet(),
 ) : UiState {
+    /**
+     * Opaque and titled with the book. Desktop's bar, mobile's bar once the hero has scrolled away,
+     * and the offline placeholder's bar, which has no hero to sit over.
+     */
+    val topBar: TopBarUiModel
+        get() = TopBarUiModel(
+            title = book?.title,
+            surface = TopBarSurface.Opaque,
+        )
+
     /**
      * The edition pinned by an external entry point (a barcode scan), if any. It wins over every
      * other edition — including the persisted on-shelf edition — so a scan always shows the exact

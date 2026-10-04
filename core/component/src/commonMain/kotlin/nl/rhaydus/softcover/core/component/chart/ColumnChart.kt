@@ -91,7 +91,7 @@ fun ColumnChart(
                                 },
                             )
                             .clip(shape)
-                            .background(column.tone.color())
+                            .background(column.tone.color(colors = MaterialTheme.colorScheme))
                             .skeletonMask(
                                 visible = model.isLoading,
                                 shape = shape,

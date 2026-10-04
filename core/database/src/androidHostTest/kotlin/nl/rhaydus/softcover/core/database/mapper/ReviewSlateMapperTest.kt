@@ -18,7 +18,8 @@ class ReviewSlateMapperTest {
                     bold = true,
                 ),
                 ReviewRun(text = " it a ton. "),
-            ),),
+            ),
+            ),
             ReviewParagraph(runs = listOf(
                 ReviewRun(text = "Will be reading more by "),
                 ReviewRun(
@@ -26,13 +27,15 @@ class ReviewSlateMapperTest {
                     italic = true,
                 ),
                 ReviewRun(text = "."),
-            ),),
+            ),
+            ),
             ReviewParagraph(runs = listOf(
                 ReviewRun(
                     text = "Test",
                     spoiler = true,
                 ),
-            ),),
+            ),
+            ),
         ),
     )
 
@@ -111,8 +114,10 @@ class ReviewSlateMapperTest {
                         bold = true,
                     ),
                     ReviewRun(text = "Plain"),
-                ),),
-            ),)
+                ),
+                ),
+            ),
+            )
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -134,8 +139,10 @@ class ReviewSlateMapperTest {
                         italic = true,
                     ),
                     ReviewRun(text = "Plain"),
-                ),),
-            ),)
+                ),
+                ),
+            ),
+            )
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -157,8 +164,10 @@ class ReviewSlateMapperTest {
                         spoiler = true,
                     ),
                     ReviewRun(text = "Plain"),
-                ),),
-            ),)
+                ),
+                ),
+            ),
+            )
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -192,7 +201,8 @@ class ReviewSlateMapperTest {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
                 ReviewParagraph(listOf(ReviewRun("Hello"), ReviewRun("World"))),
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
@@ -209,7 +219,8 @@ class ReviewSlateMapperTest {
                 ReviewParagraph(listOf(ReviewRun("P1"))),
                 ReviewParagraph(listOf(ReviewRun("P2"))),
                 ReviewParagraph(listOf(ReviewRun("P3"))),
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = reviewSlateFromDocument(doc)

@@ -61,10 +61,12 @@ class MarkBookAsReadUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
-            coVerify(exactly = 1) { repository.markBookAsRead(
-                book = inputBook,
-                editionId = null,
-            ) }
+            coVerify(exactly = 1) {
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = null,
+                )
+            }
             coVerify(exactly = 1) { repository.cacheBook(book = updatedBook) }
             coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
         }
@@ -98,10 +100,12 @@ class MarkBookAsReadUseCaseTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 1) { repository.markBookAsRead(
-                book = inputBook,
-                editionId = editionId,
-            ) }
+            coVerify(exactly = 1) {
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = editionId,
+                )
+            }
             coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
         }
 
@@ -135,11 +139,13 @@ class MarkBookAsReadUseCaseTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 1) { repository.markBookAsRead(
-                book = inputBook,
-                editionId = null,
-                actionAt = actionAt,
-            ) }
+            coVerify(exactly = 1) {
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = null,
+                    actionAt = actionAt,
+                )
+            }
             coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
         }
 
@@ -168,10 +174,12 @@ class MarkBookAsReadUseCaseTest {
             useCase(book = inputBook)
 
             // ----- Assert -----
-            coVerify(exactly = 1) { repository.markBookAsRead(
-                book = inputBook,
-                editionId = null,
-            ) }
+            coVerify(exactly = 1) {
+                repository.markBookAsRead(
+                    book = inputBook,
+                    editionId = null,
+                )
+            }
             coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
         }
 
@@ -247,10 +255,12 @@ class MarkBookAsReadUseCaseTest {
 
             // ----- Assert -----
             result.getOrNull() shouldBe ShelfMutationOutcome.NoChange
-            coVerify(exactly = 0) { repository.markBookAsRead(
-                any(),
-                any(),
-            ) }
+            coVerify(exactly = 0) {
+                repository.markBookAsRead(
+                    any(),
+                    any(),
+                )
+            }
             coVerify(exactly = 0) { repository.cacheBook(any()) }
             coVerify(exactly = 0) { markReadingActivityTodayUseCase() }
         }

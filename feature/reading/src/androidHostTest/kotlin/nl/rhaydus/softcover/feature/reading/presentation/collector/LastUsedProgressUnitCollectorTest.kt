@@ -48,10 +48,12 @@ class LastUsedProgressUnitCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(ProgressUnit.PERCENTAGE)
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.PERCENTAGE
@@ -63,10 +65,12 @@ class LastUsedProgressUnitCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(ProgressUnit.PAGE)
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.PAGE
@@ -78,10 +82,12 @@ class LastUsedProgressUnitCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(ProgressUnit.TIME)
             val collector = LastUsedProgressUnitCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Assert -----
             stateFlow.value.progressSheetTab shouldBe ProgressSheetTab.TIME

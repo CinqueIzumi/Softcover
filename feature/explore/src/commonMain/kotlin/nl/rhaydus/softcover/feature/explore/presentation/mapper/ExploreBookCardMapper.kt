@@ -68,7 +68,7 @@ internal fun Book.toUpNextCard(
             }
             ?: persistentListOf(),
     ),
-    menuLabel = "More options",
+    hasMenu = true,
 )
 
 internal fun Book.toSearchResultCard(cover: CoverUiModel): BookCardUiModel {
@@ -103,7 +103,7 @@ private fun Book.toColumnCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
     text: BookCardContent,
-    menuLabel: String? = null,
+    hasMenu: Boolean = false,
 ): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = id),
     variant = BookCardVariant.Column(
@@ -114,6 +114,6 @@ private fun Book.toColumnCard(
             )
         },
         text = text,
-        menuLabel = menuLabel,
+        hasMenu = hasMenu,
     ),
 )

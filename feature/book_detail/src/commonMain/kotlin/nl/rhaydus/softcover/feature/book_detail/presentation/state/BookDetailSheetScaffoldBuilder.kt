@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.share.ShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
@@ -65,18 +66,19 @@ internal fun editionSheetScaffoldFor(
         layout = SheetLayout.PinnedLazy,
     )
 
-internal fun shareSheetBodyFor(
-    displayName: String,
+internal fun shareSheetFor(
+    card: ShareCardUiModel,
+    bookTitle: String,
     variant: ShareCardVariant,
     hasUpdateCard: Boolean,
-    isSharing: Boolean,
-    isSavingToGallery: Boolean,
-): ShareSheetBodyUiModel =
-    ShareSheetBodyUiModel(
-        displayName = displayName,
-        shareLabel = if (isSharing) "Sharing…" else "Share",
-        saveToGalleryLabel = if (isSavingToGallery) "Saving to gallery…" else "Save to gallery",
-        isBusy = isSharing || isSavingToGallery,
+): ShareSheetUiModel =
+    ShareSheetUiModel(
+        card = card,
+        scaffold = shareSheetScaffoldFor(
+            bookTitle = bookTitle,
+            variant = variant,
+        ),
+        displayName = bookTitle,
         variantToggle = if (hasUpdateCard) {
             SegmentedControlUiModel(
                 options = ShareCardVariant.entries
@@ -84,7 +86,6 @@ internal fun shareSheetBodyFor(
                         SegmentUiModel(
                             key = option,
                             label = option.label,
-                            enabled = (isSharing || isSavingToGallery).not(),
                         )
                     }
                     .toImmutableList(),
@@ -95,7 +96,7 @@ internal fun shareSheetBodyFor(
         },
     )
 
-internal fun shareSheetScaffoldFor(
+private fun shareSheetScaffoldFor(
     bookTitle: String,
     variant: ShareCardVariant,
 ): SheetScaffoldUiModel =

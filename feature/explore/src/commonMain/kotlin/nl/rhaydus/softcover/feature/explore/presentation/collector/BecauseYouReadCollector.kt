@@ -22,6 +22,7 @@ internal class BecauseYouReadCollector : ExploreCollector {
                         SectionHeaderUiModel.Section(
                             eyebrow = "Because you read",
                             headline = genre,
+                            isLoading = recommendation.loading,
                         )
                     } ?: BECAUSE_YOU_READ_HEADER_STAND_IN,
                     becauseYouReadGenreOptions = recommendation?.genreOptions.orEmpty(),

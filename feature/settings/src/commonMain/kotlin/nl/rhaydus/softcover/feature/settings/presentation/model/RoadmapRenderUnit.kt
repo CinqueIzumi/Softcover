@@ -15,7 +15,10 @@ internal sealed interface RoadmapRenderUnit {
 
     data class PlainHeading(val text: String) : RoadmapRenderUnit
 
-    data class ListGroup(val items: List<RoadmapBlock>) : RoadmapRenderUnit
+    data class ListGroup(
+        val items: List<RoadmapBlock>,
+        val isLoading: Boolean = false,
+    ) : RoadmapRenderUnit
 
     data class Paragraph(val spans: List<RoadmapSpan>) : RoadmapRenderUnit
 

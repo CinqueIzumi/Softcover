@@ -15,40 +15,29 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-
-/**
- * A picker tile is a picture, not a text block, so it stops growing once it is big enough to read —
- * a row of them stretched across a desktop settings pane would read as a row of posters. Shared by
- * the theme and spine-colour pickers, so the two rows are the same size.
- */
-internal val PREVIEW_TILE_MAX_WIDTH = 128.dp
-
-/** The gap between picker tiles along a row. */
-internal val PREVIEW_TILE_GAP = 14.dp
+import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsChoiceRowUiModel
 
 /**
  * One flat, radio-semantics [SettingsRow], shared by the date-notation rows (label + today's example,
- * tabular-numeral) and the desktop UI-scale rows (label only, [example] `null`). The active row is
+ * tabular-numeral) and the desktop UI-scale rows (label only, [SettingsChoiceRowUiModel.example] `null`). The active row is
  * marked by a `primary`-tinted label and a trailing check glyph, whose 24dp slot stays reserved
  * (transparent tint) when unselected so the label width never shifts on selection.
  */
 @Composable
 internal fun SettingsSelectableRow(
-    label: String,
-    example: String?,
-    isSelected: Boolean,
+    model: SettingsChoiceRowUiModel<*>,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
     SettingsRow(
-        title = label,
-        titleColor = if (isSelected) {
+        title = model.label,
+        titleColor = if (model.selected) {
             MaterialTheme.colorScheme.primary
         } else {
             MaterialTheme.colorScheme.onSurface
         },
-        secondary = example,
+        secondary = model.example,
         secondaryStyle = MaterialTheme.editorialTypography.bodySmall.copy(
             letterSpacing = 0.3.sp,
             fontFeatureSettings = "tnum",
@@ -62,13 +51,13 @@ internal fun SettingsSelectableRow(
             Icon(
                 painter = checkIcon.getIconPainter(),
                 contentDescription = checkIcon.contentDescription,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                tint = if (model.selected) MaterialTheme.colorScheme.primary else Color.Transparent,
                 modifier = Modifier.size(24.dp),
             )
         },
         interactionSource = interactionSource,
         semantics = Modifier.selectable(
-            selected = isSelected,
+            selected = model.selected,
             interactionSource = interactionSource,
             indication = null,
             role = Role.RadioButton,

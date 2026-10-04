@@ -13,8 +13,6 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.haptics.rememberHaptics
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -78,10 +76,6 @@ class BookDetailScreen(
 
         var celebrationKey by remember { mutableIntStateOf(0) }
 
-        val shareCaptureEvents = remember {
-            MutableSharedFlow<BookDetailEvent.ShareCaptureEvent>(extraBufferCapacity = 1)
-        }
-
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
                 is BookDetailEvent.RefreshDetailBookEvent -> {
@@ -106,10 +100,6 @@ class BookDetailScreen(
                 is BookDetailEvent.OpenExternalLinkEvent -> {
                     uriHandler.openUri(uri = it.url)
                 }
-
-                is BookDetailEvent.ShareCaptureEvent -> {
-                    shareCaptureEvents.tryEmit(it)
-                }
             }
         }
 
@@ -120,9 +110,6 @@ class BookDetailScreen(
             runAction = screenModel::runAction,
             onNavigateBack = onNavigateBack,
             onCoverClick = {
-                // Reads the model the collector already mapped rather than mapping here: this lambda
-                // only runs on tap, but it is lexically inside a composable and captures composition
-                // state, which is exactly the shape R9 forbids.
                 val cover = state.fullScreenCover ?: return@BookDetailScreenLayout
 
                 overlayNavigator.push(FullScreenCoverScreen(cover = cover))
@@ -150,7 +137,6 @@ class BookDetailScreen(
             },
             isOnline = isOnline,
             celebrationKey = celebrationKey,
-            shareCaptureEvents = shareCaptureEvents,
         )
     }
 }
@@ -160,9 +146,8 @@ class BookDetailScreen(
  * `actual`: the shared `ScreenModel` / state / actions / overlays wire up identically in
  * [BookDetailScreen.Content], and only the rendered layout branches — mobile is a single scrolling
  * column, desktop is a fixed identity sidebar beside a scrolling content column. `expect` cannot carry
- * default argument values, so every parameter is supplied explicitly at the single call site above.
- * The screen's id and morph surface are **not** parameters here: the cover's shared-element key is
- * resolved by `CoverModelsCollector` and arrives on `BookDetailUiState.heroCover` (R7/R9).
+ * default argument values, so every parameter is supplied explicitly at the single call site in
+ * [BookDetailScreen.Content].
  */
 @Composable
 internal expect fun BookDetailScreenLayout(
@@ -173,5 +158,4 @@ internal expect fun BookDetailScreenLayout(
     onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
     celebrationKey: Int,
-    shareCaptureEvents: Flow<BookDetailEvent.ShareCaptureEvent>,
 )

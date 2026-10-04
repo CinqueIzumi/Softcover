@@ -15,8 +15,6 @@ internal class OnDismissShareSheetAction : BookDetailAction {
             it.copy(
                 isShareSheetVisible = false,
                 chosenShareVariant = null,
-                isSharing = false,
-                isSavingToGallery = false,
             )
         }
     }

@@ -47,22 +47,26 @@ class ObserveReadingLifeUseCaseTest {
         booksByYear = listOf(YearCount(
             year = 2026,
             count = 5,
-        ),),
+        ),
+        ),
         pagesByYear = listOf(YearCount(
             year = 2026,
             count = 1500,
-        ),),
+        ),
+        ),
         pagesByMonth = listOf(MonthCount(
             year = 2026,
             month = 3,
             count = 300,
-        ),),
+        ),
+        ),
         genres = GenreBreakdown(
             slices = listOf(GenreSlice(
                 name = "Fantasy",
                 count = 5,
                 fraction = 1.0,
-            ),),
+            ),
+            ),
             taggedBookCount = 5,
         ),
         ratings = ratings,
@@ -139,7 +143,8 @@ class ObserveReadingLifeUseCaseTest {
                     gender = Gender.Other,
                     count = 2,
                     fraction = 1.0,
-                ),),
+                ),
+                ),
                 knownGenderCount = 2,
                 lgbtqBreakdown = DemographicBreakdown(
                     yesCount = 1,
@@ -158,7 +163,8 @@ class ObserveReadingLifeUseCaseTest {
             } returns flowOf(profileData(
                 ratings = ratings,
                 authorDemographics = demographics,
-            ),)
+            ),
+            )
 
             // ----- Act -----
             val result = useCase().first()

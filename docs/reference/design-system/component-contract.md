@@ -47,11 +47,11 @@ sealed interface ProgressSheetEvent {
 }
 ```
 
-- **One hoisted handler per list.** `BookCard` events carry a `BookCardKey`. A surface builds one handler
-  with `rememberBookCardEventHandler(resolve, onEvent)`, where `resolve` maps a key to the payload it was
-  built from and `onEvent` receives the event plus that payload. An event whose key `resolve` does not know
-  is dropped. A list that mutates should resolve from a payload map built in the same pass as its cards, not
-  from a live list that can move ahead of them. `rememberPrefetchingBookCardEventHandler`
+- **One hoisted handler per list.** `BookCard` events carry a `BookCardKey`. A surface holds its cards as a
+  `BookCardSet<P>` on `UiState`: the cards paired with the payload each key resolves to, built in one pass by
+  a collector or mapper (`toBookCardSet()`). It builds one handler with
+  `rememberBookCardEventHandler(set, onEvent)`, where `onEvent` receives the event plus the set's payload for
+  its key. An event whose key the set does not hold is dropped. `rememberPrefetchingBookCardEventHandler`
   (`:core:presentation`) adds the book-detail prefetch on press. A lazy-list key comes from
   `BookCardKey.lazyKey` (`"book:12"`, `"edition:3"`, `"series:7"`): Bundle-saveable and unique across kinds.
 - **Screen state the component renders belongs on the model**, not in a second parameter (the progress
@@ -293,19 +293,17 @@ It is a **shipped easter egg**, rendered on Android, iOS and desktop from `commo
   resets the count). The seventh tap confirms with a haptic and pushes the gallery. The footer gives no
   hint.
 - **The registry is data in the library.** `GalleryRegistry` (`:core:component/gallery/`) pairs each
-  component with its family and fixtures. A new component adds its entry in the same change. An empty
-  family is filtered out.
+  component with its family and fixtures. A new component adds its entry in the same change.
 - **The screen lives in `feature:settings`**, which pushes it itself from the tap gesture. It has no nav
   destination and no sidebar row.
 - **It is a user-visible surface**, so it gets a design pass like any other screen.
 
 **Anatomy.** An intro line, then a "Preview controls" region opened by a `SectionHeader` (Section register) with two
 override chip rows, **Brightness** (`ThemeMode`) and **Spine colour** (`ColorPalette`), each a wrapping row
-of `Chip`s under a bar-less `eyebrowSmall` sub-label. Both rows always render, even with an empty registry.
-Tapping the selected chip clears the override back to the app's own setting (tap-to-toggle-off), and a
-short gloss line under the rows says so. Once the registry has a family, a third chip row filters the
-sections to one family, with the same toggle-off rule. All three rows stay in the app's own look, outside
-the overridden theme.
+of `Chip`s under a bar-less `eyebrowSmall` sub-label. Tapping the selected chip clears the override back to
+the app's own setting (tap-to-toggle-off), and a short gloss line under the rows says so. A third chip row
+filters the sections to one family, with the same toggle-off rule. All three rows stay in the app's own
+look, outside the overridden theme.
 
 Below sits the **themed region**: a `SoftcoverTheme` resolved from the overrides (each falling back to
 `LocalThemeConfiguration` when `null`; dynamic colour forced off whenever a palette override is set),
@@ -330,6 +328,22 @@ Families consolidate on **shared anatomy, not shared category name.**
 
 The test: **can the two share a layout, with the variant choosing only which parts appear?** If yes, one
 component. If the variant would choose *which parameters mean anything*, two components.
+
+### 7.6a Over-engineering
+
+Every component, mapper, collector and state field takes the simplest shape that fits this contract. These
+are rejected at design time, in briefs and in review:
+
+- A style or metrics table, or an internal type, whose fields only one variant sets off a shared value, or
+  that copies what the framework already supplies (`Surface`'s content colour, `LocalContentColor`).
+- One layout split between a table and `when` branches. Variants whose anatomies differ get private
+  per-variant bodies; one scaffold plus a small style only when the bodies are near-identical.
+- Surface-named variants that mostly share one style tuple; a data-free primitive still behind a model
+  (§ 7.4a).
+- A model field no call site sets off its default, a sub-model wrapping one field, a variant no call site
+  uses.
+- A mapper, helper, handler factory or seam with one caller that adds a layer without removing repetition.
+- State fields that duplicate each other, or one derived value written in more than one place.
 
 ### 7.7 Rationale (optional reading)
 

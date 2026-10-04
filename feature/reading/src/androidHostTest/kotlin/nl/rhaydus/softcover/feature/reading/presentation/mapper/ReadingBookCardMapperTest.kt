@@ -457,7 +457,7 @@ class ReadingBookCardMapperTest {
             column.text.title shouldBe "Piranesi"
             column.text.eyebrow.shouldBeNull()
             column.text.byline.shouldBeNull()
-            column.menuLabel.shouldBeNull()
+            column.hasMenu shouldBe false
             column.cover.shouldNotBeNull()
             card.decorations.progress.shouldBeNull()
         }

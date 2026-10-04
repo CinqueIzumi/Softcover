@@ -2485,7 +2485,8 @@ class BooksRemoteDataSourceImplTest {
             val existingJournals = listOf(ReadingJournal(
                 updatedAt = "2024-01-01T00:00:00.000000",
                 event = "status_updated",
-            ),)
+            ),
+            )
             val userBook = stubUserBook(
                 id = 3,
                 journals = existingJournals,
@@ -2658,7 +2659,8 @@ class BooksRemoteDataSourceImplTest {
             val existingJournals = listOf(ReadingJournal(
                 updatedAt = "2024-01-01T00:00:00.000000",
                 event = "status_updated",
-            ),)
+            ),
+            )
             val userBook = stubUserBook(
                 id = 3,
                 journals = existingJournals,

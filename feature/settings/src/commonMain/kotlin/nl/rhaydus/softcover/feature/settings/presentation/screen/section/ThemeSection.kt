@@ -12,8 +12,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.control.PreviewTileEvent
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTile
-import nl.rhaydus.softcover.core.component.control.ThemePreviewTileEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -40,14 +40,14 @@ internal fun ThemeSection(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(PREVIEW_TILE_GAP),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             state.themeChoices.forEach { tile ->
                 ThemePreviewTile(
                     model = tile,
                     onEvent = { event ->
                         when (event) {
-                            is ThemePreviewTileEvent.Clicked ->
+                            is PreviewTileEvent.Clicked ->
                                 runAction(OnThemeModeSelectedAction(mode = event.key))
                         }
                     },
@@ -56,7 +56,7 @@ internal fun ThemeSection(
                             weight = 1f,
                             fill = false,
                         )
-                        .widthIn(max = PREVIEW_TILE_MAX_WIDTH),
+                        .widthIn(max = 128.dp),
                 )
             }
         }
