@@ -146,7 +146,7 @@ component/
 +              SkeletonMask (Modifier.skeletonMask)
 +              · ErrorState
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
-+              · StatTile  · Chart  · Legend
++              StatTile(+UiModel, +Variant)  · Chart  · Legend
 + text/        SoftcoverText
 + topbar/      TopBar  TopBarUiModel/Event/Surface
 +              SearchTopBar(+UiModel, +Event)   EditorialTopBar(+UiModel, +Event)

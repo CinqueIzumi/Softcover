@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.collector
 import kotlinx.coroutines.flow.filterNotNull
 import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -26,6 +27,7 @@ internal class UserInformationCollector : ProfileCollector {
                     it.copy(
                         userProfileData = profileData,
                         isLoading = false,
+                        readingAtlas = readingAtlasUiModel(profileData),
                         readingLifeShareCard = it.readingLife?.toReadingLifeShareCardUiModel(profileData),
                     )
                 }

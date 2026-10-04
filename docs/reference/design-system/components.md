@@ -74,6 +74,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 ## Statistics
 
 - **Animated stat number** — `core:component/statistic` — tweens a stat into place.
+- **Stat tile** — `core:component/statistic` — a labelled stat on a hero, standard or compact tile; only the number masks while loading.
 - **Editorial figure / chart** (feature-local) — [detail](components/statistics.md#editorial-figure--chart) — five hand-drawn monochrome charts.
 
 ## Share

@@ -329,7 +329,7 @@ private fun ReadingLifeContent(
     onBookCardEvent: (BookCardEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // ReadingAtlasSection reads state.isLoading directly (it is driven by userProfileData alone),
+    // ReadingAtlasSection renders from state.readingAtlas (itself driven by userProfileData alone),
     // but every section below also needs readingLife to have arrived — the two land via separate
     // collectors, so gating on isLoading alone risks a section briefly rendering its permanent
     // "nothing yet" copy before readingLife has actually resolved.
@@ -337,8 +337,7 @@ private fun ReadingLifeContent(
 
     Column(modifier = modifier) {
         ReadingAtlasSection(
-            userProfileData = state.userProfileData,
-            isLoading = state.isLoading,
+            readingAtlas = state.readingAtlas,
             header = state.readingAtlasHeader,
         )
 

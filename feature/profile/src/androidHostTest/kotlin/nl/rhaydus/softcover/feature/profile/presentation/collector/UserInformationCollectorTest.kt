@@ -19,6 +19,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.core.profile.domain.usecase.RefreshUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
@@ -110,10 +111,12 @@ class UserInformationCollectorTest {
             } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
-            val job = launch { initializer.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                initializer.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             // (refresh is triggered immediately on launch via dependencies.launch { ... })
@@ -132,10 +135,12 @@ class UserInformationCollectorTest {
             val profileData = buildProfileData()
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
-            val job = launch { initializer.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                initializer.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             profileDataFlow.emit(profileData)
@@ -148,6 +153,30 @@ class UserInformationCollectorTest {
         }
 
         @Test
+        fun `sets readingAtlas to the atlas mapped from the emitted profile data`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            coEvery {
+                refreshUserProfileDataUseCase()
+            } returns Result.success(Unit)
+            val profileData = buildProfileData()
+            val dependencies = stubDependencies(this)
+            val initializer = UserInformationCollector()
+            val job = launch {
+                initializer.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            profileDataFlow.emit(profileData)
+
+            // ----- Assert -----
+            stateFlow.value.readingAtlas shouldBe readingAtlasUiModel(profileData)
+            job.cancel()
+        }
+
+        @Test
         fun `does not update state when observe emits null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             coEvery {
@@ -155,10 +184,12 @@ class UserInformationCollectorTest {
             } returns Result.success(Unit)
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
-            val job = launch { initializer.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                initializer.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             profileDataFlow.emit(null)
@@ -178,10 +209,12 @@ class UserInformationCollectorTest {
             val profileData = buildProfileData()
             val dependencies = stubDependencies(this)
             val initializer = UserInformationCollector()
-            val job = launch { initializer.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                initializer.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             profileDataFlow.emit(profileData)
@@ -204,10 +237,12 @@ class UserInformationCollectorTest {
                 stateFlow.value = ProfileUiState(readingLife = readingLife)
                 val dependencies = stubDependencies(this)
                 val initializer = UserInformationCollector()
-                val job = launch { initializer.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    initializer.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 profileDataFlow.emit(profileData)
@@ -230,10 +265,12 @@ class UserInformationCollectorTest {
                 stateFlow.value = ProfileUiState(readingLife = readingLife)
                 val dependencies = stubDependencies(this)
                 val initializer = UserInformationCollector()
-                val job = launch { initializer.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    initializer.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 profileDataFlow.emit(firstProfileData)

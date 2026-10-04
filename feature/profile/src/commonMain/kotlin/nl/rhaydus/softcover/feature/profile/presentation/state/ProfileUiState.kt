@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
 import nl.rhaydus.toad.UiState
@@ -35,6 +36,8 @@ internal data class ProfileUiState(
         enabled = false,
     ),
     val isLoading: Boolean = true,
+
+    val readingAtlas: ReadingAtlasUiModel = readingAtlasUiModel(null),
 
     val readingAtlasHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Reading atlas"),
     val theReaderHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "The reader"),

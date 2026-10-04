@@ -39,6 +39,9 @@ import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatTile
+import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
@@ -241,6 +244,20 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         },
     ),
     galleryEntry(
+        name = "StatTile",
+        family = GalleryFamily.STATISTIC,
+        blurb = "A labelled statistic on a tile, in a hero, standard or compact surface; while " +
+            "loading only the number masks and the tile around it stays real.",
+        previews = StatTileUiModel,
+        label = ::statTileFixtureLabel,
+        content = { model, modifier ->
+            StatTile(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
         name = "ThemePreviewTile",
         family = GalleryFamily.CONTROL,
         blurb = "One choice in the theme picker: the app's own page in miniature, painted in " +
@@ -348,9 +365,22 @@ private fun dividerFixtureLabel(model: DividerUiModel): String = when (model) {
     is DividerUiModel.Vertical -> if (model.length != null) "Fixed-length vertical rule" else "Vertical rule"
 }
 
-/** Names what a [StatNumberUiModel] fixture demonstrates — its format, which is its anatomy. */
-private fun statNumberFixtureLabel(model: StatNumberUiModel): String = when (model.format) {
-    StatNumberFormat.Grouped -> "Grouped thousands"
-    StatNumberFormat.Plain -> "Plain integer"
-    is StatNumberFormat.Decimal -> "One decimal"
+private fun statNumberFixtureLabel(model: StatNumberUiModel): String {
+    if (model.isLoading) return "Loading"
+
+    return when (model.format) {
+        StatNumberFormat.Grouped -> "Grouped thousands"
+        StatNumberFormat.Plain -> "Plain integer"
+        is StatNumberFormat.Decimal -> "One decimal"
+    }
+}
+
+private fun statTileFixtureLabel(model: StatTileUiModel): String {
+    val variant = when (model.variant) {
+        is StatTileVariant.Hero -> "Hero"
+        is StatTileVariant.Standard -> "Standard"
+        is StatTileVariant.Compact -> "Compact"
+    }
+
+    return if (model.stat.isLoading) "$variant, loading" else variant
 }

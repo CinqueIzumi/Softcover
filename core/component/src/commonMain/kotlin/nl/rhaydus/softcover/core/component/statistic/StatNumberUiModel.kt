@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 data class StatNumberUiModel(
     val value: Double,
     val format: StatNumberFormat = StatNumberFormat.Grouped,
+    val isLoading: Boolean = false,
 ) {
     companion object : UiModelPreviews<StatNumberUiModel> {
         override val previews: ImmutableList<StatNumberUiModel> = persistentListOf(
@@ -26,6 +27,10 @@ data class StatNumberUiModel(
             StatNumberUiModel(
                 value = 4.23,
                 format = StatNumberFormat.Decimal(fractionDigits = 1),
+            ),
+            StatNumberUiModel(
+                value = 0.0,
+                isLoading = true,
             ),
         )
     }

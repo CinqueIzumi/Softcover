@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8 is done (controls closed, step file deleted, #275 ticked). SP added after S10 (absorbs old S11-5). SL-3b blocked on F34, SL-12 on S9-3; F33 open.
-- **Next:** `steps/s9-statistics.md` S9-1.
+- **State:** S9-1 done (`StatTile` in `statistic/`; `FeaturedProgressStat` moved to S9-4). SL-3b blocked on F34, SL-12 on S9-3; F33 open.
+- **Next:** `steps/s9-statistics.md` S9-2 (Phase 1: the chart model).
 - **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `Color.LightGray` / `White`, not theme roles, so network-latency shimmers are a light-grey block on the dark theme — foundation upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
 - **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add an SP checkbox to #275?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** JDK 21. Host tests for every touched module passed. Full `styleCheck` passed after the fix round.
-- **Uncommitted:** the S8 controls change (`:core:component`, `:core:uibinding`, feature call sites and tests), tracker and step docs (`s8-controls.md` deleted, `sp-spacing-scale.md` new), one reviewer memory.
+- **Verification:** JDK 21. `:feature:profile` host tests passed; full `styleCheck` passed after the review fix round. Reviewer: no blockers.
+- **Uncommitted:** S9-1 (`statistic/`, gallery, profile atlas + tests, two reference docs), SS step, tracker.
 
 ## Local verification
 
@@ -70,10 +70,11 @@ every sub-step's Verify.
 | S8 | — (screen states) | S8-1–S8-3, S8-C-a–C-c | [x] |
 | S8 | — (controls) | S8-4–S8-6, S8-C-controls | [x] |
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
+| SS | [steps/ss-simplicity-audit.md](steps/ss-simplicity-audit.md) | SS-0–SS-7; after S9, before PF / S10 | [ ] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
 | SP | [steps/sp-spacing-scale.md](steps/sp-spacing-scale.md) | SP-1–SP-5, SP-C; after S10, before S11 | [ ] |
-| S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-4 | [ ] |
+| S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-3 | [ ] |
 | S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |
 
 ## Decisions
@@ -82,6 +83,7 @@ every sub-step's Verify.
 - Test posture: no Compose UI tests; unit tests follow `.claude/rules/tests.md`; the Component Gallery is the visual-acceptance surface.
 - A `:core:uibinding` → `:core:<data>` edge is pre-approved when a mapper needs one; write it when the edge exists.
 - Loading follows `component-contract.md` R12; SL retrofits the existing surfaces.
+- Every step builds the simplest shape: no style tables, single-variant fields or one-caller layers.
 - A step spanning several sessions splits into sub-steps, one session each, in the step file's `## Sub-steps`.
 
 ## Baseline

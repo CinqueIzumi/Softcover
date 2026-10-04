@@ -81,7 +81,15 @@ fun StatNumber(
         modifier = modifier,
         autoSize = autoSize,
         maxLines = maxLines,
+        isLoading = model.isLoading,
+        standIn = model.format.standIn(),
     )
+}
+
+private fun StatNumberFormat.standIn(): String = when (this) {
+    StatNumberFormat.Grouped -> "0,000"
+    StatNumberFormat.Plain -> "00"
+    is StatNumberFormat.Decimal -> "0." + "0".repeat(fractionDigits)
 }
 
 private fun StatNumberFormat.render(value: Double): String = when (this) {
@@ -103,6 +111,8 @@ private fun StatPulseText(
     modifier: Modifier,
     autoSize: TextAutoSize?,
     maxLines: Int,
+    isLoading: Boolean,
+    standIn: String,
 ) {
     val playMotion = playDecorativeMotion()
 
@@ -154,6 +164,8 @@ private fun StatPulseText(
             style = style.copy(fontFeatureSettings = TABULAR_NUMS),
             autoSize = autoSize,
             maxLines = maxLines,
+            isLoading = isLoading,
+            standIn = standIn,
         )
     }
 }

@@ -14,7 +14,6 @@ primitives among them).
 | S11-1 | R10 sweep: every UI model built outside a collector, behind a build gate | [ ] |
 | S11-2 | R11 holdouts | [ ] |
 | S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | [ ] |
-| S11-4 | Minimal-shape audit of every `*UiModel` (below) | [ ] |
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S11-1 — R10 sweep
@@ -53,11 +52,3 @@ Components still taking a loose render parameter instead of the model deciding i
   either the rule for it goes into `component-contract.md` R10, or it becomes a § 7.4a exception.
 - Fold `ShareCardPalette`'s two parallel colour `when`s into a per-variant lookup.
 - Run the final `component-contract.md` § 7.4a check: no remaining exception rows.
-
-## S11-4 — Minimal-shape audit
-
-Audit every `*UiModel` for needless indirection, the way S5-10 found `Divider`'s 27 surfaces sharing 5
-styles. A component whose look depends on no data moves to the data-free-primitive exception (plain
-parameters with defaults, no model). A data-driven model keeps the smallest contract-fitting shape: content
-fields plus a small style axis, with overridable defaulted fields, not one surface-named variant per call
-site. Propose per family, then stop for approval.

@@ -129,8 +129,7 @@ internal actual fun ProfileScreenLayout(
             Spacer(modifier = Modifier.height(36.dp))
 
             ReadingAtlasSection(
-                userProfileData = state.userProfileData,
-                isLoading = state.isLoading,
+                readingAtlas = state.readingAtlas,
                 header = state.readingAtlasHeader,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
