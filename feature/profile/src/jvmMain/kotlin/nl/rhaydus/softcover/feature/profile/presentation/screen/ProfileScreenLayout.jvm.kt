@@ -47,7 +47,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
@@ -354,7 +353,8 @@ private fun ReadingLifeContent(
         Spacer(modifier = Modifier.height(40.dp))
 
         YearColumnHistorySection(
-            readingLife = state.readingLife,
+            chart = state.yearHistoryChart,
+            caption = state.yearHistoryCaption,
             isLoading = readingLifeLoading,
             header = state.yearColumnHistoryHeader,
             metricToggle = state.yearMetricToggle,
@@ -388,7 +388,9 @@ private fun ReadingLifeContent(
         Spacer(modifier = Modifier.height(40.dp))
 
         RatingsHistogramSection(
-            ratings = state.readingLife?.ratings ?: RatingsDistribution(),
+            chart = state.ratingsChart,
+            average = state.ratingsAverage,
+            totalRatings = state.ratingsTotal,
             isLoading = readingLifeLoading,
             header = state.ratingsHistogramHeader,
             caption = state.ratingsHistogramCaption,

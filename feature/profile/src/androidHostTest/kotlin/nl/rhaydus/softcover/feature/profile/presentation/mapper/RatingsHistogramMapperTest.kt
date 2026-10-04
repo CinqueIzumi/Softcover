@@ -1,12 +1,125 @@
 package nl.rhaydus.softcover.feature.profile.presentation.mapper
 
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
+import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class RatingsHistogramMapperTest {
+    @Nested
+    inner class RatingsChartUiModel {
+        @Test
+        fun `null ratings yield a loading model with nine columns`() {
+            // ----- Arrange & Act -----
+            val result = ratingsChartUiModel(null)
+
+            // ----- Assert -----
+            result.isLoading shouldBe true
+            result.columns shouldHaveSize 9
+        }
+
+        @Test
+        fun `whole steps are labelled and Lead, half steps unlabelled and Fourth`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(halfStarBuckets = List(9) { 4 })
+
+            // ----- Act -----
+            val result = ratingsChartUiModel(ratings)
+
+            // ----- Assert -----
+            result.isLoading shouldBe false
+            result.columns.map { it.label } shouldBe
+                listOf("1★", null, "2★", null, "3★", null, "4★", null, "5★")
+            result.columns.map { it.tone } shouldBe List(9) { index ->
+                if (index % 2 == 0) ChartTone.Lead else ChartTone.Fourth
+            }
+        }
+
+        @Test
+        fun `zero count column is Fifth with no fraction`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(
+                halfStarBuckets = listOf(0, 0, 2, 0, 0, 0, 0, 0, 4),
+            )
+
+            // ----- Act -----
+            val columns = ratingsChartUiModel(ratings).columns
+
+            // ----- Assert -----
+            columns[0].tone shouldBe ChartTone.Fifth
+            columns[1].tone shouldBe ChartTone.Fifth
+            columns[0].fraction shouldBe 0f
+            columns[2].tone shouldBe ChartTone.Lead
+        }
+
+        @Test
+        fun `fraction is the count relative to the largest bucket`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(
+                halfStarBuckets = listOf(1, 0, 2, 0, 0, 0, 0, 0, 4),
+            )
+
+            // ----- Act -----
+            val columns = ratingsChartUiModel(ratings).columns
+
+            // ----- Assert -----
+            columns[0].fraction shouldBe 0.25f
+            columns[2].fraction shouldBe 0.5f
+            columns[8].fraction shouldBe 1f
+        }
+
+        @Test
+        fun `all-zero buckets give zero fractions without dividing by zero`() {
+            // ----- Arrange & Act -----
+            val columns = ratingsChartUiModel(RatingsDistribution()).columns
+
+            // ----- Assert -----
+            columns.map { it.fraction } shouldBe List(9) { 0f }
+        }
+
+        @Test
+        fun `columns never carry a value`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(halfStarBuckets = List(9) { 3 })
+
+            // ----- Act -----
+            val loaded = ratingsChartUiModel(ratings).columns
+            val loading = ratingsChartUiModel(null).columns
+
+            // ----- Assert -----
+            loaded.map { it.value }.distinct() shouldBe listOf(null)
+            loading.map { it.value }.distinct() shouldBe listOf(null)
+        }
+    }
+
+    @Nested
+    inner class RatingsAverageUiModel {
+        @Test
+        fun `null ratings yield a loading model`() {
+            // ----- Arrange & Act -----
+            val result = ratingsAverageUiModel(null)
+
+            // ----- Assert -----
+            result.isLoading shouldBe true
+        }
+
+        @Test
+        fun `loaded ratings carry the average in decimal format`() {
+            // ----- Arrange & Act -----
+            val result = ratingsAverageUiModel(RatingsDistribution(average = 4.2))
+
+            // ----- Assert -----
+            result.isLoading shouldBe false
+            result.value shouldBe 4.2
+            result.format shouldBe StatNumberFormat.Decimal(fractionDigits = 1)
+        }
+    }
+
     @Nested
     inner class ToRatingsHistogramHeader {
         @Test

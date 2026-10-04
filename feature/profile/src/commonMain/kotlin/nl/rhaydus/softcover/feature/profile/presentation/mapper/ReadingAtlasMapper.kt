@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.RATING_FRACTION_DIGITS
 import nl.rhaydus.softcover.feature.profile.presentation.state.ReadingAtlasUiModel
 
 /** A null [profileData] yields the loading tiles. */

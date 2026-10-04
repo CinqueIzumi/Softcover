@@ -147,6 +147,7 @@ component/
 +              · ErrorState
 + chart/       ChartTone  RankedBars(+UiModel, +BarUiModel)
 +              ProportionChart(+UiModel, +SegmentUiModel)
++              ColumnChart(+UiModel)  ColumnUiModel
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
 +              StatTile(+UiModel, +Variant)
 + text/        SoftcoverText

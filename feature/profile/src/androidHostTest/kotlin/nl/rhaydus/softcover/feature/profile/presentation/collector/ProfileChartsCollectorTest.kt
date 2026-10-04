@@ -26,6 +26,8 @@ import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
@@ -143,12 +145,13 @@ class ProfileChartsCollectorTest {
     private fun buildReadingLife(
         demographics: AuthorDemographics = buildDemographics(),
         genres: GenreBreakdown = buildGenres(),
+        ratings: RatingsDistribution = RatingsDistribution(),
     ): ReadingLife = ReadingLife(
         booksByYear = emptyList(),
         pagesByYear = emptyList(),
         pagesByMonth = emptyList(),
         genres = genres,
-        ratings = RatingsDistribution(),
+        ratings = ratings,
         recentlyLoved = emptyList(),
         authorDemographics = demographics,
     )
@@ -196,6 +199,80 @@ class ProfileChartsCollectorTest {
                 stateFlow.value.bipocChart shouldBe demographicChartUiModel(demographics.bipocBreakdown)
                 stateFlow.value.lgbtqChart shouldBe demographicChartUiModel(demographics.lgbtqBreakdown)
                 stateFlow.value.authorDemographics shouldBe demographics
+                job.cancel()
+            }
+
+        @Test
+        fun `maps the ratings chart and average once both reading life and profile have arrived`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val ratings = RatingsDistribution(
+                    average = 4.2,
+                    totalRatings = 9,
+                    halfStarBuckets = listOf(0, 0, 1, 0, 2, 0, 3, 0, 3),
+                )
+                val dependencies = stubDependencies(this)
+                val job = launch {
+                    ProfileChartsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                hideFlow.emit(false)
+                profileDataFlow.emit(buildProfileData())
+                readingLifeFlow.emit(buildReadingLife(ratings = ratings))
+
+                // ----- Assert -----
+                stateFlow.value.ratingsChart shouldBe ratingsChartUiModel(ratings)
+                stateFlow.value.ratingsAverage shouldBe ratingsAverageUiModel(ratings)
+                stateFlow.value.ratingsChart.isLoading shouldBe false
+                stateFlow.value.ratingsAverage.isLoading shouldBe false
+                job.cancel()
+            }
+
+        @Test
+        fun `ratings stay loading when only the reading life has arrived`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val dependencies = stubDependencies(this)
+                val job = launch {
+                    ProfileChartsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                hideFlow.emit(false)
+                readingLifeFlow.emit(buildReadingLife(ratings = RatingsDistribution(average = 3.0)))
+
+                // ----- Assert -----
+                stateFlow.value.ratingsChart.isLoading shouldBe true
+                stateFlow.value.ratingsAverage.isLoading shouldBe true
+                job.cancel()
+            }
+
+        @Test
+        fun `ratings stay loading when only the profile data has arrived`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val dependencies = stubDependencies(this)
+                val job = launch {
+                    ProfileChartsCollector().onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                hideFlow.emit(false)
+                profileDataFlow.emit(buildProfileData())
+
+                // ----- Assert -----
+                stateFlow.value.ratingsChart.isLoading shouldBe true
+                stateFlow.value.ratingsAverage.isLoading shouldBe true
                 job.cancel()
             }
 

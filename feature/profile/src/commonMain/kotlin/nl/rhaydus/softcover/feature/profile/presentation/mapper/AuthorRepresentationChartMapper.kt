@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.core.component.chart.ProportionSegmentUiModel
 import nl.rhaydus.softcover.core.domain.model.Gender
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
 import nl.rhaydus.softcover.core.profile.domain.model.GenderSlice
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.PERCENTAGE_MULTIPLIER
 import kotlin.math.roundToInt
 
 private const val LOADING_SEGMENT_COUNT = 3

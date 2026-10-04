@@ -14,7 +14,7 @@ both themes in the gallery.
 |---|---|---|
 | S9-1 | Stat tiles | [x] |
 | S9-2 | `ChartTone`, `RankedBars`, `ProportionChart` | [x] |
-| S9-3 | `ColumnChart`, the ratings stat model | [ ] |
+| S9-3 | `ColumnChart`, the ratings stat model | [x] |
 | S9-4 | Progress | [ ] |
 | S9-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 

@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.core.component.chart.ChartTone
 import nl.rhaydus.softcover.core.component.chart.RankedBarUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.PERCENTAGE_MULTIPLIER
 import kotlin.math.roundToInt
 
 private const val RANKED_GENRE_COUNT = 5

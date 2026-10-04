@@ -25,6 +25,8 @@ import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
 import nl.rhaydus.softcover.core.component.chart.ChartTone
+import nl.rhaydus.softcover.core.component.chart.ColumnChart
+import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.ProportionChart
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBars
@@ -242,6 +244,20 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         label = { model -> if (model.isLoading) "Loading" else "${model.rows.size} rows" },
         content = { model, modifier ->
             RankedBars(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "ColumnChart",
+        family = GalleryFamily.STATISTIC,
+        blurb = "Vertical columns scaled against the tallest, each with an optional label and value; " +
+            "while loading the columns keep their layout and mask.",
+        previews = ColumnChartUiModel,
+        label = { model -> if (model.isLoading) "Loading" else "${model.columns.size} columns" },
+        content = { model, modifier ->
+            ColumnChart(
                 model = model,
                 modifier = modifier,
             )

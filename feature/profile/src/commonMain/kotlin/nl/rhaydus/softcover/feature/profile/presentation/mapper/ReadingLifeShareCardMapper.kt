@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.core.component.share.ReadingLifeGenre
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
-import nl.rhaydus.softcover.feature.profile.presentation.screen.section.PERCENTAGE_MULTIPLIER
 import kotlin.math.roundToInt
 
 private const val SHARE_CARD_GENRE_LIMIT = 3

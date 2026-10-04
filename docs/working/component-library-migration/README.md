@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S9-1 done (`StatTile`, per-variant bodies). S9-2 done (`chart/`; `ProfileChartsCollector` sole writer). SS audit added after S9. SL-3b blocked on F34, SL-12 on S9-3; F33 open.
-- **Next:** `steps/s9-statistics.md` S9-3 build (§ Approved shape), held to `steps/ss-simplicity-audit.md`'s smells.
+- **State:** S9-1–S9-3 done (`StatTile`; `chart/` incl. `ColumnChart`). SS audit after S9. SL-3b blocked on F34; SL-12 unblocked; F33 open.
+- **Next:** `steps/s9-statistics.md` S9-4 Phase 1 (progress family, with the user).
 - **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `Color.LightGray` / `White`, not theme roles, so network-latency shimmers are a light-grey block on the dark theme — foundation upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
-- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile`, `RankedBars`, `ProportionChart` not yet eyeballed in the gallery (both themes).
+- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile` and the three charts not yet eyeballed in the gallery (both themes).
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** JDK 21. profile + component host tests and `styleCheck` passed. Reviewer: looks good.
-- **Uncommitted:** S9-2 (`chart/`, profile, tests, 3 docs), tracker.
+- **Verification:** JDK 21. profile host tests, `styleCheck` passed. Reviewer: minor fixes applied.
+- **Uncommitted:** S9-3 (`ColumnChart`, profile, tests, 3 docs), tracker.
 
 ## Local verification
 

@@ -10,6 +10,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollec
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.RecentlyLovedCardsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.UserInformationCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.YearHistoryCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.YearMetricToggleCollector
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileScreenScreenModel
 import org.koin.dsl.bind
@@ -42,4 +43,5 @@ val profileScreenModule = module {
     factory { ProfileChartsCollector() } bind ProfileCollector::class
     factory { HideUntaggedAuthorsCollector() } bind ProfileCollector::class
     factory { YearMetricToggleCollector() } bind ProfileCollector::class
+    factory { YearHistoryCollector() } bind ProfileCollector::class
 }

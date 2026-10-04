@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
@@ -10,6 +11,7 @@ import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
@@ -19,9 +21,13 @@ import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryCaption
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.yearHistoryChartUiModel
 import nl.rhaydus.toad.UiState
 
 internal data class ProfileUiState(
@@ -40,6 +46,12 @@ internal data class ProfileUiState(
         selected = YearMetric.BOOKS,
         enabled = false,
     ),
+
+    val yearHistoryChart: ColumnChartUiModel = yearHistoryChartUiModel(null),
+    val yearHistoryCaption: String = yearHistoryCaption(
+        series = null,
+        metric = YearMetric.BOOKS,
+    ),
     val isLoading: Boolean = true,
 
     val readingAtlas: ReadingAtlasUiModel = readingAtlasUiModel(null),
@@ -56,6 +68,8 @@ internal data class ProfileUiState(
     val genderChart: ProportionChartUiModel = genderChartUiModel(null),
     val bipocChart: ProportionChartUiModel = demographicChartUiModel(null),
     val lgbtqChart: ProportionChartUiModel = demographicChartUiModel(null),
+    val ratingsChart: ColumnChartUiModel = ratingsChartUiModel(null),
+    val ratingsAverage: StatNumberUiModel = ratingsAverageUiModel(null),
 
     val readingAtlasHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Reading atlas"),
     val theReaderHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "The reader"),
@@ -86,6 +100,9 @@ internal data class ProfileUiState(
 ) : UiState {
     private val allAuthorDemographics: AuthorDemographics
         get() = readingLife?.authorDemographics ?: AuthorDemographics()
+
+    val ratingsTotal: Int
+        get() = readingLife?.ratings?.totalRatings ?: 0
 
     /**
      * Whether the reader has any loved reads to show. Read from [readingLife] rather than the mapped
