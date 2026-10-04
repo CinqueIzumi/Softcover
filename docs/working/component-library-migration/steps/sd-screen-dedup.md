@@ -1,6 +1,6 @@
 # SD — Screen de-duplication
 
-**Stage:** after SS, before PF and S10, so later stages change one screen body, not two.
+**Stage:** after TP, before PF and S10, so later stages change one screen body, not two.
 **Delegation:** user (Phase 1 per sub-step), `softcover-implementer` (Phase 2).
 
 **Goal:** a screen whose mobile (`mobileMain` / `commonMain`) and desktop (`jvmMain`) layouts render the
