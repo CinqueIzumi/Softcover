@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderTone
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
@@ -35,7 +34,6 @@ internal data class LibraryVisibilitySettingsUiState(
     val topBar: TopBarUiModel = TopBarUiModel(
         title = LIBRARY_TABS_TITLE,
     ),
-    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = LIBRARY_TABS_TITLE),
     /** Derived from the count, list and draft fields, but only refreshed by [withOrderedEntries]. */
     val orderedEntries: List<LibraryTabEntry> = buildLibraryTabEntries(
         statusCounts = emptyMap(),

@@ -87,15 +87,8 @@ fun SearchTopBar(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             SearchChromeField(
-                query = model.query,
-                onQueryChange = { query -> onEvent(SearchTopBarEvent.QueryChanged(query = query)) },
-                focused = model.focused,
-                onSearchActivated = { onEvent(SearchTopBarEvent.SearchActivated) },
-                onSearchDismissed = { onEvent(SearchTopBarEvent.SearchDismissed) },
-                onClearSearch = { onEvent(SearchTopBarEvent.SearchCleared) },
-                isLoading = model.isLoading,
-                active = model.active,
-                placeholder = model.placeholder,
+                model = model,
+                onEvent = onEvent,
                 modifier = Modifier.weight(1f),
             )
 
@@ -107,15 +100,8 @@ fun SearchTopBar(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SearchChromeField(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    focused: Boolean,
-    onSearchActivated: () -> Unit,
-    onSearchDismissed: () -> Unit,
-    onClearSearch: () -> Unit,
-    isLoading: Boolean,
-    active: Boolean,
-    placeholder: String,
+    model: SearchTopBarUiModel,
+    onEvent: (SearchTopBarEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
@@ -131,14 +117,14 @@ private fun SearchChromeField(
     // SearchChromeInputArea). The explicit show/hide is the belt to that braces: a field can hold
     // focus with its input session already torn down, and re-showing is what reconnects the
     // keyboard that would otherwise sit there swallowing keystrokes.
-    var appliedFocus by remember { mutableStateOf(focused) }
+    var appliedFocus by remember { mutableStateOf(model.focused) }
 
-    LaunchedEffect(focused) {
-        if (focused == appliedFocus) return@LaunchedEffect
+    LaunchedEffect(model.focused) {
+        if (model.focused == appliedFocus) return@LaunchedEffect
 
-        appliedFocus = focused
+        appliedFocus = model.focused
 
-        if (focused) {
+        if (model.focused) {
             focusRequester.requestFocus()
             keyboardController?.show()
         } else if (fieldHoldsFocus) {
@@ -151,7 +137,7 @@ private fun SearchChromeField(
         modifier = modifier.height(48.dp),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceContainer,
-        border = if (active) BorderStroke(
+        border = if (model.active) BorderStroke(
             1.5.dp,
             MaterialTheme.colorScheme.primary,
         ) else null,
@@ -164,24 +150,21 @@ private fun SearchChromeField(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             SearchChromeInputArea(
-                query = query,
-                onQueryChange = onQueryChange,
-                onSearchActivated = onSearchActivated,
-                onSearchDismissed = onSearchDismissed,
+                model = model,
+                onEvent = onEvent,
                 onFieldFocusChange = { fieldHoldsFocus = it },
                 focusRequester = focusRequester,
-                placeholder = placeholder,
                 modifier = Modifier.weight(1f),
             )
 
             when {
-                isLoading -> CircularWavyProgressIndicator(modifier = Modifier.size(18.dp))
+                model.isLoading -> CircularWavyProgressIndicator(modifier = Modifier.size(18.dp))
 
-                active -> ChromeIconButton(
+                model.active -> ChromeIconButton(
                     icon = SoftcoverIcon.Close,
                     contentDescription = "Clear search",
                     tooltip = "Clear",
-                    onClick = onClearSearch,
+                    onClick = { onEvent(SearchTopBarEvent.SearchCleared) },
                     colors = IconButtonDefaults.iconButtonColors(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     ),
@@ -202,7 +185,7 @@ private fun SearchChromeField(
  * an activation.
  *
  * A tap drives the platform side (focus, keyboard) here rather than only reporting
- * [onSearchActivated] and waiting for the state to come back, because "activate" is a level, not a
+ * [SearchTopBarEvent.SearchActivated] and waiting for the state to come back, because "activate" is a level, not a
  * pulse: re-activating while the caller already holds `focused = true` writes an equal state that a
  * `StateFlow` drops, so nothing downstream would fire. That is not hypothetical — the system back
  * button hides the keyboard without touching the field's focus, and every tap after that would be
@@ -210,13 +193,10 @@ private fun SearchChromeField(
  */
 @Composable
 private fun SearchChromeInputArea(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    onSearchActivated: () -> Unit,
-    onSearchDismissed: () -> Unit,
+    model: SearchTopBarUiModel,
+    onEvent: (SearchTopBarEvent) -> Unit,
     onFieldFocusChange: (Boolean) -> Unit,
     focusRequester: FocusRequester,
-    placeholder: String,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
@@ -230,7 +210,7 @@ private fun SearchChromeInputArea(
                     pass = PointerEventPass.Initial,
                 )
 
-                onSearchActivated()
+                onEvent(SearchTopBarEvent.SearchActivated)
 
                 focusRequester.requestFocus()
                 keyboardController?.show()
@@ -252,9 +232,9 @@ private fun SearchChromeInputArea(
         )
 
         Box(modifier = Modifier.weight(1f)) {
-            if (query.isEmpty()) {
+            if (model.query.isEmpty()) {
                 SoftcoverText(
-                    text = placeholder,
+                    text = "Search books, authors…",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -263,8 +243,8 @@ private fun SearchChromeInputArea(
             }
 
             BasicTextField(
-                value = query,
-                onValueChange = onQueryChange,
+                value = model.query,
+                onValueChange = { query -> onEvent(SearchTopBarEvent.QueryChanged(query = query)) },
                 singleLine = true,
                 textStyle = LocalTextStyle.current.merge(
                     MaterialTheme.typography.bodyLarge.copy(
@@ -283,9 +263,9 @@ private fun SearchChromeInputArea(
                         onFieldFocusChange(focusState.isFocused)
 
                         if (focusState.isFocused) {
-                            onSearchActivated()
+                            onEvent(SearchTopBarEvent.SearchActivated)
                         } else {
-                            onSearchDismissed()
+                            onEvent(SearchTopBarEvent.SearchDismissed)
                         }
                     },
             )

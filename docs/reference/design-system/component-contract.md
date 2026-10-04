@@ -269,6 +269,8 @@ Consequences:
   style, so it is a data-free primitive like `Text`: the caller passes its own model's string inline. Styling
   goes through `style` alone; `Text`'s loose font parameters are not exposed. The exemption covers this
   primitive only; a component that renders data still carries its treatment on its model.
+- **Debug screens (`app/src/debug/`) are exempt from R10.** They may build UI models in composition or hold
+  file-level `*UiModel` constants.
 - **No migrated sheet or dialog has a gallery entry**, because a fixture tile cannot render a modal inline. Their
   models still ship `previews` (R5), and the components' own `@Preview` functions render from that list. A
   "tap to open" fixture is a gallery feature to design once for all sheets, not per sheet.

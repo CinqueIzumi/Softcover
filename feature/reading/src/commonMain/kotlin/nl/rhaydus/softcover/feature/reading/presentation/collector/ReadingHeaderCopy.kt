@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import nl.rhaydus.common.currentLocalDateTime
-import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import kotlin.math.roundToInt
 
@@ -14,11 +13,6 @@ internal fun List<Book>.averageProgress(): Float? {
 
 internal fun mastheadEyebrowFor(isLoading: Boolean): String =
     if (isLoading) "Catching up on your reading…" else "Now reading"
-
-internal fun mastheadRefreshFor(isLoading: Boolean): MastheadRefreshUiModel = MastheadRefreshUiModel(
-    label = if (isLoading) "Refreshing…" else "Refresh",
-    enabled = isLoading.not(),
-)
 
 internal fun greetingForNow(): String {
     val hour = currentLocalDateTime().hour

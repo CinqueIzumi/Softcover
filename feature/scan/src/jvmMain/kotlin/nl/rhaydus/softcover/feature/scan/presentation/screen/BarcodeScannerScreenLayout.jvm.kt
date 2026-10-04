@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
 /**
@@ -42,10 +42,10 @@ internal actual fun BarcodeScannerScreenLayout(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             EditorialTopBar(
-                model = state.editorialTopBar,
+                model = state.topBar,
                 onEvent = { event ->
                     when (event) {
-                        EditorialTopBarEvent.BackClicked -> onNavigateBack()
+                        TopBarEvent.BackClicked -> onNavigateBack()
                     }
                 },
             )

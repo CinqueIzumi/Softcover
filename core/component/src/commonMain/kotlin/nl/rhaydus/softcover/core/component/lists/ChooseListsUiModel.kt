@@ -13,7 +13,6 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
-import nl.rhaydus.softcover.core.component.header.EmphasisTreatment
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
@@ -54,10 +53,7 @@ data class ChooseListsUiModel(
                     eyebrow = "Lists",
                     headline = persistentListOf(
                         HeaderTextSegment.Plain(text = "Shelve "),
-                        HeaderTextSegment.Emphasised(
-                            text = name,
-                            treatment = EmphasisTreatment.Accent,
-                        ),
+                        HeaderTextSegment.Emphasised(text = name),
                     ),
                     description = persistentListOf(HeaderTextSegment.Plain(text = description)),
                 ),

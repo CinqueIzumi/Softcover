@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
+import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTabStats
 import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 import nl.rhaydus.softcover.feature.library.presentation.util.formatPageCount
@@ -52,11 +53,6 @@ internal data class MastheadSnapshot(
 
     private fun eyebrow(): String = if (isLoading) "Refreshing your shelf…" else "Your collection"
 }
-
-internal fun mastheadRefreshFor(isLoading: Boolean): MastheadRefreshUiModel = MastheadRefreshUiModel(
-    label = if (isLoading) "Refreshing…" else "Refresh",
-    enabled = isLoading.not(),
-)
 
 private fun subtitleFor(
     tab: LibraryTab,

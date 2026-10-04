@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
@@ -84,10 +85,7 @@ internal data class ExploreScreenUiState(
         title = "Explore",
         subtitle = "Trending books, the next in your series, and anything you search for.",
     ),
-    val mastheadRefresh: MastheadRefreshUiModel = MastheadRefreshUiModel(
-        label = "Refresh",
-        enabled = true,
-    ),
+    val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = false),
     val searchText: String = "",
     /** The search chrome, derived off the four fields below by `SearchTopBarCollector` (R9). */
     val searchTopBar: SearchTopBarUiModel = SearchTopBarUiModel(

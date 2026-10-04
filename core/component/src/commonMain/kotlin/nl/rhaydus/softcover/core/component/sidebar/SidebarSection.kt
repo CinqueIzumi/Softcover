@@ -36,22 +36,6 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
-private object SidebarRowMetrics {
-    val OuterPaddingHorizontal = 12.dp
-    val OuterPaddingVertical = 2.dp
-    val InnerPaddingHorizontal = 14.dp
-    val InnerPaddingVertical = 11.dp
-    val Shape = RoundedCornerShape(10.dp)
-    val IconSize = 20.dp
-    val IconGap = 14.dp
-    val ArrowSize = 18.dp
-}
-
-private val SidebarLabelInsetStart = 26.dp
-private val SidebarLabelInsetTop = 8.dp
-private val SidebarLabelInsetBottom = 6.dp
-private val SidebarSectionGap = 16.dp
-
 /** Renders every section in [model] under one shared `selectableGroup()`, with a gap between sections. */
 @Composable
 fun <K> Sidebar(
@@ -62,7 +46,7 @@ fun <K> Sidebar(
     Column(modifier = modifier.selectableGroup()) {
         model.sections.forEachIndexed { index, section ->
             if (index > 0) {
-                Spacer(modifier = Modifier.height(SidebarSectionGap))
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
             SidebarSection(
@@ -84,9 +68,9 @@ private fun <K> SidebarSection(
             SectionHeader(
                 model = model.label,
                 modifier = Modifier.padding(
-                    start = SidebarLabelInsetStart,
-                    top = SidebarLabelInsetTop,
-                    bottom = SidebarLabelInsetBottom,
+                    start = 26.dp,
+                    top = 8.dp,
+                    bottom = 6.dp,
                 ),
             )
         }
@@ -132,13 +116,13 @@ private fun <K> SidebarRow(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                horizontal = SidebarRowMetrics.OuterPaddingHorizontal,
-                vertical = SidebarRowMetrics.OuterPaddingVertical,
+                horizontal = 12.dp,
+                vertical = 2.dp,
             )
             .pointerHandCursor()
             .hoverHighlight(
                 interactionSource = interactionSource,
-                shape = SidebarRowMetrics.Shape,
+                shape = RoundedCornerShape(10.dp),
             )
             .semantics {
                 role = rowRole
@@ -154,12 +138,12 @@ private fun <K> SidebarRow(
             ),
         color = container,
         contentColor = content,
-        shape = SidebarRowMetrics.Shape,
+        shape = RoundedCornerShape(10.dp),
     ) {
         Row(
             modifier = Modifier.padding(
-                horizontal = SidebarRowMetrics.InnerPaddingHorizontal,
-                vertical = SidebarRowMetrics.InnerPaddingVertical,
+                horizontal = 14.dp,
+                vertical = 11.dp,
             ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -172,10 +156,10 @@ private fun <K> SidebarRow(
                 Icon(
                     painter = leadingIcon.getIconPainter(),
                     contentDescription = leadingIcon.contentDescription,
-                    modifier = Modifier.size(SidebarRowMetrics.IconSize),
+                    modifier = Modifier.size(20.dp),
                 )
 
-                Spacer(modifier = Modifier.width(SidebarRowMetrics.IconGap))
+                Spacer(modifier = Modifier.width(14.dp))
             }
 
             SoftcoverText(
@@ -197,7 +181,7 @@ private fun <K> SidebarRow(
                 Icon(
                     painter = arrowIcon.getIconPainter(),
                     contentDescription = arrowIcon.contentDescription,
-                    modifier = Modifier.size(SidebarRowMetrics.ArrowSize),
+                    modifier = Modifier.size(18.dp),
                 )
             }
         }

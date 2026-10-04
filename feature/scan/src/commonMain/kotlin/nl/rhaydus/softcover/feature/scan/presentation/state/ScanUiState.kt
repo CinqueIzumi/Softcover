@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.toad.UiState
 
@@ -41,5 +40,4 @@ internal data class ScanUiState(
     val topBar: TopBarUiModel = TopBarUiModel(
         title = SCAN_TITLE,
     ),
-    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = SCAN_TITLE),
 ) : UiState

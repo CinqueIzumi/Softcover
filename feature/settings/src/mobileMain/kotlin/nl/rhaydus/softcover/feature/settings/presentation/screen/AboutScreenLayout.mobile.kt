@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
@@ -22,7 +21,6 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUi
 @Composable
 internal actual fun AboutScreenLayout(
     topBar: TopBarUiModel,
-    editorialTopBar: EditorialTopBarUiModel,
     versionLabel: String,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
@@ -72,7 +70,6 @@ private fun AboutScreenPreview() {
     SoftcoverTheme {
         AboutScreenLayout(
             topBar = state.aboutTopBar,
-            editorialTopBar = state.aboutEditorialTopBar,
             versionLabel = "Version 1.0.0 (1)",
             creditsHeader = state.aboutCreditsHeader,
             sourceHeader = state.aboutSourceHeader,

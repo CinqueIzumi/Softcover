@@ -40,7 +40,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
@@ -113,10 +113,10 @@ private fun ProfileContent(
 
     Column(modifier = Modifier.fillMaxSize()) {
         EditorialTopBar(
-            model = state.editorialTopBar,
+            model = state.topBar,
             onEvent = { event ->
                 when (event) {
-                    EditorialTopBarEvent.BackClicked -> onNavigateUp()
+                    TopBarEvent.BackClicked -> onNavigateUp()
                 }
             },
             actions = {

@@ -33,11 +33,6 @@ fun PageMasthead(
     isLoading: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
-    val dimensions = PageMastheadDimensions.forSize(
-        size = model.size,
-        typography = MaterialTheme.editorialTypography,
-    )
-
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Column(modifier = Modifier.weight(1f)) {
             if (model.eyebrow != null) {
@@ -52,7 +47,10 @@ fun PageMasthead(
 
             SoftcoverText(
                 text = model.title,
-                style = dimensions.titleStyle,
+                style = when (model.size) {
+                    PageMastheadSize.Regular -> MaterialTheme.editorialTypography.pageTitle
+                    PageMastheadSize.Compact -> MaterialTheme.editorialTypography.headlineMedium
+                },
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -60,15 +58,25 @@ fun PageMasthead(
             )
 
             if (model.subtitle != null) {
-                Spacer(modifier = Modifier.height(dimensions.titleToSubtitleGap))
+                Spacer(
+                    modifier = Modifier.height(
+                        when (model.size) {
+                            PageMastheadSize.Regular -> 6.dp
+                            PageMastheadSize.Compact -> 4.dp
+                        },
+                    ),
+                )
 
                 SoftcoverText(
                     text = model.subtitle,
                     isLoading = isLoading,
                     standIn = model.subtitle,
-                    style = dimensions.subtitleStyle,
+                    style = when (model.size) {
+                        PageMastheadSize.Regular -> MaterialTheme.editorialTypography.body
+                        PageMastheadSize.Compact -> MaterialTheme.editorialTypography.bodySmall
+                    },
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.widthIn(max = SUBTITLE_MAX_WIDTH),
+                    modifier = Modifier.widthIn(max = 300.dp),
                 )
             }
         }

@@ -48,10 +48,7 @@ class HeaderAnnotatedStringTest {
             val result = headerAnnotatedString(
                 segments = listOf(
                     HeaderTextSegment.Plain(text = "Shelve "),
-                    HeaderTextSegment.Emphasised(
-                        text = "Piranesi",
-                        treatment = EmphasisTreatment.Accent,
-                    ),
+                    HeaderTextSegment.Emphasised(text = "Piranesi"),
                     HeaderTextSegment.Plain(text = " now"),
                 ),
                 colorScheme = colorScheme,
@@ -70,15 +67,9 @@ class HeaderAnnotatedStringTest {
             // ----- Act -----
             val result = headerAnnotatedString(
                 segments = persistentListOf(
-                    HeaderTextSegment.Emphasised(
-                        text = "A",
-                        treatment = EmphasisTreatment.Accent,
-                    ),
+                    HeaderTextSegment.Emphasised(text = "A"),
                     HeaderTextSegment.Plain(text = "-"),
-                    HeaderTextSegment.Emphasised(
-                        text = "B",
-                        treatment = EmphasisTreatment.Accent,
-                    ),
+                    HeaderTextSegment.Emphasised(text = "B"),
                 ),
                 colorScheme = colorScheme,
             )

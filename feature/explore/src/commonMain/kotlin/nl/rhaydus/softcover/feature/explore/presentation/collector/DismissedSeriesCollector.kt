@@ -26,7 +26,6 @@ internal class DismissedSeriesCollector : HiddenSuggestionsCollector {
                         entry.toHiddenSeriesCard(cover = entry.toCoverUiModel())
                     }.toImmutableList(),
                     hiddenSeriesGroupHeader = it.hiddenSeriesGroupHeader.copy(count = series.size.toString()),
-                    hiddenSeriesLoaded = true,
                 )
             }
         }

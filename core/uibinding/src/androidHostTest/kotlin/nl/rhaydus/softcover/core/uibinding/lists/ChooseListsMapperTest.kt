@@ -12,7 +12,6 @@ import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.component.header.EmphasisTreatment
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
@@ -79,10 +78,7 @@ class ChooseListsMapperTest {
             val header = result.scaffold.header
             header.section.headline shouldBe persistentListOf(
                 HeaderTextSegment.Plain(text = "Shelve "),
-                HeaderTextSegment.Emphasised(
-                    text = "Piranesi",
-                    treatment = EmphasisTreatment.Accent,
-                ),
+                HeaderTextSegment.Emphasised(text = "Piranesi"),
             )
             header.trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
         }
@@ -618,10 +614,7 @@ class ChooseListsMapperTest {
             val section = result.scaffold.header.section
             section.headline shouldBe persistentListOf(
                 HeaderTextSegment.Plain(text = "Shelve "),
-                HeaderTextSegment.Emphasised(
-                    text = "3 books",
-                    treatment = EmphasisTreatment.Accent,
-                ),
+                HeaderTextSegment.Emphasised(text = "3 books"),
             )
             result.scaffold.layout shouldBe SheetLayout.PinnedLazy
         }

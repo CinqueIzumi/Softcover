@@ -40,18 +40,6 @@ class SectionHeaderUiModelTest {
         }
 
         @Test
-        fun `every Section fixture leaves pulseKey at its default`() {
-            // ----- Act -----
-            val pulseKeys = SectionHeaderUiModel.previews
-                .filterIsInstance<SectionHeaderUiModel.Section>()
-                .map { it.pulseKey }
-                .toSet()
-
-            // ----- Assert -----
-            pulseKeys shouldBe setOf(0)
-        }
-
-        @Test
         fun `Label fixtures cover both the default Muted tone and an explicit Accent tone`() {
             // ----- Arrange -----
             val expectedTones = setOf(SectionHeaderTone.Muted, SectionHeaderTone.Accent)
@@ -115,10 +103,7 @@ class SectionHeaderUiModelTest {
                 eyebrow = "Lists",
                 headline = persistentListOf(
                     HeaderTextSegment.Plain(text = "Shelve "),
-                    HeaderTextSegment.Emphasised(
-                        text = "Piranesi",
-                        treatment = EmphasisTreatment.Accent,
-                    ),
+                    HeaderTextSegment.Emphasised(text = "Piranesi"),
                 ),
                 description = null,
             )

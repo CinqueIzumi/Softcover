@@ -16,7 +16,7 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
@@ -37,10 +37,10 @@ internal actual fun HiddenSuggestionsScreenLayout(
 
     Column(modifier = Modifier.fillMaxSize()) {
         EditorialTopBar(
-            model = state.editorialTopBar,
+            model = state.topBar,
             onEvent = { event ->
                 when (event) {
-                    EditorialTopBarEvent.BackClicked -> onNavigateBack()
+                    TopBarEvent.BackClicked -> onNavigateBack()
                 }
             },
         )

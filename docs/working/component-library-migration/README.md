@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S9 closed. SS-1 done. SL-3b blocked on F34; SL-12 unblocked; F33 open.
-- **Next:** `steps/ss-simplicity-audit.md` § Sub-steps, SS-2 — Phase 1 audit, stop for approval.
+- **State:** S9 closed; SS-1 done (`ac78933d`); SS-2 built and reviewed. SL-3b blocked on F34; SL-12 unblocked; F33 open.
+- **Next:** `steps/ss-simplicity-audit.md` § Sub-steps, SS-3 — Phase 1 audit, stop for approval.
 - **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `LightGray` / `White`, not theme roles — a light block on the dark theme; upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
-- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile`, charts, `ProgressBar`, 12 dp card bars unchecked in gallery. Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
+- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add SP and SS checkboxes to #275? `StatTile`, charts, `ProgressBar`, 12 dp card bars unchecked in gallery. Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** SS-1: JDK 21 tests of 5 modules + `styleCheck` pass; reviewer no blockers.
-- **Uncommitted:** SS-1, the SH step, this block.
+- **Verification:** SS-2: JDK 21 tests of 6 modules + `styleCheck` pass; reviewer no blockers, its 3 nits fixed.
+- **Uncommitted:** SS-2 (code, tests, contract § 7.4a debug-screen exemption), this block.
 
 ## Local verification
 

@@ -4,7 +4,6 @@ import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
@@ -34,13 +33,10 @@ internal data class HiddenSuggestionsUiState(
     // `null` until the surface has loaded.
     val hiddenBookCards: ImmutableList<BookCardUiModel>? = null,
     val hiddenSeriesCards: ImmutableList<BookCardUiModel>? = null,
-    val hiddenBooksLoaded: Boolean = false,
-    val hiddenSeriesLoaded: Boolean = false,
     val topBar: TopBarUiModel = TopBarUiModel(
         title = HIDDEN_SUGGESTIONS_TITLE,
     ),
-    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = HIDDEN_SUGGESTIONS_TITLE),
 ) : UiState {
     val isEmpty: Boolean
-        get() = hiddenBooksLoaded && hiddenSeriesLoaded && hiddenBooks.isEmpty() && hiddenSeries.isEmpty()
+        get() = hiddenBookCards != null && hiddenSeriesCards != null && hiddenBooks.isEmpty() && hiddenSeries.isEmpty()
 }

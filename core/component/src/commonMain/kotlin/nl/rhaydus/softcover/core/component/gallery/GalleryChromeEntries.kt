@@ -53,7 +53,6 @@ import nl.rhaydus.softcover.core.component.statistic.StatTileUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBar
 import nl.rhaydus.softcover.core.component.topbar.SearchTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
@@ -81,8 +80,13 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         family = GalleryFamily.TOPBAR,
         blurb = "The desktop page bar: a back button, a start-aligned editorial headline and a " +
             "slot for the screen's own actions.",
-        previews = EditorialTopBarUiModel,
-        label = ::editorialTopBarFixtureLabel,
+        previews = object : UiModelPreviews<TopBarUiModel> {
+            override val previews: ImmutableList<TopBarUiModel> = persistentListOf(
+                TopBarUiModel(title = "Appearance"),
+                TopBarUiModel(),
+            )
+        },
+        label = { model -> if (model.title == null) "Back only" else "Titled" },
         content = { model, modifier ->
             EditorialTopBar(
                 model = model,
@@ -418,16 +422,11 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
 /** Names what a [TopBarUiModel] fixture demonstrates, derived from its anatomy branch. */
 private fun topBarFixtureLabel(model: TopBarUiModel): String = when {
     model.surface == TopBarSurface.OVER_MEDIA -> "Over cover art"
-    model.subtitle != null -> "With a subtitle"
     (model.title?.length ?: 0) > TOP_BAR_LONG_TITLE_FLOOR -> "Long title, autosized"
     else -> "With back"
 }
 
 private const val TOP_BAR_LONG_TITLE_FLOOR = 30
-
-/** Names what an [EditorialTopBarUiModel] fixture demonstrates. */
-private fun editorialTopBarFixtureLabel(model: EditorialTopBarUiModel): String =
-    if (model.title == null) "Back only" else "Titled"
 
 /** Names what a [SearchTopBarUiModel] fixture demonstrates. */
 private fun searchTopBarFixtureLabel(model: SearchTopBarUiModel): String = when {

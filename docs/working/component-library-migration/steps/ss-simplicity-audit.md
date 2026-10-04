@@ -40,7 +40,7 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 |---|---|---|
 | SS-0 | Regenerate this table from the code (Procedure) | [x] |
 | SS-1 | `chip`, `badge`, `divider`, `selection`, `shape`, `text`, `ComponentAlpha.kt`; uibinding `release` (`UnreleasedBadgeStyle`) — ~1.6k | [x] |
-| SS-2 | `header`, `topbar`, `chrome`, `sidebar`; explore `HiddenGroupHeaderUiModel` — ~1.8k | [ ] |
+| SS-2 | `header`, `topbar`, `chrome`, `sidebar`; explore `HiddenGroupHeaderUiModel` — ~1.8k | [x] |
 | SS-3 | `bookcard`; uibinding `book` — ~1.8k | [ ] |
 | SS-4 | `cover`, `lists`; uibinding `cover` (all platforms), `lists`; library `ArrangeMakeOrderedUiModel` — ~2.1k | [ ] |
 | SS-5 | `sheet`, `dialog`, `callout`, `state`; explore `ContinueSeriesEntryUiModel`, orchestration `ReAuthSheetUiModel` — ~2.2k | [ ] |
@@ -63,3 +63,11 @@ SS-1:
 - `text`: `SoftcoverText`'s String overload forwards to the AnnotatedString one; the private layout layer goes.
 - uibinding `release`: `UnreleasedBadgeStyle` → three named mappers in `UnreleasedMapper.kt`.
 - Kept: Choice chip's Medium → SemiBold on select. Deferred: `ChipSet` + `PillButtonSet` (SS-6); gallery label functions (SS-11); stray pill shapes (SS-6 / SS-4).
+
+SS-2:
+- `header`: delete `Section.pulseKey` and the pulse animation; `SectionHeaderEyebrowStyle` + `BarSpec` go — `Label` renders its text directly, `Section` / `Inline` share one private bar-plus-text body, dp inline; `SectionHeaderInline` goes; `Section.tone` goes (bar uses `primary`); `EmphasisTreatment` and `Emphasised.treatment` go; `PageMastheadDimensions` goes (inline `when (size)`, `300.dp` inline).
+- Masthead refresh copy: one `:core:uibinding` mapper replaces library `MastheadSnapshot`, reading `ReadingHeaderCopy`, explore `MastheadCollector` and explore's hand-written default.
+- `topbar`: `TopBarSurfaceColors` → `when (model.surface)`; `TopBarUiModel.subtitle` and `SearchTopBarUiModel.placeholder` go (literal in the component); `SearchChromeField` / `SearchChromeInputArea` take `model` + `onEvent`; `EditorialTopBarUiModel` / `EditorialTopBarEvent` merge into `TopBarUiModel` / `TopBarEvent`, one `topBar` field per state; desktop ignores `surface`.
+- `sidebar`: `SidebarRowMetrics` and the file-level dp vals go; values inline.
+- explore: one private `HiddenGroupSection` replaces `HiddenBooksSection` / `HiddenSeriesSection`; `hiddenBooksLoaded` / `hiddenSeriesLoaded` go (read `cards == null`); unused imports go.
+- Kept: debug screens (exempt, contract § 7.4a). Deferred: `MastheadRefreshAction` + `ChromeIconButton` (SS-6); gallery labels (SS-11); BookDetail mobile `remember { TopBarUiModel }` (scroll-driven surface); file-level loading stand-in models; R2 still prescribes `*Dimensions` tables.

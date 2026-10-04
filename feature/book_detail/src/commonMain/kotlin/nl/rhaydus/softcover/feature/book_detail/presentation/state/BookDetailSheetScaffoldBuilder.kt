@@ -5,7 +5,6 @@ import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.control.SegmentUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.component.header.EmphasisTreatment
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
@@ -27,10 +26,7 @@ internal fun tagEditorSheetScaffoldFor(
                 headline = persistentListOf(HeaderTextSegment.Plain(text = "Tag it your way.")),
                 description = persistentListOf(
                     HeaderTextSegment.Plain(text = "Your own genres, moods and notes on "),
-                    HeaderTextSegment.Emphasised(
-                        text = bookTitle,
-                        treatment = EmphasisTreatment.Accent,
-                    ),
+                    HeaderTextSegment.Emphasised(text = bookTitle),
                     HeaderTextSegment.Plain(text = ". Mark any as a spoiler to keep it off shared cards."),
                 ),
             ),

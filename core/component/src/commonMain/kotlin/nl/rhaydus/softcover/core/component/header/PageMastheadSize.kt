@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.core.component.header
 
-/** [PageMastheadUiModel]'s type scale, per host surface — see [PageMastheadDimensions]. */
+/** [PageMastheadUiModel]'s type scale, per host surface. */
 enum class PageMastheadSize {
     /** A page's own masthead. */
     Regular,

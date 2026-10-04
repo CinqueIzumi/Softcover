@@ -1,8 +1,5 @@
 package nl.rhaydus.softcover.core.component.header
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -12,21 +9,18 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -36,13 +30,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import kotlin.math.abs
-
-private const val PULSE_BAR_WIDTH_DELTA_DP = 16
-private const val PULSE_SCALE_DELTA = 0.5f
 
 /**
  * Opens a region within a page or sheet: one of [SectionHeaderUiModel]'s three accent-bar registers,
@@ -97,8 +86,12 @@ private fun SectionHeaderRegister(
             isLoading = isLoading,
             modifier = modifier,
         )
-        is SectionHeaderUiModel.Inline -> SectionHeaderInline(
-            model = model,
+        is SectionHeaderUiModel.Inline -> SectionHeaderInlineEyebrow(
+            eyebrow = model.eyebrow,
+            color = sectionHeaderToneColor(
+                tone = model.tone,
+                colorScheme = MaterialTheme.colorScheme,
+            ),
             isLoading = isLoading,
             modifier = modifier,
         )
@@ -110,56 +103,22 @@ private fun SectionHeaderRegister(
     }
 }
 
-private data class SectionHeaderEyebrowStyle(
-    val bar: BarSpec?,
-    val gap: Dp,
-    val textStyle: TextStyle,
-) {
-    data class BarSpec(
-        val width: Dp,
-        val height: Dp,
-        val shape: Shape,
-    )
-}
-
 @Composable
 private fun SectionHeaderRegion(
     model: SectionHeaderUiModel.Section,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val playMotion = playDecorativeMotion()
-
-    val pulse = remember { Animatable(initialValue = 0f) }
-
-    LaunchedEffect(model.pulseKey) {
-        if (model.pulseKey == 0 || playMotion.not()) return@LaunchedEffect
-
-        pulse.snapTo(targetValue = 0f)
-        pulse.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 400),
-        )
-    }
-
     Column(modifier = modifier.fillMaxWidth()) {
-        SectionHeaderEyebrowRow(
+        SectionHeaderBarRow(
             eyebrow = model.eyebrow,
-            style = SectionHeaderEyebrowStyle(
-                bar = SectionHeaderEyebrowStyle.BarSpec(
-                    width = 32.dp,
-                    height = 4.dp,
-                    shape = RoundedCornerShape(2.dp),
-                ),
-                gap = 12.dp,
-                textStyle = MaterialTheme.editorialTypography.eyebrow,
-            ),
-            color = sectionHeaderToneColor(
-                tone = model.tone,
-                colorScheme = MaterialTheme.colorScheme,
-            ),
+            barWidth = 32.dp,
+            barHeight = 4.dp,
+            barShape = RoundedCornerShape(2.dp),
+            gap = 12.dp,
+            textStyle = MaterialTheme.editorialTypography.eyebrow,
+            color = MaterialTheme.colorScheme.primary,
             isLoading = isLoading,
-            pulse = pulse,
             isHeading = model.headline == null,
         )
 
@@ -203,11 +162,7 @@ internal fun headerAnnotatedString(
     segments.forEach { segment ->
         when (segment) {
             is HeaderTextSegment.Plain -> append(segment.text)
-            is HeaderTextSegment.Emphasised -> withStyle(
-                when (segment.treatment) {
-                    EmphasisTreatment.Accent -> SpanStyle(color = colorScheme.primary)
-                },
-            ) {
+            is HeaderTextSegment.Emphasised -> withStyle(SpanStyle(color = colorScheme.primary)) {
                 append(segment.text)
             }
         }
@@ -223,23 +178,6 @@ internal fun sectionHeaderToneColor(
     SectionHeaderTone.Muted -> colorScheme.onSurfaceVariant
 }
 
-@Composable
-private fun SectionHeaderInline(
-    model: SectionHeaderUiModel.Inline,
-    isLoading: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    SectionHeaderInlineEyebrow(
-        eyebrow = model.eyebrow,
-        color = sectionHeaderToneColor(
-            tone = model.tone,
-            colorScheme = MaterialTheme.colorScheme,
-        ),
-        isLoading = isLoading,
-        modifier = modifier,
-    )
-}
-
 /** The hairline-bar eyebrow of [SectionHeaderUiModel.Inline], for callers that colour it themselves. */
 @Composable
 internal fun SectionHeaderInlineEyebrow(
@@ -248,17 +186,13 @@ internal fun SectionHeaderInlineEyebrow(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
-    SectionHeaderEyebrowRow(
+    SectionHeaderBarRow(
         eyebrow = eyebrow,
-        style = SectionHeaderEyebrowStyle(
-            bar = SectionHeaderEyebrowStyle.BarSpec(
-                width = 20.dp,
-                height = 1.dp,
-                shape = RectangleShape,
-            ),
-            gap = 8.dp,
-            textStyle = MaterialTheme.editorialTypography.eyebrowSmall,
-        ),
+        barWidth = 20.dp,
+        barHeight = 1.dp,
+        barShape = RectangleShape,
+        gap = 8.dp,
+        textStyle = MaterialTheme.editorialTypography.eyebrowSmall,
         color = color,
         isLoading = isLoading,
         modifier = modifier,
@@ -271,30 +205,29 @@ private fun SectionHeaderLabel(
     isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    SectionHeaderEyebrowRow(
+    SectionHeaderEyebrowText(
         eyebrow = model.eyebrow,
-        style = SectionHeaderEyebrowStyle(
-            bar = null,
-            gap = 0.dp,
-            textStyle = MaterialTheme.editorialTypography.eyebrowSmall,
-        ),
+        style = MaterialTheme.editorialTypography.eyebrowSmall,
         color = sectionHeaderToneColor(
             tone = model.tone,
             colorScheme = MaterialTheme.colorScheme,
         ),
         isLoading = isLoading,
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) { heading() },
     )
 }
 
 @Composable
-private fun SectionHeaderEyebrowRow(
+private fun SectionHeaderBarRow(
     eyebrow: String,
-    style: SectionHeaderEyebrowStyle,
+    barWidth: Dp,
+    barHeight: Dp,
+    barShape: Shape,
+    gap: Dp,
+    textStyle: TextStyle,
     color: Color,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
-    pulse: Animatable<Float, AnimationVector1D>? = null,
     isHeading: Boolean = true,
 ) {
     Row(
@@ -303,27 +236,21 @@ private fun SectionHeaderEyebrowRow(
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val bar = style.bar
+        Box(
+            modifier = Modifier
+                .size(
+                    width = barWidth,
+                    height = barHeight,
+                )
+                .clip(barShape)
+                .background(color),
+        )
 
-        if (bar != null) {
-            Box(
-                modifier = Modifier
-                    .height(bar.height)
-                    .pulsingBarWidth(
-                        baseWidth = bar.width,
-                        pulse = pulse,
-                    )
-                    .pulsingScaleY(pulse = pulse)
-                    .clip(bar.shape)
-                    .background(color),
-            )
-
-            Spacer(modifier = Modifier.width(style.gap))
-        }
+        Spacer(modifier = Modifier.width(gap))
 
         SectionHeaderEyebrowText(
             eyebrow = eyebrow,
-            style = style.textStyle,
+            style = textStyle,
             color = color,
             isLoading = isLoading,
         )
@@ -347,47 +274,4 @@ internal fun SectionHeaderEyebrowText(
         color = color,
         modifier = modifier,
     )
-}
-
-/**
- * Fraction of a pulse cycle spent at its peak, `0f` at the ends of [progress] and `1f` at its
- * midpoint — the widen-and-settle envelope for [SectionHeaderRegion]'s bar.
- */
-internal fun sectionHeaderPulseEnvelope(progress: Float): Float =
-    (1f - abs(progress * 2f - 1f)).coerceIn(
-        minimumValue = 0f,
-        maximumValue = 1f,
-    )
-
-private fun Modifier.pulsingBarWidth(
-    baseWidth: Dp,
-    pulse: Animatable<Float, AnimationVector1D>?,
-): Modifier = if (pulse == null) {
-    width(baseWidth)
-} else {
-    layout { measurable, constraints ->
-        val envelope = sectionHeaderPulseEnvelope(progress = pulse.value)
-        val width = (baseWidth + PULSE_BAR_WIDTH_DELTA_DP.dp * envelope).roundToPx()
-        val placeable = measurable.measure(
-            constraints.copy(
-                minWidth = width,
-                maxWidth = width,
-            ),
-        )
-
-        layout(width = width, height = placeable.height) {
-            placeable.placeRelative(
-                x = 0,
-                y = 0,
-            )
-        }
-    }
-}
-
-private fun Modifier.pulsingScaleY(pulse: Animatable<Float, AnimationVector1D>?): Modifier = if (pulse == null) {
-    this
-} else {
-    graphicsLayer {
-        scaleY = 1f + sectionHeaderPulseEnvelope(progress = pulse.value) * PULSE_SCALE_DELTA
-    }
 }

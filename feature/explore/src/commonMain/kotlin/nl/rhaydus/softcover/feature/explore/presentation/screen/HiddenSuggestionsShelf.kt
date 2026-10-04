@@ -9,9 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
@@ -23,8 +21,6 @@ import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.modifier.quoteGlyphSway
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.LocalDarkTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockBookAction
@@ -99,22 +95,24 @@ internal fun HiddenSuggestionsContent(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (state.hiddenBooksLoaded.not() || state.hiddenBooks.isNotEmpty()) {
-                HiddenBooksSection(
+            if (state.hiddenBookCards == null || state.hiddenBooks.isNotEmpty()) {
+                HiddenGroupSection(
                     header = state.hiddenBooksGroupHeader,
                     cards = state.hiddenBookCards,
-                    isLoading = state.hiddenBooksLoaded.not(),
+                    standIn = HIDDEN_BOOK_STAND_IN_CARD,
+                    isLoading = state.hiddenBookCards == null,
                     onEvent = onEvent,
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
             }
 
-            if (state.hiddenSeriesLoaded.not() || state.hiddenSeries.isNotEmpty()) {
-                HiddenSeriesSection(
+            if (state.hiddenSeriesCards == null || state.hiddenSeries.isNotEmpty()) {
+                HiddenGroupSection(
                     header = state.hiddenSeriesGroupHeader,
                     cards = state.hiddenSeriesCards,
-                    isLoading = state.hiddenSeriesLoaded.not(),
+                    standIn = HIDDEN_SERIES_STAND_IN_CARD,
+                    isLoading = state.hiddenSeriesCards == null,
                     onEvent = onEvent,
                 )
             }
@@ -125,9 +123,10 @@ internal fun HiddenSuggestionsContent(
 }
 
 @Composable
-private fun HiddenBooksSection(
+private fun HiddenGroupSection(
     header: HiddenGroupHeaderUiModel,
     cards: ImmutableList<BookCardUiModel>?,
+    standIn: BookCardUiModel,
     isLoading: Boolean,
     onEvent: (BookCardEvent) -> Unit,
 ) {
@@ -142,42 +141,7 @@ private fun HiddenBooksSection(
         if (cards == null) {
             repeat(2) {
                 BookCard(
-                    model = HIDDEN_BOOK_STAND_IN_CARD,
-                    onEvent = {},
-                )
-            }
-        } else {
-            cards.forEach { card ->
-                key(card.key.lazyKey) {
-                    BookCard(
-                        model = card,
-                        onEvent = onEvent,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HiddenSeriesSection(
-    header: HiddenGroupHeaderUiModel,
-    cards: ImmutableList<BookCardUiModel>?,
-    isLoading: Boolean,
-    onEvent: (BookCardEvent) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        HiddenSuggestionsGroupHeader(
-            model = header,
-            isLoading = isLoading,
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (cards == null) {
-            repeat(2) {
-                BookCard(
-                    model = HIDDEN_SERIES_STAND_IN_CARD,
+                    model = standIn,
                     onEvent = {},
                 )
             }

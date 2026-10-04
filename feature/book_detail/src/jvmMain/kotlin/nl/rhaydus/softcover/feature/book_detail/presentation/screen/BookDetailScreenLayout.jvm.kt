@@ -31,7 +31,7 @@ import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
@@ -79,10 +79,10 @@ internal actual fun BookDetailScreenLayout(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             EditorialTopBar(
-                model = state.editorialTopBar,
+                model = state.topBar,
                 onEvent = { event ->
                     when (event) {
-                        EditorialTopBarEvent.BackClicked -> onNavigateBack()
+                        TopBarEvent.BackClicked -> onNavigateBack()
                     }
                 },
                 actions = {

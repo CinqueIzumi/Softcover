@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
@@ -22,8 +23,8 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
- * The app's page bar: a centred, autosizing title with an optional subtitle, a back button, and a
- * trailing slot for the screen's own actions.
+ * The app's page bar: a centred, autosizing title, a back button, and a trailing slot for the
+ * screen's own actions.
  *
  * [scrollBehavior] is Compose plumbing rather than model data — it is a hoisted, mutable state
  * object a `Scaffold` and its content share, so it travels as a parameter for the same reason
@@ -41,17 +42,27 @@ fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     actions: @Composable RowScope.(IconButtonColors) -> Unit = {},
 ) {
-    val surfaceColors = model.surface.colors(MaterialTheme.colorScheme)
+    val scheme = MaterialTheme.colorScheme
 
     val containerColor by animateColorAsState(
-        targetValue = surfaceColors.container,
+        targetValue = when (model.surface) {
+            TopBarSurface.OPAQUE -> scheme.surface
+            TopBarSurface.OVER_MEDIA -> Color.Transparent
+        },
         label = "TopBarContainer",
     )
 
-    val controlColors = IconButtonDefaults.iconButtonColors(
-        containerColor = surfaceColors.controlContainer,
-        contentColor = surfaceColors.controlContent,
-    )
+    val controlColors = when (model.surface) {
+        TopBarSurface.OPAQUE -> IconButtonDefaults.iconButtonColors(
+            containerColor = Color.Transparent,
+            contentColor = scheme.onSurface,
+        )
+
+        TopBarSurface.OVER_MEDIA -> IconButtonDefaults.iconButtonColors(
+            containerColor = Color.Black.copy(alpha = 0.35f),
+            contentColor = Color.White,
+        )
+    }
 
     TopAppBar(
         modifier = modifier,
@@ -65,7 +76,7 @@ fun TopBar(
                 )
             }
         },
-        subtitle = { model.subtitle?.let { subtitle -> SoftcoverText(text = subtitle) } },
+        subtitle = {},
         scrollBehavior = scrollBehavior,
         titleHorizontalAlignment = Alignment.CenterHorizontally,
         colors = TopAppBarDefaults.topAppBarColors().copy(containerColor = containerColor),

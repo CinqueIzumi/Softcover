@@ -12,8 +12,5 @@ sealed interface HeaderTextSegment {
 
     data class Plain(override val text: String) : HeaderTextSegment
 
-    data class Emphasised(
-        override val text: String,
-        val treatment: EmphasisTreatment,
-    ) : HeaderTextSegment
+    data class Emphasised(override val text: String) : HeaderTextSegment
 }

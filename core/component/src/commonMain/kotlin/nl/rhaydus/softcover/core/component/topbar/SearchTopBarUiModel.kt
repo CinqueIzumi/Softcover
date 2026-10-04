@@ -5,9 +5,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 
-/** The placeholder shown when nothing has been typed yet. */
-private const val DEFAULT_PLACEHOLDER = "Search books, authors…"
-
 /**
  * Everything [SearchTopBar] renders.
  *
@@ -25,7 +22,6 @@ data class SearchTopBarUiModel(
     val active: Boolean,
     val focused: Boolean,
     val isLoading: Boolean,
-    val placeholder: String = DEFAULT_PLACEHOLDER,
 ) {
     companion object : UiModelPreviews<SearchTopBarUiModel> {
         override val previews: ImmutableList<SearchTopBarUiModel> = persistentListOf(

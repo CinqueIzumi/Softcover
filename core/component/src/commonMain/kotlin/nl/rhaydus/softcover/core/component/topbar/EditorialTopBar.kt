@@ -22,11 +22,13 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 /**
  * The desktop page bar: a back button, a start-aligned editorial headline, and a trailing slot for
  * the screen's own actions.
+ *
+ * It always draws on the page background, so [TopBarUiModel.surface] is ignored.
  */
 @Composable
 fun EditorialTopBar(
-    model: EditorialTopBarUiModel,
-    onEvent: (EditorialTopBarEvent) -> Unit,
+    model: TopBarUiModel,
+    onEvent: (TopBarEvent) -> Unit,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
@@ -45,7 +47,7 @@ fun EditorialTopBar(
             icon = SoftcoverIcon.ArrowBack,
             contentDescription = "Navigate back",
             tooltip = "Back",
-            onClick = { onEvent(EditorialTopBarEvent.BackClicked) },
+            onClick = { onEvent(TopBarEvent.BackClicked) },
         )
 
         model.title?.let { title ->

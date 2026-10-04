@@ -25,7 +25,6 @@ import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
@@ -202,7 +201,7 @@ internal data class BookDetailUiState(
     val editionCountHeader: SectionHeaderUiModel = editionCountHeaderFor(count = 0),
 
     /** Desktop only; mobile's bar follows the scroll position and is built by its layout. */
-    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(),
+    val topBar: TopBarUiModel = TopBarUiModel(),
 
     /**
      * Opaque and untitled, for the offline placeholder: it has no hero for the scroll-derived bar to

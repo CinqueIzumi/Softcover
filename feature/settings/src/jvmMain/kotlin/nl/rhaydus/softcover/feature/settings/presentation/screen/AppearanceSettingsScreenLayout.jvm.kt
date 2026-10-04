@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
+import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
@@ -34,10 +34,10 @@ internal actual fun AppearanceSettingsScreenLayout(
 
     Column(modifier = Modifier.fillMaxSize()) {
         EditorialTopBar(
-            model = state.appearanceEditorialTopBar,
+            model = state.appearanceTopBar,
             onEvent = { event ->
                 when (event) {
-                    EditorialTopBarEvent.BackClicked -> onNavigateBack()
+                    TopBarEvent.BackClicked -> onNavigateBack()
                 }
             },
         )

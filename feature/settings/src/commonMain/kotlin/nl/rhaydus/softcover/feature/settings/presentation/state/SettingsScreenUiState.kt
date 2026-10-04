@@ -6,7 +6,6 @@ import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
@@ -154,9 +153,7 @@ internal data class SettingsScreenUiState(
     val aboutTopBar: TopBarUiModel = TopBarUiModel(
         title = ABOUT_TITLE,
     ),
-    val aboutEditorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = ABOUT_TITLE),
     val appearanceTopBar: TopBarUiModel = TopBarUiModel(
         title = APPEARANCE_TITLE,
     ),
-    val appearanceEditorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = APPEARANCE_TITLE),
 ) : UiState

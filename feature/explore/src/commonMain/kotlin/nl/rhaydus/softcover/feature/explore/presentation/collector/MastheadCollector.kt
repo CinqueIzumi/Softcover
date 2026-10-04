@@ -3,8 +3,8 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
+import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -31,10 +31,7 @@ internal class MastheadCollector : ExploreCollector {
                             title = "Explore",
                             subtitle = "Trending books, the next in your series, and anything you search for.",
                         ),
-                        mastheadRefresh = MastheadRefreshUiModel(
-                            label = if (isRefreshing) "Refreshing…" else "Refresh",
-                            enabled = isRefreshing.not(),
-                        ),
+                        mastheadRefresh = mastheadRefreshFor(isLoading = isRefreshing),
                     )
                 }
             }

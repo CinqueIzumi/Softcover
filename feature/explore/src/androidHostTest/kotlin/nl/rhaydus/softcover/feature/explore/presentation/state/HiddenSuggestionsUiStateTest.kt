@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import io.kotest.matchers.shouldBe
+import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import org.junit.jupiter.api.Nested
@@ -24,9 +25,9 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
-        fun `is false when only the books flag is set and both lists are empty`() {
+        fun `is false when only the book cards are loaded and both lists are empty`() {
             // ----- Arrange -----
-            val state = HiddenSuggestionsUiState(hiddenBooksLoaded = true)
+            val state = HiddenSuggestionsUiState(hiddenBookCards = persistentListOf())
 
             // ----- Act -----
             val result = state.isEmpty
@@ -36,9 +37,9 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
-        fun `is false when only the series flag is set and both lists are empty`() {
+        fun `is false when only the series cards are loaded and both lists are empty`() {
             // ----- Arrange -----
-            val state = HiddenSuggestionsUiState(hiddenSeriesLoaded = true)
+            val state = HiddenSuggestionsUiState(hiddenSeriesCards = persistentListOf())
 
             // ----- Act -----
             val result = state.isEmpty
@@ -48,11 +49,11 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
-        fun `is true when both flags are set and both lists are empty`() {
+        fun `is true when both card lists are loaded and both lists are empty`() {
             // ----- Arrange -----
             val state = HiddenSuggestionsUiState(
-                hiddenBooksLoaded = true,
-                hiddenSeriesLoaded = true,
+                hiddenBookCards = persistentListOf(),
+                hiddenSeriesCards = persistentListOf(),
             )
 
             // ----- Act -----
@@ -76,8 +77,8 @@ class HiddenSuggestionsUiStateTest {
             )
             val state = HiddenSuggestionsUiState(
                 hiddenBooks = listOf(book),
-                hiddenBooksLoaded = true,
-                hiddenSeriesLoaded = true,
+                hiddenBookCards = persistentListOf(),
+                hiddenSeriesCards = persistentListOf(),
             )
 
             // ----- Act -----
@@ -99,8 +100,8 @@ class HiddenSuggestionsUiStateTest {
             )
             val state = HiddenSuggestionsUiState(
                 hiddenSeries = listOf(series),
-                hiddenBooksLoaded = true,
-                hiddenSeriesLoaded = true,
+                hiddenBookCards = persistentListOf(),
+                hiddenSeriesCards = persistentListOf(),
             )
 
             // ----- Act -----

@@ -15,18 +15,11 @@ sealed interface SectionHeaderUiModel {
     /**
      * [headline] and [description] are segment runs so a builder can emphasise an interpolated span;
      * the secondary constructor takes plain strings for the common case of no emphasis.
-     *
-     * @property pulseKey Bumped to replay the bar's widen-and-settle pulse; `0` plays nothing, so a
-     * header that never needs the pulse can leave it at the default.
-     * @property tone Colours the bar and eyebrow only; the headline and description stay onSurface /
-     * onSurfaceVariant regardless.
      */
     data class Section(
         val eyebrow: String,
         val headline: ImmutableList<HeaderTextSegment>?,
         val description: ImmutableList<HeaderTextSegment>?,
-        val pulseKey: Int = 0,
-        val tone: SectionHeaderTone = SectionHeaderTone.Accent,
     ) : SectionHeaderUiModel {
         /** [headline] with its emphasis dropped, for surfaces that need the words and not the styling. */
         val headlineText: String? get() = headline?.joinToString(separator = "") { it.text }
@@ -35,14 +28,10 @@ sealed interface SectionHeaderUiModel {
             eyebrow: String,
             headline: String? = null,
             description: String? = null,
-            pulseKey: Int = 0,
-            tone: SectionHeaderTone = SectionHeaderTone.Accent,
         ) : this(
             eyebrow = eyebrow,
             headline = headline?.toPlainSegments(),
             description = description?.toPlainSegments(),
-            pulseKey = pulseKey,
-            tone = tone,
         )
     }
 
@@ -69,16 +58,9 @@ sealed interface SectionHeaderUiModel {
                 eyebrow = "Lists",
                 headline = persistentListOf(
                     HeaderTextSegment.Plain(text = "Shelve "),
-                    HeaderTextSegment.Emphasised(
-                        text = "Piranesi",
-                        treatment = EmphasisTreatment.Accent,
-                    ),
+                    HeaderTextSegment.Emphasised(text = "Piranesi"),
                 ),
                 description = null,
-            ),
-            Section(
-                eyebrow = "Couldn't sync — tap to retry",
-                tone = SectionHeaderTone.Error,
             ),
             Inline(eyebrow = "Recently added"),
             Inline(

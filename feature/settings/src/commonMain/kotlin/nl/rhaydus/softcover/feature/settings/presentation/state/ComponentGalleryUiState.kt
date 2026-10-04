@@ -6,7 +6,6 @@ import kotlinx.collections.immutable.toPersistentMap
 import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
 import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SpinePalette
 import nl.rhaydus.softcover.core.domain.model.ColorPalette
@@ -53,5 +52,4 @@ internal data class ComponentGalleryUiState(
     val topBar: TopBarUiModel = TopBarUiModel(
         title = COMPONENT_GALLERY_TITLE,
     ),
-    val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = COMPONENT_GALLERY_TITLE),
 ) : UiState
