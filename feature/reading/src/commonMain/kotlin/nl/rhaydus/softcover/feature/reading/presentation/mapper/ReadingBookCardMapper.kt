@@ -84,7 +84,6 @@ internal fun Book.toPickUpNextCard(): BookCardUiModel = BookCardUiModel(
     variant = BookCardVariant.Column(
         cover = BookCardCover(model = toTransitionCover(variant = CoverVariant.ReadingPickUpNextTile)),
         text = BookCardContent(title = title),
-        menuLabel = null,
     ),
 )
 

@@ -8,7 +8,6 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
-import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
@@ -52,13 +51,13 @@ class HiddenSuggestionsBookCardMapperTest {
         bookCount = bookCount,
     )
 
-    private fun BookCardUiModel.captionParts(): List<String> = row().text.supportingLines.single().parts
+    private fun BookCardUiModel.captionParts(): List<String> = row().text.supportingLines.single()
         .map { it.shouldBeInstanceOf<BookCardLinePart.Text>().text }
 
     private fun BookCardUiModel.caption(): String {
         val line = row().text.supportingLines.single()
 
-        return line.parts.single().shouldBeInstanceOf<BookCardLinePart.Text>().text
+        return line.single().shouldBeInstanceOf<BookCardLinePart.Text>().text
     }
 
     @Nested
@@ -136,18 +135,6 @@ class HiddenSuggestionsBookCardMapperTest {
             card.row().size shouldBe BookCardVariant.Row.Size.Compact
             card.row().lead shouldBe BookCardLead.SeriesStack(front = cover)
             card.row().trailing shouldBe BookCardTrailing.Restore(label = "Restore")
-        }
-
-        @Test
-        fun `keeps the series stack lead when there is no cover`() {
-            // ----- Arrange -----
-            val input = hiddenSeries()
-
-            // ----- Act -----
-            val card = input.toHiddenSeriesCard(cover = null)
-
-            // ----- Assert -----
-            card.row().lead shouldBe BookCardLead.SeriesStack(front = null)
         }
 
         @Test

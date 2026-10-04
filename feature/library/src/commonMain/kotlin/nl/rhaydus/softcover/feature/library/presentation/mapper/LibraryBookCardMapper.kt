@@ -15,7 +15,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -36,7 +35,7 @@ import nl.rhaydus.softcover.core.uibinding.format.percentLabel
 internal fun Book.toBookCard(
     layout: LibraryGridLayout,
     press: BookCardDecorations.Press,
-    selection: SelectionMarkUiModel?,
+    selection: BookCardSelection?,
     deadline: BookDeadline?,
     dateStyle: DateStyle,
 ): BookCardUiModel {
@@ -89,7 +88,7 @@ internal fun Book.toBookCard(
                 trailing = deadlineProgress?.toBadgeUiModel()?.let { BookCardTrailing.Badge(model = it) },
             )
             decorations = BookCardDecorations(
-                selection = selection?.let { BookCardSelection.Multiple(mark = it) },
+                selection = selection,
                 pressBehaviour = press,
             )
         }
@@ -114,7 +113,7 @@ internal fun Book.toBookCard(
             )
             decorations = BookCardDecorations(
                 progress = labelledProgress(),
-                selection = selection?.let { BookCardSelection.Multiple(mark = it) },
+                selection = selection,
                 pressBehaviour = press,
             )
         }
@@ -193,7 +192,7 @@ internal fun libraryLargeRow(
 )
 
 private fun Book.gridDecorations(
-    selection: SelectionMarkUiModel?,
+    selection: BookCardSelection?,
     press: BookCardDecorations.Press,
 ): BookCardDecorations {
     val progress = userBookRead?.progress
@@ -207,7 +206,7 @@ private fun Book.gridDecorations(
         } else {
             BookCardProgress.Reserved
         },
-        selection = selection?.let { BookCardSelection.Multiple(mark = it) },
+        selection = selection,
         pressBehaviour = press,
     )
 }

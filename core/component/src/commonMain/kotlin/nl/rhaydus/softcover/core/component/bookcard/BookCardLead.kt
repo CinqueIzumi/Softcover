@@ -7,6 +7,5 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 sealed interface BookCardLead {
     data class Cover(val cover: BookCardCover) : BookCardLead
 
-    /** `null` [front] leaves the front cover's footprint empty; the plates behind it still draw. */
-    data class SeriesStack(val front: CoverUiModel?) : BookCardLead
+    data class SeriesStack(val front: CoverUiModel) : BookCardLead
 }

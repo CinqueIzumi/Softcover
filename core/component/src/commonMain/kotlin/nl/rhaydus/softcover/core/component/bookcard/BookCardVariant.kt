@@ -5,10 +5,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 
-/** A `null` cover still reserves the cover's 2:3 footprint. */
+/** A `null` [Column.cover] still reserves the cover's 2:3 footprint. */
 @Immutable
 sealed interface BookCardVariant {
-    data class CoverOnly(val cover: BookCardCover?) : BookCardVariant
+    data class CoverOnly(val cover: BookCardCover) : BookCardVariant
 
     /**
      * @property menuLabel The overflow button's content description; non-null draws the button over the

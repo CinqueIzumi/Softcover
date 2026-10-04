@@ -60,6 +60,7 @@ internal fun BookList(
     if (rawBooks == null || (rawBooks.isEmpty() && state.isLoading)) {
         LibraryLoadingGrid(
             layout = state.gridLayout,
+            cards = state.loadingCards,
             gridState = gridState,
             columnsOverride = columnsOverride,
         )
@@ -86,6 +87,7 @@ internal fun BookList(
     if (tabCards == null) {
         LibraryLoadingGrid(
             layout = state.gridLayout,
+            cards = state.loadingCards,
             gridState = gridState,
             columnsOverride = columnsOverride,
         )

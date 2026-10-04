@@ -19,6 +19,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
+import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -159,14 +160,14 @@ private fun TitleRow(
 
 @Composable
 private fun SupportingLine(
-    line: BookCardLine,
+    line: ImmutableList<BookCardLinePart>,
     isLoading: Boolean,
 ) {
     val style = MaterialTheme.editorialTypography.bodySmall.copy(fontFeatureSettings = "tnum")
     val color = MaterialTheme.colorScheme.onSurfaceVariant
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        line.parts.forEachIndexed { index, part ->
+        line.forEachIndexed { index, part ->
             if (index > 0) {
                 SoftcoverText(
                     text = " · ",

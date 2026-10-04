@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
@@ -33,7 +34,7 @@ internal data class ProfileUiState(
     val userProfileData: UserProfileData? = null,
     val readingLife: ReadingLife? = null,
     val readingLifeShareCard: ReadingLifeShareCardUiModel? = null,
-    val recentlyLovedCards: ImmutableList<BookCardUiModel> = persistentListOf(),
+    val recentlyLovedCards: ImmutableList<BookCardUiModel> = RECENTLY_LOVED_STAND_IN_CARDS,
     val hideUntaggedAuthors: Boolean = false,
 
     /** Mapped by \`HideUntaggedAuthorsCollector\` alongside [hideUntaggedAuthors]. */
@@ -101,6 +102,9 @@ internal data class ProfileUiState(
 ) : UiState {
     private val allAuthorDemographics: AuthorDemographics
         get() = readingLife?.authorDemographics ?: AuthorDemographics()
+
+    val isReadingLifeLoading: Boolean
+        get() = isLoading || readingLife == null
 
     val ratingsTotal: Int
         get() = readingLife?.ratings?.totalRatings ?: 0

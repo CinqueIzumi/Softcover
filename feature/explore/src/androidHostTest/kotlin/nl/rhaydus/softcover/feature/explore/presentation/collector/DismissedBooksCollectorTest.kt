@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
-import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -85,12 +85,12 @@ class DismissedBooksCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.hiddenBooks shouldBe listOf(book)
-            stateFlow.value.hiddenBookCards.shouldNotBeNull().map { it.key } shouldBe listOf(BookCardKey.Book(bookId = 1))
+            stateFlow.value.hiddenBookCards.map { it.key } shouldBe listOf(BookCardKey.Book(bookId = 1))
             job.cancel()
         }
 
         @Test
-        fun `leaves hiddenSeriesCards null when only books are emitted`() = runTest(UnconfinedTestDispatcher()) {
+        fun `leaves the hiddenSeriesCards stand-ins in place when only books are emitted`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DismissedBooksCollector()
             val job = launch {
@@ -104,10 +104,30 @@ class DismissedBooksCollectorTest {
             dismissedBooksFlow.emit(emptyList())
 
             // ----- Assert -----
-            stateFlow.value.hiddenBookCards.shouldNotBeNull()
-            stateFlow.value.hiddenSeriesCards shouldBe null
+            stateFlow.value.isLoadingBooks shouldBe false
+            stateFlow.value.isLoadingSeries shouldBe true
             job.cancel()
         }
+
+        @Test
+        fun `emits an empty card list rather than stand-ins when the emitted list is empty`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = DismissedBooksCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                dismissedBooksFlow.emit(emptyList())
+
+                // ----- Assert -----
+                stateFlow.value.hiddenBookCards.shouldBeEmpty()
+                job.cancel()
+            }
 
         @Test
         fun `sets the group header count to the emitted list size`() = runTest(UnconfinedTestDispatcher()) {

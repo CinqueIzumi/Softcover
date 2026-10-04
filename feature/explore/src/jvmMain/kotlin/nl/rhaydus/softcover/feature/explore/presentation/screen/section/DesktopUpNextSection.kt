@@ -33,7 +33,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 @Composable
 internal fun DesktopUpNextSection(
     entries: List<ContinueSeriesEntryUiModel>,
-    cards: ImmutableList<BookCardUiModel>?,
+    cards: ImmutableList<BookCardUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
     onBookClick: (Book, String?) -> Unit,
@@ -77,23 +77,13 @@ internal fun DesktopUpNextSection(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            if (cards == null) {
-                repeat(8) {
+            cards.forEach { card ->
+                key(card.key.lazyKey) {
                     BookCard(
-                        model = UP_NEXT_STAND_IN_CARD,
-                        onEvent = {},
+                        model = card,
+                        onEvent = onCardEvent,
                         modifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH),
                     )
-                }
-            } else {
-                cards.forEach { card ->
-                    key(card.key.lazyKey) {
-                        BookCard(
-                            model = card,
-                            onEvent = onCardEvent,
-                            modifier = Modifier.width(DESKTOP_UP_NEXT_CARD_WIDTH),
-                        )
-                    }
                 }
             }
         }

@@ -23,7 +23,6 @@ sealed interface BookCardTrailing {
 
     data class Bookmark(val toggle: ToggleUiModel) : BookCardTrailing {
         companion object {
-            /** A card still loading is built with `enabled = false`; the render never rewrites the toggle. */
             fun labelled(
                 saved: Boolean,
                 contentDescription: String,

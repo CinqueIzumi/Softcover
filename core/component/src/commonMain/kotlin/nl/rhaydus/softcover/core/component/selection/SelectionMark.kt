@@ -18,19 +18,19 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
 /**
- * A circular selection mark: filled with a check mark when selected, an empty ring of
- * `model.backdrop`'s unselected fill otherwise. Inert: a mark is read, never tapped, so it takes no
- * event lambda (§ 7.2 R1 — the caller hoists selection onto the tappable surface around it).
+ * A circular selection mark. Inert: the caller makes the surface around it tappable and owns the
+ * selection.
  */
 @Composable
 fun SelectionMark(
-    model: SelectionMarkUiModel,
+    selected: Boolean,
     modifier: Modifier = Modifier,
+    backdrop: SelectionMarkBackdrop = SelectionMarkBackdrop.Image,
 ) {
     val scheme = MaterialTheme.colorScheme
     val container = when {
-        model.selected -> scheme.primary
-        model.backdrop == SelectionMarkBackdrop.Image -> scheme.surface.copy(alpha = 0.72f)
+        selected -> scheme.primary
+        backdrop == SelectionMarkBackdrop.Image -> scheme.surface.copy(alpha = 0.72f)
         else -> scheme.surfaceContainerHigh
     }
 
@@ -38,13 +38,13 @@ fun SelectionMark(
         modifier = modifier
             .size(24.dp)
             .semantics {
-                selected = model.selected
-                stateDescription = if (model.selected) "Selected" else "Not selected"
+                this.selected = selected
+                stateDescription = if (selected) "Selected" else "Not selected"
             },
         color = container,
         shape = CircleShape,
     ) {
-        if (model.selected) {
+        if (selected) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,

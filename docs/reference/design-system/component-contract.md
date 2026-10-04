@@ -203,7 +203,8 @@ RichText(model = state.review)          // model.variant decides the face and th
 the screen may not have yet takes `isLoading` (on the model, or as a parameter on a data-free primitive)
 and keeps its real layout while loading. Unknown text renders through `SoftcoverText` with a stand-in;
 other unknown leaves sit under `Modifier.skeletonMask(isLoading)` at their real size. A list of unknown
-length renders a fixed count of its real items, each loading, with the count written at the call site.
+length renders a fixed count of its real items, each loading: the UiState carries that list of loading
+models, built by the feature's mapper / collector, and the render iterates it like the loaded list.
 No per-surface skeleton composable, no skeleton variant, no `SkeletonCrossfade` from a skeleton layout to
 the real one (`Cover`'s crossfade from its own masked slot to the image is the real layout). A model's
 `previews` include a loading fixture; a data-free primitive's gallery fixtures do.

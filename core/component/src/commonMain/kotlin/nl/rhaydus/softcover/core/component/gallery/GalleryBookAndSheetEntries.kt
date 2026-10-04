@@ -294,7 +294,7 @@ private fun bookCardFixtureLabel(model: BookCardUiModel): String {
     val decorations = model.decorations
     val selection = decorations.selection
     val badged = when (val variant = model.variant) {
-        is BookCardVariant.CoverOnly -> variant.cover?.badge != null
+        is BookCardVariant.CoverOnly -> variant.cover.badge != null
         is BookCardVariant.Column -> variant.cover?.badge != null
         is BookCardVariant.Row -> (variant.lead as? BookCardLead.Cover)?.cover?.badge != null
     }

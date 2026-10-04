@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
-import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
@@ -30,14 +29,14 @@ internal fun DismissedSeriesBook.toHiddenBookCard(cover: CoverUiModel): BookCard
     ),
 )
 
-internal fun DismissedSeries.toHiddenSeriesCard(cover: CoverUiModel?): BookCardUiModel = BookCardUiModel(
+internal fun DismissedSeries.toHiddenSeriesCard(cover: CoverUiModel): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Series(seriesId = seriesId),
     variant = BookCardVariant.Row(
         size = BookCardVariant.Row.Size.Compact,
         lead = BookCardLead.SeriesStack(front = cover),
         text = BookCardContent(
             title = seriesName ?: "Hidden series",
-            supportingLines = persistentListOf(BookCardLine(parts = scopeCaption())),
+            supportingLines = persistentListOf(scopeCaption()),
         ),
         trailing = BookCardTrailing.Restore(label = "Restore"),
     ),

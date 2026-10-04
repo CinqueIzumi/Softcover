@@ -26,8 +26,6 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestion
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockBookAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnUnblockSeriesAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.HiddenGroupHeaderUiModel
-import nl.rhaydus.softcover.feature.explore.presentation.screen.section.HIDDEN_BOOK_STAND_IN_CARD
-import nl.rhaydus.softcover.feature.explore.presentation.screen.section.HIDDEN_SERIES_STAND_IN_CARD
 import nl.rhaydus.softcover.feature.explore.presentation.state.HiddenSuggestionsUiState
 
 /**
@@ -95,24 +93,22 @@ internal fun HiddenSuggestionsContent(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (state.hiddenBookCards == null || state.hiddenBooks.isNotEmpty()) {
+            if (state.isLoadingBooks || state.hiddenBooks.isNotEmpty()) {
                 HiddenGroupSection(
                     header = state.hiddenBooksGroupHeader,
                     cards = state.hiddenBookCards,
-                    standIn = HIDDEN_BOOK_STAND_IN_CARD,
-                    isLoading = state.hiddenBookCards == null,
+                    isLoading = state.isLoadingBooks,
                     onEvent = onEvent,
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
             }
 
-            if (state.hiddenSeriesCards == null || state.hiddenSeries.isNotEmpty()) {
+            if (state.isLoadingSeries || state.hiddenSeries.isNotEmpty()) {
                 HiddenGroupSection(
                     header = state.hiddenSeriesGroupHeader,
                     cards = state.hiddenSeriesCards,
-                    standIn = HIDDEN_SERIES_STAND_IN_CARD,
-                    isLoading = state.hiddenSeriesCards == null,
+                    isLoading = state.isLoadingSeries,
                     onEvent = onEvent,
                 )
             }
@@ -125,8 +121,7 @@ internal fun HiddenSuggestionsContent(
 @Composable
 private fun HiddenGroupSection(
     header: HiddenGroupHeaderUiModel,
-    cards: ImmutableList<BookCardUiModel>?,
-    standIn: BookCardUiModel,
+    cards: ImmutableList<BookCardUiModel>,
     isLoading: Boolean,
     onEvent: (BookCardEvent) -> Unit,
 ) {
@@ -138,21 +133,12 @@ private fun HiddenGroupSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (cards == null) {
-            repeat(2) {
+        cards.forEach { card ->
+            key(card.key.lazyKey) {
                 BookCard(
-                    model = standIn,
-                    onEvent = {},
+                    model = card,
+                    onEvent = onEvent,
                 )
-            }
-        } else {
-            cards.forEach { card ->
-                key(card.key.lazyKey) {
-                    BookCard(
-                        model = card,
-                        onEvent = onEvent,
-                    )
-                }
             }
         }
     }

@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
-import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
@@ -32,15 +31,12 @@ internal fun Book.toTrendingCard(
             persistentListOf()
         } else {
             persistentListOf(
-                BookCardLine(
-                    parts = persistentListOf(
-                        ratingPart(rating = rating),
-                    ),
+                persistentListOf(
+                    ratingPart(rating = rating),
                 ),
             )
         },
     ),
-    menuLabel = null,
 )
 
 /** The "Because you read" card: the author is the byline. */
@@ -54,7 +50,6 @@ internal fun Book.toBecauseYouReadCard(
         title = title,
         byline = byline(author = authorString),
     ),
-    menuLabel = null,
 )
 
 /** An "Up next in your series" card, released or not; the overflow button opens the dismiss sheet. */
@@ -69,7 +64,7 @@ internal fun Book.toUpNextCard(
         eyebrow = seriesEyebrow(seriesText = bookSeries?.name),
         supportingLines = positionInSeriesDisplay
             ?.let { position ->
-                persistentListOf(BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = "Book #$position"))))
+                persistentListOf(persistentListOf(BookCardLinePart.Text(text = "Book #$position")))
             }
             ?: persistentListOf(),
     ),
@@ -108,7 +103,7 @@ private fun Book.toColumnCard(
     cover: CoverUiModel?,
     coverBadge: CoverOverlayUiModel?,
     text: BookCardContent,
-    menuLabel: String?,
+    menuLabel: String? = null,
 ): BookCardUiModel = BookCardUiModel(
     key = BookCardKey.Book(bookId = id),
     variant = BookCardVariant.Column(

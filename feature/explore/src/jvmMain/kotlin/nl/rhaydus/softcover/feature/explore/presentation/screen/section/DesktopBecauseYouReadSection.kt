@@ -31,12 +31,12 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_
 @Composable
 internal fun DesktopBecauseYouReadSection(
     genre: String?,
-    header: SectionHeaderUiModel?,
+    header: SectionHeaderUiModel,
     genreOptions: List<String>,
     genreSheet: SheetScaffoldUiModel,
     genreGroup: SheetRowGroupUiModel<String?>,
     books: List<Book>,
-    cards: ImmutableList<BookCardUiModel>?,
+    cards: ImmutableList<BookCardUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -60,7 +60,7 @@ internal fun DesktopBecauseYouReadSection(
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
-            model = header ?: BECAUSE_YOU_READ_HEADER_STAND_IN,
+            model = header,
             isLoading = isLoading,
             modifier = Modifier.padding(horizontal = 24.dp),
         )
@@ -82,23 +82,13 @@ internal fun DesktopBecauseYouReadSection(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            if (cards == null) {
-                repeat(8) {
+            cards.forEach { card ->
+                key(card.key.lazyKey) {
                     BookCard(
-                        model = BECAUSE_YOU_READ_STAND_IN_CARD,
-                        onEvent = {},
+                        model = card,
+                        onEvent = onCardEvent,
                         modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
                     )
-                }
-            } else {
-                cards.forEach { card ->
-                    key(card.key.lazyKey) {
-                        BookCard(
-                            model = card,
-                            onEvent = onCardEvent,
-                            modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
-                        )
-                    }
                 }
             }
         }

@@ -12,5 +12,5 @@ data class BookCardContent(
     val eyebrow: BookCardEyebrow? = null,
     val titleIcon: SoftcoverIcon? = null,
     val byline: String? = null,
-    val supportingLines: ImmutableList<BookCardLine> = persistentListOf(),
+    val supportingLines: ImmutableList<ImmutableList<BookCardLinePart>> = persistentListOf(),
 )

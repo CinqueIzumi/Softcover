@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,7 +38,7 @@ private val UP_NEXT_CARD_WIDTH = 126.dp
 @Composable
 internal fun ContinueSeriesSection(
     entries: List<ContinueSeriesEntryUiModel>,
-    cards: ImmutableList<BookCardUiModel>?,
+    cards: ImmutableList<BookCardUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
     onBookClick: (Book, String?) -> Unit,
@@ -79,34 +78,28 @@ internal fun ContinueSeriesSection(
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 
-        if (cards == null) {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(3) {
-                    BookCard(
-                        model = UP_NEXT_STAND_IN_CARD,
-                        onEvent = {},
-                        modifier = Modifier.width(UP_NEXT_CARD_WIDTH),
-                    )
-                }
-            }
-        } else {
-            LazyRow(
-                state = continueSeriesListState,
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                itemsIndexed(cards, key = { _, card -> card.key.lazyKey }) { index, card ->
-                    BookCard(
-                        model = card,
-                        onEvent = onCardEvent,
-                        modifier = Modifier
-                            .width(UP_NEXT_CARD_WIDTH)
-                            .staggeredEntry(coordinator = entry, index = index),
-                    )
-                }
+        LazyRow(
+            state = continueSeriesListState,
+            contentPadding = PaddingValues(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            itemsIndexed(cards, key = { _, card -> card.key.lazyKey }) { index, card ->
+                BookCard(
+                    model = card,
+                    onEvent = onCardEvent,
+                    modifier = Modifier
+                        .width(UP_NEXT_CARD_WIDTH)
+                        .let {
+                            if (card.isLoading) {
+                                it
+                            } else {
+                                it.staggeredEntry(
+                                    coordinator = entry,
+                                    index = index,
+                                )
+                            }
+                        },
+                )
             }
         }
     }

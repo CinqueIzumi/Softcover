@@ -28,7 +28,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_TRENDING
 @Composable
 internal fun DesktopTrendingSection(
     books: List<Book>,
-    cards: ImmutableList<BookCardUiModel>?,
+    cards: ImmutableList<BookCardUiModel>,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
     onBookClick: (Book, String?) -> Unit,
@@ -61,23 +61,13 @@ internal fun DesktopTrendingSection(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            if (cards == null) {
-                repeat(8) {
+            cards.forEach { card ->
+                key(card.key.lazyKey) {
                     BookCard(
-                        model = TRENDING_STAND_IN_CARD,
-                        onEvent = {},
+                        model = card,
+                        onEvent = onCardEvent,
                         modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
                     )
-                }
-            } else {
-                cards.forEach { card ->
-                    key(card.key.lazyKey) {
-                        BookCard(
-                            model = card,
-                            onEvent = onCardEvent,
-                            modifier = Modifier.width(DESKTOP_TRENDING_CARD_WIDTH),
-                        )
-                    }
                 }
             }
         }

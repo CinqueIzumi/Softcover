@@ -1,17 +1,13 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
 import androidx.compose.runtime.Immutable
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 
 @Immutable
 sealed interface BookCardSelection {
     val selected: Boolean
 
     /** Every card draws the mark and an unselected card is dimmed; the card announces a checkbox. */
-    data class Multiple(val mark: SelectionMarkUiModel) : BookCardSelection {
-        override val selected: Boolean get() = mark.selected
-    }
+    data class Multiple(override val selected: Boolean) : BookCardSelection
 
     /**
      * Only the selected card draws the ring and the mark; the others draw nothing and are not dimmed. The
@@ -20,13 +16,11 @@ sealed interface BookCardSelection {
     data class Single(override val selected: Boolean) : BookCardSelection
 }
 
-internal val BookCardSelection.renderedMark: SelectionMarkUiModel?
+/** `null` when the card draws no mark. */
+internal val BookCardSelection.markSelected: Boolean?
     get() = when (this) {
-        is BookCardSelection.Multiple -> mark
-        is BookCardSelection.Single -> SelectionMarkUiModel(
-            selected = true,
-            backdrop = SelectionMarkBackdrop.Image,
-        ).takeIf { selected }
+        is BookCardSelection.Multiple -> selected
+        is BookCardSelection.Single -> true.takeIf { selected }
     }
 
 internal val BookCardSelection.dimsUnselected: Boolean

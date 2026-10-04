@@ -14,7 +14,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
-import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
@@ -54,7 +53,6 @@ internal fun BookEdition.toEditionCard(
             supportingLines = supportingLines(),
         ),
         trailing = TRACKING_TRAILING.takeIf { tracked },
-        deadline = null,
     ),
     decorations = BookCardDecorations(selection = BookCardSelection.Single(selected = selected)),
 )
@@ -76,10 +74,10 @@ private val OWNED_COVER_BADGE = CoverOverlayUiModel(
 private fun BookEdition.supportingLines() = buildList {
     metaLine()
         .takeIf { it.isNotEmpty() }
-        ?.let { add(BookCardLine(parts = it)) }
+        ?.let { add(it) }
 
     isbnWhisper()
-        ?.let { add(BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = it)))) }
+        ?.let { add(persistentListOf(BookCardLinePart.Text(text = it))) }
 }.toImmutableList()
 
 /** The format glyph that leads each row; `readingFormat` maps to a single icon. */

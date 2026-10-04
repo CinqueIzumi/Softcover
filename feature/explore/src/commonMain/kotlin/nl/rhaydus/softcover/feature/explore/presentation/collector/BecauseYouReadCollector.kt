@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_HEADER_STAND_IN
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -22,7 +23,7 @@ internal class BecauseYouReadCollector : ExploreCollector {
                             eyebrow = "Because you read",
                             headline = genre,
                         )
-                    },
+                    } ?: BECAUSE_YOU_READ_HEADER_STAND_IN,
                     becauseYouReadGenreOptions = recommendation?.genreOptions.orEmpty(),
                     becauseYouReadBooks = recommendation?.books.orEmpty(),
                     // Mapped from the recommendation rather than hardcoded false - see

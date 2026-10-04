@@ -1,9 +1,9 @@
 package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -62,7 +62,7 @@ class RecentlyLovedCardsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `leaves the cards empty when reading life has not loaded`() = runTest(UnconfinedTestDispatcher()) {
+        fun `shows loading stand-ins while reading life has not loaded`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = RecentlyLovedCardsCollector()
 
@@ -75,14 +75,18 @@ class RecentlyLovedCardsCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.recentlyLovedCards.shouldBeEmpty()
+            stateFlow.value.recentlyLovedCards.shouldNotBeEmpty()
+            stateFlow.value.recentlyLovedCards.forEach { it.isLoading shouldBe true }
             job.cancel()
         }
 
         @Test
-        fun `produces no cards when the recently loved list is empty`() = runTest(UnconfinedTestDispatcher()) {
+        fun `produces no cards once reading life has landed with nothing loved`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ProfileUiState(readingLife = readingLife(emptyList()))
+            stateFlow.value = ProfileUiState(
+                isLoading = false,
+                readingLife = readingLife(emptyList()),
+            )
             val collector = RecentlyLovedCardsCollector()
 
             // ----- Act -----
@@ -169,7 +173,7 @@ class RecentlyLovedCardsCollectorTest {
         }
 
         @Test
-        fun `clears the cards when reading life becomes null`() = runTest(UnconfinedTestDispatcher()) {
+        fun `returns to loading stand-ins when reading life becomes null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(2)))
             val collector = RecentlyLovedCardsCollector()
@@ -184,8 +188,36 @@ class RecentlyLovedCardsCollectorTest {
             stateFlow.value = stateFlow.value.copy(readingLife = null)
 
             // ----- Assert -----
-            stateFlow.value.recentlyLovedCards shouldBe persistentListOf()
+            stateFlow.value.recentlyLovedCards.shouldNotBeEmpty()
+            stateFlow.value.recentlyLovedCards.forEach { it.isLoading shouldBe true }
             job.cancel()
         }
+
+        @Test
+        fun `maps the loved books rather than stand-ins while a refresh is still loading`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                stateFlow.value = ProfileUiState(
+                    isLoading = true,
+                    readingLife = readingLife(lovedBooks(2)),
+                )
+                val collector = RecentlyLovedCardsCollector()
+
+                // ----- Act -----
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = mockk<ProfileDependencies>(relaxed = true),
+                    )
+                }
+
+                // ----- Assert -----
+                stateFlow.value.recentlyLovedCards.map { it.key } shouldBe listOf(
+                    BookCardKey.Book(bookId = 1),
+                    BookCardKey.Book(bookId = 2),
+                )
+                stateFlow.value.recentlyLovedCards.forEach { it.isLoading shouldBe false }
+                job.cancel()
+            }
     }
 }

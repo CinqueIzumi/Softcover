@@ -27,6 +27,9 @@ import nl.rhaydus.softcover.core.personal.domain.model.ReadingPaceForecast
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
 import nl.rhaydus.softcover.feature.reading.presentation.collector.mastheadEyebrowFor
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.FEATURED_STAND_IN_BOOK
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.PICK_UP_NEXT_STAND_IN_CARDS
 import nl.rhaydus.toad.UiState
 
 internal data class ReadingScreenUiState(
@@ -104,14 +107,14 @@ internal data class ReadingScreenUiState(
     val verdictCover: CoverUiModel? = null,
 
     /**
-     * The "Also reading" rows in display order (every book but the featured first; `null` until the
-     * collector has built them for the current [books], and while there are none), and the empty
-     * screen's "Pick up next" tiles in display order (`null` until [wantToReadBooks] loads), mapped off
-     * the composition by `BookCardModelsCollector` (R9) from [books], [wantToReadBooks], [deadlines],
-     * [dateStyle], [deadlineCoverOverlays] and [failedMutationBookIds] — never by the render.
+     * The "Also reading" rows in display order (every book but the featured first), and the empty
+     * screen's "Pick up next" tiles in display order, mapped off the composition by
+     * `BookCardModelsCollector` (R9) from [books], [wantToReadBooks], [deadlines], [dateStyle],
+     * [deadlineCoverOverlays] and [failedMutationBookIds] — never by the render. The rows are loading
+     * stand-ins while [books] is empty and the tiles while [wantToReadBooks] is `null`.
      */
-    val alsoReadingCards: ImmutableList<BookCardUiModel>? = null,
-    val pickUpNextCards: ImmutableList<BookCardUiModel>? = null,
+    val alsoReadingCards: ImmutableList<BookCardUiModel> = ALSO_READING_STAND_IN_CARDS,
+    val pickUpNextCards: ImmutableList<BookCardUiModel> = PICK_UP_NEXT_STAND_IN_CARDS,
 
     /**
      * Each book's deadline cover overlay badge, mapped off the composition by
@@ -158,4 +161,11 @@ internal data class ReadingScreenUiState(
 
     /** [masthead]'s trailing refresh action label and enabled state, tracking [isLoading]. */
     val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = true),
-) : UiState
+) : UiState {
+    /** The first of [books], or the loading stand-in while there are none. */
+    val featuredBook: Book
+        get() = books.firstOrNull() ?: FEATURED_STAND_IN_BOOK
+
+    val isLoadingFeatured: Boolean
+        get() = books.isEmpty()
+}

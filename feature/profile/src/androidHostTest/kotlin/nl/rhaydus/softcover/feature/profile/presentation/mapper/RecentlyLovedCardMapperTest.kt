@@ -60,7 +60,7 @@ class RecentlyLovedCardMapperTest {
             val lines = book.toRecentlyLovedCard().column().text.supportingLines
 
             // ----- Assert -----
-            lines.map { it.parts } shouldBe listOf(
+            lines shouldBe listOf(
                 listOf(
                     BookCardLinePart.Rating(
                         label = "4.5",
@@ -82,7 +82,7 @@ class RecentlyLovedCardMapperTest {
             val lines = book.toRecentlyLovedCard().column().text.supportingLines
 
             // ----- Assert -----
-            lines.first().parts shouldBe listOf(
+            lines.first() shouldBe listOf(
                 BookCardLinePart.Rating(
                     label = "4.0",
                     contentDescription = "Rated 4.0 out of 5",
@@ -99,7 +99,7 @@ class RecentlyLovedCardMapperTest {
             val lines = book.toRecentlyLovedCard().column().text.supportingLines
 
             // ----- Assert -----
-            lines.first().parts shouldBe listOf(
+            lines.first() shouldBe listOf(
                 BookCardLinePart.Rating(
                     label = "4.3",
                     contentDescription = "Rated 4.3 out of 5",

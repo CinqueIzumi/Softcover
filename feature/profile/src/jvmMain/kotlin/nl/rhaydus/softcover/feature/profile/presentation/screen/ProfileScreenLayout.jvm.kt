@@ -330,12 +330,6 @@ private fun ReadingLifeContent(
     onBookCardEvent: (BookCardEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // ReadingAtlasSection renders from state.readingAtlas (itself driven by userProfileData alone),
-    // but every section below also needs readingLife to have arrived — the two land via separate
-    // collectors, so gating on isLoading alone risks a section briefly rendering its permanent
-    // "nothing yet" copy before readingLife has actually resolved.
-    val readingLifeLoading = state.isLoading || state.readingLife == null
-
     Column(modifier = modifier) {
         ReadingAtlasSection(
             readingAtlas = state.readingAtlas,
@@ -345,7 +339,7 @@ private fun ReadingLifeContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         ShareEntryRow(
-            isLoading = readingLifeLoading,
+            isLoading = state.isReadingLifeLoading,
             onClick = onShareClick,
         )
 
@@ -354,7 +348,7 @@ private fun ReadingLifeContent(
         YearColumnHistorySection(
             chart = state.yearHistoryChart,
             caption = state.yearHistoryCaption,
-            isLoading = readingLifeLoading,
+            isLoading = state.isReadingLifeLoading,
             header = state.yearColumnHistoryHeader,
             metricToggle = state.yearMetricToggle,
             onMetricSelected = onYearMetricSelected,
@@ -365,7 +359,7 @@ private fun ReadingLifeContent(
         GenreRankingSection(
             genres = state.readingLife?.genres ?: GenreBreakdown(),
             genreRanking = state.genreRanking,
-            isLoading = readingLifeLoading,
+            isLoading = state.isReadingLifeLoading,
             header = state.genreRankingHeader,
         )
 
@@ -379,7 +373,7 @@ private fun ReadingLifeContent(
             hideUntaggedAuthors = state.hideUntaggedAuthors,
             hideUntaggedAuthorsToggle = state.hideUntaggedAuthorsToggle,
             canHideUntaggedAuthors = state.hasUntaggedAuthors,
-            isLoading = readingLifeLoading,
+            isLoading = state.isReadingLifeLoading,
             header = state.authorRepresentationHeader,
             onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
         )
@@ -390,7 +384,7 @@ private fun ReadingLifeContent(
             chart = state.ratingsChart,
             average = state.ratingsAverage,
             totalRatings = state.ratingsTotal,
-            isLoading = readingLifeLoading,
+            isLoading = state.isReadingLifeLoading,
             header = state.ratingsHistogramHeader,
             caption = state.ratingsHistogramCaption,
         )
@@ -400,7 +394,7 @@ private fun ReadingLifeContent(
         RecentlyLovedSection(
             cards = state.recentlyLovedCards,
             hasRecentlyLoved = state.hasRecentlyLoved,
-            isLoading = readingLifeLoading,
+            isLoading = state.isReadingLifeLoading,
             header = state.recentlyLovedHeader,
             onEvent = onBookCardEvent,
         )

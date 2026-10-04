@@ -7,6 +7,8 @@ import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.HIDDEN_BOOK_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.HIDDEN_SERIES_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.model.HiddenGroupHeaderUiModel
 import nl.rhaydus.toad.UiState
 
@@ -30,13 +32,19 @@ internal data class HiddenSuggestionsUiState(
         body = "Books and series you mute from “Up next in your series” land here, " +
             "so you can bring any of them back whenever you like.",
     ),
-    // `null` until the surface has loaded.
-    val hiddenBookCards: ImmutableList<BookCardUiModel>? = null,
-    val hiddenSeriesCards: ImmutableList<BookCardUiModel>? = null,
+    // Loading stand-ins until the surface has loaded.
+    val hiddenBookCards: ImmutableList<BookCardUiModel> = HIDDEN_BOOK_STAND_IN_CARDS,
+    val hiddenSeriesCards: ImmutableList<BookCardUiModel> = HIDDEN_SERIES_STAND_IN_CARDS,
     val topBar: TopBarUiModel = TopBarUiModel(
         title = HIDDEN_SUGGESTIONS_TITLE,
     ),
 ) : UiState {
+    val isLoadingBooks: Boolean
+        get() = hiddenBookCards.any(BookCardUiModel::isLoading)
+
+    val isLoadingSeries: Boolean
+        get() = hiddenSeriesCards.any(BookCardUiModel::isLoading)
+
     val isEmpty: Boolean
-        get() = hiddenBookCards != null && hiddenSeriesCards != null && hiddenBooks.isEmpty() && hiddenSeries.isEmpty()
+        get() = isLoadingBooks.not() && isLoadingSeries.not() && hiddenBooks.isEmpty() && hiddenSeries.isEmpty()
 }

@@ -39,11 +39,11 @@ class EditionBookCardMapperTest {
         row().lead.shouldBeInstanceOf<BookCardLead.Cover>().cover
 
     private fun BookCardUiModel.lines(): List<String> = row().text.supportingLines.map { line ->
-        line.parts.single().shouldBeInstanceOf<BookCardLinePart.Text>().text
+        line.single().shouldBeInstanceOf<BookCardLinePart.Text>().text
     }
 
     private fun BookCardUiModel.linePartTexts(): List<List<String>> = row().text.supportingLines.map { line ->
-        line.parts.map { it.shouldBeInstanceOf<BookCardLinePart.Text>().text }
+        line.map { it.shouldBeInstanceOf<BookCardLinePart.Text>().text }
     }
 
     @Nested

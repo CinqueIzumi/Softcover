@@ -21,6 +21,11 @@ import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_HEADER_STAND_IN
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.SEARCH_RESULT_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.TRENDING_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.UP_NEXT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSortPillButton
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.toad.UiState
@@ -51,12 +56,12 @@ internal data class ExploreScreenUiState(
     // reproducing today's ExploreShelf.kt:202,236 behaviour.
     val unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel> = emptyMap(),
     val featuredReleaseBadge: BadgeUiModel? = null,
-    // `null` until the surface has loaded.
-    val trendingCards: ImmutableList<BookCardUiModel>? = null,
-    val becauseYouReadCards: ImmutableList<BookCardUiModel>? = null,
-    val upNextCards: ImmutableList<BookCardUiModel>? = null,
-    // `null` while a search runs or its first result's cover is pending.
-    val queriedBookCards: ImmutableList<BookCardUiModel>? = null,
+    // Loading stand-ins until the surface has loaded.
+    val trendingCards: ImmutableList<BookCardUiModel> = TRENDING_STAND_IN_CARDS,
+    val becauseYouReadCards: ImmutableList<BookCardUiModel> = BECAUSE_YOU_READ_STAND_IN_CARDS,
+    val upNextCards: ImmutableList<BookCardUiModel> = UP_NEXT_STAND_IN_CARDS,
+    // Loading stand-ins while a search runs or its first result's cover is pending.
+    val queriedBookCards: ImmutableList<BookCardUiModel> = SEARCH_RESULT_STAND_IN_CARDS,
     // Search paging (explore-3a feedback item 7). The Typesense `search` endpoint returns no
     // total hit count, so `queriedBooksHasMore` is a "maybe more" signal derived from whether the
     // last fetched page came back full, not an authoritative total. `loadingMoreQueriedBooks` is
@@ -119,8 +124,8 @@ internal data class ExploreScreenUiState(
     // `becauseYouReadGenreOptions` is the picker's choice list: the distinct Genre-category tags
     // across the user's own books, same derivation as Library's `LibraryFilterOptionsBuilder`.
     val becauseYouReadGenre: String? = null,
-    /** `null` hides the because-you-read rail, as a `null` [becauseYouReadGenre] does. */
-    val becauseYouReadHeader: SectionHeaderUiModel? = null,
+    /** A loading stand-in until a genre resolves; the rail is hidden by a `null` [becauseYouReadGenre], not by this. */
+    val becauseYouReadHeader: SectionHeaderUiModel = BECAUSE_YOU_READ_HEADER_STAND_IN,
     val becauseYouReadGenreOptions: List<String> = emptyList(),
     val becauseYouReadGenreSheet: SheetScaffoldUiModel = becauseYouReadGenreSheetScaffold(),
     /** A `null` key is the "Auto (most-read)" row. */

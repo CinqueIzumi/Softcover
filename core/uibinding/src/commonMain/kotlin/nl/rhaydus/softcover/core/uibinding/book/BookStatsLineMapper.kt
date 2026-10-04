@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.core.uibinding.book
 
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.common.formatGroupedNumber
-import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 
 /**
@@ -14,12 +14,12 @@ fun bookStatsLine(
     releaseYear: Int?,
     usersCount: Int?,
     rating: Double?,
-): BookCardLine? {
+): ImmutableList<BookCardLinePart>? {
     val parts = listOfNotNull(
         releaseYear?.takeIf { it != -1 }?.let { BookCardLinePart.Text(text = it.toString()) },
         usersCount?.let { BookCardLinePart.Text(text = "${formatGroupedNumber(it)} readers") },
         rating?.takeIf { it != 0.0 }?.let { ratingPart(rating = it) },
     )
 
-    return if (parts.isEmpty()) null else BookCardLine(parts = parts.toImmutableList())
+    return if (parts.isEmpty()) null else parts.toImmutableList()
 }

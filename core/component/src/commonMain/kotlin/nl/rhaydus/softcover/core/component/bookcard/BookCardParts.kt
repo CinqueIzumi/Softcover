@@ -30,7 +30,6 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverDimensions
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.progress.ProgressBarHeight
 import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
@@ -46,7 +45,7 @@ internal fun BookCardCoverLayout(
     modifier: Modifier = Modifier,
 ) {
     val selected = selection?.selected == true
-    val mark = selection?.renderedMark
+    val markSelected = selection?.markSelected
 
     val coverModel = cover?.model
     val badge = cover?.badge
@@ -90,9 +89,9 @@ internal fun BookCardCoverLayout(
             )
         }
 
-        if (mark != null) {
+        if (markSelected != null) {
             SelectionMark(
-                model = mark,
+                selected = markSelected,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp),
@@ -103,13 +102,12 @@ internal fun BookCardCoverLayout(
 
 @Composable
 internal fun BookCardSeriesStack(
-    front: CoverUiModel?,
+    front: CoverUiModel,
     width: Dp,
     isLoading: Boolean,
 ) {
     val frontWidth = width - 12.dp
-    val plateVariant = front?.variant ?: CoverVariant.HiddenSeriesStack
-    val plateShape = RoundedCornerShape(CoverDimensions.forVariant(variant = plateVariant).cornerRadius)
+    val plateShape = RoundedCornerShape(CoverDimensions.forVariant(variant = front.variant).cornerRadius)
 
     Box(modifier = Modifier.width(width)) {
         SeriesStackPlate(

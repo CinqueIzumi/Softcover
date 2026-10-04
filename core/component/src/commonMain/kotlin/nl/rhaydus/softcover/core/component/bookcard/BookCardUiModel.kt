@@ -15,12 +15,10 @@ import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
- * The component fixes every measurement; nothing here sets a size, gap or style:
+ * The component fixes every measurement; the only dp a model carries are [BookCardVariant.Row]'s content insets:
  * - **Cover** — fills the width its modifier gives it at 2:3; a row's lead width follows
  *   [BookCardVariant.Row.Size].
  * - **Selection** — one treatment on any cover; a coverless row leads with the mark. A selecting card
@@ -29,8 +27,8 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * - **Text** — resolved and cased by the mapper; the card never formats, upper-cases or computes a
  *   shared-transition key.
  *
- * @property isLoading The card lays out the model as given with every leaf masked and no event emitted, so a
- * stand-in model sizes the slot the real one will fill.
+ * @property isLoading The card lays out the model as given with every leaf masked, so a stand-in model sizes
+ * the slot the real one will fill. Its trailing control is built disabled, which is what keeps it silent.
  */
 @Immutable
 data class BookCardUiModel(
@@ -45,13 +43,9 @@ data class BookCardUiModel(
             variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Loading")),
             decorations = BookCardDecorations(
                 progress = BookCardProgress.Value(
-                    bar = ProgressBarUiModel(
-                        fraction = 0.5f,
-                        isLoading = true,
-                    ),
+                    bar = ProgressBarUiModel(fraction = 0.5f),
                     label = "50%",
                 ),
-                pressBehaviour = BookCardDecorations.Press.None,
             ),
             isLoading = true,
         )
@@ -66,7 +60,6 @@ data class BookCardUiModel(
                     byline = "By Author Name",
                 ),
             ),
-            decorations = BookCardDecorations(pressBehaviour = BookCardDecorations.Press.None),
             isLoading = true,
         )
 
@@ -80,7 +73,6 @@ data class BookCardUiModel(
                     byline = "By Author Name",
                 ),
             ),
-            decorations = BookCardDecorations(pressBehaviour = BookCardDecorations.Press.None),
             isLoading = true,
         )
 
@@ -94,7 +86,6 @@ data class BookCardUiModel(
                     byline = "By Author Name",
                 ),
             ),
-            decorations = BookCardDecorations(pressBehaviour = BookCardDecorations.Press.None),
             isLoading = true,
         )
 
@@ -127,12 +118,12 @@ data class BookCardUiModel(
             BookCardUiModel(
                 key = BookCardKey.Book(bookId = 2),
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Dune")),
-                decorations = BookCardDecorations(selection = multipleSelection(selected = true)),
+                decorations = BookCardDecorations(selection = BookCardSelection.Multiple(selected = true)),
             ),
             BookCardUiModel(
                 key = BookCardKey.Book(bookId = 3),
                 variant = BookCardVariant.CoverOnly(cover = bookCover(title = "Hyperion")),
-                decorations = BookCardDecorations(selection = multipleSelection(selected = false)),
+                decorations = BookCardDecorations(selection = BookCardSelection.Multiple(selected = false)),
             ),
             BookCardUiModel(
                 key = BookCardKey.Book(bookId = 4),
@@ -163,12 +154,10 @@ data class BookCardUiModel(
                     text = BookCardContent(
                         title = "Piranesi",
                         supportingLines = persistentListOf(
-                            BookCardLine(
-                                parts = persistentListOf(
-                                    BookCardLinePart.Rating(
-                                        label = "4.5",
-                                        contentDescription = "Rated 4.5 out of 5",
-                                    ),
+                            persistentListOf(
+                                BookCardLinePart.Rating(
+                                    label = "4.5",
+                                    contentDescription = "Rated 4.5 out of 5",
                                 ),
                             ),
                         ),
@@ -189,13 +178,11 @@ data class BookCardUiModel(
                     text = BookCardContent(
                         title = "Gideon the Ninth",
                         supportingLines = persistentListOf(
-                            BookCardLine(
-                                parts = persistentListOf(
-                                    BookCardLinePart.Text(text = "Tamsyn Muir"),
-                                    BookCardLinePart.Rating(
-                                        label = "4.1",
-                                        contentDescription = "Rated 4.1 out of 5",
-                                    ),
+                            persistentListOf(
+                                BookCardLinePart.Text(text = "Tamsyn Muir"),
+                                BookCardLinePart.Rating(
+                                    label = "4.1",
+                                    contentDescription = "Rated 4.1 out of 5",
                                 ),
                             ),
                         ),
@@ -276,7 +263,6 @@ data class BookCardUiModel(
                     ),
                     trailing = BookCardTrailing.Restore(label = "Restore"),
                 ),
-                decorations = BookCardDecorations(pressBehaviour = BookCardDecorations.Press.Tap),
             ),
             BookCardUiModel(
                 key = BookCardKey.Edition(editionId = 10),
@@ -289,7 +275,7 @@ data class BookCardUiModel(
                         byline = "By Susanna Clarke",
                     ),
                 ),
-                decorations = BookCardDecorations(selection = multipleSelection(selected = true)),
+                decorations = BookCardDecorations(selection = BookCardSelection.Multiple(selected = true)),
             ),
             BookCardUiModel(
                 key = BookCardKey.Edition(editionId = 11),
@@ -338,13 +324,6 @@ data class BookCardUiModel(
             ),
             coverlessTitle = title,
             variant = CoverVariant.ExploreRail,
-        )
-
-        private fun multipleSelection(selected: Boolean) = BookCardSelection.Multiple(
-            mark = SelectionMarkUiModel(
-                selected = selected,
-                backdrop = SelectionMarkBackdrop.Image,
-            ),
         )
     }
 }

@@ -41,10 +41,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSh
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
-import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ALSO_READING_STAND_IN_CARD
-import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ALSO_READING_STAND_IN_COUNT
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
-import nl.rhaydus.softcover.feature.reading.presentation.screen.section.FEATURED_STAND_IN_BOOK
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBookCard
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
@@ -164,9 +161,8 @@ private fun DesktopReadingContent(
     controller: MarkAsReadController,
     modifier: Modifier = Modifier,
 ) {
-    val featuredBook = state.books.firstOrNull()
-    val isLoading = featuredBook == null
-    val featured = featuredBook ?: FEATURED_STAND_IN_BOOK
+    val featured = state.featuredBook
+    val isLoading = state.isLoadingFeatured
     val rest = state.books.drop(1)
 
     val isInspection = LocalInspectionMode.current
@@ -226,19 +222,8 @@ private fun DesktopReadingContent(
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
-                }
 
-                val alsoReadingCards = state.alsoReadingCards
-
-                if (alsoReadingCards == null) {
-                    repeat(ALSO_READING_STAND_IN_COUNT) {
-                        BookCard(
-                            model = ALSO_READING_STAND_IN_CARD,
-                            onEvent = {},
-                        )
-                    }
-                } else {
-                    alsoReadingCards.forEach { card ->
+                    state.alsoReadingCards.forEach { card ->
                         val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@forEach
 
                         BookCard(

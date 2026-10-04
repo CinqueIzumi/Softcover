@@ -78,12 +78,6 @@ internal actual fun ProfileScreenLayout(
 
     val shareContent = state.readingLifeShareCard
 
-    // ReadingAtlasSection reads state.isLoading directly (it is driven by userProfileData alone),
-    // but every reading-life section below also needs readingLife to have arrived — the two land
-    // via separate collectors, so gating on isLoading alone risks a section briefly rendering its
-    // permanent "nothing yet" copy before readingLife has actually resolved.
-    val readingLifeLoading = state.isLoading || state.readingLife == null
-
     Scaffold(
         topBar = {
             TopBar(
@@ -139,7 +133,7 @@ internal actual fun ProfileScreenLayout(
             Spacer(modifier = Modifier.height(16.dp))
 
             ShareEntryRow(
-                isLoading = readingLifeLoading,
+                isLoading = state.isReadingLifeLoading,
                 onClick = { showShareSheet = true },
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
@@ -149,7 +143,7 @@ internal actual fun ProfileScreenLayout(
             YearColumnHistorySection(
                 chart = state.yearHistoryChart,
                 caption = state.yearHistoryCaption,
-                isLoading = readingLifeLoading,
+                isLoading = state.isReadingLifeLoading,
                 header = state.yearColumnHistoryHeader,
                 metricToggle = state.yearMetricToggle,
                 onMetricSelected = { runAction(OnYearMetricSelectedAction(metric = it)) },
@@ -161,7 +155,7 @@ internal actual fun ProfileScreenLayout(
             GenreRankingSection(
                 genres = state.readingLife?.genres ?: GenreBreakdown(),
                 genreRanking = state.genreRanking,
-                isLoading = readingLifeLoading,
+                isLoading = state.isReadingLifeLoading,
                 header = state.genreRankingHeader,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
@@ -176,7 +170,7 @@ internal actual fun ProfileScreenLayout(
                 hideUntaggedAuthors = state.hideUntaggedAuthors,
                 hideUntaggedAuthorsToggle = state.hideUntaggedAuthorsToggle,
                 canHideUntaggedAuthors = state.hasUntaggedAuthors,
-                isLoading = readingLifeLoading,
+                isLoading = state.isReadingLifeLoading,
                 header = state.authorRepresentationHeader,
                 onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -188,7 +182,7 @@ internal actual fun ProfileScreenLayout(
                 chart = state.ratingsChart,
                 average = state.ratingsAverage,
                 totalRatings = state.ratingsTotal,
-                isLoading = readingLifeLoading,
+                isLoading = state.isReadingLifeLoading,
                 header = state.ratingsHistogramHeader,
                 caption = state.ratingsHistogramCaption,
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -199,7 +193,7 @@ internal actual fun ProfileScreenLayout(
             RecentlyLovedSection(
                 cards = state.recentlyLovedCards,
                 hasRecentlyLoved = state.hasRecentlyLoved,
-                isLoading = readingLifeLoading,
+                isLoading = state.isReadingLifeLoading,
                 header = state.recentlyLovedHeader,
                 onEvent = onBookCardEvent,
                 modifier = Modifier.padding(horizontal = 24.dp),

@@ -27,7 +27,6 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
-import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
@@ -35,8 +34,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
@@ -105,7 +102,7 @@ class BookCardModelsCollectorTest {
     }
 
     private fun BookCardUiModel.coverBadge(): CoverOverlayUiModel? = when (val shape = variant) {
-        is BookCardVariant.CoverOnly -> shape.cover?.badge
+        is BookCardVariant.CoverOnly -> shape.cover.badge
         is BookCardVariant.Column -> shape.cover?.badge
         is BookCardVariant.Row -> (shape.lead as? BookCardLead.Cover)?.cover?.badge
     }
@@ -876,50 +873,6 @@ class BookCardModelsCollectorTest {
         }
 
         @Test
-        fun `the compact list marks selection on a surface backdrop`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val job = launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = bookState(
-                books = listOf(stubBook(id = 1)),
-                layout = LibraryGridLayout.LIST_COMPACT,
-                selectionMode = true,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.selection shouldBe
-                BookCardSelection.Multiple(
-                    mark = SelectionMarkUiModel(
-                        selected = false,
-                        backdrop = SelectionMarkBackdrop.Surface,
-                    ),
-                )
-            job.cancel()
-        }
-
-        @Test
-        fun `every other layout marks selection on an image backdrop`() = runTest(testDispatcher) {
-            LibraryGridLayout.entries.filter { it != LibraryGridLayout.LIST_COMPACT }.forEach { layout ->
-                // ----- Arrange -----
-                setUp()
-                val job = launchCollector()
-
-                // ----- Act -----
-                stateFlow.value = bookState(
-                    books = listOf(stubBook(id = 1)),
-                    layout = layout,
-                    selectionMode = true,
-                )
-
-                // ----- Assert -----
-                stateFlow.value.bookCardsByTab.getValue("all").cards.cardWithId(1).decorations.selection
-                    .shouldBeInstanceOf<BookCardSelection.Multiple>().mark.backdrop shouldBe SelectionMarkBackdrop.Image
-                job.cancel()
-            }
-        }
-
-        @Test
         fun `only the selected books are marked selected`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val job = launchCollector()
@@ -1204,14 +1157,12 @@ class BookCardModelsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.row().text.supportingLines shouldBe listOf(
-                BookCardLine(
-                    parts = persistentListOf(
-                        BookCardLinePart.Text(text = "1965"),
-                        BookCardLinePart.Text(text = "12 readers"),
-                        BookCardLinePart.Rating(
-                            label = "4.2",
-                            contentDescription = "Rated 4.2 out of 5",
-                        ),
+                persistentListOf(
+                    BookCardLinePart.Text(text = "1965"),
+                    BookCardLinePart.Text(text = "12 readers"),
+                    BookCardLinePart.Rating(
+                        label = "4.2",
+                        contentDescription = "Rated 4.2 out of 5",
                     ),
                 ),
             )

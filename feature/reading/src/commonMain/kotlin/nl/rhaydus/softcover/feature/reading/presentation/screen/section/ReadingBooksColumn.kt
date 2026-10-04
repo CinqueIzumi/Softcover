@@ -24,6 +24,7 @@ import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.domain.model.Book
@@ -44,8 +45,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiSt
  * [contentPadding] are supplied by each layout so desktop can attach a scrollbar and mobile can
  * reserve bottom-bar space.
  *
- * With no books yet it renders the same layout around [FEATURED_STAND_IN_BOOK] and
- * [ALSO_READING_STAND_IN_COUNT] loading rows.
+ * With no books yet it renders the same layout from the state's loading stand-ins.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,15 +59,16 @@ internal fun ReadingBooksColumn(
     modifier: Modifier = Modifier,
     header: @Composable () -> Unit,
 ) {
-    val featuredBook = state.books.firstOrNull()
-    val isLoading = featuredBook == null
-    val featured = featuredBook ?: FEATURED_STAND_IN_BOOK
+    val featured = state.featuredBook
+    val isLoading = state.isLoadingFeatured
     val rest = state.books.drop(1)
 
     val alsoReadingCards = state.alsoReadingCards
 
     val animator = rememberLazyItemMutationAnimator(
-        keys = remember(alsoReadingCards) { alsoReadingCards.orEmpty().map { it.key.lazyKey } },
+        keys = remember(alsoReadingCards) {
+            alsoReadingCards.filterNot(BookCardUiModel::isLoading).map { it.key.lazyKey }
+        },
     )
 
     val entry = rememberStaggeredEntryCoordinator(key = "reading:rest")
@@ -136,38 +137,32 @@ internal fun ReadingBooksColumn(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                if (alsoReadingCards == null) {
-                    items(
-                        count = ALSO_READING_STAND_IN_COUNT,
-                        key = { "also-reading-stand-in-$it" },
-                    ) {
-                        BookCard(
-                            model = ALSO_READING_STAND_IN_CARD,
-                            onEvent = {},
-                        )
-                    }
-                } else {
-                    itemsIndexed(
-                        alsoReadingCards,
-                        key = { _, card -> card.key.lazyKey },
-                    ) { index, card ->
-                        val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@itemsIndexed
+                itemsIndexed(
+                    alsoReadingCards,
+                    key = { _, card -> card.key.lazyKey },
+                ) { index, card ->
+                    val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@itemsIndexed
 
-                        BookCard(
-                            model = card,
-                            onEvent = onCardEvent,
-                            modifier = Modifier.mutationAnimated(
-                                scope = this,
-                                animator = animator,
-                                itemKey = card.key.lazyKey,
-                            )
-                                .staggeredEntry(
-                                    coordinator = entry,
-                                    index = index,
-                                )
-                                .then(controller.slideModifier(bookId)),
+                    BookCard(
+                        model = card,
+                        onEvent = onCardEvent,
+                        modifier = Modifier.mutationAnimated(
+                            scope = this,
+                            animator = animator,
+                            itemKey = card.key.lazyKey,
                         )
-                    }
+                            .let {
+                                if (card.isLoading) {
+                                    it
+                                } else {
+                                    it.staggeredEntry(
+                                        coordinator = entry,
+                                        index = index,
+                                    )
+                                }
+                            }
+                            .then(controller.slideModifier(bookId)),
+                    )
                 }
             }
         }

@@ -10,13 +10,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.EditorialTypography
+import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -25,20 +23,21 @@ internal fun BookCardRowLayout(
     variant: BookCardVariant.Row,
     onEvent: (BookCardEvent) -> Unit,
     modifier: Modifier,
-    isLoading: Boolean,
     content: (@Composable () -> Unit)?,
 ) {
     val selection = model.decorations.selection
-    val mark = selection?.renderedMark
+    val markSelected = selection?.markSelected
+    val isLoading = model.isLoading
     val lead = variant.lead
     val trailing = variant.trailing
     val deadline = variant.deadline
     val typography = MaterialTheme.editorialTypography
 
-    val metrics = RowMetrics.forSize(
-        size = variant.size,
-        typography = typography,
-    )
+    val leadWidth = when (variant.size) {
+        BookCardVariant.Row.Size.Compact -> 40.dp
+        BookCardVariant.Row.Size.Standard -> 56.dp
+        BookCardVariant.Row.Size.Large -> 74.dp
+    }
 
     Column(
         modifier = modifier
@@ -47,7 +46,6 @@ internal fun BookCardRowLayout(
                 model = model,
                 onEvent = onEvent,
                 hoverHighlight = true,
-                isLoading = isLoading,
             ),
     ) {
         Divider()
@@ -64,8 +62,11 @@ internal fun BookCardRowLayout(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (lead !is BookCardLead.Cover && mark != null) {
-                    SelectionMark(model = mark)
+                if (lead !is BookCardLead.Cover && markSelected != null) {
+                    SelectionMark(
+                        selected = markSelected,
+                        backdrop = SelectionMarkBackdrop.Surface,
+                    )
                 }
 
                 when (lead) {
@@ -73,12 +74,12 @@ internal fun BookCardRowLayout(
                         cover = lead.cover,
                         selection = selection,
                         isLoading = isLoading,
-                        modifier = Modifier.width(metrics.leadWidth),
+                        modifier = Modifier.width(leadWidth),
                     )
 
                     is BookCardLead.SeriesStack -> BookCardSeriesStack(
                         front = lead.front,
-                        width = metrics.leadWidth,
+                        width = leadWidth,
                         isLoading = isLoading,
                     )
 
@@ -87,9 +88,13 @@ internal fun BookCardRowLayout(
 
                 BookCardTextBlock(
                     content = variant.text,
-                    titleStyle = metrics.titleStyle,
+                    titleStyle = if (variant.size == BookCardVariant.Row.Size.Large) {
+                        typography.titleLarge
+                    } else {
+                        typography.titleMedium
+                    },
                     titleMinLines = 1,
-                    titleMaxLines = metrics.titleMaxLines,
+                    titleMaxLines = if (variant.size == BookCardVariant.Row.Size.Compact) 1 else 2,
                     progress = model.decorations.progress,
                     isLoading = isLoading,
                     modifier = Modifier.weight(1f),
@@ -99,7 +104,6 @@ internal fun BookCardRowLayout(
                     BookCardTrailingControl(
                         trailing = trailing,
                         isLoading = isLoading,
-                        onToggleEvent = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
                         onClick = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
                     )
                 }
@@ -112,37 +116,6 @@ internal fun BookCardRowLayout(
             if (deadline != null) {
                 DeadlineSummaryLine(model = deadline)
             }
-        }
-    }
-}
-
-private data class RowMetrics(
-    val titleStyle: TextStyle,
-    val titleMaxLines: Int,
-    val leadWidth: Dp,
-) {
-    companion object {
-        fun forSize(
-            size: BookCardVariant.Row.Size,
-            typography: EditorialTypography,
-        ): RowMetrics = when (size) {
-            BookCardVariant.Row.Size.Compact -> RowMetrics(
-                titleStyle = typography.titleMedium,
-                titleMaxLines = 1,
-                leadWidth = 40.dp,
-            )
-
-            BookCardVariant.Row.Size.Standard -> RowMetrics(
-                titleStyle = typography.titleMedium,
-                titleMaxLines = 2,
-                leadWidth = 56.dp,
-            )
-
-            BookCardVariant.Row.Size.Large -> RowMetrics(
-                titleStyle = typography.titleLarge,
-                titleMaxLines = 2,
-                leadWidth = 74.dp,
-            )
         }
     }
 }

@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
@@ -32,6 +33,7 @@ import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.library.presentation.collector.MASTHEAD_SUBTITLE_STAND_IN
 import nl.rhaydus.softcover.feature.library.presentation.collector.emptyStatesFor
 import nl.rhaydus.softcover.feature.library.presentation.collector.shelfSidebarFor
+import nl.rhaydus.softcover.feature.library.presentation.mapper.standInCards
 import nl.rhaydus.toad.UiState
 
 internal data class LibraryUiState(
@@ -74,6 +76,9 @@ internal data class LibraryUiState(
 
     val isLoading: Boolean = true,
     val gridLayout: LibraryGridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+
+    /** The loading cards a tab shows until its own cards land, shaped for [gridLayout]: set the two together. */
+    val loadingCards: ImmutableList<BookCardUiModel> = LibraryGridLayout.GRID_TWO_COLUMNS.standInCards(),
 
     /**
      * Whether the mobile shelf pager accepts a horizontal swipe, and with it whether the neighbour

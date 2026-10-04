@@ -3,18 +3,11 @@ package nl.rhaydus.softcover.core.component.bookcard
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.state.ToggleableState
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookCardSemanticsTest {
-    private fun multiple(selected: Boolean) = BookCardSelection.Multiple(
-        mark = SelectionMarkUiModel(
-            selected = selected,
-            backdrop = SelectionMarkBackdrop.Image,
-        ),
-    )
+    private fun multiple(selected: Boolean) = BookCardSelection.Multiple(selected = selected)
 
     @Nested
     inner class Interactive {

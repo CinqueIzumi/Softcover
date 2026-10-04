@@ -47,6 +47,7 @@ internal fun EditionList(
     if (rawEditions == null || (rawEditions.isEmpty() && state.isLoading)) {
         LibraryLoadingGrid(
             layout = state.gridLayout,
+            cards = state.loadingCards,
             gridState = gridState,
             columnsOverride = columnsOverride,
         )
@@ -73,6 +74,7 @@ internal fun EditionList(
     if (tabCards == null) {
         LibraryLoadingGrid(
             layout = state.gridLayout,
+            cards = state.loadingCards,
             gridState = gridState,
             columnsOverride = columnsOverride,
         )

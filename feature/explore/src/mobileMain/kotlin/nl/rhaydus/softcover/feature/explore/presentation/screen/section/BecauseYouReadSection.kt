@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -37,12 +36,12 @@ private val BECAUSE_YOU_READ_CARD_WIDTH = 118.dp
 @Composable
 internal fun BecauseYouReadSection(
     genre: String?,
-    header: SectionHeaderUiModel?,
+    header: SectionHeaderUiModel,
     genreOptions: List<String>,
     genreSheet: SheetScaffoldUiModel,
     genreGroup: SheetRowGroupUiModel<String?>,
     books: List<Book>,
-    cards: ImmutableList<BookCardUiModel>?,
+    cards: ImmutableList<BookCardUiModel>,
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
@@ -69,7 +68,7 @@ internal fun BecauseYouReadSection(
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionHeader(
-            model = header ?: BECAUSE_YOU_READ_HEADER_STAND_IN,
+            model = header,
             isLoading = isLoading,
             modifier = Modifier.padding(horizontal = 24.dp),
         )
@@ -84,34 +83,28 @@ internal fun BecauseYouReadSection(
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 
-        if (cards == null) {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(3) {
-                    BookCard(
-                        model = BECAUSE_YOU_READ_STAND_IN_CARD,
-                        onEvent = {},
-                        modifier = Modifier.width(BECAUSE_YOU_READ_CARD_WIDTH),
-                    )
-                }
-            }
-        } else {
-            LazyRow(
-                state = becauseYouReadListState,
-                contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                itemsIndexed(cards, key = { _, card -> card.key.lazyKey }) { index, card ->
-                    BookCard(
-                        model = card,
-                        onEvent = onCardEvent,
-                        modifier = Modifier
-                            .width(BECAUSE_YOU_READ_CARD_WIDTH)
-                            .staggeredEntry(coordinator = entry, index = index),
-                    )
-                }
+        LazyRow(
+            state = becauseYouReadListState,
+            contentPadding = PaddingValues(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            itemsIndexed(cards, key = { _, card -> card.key.lazyKey }) { index, card ->
+                BookCard(
+                    model = card,
+                    onEvent = onCardEvent,
+                    modifier = Modifier
+                        .width(BECAUSE_YOU_READ_CARD_WIDTH)
+                        .let {
+                            if (card.isLoading) {
+                                it
+                            } else {
+                                it.staggeredEntry(
+                                    coordinator = entry,
+                                    index = index,
+                                )
+                            }
+                        },
+                )
             }
         }
     }

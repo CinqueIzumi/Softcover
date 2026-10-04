@@ -20,7 +20,6 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.control.Toggle
-import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -32,38 +31,24 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverIn
 internal fun BookCardTrailingControl(
     trailing: BookCardTrailing,
     isLoading: Boolean,
-    onToggleEvent: (ToggleEvent) -> Unit,
     onClick: () -> Unit,
 ) {
     Box(modifier = Modifier.skeletonMask(visible = isLoading)) {
-        TrailingControlContent(
-            trailing = trailing,
-            onToggleEvent = onToggleEvent,
-            onClick = onClick,
-        )
-    }
-}
+        when (trailing) {
+            is BookCardTrailing.Badge -> Badge(model = trailing.model)
 
-@Composable
-private fun TrailingControlContent(
-    trailing: BookCardTrailing,
-    onToggleEvent: (ToggleEvent) -> Unit,
-    onClick: () -> Unit,
-) {
-    when (trailing) {
-        is BookCardTrailing.Badge -> Badge(model = trailing.model)
+            is BookCardTrailing.Restore -> RestoreLabel(label = trailing.label)
 
-        is BookCardTrailing.Restore -> RestoreLabel(label = trailing.label)
+            is BookCardTrailing.Bookmark -> Toggle(
+                model = trailing.toggle,
+                onEvent = { onClick() },
+            )
 
-        is BookCardTrailing.Bookmark -> Toggle(
-            model = trailing.toggle,
-            onEvent = onToggleEvent,
-        )
-
-        is BookCardTrailing.SetProgress -> PillButton(
-            model = trailing.pill,
-            onEvent = { onClick() },
-        )
+            is BookCardTrailing.SetProgress -> PillButton(
+                model = trailing.pill,
+                onEvent = { onClick() },
+            )
+        }
     }
 }
 

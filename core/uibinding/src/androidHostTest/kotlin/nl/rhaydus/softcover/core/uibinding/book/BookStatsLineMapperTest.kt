@@ -27,7 +27,7 @@ class BookStatsLineMapperTest {
             )
 
             // ----- Assert -----
-            line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Text(text = "1965"))
+            line.shouldNotBeNull() shouldBe listOf(BookCardLinePart.Text(text = "1965"))
         }
 
         @Test
@@ -46,7 +46,7 @@ class BookStatsLineMapperTest {
 
             // ----- Assert -----
             lines.forEach { line ->
-                line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Text(text = "5 readers"))
+                line.shouldNotBeNull() shouldBe listOf(BookCardLinePart.Text(text = "5 readers"))
             }
         }
     }
@@ -68,7 +68,7 @@ class BookStatsLineMapperTest {
             )
 
             // ----- Assert -----
-            line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Text(text = "12 readers"))
+            line.shouldNotBeNull() shouldBe listOf(BookCardLinePart.Text(text = "12 readers"))
         }
 
         @Test
@@ -86,7 +86,7 @@ class BookStatsLineMapperTest {
             )
 
             // ----- Assert -----
-            line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Text(text = "0 readers"))
+            line.shouldNotBeNull() shouldBe listOf(BookCardLinePart.Text(text = "0 readers"))
         }
 
         @Test
@@ -104,7 +104,7 @@ class BookStatsLineMapperTest {
             )
 
             // ----- Assert -----
-            val text = line.shouldNotBeNull().parts.single().shouldBeInstanceOf<BookCardLinePart.Text>().text
+            val text = line.shouldNotBeNull().single().shouldBeInstanceOf<BookCardLinePart.Text>().text
             text.endsWith(" readers") shouldBe true
             text.filter { it.isDigit() } shouldBe "1234567 readers".filter { it.isDigit() }
             (text.length > "1234567 readers".length) shouldBe true
@@ -128,10 +128,12 @@ class BookStatsLineMapperTest {
             )
 
             // ----- Assert -----
-            line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Rating(
-                label = "4.3",
-                contentDescription = "Rated 4.3 out of 5",
-            ),)
+            line.shouldNotBeNull() shouldBe listOf(
+                BookCardLinePart.Rating(
+                    label = "4.3",
+                    contentDescription = "Rated 4.3 out of 5",
+                ),
+            )
         }
 
         @Test
@@ -150,7 +152,7 @@ class BookStatsLineMapperTest {
 
             // ----- Assert -----
             lines.forEach { line ->
-                line.shouldNotBeNull().parts shouldBe listOf(BookCardLinePart.Text(text = "2000"))
+                line.shouldNotBeNull() shouldBe listOf(BookCardLinePart.Text(text = "2000"))
             }
         }
     }
@@ -172,7 +174,7 @@ class BookStatsLineMapperTest {
             )
 
             // ----- Assert -----
-            val parts = line.shouldNotBeNull().parts
+            val parts = line.shouldNotBeNull()
             parts shouldHaveSize 3
             parts[0] shouldBe BookCardLinePart.Text(text = "1965")
             parts[1] shouldBe BookCardLinePart.Text(text = "12 readers")

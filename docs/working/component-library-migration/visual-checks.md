@@ -46,3 +46,4 @@ shift; tick each during S12.
 - [ ] S9-4: featured-card bar 10 → 12 dp, book-detail in-progress bar 14 → 12 dp; Focus, featured and in-progress bars animate on change.
 - [ ] S9-C: library and reading card bars 8 dp / M3 default → 12 dp, M3 track colour (was `outlineVariant`), animated (check the grid card); card % label masks alone while loading; genre and legend rows one 12 dp label-to-share gap, legend labels ellipsize.
 - [ ] S8-C-controls: 48 dp hit areas on toggles, segments and field affordances; ghost placeholder ink on every field; Numeral's "0" placeholder; Hero field at a fixed height; segmented controls in the Track look; Library arrange switch rows press with the row wash; disabled pills and chips 45% → 40%.
+- [ ] SS-3: gallery coverless `Edition` fixture's selection mark Image → Surface backdrop; Explore search-result loading card's series eyebrow uppercased (wider stand-in).

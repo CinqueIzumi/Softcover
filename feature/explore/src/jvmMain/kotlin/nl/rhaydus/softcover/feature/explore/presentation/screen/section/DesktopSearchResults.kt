@@ -30,6 +30,7 @@ import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
@@ -65,9 +66,13 @@ internal fun DesktopSearchResults(
 
         // Feedback item 7: same append-on-scroll-near-end trigger as mobile's LazyColumn, driven off
         // this grid's own `searchResultsGridState` instead of a per-composition list state.
-        LaunchedEffect(state.queriedBooks.size, state.queriedBooksHasMore) {
+        val cards = state.queriedBookCards
+
+        val showsStandIns = cards.any(BookCardUiModel::isLoading)
+
+        LaunchedEffect(state.queriedBooks.size, state.queriedBooksHasMore, showsStandIns) {
             val itemCount = state.queriedBooks.size
-            if (state.queriedBooksHasMore.not() || itemCount == 0) return@LaunchedEffect
+            if (state.queriedBooksHasMore.not() || itemCount == 0 || showsStandIns) return@LaunchedEffect
 
             snapshotFlow { searchResultsGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
                 .collect { lastVisibleIndex ->
@@ -114,49 +119,30 @@ internal fun DesktopSearchResults(
                 }
             }
 
-            val cards = state.queriedBookCards
-
-            if (cards == null) {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 380.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    items(6) {
-                        BookCard(
-                            model = SEARCH_RESULT_STAND_IN_CARD,
-                            onEvent = {},
-                        )
-                    }
+            LazyVerticalGrid(
+                state = searchResultsGridState,
+                columns = GridCells.Adaptive(minSize = 380.dp),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(cards, key = { it.key.lazyKey }) { card ->
+                    BookCard(
+                        model = card,
+                        onEvent = onSearchResultEvent,
+                    )
                 }
-            } else {
-                LazyVerticalGrid(
-                    state = searchResultsGridState,
-                    columns = GridCells.Adaptive(minSize = 380.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    items(cards, key = { it.key.lazyKey }) { card ->
-                        BookCard(
-                            model = card,
-                            onEvent = onSearchResultEvent,
-                        )
-                    }
 
-                    if (state.loadingMoreQueriedBooks) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 24.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularWavyProgressIndicator()
-                            }
+                if (state.loadingMoreQueriedBooks && showsStandIns.not()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularWavyProgressIndicator()
                         }
                     }
                 }

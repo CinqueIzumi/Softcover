@@ -1,6 +1,8 @@
-package nl.rhaydus.softcover.feature.reading.presentation.screen.section
+package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
@@ -22,9 +24,12 @@ import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 
-internal const val ALSO_READING_STAND_IN_COUNT = 2
+private const val ALSO_READING_STAND_IN_COUNT = 2
 
-internal val ALSO_READING_STAND_IN_CARD = BookCardUiModel(
+/** Also the number of want-to-read books the empty screen shows as "Pick up next" tiles. */
+internal const val PICK_UP_NEXT_TILE_COUNT = 3
+
+private val ALSO_READING_STAND_IN_TEMPLATE = BookCardUiModel(
     key = BookCardKey.Book(bookId = -1),
     variant = BookCardVariant.Row(
         size = BookCardVariant.Row.Size.Standard,
@@ -34,7 +39,6 @@ internal val ALSO_READING_STAND_IN_CARD = BookCardUiModel(
                     source = null,
                     coverlessTitle = null,
                     variant = CoverVariant.ReadingRowThumb,
-                    isLoading = true,
                 ),
             ),
         ),
@@ -52,32 +56,37 @@ internal val ALSO_READING_STAND_IN_CARD = BookCardUiModel(
     ),
     decorations = BookCardDecorations(
         progress = BookCardProgress.Value(
-            bar = ProgressBarUiModel(
-                fraction = 0.5f,
-                isLoading = true,
-            ),
+            bar = ProgressBarUiModel(fraction = 0.5f),
             label = "50%",
         ),
     ),
     isLoading = true,
 )
 
-internal val PICK_UP_NEXT_STAND_IN_CARD = BookCardUiModel(
-    key = BookCardKey.Book(bookId = -2),
+internal val ALSO_READING_STAND_IN_CARDS: ImmutableList<BookCardUiModel> =
+    List(ALSO_READING_STAND_IN_COUNT) { index ->
+        ALSO_READING_STAND_IN_TEMPLATE.copy(key = BookCardKey.Book(bookId = -(index + 1)))
+    }.toImmutableList()
+
+private val PICK_UP_NEXT_STAND_IN_TEMPLATE = BookCardUiModel(
+    key = BookCardKey.Book(bookId = -1),
     variant = BookCardVariant.Column(
         cover = BookCardCover(
             model = CoverUiModel(
                 source = null,
                 coverlessTitle = null,
                 variant = CoverVariant.ReadingPickUpNextTile,
-                isLoading = true,
             ),
         ),
         text = BookCardContent(title = "The Name of the Wind"),
-        menuLabel = null,
     ),
     isLoading = true,
 )
+
+internal val PICK_UP_NEXT_STAND_IN_CARDS: ImmutableList<BookCardUiModel> =
+    List(PICK_UP_NEXT_TILE_COUNT) { index ->
+        PICK_UP_NEXT_STAND_IN_TEMPLATE.copy(key = BookCardKey.Book(bookId = -(index + 1)))
+    }.toImmutableList()
 
 private val FEATURED_STAND_IN_EDITION = BookEdition(
     id = -1,

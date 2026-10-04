@@ -43,7 +43,6 @@ import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 
 internal val headerEntries: ImmutableList<GalleryEntry> = persistentListOf(
     galleryEntry(
@@ -121,19 +120,29 @@ internal val headerEntries: ImmutableList<GalleryEntry> = persistentListOf(
             }
         },
     ),
-    galleryEntry(
+    GalleryEntry(
         name = "SelectionMark",
         family = GalleryFamily.SELECTION,
         blurb = "A circular selection mark — filled with a check when selected, an empty ring " +
             "otherwise — for a library grid cover, a row's leading indicator, or an edition card.",
-        previews = SelectionMarkUiModel,
-        label = ::selectionMarkFixtureLabel,
-        content = { model, modifier ->
-            SelectionMark(
-                model = model,
-                modifier = modifier,
-            )
-        },
+        fixtures = persistentListOf(
+            selectionMarkFixture(
+                backdrop = SelectionMarkBackdrop.Image,
+                selected = true,
+            ),
+            selectionMarkFixture(
+                backdrop = SelectionMarkBackdrop.Image,
+                selected = false,
+            ),
+            selectionMarkFixture(
+                backdrop = SelectionMarkBackdrop.Surface,
+                selected = true,
+            ),
+            selectionMarkFixture(
+                backdrop = SelectionMarkBackdrop.Surface,
+                selected = false,
+            ),
+        ),
     ),
     galleryEntry(
         name = "DeadlineSummaryLine",
@@ -290,14 +299,25 @@ private fun coverOverlayFixtureLabel(model: CoverOverlayUiModel): String = when 
     else -> "On track"
 }
 
-/** Names what a [SelectionMarkUiModel] fixture demonstrates — its backdrop and selected state. */
-private fun selectionMarkFixtureLabel(model: SelectionMarkUiModel): String {
-    val backdrop = when (model.backdrop) {
+private fun selectionMarkFixture(
+    backdrop: SelectionMarkBackdrop,
+    selected: Boolean,
+): GalleryFixture {
+    val backdropLabel = when (backdrop) {
         SelectionMarkBackdrop.Image -> "On image"
         SelectionMarkBackdrop.Surface -> "On surface"
     }
 
-    return if (model.selected) "$backdrop, selected" else "$backdrop, unselected"
+    return GalleryFixture(
+        label = if (selected) "$backdropLabel, selected" else "$backdropLabel, unselected",
+        render = { modifier ->
+            SelectionMark(
+                selected = selected,
+                modifier = modifier,
+                backdrop = backdrop,
+            )
+        },
+    )
 }
 
 /** Names what a [DeadlineSummaryUiModel] fixture demonstrates, derived from its anatomy branch. */

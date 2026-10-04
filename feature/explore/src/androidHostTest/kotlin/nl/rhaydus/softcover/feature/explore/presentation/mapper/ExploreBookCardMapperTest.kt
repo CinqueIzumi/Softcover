@@ -14,7 +14,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
-import nl.rhaydus.softcover.core.component.bookcard.BookCardLine
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
@@ -112,12 +111,10 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             card.stacked().text.supportingLines shouldBe persistentListOf(
-                BookCardLine(
-                    parts = persistentListOf(
-                        BookCardLinePart.Rating(
-                            label = "4.5",
-                            contentDescription = "Rated 4.5 out of 5",
-                        ),
+                persistentListOf(
+                    BookCardLinePart.Rating(
+                        label = "4.5",
+                        contentDescription = "Rated 4.5 out of 5",
                     ),
                 ),
             )
@@ -233,7 +230,7 @@ class ExploreBookCardMapperTest {
             // ----- Assert -----
             card.stacked().text.eyebrow.shouldNotBeNull().text shouldBe "EARTHSEA"
             card.stacked().text.supportingLines shouldBe persistentListOf(
-                BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = "Book #2"))),
+                persistentListOf(BookCardLinePart.Text(text = "Book #2")),
             )
         }
 
@@ -412,14 +409,12 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             card.row().text.supportingLines shouldBe persistentListOf(
-                BookCardLine(
-                    parts = persistentListOf(
-                        BookCardLinePart.Text(text = "2021"),
-                        BookCardLinePart.Text(text = "12 readers"),
-                        BookCardLinePart.Rating(
-                            label = "4.5",
-                            contentDescription = "Rated 4.5 out of 5",
-                        ),
+                persistentListOf(
+                    BookCardLinePart.Text(text = "2021"),
+                    BookCardLinePart.Text(text = "12 readers"),
+                    BookCardLinePart.Rating(
+                        label = "4.5",
+                        contentDescription = "Rated 4.5 out of 5",
                     ),
                 ),
             )
@@ -439,7 +434,7 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             card.row().text.supportingLines shouldBe persistentListOf(
-                BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = "5 readers"))),
+                persistentListOf(BookCardLinePart.Text(text = "5 readers")),
             )
         }
     }

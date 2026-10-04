@@ -14,6 +14,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.BecauseYouReadRecommendation
 import nl.rhaydus.softcover.feature.explore.domain.usecase.GetBecauseYouReadBooksUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.BECAUSE_YOU_READ_HEADER_STAND_IN
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -142,7 +143,7 @@ class BecauseYouReadCollectorTest {
         }
 
         @Test
-        fun `hides the section by clearing genre and books when the recommendation is null`() = runTest(UnconfinedTestDispatcher()) {
+        fun `falls back to the header stand-in when the recommendation is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BecauseYouReadCollector()
             val job = launch {
@@ -159,7 +160,7 @@ class BecauseYouReadCollectorTest {
             stateFlow.value.becauseYouReadGenre shouldBe null
             stateFlow.value.becauseYouReadBooks shouldBe emptyList()
             stateFlow.value.loadingBecauseYouReadBooks shouldBe false
-            stateFlow.value.becauseYouReadHeader shouldBe null
+            stateFlow.value.becauseYouReadHeader shouldBe BECAUSE_YOU_READ_HEADER_STAND_IN
             job.cancel()
         }
 

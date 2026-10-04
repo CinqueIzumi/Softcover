@@ -41,7 +41,7 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 | SS-0 | Regenerate this table from the code (Procedure) | [x] |
 | SS-1 | `chip`, `badge`, `divider`, `selection`, `shape`, `text`, `ComponentAlpha.kt`; uibinding `release` (`UnreleasedBadgeStyle`) — ~1.6k | [x] |
 | SS-2 | `header`, `topbar`, `chrome`, `sidebar`; explore `HiddenGroupHeaderUiModel` — ~1.8k | [x] |
-| SS-3 | `bookcard`; uibinding `book` — ~1.8k | [ ] |
+| SS-3 | `bookcard`; uibinding `book` — ~1.8k | [x] |
 | SS-4 | `cover`, `lists`; uibinding `cover` (all platforms), `lists`; library `ArrangeMakeOrderedUiModel` — ~2.1k | [ ] |
 | SS-5 | `sheet`, `dialog`, `callout`, `state`; explore `ContinueSeriesEntryUiModel`, orchestration `ReAuthSheetUiModel` — ~2.2k | [ ] |
 | SS-6 | `control`, `button`; book_detail `ExternalLinksUiModel`, `ShareSheetBodyUiModel`; settings `SettingsToggleRowUiModel`, `SettingsChoiceRowUiModel` — ~1.9k | [ ] |
@@ -71,3 +71,18 @@ SS-2:
 - `sidebar`: `SidebarRowMetrics` and the file-level dp vals go; values inline.
 - explore: one private `HiddenGroupSection` replaces `HiddenBooksSection` / `HiddenSeriesSection`; `hiddenBooksLoaded` / `hiddenSeriesLoaded` go (read `cards == null`); unused imports go.
 - Kept: debug screens (exempt, contract § 7.4a). Deferred: `MastheadRefreshAction` + `ChromeIconButton` (SS-6); gallery labels (SS-11); BookDetail mobile `remember { TopBarUiModel }` (scroll-driven surface); file-level loading stand-in models; R2 still prescribes `*Dimensions` tables.
+
+SS-3:
+- Layouts: `BookCardCoverOnlyLayout` / `BookCardColumnLayout` go (`BookCard`'s `when` calls the scaffold); `CoverMenu` + `CoverWithCorner` inline into it; layout and `bookCardInteraction` `isLoading` params go (read `model`).
+- `RowMetrics` goes: lead width, title style and title max lines inline.
+- `BookCardTrailingControl` + `TrailingControlContent` → one function, one `onClick`; `Bookmark.labelled(enabled)` / `SetProgress.labelled(interaction)` stay — stand-ins build their controls disabled (toggle contract), no click guard.
+- Book card stand-ins reach composables only through UiState (reading, library, explore, profile); render files keep no stand-in reads.
+- `BookCardSelection.Multiple(selected)`; backdrop from placement (over cover → Image, coverless row → Surface); collector backdrop logic goes; `SelectionMark` → data-free `SelectionMark(selected, backdrop = Image)`, no model.
+- `BookCardLine` goes → `supportingLines: ImmutableList<ImmutableList<BookCardLinePart>>`.
+- `SeriesStack.front`, `CoverOnly.cover` non-null; the `HiddenSeriesStack` fallback goes.
+- Restated defaults go (`menuLabel`, `deadline`, `progress`, `Press.Tap`, stand-in `Press.None` and `isLoading = true`).
+- Files merge: KeyId → Key only (ktlint one-type-per-file rejects the rest); `BookCardColumn.kt` folds into `BookCard.kt`.
+- Stand-in models leave render files for `mapper/` beside their mapper (reading, library, explore, profile).
+- Fixes: `BookCardUiModel` size KDoc; search stand-in eyebrow uppercased; gallery coverless `Edition` fixture on Surface (accepted shift).
+- Later: non-book-card stand-ins still in render files — explore `FeaturedCard` badge / cover, `MoodGrid` tile, settings `RoadmapContent`.
+- Kept: `BookCardSemantics`, `rememberBookCardEventHandler`, Row's body and insets. Deferred: `maskedCover`, series stack (SS-4); `Bookmark` / `SetProgress` wrappers, menu button (SS-6); `Progress.Value.bar`, `maskedBar` (SS-8); fixture pruning (SS-11).

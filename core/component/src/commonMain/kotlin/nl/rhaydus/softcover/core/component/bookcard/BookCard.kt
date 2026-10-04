@@ -4,10 +4,17 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
@@ -16,11 +23,13 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
  * [content] is positioned but not sized by the card: at the cover's top-end corner on cover-only and
@@ -34,21 +43,23 @@ fun BookCard(
     content: (@Composable () -> Unit)? = null,
 ) {
     when (val variant = model.variant) {
-        is BookCardVariant.CoverOnly -> BookCardCoverOnlyLayout(
+        is BookCardVariant.CoverOnly -> BookCardCoverScaffold(
             model = model,
-            variant = variant,
+            cover = variant.cover,
+            menuLabel = null,
+            text = null,
             onEvent = onEvent,
             modifier = modifier,
-            isLoading = model.isLoading,
             content = content,
         )
 
-        is BookCardVariant.Column -> BookCardColumnLayout(
+        is BookCardVariant.Column -> BookCardCoverScaffold(
             model = model,
-            variant = variant,
+            cover = variant.cover,
+            menuLabel = variant.menuLabel,
+            text = variant.text,
             onEvent = onEvent,
             modifier = modifier,
-            isLoading = model.isLoading,
             content = content,
         )
 
@@ -57,9 +68,77 @@ fun BookCard(
             variant = variant,
             onEvent = onEvent,
             modifier = modifier,
-            isLoading = model.isLoading,
             content = content,
         )
+    }
+}
+
+@Composable
+private fun BookCardCoverScaffold(
+    model: BookCardUiModel,
+    cover: BookCardCover?,
+    menuLabel: String?,
+    text: BookCardContent?,
+    onEvent: (BookCardEvent) -> Unit,
+    modifier: Modifier,
+    content: (@Composable () -> Unit)?,
+) {
+    val progress = model.decorations.progress
+    val isLoading = model.isLoading
+
+    Column(
+        modifier = modifier.bookCardInteraction(
+            model = model,
+            onEvent = onEvent,
+            hoverHighlight = false,
+        ),
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            BookCardCoverLayout(
+                cover = cover,
+                selection = model.decorations.selection,
+                isLoading = isLoading,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            if (isLoading.not() && (menuLabel != null || content != null)) {
+                Row(modifier = Modifier.align(Alignment.TopEnd)) {
+                    if (menuLabel != null) {
+                        BookCardMenuButton(
+                            contentDescription = menuLabel,
+                            onClick = { onEvent(BookCardEvent.MenuClicked(key = model.key)) },
+                        )
+                    }
+
+                    if (content != null) {
+                        Box(modifier = Modifier.padding(4.dp)) {
+                            content()
+                        }
+                    }
+                }
+            }
+        }
+
+        if (progress != null) {
+            BookCardProgressBar(
+                progress = progress,
+                isLoading = isLoading,
+                modifier = Modifier.padding(top = 9.dp),
+            )
+        }
+
+        if (text != null) {
+            BookCardTextBlock(
+                content = text,
+                titleStyle = MaterialTheme.editorialTypography.titleSmall,
+                titleMinLines = 2,
+                titleMaxLines = 2,
+                isLoading = isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 9.dp),
+            )
+        }
     }
 }
 
@@ -72,9 +151,8 @@ internal fun Modifier.bookCardInteraction(
     model: BookCardUiModel,
     onEvent: (BookCardEvent) -> Unit,
     hoverHighlight: Boolean,
-    isLoading: Boolean,
 ): Modifier {
-    if (isLoading) return this
+    if (model.isLoading) return this
 
     val decorations = model.decorations
     val key = model.key

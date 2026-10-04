@@ -7,9 +7,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSelection
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkBackdrop
-import nl.rhaydus.softcover.core.component.selection.SelectionMarkUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -110,12 +109,6 @@ private inline fun <I, T : Any> cachedTab(
 private fun BookCardModelsSnapshot.toBookCards(
     previous: Map<String, CachedTab<BookTabInputs, Book>>,
 ): Map<String, CachedTab<BookTabInputs, Book>> = buildMap {
-    val backdrop = if (gridLayout == LibraryGridLayout.LIST_COMPACT) {
-        SelectionMarkBackdrop.Surface
-    } else {
-        SelectionMarkBackdrop.Image
-    }
-
     visibleTabs.forEach { tab ->
         val books = booksByTab[tab.id]?.let { displayBooksByTab[tab.id] ?: it } ?: return@forEach
 
@@ -139,12 +132,9 @@ private fun BookCardModelsSnapshot.toBookCards(
             books = books,
             deadlines = books.map { deadlines[it.id] },
             dateStyle = dateStyle,
-            marks = books.map { book ->
+            selections = books.map { book ->
                 if (selectionMode) {
-                    SelectionMarkUiModel(
-                        selected = book.id in selectedBookIds,
-                        backdrop = backdrop,
-                    )
+                    BookCardSelection.Multiple(selected = book.id in selectedBookIds)
                 } else {
                     null
                 }
@@ -164,7 +154,7 @@ private fun BookCardModelsSnapshot.toBookCards(
                     book to book.toBookCard(
                         layout = inputs.layout,
                         press = press,
-                        selection = inputs.marks[index],
+                        selection = inputs.selections[index],
                         deadline = inputs.deadlines[index],
                         dateStyle = inputs.dateStyle,
                     )

@@ -1,19 +1,132 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
+import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeries
 import nl.rhaydus.softcover.feature.explore.domain.model.DismissedSeriesBook
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class HiddenSuggestionsUiStateTest {
+    private fun realCard(id: Int): BookCardUiModel = BookCardUiModel(
+        key = BookCardKey.Book(bookId = id),
+        variant = BookCardVariant.Row(
+            size = BookCardVariant.Row.Size.Compact,
+            lead = BookCardLead.SeriesStack(front = mockk<CoverUiModel>()),
+            text = BookCardContent(title = "Book $id"),
+        ),
+    )
+
+    private val hiddenBook = DismissedSeriesBook(
+        bookId = 1,
+        title = "Book",
+        coverUrl = null,
+        authorText = null,
+        seriesName = null,
+        seriesId = null,
+        seriesPosition = null,
+    )
+
+    private val hiddenSeries = DismissedSeries(
+        seriesId = 1,
+        seriesName = "Series",
+        coverUrl = null,
+        authorText = null,
+        bookCount = null,
+    )
+
+    // ----- isLoadingBooks / isLoadingSeries -----
+
+    @Nested
+    inner class IsLoading {
+        @Test
+        fun `reports both lists loading before any data lands`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState()
+
+            // ----- Act -----
+            val books = state.isLoadingBooks
+            val series = state.isLoadingSeries
+
+            // ----- Assert -----
+            books shouldBe true
+            series shouldBe true
+        }
+
+        @Test
+        fun `reports books not loading once real book cards replace the stand-ins`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(hiddenBookCards = persistentListOf(realCard(id = 1)))
+
+            // ----- Act -----
+            val result = state.isLoadingBooks
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `reports books not loading when the book cards are empty`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(hiddenBookCards = persistentListOf())
+
+            // ----- Act -----
+            val result = state.isLoadingBooks
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `reports series not loading once real series cards replace the stand-ins`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(hiddenSeriesCards = persistentListOf(realCard(id = 1)))
+
+            // ----- Act -----
+            val result = state.isLoadingSeries
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `reports series not loading when the series cards are empty`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(hiddenSeriesCards = persistentListOf())
+
+            // ----- Act -----
+            val result = state.isLoadingSeries
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `keeps series loading while only the books have landed`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(hiddenBookCards = persistentListOf())
+
+            // ----- Act -----
+            val result = state.isLoadingSeries
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+    }
+
     // ----- isEmpty -----
 
     @Nested
     inner class IsEmpty {
         @Test
-        fun `is false when nothing has loaded`() {
+        fun `is false while both card lists are still stand-ins`() {
             // ----- Arrange -----
             val state = HiddenSuggestionsUiState()
 
@@ -25,7 +138,7 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
-        fun `is false when only the book cards are loaded and both lists are empty`() {
+        fun `is false while only the book cards have landed and both lists are empty`() {
             // ----- Arrange -----
             val state = HiddenSuggestionsUiState(hiddenBookCards = persistentListOf())
 
@@ -37,7 +150,7 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
-        fun `is false when only the series cards are loaded and both lists are empty`() {
+        fun `is false while only the series cards have landed and both lists are empty`() {
             // ----- Arrange -----
             val state = HiddenSuggestionsUiState(hiddenSeriesCards = persistentListOf())
 
@@ -49,7 +162,7 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
-        fun `is true when both card lists are loaded and both lists are empty`() {
+        fun `is true when both card lists have landed empty and nothing is hidden`() {
             // ----- Arrange -----
             val state = HiddenSuggestionsUiState(
                 hiddenBookCards = persistentListOf(),
@@ -64,19 +177,10 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
-        fun `is false when both are loaded but a book is hidden`() {
+        fun `is false when both have landed but a book is hidden`() {
             // ----- Arrange -----
-            val book = DismissedSeriesBook(
-                bookId = 1,
-                title = "Book",
-                coverUrl = null,
-                authorText = null,
-                seriesName = null,
-                seriesId = null,
-                seriesPosition = null,
-            )
             val state = HiddenSuggestionsUiState(
-                hiddenBooks = listOf(book),
+                hiddenBooks = listOf(hiddenBook),
                 hiddenBookCards = persistentListOf(),
                 hiddenSeriesCards = persistentListOf(),
             )
@@ -89,19 +193,29 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
-        fun `is false when both are loaded but a series is hidden`() {
+        fun `is false when both have landed but a series is hidden`() {
             // ----- Arrange -----
-            val series = DismissedSeries(
-                seriesId = 1,
-                seriesName = "Series",
-                coverUrl = null,
-                authorText = null,
-                bookCount = null,
-            )
             val state = HiddenSuggestionsUiState(
-                hiddenSeries = listOf(series),
+                hiddenSeries = listOf(hiddenSeries),
                 hiddenBookCards = persistentListOf(),
                 hiddenSeriesCards = persistentListOf(),
+            )
+
+            // ----- Act -----
+            val result = state.isEmpty
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `is false when real cards have landed for both lists`() {
+            // ----- Arrange -----
+            val state = HiddenSuggestionsUiState(
+                hiddenBooks = listOf(hiddenBook),
+                hiddenSeries = listOf(hiddenSeries),
+                hiddenBookCards = persistentListOf(realCard(id = 1)),
+                hiddenSeriesCards = persistentListOf(realCard(id = 2)),
             )
 
             // ----- Act -----

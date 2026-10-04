@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryGridLayoutAsFlowUseCase
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.mapper.standInCards
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
@@ -87,6 +88,45 @@ class GridLayoutCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.gridLayout shouldBe LibraryGridLayout.LIST_LARGE
+            job.cancel()
+        }
+
+        @Test
+        fun `sets the loading cards for the emitted layout`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = GridLayoutCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            gridLayoutFlow.emit(LibraryGridLayout.LIST_LARGE)
+
+            // ----- Assert -----
+            stateFlow.value.loadingCards shouldBe LibraryGridLayout.LIST_LARGE.standInCards()
+            job.cancel()
+        }
+
+        @Test
+        fun `swaps the loading cards when the layout changes`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = GridLayoutCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+            gridLayoutFlow.emit(LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY)
+
+            // ----- Act -----
+            gridLayoutFlow.emit(LibraryGridLayout.LIST_COMPACT)
+
+            // ----- Assert -----
+            stateFlow.value.loadingCards shouldBe LibraryGridLayout.LIST_COMPACT.standInCards()
             job.cancel()
         }
 

@@ -1,6 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.collector
 
-import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -83,12 +83,12 @@ class DismissedSeriesCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.hiddenSeries shouldBe listOf(series)
-            stateFlow.value.hiddenSeriesCards.shouldNotBeNull().map { it.key } shouldBe listOf(BookCardKey.Series(seriesId = 1))
+            stateFlow.value.hiddenSeriesCards.map { it.key } shouldBe listOf(BookCardKey.Series(seriesId = 1))
             job.cancel()
         }
 
         @Test
-        fun `leaves hiddenBookCards null when only series are emitted`() = runTest(UnconfinedTestDispatcher()) {
+        fun `leaves the hiddenBookCards stand-ins in place when only series are emitted`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DismissedSeriesCollector()
             val job = launch {
@@ -102,10 +102,30 @@ class DismissedSeriesCollectorTest {
             dismissedSeriesFlow.emit(emptyList())
 
             // ----- Assert -----
-            stateFlow.value.hiddenSeriesCards.shouldNotBeNull()
-            stateFlow.value.hiddenBookCards shouldBe null
+            stateFlow.value.isLoadingSeries shouldBe false
+            stateFlow.value.isLoadingBooks shouldBe true
             job.cancel()
         }
+
+        @Test
+        fun `emits an empty card list rather than stand-ins when the emitted list is empty`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val collector = DismissedSeriesCollector()
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Act -----
+                dismissedSeriesFlow.emit(emptyList())
+
+                // ----- Assert -----
+                stateFlow.value.hiddenSeriesCards.shouldBeEmpty()
+                job.cancel()
+            }
 
         @Test
         fun `sets the group header count to the emitted list size`() = runTest(UnconfinedTestDispatcher()) {
