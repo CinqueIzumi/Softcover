@@ -3,6 +3,9 @@ package nl.rhaydus.softcover.core.component.progress
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.control.SegmentUiModel
+import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
@@ -12,7 +15,8 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
  * Everything `UpdateProgressBottomSheet` renders: the book it is logging against, what that book's
  * progress is measured in, and which entry tab is showing.
  *
- * [selectedTab] lives here rather than beside the model as a second parameter because it is part of
+ * [tabs] carries the entry tabs the medium offers and the one showing; build it with [tabsFor]. The
+ * showing tab lives here rather than beside the model as a second parameter because it is part of
  * what the sheet draws, and the contract's § 7.1 signature admits only `model`, `onEvent` and
  * `modifier`. Its single *stored* home is the hosting feature's `UiState`; this field is derived from
  * it, so there is one writer and the two cannot drift.
@@ -24,10 +28,46 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 data class ProgressSheetUiModel(
     val medium: ProgressSheetMedium,
     val progressPercent: Int,
-    val selectedTab: ProgressSheetTab,
+    val tabs: SegmentedControlUiModel<ProgressSheetTab>,
     val scaffold: SheetScaffoldUiModel,
 ) {
+    val selectedTab: ProgressSheetTab get() = tabs.selected
+
     companion object : UiModelPreviews<ProgressSheetUiModel> {
+        /**
+         * Percentage entry needs a known total to convert a fraction into pages (or seconds); without one
+         * it can only ever record 0, so it is offered only when that total is known. The primary unit —
+         * time for an audiobook, pages otherwise — always stays, allowing free entry even with no total.
+         * A [selectedTab] that is not offered (a stored PAGE on an audiobook) falls back to the primary one.
+         */
+        fun tabsFor(
+            medium: ProgressSheetMedium,
+            selectedTab: ProgressSheetTab,
+        ): SegmentedControlUiModel<ProgressSheetTab> {
+            val primaryTab = when (medium) {
+                is ProgressSheetMedium.Timed -> ProgressSheetTab.TIME
+                is ProgressSheetMedium.Paged -> ProgressSheetTab.PAGE
+            }
+
+            val offered = if (medium.hasKnownTotal) {
+                listOf(primaryTab, ProgressSheetTab.PERCENTAGE)
+            } else {
+                listOf(primaryTab)
+            }
+
+            return SegmentedControlUiModel(
+                options = offered
+                    .map { tab ->
+                        SegmentUiModel(
+                            key = tab,
+                            label = tab.tabName,
+                        )
+                    }
+                    .toImmutableList(),
+                selected = if (selectedTab in offered) selectedTab else primaryTab,
+            )
+        }
+
         private fun fixture(
             bookTitle: String,
             medium: ProgressSheetMedium,
@@ -36,7 +76,10 @@ data class ProgressSheetUiModel(
         ): ProgressSheetUiModel = ProgressSheetUiModel(
             medium = medium,
             progressPercent = progressPercent,
-            selectedTab = selectedTab,
+            tabs = tabsFor(
+                medium = medium,
+                selectedTab = selectedTab,
+            ),
             scaffold = SheetScaffoldUiModel(
                 header = SheetHeaderUiModel(
                     section = SectionHeaderUiModel.Section(

@@ -21,12 +21,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,8 +46,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.softcover.core.component.control.RichTextFormattingToolbar
+import kotlinx.collections.immutable.toImmutableSet
+import nl.rhaydus.softcover.core.component.control.Toggle
+import nl.rhaydus.softcover.core.component.control.ToggleEvent
+import nl.rhaydus.softcover.core.component.control.ToggleUiModel
+import nl.rhaydus.softcover.core.component.control.ToggleVariant
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbar
+import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbarEvent
+import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbarUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextMark
 import nl.rhaydus.softcover.core.component.richtext.RichTextMarkType
 import nl.rhaydus.softcover.core.component.richtext.applyEditToMarks
@@ -234,32 +240,28 @@ fun VerdictSheet(
             Spacer(modifier = Modifier.height(12.dp))
 
             RichTextFormattingToolbar(
-                isBold = isRangeMarked(
-                    marks = marks,
-                    start = selectionStart,
-                    end = selectionEnd,
-                    type = RichTextMarkType.BOLD,
+                model = RichTextFormattingToolbarUiModel(
+                    activeMarks = RichTextMarkType.entries
+                        .filter { type ->
+                            isRangeMarked(
+                                marks = marks,
+                                start = selectionStart,
+                                end = selectionEnd,
+                                type = type,
+                            )
+                        }
+                        .toImmutableSet(),
+                    enabled = hasSelection,
                 ),
-                isItalic = isRangeMarked(
-                    marks = marks,
-                    start = selectionStart,
-                    end = selectionEnd,
-                    type = RichTextMarkType.ITALIC,
-                ),
-                isSpoiler = isRangeMarked(
-                    marks = marks,
-                    start = selectionStart,
-                    end = selectionEnd,
-                    type = RichTextMarkType.SPOILER,
-                ),
-                enabled = hasSelection,
-                onToggle = { type ->
-                    marks = toggleMark(
-                        marks = marks,
-                        start = selectionStart,
-                        end = selectionEnd,
-                        type = type,
-                    )
+                onEvent = { event ->
+                    when (event) {
+                        is RichTextFormattingToolbarEvent.MarkToggled -> marks = toggleMark(
+                            marks = marks,
+                            start = selectionStart,
+                            end = selectionEnd,
+                            type = event.mark,
+                        )
+                    }
                 },
             )
 
@@ -295,9 +297,18 @@ fun VerdictSheet(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Switch(
-                    checked = hasSpoilers,
-                    onCheckedChange = { hasSpoilers = it },
+                Toggle(
+                    model = ToggleUiModel(
+                        key = "spoilers",
+                        checked = hasSpoilers,
+                        description = "Contains spoilers",
+                        variant = ToggleVariant.Switch,
+                    ),
+                    onEvent = { event ->
+                        when (event) {
+                            is ToggleEvent.Toggled -> hasSpoilers = event.checked
+                        }
+                    },
                 )
             }
 

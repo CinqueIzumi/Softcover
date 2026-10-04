@@ -6,7 +6,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -14,6 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.softcover.core.component.control.Toggle
+import nl.rhaydus.softcover.core.component.control.ToggleUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -28,12 +29,12 @@ internal val PREVIEW_TILE_MAX_WIDTH = 128.dp
 /** The gap between picker tiles along a row. */
 internal val PREVIEW_TILE_GAP = 14.dp
 
-/** One flat [SettingsRow] toggle: [label] over [gloss] on the left, an M3 [Switch] on the right. */
+/** One flat [SettingsRow] toggle: [label] over [gloss] on the left, a [Toggle] switch on the right. */
 @Composable
 internal fun SettingsToggleRow(
     label: String,
     gloss: String,
-    checked: Boolean,
+    toggle: ToggleUiModel,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -42,16 +43,17 @@ internal fun SettingsToggleRow(
         title = label,
         secondary = gloss,
         trailing = {
-            Switch(
-                checked = checked,
-                onCheckedChange = null,
+            Toggle(
+                model = toggle,
+                onEvent = {},
             )
         },
         interactionSource = interactionSource,
         semantics = Modifier.toggleable(
-            value = checked,
+            value = toggle.checked,
             interactionSource = interactionSource,
             indication = null,
+            enabled = toggle.enabled,
             role = Role.Switch,
             onValueChange = onCheckedChange,
         ),

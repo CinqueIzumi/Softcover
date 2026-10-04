@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.feature.library.presentation.collector.FilterOptions
 import nl.rhaydus.softcover.feature.library.presentation.collector.GridLayoutCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.LibraryCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.MastheadCollector
+import nl.rhaydus.softcover.feature.library.presentation.collector.PillButtonsCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.RearrangeChipCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSidebarCollector
 import nl.rhaydus.softcover.feature.library.presentation.collector.ShelfSwipeCollector
@@ -72,6 +73,7 @@ val libraryModule = module {
     factory { FilterChipModelsCollector() } bind LibraryCollector::class
     factory { ActiveFilterChipsCollector() } bind LibraryCollector::class
     factory { RearrangeChipCollector() } bind LibraryCollector::class
+    factory { PillButtonsCollector() } bind LibraryCollector::class
     factory { ArrangeDraftChipsCollector() } bind LibraryCollector::class
     factory { FilterDraftChipsCollector() } bind LibraryCollector::class
     factory { ArrangeSheetCollector() } bind LibraryCollector::class

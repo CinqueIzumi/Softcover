@@ -58,6 +58,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksC
 import nl.rhaydus.softcover.feature.explore.presentation.collector.QueriedBooksHasMoreCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.RecentSearchChipsCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.SearchTopBarCollector
+import nl.rhaydus.softcover.feature.explore.presentation.collector.SortPillCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.TrendingBooksCollector
 import nl.rhaydus.softcover.feature.explore.presentation.collector.UnreleasedCoverOverlaysCollector
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
@@ -111,6 +112,7 @@ val exploreModule = module {
     factory { PreviousQueriesCollector() } bind ExploreCollector::class
 
     factory { SearchTopBarCollector() } bind ExploreCollector::class
+    factory { SortPillCollector() } bind ExploreCollector::class
 
     factory { QueriedBooksCollector() } bind ExploreCollector::class
 

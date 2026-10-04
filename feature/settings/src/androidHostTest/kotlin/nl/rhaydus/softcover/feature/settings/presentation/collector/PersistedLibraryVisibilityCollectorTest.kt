@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.collector
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -10,9 +11,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledListIdsAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetEnabledStatusCodesAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLibraryTabOrderAsFlowUseCase
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
@@ -105,6 +108,30 @@ class PersistedLibraryVisibilityCollectorTest {
         }
 
         @Test
+        fun `first emission rebuilds orderedEntries from the persisted draft`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val readId = LibraryTab.Status.idFor(status = UserBookStatus.READ)
+            val collector = PersistedLibraryVisibilityCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            statusCodesFlow.emit(setOf(UserBookStatus.READ.code))
+            listIdsFlow.emit(emptySet())
+            tabOrderFlow.emit(listOf(readId))
+
+            // ----- Assert -----
+            val entries = stateFlow.value.orderedEntries
+            entries[1].id shouldBe readId
+            entries[1].visibilityToggle.shouldNotBeNull().checked shouldBe true
+            job.cancel()
+        }
+
+        @Test
         fun `subsequent emission updates persisted fields only — draft is not touched`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PersistedLibraryVisibilityCollector()
@@ -180,6 +207,9 @@ class PersistedLibraryVisibilityCollectorTest {
                 every {
                     name
                 } returns "My List"
+                every {
+                    books
+                } returns emptyList()
             }
             stateFlow.value = LibraryVisibilitySettingsUiState(availableLists = listOf(mockList))
             val collector = PersistedLibraryVisibilityCollector()

@@ -10,16 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +20,9 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.control.SegmentedControl
+import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
+import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -36,7 +31,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.YearCount
-import nl.rhaydus.softcover.feature.profile.presentation.screen.YearMetric
+import nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric
 
 private val YEAR_COLUMN_VALUE_LABEL_HEIGHT = 16.dp
 private val YEAR_COLUMN_BAR_AREA_HEIGHT = 96.dp
@@ -51,18 +46,19 @@ private const val COMPACT_COUNT_THOUSAND = 1_000
 private const val COMPACT_COUNT_MILLION = 1_000_000
 
 /**
- * "The shape of the years" — a Books/Pages toggle over a peak-annotated column chart. The toggle is
- * composable-local state (no TOAD action) since it only picks which of [ReadingLife.booksByYear] /
- * [ReadingLife.pagesByYear] the chart currently reads.
+ * "The shape of the years" — a Books/Pages toggle over a peak-annotated column chart. The toggle picks
+ * which of [ReadingLife.booksByYear] / [ReadingLife.pagesByYear] the chart currently reads.
  */
 @Composable
 internal fun YearColumnHistorySection(
     readingLife: ReadingLife?,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
+    metricToggle: SegmentedControlUiModel<YearMetric>,
+    onMetricSelected: (YearMetric) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selectedMetric by remember { mutableStateOf(YearMetric.BOOKS) }
+    val selectedMetric = metricToggle.selected
 
     val data = when (selectedMetric) {
         YearMetric.BOOKS -> readingLife?.booksByYear.orEmpty()
@@ -74,10 +70,14 @@ internal fun YearColumnHistorySection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        YearMetricToggle(
-            selected = selectedMetric,
-            onSelected = { selectedMetric = it },
-            enabled = isLoading.not(),
+        SegmentedControl(
+            model = metricToggle,
+            onEvent = { event ->
+                when (event) {
+                    is SegmentedControlEvent.Selected -> onMetricSelected(event.key)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -107,37 +107,6 @@ internal fun YearColumnHistorySection(
                 ),
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun YearMetricToggle(
-    selected: YearMetric,
-    onSelected: (YearMetric) -> Unit,
-    enabled: Boolean,
-) {
-    val metrics = YearMetric.entries
-
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        metrics.forEachIndexed { index, metric ->
-            SegmentedButton(
-                selected = metric == selected,
-                onClick = { onSelected(metric) },
-                enabled = enabled,
-                shape = SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = metrics.size,
-                ),
-                modifier = Modifier.weight(1f),
-                label = {
-                    SoftcoverText(
-                        text = metric.label,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                },
             )
         }
     }

@@ -87,9 +87,9 @@ class DisplayToggleRowsMapperTest {
             )
 
             // ----- Assert -----
-            result.first { it.key == DisplayToggle.FLOATING_BOTTOM_BAR }.checked shouldBe true
-            result.first { it.key == DisplayToggle.SHELF_SWIPE }.checked shouldBe false
-            result.first { it.key == DisplayToggle.READING_STREAK }.checked shouldBe true
+            result.first { it.key == DisplayToggle.FLOATING_BOTTOM_BAR }.toggle.checked shouldBe true
+            result.first { it.key == DisplayToggle.SHELF_SWIPE }.toggle.checked shouldBe false
+            result.first { it.key == DisplayToggle.READING_STREAK }.toggle.checked shouldBe true
         }
     }
 }

@@ -67,7 +67,7 @@ internal fun ActiveSearchContent(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
         ) {
             SortChip(
-                sortMode = state.sortMode,
+                state = state,
                 runAction = runAction,
             )
         }

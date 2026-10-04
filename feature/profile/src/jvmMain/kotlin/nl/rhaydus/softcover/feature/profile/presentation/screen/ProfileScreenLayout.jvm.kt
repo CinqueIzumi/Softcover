@@ -51,6 +51,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnYearMetricSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection
@@ -64,6 +65,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.screen.section.ShareEnt
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.YearColumnHistorySection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.profileReadingLifePreview
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
+import nl.rhaydus.softcover.feature.profile.presentation.state.YearMetric
 
 /**
  * Desktop Profile. On a wide surface it is a fixed identity column (cookie-cut avatar, the reader's
@@ -149,6 +151,7 @@ private fun ProfileContent(
                     onShareClick = { showShareSheet = true },
                     onLogOutClick = { showLogOutConfirm = true },
                     onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
+                    onYearMetricSelected = { runAction(OnYearMetricSelectedAction(metric = it)) },
                     onBookCardEvent = onBookCardEvent,
                 )
             } else {
@@ -157,6 +160,7 @@ private fun ProfileContent(
                     onShareClick = { showShareSheet = true },
                     onLogOutClick = { showLogOutConfirm = true },
                     onHideUntaggedAuthorsChange = { runAction(OnHideUntaggedAuthorsToggledAction(newValue = it)) },
+                    onYearMetricSelected = { runAction(OnYearMetricSelectedAction(metric = it)) },
                     onBookCardEvent = onBookCardEvent,
                 )
             }
@@ -195,6 +199,7 @@ private fun TwoColumnProfile(
     onShareClick: () -> Unit,
     onLogOutClick: () -> Unit,
     onHideUntaggedAuthorsChange: (Boolean) -> Unit,
+    onYearMetricSelected: (YearMetric) -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
@@ -238,6 +243,7 @@ private fun TwoColumnProfile(
                     state = state,
                     onShareClick = onShareClick,
                     onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
+                    onYearMetricSelected = onYearMetricSelected,
                     onBookCardEvent = onBookCardEvent,
                     modifier = Modifier.widthIn(max = 640.dp),
                 )
@@ -260,6 +266,7 @@ private fun SingleColumnProfile(
     onShareClick: () -> Unit,
     onLogOutClick: () -> Unit,
     onHideUntaggedAuthorsChange: (Boolean) -> Unit,
+    onYearMetricSelected: (YearMetric) -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -284,6 +291,7 @@ private fun SingleColumnProfile(
                 state = state,
                 onShareClick = onShareClick,
                 onHideUntaggedAuthorsChange = onHideUntaggedAuthorsChange,
+                onYearMetricSelected = onYearMetricSelected,
                 onBookCardEvent = onBookCardEvent,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -317,6 +325,7 @@ private fun ReadingLifeContent(
     state: ProfileUiState,
     onShareClick: () -> Unit,
     onHideUntaggedAuthorsChange: (Boolean) -> Unit,
+    onYearMetricSelected: (YearMetric) -> Unit,
     onBookCardEvent: (BookCardEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -346,6 +355,8 @@ private fun ReadingLifeContent(
             readingLife = state.readingLife,
             isLoading = readingLifeLoading,
             header = state.yearColumnHistoryHeader,
+            metricToggle = state.yearMetricToggle,
+            onMetricSelected = onYearMetricSelected,
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -361,6 +372,7 @@ private fun ReadingLifeContent(
         AuthorRepresentationSection(
             authorDemographics = state.authorDemographics,
             hideUntaggedAuthors = state.hideUntaggedAuthors,
+            hideUntaggedAuthorsToggle = state.hideUntaggedAuthorsToggle,
             canHideUntaggedAuthors = state.hasUntaggedAuthors,
             isLoading = readingLifeLoading,
             header = state.authorRepresentationHeader,

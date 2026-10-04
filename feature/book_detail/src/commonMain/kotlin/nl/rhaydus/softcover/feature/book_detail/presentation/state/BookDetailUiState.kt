@@ -6,9 +6,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.button.PillButtonContent
+import nl.rhaydus.softcover.core.component.button.PillButtonTone
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -24,6 +28,7 @@ import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictBlockUiModel
 import nl.rhaydus.softcover.core.component.verdict.VerdictSheetUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -93,6 +98,12 @@ internal data class BookDetailUiState(
      */
     val shelveControlHeader: SectionHeaderUiModel = SectionHeaderUiModel.Inline(eyebrow = "Shelve this book"),
 
+    /** The sticky lens switch, mapped by `LensToggleCollector` off [selectedLens] and whether [book] has a user copy. */
+    val lensToggle: SegmentedControlUiModel<BookDetailLens> = lensToggleFor(
+        selectedLens = BookDetailLens.THE_BOOK,
+        yoursEnabled = false,
+    ),
+
     val deadline: BookDeadline? = null,
     val deadlineProgress: DeadlineProgress? = null,
 
@@ -105,6 +116,23 @@ internal data class BookDetailUiState(
 
     /** [Book.effectiveReleaseDate] mapped to an unreleased-release badge by `UnreleasedBadgeCollector` (R9), off [book]. */
     val unreleasedBadge: BadgeUiModel? = null,
+
+    /** The "Find it" pills, mapped by `ExternalLinksCollector` off [displayedEdition]; null without an ISBN. */
+    val externalLinks: ExternalLinksUiModel? = null,
+
+    val updateProgressPill: PillButtonUiModel = PillButtonUiModel(
+        key = "update-progress",
+        content = PillButtonContent.Label(
+            text = "Update",
+            leadingIcon = SoftcoverIcon.Edit,
+        ),
+        tone = PillButtonTone.Accent,
+    ),
+    val tagAddPill: PillButtonUiModel = PillButtonUiModel(
+        key = "add-tag",
+        content = PillButtonContent.Label(text = "Add"),
+        tone = PillButtonTone.Filled,
+    ),
 
     val statusCallout: CalloutUiModel? = null,
 

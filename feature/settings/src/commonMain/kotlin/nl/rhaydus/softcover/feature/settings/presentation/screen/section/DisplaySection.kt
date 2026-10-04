@@ -33,7 +33,7 @@ internal fun DisplaySection(
                     SettingsToggleRow(
                         label = displayToggleRow.label,
                         gloss = displayToggleRow.gloss,
-                        checked = displayToggleRow.checked,
+                        toggle = displayToggleRow.toggle,
                         onCheckedChange = {
                             runAction(
                                 displayToggleActionFor(

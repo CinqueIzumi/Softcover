@@ -19,6 +19,8 @@ internal data class OnSortModeChangeAction(val mode: ExploreSortMode) : ExploreA
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
+        scope.setState { it.copy(isSortMenuExpanded = false) }
+
         if (scope.currentState.sortMode == mode) return
 
         scope.setState { it.copy(sortMode = mode) }

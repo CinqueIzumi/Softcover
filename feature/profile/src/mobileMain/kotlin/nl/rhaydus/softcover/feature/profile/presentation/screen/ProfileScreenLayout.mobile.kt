@@ -48,6 +48,7 @@ import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnYearMetricSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection
@@ -148,6 +149,8 @@ internal actual fun ProfileScreenLayout(
                 readingLife = state.readingLife,
                 isLoading = readingLifeLoading,
                 header = state.yearColumnHistoryHeader,
+                metricToggle = state.yearMetricToggle,
+                onMetricSelected = { runAction(OnYearMetricSelectedAction(metric = it)) },
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
 
@@ -165,6 +168,7 @@ internal actual fun ProfileScreenLayout(
             AuthorRepresentationSection(
                 authorDemographics = state.authorDemographics,
                 hideUntaggedAuthors = state.hideUntaggedAuthors,
+                hideUntaggedAuthorsToggle = state.hideUntaggedAuthorsToggle,
                 canHideUntaggedAuthors = state.hasUntaggedAuthors,
                 isLoading = readingLifeLoading,
                 header = state.authorRepresentationHeader,

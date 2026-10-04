@@ -107,7 +107,7 @@ class ReadingStreakCollectorTest {
                 // ----- Assert -----
                 stateFlow.value.displayToggleRows
                     .first { it.key == DisplayToggle.READING_STREAK }
-                    .checked shouldBe false
+                    .toggle.checked shouldBe false
                 job.cancel()
             }
 

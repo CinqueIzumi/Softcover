@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
@@ -19,6 +20,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSortPillButton
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesEntryUiModel
 import nl.rhaydus.toad.UiState
 
@@ -100,6 +102,9 @@ internal data class ExploreScreenUiState(
     // Search chrome / focus state (explore-3a §4 "Search chrome" + "Search focus state").
     val searchFocused: Boolean = false,
     val sortMode: ExploreSortMode = ExploreSortMode.RELEVANCE,
+    // The sort control, mapped by `SortPillCollector` off [sortMode]; [isSortMenuExpanded] is the menu it anchors.
+    val sortPill: PillButtonUiModel = ExploreSortMode.RELEVANCE.toSortPillButton(),
+    val isSortMenuExpanded: Boolean = false,
     // Featured upcoming release card (explore-3a §4 "Featured card").
     val featuredUpcomingRelease: Book? = null,
     val loadingFeaturedUpcomingRelease: Boolean = true,

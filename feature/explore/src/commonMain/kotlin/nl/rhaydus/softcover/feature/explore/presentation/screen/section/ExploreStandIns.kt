@@ -78,9 +78,10 @@ internal val SEARCH_RESULT_STAND_IN_CARD = BookCardUiModel(
                 BookCardLine(parts = persistentListOf(BookCardLinePart.Text(text = "2007 · 1.2k readers"))),
             ),
         ),
-        trailing = BookCardTrailing.Bookmark(
+        trailing = BookCardTrailing.Bookmark.labelled(
             saved = false,
             contentDescription = "",
+            enabled = false,
         ),
     ),
     isLoading = true,

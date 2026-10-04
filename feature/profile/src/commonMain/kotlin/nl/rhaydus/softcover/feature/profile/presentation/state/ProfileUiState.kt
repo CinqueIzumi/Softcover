@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
+import nl.rhaydus.softcover.core.component.control.ToggleUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingLifeShareCardUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
@@ -22,6 +24,16 @@ internal data class ProfileUiState(
     val readingLifeShareCard: ReadingLifeShareCardUiModel? = null,
     val recentlyLovedCards: ImmutableList<BookCardUiModel> = persistentListOf(),
     val hideUntaggedAuthors: Boolean = false,
+
+    /** Mapped by \`HideUntaggedAuthorsCollector\` alongside [hideUntaggedAuthors]. */
+    val hideUntaggedAuthorsToggle: ToggleUiModel = hideUntaggedAuthorsToggleFor(hide = false),
+    val selectedYearMetric: YearMetric = YearMetric.BOOKS,
+
+    /** Mapped by \`YearMetricToggleCollector\` off [selectedYearMetric] and whether the reading life has loaded. */
+    val yearMetricToggle: SegmentedControlUiModel<YearMetric> = yearMetricToggleFor(
+        selected = YearMetric.BOOKS,
+        enabled = false,
+    ),
     val isLoading: Boolean = true,
 
     val readingAtlasHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Reading atlas"),

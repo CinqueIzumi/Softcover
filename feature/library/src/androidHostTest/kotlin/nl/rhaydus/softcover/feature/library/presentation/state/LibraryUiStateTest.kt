@@ -886,4 +886,36 @@ class LibraryUiStateTest {
             result.isEmpty shouldBe true
         }
     }
+
+    @Nested
+    inner class FilterPillFor {
+        @Test
+        fun `returns the stored pill for a tab that has one`() {
+            // ----- Arrange -----
+            val storedPill = filterPillButton(active = true)
+            val state = buildState().copy(filterPillByTab = mapOf(readTabId to storedPill))
+
+            // ----- Act -----
+            val result = state.filterPillFor(readTabId)
+
+            // ----- Assert -----
+            result shouldBe storedPill
+            result.indicator shouldBe true
+        }
+
+        @Test
+        fun `returns the inactive pill without an indicator for an unknown tab`() {
+            // ----- Arrange -----
+            val state = buildState().copy(
+                filterPillByTab = mapOf(readTabId to filterPillButton(active = true)),
+            )
+
+            // ----- Act -----
+            val result = state.filterPillFor(otherTabId)
+
+            // ----- Assert -----
+            result shouldBe state.inactiveFilterPill
+            result.indicator shouldBe false
+        }
+    }
 }

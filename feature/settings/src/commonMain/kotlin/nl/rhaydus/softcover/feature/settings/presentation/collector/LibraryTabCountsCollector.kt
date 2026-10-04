@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilit
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
 import nl.rhaydus.toad.ActionScope
 
 internal class LibraryTabCountsCollector : LibraryVisibilityCollector {
@@ -31,10 +32,12 @@ internal class LibraryTabCountsCollector : LibraryVisibilityCollector {
             all.size to statusCounts
         }.collectLatest { (totalCount, statusCounts) ->
             scope.setState { state ->
-                state.copy(
-                    totalCount = totalCount,
-                    statusCounts = statusCounts,
-                )
+                state
+                    .copy(
+                        totalCount = totalCount,
+                        statusCounts = statusCounts,
+                    )
+                    .withOrderedEntries()
             }
         }
     }

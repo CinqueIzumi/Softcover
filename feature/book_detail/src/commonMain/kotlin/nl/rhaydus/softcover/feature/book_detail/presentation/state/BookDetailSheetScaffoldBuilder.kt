@@ -1,6 +1,9 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import nl.rhaydus.softcover.core.component.control.SegmentUiModel
+import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.EmphasisTreatment
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
@@ -78,6 +81,18 @@ internal fun shareSheetBodyFor(
         saveToGalleryLabel = if (isSavingToGallery) "Saving to gallery…" else "Save to gallery",
         isBusy = isSharing || isSavingToGallery,
         hasVariantToggle = hasUpdateCard,
+        variantToggle = SegmentedControlUiModel(
+            options = ShareCardVariant.entries
+                .map { option ->
+                    SegmentUiModel(
+                        key = option,
+                        label = option.label,
+                        enabled = (isSharing || isSavingToGallery).not(),
+                    )
+                }
+                .toImmutableList(),
+            selected = variant,
+        ),
     )
 
 internal fun shareSheetScaffoldFor(

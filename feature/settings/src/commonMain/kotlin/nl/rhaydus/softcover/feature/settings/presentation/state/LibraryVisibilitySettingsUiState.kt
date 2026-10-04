@@ -5,9 +5,8 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.BookList
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
+import nl.rhaydus.softcover.feature.settings.presentation.model.buildLibraryTabEntries
 import nl.rhaydus.toad.UiState
 
 private const val LIBRARY_TABS_TITLE = "Library tabs"
@@ -37,6 +36,15 @@ internal data class LibraryVisibilitySettingsUiState(
         title = LIBRARY_TABS_TITLE,
     ),
     val editorialTopBar: EditorialTopBarUiModel = EditorialTopBarUiModel(title = LIBRARY_TABS_TITLE),
+    /** Derived from the count, list and draft fields, but only refreshed by [withOrderedEntries]. */
+    val orderedEntries: List<LibraryTabEntry> = buildLibraryTabEntries(
+        statusCounts = emptyMap(),
+        totalCount = 0,
+        availableLists = emptyList(),
+        draftEnabledStatusCodes = emptySet(),
+        draftEnabledListIds = emptySet(),
+        draftTabOrder = emptyList(),
+    ),
 ) : UiState {
     val isDirty: Boolean
         get() = initialized && (
@@ -44,52 +52,15 @@ internal data class LibraryVisibilitySettingsUiState(
                 draftEnabledListIds != persistedEnabledListIds ||
                 draftTabOrder != persistedTabOrder
             )
-
-    val orderedEntries: List<LibraryTabEntry>
-        get() {
-            val statusEntries: List<LibraryTabEntry> = defaultStatusOrder
-                .map { status ->
-                    LibraryTabEntry.Status(
-                        status = status,
-                        statusLabel = LibraryTab.Status.labelFor(status = status),
-                        statusCount = statusCounts[status.code] ?: 0,
-                    )
-                }
-
-            val listEntries: List<LibraryTabEntry> = availableLists
-                .sortedBy { it.name.lowercase() }
-                .map { list ->
-                    LibraryTabEntry.CustomList(
-                        listId = list.id,
-                        listName = list.name,
-                        listCount = list.books.size,
-                    )
-                }
-
-            val reorderableUniverse: List<LibraryTabEntry> = statusEntries + listEntries
-
-            val reorderableOrdered = if (draftTabOrder.isEmpty()) {
-                reorderableUniverse
-            } else {
-                val byId = reorderableUniverse.associateBy { it.id }
-                val ordered = draftTabOrder.mapNotNull { byId[it] }
-                val orderedIds = ordered.map { it.id }.toSet()
-                val appended = reorderableUniverse.filter { it.id !in orderedIds }
-
-                ordered + appended
-            }
-
-            val allEntry: LibraryTabEntry = LibraryTabEntry.All(totalCount = totalCount)
-
-            return listOf(allEntry) + reorderableOrdered
-        }
-
-    private companion object {
-        val defaultStatusOrder: List<UserBookStatus> = listOf(
-            UserBookStatus.CURRENTLY_READING,
-            UserBookStatus.WANT_TO_READ,
-            UserBookStatus.READ,
-            UserBookStatus.DID_NOT_FINISH,
-        )
-    }
 }
+
+internal fun LibraryVisibilitySettingsUiState.withOrderedEntries(): LibraryVisibilitySettingsUiState = copy(
+    orderedEntries = buildLibraryTabEntries(
+        statusCounts = statusCounts,
+        totalCount = totalCount,
+        availableLists = availableLists,
+        draftEnabledStatusCodes = draftEnabledStatusCodes,
+        draftEnabledListIds = draftEnabledListIds,
+        draftTabOrder = draftTabOrder,
+    ),
+)

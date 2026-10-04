@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
@@ -41,6 +42,7 @@ internal fun TagEditorBottomSheet(
     suggestions: ChipSet<UserTag>,
     selectedCategory: TagCategory,
     draft: String,
+    addPill: PillButtonUiModel,
     onCategorySelected: (TagCategory) -> Unit,
     onDraftChange: (String) -> Unit,
     onAddTag: (String, TagCategory) -> Unit,
@@ -82,6 +84,7 @@ internal fun TagEditorBottomSheet(
                 selectedCategory = selectedCategory,
                 categoryChips = categoryChips,
                 draft = draft,
+                addPill = addPill,
                 suggestionChips = suggestions.chips,
                 onCategoryChipEvent = onCategoryChipEvent,
                 onDraftChange = onDraftChange,

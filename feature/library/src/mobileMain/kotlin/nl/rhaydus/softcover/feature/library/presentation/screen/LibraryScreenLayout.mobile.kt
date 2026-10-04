@@ -196,7 +196,7 @@ internal actual fun LibraryScreenLayout(
             if (state.selectionMode) {
                 SelectionHeader(
                     selectedCount = state.selectedBookIds.size,
-                    bulkActionInProgress = state.bulkActionInProgress,
+                    pills = state.selectionPills,
                     isMoveMenuExpanded = state.isBulkMoveMenuExpanded,
                     onExit = { runAction(OnExitSelectionModeAction()) },
                     onMoveMenuExpandedChange = { expanded ->
@@ -296,10 +296,12 @@ internal actual fun LibraryScreenLayout(
                                 onChipEvent = { event ->
                                     when (event) {
                                         is ChipEvent.Clicked ->
-                                            runAction(OnActiveFilterChipClickedAction(
-                                                tabId = tabId,
-                                                key = event.key,
-                                            ),)
+                                            runAction(
+                                                OnActiveFilterChipClickedAction(
+                                                    tabId = tabId,
+                                                    key = event.key,
+                                                ),
+                                            )
 
                                         is ChipEvent.Dismissed -> Unit
                                         is ChipEvent.SpoilerToggled -> Unit

@@ -94,6 +94,7 @@ internal fun BookDetailOverlays(
             suggestions = state.tagSuggestionChips,
             selectedCategory = state.tagEditorCategory,
             draft = state.tagEditorInput,
+            addPill = state.tagAddPill,
             onCategorySelected = { runAction(OnTagEditorCategoryChangeAction(category = it)) },
             onDraftChange = { runAction(OnTagDraftChangeAction(input = it)) },
             onAddTag = { name, category ->

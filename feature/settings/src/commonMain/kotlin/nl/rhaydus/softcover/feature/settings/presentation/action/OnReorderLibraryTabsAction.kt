@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
 import nl.rhaydus.toad.ActionScope
 
 internal class OnReorderLibraryTabsAction(
@@ -15,7 +16,7 @@ internal class OnReorderLibraryTabsAction(
         scope: ActionScope<LibraryVisibilitySettingsUiState, LibraryVisibilitySettingsEvent, LibraryVisibilitySettingsLocalVariables>,
     ) {
         scope.setState { state ->
-            state.copy(draftTabOrder = newOrderedIds.filterNot { it == LibraryTabEntry.ALL_ID })
+            state.copy(draftTabOrder = newOrderedIds.filterNot { it == LibraryTabEntry.ALL_ID }).withOrderedEntries()
         }
     }
 }

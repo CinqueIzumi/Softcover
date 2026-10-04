@@ -196,7 +196,6 @@ private fun NarrativeColumn(
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
-    val yoursEnabled = state.book?.userBook != null
 
     Box(modifier = modifier) {
         LazyColumn(
@@ -206,9 +205,8 @@ private fun NarrativeColumn(
         ) {
             stickyHeader {
                 LensToggle(
-                    selectedLens = state.selectedLens,
+                    model = state.lensToggle,
                     onLensSelected = { runAction(OnLensSelectedAction(lens = it)) },
-                    yoursEnabled = yoursEnabled,
                 )
             }
 
@@ -240,7 +238,6 @@ private fun SingleColumnContent(
     onCoverClick: () -> Unit,
 ) {
     val listState = rememberLazyListState()
-    val yoursEnabled = state.book?.userBook != null
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -285,9 +282,8 @@ private fun SingleColumnContent(
 
             stickyHeader {
                 LensToggle(
-                    selectedLens = state.selectedLens,
+                    model = state.lensToggle,
                     onLensSelected = { runAction(OnLensSelectedAction(lens = it)) },
-                    yoursEnabled = yoursEnabled,
                 )
             }
 

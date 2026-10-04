@@ -21,12 +21,13 @@ Shared components; a `detail` link opens the family file with the full contract.
 ## Buttons & controls
 
 - **Button** — [detail](components/buttons-controls.md#button) — five styles/sizes; filled is one primary per region.
-- **Toggle button / icon toggle button** — [detail](components/buttons-controls.md#toggle-buttons) — shape-morph active state.
+- **Pill button** — `core:component/button` — fixed-height action pill or icon-only circle in five tones, with an optional active dot.
+- **Toggle** — `core:component/control` — two-state control: filled or bare icon toggle (the bookmark and the library-tab eye), the platform switch, or a display-only switch inside a row that owns the tap.
+- **Segmented control** — `core:component/control` — one-of-N choice as a pill track (lens, share variant, year metric, progress tabs) or as words in a sentence.
 - **Split button** — [detail](components/buttons-controls.md#split-button) — primary action with a chevron menu of variants.
 - **Theme preview tile** — `core:component/control` — mini-page theme choice.
 - **Colour palette preview tile** — `core:component/control` — mini-page spine-colour choice.
 - **Preview tile frame** — `core:component/control` — tiles' internal frame primitives.
-- **Bookmark toggle** — [detail](components/buttons-controls.md#bookmark-toggle) — inline add/remove-library row control.
 - **Swipe row actions** — [detail](components/buttons-controls.md#swipe-row-actions) — swipe-to-mark-as-read / swipe-to-remove.
 
 ## Chips
@@ -83,7 +84,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Softcover text** — `core:component/text` — `SoftcoverText(text, isLoading, standIn, …)`: the one text leaf; it lays out `standIn` under `skeletonMask` while loading or while `text` is null.
 - **Clickable text** — `core:component/richtext` — prose with a tappable substring resolved to a link event.
 - **Rich text** — `core:component/richtext` — read-only formatted, spoiler-maskable prose.
-- **Rich-text formatting toolbar** — `core:component/control` — bold/italic/spoiler control row inside `VerdictSheet`.
+- **Rich-text formatting toolbar** — `core:component/richtext` — bold/italic/spoiler chip row inside `VerdictSheet`.
 
 ## Editorial
 

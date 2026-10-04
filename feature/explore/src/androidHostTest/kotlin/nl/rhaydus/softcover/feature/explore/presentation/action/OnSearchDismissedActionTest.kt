@@ -85,5 +85,20 @@ class OnSearchDismissedActionTest {
             stateFlow.value.searchText shouldBe "dune"
             stateFlow.value.queriedBooks shouldBe existingBooks
         }
+
+        @Test
+        fun `closes the sort menu when it was expanded`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(isSortMenuExpanded = true)
+
+            // ----- Act -----
+            OnSearchDismissedAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isSortMenuExpanded shouldBe false
+        }
     }
 }

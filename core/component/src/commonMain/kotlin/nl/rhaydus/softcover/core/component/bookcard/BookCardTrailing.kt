@@ -2,6 +2,14 @@ package nl.rhaydus.softcover.core.component.bookcard
 
 import androidx.compose.runtime.Immutable
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.button.PillButtonContent
+import nl.rhaydus.softcover.core.component.button.PillButtonInteraction
+import nl.rhaydus.softcover.core.component.button.PillButtonTone
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
+import nl.rhaydus.softcover.core.component.control.ToggleIconStyle
+import nl.rhaydus.softcover.core.component.control.ToggleUiModel
+import nl.rhaydus.softcover.core.component.control.ToggleVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
 /**
  * [Badge] and [Restore] are read-only — a hidden row restores through the card's own tap. [Bookmark] and
@@ -13,10 +21,45 @@ sealed interface BookCardTrailing {
 
     data class Restore(val label: String) : BookCardTrailing
 
-    data class Bookmark(
-        val saved: Boolean,
-        val contentDescription: String,
-    ) : BookCardTrailing
+    data class Bookmark(val toggle: ToggleUiModel) : BookCardTrailing {
+        companion object {
+            /** A card still loading is built with `enabled = false`; the render never rewrites the toggle. */
+            fun labelled(
+                saved: Boolean,
+                contentDescription: String,
+                enabled: Boolean = true,
+            ): Bookmark = Bookmark(
+                toggle = ToggleUiModel(
+                    key = "bookmark",
+                    checked = saved,
+                    description = contentDescription,
+                    variant = ToggleVariant.Icon(
+                        on = SoftcoverIcon.BookmarkAdded,
+                        off = SoftcoverIcon.BookmarkAdd,
+                        style = ToggleIconStyle.Filled,
+                    ),
+                    enabled = enabled,
+                ),
+            )
+        }
+    }
 
-    data class SetProgress(val label: String) : BookCardTrailing
+    data class SetProgress(val pill: PillButtonUiModel) : BookCardTrailing {
+        companion object {
+            fun labelled(
+                label: String,
+                interaction: PillButtonInteraction = PillButtonInteraction.Clickable,
+            ): SetProgress = SetProgress(
+                pill = PillButtonUiModel(
+                    key = "set-progress",
+                    content = PillButtonContent.IconOnly(
+                        icon = SoftcoverIcon.Edit,
+                        description = label,
+                    ),
+                    tone = PillButtonTone.Accent,
+                    interaction = interaction,
+                ),
+            )
+        }
+    }
 }

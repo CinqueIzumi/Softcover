@@ -12,9 +12,8 @@ import kotlin.math.roundToInt
 /**
  * Maps a [Book] onto what the progress sheet renders.
  *
- * [selectedTab] is the reader's stored last-used unit, which the sheet may still override: a stored
- * `PAGE` on an audiobook is not a valid tab, and the sheet falls back to the medium's primary unit
- * rather than the mapper second-guessing it here.
+ * [selectedTab] is the reader's stored last-used unit. A stored `PAGE` on an audiobook is not a valid
+ * tab, so [ProgressSheetUiModel.tabsFor] falls back to the medium's primary unit.
  *
  * **Two resolution asymmetries are deliberate and preserved from the pre-migration sheet.** The page
  * total falls back to the book's default edition when the current one has no page count, but the
@@ -40,7 +39,10 @@ fun Book.toProgressSheetUiModel(selectedTab: ProgressSheetTab): ProgressSheetUiM
     return ProgressSheetUiModel(
         medium = medium,
         progressPercent = userBookRead?.progress?.roundToInt() ?: 0,
-        selectedTab = selectedTab,
+        tabs = ProgressSheetUiModel.tabsFor(
+            medium = medium,
+            selectedTab = selectedTab,
+        ),
         scaffold = SheetScaffoldUiModel(
             header = SheetHeaderUiModel(
                 section = SectionHeaderUiModel.Section(

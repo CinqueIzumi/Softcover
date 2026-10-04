@@ -4,6 +4,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilit
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
 import nl.rhaydus.toad.ActionScope
 
 internal class OnStatusToggleAction(
@@ -16,7 +17,7 @@ internal class OnStatusToggleAction(
     ) {
         scope.setState { state ->
             val updated = if (enabled) state.draftEnabledStatusCodes + code else state.draftEnabledStatusCodes - code
-            state.copy(draftEnabledStatusCodes = updated)
+            state.copy(draftEnabledStatusCodes = updated).withOrderedEntries()
         }
     }
 }

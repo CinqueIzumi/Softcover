@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilit
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
 import nl.rhaydus.toad.ActionScope
 
 internal class UserListsCollector : LibraryVisibilityCollector {
@@ -13,7 +14,11 @@ internal class UserListsCollector : LibraryVisibilityCollector {
         dependencies: LibraryVisibilitySettingsDependencies,
     ) {
         dependencies.getAllUserListsUseCase().collectLatest { lists ->
-            scope.setState { it.copy(availableLists = lists.sortedBy { list -> list.name.lowercase() }) }
+            scope.setState { state ->
+                state
+                    .copy(availableLists = lists.sortedBy { list -> list.name.lowercase() })
+                    .withOrderedEntries()
+            }
         }
     }
 }

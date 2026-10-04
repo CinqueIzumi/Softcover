@@ -8,18 +8,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.zIndex
 import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnListToggleAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnReorderLibraryTabsAction
@@ -119,18 +120,16 @@ internal fun ReorderableTabsGroup(
                     }
                     .onSizeChanged { size -> itemHeightsPx[entry.id] = size.height },
             ) {
-                val rowEnabled = entry.isEnabled(state = state)
-                val hidden = entry.canHide && rowEnabled.not()
-
                 ReorderableRow(
                     entry = entry,
-                    hidden = hidden,
                     isDragging = isDragging,
-                    onToggle = {
-                        entry.dispatchToggle(
-                            enabled = rowEnabled.not(),
-                            runAction = runAction,
-                        )
+                    onToggle = { event ->
+                        when (event) {
+                            is ToggleEvent.Toggled -> entry.dispatchToggle(
+                                enabled = event.checked,
+                                runAction = runAction,
+                            )
+                        }
                     },
                     modifier = if (entry.isReorderable) {
                         val draggableState = rememberDraggableState { delta ->
@@ -188,16 +187,6 @@ internal fun ReorderableTabsGroup(
             }
         }
     }
-}
-
-/**
- * A row counts as "on" whenever it can't be hidden at all ("All", and any status with
- * `canHide = false` such as Currently Reading) or the draft set says so.
- */
-private fun LibraryTabEntry.isEnabled(state: LibraryVisibilitySettingsUiState): Boolean = when (this) {
-    is LibraryTabEntry.All -> true
-    is LibraryTabEntry.Status -> canHide.not() || status.code in state.draftEnabledStatusCodes
-    is LibraryTabEntry.CustomList -> listId in state.draftEnabledListIds
 }
 
 private fun LibraryTabEntry.dispatchToggle(

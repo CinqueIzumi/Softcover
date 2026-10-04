@@ -144,5 +144,20 @@ class OnClearSearchActionTest {
                 clearSearchResultsUseCase()
             }
         }
+
+        @Test
+        fun `closes the sort menu when it was expanded`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateFlow.value.copy(isSortMenuExpanded = true)
+
+            // ----- Act -----
+            OnClearSearchAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isSortMenuExpanded shouldBe false
+        }
     }
 }

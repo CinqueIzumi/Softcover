@@ -196,7 +196,7 @@ data class BookCardUiModel(
                             ),
                         ),
                     ),
-                    trailing = BookCardTrailing.Bookmark(
+                    trailing = BookCardTrailing.Bookmark.labelled(
                         saved = false,
                         contentDescription = "Save to library",
                     ),
@@ -215,7 +215,7 @@ data class BookCardUiModel(
                         ),
                         byline = "By Arkady Martine",
                     ),
-                    trailing = BookCardTrailing.SetProgress(label = "Set progress"),
+                    trailing = BookCardTrailing.SetProgress.labelled(label = "Set progress"),
                     deadline = DeadlineSummaryUiModel(
                         dateText = "28 Aug",
                         paceText = "18 pages/day",

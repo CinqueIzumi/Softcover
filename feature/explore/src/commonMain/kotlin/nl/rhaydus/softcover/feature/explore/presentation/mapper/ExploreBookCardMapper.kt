@@ -96,7 +96,7 @@ internal fun Book.toSearchResultCard(cover: CoverUiModel): BookCardUiModel {
                     ),
                 ).toImmutableList(),
             ),
-            trailing = BookCardTrailing.Bookmark(
+            trailing = BookCardTrailing.Bookmark.labelled(
                 saved = saved,
                 contentDescription = if (saved) "Remove from library" else "Add to library",
             ),

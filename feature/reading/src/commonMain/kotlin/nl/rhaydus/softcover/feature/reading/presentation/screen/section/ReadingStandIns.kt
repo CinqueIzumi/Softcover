@@ -11,6 +11,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardProgress
 import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
+import nl.rhaydus.softcover.core.component.button.PillButtonInteraction
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.domain.model.Author
@@ -41,7 +42,10 @@ internal val ALSO_READING_STAND_IN_CARD = BookCardUiModel(
             eyebrow = BookCardEyebrow(text = "THE KINGKILLER CHRONICLE"),
             byline = "By Patrick Rothfuss",
         ),
-        trailing = BookCardTrailing.SetProgress(label = "Set progress"),
+        trailing = BookCardTrailing.SetProgress.labelled(
+            label = "Set progress",
+            interaction = PillButtonInteraction.Disabled,
+        ),
         contentHorizontalInset = 24.dp,
         contentVerticalInset = 18.dp,
     ),

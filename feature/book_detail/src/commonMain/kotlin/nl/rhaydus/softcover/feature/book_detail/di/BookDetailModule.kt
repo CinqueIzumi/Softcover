@@ -43,7 +43,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.DateStyle
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionCardsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSelectionCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.EditionSheetCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ExternalLinksCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LastUsedProgressUnitCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.LensToggleCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.OfflineStateCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ProgressSheetCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPaceForecastCollector
@@ -87,6 +89,7 @@ val bookDetailModule = module {
     factory { OfflineStateCollector() } bind BookDetailCollector::class
     factory { BookDeadlineCollector() } bind BookDetailCollector::class
     factory { UnreleasedBadgeCollector() } bind BookDetailCollector::class
+    factory { ExternalLinksCollector() } bind BookDetailCollector::class
     factory { CalloutsCollector() } bind BookDetailCollector::class
     factory { EditionSelectionCollector() } bind BookDetailCollector::class
     factory { EditionCardsCollector() } bind BookDetailCollector::class
@@ -108,6 +111,7 @@ val bookDetailModule = module {
     factory { ProgressSheetCollector() } bind BookDetailCollector::class
     factory { ChooseListsCollector() } bind BookDetailCollector::class
     factory { ShelveControlHeaderCollector() } bind BookDetailCollector::class
+    factory { LensToggleCollector() } bind BookDetailCollector::class
 
     single<BookReviewsRemoteDataSource> {
         BookReviewsRemoteDataSourceImpl(apolloClient = get())

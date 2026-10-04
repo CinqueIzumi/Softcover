@@ -140,6 +140,35 @@ class LibraryTabCountsCollectorTest {
         }
 
         @Test
+        fun `rebuilds orderedEntries with the emitted counts`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = LibraryTabCountsCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            allFlow.emit(books(20))
+            currentlyReadingFlow.emit(books(3))
+            wantToReadFlow.emit(books(5))
+            readFlow.emit(books(9))
+            didNotFinishFlow.emit(books(2))
+
+            // ----- Assert -----
+            stateFlow.value.orderedEntries.map { it.count } shouldBe listOf(
+                20,
+                3,
+                5,
+                9,
+                2,
+            )
+            job.cancel()
+        }
+
+        @Test
         fun `updates to the latest counts when the flows emit multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LibraryTabCountsCollector()

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.model
 
+import nl.rhaydus.softcover.core.component.control.ToggleUiModel
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 
@@ -10,6 +11,7 @@ internal sealed class LibraryTabEntry(
     val isReorderable: Boolean,
     val canHide: Boolean,
     val isList: Boolean,
+    val visibilityToggle: ToggleUiModel?,
 ) {
     data class All(
         val totalCount: Int,
@@ -20,12 +22,14 @@ internal sealed class LibraryTabEntry(
         isReorderable = false,
         canHide = false,
         isList = false,
+        visibilityToggle = null,
     )
 
     data class Status(
         val status: UserBookStatus,
         val statusLabel: String,
         val statusCount: Int,
+        val statusVisibilityToggle: ToggleUiModel?,
     ) : LibraryTabEntry(
         id = LibraryTab.Status.idFor(status = status),
         label = statusLabel,
@@ -33,12 +37,14 @@ internal sealed class LibraryTabEntry(
         isReorderable = true,
         canHide = status.isAlwaysVisibleInLibrary.not(),
         isList = false,
+        visibilityToggle = statusVisibilityToggle,
     )
 
     data class CustomList(
         val listId: Int,
         val listName: String,
         val listCount: Int,
+        val listVisibilityToggle: ToggleUiModel,
     ) : LibraryTabEntry(
         id = LibraryTab.CustomList.idFor(listId = listId),
         label = listName,
@@ -46,6 +52,7 @@ internal sealed class LibraryTabEntry(
         isReorderable = true,
         canHide = true,
         isList = true,
+        visibilityToggle = listVisibilityToggle,
     )
 
     companion object {

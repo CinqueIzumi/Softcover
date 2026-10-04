@@ -208,7 +208,7 @@ class ThemeConfigurationCollectorTest {
                 // ----- Assert -----
                 stateFlow.value.displayToggleRows
                     .first { it.key == DisplayToggle.FLOATING_BOTTOM_BAR }
-                    .checked shouldBe true
+                    .toggle.checked shouldBe true
                 job.cancel()
             }
 
@@ -226,7 +226,7 @@ class ThemeConfigurationCollectorTest {
                 themeConfigFlow.emit(ThemeConfiguration(useDynamicColor = true))
 
                 // ----- Assert -----
-                stateFlow.value.dynamicColorToggleRow.checked shouldBe true
+                stateFlow.value.dynamicColorToggleRow.toggle.checked shouldBe true
                 job.cancel()
             }
     }

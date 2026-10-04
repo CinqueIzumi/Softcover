@@ -6,15 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,10 +21,11 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.share.SaveOutcome
-import nl.rhaydus.designsystem.share.ShareCardCapture
 import nl.rhaydus.designsystem.share.ShareOutcome
 import nl.rhaydus.designsystem.share.rememberShareCardCapture
 import nl.rhaydus.designsystem.util.SnackBarManager
+import nl.rhaydus.softcover.core.component.control.SegmentedControl
+import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
 import nl.rhaydus.softcover.core.component.share.BookShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ReadingUpdateShareCardUiModel
 import nl.rhaydus.softcover.core.component.share.ScaledShareCardPreview
@@ -40,7 +35,6 @@ import nl.rhaydus.softcover.core.component.share.softcoverShareCardCaptureConfig
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
-import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareCardVariant
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShareSheetBodyUiModel
@@ -137,10 +131,14 @@ internal fun ShareBookBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (body.hasVariantToggle) {
-                ShareCardVariantToggle(
-                    selectedVariant = body.variant,
-                    onVariantSelected = onVariantSelected,
-                    enabled = body.isBusy.not(),
+                SegmentedControl(
+                    model = body.variantToggle,
+                    onEvent = { event ->
+                        when (event) {
+                            is SegmentedControlEvent.Selected -> onVariantSelected(event.key)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 
@@ -201,35 +199,5 @@ private suspend fun reportingFailures(
         AppLog.e("Share capture failed: $error")
 
         SnackBarManager.showSnackbar(title = failureMessage)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ShareCardVariantToggle(
-    selectedVariant: ShareCardVariant,
-    onVariantSelected: (ShareCardVariant) -> Unit,
-    enabled: Boolean,
-) {
-    val variants = ShareCardVariant.entries
-
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        variants.forEachIndexed { index, variant ->
-            SegmentedButton(
-                selected = variant == selectedVariant,
-                onClick = { onVariantSelected(variant) },
-                enabled = enabled,
-                shape = SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = variants.size,
-                ),
-                label = {
-                    SoftcoverText(
-                        text = variant.label,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                },
-            )
-        }
     }
 }

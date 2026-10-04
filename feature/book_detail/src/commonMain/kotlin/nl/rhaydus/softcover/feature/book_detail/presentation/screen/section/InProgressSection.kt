@@ -35,6 +35,7 @@ import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
+import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -69,37 +70,10 @@ internal fun InProgressSection(
 
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         SectionHeader(model = state.inProgressSectionHeader) {
-            Surface(
-                shape = RoundedCornerShape(percent = 50),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.primary,
-                onClick = { runAction(OnShowUpdateProgressSheetClickAction()) },
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val updateProgressIcon = drawableIconResource(
-                        icon = SoftcoverIcon.Edit,
-                        contentDescription = "Update progress",
-                    )
-
-                    Icon(
-                        painter = updateProgressIcon.getIconPainter(),
-                        contentDescription = updateProgressIcon.contentDescription,
-                        modifier = Modifier.size(15.dp),
-                    )
-
-                    Spacer(modifier = Modifier.width(6.dp))
-
-                    SoftcoverText(
-                        text = "Update",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                        ),
-                    )
-                }
-            }
+            PillButton(
+                model = state.updateProgressPill,
+                onEvent = { runAction(OnShowUpdateProgressSheetClickAction()) },
+            )
         }
 
         Spacer(modifier = Modifier.height(6.dp))

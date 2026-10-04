@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
@@ -157,6 +158,14 @@ internal data class LibraryUiState(
     val activeFilterChipsByTab: Map<String, LibraryActiveFilterChips> = emptyMap(),
     val rearrangeChipByTab: Map<String, ChipUiModel> = emptyMap(),
 
+    /** The control line's Filter pill per tab, mapped by `PillButtonsCollector`; the dot marks active filters. */
+    val filterPillByTab: Map<String, PillButtonUiModel> = emptyMap(),
+    val inactiveFilterPill: PillButtonUiModel = filterPillButton(active = false),
+    val selectPill: PillButtonUiModel = selectPillButton(),
+
+    /** The selection header's pills, mapped by `PillButtonsCollector` off [bulkActionInProgress]. */
+    val selectionPills: LibrarySelectionPills = LibrarySelectionPills.of(bulkActionInProgress = false),
+
     /**
      * Search + filter-chip results per tab for book shelves (year-finished narrowing lives inside
      * [LibraryFilters.readYear]), precomputed off the main thread by [DisplayListsCollector] so
@@ -291,6 +300,9 @@ internal data class LibraryUiState(
 
     fun rearrangeChipFor(tabId: String): ChipUiModel? =
         rearrangeChipByTab[tabId]
+
+    fun filterPillFor(tabId: String): PillButtonUiModel =
+        filterPillByTab[tabId] ?: inactiveFilterPill
 
     /**
      * Books to render for [tabId], precomputed by [DisplayListsCollector] and served as an O(1)

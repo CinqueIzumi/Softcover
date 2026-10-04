@@ -1,11 +1,9 @@
 package nl.rhaydus.softcover.feature.lists.presentation.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,13 +13,11 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -29,17 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
@@ -51,16 +42,16 @@ import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.control.SegmentedControl
+import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedAction
-import nl.rhaydus.softcover.feature.lists.presentation.action.OnPrivacyToggledAction
+import nl.rhaydus.softcover.feature.lists.presentation.action.OnPrivacySelectedAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnSubmitAction
 import nl.rhaydus.softcover.feature.lists.presentation.state.CreateListUiState
 
@@ -142,9 +133,13 @@ internal fun CreateListSheetContent(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        PrivacyProseToggle(
-            privacy = state.privacy,
-            onToggle = { runAction(OnPrivacyToggledAction()) },
+        SegmentedControl(
+            model = state.privacyToggle,
+            onEvent = { event ->
+                when (event) {
+                    is SegmentedControlEvent.Selected -> runAction(OnPrivacySelectedAction(privacy = event.key))
+                }
+            },
         )
 
         Spacer(modifier = Modifier.height(34.dp))
@@ -281,110 +276,5 @@ private fun fittedHeroFontSize(
         }
 
         candidate
-    }
-}
-
-/**
- * "This shelf is *public* / *private*." — the privacy sentence you tap to flip. Each word is its own
- * tap target (§ "Prose toggle" pattern in design-system.md); tapping the already-chosen word is a
- * no-op since [OnPrivacyToggledAction] only flips, and flipping the already-selected word would just
- * flip it away again.
- */
-@Composable
-private fun PrivacyProseToggle(
-    privacy: PrivacySetting,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val isPublic = privacy != PrivacySetting.PRIVATE
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.selectableGroup(),
-    ) {
-        SoftcoverText(
-            text = "This shelf is ",
-            style = MaterialTheme.editorialTypography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
-        PrivacyWord(
-            word = "public",
-            isSelected = isPublic,
-            onSelect = onToggle,
-        )
-
-        SoftcoverText(
-            text = " / ",
-            style = MaterialTheme.editorialTypography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-        )
-
-        PrivacyWord(
-            word = "private",
-            isSelected = isPublic.not(),
-            onSelect = onToggle,
-        )
-
-        SoftcoverText(
-            text = ".",
-            style = MaterialTheme.editorialTypography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-    }
-}
-
-/**
- * One tappable word of the [PrivacyProseToggle] sentence. A 20sp word sits well below the 48dp
- * minimum touch target, so [Modifier.minimumInteractiveComponentSize] pads the tap area invisibly
- * rather than inflating the glyph itself. The underline is always laid out (transparent when
- * unchosen) so flipping never reflows the sentence, and `Modifier.width(IntrinsicSize.Min)` sizes it
- * to the word's own measured width rather than the row's.
- */
-@Composable
-private fun PrivacyWord(
-    word: String,
-    isSelected: Boolean,
-    onSelect: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val wordColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
-    }
-    val underlineColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-
-    Box(
-        modifier = modifier
-            .minimumInteractiveComponentSize()
-            .pointerHandCursor()
-            .pressScaleClickable(onClick = { if (isSelected.not()) onSelect() })
-            .semantics {
-                role = Role.RadioButton
-                selected = isSelected
-            },
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(IntrinsicSize.Min),
-        ) {
-            SoftcoverText(
-                text = word,
-                style = MaterialTheme.editorialTypography.bodyLarge.copy(
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                ),
-                color = wordColor,
-            )
-
-            Spacer(modifier = Modifier.height(1.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .background(underlineColor),
-            )
-        }
     }
 }

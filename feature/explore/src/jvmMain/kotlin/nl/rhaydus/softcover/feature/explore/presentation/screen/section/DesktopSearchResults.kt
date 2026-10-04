@@ -56,7 +56,7 @@ internal fun DesktopSearchResults(
     ) {
         Row(modifier = Modifier.padding(vertical = 8.dp)) {
             SortChip(
-                sortMode = state.sortMode,
+                state = state,
                 runAction = runAction,
             )
         }

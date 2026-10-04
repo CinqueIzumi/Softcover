@@ -318,7 +318,7 @@ class ExploreBookCardMapperTest {
             val card = input.toSearchResultCard(cover = cover)
 
             // ----- Assert -----
-            card.row().trailing shouldBe BookCardTrailing.Bookmark(
+            card.row().trailing shouldBe BookCardTrailing.Bookmark.labelled(
                 saved = false,
                 contentDescription = "Add to library",
             )
@@ -348,7 +348,7 @@ class ExploreBookCardMapperTest {
             val card = input.toSearchResultCard(cover = cover)
 
             // ----- Assert -----
-            card.row().trailing shouldBe BookCardTrailing.Bookmark(
+            card.row().trailing shouldBe BookCardTrailing.Bookmark.labelled(
                 saved = true,
                 contentDescription = "Remove from library",
             )

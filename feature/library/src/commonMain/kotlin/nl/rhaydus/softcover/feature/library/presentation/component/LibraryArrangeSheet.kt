@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +18,8 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.control.Toggle
+import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
@@ -147,9 +148,13 @@ private fun ShowTitlesToggleRow(
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        Switch(
-            checked = model.checked,
-            onCheckedChange = onCheckedChange,
+        Toggle(
+            model = model.toggle,
+            onEvent = { event ->
+                when (event) {
+                    is ToggleEvent.Toggled -> onCheckedChange(event.checked)
+                }
+            },
         )
     }
 }

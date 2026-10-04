@@ -395,6 +395,77 @@ class BookDetailSheetScaffoldBuilderTest {
             result.saveToGalleryLabel shouldNotBe idle.saveToGalleryLabel
             result.shareLabel shouldBe idle.shareLabel
         }
+
+        @Test
+        fun `variant toggle offers every variant and selects the current one`() {
+            // ----- Arrange & Act -----
+            val result = shareSheetBodyFor(
+                variant = ShareCardVariant.MY_UPDATE,
+                hasUpdateCard = true,
+                isSharing = false,
+                isSavingToGallery = false,
+            )
+
+            // ----- Assert -----
+            result.variantToggle.options.map { it.key } shouldBe ShareCardVariant.entries.toList()
+            result.variantToggle.selected shouldBe ShareCardVariant.MY_UPDATE
+        }
+
+        @Test
+        fun `variant toggle labels each option with its variant label`() {
+            // ----- Arrange & Act -----
+            val result = shareSheetBodyFor(
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = true,
+                isSharing = false,
+                isSavingToGallery = false,
+            )
+
+            // ----- Assert -----
+            result.variantToggle.options.map { it.label } shouldBe ShareCardVariant.entries.map { it.label }
+        }
+
+        @Test
+        fun `variant toggle is enabled when idle`() {
+            // ----- Arrange & Act -----
+            val result = shareSheetBodyFor(
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = true,
+                isSharing = false,
+                isSavingToGallery = false,
+            )
+
+            // ----- Assert -----
+            result.variantToggle.options.all { it.enabled } shouldBe true
+        }
+
+        @Test
+        fun `variant toggle is disabled while sharing`() {
+            // ----- Arrange & Act -----
+            val result = shareSheetBodyFor(
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = true,
+                isSharing = true,
+                isSavingToGallery = false,
+            )
+
+            // ----- Assert -----
+            result.variantToggle.options.none { it.enabled } shouldBe true
+        }
+
+        @Test
+        fun `variant toggle is disabled while saving to gallery`() {
+            // ----- Arrange & Act -----
+            val result = shareSheetBodyFor(
+                variant = ShareCardVariant.BOOK,
+                hasUpdateCard = true,
+                isSharing = false,
+                isSavingToGallery = true,
+            )
+
+            // ----- Assert -----
+            result.variantToggle.options.none { it.enabled } shouldBe true
+        }
     }
 }
 

@@ -111,7 +111,7 @@ internal fun SpineColourSection(
             SettingsToggleRow(
                 label = state.dynamicColorToggleRow.label,
                 gloss = state.dynamicColorToggleRow.gloss,
-                checked = state.dynamicColorToggleRow.checked,
+                toggle = state.dynamicColorToggleRow.toggle,
                 onCheckedChange = {
                     runAction(
                         displayToggleActionFor(

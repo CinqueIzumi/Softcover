@@ -20,6 +20,8 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -135,11 +137,13 @@ private fun ChipScaffold(
     modifier: Modifier,
 ) {
     val tappable = model.tone != ChipTone.Spoiler
+    val selectable = model.tone == ChipTone.Tonal || model.tone == ChipTone.Choice
 
     val rowModifier = modifier
         .clip(ChipShape)
         .background(style.container)
         .thenChipBorder(border = style.border)
+        .then(if (selectable) Modifier.semantics { selected = model.selected } else Modifier)
         .chipInteraction(interaction = model.interaction) {
             onEvent(ChipEvent.Clicked(key = model.key))
         }

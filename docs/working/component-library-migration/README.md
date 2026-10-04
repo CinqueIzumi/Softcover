@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SL-13 done, uncommitted: `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry and `SkeletonUiModelTest` are deleted; `module-structure.md`, `components.md`, `component-contract.md` § 7.2 (profile is the only holdout) and `foundations.md` (footprint bullet now points at § 7.2) are rewritten. SL's open sub-steps are blocked: SL-3b on F34, SL-12 on S9-3. F33 open.
-- **Next:** S8-4 in `steps/s8-controls.md` — `Toggle` + `SegmentedControl` design and their call sites.
+- **State:** S8 Phase 1 done for S8-4–S8-6 together (`steps/s8-controls.md` § Approved shape). S8-6 (`PillButton`) done: reviewed, fixed, tests pass. S8-4 (`SegmentedControl` + `Toggle` + toolbar → `richtext/`) built, glommed closers fixed, not yet tested or reviewed. They share files, so they commit together once S8-4 is green. SL-3b blocked on F34, SL-12 on S9-3; F33 open.
+- **Next:** S8-4 test round per `steps/s8-controls.md` § S8-4 open, then its fix round, reviewer, commit; then S8-5.
 - **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `Color.LightGray` / `White`, not theme roles, so network-latency shimmers are a light-grey block on the dark theme — foundation upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
-- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? `BookmarkToggle` → foundation toggle? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
+- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** SL-13: `:core:component:compileKotlinJvm`, `styleCheck` (JDK 21), `:core:component:testAndroidHostTest`, 1 review (one fused doc line, fixed) ✅.
-- **Uncommitted:** the three deleted `state/Skeleton*.kt`, `SkeletonUiModelTest.kt`, `GalleryChromeEntries.kt`, the four reference docs above, the SL-13 tick, this block.
+- **Verification:** S8-6 all gates, tests, review ✅. S8-4: main compile, ktlint, detekt, module graph green; `styleCheck` red on `compileAndroidHostTest` (explore/library/lists/settings) until its test round.
+- **Uncommitted:** new `core/component/button/`, `control/` segmented + toggle, `richtext/` toolbar, gallery entries; ~75 call-site/state/collector/action files across seven features + uibinding; `TabSwitcher.kt`, old toolbar, `OnPrivacyToggledAction.kt` deleted; S8-6 tests; reference docs; tracker docs.
 
 ## Local verification
 
@@ -68,7 +68,7 @@ every sub-step's Verify.
 | S7 | — (book cards) | S7-1–S7-7, S7-C1–C5 | [x] |
 | SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-13, app-wide; SL-1–SL-7 before S7-2 | [ ] |
 | S8 | — (screen states) | S8-1–S8-3, S8-C-a–C-c | [x] |
-| S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-5 | [ ] |
+| S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-6, S8-C-controls | [ ] |
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |

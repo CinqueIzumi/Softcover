@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import nl.rhaydus.softcover.core.component.control.ToggleUiModel
+import nl.rhaydus.softcover.core.component.control.ToggleVariant
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 
 internal data class ArrangeSheetSnapshot(
@@ -28,7 +30,12 @@ internal data class ArrangeSheetSnapshot(
                     ?.let { layout ->
                         ArrangeTitlesToggleUiModel(
                             label = "Show titles & authors",
-                            checked = layout.showsTitles,
+                            toggle = ToggleUiModel(
+                                key = "show-titles",
+                                checked = layout.showsTitles,
+                                description = "Show titles & authors",
+                                variant = ToggleVariant.Switch,
+                            ),
                         )
                     },
                 makeOrdered = unrankedList?.let { list ->

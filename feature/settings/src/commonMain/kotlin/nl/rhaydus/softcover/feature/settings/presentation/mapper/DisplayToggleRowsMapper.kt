@@ -4,6 +4,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.feature.settings.presentation.model.DisplayToggle
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsToggleRowUiModel
+import nl.rhaydus.softcover.feature.settings.presentation.model.settingsSwitchToggle
 
 /**
  * The Display section's toggle rows, off the composition (`component-contract.md` R9):
@@ -23,7 +24,11 @@ internal fun displayToggleRowsFor(
                 key = DisplayToggle.FLOATING_BOTTOM_BAR,
                 label = "Floating bottom bar",
                 gloss = "Lift the nav off the edge, with rounded corners.",
-                checked = useFloatingBarChecked,
+                toggle = settingsSwitchToggle(
+                    key = DisplayToggle.FLOATING_BOTTOM_BAR.name,
+                    label = "Floating bottom bar",
+                    checked = useFloatingBarChecked,
+                ),
             ),
         )
     }
@@ -34,7 +39,11 @@ internal fun displayToggleRowsFor(
                 key = DisplayToggle.SHELF_SWIPE,
                 label = "Swipe between shelves",
                 gloss = "Flick left or right in your Library to move to the next shelf.",
-                checked = shelfSwipeEnabledChecked,
+                toggle = settingsSwitchToggle(
+                    key = DisplayToggle.SHELF_SWIPE.name,
+                    label = "Swipe between shelves",
+                    checked = shelfSwipeEnabledChecked,
+                ),
             ),
         )
     }
@@ -44,7 +53,11 @@ internal fun displayToggleRowsFor(
             key = DisplayToggle.READING_STREAK,
             label = "Reading streak",
             gloss = "Count the days you read in a row, shown on your profile.",
-            checked = readingStreakEnabledChecked,
+            toggle = settingsSwitchToggle(
+                key = DisplayToggle.READING_STREAK.name,
+                label = "Reading streak",
+                checked = readingStreakEnabledChecked,
+            ),
         ),
     )
 }.toImmutableList()

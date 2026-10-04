@@ -68,7 +68,7 @@ class ArrangeSheetSnapshotTest {
             val snapshot = ArrangeSheetSnapshot.from(state = state)
 
             // ----- Assert -----
-            snapshot.titlesToggle.shouldNotBeNull().checked shouldBe true
+            snapshot.titlesToggle.shouldNotBeNull().toggle.checked shouldBe true
         }
 
         @Test
@@ -82,7 +82,7 @@ class ArrangeSheetSnapshotTest {
             val snapshot = ArrangeSheetSnapshot.from(state = state)
 
             // ----- Assert -----
-            snapshot.titlesToggle.shouldNotBeNull().checked shouldBe false
+            snapshot.titlesToggle.shouldNotBeNull().toggle.checked shouldBe false
         }
     }
 

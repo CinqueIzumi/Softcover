@@ -8,10 +8,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
+import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -52,6 +55,23 @@ class OnListToggleActionTest {
         }
     }
 
+    private fun stubBookList(
+        id: Int,
+        name: String,
+    ): BookList = mockk {
+        every {
+            this@mockk.id
+        } returns id
+
+        every {
+            this@mockk.name
+        } returns name
+
+        every {
+            this@mockk.books
+        } returns emptyList()
+    }
+
     @Nested
     inner class Execute {
         @Test
@@ -75,6 +95,38 @@ class OnListToggleActionTest {
 
             // ----- Assert -----
             stateFlow.value.draftEnabledListIds shouldBe setOf(10, 20)
+        }
+
+        @Test
+        fun `rebuilds orderedEntries so the toggled list entry reflects the new checked state`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                availableLists = listOf(
+                    stubBookList(
+                        id = 20,
+                        name = "Favourites",
+                    ),
+                ),
+                draftEnabledListIds = emptySet(),
+                initialized = true,
+            ).withOrderedEntries()
+            val dependencies = stubDependencies(this)
+            val action = OnListToggleAction(
+                id = 20,
+                enabled = true,
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            val entry = stateFlow.value.orderedEntries
+                .filterIsInstance<LibraryTabEntry.CustomList>()
+                .single()
+            entry.listVisibilityToggle.checked shouldBe true
         }
 
         @Test

@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -23,6 +23,8 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.model.ModalSheetForm
 import nl.rhaydus.designsystem.theme.StandardPreview
+import nl.rhaydus.softcover.core.component.control.SegmentedControl
+import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldContent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
@@ -77,23 +79,7 @@ private fun ProgressBottomSheetContent(
 ) {
     val medium = model.medium
 
-    // Percentage entry needs a known total to convert a fraction into pages (or seconds); without one
-    // it can only ever record 0, so it's offered only when that total is known. The primary unit —
-    // time for an audiobook, pages otherwise — always stays, allowing free entry even with no total.
-    val primaryTab = when (medium) {
-        is ProgressSheetMedium.Timed -> ProgressSheetTab.TIME
-        is ProgressSheetMedium.Paged -> ProgressSheetTab.PAGE
-    }
-
-    val visibleTabs = if (medium.hasKnownTotal) {
-        listOf(primaryTab, ProgressSheetTab.PERCENTAGE)
-    } else {
-        listOf(primaryTab)
-    }
-
-    // A stored unit that isn't valid for this book (e.g. PAGE on an audiobook) falls back to the
-    // primary tab, which is always the first visible one.
-    val activeTab = if (model.selectedTab in visibleTabs) model.selectedTab else primaryTab
+    val activeTab = model.selectedTab
 
     val focusManager = LocalFocusManager.current
 
@@ -120,10 +106,14 @@ private fun ProgressBottomSheetContent(
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             },
     ) {
-        TabSwitcher(
-            activeTab = activeTab,
-            visibleTabs = visibleTabs,
-            onEvent = onEvent,
+        SegmentedControl(
+            model = model.tabs,
+            onEvent = { event ->
+                when (event) {
+                    is SegmentedControlEvent.Selected -> onEvent(ProgressSheetEvent.TabSelected(tab = event.key))
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
         )
 
         Spacer(modifier = Modifier.height(24.dp))

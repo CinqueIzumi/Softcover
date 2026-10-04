@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.layout.FlowRowExpansion
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
@@ -36,6 +37,7 @@ internal fun TagEditorAddBlock(
     selectedCategory: TagCategory,
     categoryChips: List<ChipUiModel>,
     draft: String,
+    addPill: PillButtonUiModel,
     suggestionChips: List<ChipUiModel>,
     onCategoryChipEvent: (ChipEvent) -> Unit,
     onDraftChange: (String) -> Unit,
@@ -61,6 +63,7 @@ internal fun TagEditorAddBlock(
         TagNamingField(
             draft = draft,
             placeholder = selectedCategory.namingHint,
+            addPill = addPill,
             onDraftChange = onDraftChange,
             onCommit = onCommit,
         )

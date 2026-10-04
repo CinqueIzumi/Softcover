@@ -8,11 +8,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.settings.presentation.event.LibraryVisibilitySettingsEvent
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVisibilitySettingsDependencies
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -75,6 +78,34 @@ class OnReorderLibraryTabsActionTest {
 
             // ----- Assert -----
             stateFlow.value.draftTabOrder shouldBe newOrder
+        }
+
+        @Test
+        fun `rebuilds orderedEntries following the supplied order`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(initialized = true).withOrderedEntries()
+            val dependencies = stubDependencies(this)
+            val readId = LibraryTab.Status.idFor(status = UserBookStatus.READ)
+            val wantToReadId = LibraryTab.Status.idFor(status = UserBookStatus.WANT_TO_READ)
+            val action = OnReorderLibraryTabsAction(
+                newOrderedIds = listOf(
+                    readId,
+                    wantToReadId,
+                ),
+            )
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.orderedEntries.take(3).map { it.id } shouldBe listOf(
+                LibraryTabEntry.ALL_ID,
+                readId,
+                wantToReadId,
+            )
         }
 
         @Test

@@ -27,8 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.control.Toggle
+import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -47,11 +48,11 @@ private const val HIDDEN_ROW_ALPHA = 0.52f
 @Composable
 internal fun ReorderableRow(
     entry: LibraryTabEntry,
-    hidden: Boolean,
     isDragging: Boolean,
-    onToggle: () -> Unit,
+    onToggle: (ToggleEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val hidden = entry.visibilityToggle?.checked == false
     val playMotion = playDecorativeMotion()
 
     val rowBackground by animateColorAsState(
@@ -98,11 +99,10 @@ internal fun ReorderableRow(
             )
         }
 
-        if (entry.canHide) {
-            EyeToggle(
-                hidden = hidden,
-                label = entry.label,
-                onClick = onToggle,
+        entry.visibilityToggle?.let { visibilityToggle ->
+            Toggle(
+                model = visibilityToggle,
+                onEvent = onToggle,
             )
         }
     }
@@ -204,42 +204,4 @@ private fun RowCountLine(
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-}
-
-/**
- * The trailing 38dp circular visibility toggle — the single control that shows/hides a row, replacing
- * both the old per-row `Switch` and the (already-absent) overflow menu. Mirrors the tag editor sheet's
- * spoiler-toggle eye affordance: hand-cursor + press-scale + a [DesktopTooltip]-carried label.
- */
-@Composable
-private fun EyeToggle(
-    hidden: Boolean,
-    label: String,
-    onClick: () -> Unit,
-) {
-    val description = if (hidden) "Show $label on the library tabs" else "Hide $label from the library tabs"
-    val icon = if (hidden) SoftcoverIcon.VisibilityOff else SoftcoverIcon.Visibility
-    val tint = if (hidden) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary
-    val resolvedIcon = drawableIconResource(
-        icon = icon,
-        contentDescription = description,
-    )
-
-    DesktopTooltip(text = description) {
-        Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(CircleShape)
-                .pointerHandCursor()
-                .pressScaleClickable(onClick = onClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = resolvedIcon.getIconPainter(),
-                contentDescription = resolvedIcon.contentDescription,
-                tint = tint,
-                modifier = Modifier.size(20.dp),
-            )
-        }
-    }
 }

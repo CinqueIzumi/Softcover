@@ -14,6 +14,11 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
+import nl.rhaydus.softcover.core.component.button.PillButton
+import nl.rhaydus.softcover.core.component.button.PillButtonContent
+import nl.rhaydus.softcover.core.component.button.PillButtonInteraction
+import nl.rhaydus.softcover.core.component.button.PillButtonTone
+import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipFace
 import nl.rhaydus.softcover.core.component.chip.ChipInteraction
@@ -63,6 +68,21 @@ internal val headerEntries: ImmutableList<GalleryEntry> = persistentListOf(
         content = { model, modifier ->
             Chip(
                 model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "PillButton",
+        family = GalleryFamily.BUTTON,
+        blurb = "A fixed-height action pill — label or icon-only circle — in tonal, accent, " +
+            "filled, outlined and quiet tones, with an optional active dot.",
+        previews = PillButtonUiModel,
+        label = ::pillButtonFixtureLabel,
+        content = { model, modifier ->
+            PillButton(
+                model = model,
+                onEvent = {},
                 modifier = modifier,
             )
         },
@@ -221,6 +241,16 @@ private fun chipFixtureLabel(model: ChipUiModel): String = when {
 }
 
 private const val CHIP_LONG_LABEL_FLOOR = 30
+
+private fun pillButtonFixtureLabel(model: PillButtonUiModel): String = when {
+    model.interaction == PillButtonInteraction.Disabled -> "Disabled"
+    model.indicator -> "With indicator"
+    model.content is PillButtonContent.IconOnly -> "Icon only"
+    model.tone == PillButtonTone.Accent -> "Accent"
+    model.tone == PillButtonTone.Filled -> "Filled"
+    model.tone == PillButtonTone.Outlined -> "Outlined"
+    else -> "Tonal"
+}
 
 /** Names what a [BadgeUiModel] fixture demonstrates — its icon or size when that differs, else its tone. */
 private fun badgeFixtureLabel(model: BadgeUiModel): String = when {

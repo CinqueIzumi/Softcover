@@ -1,0 +1,377 @@
+package nl.rhaydus.softcover.feature.settings.presentation.model
+
+import io.kotest.inspectors.forAll
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
+import io.mockk.mockk
+import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.UserBookStatus
+import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
+import nl.rhaydus.softcover.feature.settings.presentation.state.withOrderedEntries
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class LibraryTabEntryBuilderTest {
+    private fun stubBookList(
+        id: Int,
+        name: String,
+        bookCount: Int = 0,
+    ): BookList = mockk {
+        every {
+            this@mockk.id
+        } returns id
+
+        every {
+            this@mockk.name
+        } returns name
+
+        every {
+            this@mockk.books
+        } returns List(bookCount) { mockk() }
+    }
+
+    private fun build(
+        statusCounts: Map<Int, Int> = emptyMap(),
+        totalCount: Int = 0,
+        availableLists: List<BookList> = emptyList(),
+        draftEnabledStatusCodes: Set<Int> = emptySet(),
+        draftEnabledListIds: Set<Int> = emptySet(),
+        draftTabOrder: List<String> = emptyList(),
+    ): List<LibraryTabEntry> = buildLibraryTabEntries(
+        statusCounts = statusCounts,
+        totalCount = totalCount,
+        availableLists = availableLists,
+        draftEnabledStatusCodes = draftEnabledStatusCodes,
+        draftEnabledListIds = draftEnabledListIds,
+        draftTabOrder = draftTabOrder,
+    )
+
+    @Nested
+    inner class DefaultOrder {
+        @Test
+        fun `returns default status order followed by lists sorted by name when draftTabOrder is empty`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                stubBookList(
+                    id = 3,
+                    name = "Zebra",
+                ),
+                stubBookList(
+                    id = 1,
+                    name = "Alpha",
+                ),
+                stubBookList(
+                    id = 2,
+                    name = "Middle",
+                ),
+            )
+
+            // ----- Act -----
+            val entries = build(availableLists = lists)
+
+            // ----- Assert -----
+            entries.filterIsInstance<LibraryTabEntry.Status>().map { it.status } shouldBe listOf(
+                UserBookStatus.CURRENTLY_READING,
+                UserBookStatus.WANT_TO_READ,
+                UserBookStatus.READ,
+                UserBookStatus.DID_NOT_FINISH,
+            )
+            entries.filterIsInstance<LibraryTabEntry.CustomList>().map { it.listName } shouldBe listOf(
+                "Alpha",
+                "Middle",
+                "Zebra",
+            )
+        }
+
+        @Test
+        fun `list sort is case-insensitive`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                stubBookList(
+                    id = 1,
+                    name = "Beta",
+                ),
+                stubBookList(
+                    id = 2,
+                    name = "alpha",
+                ),
+            )
+
+            // ----- Act -----
+            val entries = build(availableLists = lists)
+
+            // ----- Assert -----
+            entries.filterIsInstance<LibraryTabEntry.CustomList>().map { it.listName } shouldBe listOf(
+                "alpha",
+                "Beta",
+            )
+        }
+
+        @Test
+        fun `status entries always precede list entries`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                stubBookList(
+                    id = 1,
+                    name = "MyList",
+                ),
+            )
+
+            // ----- Act -----
+            val entries = build(availableLists = lists)
+
+            // ----- Assert -----
+            val firstListIndex = entries.indexOfFirst { it is LibraryTabEntry.CustomList }
+            val lastStatusIndex = entries.indexOfLast { it is LibraryTabEntry.Status }
+            (lastStatusIndex < firstListIndex) shouldBe true
+        }
+
+        @Test
+        fun `first entry is All with count equal to totalCount`() {
+            // ----- Act -----
+            val entries = build(totalCount = 42)
+
+            // ----- Assert -----
+            entries[0].shouldBeInstanceOf<LibraryTabEntry.All>()
+            entries[0].count shouldBe 42
+        }
+
+        @Test
+        fun `returns only All and the four statuses when there are no lists`() {
+            // ----- Act -----
+            val entries = build()
+
+            // ----- Assert -----
+            entries.size shouldBe 5
+        }
+    }
+
+    @Nested
+    inner class DraftTabOrder {
+        @Test
+        fun `known ids reorder entries accordingly`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                stubBookList(
+                    id = 1,
+                    name = "Alpha",
+                ),
+                stubBookList(
+                    id = 2,
+                    name = "Beta",
+                ),
+            )
+            val order = listOf(
+                "list-2",
+                "status-${UserBookStatus.READ.code}",
+                "list-1",
+            )
+
+            // ----- Act -----
+            val entries = build(
+                availableLists = lists,
+                draftTabOrder = order,
+            )
+
+            // ----- Assert -----
+            entries[0].shouldBeInstanceOf<LibraryTabEntry.All>()
+            (entries[1] as LibraryTabEntry.CustomList).listId shouldBe 2
+            (entries[2] as LibraryTabEntry.Status).status shouldBe UserBookStatus.READ
+            (entries[3] as LibraryTabEntry.CustomList).listId shouldBe 1
+        }
+
+        @Test
+        fun `unknown ids are ignored`() {
+            // ----- Act -----
+            val entries = build(
+                draftTabOrder = listOf(
+                    "unknown-id-1",
+                    "unknown-id-2",
+                ),
+            )
+
+            // ----- Assert -----
+            entries.size shouldBe 5
+            entries.none { it.id == "unknown-id-1" } shouldBe true
+            entries.none { it.id == "unknown-id-2" } shouldBe true
+        }
+
+        @Test
+        fun `entries missing from the order are appended in default order`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                stubBookList(
+                    id = 1,
+                    name = "Alpha",
+                ),
+                stubBookList(
+                    id = 2,
+                    name = "Beta",
+                ),
+            )
+
+            // ----- Act -----
+            val entries = build(
+                availableLists = lists,
+                draftTabOrder = listOf("list-2"),
+            )
+
+            // ----- Assert -----
+            entries[1].id shouldBe "list-2"
+            entries.filterIsInstance<LibraryTabEntry.CustomList>().map { it.listId } shouldBe listOf(
+                2,
+                1,
+            )
+            entries.size shouldBe 7
+        }
+    }
+
+    @Nested
+    inner class Counts {
+        @Test
+        fun `count, isReorderable, canHide and isList are populated correctly per entry kind`() {
+            // ----- Arrange -----
+            val statusCounts = mapOf(
+                UserBookStatus.CURRENTLY_READING.code to 3,
+                UserBookStatus.WANT_TO_READ.code to 5,
+                UserBookStatus.READ.code to 11,
+                UserBookStatus.DID_NOT_FINISH.code to 2,
+            )
+            val list = stubBookList(
+                id = 1,
+                name = "MyList",
+                bookCount = 7,
+            )
+
+            // ----- Act -----
+            val entries = build(
+                availableLists = listOf(list),
+                statusCounts = statusCounts,
+                totalCount = 21,
+            )
+
+            // ----- Assert -----
+            val allEntry = entries[0] as LibraryTabEntry.All
+            allEntry.isReorderable shouldBe false
+            allEntry.canHide shouldBe false
+            allEntry.isList shouldBe false
+            allEntry.count shouldBe 21
+
+            val statuses = entries.filterIsInstance<LibraryTabEntry.Status>()
+            statuses.map { it.count } shouldBe listOf(
+                3,
+                5,
+                11,
+                2,
+            )
+            statuses.forAll { it.isReorderable shouldBe true }
+            statuses.filterNot { it.status == UserBookStatus.CURRENTLY_READING }.forAll { it.canHide shouldBe true }
+            statuses.first { it.status == UserBookStatus.CURRENTLY_READING }.canHide shouldBe false
+
+            val listEntry = entries.filterIsInstance<LibraryTabEntry.CustomList>().single()
+            listEntry.isList shouldBe true
+            listEntry.canHide shouldBe true
+            listEntry.count shouldBe 7
+        }
+
+        @Test
+        fun `status missing from statusCounts counts as zero`() {
+            // ----- Act -----
+            val entries = build(statusCounts = mapOf(UserBookStatus.READ.code to 4))
+
+            // ----- Assert -----
+            entries
+                .filterIsInstance<LibraryTabEntry.Status>()
+                .associate { it.status to it.count } shouldBe mapOf(
+                UserBookStatus.CURRENTLY_READING to 0,
+                UserBookStatus.WANT_TO_READ to 0,
+                UserBookStatus.READ to 4,
+                UserBookStatus.DID_NOT_FINISH to 0,
+            )
+        }
+    }
+
+    @Nested
+    inner class Toggles {
+        @Test
+        fun `status toggle checked follows draftEnabledStatusCodes`() {
+            // ----- Act -----
+            val entries = build(draftEnabledStatusCodes = setOf(UserBookStatus.READ.code))
+
+            // ----- Assert -----
+            val byStatus = entries.filterIsInstance<LibraryTabEntry.Status>().associateBy { it.status }
+            byStatus.getValue(UserBookStatus.READ).statusVisibilityToggle.shouldNotBeNull().checked shouldBe true
+            byStatus.getValue(UserBookStatus.WANT_TO_READ).statusVisibilityToggle.shouldNotBeNull().checked shouldBe false
+            byStatus.getValue(UserBookStatus.DID_NOT_FINISH).statusVisibilityToggle.shouldNotBeNull().checked shouldBe false
+        }
+
+        @Test
+        fun `always-visible status has no toggle even when its code is enabled`() {
+            // ----- Act -----
+            val entries = build(draftEnabledStatusCodes = setOf(UserBookStatus.CURRENTLY_READING.code))
+
+            // ----- Assert -----
+            val currentlyReading = entries
+                .filterIsInstance<LibraryTabEntry.Status>()
+                .single { it.status == UserBookStatus.CURRENTLY_READING }
+            currentlyReading.statusVisibilityToggle.shouldBeNull()
+        }
+
+        @Test
+        fun `All entry has no toggle`() {
+            // ----- Act -----
+            val entries = build()
+
+            // ----- Assert -----
+            entries[0].visibilityToggle.shouldBeNull()
+        }
+
+        @Test
+        fun `list toggle checked follows draftEnabledListIds`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                stubBookList(
+                    id = 1,
+                    name = "Alpha",
+                ),
+                stubBookList(
+                    id = 2,
+                    name = "Beta",
+                ),
+            )
+
+            // ----- Act -----
+            val entries = build(
+                availableLists = lists,
+                draftEnabledListIds = setOf(2),
+            )
+
+            // ----- Assert -----
+            val byId = entries.filterIsInstance<LibraryTabEntry.CustomList>().associateBy { it.listId }
+            byId.getValue(1).listVisibilityToggle.checked shouldBe false
+            byId.getValue(2).listVisibilityToggle.checked shouldBe true
+        }
+    }
+
+    @Nested
+    inner class WithOrderedEntries {
+        @Test
+        fun `fills orderedEntries from the state inputs`() {
+            // ----- Arrange -----
+            val state = LibraryVisibilitySettingsUiState(
+                totalCount = 8,
+                draftTabOrder = listOf("status-${UserBookStatus.READ.code}"),
+            )
+
+            // ----- Act -----
+            val result = state.withOrderedEntries()
+
+            // ----- Assert -----
+            result.orderedEntries[0].count shouldBe 8
+            result.orderedEntries[1].id shouldBe "status-${UserBookStatus.READ.code}"
+        }
+    }
+}

@@ -93,6 +93,46 @@ class OnSortModeChangeActionTest {
         }
 
         @Test
+        fun `closes the sort menu even when the mode is unchanged`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                sortMode = ExploreSortMode.RELEVANCE,
+                isSortMenuExpanded = true,
+            )
+            val action = OnSortModeChangeAction(mode = ExploreSortMode.RELEVANCE)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isSortMenuExpanded shouldBe false
+        }
+
+        @Test
+        fun `closes the sort menu when the mode changes`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            stateFlow.value = stateFlow.value.copy(
+                sortMode = ExploreSortMode.RELEVANCE,
+                isSortMenuExpanded = true,
+            )
+            val action = OnSortModeChangeAction(mode = ExploreSortMode.POPULARITY)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isSortMenuExpanded shouldBe false
+        }
+
+        @Test
         fun `updates sortMode without triggering a search when searchText is empty`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.control.Toggle
+import nl.rhaydus.softcover.core.component.control.ToggleEvent
+import nl.rhaydus.softcover.core.component.control.ToggleUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -64,6 +66,7 @@ private val GENDER_STACK_ALPHAS = listOf(1f, 0.82f, 0.64f)
 internal fun AuthorRepresentationSection(
     authorDemographics: AuthorDemographics,
     hideUntaggedAuthors: Boolean,
+    hideUntaggedAuthorsToggle: ToggleUiModel,
     canHideUntaggedAuthors: Boolean,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
@@ -82,7 +85,7 @@ internal fun AuthorRepresentationSection(
 
         if (canHideUntaggedAuthors && isLoading.not()) {
             HideUntaggedAuthorsToggle(
-                checked = hideUntaggedAuthors,
+                toggle = hideUntaggedAuthorsToggle,
                 onCheckedChange = onHideUntaggedAuthorsChange,
             )
 
@@ -162,7 +165,7 @@ internal fun AuthorRepresentationSection(
 // explanation, since "untagged" means something different per bar and a bare label couldn't say so.
 @Composable
 private fun HideUntaggedAuthorsToggle(
-    checked: Boolean,
+    toggle: ToggleUiModel,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
@@ -187,9 +190,13 @@ private fun HideUntaggedAuthorsToggle(
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
+        Toggle(
+            model = toggle,
+            onEvent = { event ->
+                when (event) {
+                    is ToggleEvent.Toggled -> onCheckedChange(event.checked)
+                }
+            },
         )
     }
 }

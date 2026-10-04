@@ -126,7 +126,6 @@ internal actual fun BookDetailScreenLayout(
             return@Scaffold
         }
 
-        val yoursEnabled = state.book?.userBook != null
 
         LazyColumn(
             modifier = Modifier
@@ -199,9 +198,8 @@ internal actual fun BookDetailScreenLayout(
 
             stickyHeader {
                 LensToggle(
-                    selectedLens = state.selectedLens,
+                    model = state.lensToggle,
                     onLensSelected = { lens -> runAction(OnLensSelectedAction(lens = lens)) },
-                    yoursEnabled = yoursEnabled,
                 )
             }
 

@@ -62,7 +62,7 @@ internal fun Book.toAlsoReadingCard(
                 eyebrow = eyebrow,
                 byline = byline(author = authorString),
             ),
-            trailing = BookCardTrailing.SetProgress(label = "Set progress"),
+            trailing = BookCardTrailing.SetProgress.labelled(label = "Set progress"),
             deadline = deadlineProgress?.toDeadlineSummaryUiModel(
                 dateStyle = dateStyle,
                 tone = DeadlineSummaryTone.OnSurface,

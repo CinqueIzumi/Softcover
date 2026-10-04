@@ -1,25 +1,20 @@
 package nl.rhaydus.softcover.feature.library.presentation.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -86,21 +81,22 @@ internal fun LibraryControlLine(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        FilterPillControl(
-            state = state,
-            tabId = currentTab.id,
-            runAction = runAction,
+        PillButton(
+            model = state.filterPillFor(tabId = currentTab.id),
+            onEvent = { runAction(OnFilterSheetExpandedChangeAction(expanded = true)) },
         )
 
-        if (canSelect(
+        val canSelectTab = canSelect(
             state = state,
             tab = currentTab,
         )
-        ) {
+
+        if (canSelectTab) {
             Spacer(modifier = Modifier.width(8.dp))
 
-            SelectCircleControl(
-                onClick = { runAction(OnEnterSelectionModeAction()) },
+            PillButton(
+                model = state.selectPill,
+                onEvent = { runAction(OnEnterSelectionModeAction()) },
             )
         }
     }
@@ -149,89 +145,6 @@ private fun SortLabelControl(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(16.dp),
             )
-        }
-    }
-}
-
-@Composable
-private fun FilterPillControl(
-    state: LibraryUiState,
-    tabId: String,
-    runAction: (LibraryAction) -> Unit,
-) {
-    val isActive = state.filtersFor(tabId = tabId).isEmpty.not()
-
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        shape = RoundedCornerShape(percent = 50),
-        onClick = { runAction(OnFilterSheetExpandedChangeAction(expanded = true)) },
-        modifier = Modifier
-            .pointerHandCursor()
-            .height(38.dp),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            val filterIcon = drawableIconResource(
-                icon = SoftcoverIcon.FilterList,
-                contentDescription = "",
-            )
-
-            Icon(
-                painter = filterIcon.getIconPainter(),
-                contentDescription = filterIcon.contentDescription,
-                modifier = Modifier.size(17.dp),
-            )
-
-            Spacer(modifier = Modifier.width(6.dp))
-
-            SoftcoverText(
-                text = "Filter",
-                style = MaterialTheme.typography.labelMedium,
-            )
-
-            if (isActive) {
-                Spacer(modifier = Modifier.width(6.dp))
-
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.inversePrimary,
-                            shape = RoundedCornerShape(percent = 50),
-                        ),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SelectCircleControl(onClick: () -> Unit) {
-    DesktopTooltip(text = "Select books") {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            shape = RoundedCornerShape(percent = 50),
-            onClick = onClick,
-            modifier = Modifier
-                .pointerHandCursor()
-                .size(38.dp),
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                val selectIcon = drawableIconResource(
-                    icon = SoftcoverIcon.CheckCircle,
-                    contentDescription = "Select books",
-                )
-
-                Icon(
-                    painter = selectIcon.getIconPainter(),
-                    contentDescription = selectIcon.contentDescription,
-                    modifier = Modifier.size(19.dp),
-                )
-            }
         }
     }
 }
