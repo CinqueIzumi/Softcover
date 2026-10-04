@@ -35,7 +35,6 @@ import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -114,7 +113,7 @@ private fun SessionPeekBarContent(
         // The flush desktop strip is led by a top hairline so it reads as docked chrome rather than
         // a card hovering over the page; the floating form needs none.
         if (flush) {
-            Divider(model = DividerUiModel.Horizontal())
+            Divider()
         }
 
         Surface(

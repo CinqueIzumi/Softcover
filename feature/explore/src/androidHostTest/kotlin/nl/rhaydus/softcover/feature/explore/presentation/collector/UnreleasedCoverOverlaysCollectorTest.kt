@@ -12,8 +12,8 @@ import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.uibinding.release.UnreleasedBadgeStyle
-import nl.rhaydus.softcover.core.uibinding.release.toUnreleasedBadgeUiModel
+import nl.rhaydus.softcover.core.uibinding.release.toCompactUnreleasedBadgeUiModel
+import nl.rhaydus.softcover.core.uibinding.release.toFeaturedUnreleasedBadgeUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -30,7 +30,7 @@ private val RELEASE_DATE = LocalDate(
 )
 
 private val EXPECTED_OVERLAY = CoverOverlayUiModel(
-    badge = RELEASE_DATE.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Compact),
+    badge = RELEASE_DATE.toCompactUnreleasedBadgeUiModel(),
     corner = CoverOverlayCorner.TopStart,
     grayscale = false,
 )
@@ -239,7 +239,7 @@ class UnreleasedCoverOverlaysCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.featuredReleaseBadge shouldBe RELEASE_DATE.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Featured)
+                stateFlow.value.featuredReleaseBadge shouldBe RELEASE_DATE.toFeaturedUnreleasedBadgeUiModel()
                 job.cancel()
             }
 
@@ -262,7 +262,7 @@ class UnreleasedCoverOverlaysCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.featuredReleaseBadge shouldBe RELEASE_DATE.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Featured)
+            stateFlow.value.featuredReleaseBadge shouldBe RELEASE_DATE.toFeaturedUnreleasedBadgeUiModel()
             job.cancel()
         }
 

@@ -2,15 +2,12 @@ package nl.rhaydus.softcover.core.component.divider
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.VerticalDivider as MaterialVerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,42 +17,21 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-private val DIVIDER_THICKNESS = 1.dp
-private val CENTER_GAP = 12.dp
-
 /** A hairline rule, bare or broken by a centred glyph or label. */
 @Composable
 fun Divider(
-    model: DividerUiModel,
     modifier: Modifier = Modifier,
+    ink: DividerInk = DividerInk.Outline,
+    center: DividerCenter? = null,
 ) {
-    when (model) {
-        is DividerUiModel.Horizontal -> HorizontalDividerScaffold(
-            model = model,
-            modifier = modifier,
-        )
-
-        is DividerUiModel.Vertical -> VerticalDividerScaffold(
-            model = model,
-            modifier = modifier,
-        )
-    }
-}
-
-@Composable
-private fun HorizontalDividerScaffold(
-    model: DividerUiModel.Horizontal,
-    modifier: Modifier,
-) {
-    val color = model.ink.resolve(
+    val color = ink.resolve(
         colorScheme = MaterialTheme.colorScheme,
         contentColor = LocalContentColor.current,
     )
 
-    if (model.center == null) {
+    if (center == null) {
         HorizontalDivider(
-            modifier = modifier.padding(horizontal = model.inset),
-            thickness = DIVIDER_THICKNESS,
+            modifier = modifier,
             color = color,
         )
         return
@@ -63,25 +39,38 @@ private fun HorizontalDividerScaffold(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(CENTER_GAP),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = model.inset),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier.fillMaxWidth(),
     ) {
         HorizontalDivider(
             color = color,
-            thickness = DIVIDER_THICKNESS,
             modifier = Modifier.weight(1f),
         )
 
-        DividerCenterContent(center = model.center)
+        DividerCenterContent(center = center)
 
         HorizontalDivider(
             color = color,
-            thickness = DIVIDER_THICKNESS,
             modifier = Modifier.weight(1f),
         )
     }
+}
+
+/** A vertical hairline rule; it fills the available height unless the caller sets one. */
+@Composable
+fun VerticalDivider(
+    modifier: Modifier = Modifier,
+    ink: DividerInk = DividerInk.Outline,
+) {
+    val color = ink.resolve(
+        colorScheme = MaterialTheme.colorScheme,
+        contentColor = LocalContentColor.current,
+    )
+
+    MaterialVerticalDivider(
+        modifier = modifier,
+        color = color,
+    )
 }
 
 @Composable
@@ -117,23 +106,5 @@ private fun DividerLabel(text: String) {
         text = text.uppercase(),
         style = MaterialTheme.editorialTypography.eyebrowSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-@Composable
-private fun VerticalDividerScaffold(
-    model: DividerUiModel.Vertical,
-    modifier: Modifier,
-) {
-    val color = model.ink.resolve(
-        colorScheme = MaterialTheme.colorScheme,
-        contentColor = LocalContentColor.current,
-    )
-    val length = model.length
-
-    VerticalDivider(
-        modifier = if (length != null) modifier.height(length) else modifier.fillMaxHeight(),
-        thickness = DIVIDER_THICKNESS,
-        color = color,
     )
 }

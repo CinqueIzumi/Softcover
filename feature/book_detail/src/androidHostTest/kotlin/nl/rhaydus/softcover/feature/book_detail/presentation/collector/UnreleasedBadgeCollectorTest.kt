@@ -10,8 +10,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.uibinding.release.UnreleasedBadgeStyle
-import nl.rhaydus.softcover.core.uibinding.release.toUnreleasedBadgeUiModel
+import nl.rhaydus.softcover.core.uibinding.release.toProminentUnreleasedBadgeUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -78,7 +77,7 @@ class UnreleasedBadgeCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.unreleasedBadge shouldBe RELEASE_DATE.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Prominent)
+                stateFlow.value.unreleasedBadge shouldBe RELEASE_DATE.toProminentUnreleasedBadgeUiModel()
                 job.cancel()
             }
 

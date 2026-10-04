@@ -38,7 +38,6 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 
 @Composable
@@ -130,7 +129,7 @@ internal fun SheetScaffoldContent(
             if (spec.footerSeparated) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Divider(model = DividerUiModel.Horizontal())
+                Divider()
 
                 Spacer(modifier = Modifier.height(12.dp))
             } else {

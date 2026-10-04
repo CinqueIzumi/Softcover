@@ -15,9 +15,9 @@ class UnreleasedMapperTest {
     )
 
     @Test
-    fun `Compact style maps to a Compact release badge with an Out-prefixed compact date`() {
+    fun `Compact mapper maps to a Compact release badge with an Out-prefixed compact date`() {
         // ----- Act -----
-        val result = date.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Compact)
+        val result = date.toCompactUnreleasedBadgeUiModel()
 
         // ----- Assert -----
         result shouldBe BadgeUiModel(
@@ -28,9 +28,9 @@ class UnreleasedMapperTest {
     }
 
     @Test
-    fun `Prominent style maps to a Compact release badge with a Releases-prefixed long date`() {
+    fun `Prominent mapper maps to a Compact release badge with a Releases-prefixed long date`() {
         // ----- Act -----
-        val result = date.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Prominent)
+        val result = date.toProminentUnreleasedBadgeUiModel()
 
         // ----- Assert -----
         result shouldBe BadgeUiModel(
@@ -41,9 +41,9 @@ class UnreleasedMapperTest {
     }
 
     @Test
-    fun `Featured style maps to a Regular badge with an Arriving-prefixed compact date`() {
+    fun `Featured mapper maps to a Regular badge with an Arriving-prefixed compact date`() {
         // ----- Act -----
-        val result = date.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Featured)
+        val result = date.toFeaturedUnreleasedBadgeUiModel()
 
         // ----- Assert -----
         result shouldBe BadgeUiModel(

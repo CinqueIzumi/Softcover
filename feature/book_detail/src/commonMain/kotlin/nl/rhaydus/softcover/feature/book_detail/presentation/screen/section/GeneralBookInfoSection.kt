@@ -45,7 +45,6 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -70,7 +69,6 @@ internal fun GeneralBookInfoSection(
     ownedCoverBadge: BadgeUiModel?,
     onCoverClick: () -> Unit,
 ) {
-    val divider = DividerUiModel.Horizontal(ink = DividerInk.OnImage(alpha = 0.3f))
     val imageHeight = with(LocalDensity.current) {
         (LocalWindowInfo.current.containerSize.height * 0.3f).toDp()
     }
@@ -256,7 +254,7 @@ internal fun GeneralBookInfoSection(
                 if (showRating || showLength) {
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Divider(model = divider)
+                    Divider(ink = DividerInk.OnImage)
 
                     Spacer(modifier = Modifier.height(8.dp))
 

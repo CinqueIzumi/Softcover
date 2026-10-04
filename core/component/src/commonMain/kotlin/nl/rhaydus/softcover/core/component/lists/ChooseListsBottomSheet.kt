@@ -47,7 +47,6 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.state.EmptyState
@@ -140,7 +139,7 @@ private fun ChooseListsRow(
     val interactionSource = remember { MutableInteractionSource() }
 
     Column {
-        Divider(model = DividerUiModel.Horizontal())
+        Divider()
 
         Row(
             modifier = Modifier

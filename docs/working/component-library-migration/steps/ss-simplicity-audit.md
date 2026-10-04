@@ -39,7 +39,7 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 | Sub | Scope (`:core:component` packages + their mappers, state and call sites; ~lines) | Status |
 |---|---|---|
 | SS-0 | Regenerate this table from the code (Procedure) | [x] |
-| SS-1 | `chip`, `badge`, `divider`, `selection`, `shape`, `text`, `ComponentAlpha.kt`; uibinding `release` (`UnreleasedBadgeStyle`) — ~1.6k | [ ] |
+| SS-1 | `chip`, `badge`, `divider`, `selection`, `shape`, `text`, `ComponentAlpha.kt`; uibinding `release` (`UnreleasedBadgeStyle`) — ~1.6k | [x] |
 | SS-2 | `header`, `topbar`, `chrome`, `sidebar`; explore `HiddenGroupHeaderUiModel` — ~1.8k | [ ] |
 | SS-3 | `bookcard`; uibinding `book` — ~1.8k | [ ] |
 | SS-4 | `cover`, `lists`; uibinding `cover` (all platforms), `lists`; library `ArrangeMakeOrderedUiModel` — ~2.1k | [ ] |
@@ -52,3 +52,14 @@ visual change unless the user accepts it (log it in [`visual-checks.md`](../visu
 | SS-11 | `gallery`; uibinding `date`, `format`, `theme` — ~1.5k | [ ] |
 
 Out of scope: `core/domain` `BottomBarStyle` and `DateStyle` are stored preferences, not UI types.
+
+## Approved shape
+
+SS-1:
+- `chip`: delete `ChipDimensions` (dp inline, padding a private `when` on `ChipSize`), `ChipGapPosition` and the slot `gap` (slots place their own 8 dp `Spacer`), `ChipScaffold`'s `tappable`, `ChipBorder` (`thenChipBorder` branches on tone), Outlined's restated `mutedInk`, `ChipLeading.Icon.description`, private `ChipShape` (→ `PillShape`); dash dp inline.
+- `badge`: delete `BadgeDimensions` and `CoverOverlayDimensions`; values inline.
+- `selection`: delete `SelectionMarkColors`; one `when` for the mark colour, check tinted `onPrimary`; sizes inline.
+- `divider`: no model — `Divider(...)` / `VerticalDivider(...)` with defaulted params, Material's default thickness, no `inset` / `length` (callers use `Modifier`); `DividerInk.ContentTint` / `OnImage` become objects with fixed alpha; `SettingsScreenUiState.versionFooterDivider` goes; `component-contract.md` § 7.4a says a data-free primitive takes defaulted params, no model.
+- `text`: `SoftcoverText`'s String overload forwards to the AnnotatedString one; the private layout layer goes.
+- uibinding `release`: `UnreleasedBadgeStyle` → three named mappers in `UnreleasedMapper.kt`.
+- Kept: Choice chip's Medium → SemiBold on select. Deferred: `ChipSet` + `PillButtonSet` (SS-6); gallery label functions (SS-11); stray pill shapes (SS-6 / SS-4).

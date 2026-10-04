@@ -11,8 +11,6 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import nl.rhaydus.common.AppDispatchers
-import nl.rhaydus.softcover.core.component.divider.DividerCenter
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.domain.app.AppVersionInfo
 import nl.rhaydus.softcover.core.domain.app.AppVersionProvider
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -83,7 +81,7 @@ class SettingsScreenScreenModelTest {
         }
 
         @Test
-        fun `initial state builds versionFooterDivider label from AppVersionProvider name and code`() {
+        fun `initial state builds versionLabel from AppVersionProvider name and code`() {
             // ----- Arrange -----
             val appVersionProvider = mockk<AppVersionProvider>()
 
@@ -122,9 +120,7 @@ class SettingsScreenScreenModelTest {
             )
 
             // ----- Assert -----
-            screenModel.state.value.versionFooterDivider shouldBe DividerUiModel.Horizontal(
-                center = DividerCenter.Label(text = "Version 9.9.9 (42)"),
-            )
+            screenModel.state.value.versionLabel shouldBe "Version 9.9.9 (42)"
         }
 
         @Test

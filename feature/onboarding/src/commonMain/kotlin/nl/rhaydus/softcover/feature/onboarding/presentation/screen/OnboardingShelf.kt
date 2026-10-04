@@ -41,7 +41,6 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
@@ -127,7 +126,7 @@ internal fun ApiKeyEntryContent(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        Divider(model = DividerUiModel.Horizontal(center = DividerCenter.Label(text = "Or type it")))
+        Divider(center = DividerCenter.Label(text = "Or type it"))
 
         Spacer(modifier = Modifier.height(18.dp))
 
@@ -310,7 +309,7 @@ private fun HelperLine(openUrl: (String) -> Unit) {
 @Composable
 private fun WhereToFindItExplainer() {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Divider(model = DividerUiModel.Horizontal())
+        Divider()
 
         Spacer(modifier = Modifier.height(16.dp))
 

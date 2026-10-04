@@ -25,7 +25,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -56,7 +55,7 @@ fun DebugRoutesSection(host: Screen) {
                     onClick = { navigator.parent?.push(ShareCardDebugScreen) },
                 )
 
-                Divider(model = DividerUiModel.Horizontal(inset = 20.dp))
+                Divider(modifier = Modifier.padding(horizontal = 20.dp))
 
                 DebugNavigationRow(
                     title = "Motion & haptics",

@@ -30,7 +30,7 @@ and app `foundations.md` § 2.4 (4/8, 12/16, 20/24, 28/32, 40/48).
      hairline step exists.
    - Where the object lives: `:core:designsystem`, and an entry in
      `docs/working/foundation-upstream-candidates.md`, since § 5.1 describes the scale without shipping it.
-   - Scope: spacing only. Component sizes (heights, icon sizes), strokes and corner radii stay literal.
+   - Scope: spacing only. Component sizes (heights, icon sizes), strokes stay literal; corner radii belong to [SH](sh-shape-scale.md).
      The approved shape records the line between them.
    - The gate: a detekt or ktlint rule that fails on a dp literal in a spacing call outside the token
      file.

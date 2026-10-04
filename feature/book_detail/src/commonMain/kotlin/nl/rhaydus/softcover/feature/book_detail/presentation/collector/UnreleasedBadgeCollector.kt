@@ -3,8 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import nl.rhaydus.softcover.core.uibinding.release.UnreleasedBadgeStyle
-import nl.rhaydus.softcover.core.uibinding.release.toUnreleasedBadgeUiModel
+import nl.rhaydus.softcover.core.uibinding.release.toProminentUnreleasedBadgeUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -30,7 +29,7 @@ internal class UnreleasedBadgeCollector : BookDetailCollector {
                 val badge = book
                     ?.takeIf { it.isUnreleased }
                     ?.effectiveReleaseDate
-                    ?.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Prominent)
+                    ?.toProminentUnreleasedBadgeUiModel()
 
                 scope.setState { state ->
                     state.copy(unreleasedBadge = badge)

@@ -23,5 +23,4 @@ literalism trap but for file layout instead of dp/colour values.
 **How to apply:** before writing a style-table file, check whether it needs
 an ink/token sealed type and a style data class — if so, split it into two
 files (`FooInk.kt` for the token + its resolver, `FooStyle.kt` for the data
-class + its per-variant lookup) from the start, matching existing precedent
-(`core/component/.../chip/ChipStyle.kt` + `ChipBorder.kt`).
+class + its per-variant lookup) from the start.

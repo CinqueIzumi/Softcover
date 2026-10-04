@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryLine
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.EditorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -51,7 +50,7 @@ internal fun BookCardRowLayout(
                 isLoading = isLoading,
             ),
     ) {
-        Divider(model = DividerUiModel.Horizontal())
+        Divider()
 
         Column(
             modifier = Modifier.padding(

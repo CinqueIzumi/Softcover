@@ -7,21 +7,33 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.uibinding.date.formatCompactDate
 import nl.rhaydus.softcover.core.uibinding.date.formatLongDate
 
-/**
- * A release date as the badge a caller wants to show for it. This does not check whether the date
- * is actually in the future — `Book.isUnreleased` is the one place that decides that, and callers
- * gate on it before reaching for [style] rather than comparing dates themselves.
- */
-fun LocalDate.toUnreleasedBadgeUiModel(style: UnreleasedBadgeStyle): BadgeUiModel {
-    val (label, size) = when (style) {
-        UnreleasedBadgeStyle.Compact -> "Out ${formatCompactDate()}" to BadgeSize.Compact
-        UnreleasedBadgeStyle.Prominent -> "Releases ${formatLongDate()}" to BadgeSize.Compact
-        UnreleasedBadgeStyle.Featured -> "Arriving ${formatCompactDate()}" to BadgeSize.Regular
-    }
+/** A short "Out <date>" badge in the compact size, for a cover overlay. */
+fun LocalDate.toCompactUnreleasedBadgeUiModel(): BadgeUiModel = unreleasedBadge(
+    label = "Out ${formatCompactDate()}",
+    size = BadgeSize.Compact,
+)
 
-    return BadgeUiModel(
-        label = label,
-        tone = BadgeTone.Primary,
-        size = size,
-    )
-}
+/** A "Releases <long date>" badge in the compact size, for a book's detail header. */
+fun LocalDate.toProminentUnreleasedBadgeUiModel(): BadgeUiModel = unreleasedBadge(
+    label = "Releases ${formatLongDate()}",
+    size = BadgeSize.Compact,
+)
+
+/** An "Arriving <date>" badge in the regular size, for a featured release. */
+fun LocalDate.toFeaturedUnreleasedBadgeUiModel(): BadgeUiModel = unreleasedBadge(
+    label = "Arriving ${formatCompactDate()}",
+    size = BadgeSize.Regular,
+)
+
+/**
+ * Shared by the three mappers above; none checks that the date is in the future — `Book.isUnreleased`
+ * decides that, and callers gate on it before mapping.
+ */
+private fun unreleasedBadge(
+    label: String,
+    size: BadgeSize,
+): BadgeUiModel = BadgeUiModel(
+    label = label,
+    tone = BadgeTone.Primary,
+    size = size,
+)

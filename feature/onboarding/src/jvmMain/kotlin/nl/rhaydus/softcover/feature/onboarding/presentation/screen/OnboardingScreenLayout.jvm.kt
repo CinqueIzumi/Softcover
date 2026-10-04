@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -107,7 +106,7 @@ internal actual fun OnboardingScreenLayout(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Divider(model = DividerUiModel.Horizontal())
+                    Divider()
 
                     Spacer(modifier = Modifier.height(32.dp))
 

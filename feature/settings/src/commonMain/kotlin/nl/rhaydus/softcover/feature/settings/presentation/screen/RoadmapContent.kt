@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
@@ -256,7 +255,7 @@ private fun RoadmapUnitContent(
             openUrl = openUrl,
         )
 
-        RoadmapRenderUnit.ThematicBreak -> Divider(model = DividerUiModel.Horizontal())
+        RoadmapRenderUnit.ThematicBreak -> Divider()
     }
 }
 

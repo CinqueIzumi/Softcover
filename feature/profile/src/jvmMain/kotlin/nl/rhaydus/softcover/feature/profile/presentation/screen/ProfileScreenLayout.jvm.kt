@@ -34,8 +34,7 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
@@ -226,7 +225,7 @@ private fun TwoColumnProfile(
             )
         }
 
-        Divider(model = DividerUiModel.Vertical())
+        VerticalDivider()
 
         Box(
             modifier = Modifier

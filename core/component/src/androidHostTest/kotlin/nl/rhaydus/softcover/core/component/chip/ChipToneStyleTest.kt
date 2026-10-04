@@ -78,38 +78,4 @@ class ChipToneStyleTest {
             (selected.container == unselected.container) shouldBe false
         }
     }
-
-    @Nested
-    inner class Borders {
-        @Test
-        fun `Outlined has a solid border and Dashed a dashed one`() {
-            // ----- Act -----
-            val outlined = ChipTone.Outlined.style(
-                scheme,
-                selected = false,
-            ).border
-            val dashed = ChipTone.Dashed.style(
-                scheme,
-                selected = false,
-            ).border
-
-            // ----- Assert -----
-            (outlined is ChipBorder.Solid) shouldBe true
-            (dashed is ChipBorder.Dashed) shouldBe true
-        }
-
-        @Test
-        fun `the filled tones have no border`() {
-            // ----- Act -----
-            val tones = listOf(ChipTone.Tonal, ChipTone.Filled, ChipTone.Container, ChipTone.Spoiler)
-
-            // ----- Assert -----
-            tones.forEach { tone ->
-                tone.style(
-                    scheme,
-                    selected = false,
-                ).border shouldBe ChipBorder.None
-            }
-        }
-    }
 }

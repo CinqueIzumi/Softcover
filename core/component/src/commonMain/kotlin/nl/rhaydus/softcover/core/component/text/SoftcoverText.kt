@@ -36,23 +36,21 @@ fun SoftcoverText(
     autoSize: TextAutoSize? = null,
     onTextLayout: ((TextLayoutResult) -> Unit)? = null,
 ) {
-    val isMasked = isLoading || text == null
-    val shown = if (isMasked) standIn else text.orEmpty()
-    val annotated = remember(shown) { AnnotatedString(shown) }
+    val annotated = remember(text) { text?.let(::AnnotatedString) }
 
-    SoftcoverTextLayout(
+    SoftcoverText(
         text = annotated,
-        isMasked = isMasked,
         modifier = modifier,
         style = style,
         color = color,
+        isLoading = isLoading,
+        standIn = standIn,
         textAlign = textAlign,
         maxLines = maxLines,
         minLines = minLines,
         overflow = overflow,
         softWrap = softWrap,
         autoSize = autoSize,
-        inlineContent = emptyMap(),
         onTextLayout = onTextLayout,
     )
 }
@@ -78,41 +76,8 @@ fun SoftcoverText(
     val isMasked = isLoading || text == null
     val standInText = remember(standIn) { AnnotatedString(standIn) }
 
-    SoftcoverTextLayout(
-        text = if (isMasked || text == null) standInText else text,
-        isMasked = isMasked,
-        modifier = modifier,
-        style = style,
-        color = color,
-        textAlign = textAlign,
-        maxLines = maxLines,
-        minLines = minLines,
-        overflow = overflow,
-        softWrap = softWrap,
-        autoSize = autoSize,
-        inlineContent = inlineContent,
-        onTextLayout = onTextLayout,
-    )
-}
-
-@Composable
-private fun SoftcoverTextLayout(
-    text: AnnotatedString,
-    isMasked: Boolean,
-    modifier: Modifier,
-    style: TextStyle,
-    color: Color,
-    textAlign: TextAlign?,
-    maxLines: Int,
-    minLines: Int,
-    overflow: TextOverflow,
-    softWrap: Boolean,
-    autoSize: TextAutoSize?,
-    inlineContent: Map<String, InlineTextContent>,
-    onTextLayout: ((TextLayoutResult) -> Unit)?,
-) {
     Text(
-        text = text,
+        text = if (isMasked || text == null) standInText else text,
         modifier = modifier.skeletonMask(visible = isMasked),
         style = style,
         color = color,

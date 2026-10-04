@@ -29,7 +29,6 @@ import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -174,7 +173,7 @@ private fun SearchFocusRecentRow(
             }
         }
 
-        Divider(model = DividerUiModel.Horizontal())
+        Divider()
     }
 }
 

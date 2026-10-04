@@ -8,6 +8,5 @@ internal data class ChipStyle(
     val container: Color,
     val ink: Color,
     val weight: FontWeight,
-    val border: ChipBorder = ChipBorder.None,
     val mutedInk: Color = ink,
 )

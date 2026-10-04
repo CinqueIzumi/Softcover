@@ -20,7 +20,6 @@ import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileEvent
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -109,7 +108,7 @@ internal fun SpineColourSection(
         if (supportsDynamicColor()) {
             Spacer(modifier = Modifier.height(20.dp))
 
-            Divider(model = DividerUiModel.Horizontal())
+            Divider()
 
             ToggleRow(
                 model = state.dynamicColorToggleRow.row,

@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -35,7 +34,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.section.Version
  */
 @Composable
 internal fun AboutContent(
-    versionFooterDivider: DividerUiModel,
+    versionLabel: String,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,
@@ -77,7 +76,7 @@ internal fun AboutContent(
         Spacer(modifier = Modifier.height(40.dp))
 
         VersionFooter(
-            divider = versionFooterDivider,
+            versionLabel = versionLabel,
             onSecretUnlocked = onComponentGalleryUnlocked,
         )
     }

@@ -28,8 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.softcover.core.component.callout.Callout
-import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarEvent
@@ -172,7 +171,7 @@ private fun TwoColumnContent(
             Spacer(modifier = Modifier.height(24.dp + bottomChromePadding()))
         }
 
-        Divider(model = DividerUiModel.Vertical())
+        VerticalDivider()
 
         NarrativeColumn(
             state = state,

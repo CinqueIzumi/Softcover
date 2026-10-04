@@ -11,7 +11,7 @@ the actual rule (never assert a value obtainable only by copying a literal out o
 the file's name.
 
 - A `tone/backdrop -> ColorScheme role` or `size -> dp/typography` lookup (`BadgeColors.of`,
-  `SelectionMarkColors.of`, `DividerInk.resolve`, `sectionHeaderToneColor`) is a style table even though it
+  `DividerInk.resolve`, `sectionHeaderToneColor`) is a style table even though it
   has a real `when` branch — delete it. The branch selects between literals, it doesn't compute anything.
 - A `width -> dp/sp/Int` function with floor/ceiling clamps and proportional interpolation
   (`monogramCoverMetrics`) or a `progress -> Float` easing/envelope function with real clamping

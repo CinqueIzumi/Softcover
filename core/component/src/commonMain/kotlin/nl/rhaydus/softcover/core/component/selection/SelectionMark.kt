@@ -27,21 +27,21 @@ fun SelectionMark(
     model: SelectionMarkUiModel,
     modifier: Modifier = Modifier,
 ) {
-    val colors = SelectionMarkColors.of(
-        selected = model.selected,
-        backdrop = model.backdrop,
-        scheme = MaterialTheme.colorScheme,
-    )
+    val scheme = MaterialTheme.colorScheme
+    val container = when {
+        model.selected -> scheme.primary
+        model.backdrop == SelectionMarkBackdrop.Image -> scheme.surface.copy(alpha = 0.72f)
+        else -> scheme.surfaceContainerHigh
+    }
 
     Surface(
         modifier = modifier
-            .size(MARK_SIZE)
+            .size(24.dp)
             .semantics {
                 selected = model.selected
                 stateDescription = if (model.selected) "Selected" else "Not selected"
             },
-        color = colors.container,
-        contentColor = colors.content,
+        color = container,
         shape = CircleShape,
     ) {
         if (model.selected) {
@@ -57,12 +57,10 @@ fun SelectionMark(
                 Icon(
                     painter = icon.getIconPainter(),
                     contentDescription = null,
-                    modifier = Modifier.size(CHECK_ICON_SIZE),
+                    tint = scheme.onPrimary,
+                    modifier = Modifier.size(16.dp),
                 )
             }
         }
     }
 }
-
-private val MARK_SIZE = 24.dp
-private val CHECK_ICON_SIZE = 16.dp

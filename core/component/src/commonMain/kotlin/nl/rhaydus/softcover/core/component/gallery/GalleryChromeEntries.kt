@@ -38,7 +38,7 @@ import nl.rhaydus.softcover.core.component.control.ThemePreviewTileUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.divider.DividerInk
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.progress.ProgressBarUiModel
 import nl.rhaydus.softcover.core.component.richtext.ClickableText
@@ -134,28 +134,59 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
             )
         },
     ),
-    galleryEntry(
+    GalleryEntry(
         name = "Divider",
         family = GalleryFamily.DIVIDER,
         blurb = "A hairline rule; anatomy and ink resolve per call site, from a plain row " +
             "break to a labelled or glyph-broken one, or a vertical pane separator.",
-        previews = DividerUiModel,
-        label = ::dividerFixtureLabel,
-        content = { model, modifier ->
-            val onDarkBackdrop = model is DividerUiModel.Horizontal &&
-                model.ink is DividerInk.OnImage
-            Box(
-                modifier = if (onDarkBackdrop) Modifier.background(Color.Black) else Modifier,
-            ) {
-                Divider(
-                    model = model,
-                    modifier = when (model) {
-                        is DividerUiModel.Horizontal -> modifier
-                        is DividerUiModel.Vertical -> modifier.height(48.dp)
-                    },
-                )
-            }
-        },
+        fixtures = persistentListOf(
+            GalleryFixture(
+                label = "Plain rule",
+                render = { modifier -> Divider(modifier = modifier) },
+            ),
+            GalleryFixture(
+                label = "Content-tint rule",
+                render = { modifier ->
+                    Divider(
+                        modifier = modifier,
+                        ink = DividerInk.ContentTint,
+                    )
+                },
+            ),
+            GalleryFixture(
+                label = "On-image rule",
+                render = { modifier ->
+                    Box(modifier = Modifier.background(Color.Black)) {
+                        Divider(
+                            modifier = modifier,
+                            ink = DividerInk.OnImage,
+                        )
+                    }
+                },
+            ),
+            GalleryFixture(
+                label = "Quote mark centre",
+                render = { modifier ->
+                    Divider(
+                        modifier = modifier,
+                        center = DividerCenter.QuoteMark,
+                    )
+                },
+            ),
+            GalleryFixture(
+                label = "Labelled centre",
+                render = { modifier ->
+                    Divider(
+                        modifier = modifier,
+                        center = DividerCenter.Label(text = "Or type it"),
+                    )
+                },
+            ),
+            GalleryFixture(
+                label = "Vertical rule",
+                render = { modifier -> VerticalDivider(modifier = modifier.height(48.dp)) },
+            ),
+        ),
     ),
     galleryEntry(
         name = "EmptyState",
@@ -415,19 +446,6 @@ private fun calloutFixtureLabel(model: CalloutUiModel): String = when (model.act
     is CalloutActionUiModel.Button -> if (model.dismissible) "Edition prompt" else "Update available"
     is CalloutActionUiModel.Busy -> "Edition updating"
     CalloutActionUiModel.Progress -> "Update downloading"
-}
-
-private fun dividerFixtureLabel(model: DividerUiModel): String = when (model) {
-    is DividerUiModel.Horizontal -> when {
-        model.center == DividerCenter.QuoteMark -> "Quote mark centre"
-        model.center is DividerCenter.Label -> "Labelled centre"
-        model.ink is DividerInk.OnImage -> "On-image rule"
-        model.ink is DividerInk.ContentTint -> "Content-tint rule"
-        model.inset > 0.dp -> "Inset rule"
-        else -> "Plain rule"
-    }
-
-    is DividerUiModel.Vertical -> if (model.length != null) "Fixed-length vertical rule" else "Vertical rule"
 }
 
 private fun statNumberFixtureLabel(model: StatNumberUiModel): String {

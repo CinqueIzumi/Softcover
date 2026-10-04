@@ -23,7 +23,6 @@ import nl.rhaydus.softcover.core.component.control.SegmentedControl
 import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerCenter
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -80,7 +79,7 @@ internal fun CreateListSheetContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Divider(model = DividerUiModel.Horizontal(center = DividerCenter.QuoteMark))
+        Divider(center = DividerCenter.QuoteMark)
 
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -99,7 +98,7 @@ internal fun CreateListSheetContent(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        Divider(model = DividerUiModel.Horizontal(inset = 40.dp))
+        Divider(modifier = Modifier.padding(horizontal = 40.dp))
 
         Spacer(modifier = Modifier.height(30.dp))
 

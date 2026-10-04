@@ -6,11 +6,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -35,14 +37,11 @@ import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
+import nl.rhaydus.softcover.core.component.shape.PillShape
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
-
-private val ChipShape = RoundedCornerShape(percent = 50)
-private val DashLength = 6.dp
-private val DashGap = 4.dp
 
 /**
  * The pill-shaped chip family (`component-contract.md` § 7.2 R2): one label on a fully-rounded
@@ -91,18 +90,31 @@ private fun ChipScaffold(
         container = container,
         ink = ink,
     )
-    val tappable = model.tone != ChipTone.Spoiler
     val selectable = model.tone == ChipTone.Tonal || model.tone == ChipTone.Choice
 
     val rowModifier = modifier
-        .clip(ChipShape)
+        .clip(PillShape)
         .background(animatedStyle.container)
-        .thenChipBorder(border = animatedStyle.border)
+        .thenChipBorder(
+            tone = model.tone,
+            scheme = MaterialTheme.colorScheme,
+        )
         .then(if (selectable) Modifier.semantics { selected = model.selected } else Modifier)
         .chipInteraction(interaction = model.interaction) {
             onEvent(ChipEvent.Clicked(key = model.key))
         }
-        .padding(ChipDimensions.paddingFor(size = model.size))
+        .padding(
+            when (model.size) {
+                ChipSize.Regular -> PaddingValues(
+                    horizontal = 14.dp,
+                    vertical = 8.dp,
+                )
+                ChipSize.Compact -> PaddingValues(
+                    horizontal = 10.dp,
+                    vertical = 6.dp,
+                )
+            },
+        )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -111,7 +123,6 @@ private fun ChipScaffold(
         ChipLeadingSlot(
             leading = model.leading,
             style = animatedStyle,
-            tappable = tappable,
             onToggle = { onEvent(ChipEvent.SpoilerToggled(key = model.key)) },
         )
 
@@ -123,29 +134,31 @@ private fun ChipScaffold(
         ChipTrailingSlot(
             trailing = model.trailing,
             style = animatedStyle,
-            tappable = tappable,
             onDismiss = { onEvent(ChipEvent.Dismissed(key = model.key)) },
         )
     }
 }
 
-private fun Modifier.thenChipBorder(border: ChipBorder): Modifier = when (border) {
-    ChipBorder.None -> this
-    is ChipBorder.Solid -> this.border(
-        width = ChipDimensions.borderWidth,
-        color = border.color,
-        shape = ChipShape,
+private fun Modifier.thenChipBorder(
+    tone: ChipTone,
+    scheme: ColorScheme,
+): Modifier = when (tone) {
+    ChipTone.Outlined -> this.border(
+        width = 1.dp,
+        color = scheme.outlineVariant,
+        shape = PillShape,
     )
-    is ChipBorder.Dashed -> this.drawBehind {
+    ChipTone.Dashed -> this.drawBehind {
         drawRoundRect(
-            color = border.color,
+            color = scheme.primary,
             style = Stroke(
-                width = ChipDimensions.borderWidth.toPx(),
-                pathEffect = PathEffect.dashPathEffect(intervals = floatArrayOf(DashLength.toPx(), DashGap.toPx())),
+                width = 1.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(intervals = floatArrayOf(6.dp.toPx(), 4.dp.toPx())),
             ),
             cornerRadius = CornerRadius(size.height / 2f),
         )
     }
+    else -> this
 }
 
 @Composable
@@ -162,31 +175,32 @@ private fun Modifier.chipInteraction(
 private fun ChipLeadingSlot(
     leading: ChipLeading?,
     style: ChipStyle,
-    tappable: Boolean,
     onToggle: () -> Unit,
 ) {
     when (leading) {
         null -> Unit
 
-        is ChipLeading.Icon -> ChipIconSlot(
-            icon = leading.icon,
-            contentDescription = leading.description,
-            tint = style.mutedInk,
-            size = ChipDimensions.iconSize,
-            gap = ChipDimensions.iconGap,
-            gapPosition = ChipGapPosition.After,
-            onClick = null,
-        )
+        is ChipLeading.Icon -> {
+            ChipIconSlot(
+                icon = leading.icon,
+                contentDescription = null,
+                tint = style.mutedInk,
+                size = 18.dp,
+                onClick = null,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
 
-        is ChipLeading.SpoilerToggle -> ChipIconSlot(
-            icon = if (leading.marked) SoftcoverIcon.VisibilityOff else SoftcoverIcon.Visibility,
-            contentDescription = leading.label,
-            tint = if (leading.marked) MaterialTheme.colorScheme.primary else style.mutedInk,
-            size = ChipDimensions.iconSize,
-            gap = ChipDimensions.iconGap,
-            gapPosition = ChipGapPosition.After,
-            onClick = if (tappable) onToggle else null,
-        )
+        is ChipLeading.SpoilerToggle -> {
+            ChipIconSlot(
+                icon = if (leading.marked) SoftcoverIcon.VisibilityOff else SoftcoverIcon.Visibility,
+                contentDescription = leading.label,
+                tint = if (leading.marked) MaterialTheme.colorScheme.primary else style.mutedInk,
+                size = 18.dp,
+                onClick = onToggle,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
     }
 }
 
@@ -225,35 +239,34 @@ private fun ChipLabel(
 private fun ChipTrailingSlot(
     trailing: ChipTrailing?,
     style: ChipStyle,
-    tappable: Boolean,
     onDismiss: () -> Unit,
 ) {
     when (trailing) {
         null -> Unit
 
-        is ChipTrailing.Icon -> ChipIconSlot(
-            icon = trailing.icon,
-            contentDescription = trailing.description,
-            tint = style.mutedInk,
-            size = ChipDimensions.iconSize,
-            gap = ChipDimensions.iconGap,
-            gapPosition = ChipGapPosition.Before,
-            onClick = null,
-        )
+        is ChipTrailing.Icon -> {
+            Spacer(modifier = Modifier.width(8.dp))
+            ChipIconSlot(
+                icon = trailing.icon,
+                contentDescription = trailing.description,
+                tint = style.mutedInk,
+                size = 18.dp,
+                onClick = null,
+            )
+        }
 
-        is ChipTrailing.Dismiss -> ChipIconSlot(
-            icon = SoftcoverIcon.Close,
-            contentDescription = trailing.label,
-            tint = style.mutedInk,
-            size = ChipDimensions.dismissIconSize,
-            gap = ChipDimensions.dismissIconGap,
-            gapPosition = ChipGapPosition.Before,
-            onClick = if (tappable) onDismiss else null,
-        )
+        is ChipTrailing.Dismiss -> {
+            Spacer(modifier = Modifier.width(8.dp))
+            ChipIconSlot(
+                icon = SoftcoverIcon.Close,
+                contentDescription = trailing.label,
+                tint = style.mutedInk,
+                size = 16.dp,
+                onClick = onDismiss,
+            )
+        }
     }
 }
-
-private enum class ChipGapPosition { Before, After }
 
 @Composable
 private fun ChipIconSlot(
@@ -261,14 +274,8 @@ private fun ChipIconSlot(
     contentDescription: String?,
     tint: Color,
     size: Dp,
-    gap: Dp,
-    gapPosition: ChipGapPosition,
     onClick: (() -> Unit)?,
 ) {
-    if (gapPosition == ChipGapPosition.Before) {
-        Spacer(modifier = Modifier.width(gap))
-    }
-
     val resource = drawableIconResource(
         icon = icon,
         contentDescription = contentDescription.orEmpty(),
@@ -284,8 +291,4 @@ private fun ChipIconSlot(
                 if (onClick != null) base.pointerHandCursor().pressScaleClickable(onClick = onClick) else base
             },
     )
-
-    if (gapPosition == ChipGapPosition.After) {
-        Spacer(modifier = Modifier.width(gap))
-    }
 }

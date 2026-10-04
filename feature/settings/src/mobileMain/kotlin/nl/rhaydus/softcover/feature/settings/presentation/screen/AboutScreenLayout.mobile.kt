@@ -10,8 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.component.divider.DividerCenter
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBar
@@ -25,7 +23,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUi
 internal actual fun AboutScreenLayout(
     topBar: TopBarUiModel,
     editorialTopBar: EditorialTopBarUiModel,
-    versionFooterDivider: DividerUiModel,
+    versionLabel: String,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,
@@ -47,7 +45,7 @@ internal actual fun AboutScreenLayout(
         },
     ) { innerPadding ->
         AboutContent(
-            versionFooterDivider = versionFooterDivider,
+            versionLabel = versionLabel,
             creditsHeader = creditsHeader,
             sourceHeader = sourceHeader,
             contactHeader = contactHeader,
@@ -75,9 +73,7 @@ private fun AboutScreenPreview() {
         AboutScreenLayout(
             topBar = state.aboutTopBar,
             editorialTopBar = state.aboutEditorialTopBar,
-            versionFooterDivider = DividerUiModel.Horizontal(
-                center = DividerCenter.Label(text = "Version 1.0.0 (1)"),
-            ),
+            versionLabel = "Version 1.0.0 (1)",
             creditsHeader = state.aboutCreditsHeader,
             sourceHeader = state.aboutSourceHeader,
             contactHeader = state.aboutContactHeader,

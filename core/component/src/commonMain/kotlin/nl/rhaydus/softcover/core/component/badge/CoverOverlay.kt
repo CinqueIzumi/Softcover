@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.grayscale
 
@@ -41,7 +42,10 @@ fun CoverOverlay(
                 CoverOverlayCorner.TopStart -> Alignment.TopStart
                 CoverOverlayCorner.TopEnd -> Alignment.TopEnd
             }
-            val inset = CoverOverlayDimensions.insetFor(size = model.badge.size)
+            val inset = when (model.badge.size) {
+                BadgeSize.Compact -> 6.dp
+                BadgeSize.Regular -> 8.dp
+            }
 
             Badge(
                 model = model.badge,

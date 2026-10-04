@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.modifier.noRippleClickable
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.feature.settings.presentation.util.SecretTapCounter
 import kotlin.time.Clock
 
@@ -20,14 +20,14 @@ import kotlin.time.Clock
  */
 @Composable
 internal fun VersionFooter(
-    divider: DividerUiModel,
+    versionLabel: String,
     onSecretUnlocked: () -> Unit,
 ) {
     val tapCounter = remember { SecretTapCounter() }
     val haptics = rememberHaptics()
 
     Divider(
-        model = divider,
+        center = DividerCenter.Label(text = versionLabel),
         modifier = Modifier
             .fillMaxWidth()
             .noRippleClickable {

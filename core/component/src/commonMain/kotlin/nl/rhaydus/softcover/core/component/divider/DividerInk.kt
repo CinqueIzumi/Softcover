@@ -7,9 +7,9 @@ import androidx.compose.ui.graphics.Color
 sealed interface DividerInk {
     data object Outline : DividerInk
 
-    data class ContentTint(val alpha: Float) : DividerInk
+    data object ContentTint : DividerInk
 
-    data class OnImage(val alpha: Float) : DividerInk
+    data object OnImage : DividerInk
 }
 
 internal fun DividerInk.resolve(
@@ -17,6 +17,6 @@ internal fun DividerInk.resolve(
     contentColor: Color,
 ): Color = when (this) {
     DividerInk.Outline -> colorScheme.outlineVariant
-    is DividerInk.ContentTint -> contentColor.copy(alpha = alpha)
-    is DividerInk.OnImage -> Color.White.copy(alpha = alpha)
+    DividerInk.ContentTint -> contentColor.copy(alpha = 0.25f)
+    DividerInk.OnImage -> Color.White.copy(alpha = 0.3f)
 }

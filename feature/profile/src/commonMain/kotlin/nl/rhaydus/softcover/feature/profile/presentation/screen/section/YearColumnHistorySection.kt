@@ -14,7 +14,6 @@ import nl.rhaydus.softcover.core.component.control.SegmentedControl
 import nl.rhaydus.softcover.core.component.control.SegmentedControlEvent
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
@@ -62,7 +61,7 @@ internal fun YearColumnHistorySection(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Divider(model = DividerUiModel.Horizontal())
+            Divider()
 
             Spacer(modifier = Modifier.height(10.dp))
 

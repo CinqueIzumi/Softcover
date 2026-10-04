@@ -39,7 +39,6 @@ import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -129,7 +128,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         if (content.topGenres.isNotEmpty()) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            Divider(model = DividerUiModel.Horizontal(ink = DividerInk.ContentTint(alpha = 0.25f)))
+            Divider(ink = DividerInk.ContentTint)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -160,7 +159,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Divider(model = DividerUiModel.Horizontal(ink = DividerInk.ContentTint(alpha = 0.25f)))
+        Divider(ink = DividerInk.ContentTint)
 
         Spacer(modifier = Modifier.height(20.dp))
 

@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 
 @Composable
@@ -54,7 +53,7 @@ fun ProportionChart(
         Spacer(modifier = Modifier.height(16.dp))
 
         model.segments.forEach { segment ->
-            Divider(model = DividerUiModel.Horizontal())
+            Divider()
 
             ChartLegendRow(
                 label = segment.label,

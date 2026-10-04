@@ -17,8 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.chart.ColumnChart
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
-import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumber
@@ -119,7 +118,7 @@ private fun RatingsAverageRow(
 
         Spacer(modifier = Modifier.width(20.dp))
 
-        Divider(model = DividerUiModel.Vertical(length = 32.dp))
+        VerticalDivider(modifier = Modifier.height(32.dp))
 
         Spacer(modifier = Modifier.width(20.dp))
 

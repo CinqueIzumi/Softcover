@@ -30,8 +30,7 @@ import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
+import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
@@ -136,7 +135,7 @@ internal actual fun LibraryScreenLayout(
                 .fillMaxHeight(),
         )
 
-        Divider(model = DividerUiModel.Vertical())
+        VerticalDivider()
 
         Column(
             modifier = Modifier

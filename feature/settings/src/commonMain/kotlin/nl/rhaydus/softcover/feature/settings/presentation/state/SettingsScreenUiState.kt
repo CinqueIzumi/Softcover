@@ -2,8 +2,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
-import nl.rhaydus.softcover.core.component.divider.DividerCenter
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -142,9 +140,7 @@ internal data class SettingsScreenUiState(
     val dropDownExpanded: Boolean = false,
     val appVersionName: String = "",
     val appVersionCode: Int = 0,
-    val versionFooterDivider: DividerUiModel = DividerUiModel.Horizontal(
-        center = DividerCenter.Label(text = "Version $appVersionName ($appVersionCode)"),
-    ),
+    val versionLabel: String = "Version $appVersionName ($appVersionCode)",
     val uiScale: UiScale = UiScale.DEFAULT,
     val uiScaleRows: ImmutableList<SettingsChoiceRowUiModel<UiScale>> = uiScaleRowsFor(selected = uiScale),
     val spinePalette: SpinePalette = SpinePalette.DEFAULT,

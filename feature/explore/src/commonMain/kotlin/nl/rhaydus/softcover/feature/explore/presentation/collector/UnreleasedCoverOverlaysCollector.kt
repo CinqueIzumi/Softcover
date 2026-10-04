@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.uibinding.release.UnreleasedBadgeStyle
-import nl.rhaydus.softcover.core.uibinding.release.toUnreleasedBadgeUiModel
+import nl.rhaydus.softcover.core.uibinding.release.toCompactUnreleasedBadgeUiModel
+import nl.rhaydus.softcover.core.uibinding.release.toFeaturedUnreleasedBadgeUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -57,7 +57,7 @@ internal class UnreleasedCoverOverlaysCollector : ExploreCollector {
                         ).toUnreleasedCoverOverlays(),
                         featuredReleaseBadge = snapshot.featuredUpcomingRelease
                             ?.effectiveReleaseDate
-                            ?.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Featured),
+                            ?.toFeaturedUnreleasedBadgeUiModel(),
                     )
                 }
             }
@@ -69,7 +69,7 @@ private fun List<Book>.toUnreleasedCoverOverlays(): Map<Int, CoverOverlayUiModel
         val releaseDate = book.effectiveReleaseDate
         if (book.isUnreleased && releaseDate != null) {
             book.id to CoverOverlayUiModel(
-                badge = releaseDate.toUnreleasedBadgeUiModel(UnreleasedBadgeStyle.Compact),
+                badge = releaseDate.toCompactUnreleasedBadgeUiModel(),
                 corner = CoverOverlayCorner.TopStart,
                 grayscale = false,
             )

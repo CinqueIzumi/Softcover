@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.StarRatingInput
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichText
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 import nl.rhaydus.softcover.core.component.richtext.isBlank
@@ -124,7 +123,7 @@ fun VerdictBlock(
                         if (displayedReview != null) {
                             Spacer(modifier = Modifier.height(14.dp))
 
-                            Divider(model = DividerUiModel.Horizontal())
+                            Divider()
 
                             Spacer(modifier = Modifier.height(14.dp))
                         }

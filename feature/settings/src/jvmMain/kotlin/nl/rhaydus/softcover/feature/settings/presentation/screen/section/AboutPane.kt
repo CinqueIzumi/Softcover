@@ -19,7 +19,6 @@ import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -37,7 +36,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screen.handleAppUpdate
 @Composable
 internal fun AboutPane(
     masthead: PageMastheadUiModel,
-    versionFooterDivider: DividerUiModel,
+    versionLabel: String,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,
@@ -70,7 +69,7 @@ internal fun AboutPane(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 AboutContent(
-                    versionFooterDivider = versionFooterDivider,
+                    versionLabel = versionLabel,
                     creditsHeader = creditsHeader,
                     sourceHeader = sourceHeader,
                     contactHeader = contactHeader,

@@ -43,15 +43,12 @@ internal fun ChipTone.style(
         container = Color.Transparent,
         ink = scheme.onSurfaceVariant,
         weight = FontWeight.Medium,
-        border = ChipBorder.Solid(color = scheme.outlineVariant),
-        mutedInk = scheme.onSurfaceVariant,
     )
 
     ChipTone.Dashed -> ChipStyle(
         container = Color.Transparent,
         ink = scheme.primary,
         weight = FontWeight.SemiBold,
-        border = ChipBorder.Dashed(color = scheme.primary),
     )
 
     ChipTone.Spoiler -> ChipStyle(

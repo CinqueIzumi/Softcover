@@ -10,8 +10,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * Everything [CoverOverlay] draws on top of its `content`: the [Badge] to place in its corner,
  * which corner it uses, and whether the content itself should render desaturated.
  *
- * @property badge The badge to overlay. Its [BadgeUiModel.size] also sets the overlay's corner pad —
- * see [CoverOverlayDimensions].
+ * @property badge The badge to overlay. Its [BadgeUiModel.size] also sets the overlay's corner pad.
  * @property corner Which top corner the badge pins to.
  * @property grayscale Whether [CoverOverlay]'s `content` — the cover, never the badge — renders in
  * grayscale: what `DeadlineStatus.Expired` used to mean at the call site, a deadline that has expired

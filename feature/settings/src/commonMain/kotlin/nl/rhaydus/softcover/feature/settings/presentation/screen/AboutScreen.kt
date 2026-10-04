@@ -8,7 +8,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBarUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
@@ -28,7 +27,7 @@ class AboutScreen : Screen {
         AboutScreenLayout(
             topBar = state.aboutTopBar,
             editorialTopBar = state.aboutEditorialTopBar,
-            versionFooterDivider = state.versionFooterDivider,
+            versionLabel = state.versionLabel,
             creditsHeader = state.aboutCreditsHeader,
             sourceHeader = state.aboutSourceHeader,
             contactHeader = state.aboutContactHeader,
@@ -58,7 +57,7 @@ class AboutScreen : Screen {
 internal expect fun AboutScreenLayout(
     topBar: TopBarUiModel,
     editorialTopBar: EditorialTopBarUiModel,
-    versionFooterDivider: DividerUiModel,
+    versionLabel: String,
     creditsHeader: SectionHeaderUiModel,
     sourceHeader: SectionHeaderUiModel,
     contactHeader: SectionHeaderUiModel,

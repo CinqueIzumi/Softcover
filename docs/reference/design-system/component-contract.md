@@ -263,8 +263,8 @@ Consequences:
 
 ### 7.4a Known exceptions
 
-- **A data-free UI model may be built at the call site (R10).** When no field derives from data, as with
-  `DividerUiModel`, the call site builds it inline with its defaults and any overrides.
+- **A data-free primitive (`Divider`) takes defaulted parameters and has no UI model.** The call site passes
+  only the overrides.
 - **`SoftcoverText` takes `style` and `color` (R11) and has no model.** It is the text leaf other components
   style, so it is a data-free primitive like `Text`: the caller passes its own model's string inline. Styling
   goes through `style` alone; `Text`'s loose font parameters are not exposed. The exemption covers this

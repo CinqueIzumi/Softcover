@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 
 /**
  * A run of rows added through [content], each preceded by a hairline [Divider] — including the
@@ -29,7 +28,7 @@ internal fun SettingsRowGroup(
             object : SettingsRowGroupScope {
                 @Composable
                 override fun row(content: @Composable () -> Unit) {
-                    Divider(model = DividerUiModel.Horizontal())
+                    Divider()
                     content()
                 }
             }
