@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -49,6 +50,8 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
 
     val timeStyle = MaterialTheme.editorialTypography.headlineMedium
 
+    val onTimeFieldEvent = remember(onEvent) { timeFieldEventHandler(onEvent = onEvent) }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
@@ -56,10 +59,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
     ) {
         TextField(
             model = medium.hours,
-            onEvent = timeFieldEventHandler(
-                unit = ProgressTimeUnit.HOURS,
-                onEvent = onEvent,
-            ),
+            onEvent = onTimeFieldEvent,
         )
 
         TimeColon(textStyle = timeStyle)
@@ -73,10 +73,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
 
         TextField(
             model = medium.minutes,
-            onEvent = timeFieldEventHandler(
-                unit = ProgressTimeUnit.MINUTES,
-                onEvent = onEvent,
-            ),
+            onEvent = onTimeFieldEvent,
         )
 
         StepperCircle(
@@ -90,10 +87,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
 
         TextField(
             model = medium.seconds,
-            onEvent = timeFieldEventHandler(
-                unit = ProgressTimeUnit.SECONDS,
-                onEvent = onEvent,
-            ),
+            onEvent = onTimeFieldEvent,
         )
     }
 
@@ -153,14 +147,14 @@ private fun TimeColon(textStyle: TextStyle) {
     )
 }
 
+/** Every time field's key is its [ProgressTimeUnit] name, so one handler serves all three. */
 private fun timeFieldEventHandler(
-    unit: ProgressTimeUnit,
     onEvent: (ProgressSheetEvent) -> Unit,
 ): (TextFieldEvent) -> Unit = { event ->
     when (event) {
         is TextFieldEvent.ValueChanged -> onEvent(
             ProgressSheetEvent.TimeChanged(
-                unit = unit,
+                unit = ProgressTimeUnit.valueOf(event.key),
                 text = event.text,
             ),
         )

@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.component.field
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -10,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 
@@ -23,29 +24,34 @@ internal fun OutlinedTextFieldBody(
 ) {
     OutlinedTextField(
         value = model.text,
-        onValueChange = { text ->
-            onEvent(
-                TextFieldEvent.ValueChanged(
-                    key = model.key,
-                    text = text,
-                ),
-            )
-        },
+        onValueChange = model.onTextChange(onEvent),
         label = variant.label?.let { label ->
             { SoftcoverText(text = label) }
         },
-        placeholder = { SoftcoverText(text = model.placeholder) },
+        placeholder = {
+            TextFieldPlaceholder(
+                text = model.placeholder,
+                enabled = model.enabled,
+            )
+        },
         enabled = model.enabled,
         singleLine = true,
         shape = RoundedCornerShape(8.dp),
         keyboardOptions = model.keyboardOptions(),
-        keyboardActions = KeyboardActions(onDone = { onEvent(TextFieldEvent.Submitted(key = model.key)) }),
+        keyboardActions = model.keyboardActions(onEvent),
         colors = OutlinedTextFieldDefaults.colors().copy(
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
         ),
         modifier = modifier
             .fillMaxWidth()
-            .focusRequester(focusRequester),
+            .focusRequester(focusRequester)
+            .then(
+                if (variant.label == null) {
+                    Modifier.semantics { contentDescription = model.placeholder }
+                } else {
+                    Modifier
+                },
+            ),
     )
 }

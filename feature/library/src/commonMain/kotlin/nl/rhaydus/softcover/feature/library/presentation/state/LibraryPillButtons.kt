@@ -10,9 +10,9 @@ internal fun filterPillButton(active: Boolean): PillButtonUiModel = PillButtonUi
     content = PillButtonContent.Label(
         text = "Filter",
         leadingIcon = SoftcoverIcon.FilterList,
+        indicator = active,
     ),
     tone = PillButtonTone.Quiet,
-    indicator = active,
 )
 
 internal fun selectPillButton(): PillButtonUiModel = PillButtonUiModel(

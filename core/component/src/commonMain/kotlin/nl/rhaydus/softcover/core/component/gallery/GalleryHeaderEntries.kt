@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.button.PillButtonContent
 import nl.rhaydus.softcover.core.component.button.PillButtonInteraction
+import nl.rhaydus.softcover.core.component.button.PillButtonSize
 import nl.rhaydus.softcover.core.component.button.PillButtonTone
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.Chip
@@ -244,12 +245,10 @@ private const val CHIP_LONG_LABEL_FLOOR = 30
 
 private fun pillButtonFixtureLabel(model: PillButtonUiModel): String = when {
     model.interaction == PillButtonInteraction.Disabled -> "Disabled"
-    model.indicator -> "With indicator"
-    model.content is PillButtonContent.IconOnly -> "Icon only"
-    model.tone == PillButtonTone.Accent -> "Accent"
-    model.tone == PillButtonTone.Filled -> "Filled"
-    model.tone == PillButtonTone.Outlined -> "Outlined"
-    else -> "Tonal"
+    model.content is PillButtonContent.IconOnly -> "Icon only, ${model.tone.name}"
+    (model.content as? PillButtonContent.Label)?.indicator == true -> "${model.tone.name}, with indicator"
+    model.size == PillButtonSize.Large -> "Large ${model.tone.name}"
+    else -> "Regular ${model.tone.name}"
 }
 
 /** Names what a [BadgeUiModel] fixture demonstrates — its icon or size when that differs, else its tone. */

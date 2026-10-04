@@ -325,8 +325,8 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            withUpdateCard.hasVariantToggle shouldBe true
-            withoutUpdateCard.hasVariantToggle shouldBe false
+            withUpdateCard.variantToggle.shouldNotBeNull()
+            withoutUpdateCard.variantToggle.shouldBeNull()
         }
 
         @Test
@@ -407,8 +407,8 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.variantToggle.options.map { it.key } shouldBe ShareCardVariant.entries.toList()
-            result.variantToggle.selected shouldBe ShareCardVariant.MY_UPDATE
+            result.variantToggle.shouldNotBeNull().options.map { it.key } shouldBe ShareCardVariant.entries.toList()
+            result.variantToggle.shouldNotBeNull().selected shouldBe ShareCardVariant.MY_UPDATE
         }
 
         @Test
@@ -422,7 +422,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.variantToggle.options.map { it.label } shouldBe ShareCardVariant.entries.map { it.label }
+            result.variantToggle.shouldNotBeNull().options.map { it.label } shouldBe ShareCardVariant.entries.map { it.label }
         }
 
         @Test
@@ -436,7 +436,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.variantToggle.options.all { it.enabled } shouldBe true
+            result.variantToggle.shouldNotBeNull().options.all { it.enabled } shouldBe true
         }
 
         @Test
@@ -450,7 +450,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.variantToggle.options.none { it.enabled } shouldBe true
+            result.variantToggle.shouldNotBeNull().options.none { it.enabled } shouldBe true
         }
 
         @Test
@@ -464,7 +464,7 @@ class BookDetailSheetScaffoldBuilderTest {
             )
 
             // ----- Assert -----
-            result.variantToggle.options.none { it.enabled } shouldBe true
+            result.variantToggle.shouldNotBeNull().options.none { it.enabled } shouldBe true
         }
     }
 }

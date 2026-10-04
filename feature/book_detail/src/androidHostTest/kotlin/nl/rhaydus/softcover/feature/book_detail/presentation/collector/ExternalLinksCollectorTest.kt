@@ -72,7 +72,7 @@ class ExternalLinksCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.externalLinks.shouldNotBeNull().urlByKey.getValue("amazon") shouldBe
+            stateFlow.value.externalLinks.shouldNotBeNull().links["amazon"] shouldBe
                 "https://www.amazon.com/s?k=9780306406157"
             job.cancel()
         }
@@ -97,7 +97,7 @@ class ExternalLinksCollectorTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.externalLinks.shouldNotBeNull().urlByKey.getValue("amazon") shouldBe
+            stateFlow.value.externalLinks.shouldNotBeNull().links["amazon"] shouldBe
                 "https://www.amazon.com/s?k=9781234567897"
             job.cancel()
         }

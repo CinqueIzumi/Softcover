@@ -12,8 +12,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 /**
  * Everything [TextField] renders: the user's current [text] and how the field is dressed.
  *
- * @property placeholder Shown while [text] is empty. [TextFieldVariant.Outlined] shows it once the label has floated.
- * @property autoFocus Requests focus once when the field enters composition.
+ * @property placeholder Shown while [text] is empty, and the field's accessibility label.
+ * [TextFieldVariant.Outlined] shows it once the label has floated.
+ * @property autoFocus Requests focus when the field enters composition and whenever it flips from false to true.
  * There is no loading state: a field holds user input, so a field that must not be edited yet is built with `enabled = false`.
  */
 @Immutable
@@ -22,8 +23,6 @@ data class TextFieldUiModel(
     val text: String,
     val placeholder: String,
     val variant: TextFieldVariant,
-    val keyboard: TextFieldKeyboard = TextFieldKeyboard.Text,
-    val imeAction: TextFieldImeAction = TextFieldImeAction.Default,
     val enabled: Boolean = true,
     val autoFocus: Boolean = false,
 ) {
@@ -42,6 +41,7 @@ data class TextFieldUiModel(
                 variant = TextFieldVariant.Pill(
                     leadingIcon = SoftcoverIcon.Search,
                     size = TextFieldPillSize.Compact,
+                    tone = TextFieldPillTone.Container,
                 ),
             ),
             TextFieldUiModel(
@@ -67,42 +67,65 @@ data class TextFieldUiModel(
                 key = "outlined",
                 text = "9780374710781",
                 placeholder = "e.g. 9780374710781",
-                variant = TextFieldVariant.Outlined(label = "ISBN"),
-                keyboard = TextFieldKeyboard.Number,
+                variant = TextFieldVariant.Outlined(
+                    label = "ISBN",
+                    keyboard = TextFieldKeyboard.Number,
+                ),
             ),
             TextFieldUiModel(
                 key = "outlined-unlabelled",
                 text = "",
                 placeholder = "e.g. 9780374710781",
-                variant = TextFieldVariant.Outlined(),
-                keyboard = TextFieldKeyboard.Number,
+                variant = TextFieldVariant.Outlined(keyboard = TextFieldKeyboard.Number),
             ),
             TextFieldUiModel(
                 key = "outlined-disabled",
                 text = "9780374710781",
                 placeholder = "e.g. 9780374710781",
-                variant = TextFieldVariant.Outlined(label = "ISBN"),
-                keyboard = TextFieldKeyboard.Number,
+                variant = TextFieldVariant.Outlined(
+                    label = "ISBN",
+                    keyboard = TextFieldKeyboard.Number,
+                ),
                 enabled = false,
             ),
             TextFieldUiModel(
                 key = "hero-empty",
                 text = "",
                 placeholder = "Summer reads",
-                variant = TextFieldVariant.Hero,
+                variant = TextFieldVariant.Hero(),
             ),
             TextFieldUiModel(
                 key = "hero-long",
                 text = "Books I keep meaning to reread before the year ends",
                 placeholder = "Summer reads",
-                variant = TextFieldVariant.Hero,
+                variant = TextFieldVariant.Hero(),
+            ),
+            TextFieldUiModel(
+                key = "pill-disabled",
+                text = "slow burn",
+                placeholder = "Name a tag…",
+                variant = TextFieldVariant.Pill(leadingIcon = SoftcoverIcon.Edit),
+                enabled = false,
+            ),
+            TextFieldUiModel(
+                key = "hero-disabled",
+                text = "",
+                placeholder = "Summer reads",
+                variant = TextFieldVariant.Hero(),
+                enabled = false,
+            ),
+            TextFieldUiModel(
+                key = "numeral-disabled",
+                text = "42",
+                placeholder = "0",
+                variant = TextFieldVariant.Numeral(charCount = 2),
+                enabled = false,
             ),
             TextFieldUiModel(
                 key = "numeral",
                 text = "42",
                 placeholder = "0",
                 variant = TextFieldVariant.Numeral(charCount = 2),
-                keyboard = TextFieldKeyboard.Number,
             ),
         )
     }

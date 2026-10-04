@@ -75,7 +75,7 @@ class PillButtonUiModelTest {
             val previews = PillButtonUiModel.previews
 
             // ----- Act -----
-            val hasIndicator = previews.any { it.indicator }
+            val hasIndicator = previews.any { (it.content as? PillButtonContent.Label)?.indicator == true }
 
             // ----- Assert -----
             hasIndicator shouldBe true

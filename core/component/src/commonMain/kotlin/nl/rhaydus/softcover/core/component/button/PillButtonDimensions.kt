@@ -10,7 +10,6 @@ internal object PillButtonDimensions {
     val horizontalPadding = 14.dp
     val indicatorSize = 6.dp
     val borderWidth = 1.dp
-    const val DISABLED_ALPHA = 0.45f
 
     fun heightFor(size: PillButtonSize): Dp = when (size) {
         PillButtonSize.Regular -> 38.dp

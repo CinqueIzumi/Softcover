@@ -31,7 +31,7 @@ class ExternalLinksMapperTest {
             val result = edition.toExternalLinksUiModel()
 
             // ----- Assert -----
-            result.shouldNotBeNull().urlByKey.values.toList() shouldBe listOf(
+            result.shouldNotBeNull().links.pills.map { it.key }.map { key -> result.links[key] } shouldBe listOf(
                 "https://bookshop.org/search?keywords=9780306406157",
                 "https://www.amazon.com/s?k=9780306406157",
                 "https://openlibrary.org/search?isbn=9780306406157",
@@ -50,7 +50,7 @@ class ExternalLinksMapperTest {
             val result = edition.toExternalLinksUiModel()
 
             // ----- Assert -----
-            result.shouldNotBeNull().urlByKey.values.toList() shouldBe listOf(
+            result.shouldNotBeNull().links.pills.map { it.key }.map { key -> result.links[key] } shouldBe listOf(
                 "https://bookshop.org/search?keywords=0306406152",
                 "https://www.amazon.com/s?k=0306406152",
                 "https://openlibrary.org/search?isbn=0306406152",
@@ -69,7 +69,7 @@ class ExternalLinksMapperTest {
             val result = edition.toExternalLinksUiModel()
 
             // ----- Assert -----
-            result.shouldNotBeNull().urlByKey.getValue("amazon") shouldBe "https://www.amazon.com/s?k=0306406152"
+            result.shouldNotBeNull().links["amazon"] shouldBe "https://www.amazon.com/s?k=0306406152"
         }
 
         @Test
@@ -115,7 +115,7 @@ class ExternalLinksMapperTest {
         }
 
         @Test
-        fun `every pill has a url keyed by the pill key`() {
+        fun `every pill key resolves to a url`() {
             // ----- Arrange -----
             val edition = edition(
                 isbn10 = null,
@@ -126,7 +126,7 @@ class ExternalLinksMapperTest {
             val result = edition.toExternalLinksUiModel().shouldNotBeNull()
 
             // ----- Assert -----
-            result.pills.map { it.key }.toSet() shouldBe result.urlByKey.keys
+            result.links.pills.map { it.key }.toSet() shouldBe result.links.payloadByKey.keys
         }
     }
 }

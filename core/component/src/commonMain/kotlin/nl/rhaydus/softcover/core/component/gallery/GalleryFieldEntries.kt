@@ -27,6 +27,7 @@ internal val fieldEntries: ImmutableList<GalleryEntry> = persistentListOf(
 
 private fun textFieldFixtureLabel(model: TextFieldUiModel): String = when (val variant = model.variant) {
     is TextFieldVariant.Pill -> when {
+        model.enabled.not() -> "Pill, disabled"
         variant.trailing != null -> "Pill, trailing action"
         variant.size == TextFieldPillSize.Compact -> "Pill, compact"
         variant.size == TextFieldPillSize.Large -> "Pill, large"
@@ -40,7 +41,11 @@ private fun textFieldFixtureLabel(model: TextFieldUiModel): String = when (val v
         else -> "Outlined"
     }
 
-    TextFieldVariant.Hero -> if (model.text.length > 20) "Hero, long value" else "Hero"
+    is TextFieldVariant.Hero -> when {
+        model.enabled.not() -> "Hero, disabled"
+        model.text.length > 20 -> "Hero, long value"
+        else -> "Hero"
+    }
 
-    is TextFieldVariant.Numeral -> "Numeral"
+    is TextFieldVariant.Numeral -> if (model.enabled) "Numeral" else "Numeral, disabled"
 }

@@ -2,8 +2,10 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
+import nl.rhaydus.softcover.core.component.button.PillButtonContent
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
@@ -423,18 +425,22 @@ class LibraryUiStateTest {
             val matchByAuthor = buildBook(
                 id = 1,
                 title = "Foundation",
-                authors = listOf(Author(
-                    id = 1,
-                    name = "Isaac Asimov",
-                ),),
+                authors = listOf(
+                    Author(
+                        id = 1,
+                        name = "Isaac Asimov",
+                    ),
+                ),
             )
             val noMatch = buildBook(
                 id = 2,
                 title = "Dune",
-                authors = listOf(Author(
-                    id = 2,
-                    name = "Frank Herbert",
-                ),),
+                authors = listOf(
+                    Author(
+                        id = 2,
+                        name = "Frank Herbert",
+                    ),
+                ),
             )
 
             val state = buildState(
@@ -838,10 +844,12 @@ class LibraryUiStateTest {
     @Nested
     inner class AvailableFilterOptionsFor {
         private val sampleOptions = LibraryFilterOptions(
-            tags = listOf(Tag(
-                id = 1,
-                name = "Fiction",
-            ),),
+            tags = listOf(
+                Tag(
+                    id = 1,
+                    name = "Fiction",
+                ),
+            ),
             formats = listOf("ebook"),
             releaseYears = listOf(2024),
             supportsOwnedFilter = true,
@@ -900,7 +908,7 @@ class LibraryUiStateTest {
 
             // ----- Assert -----
             result shouldBe storedPill
-            result.indicator shouldBe true
+            result.content.shouldBeInstanceOf<PillButtonContent.Label>().indicator shouldBe true
         }
 
         @Test
@@ -915,7 +923,7 @@ class LibraryUiStateTest {
 
             // ----- Assert -----
             result shouldBe state.inactiveFilterPill
-            result.indicator shouldBe false
+            result.content.shouldBeInstanceOf<PillButtonContent.Label>().indicator shouldBe false
         }
     }
 }

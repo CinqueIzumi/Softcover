@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import nl.rhaydus.softcover.core.component.button.PillButtonContent
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -16,7 +18,7 @@ class LibraryPillButtonsTest {
             val pill = filterPillButton(active = active)
 
             // ----- Assert -----
-            pill.indicator shouldBe true
+            pill.content.shouldBeInstanceOf<PillButtonContent.Label>().indicator shouldBe true
         }
 
         @Test
@@ -28,7 +30,7 @@ class LibraryPillButtonsTest {
             val pill = filterPillButton(active = active)
 
             // ----- Assert -----
-            pill.indicator shouldBe false
+            pill.content.shouldBeInstanceOf<PillButtonContent.Label>().indicator shouldBe false
         }
 
         @Test

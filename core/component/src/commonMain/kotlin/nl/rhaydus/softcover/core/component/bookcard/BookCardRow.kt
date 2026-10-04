@@ -100,6 +100,7 @@ internal fun BookCardRowLayout(
                     BookCardTrailingControl(
                         trailing = trailing,
                         isLoading = isLoading,
+                        onToggleEvent = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
                         onClick = { onEvent(BookCardEvent.TrailingClicked(key = model.key)) },
                     )
                 }

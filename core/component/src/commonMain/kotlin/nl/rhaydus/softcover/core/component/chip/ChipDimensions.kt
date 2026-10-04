@@ -13,7 +13,6 @@ internal object ChipDimensions {
     val dismissIconSize = 16.dp
     val dismissIconGap = 8.dp
     val borderWidth = 1.dp
-    const val disabledAlpha = 0.45f
 
     fun paddingFor(size: ChipSize): PaddingValues = when (size) {
         ChipSize.Regular -> PaddingValues(

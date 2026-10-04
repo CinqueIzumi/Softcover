@@ -7,6 +7,5 @@ internal data class ShareSheetBodyUiModel(
     val shareLabel: String,
     val saveToGalleryLabel: String,
     val isBusy: Boolean,
-    val hasVariantToggle: Boolean,
-    val variantToggle: SegmentedControlUiModel<ShareCardVariant>,
+    val variantToggle: SegmentedControlUiModel<ShareCardVariant>?,
 )

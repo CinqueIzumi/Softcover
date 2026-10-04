@@ -10,7 +10,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * Everything [Toggle] renders: a two-state control exposed to accessibility as a switch.
  *
  * @property key Identity — [ToggleEvent.Toggled] carries it back.
- * @property description What the control does in its current state; it labels the glyph and the tooltip.
+ * @property description The accessibility label. A [ToggleVariant.Switch] takes a fixed name for what it
+ * controls, because a screen reader already announces the on/off state; a [ToggleVariant.Icon] takes the
+ * action a tap performs now, which changes with [checked] and doubles as the tooltip.
  * There is no loading state: a toggle that must not be used yet is built with `enabled = false`.
  */
 @Immutable
@@ -86,12 +88,6 @@ data class ToggleUiModel(
                 description = "Hide untagged authors",
                 variant = ToggleVariant.Switch,
                 enabled = false,
-            ),
-            ToggleUiModel(
-                key = "switch-display-only",
-                checked = true,
-                description = "Hide untagged authors",
-                variant = ToggleVariant.DisplaySwitch,
             ),
         )
     }

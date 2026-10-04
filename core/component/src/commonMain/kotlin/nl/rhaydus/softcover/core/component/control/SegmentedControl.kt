@@ -5,6 +5,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -22,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -31,11 +34,13 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -104,18 +109,19 @@ private fun <K> RowScope.TrackSegment(
     val playMotion = playDecorativeMotion()
     val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
 
+    val colors = segmentColors(
+        scheme = MaterialTheme.colorScheme,
+        selected = isSelected,
+    )
+
     val containerColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        targetValue = colors.container,
         animationSpec = colorSpec,
         label = "SegmentContainer",
     )
 
     val contentColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.onPrimary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
+        targetValue = colors.content,
         animationSpec = colorSpec,
         label = "SegmentContent",
     )
@@ -124,7 +130,7 @@ private fun <K> RowScope.TrackSegment(
     // flash amid everything else settling, so it rides the same tween/snap gate as the selection.
     val floatSpec = if (playMotion) tween<Float>(durationMillis = 220) else snap()
     val disabledAlpha by animateFloatAsState(
-        targetValue = if (option.enabled) 1f else 0.4f,
+        targetValue = if (option.enabled) 1f else DISABLED_ALPHA,
         animationSpec = floatSpec,
         label = "SegmentEnabledAlpha",
     )
@@ -150,6 +156,8 @@ private fun <K> RowScope.TrackSegment(
             SoftcoverText(
                 text = option.label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -162,6 +170,8 @@ private fun <K> ProseSegments(
     onEvent: (SegmentedControlEvent<K>) -> Unit,
     modifier: Modifier,
 ) {
+    val haptics = rememberHaptics()
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.selectableGroup(),
@@ -185,7 +195,10 @@ private fun <K> ProseSegments(
                 label = option.label,
                 isSelected = option.key == model.selected,
                 enabled = option.enabled,
-                onSelect = { onEvent(SegmentedControlEvent.Selected(key = option.key)) },
+                onSelect = {
+                    haptics.select()
+                    onEvent(SegmentedControlEvent.Selected(key = option.key))
+                },
             )
         }
 
@@ -199,8 +212,9 @@ private fun <K> ProseSegments(
 
 /**
  * A word sits well below the 48dp minimum touch target, so [minimumInteractiveComponentSize] pads the
- * tap area invisibly. The underline is always laid out (transparent when unchosen) so a change never
- * reflows the sentence, and it is sized to the word's measured width rather than the row's.
+ * tap area invisibly. The underline is always laid out (transparent when unchosen) and the word keeps one
+ * font weight, so a change never reflows the sentence; selection reads through colour and underline. The
+ * underline is sized to the word's measured width rather than the row's.
  */
 @Composable
 private fun ProseWord(
@@ -209,19 +223,36 @@ private fun ProseWord(
     enabled: Boolean,
     onSelect: () -> Unit,
 ) {
-    val wordColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
-    }
-    val underlineColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+    val interactionSource = remember { MutableInteractionSource() }
+    val colors = proseWordColors(
+        scheme = MaterialTheme.colorScheme,
+        selected = isSelected,
+    )
+    val playMotion = playDecorativeMotion()
+    val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
+    val wordColor by animateColorAsState(
+        targetValue = colors.word,
+        animationSpec = colorSpec,
+        label = "ProseWordColor",
+    )
+    val underlineColor by animateColorAsState(
+        targetValue = colors.underline,
+        animationSpec = colorSpec,
+        label = "ProseWordUnderline",
+    )
 
     Box(
         modifier = Modifier
             .minimumInteractiveComponentSize()
-            .alpha(if (enabled) 1f else 0.4f)
+            .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .pointerHandCursor()
-            .pressScaleClickable(onClick = { if (enabled && isSelected.not()) onSelect() })
+            .pressScale(interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled,
+                onClick = { if (isSelected.not()) onSelect() },
+            )
             .semantics {
                 role = Role.RadioButton
                 selected = isSelected
@@ -233,9 +264,7 @@ private fun ProseWord(
         ) {
             SoftcoverText(
                 text = label,
-                style = MaterialTheme.editorialTypography.bodyLarge.copy(
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                ),
+                style = MaterialTheme.editorialTypography.bodyLarge,
                 color = wordColor,
             )
 

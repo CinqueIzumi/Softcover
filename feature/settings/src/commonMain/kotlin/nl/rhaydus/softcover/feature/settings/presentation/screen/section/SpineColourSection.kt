@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTile
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileEvent
+import nl.rhaydus.softcover.core.component.control.ToggleEvent
+import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -108,18 +111,22 @@ internal fun SpineColourSection(
 
             Divider(model = DividerUiModel.Horizontal())
 
-            SettingsToggleRow(
-                label = state.dynamicColorToggleRow.label,
-                gloss = state.dynamicColorToggleRow.gloss,
-                toggle = state.dynamicColorToggleRow.toggle,
-                onCheckedChange = {
-                    runAction(
-                        displayToggleActionFor(
-                            key = state.dynamicColorToggleRow.key,
-                            newValue = it,
-                        ),
-                    )
+            ToggleRow(
+                model = state.dynamicColorToggleRow.row,
+                onEvent = { event ->
+                    when (event) {
+                        is ToggleEvent.Toggled -> runAction(
+                            displayToggleActionFor(
+                                key = state.dynamicColorToggleRow.key,
+                                newValue = event.checked,
+                            ),
+                        )
+                    }
                 },
+                contentPadding = PaddingValues(
+                    horizontal = 4.dp,
+                    vertical = 16.dp,
+                ),
             )
         }
     }

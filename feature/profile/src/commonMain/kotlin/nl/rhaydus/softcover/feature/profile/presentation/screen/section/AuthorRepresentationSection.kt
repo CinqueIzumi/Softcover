@@ -22,9 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.shimmer
-import nl.rhaydus.softcover.core.component.control.Toggle
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
-import nl.rhaydus.softcover.core.component.control.ToggleUiModel
+import nl.rhaydus.softcover.core.component.control.ToggleRow
+import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -66,7 +66,7 @@ private val GENDER_STACK_ALPHAS = listOf(1f, 0.82f, 0.64f)
 internal fun AuthorRepresentationSection(
     authorDemographics: AuthorDemographics,
     hideUntaggedAuthors: Boolean,
-    hideUntaggedAuthorsToggle: ToggleUiModel,
+    hideUntaggedAuthorsToggle: ToggleRowUiModel,
     canHideUntaggedAuthors: Boolean,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
@@ -84,9 +84,13 @@ internal fun AuthorRepresentationSection(
         Spacer(modifier = Modifier.height(20.dp))
 
         if (canHideUntaggedAuthors && isLoading.not()) {
-            HideUntaggedAuthorsToggle(
-                toggle = hideUntaggedAuthorsToggle,
-                onCheckedChange = onHideUntaggedAuthorsChange,
+            ToggleRow(
+                model = hideUntaggedAuthorsToggle,
+                onEvent = { event ->
+                    when (event) {
+                        is ToggleEvent.Toggled -> onHideUntaggedAuthorsChange(event.checked)
+                    }
+                },
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -157,47 +161,6 @@ internal fun AuthorRepresentationSection(
                 )
             }
         }
-    }
-}
-
-// The Appearance-settings toggle-row anatomy (label over an italic Fraunces gloss, trailing M3 Switch,
-// no card and no "On/Off" caption) borrowed onto a stats section — the gloss carries the whole
-// explanation, since "untagged" means something different per bar and a bare label couldn't say so.
-@Composable
-private fun HideUntaggedAuthorsToggle(
-    toggle: ToggleUiModel,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            SoftcoverText(
-                text = "Hide untagged authors",
-                style = MaterialTheme.editorialTypography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            SoftcoverText(
-                text = "Read each bar over the authors it has data for.",
-                style = MaterialTheme.editorialTypography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Toggle(
-            model = toggle,
-            onEvent = { event ->
-                when (event) {
-                    is ToggleEvent.Toggled -> onCheckedChange(event.checked)
-                }
-            },
-        )
     }
 }
 

@@ -11,13 +11,11 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
@@ -49,8 +47,7 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import kotlinx.collections.immutable.toImmutableSet
 import nl.rhaydus.softcover.core.component.control.Toggle
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
-import nl.rhaydus.softcover.core.component.control.ToggleUiModel
-import nl.rhaydus.softcover.core.component.control.ToggleVariant
+import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbar
 import nl.rhaydus.softcover.core.component.richtext.RichTextFormattingToolbarEvent
@@ -116,7 +113,7 @@ fun VerdictSheet(
 
     var marks by remember { mutableStateOf(initialBuffer.marks) }
 
-    var hasSpoilers by remember { mutableStateOf(model.initialHasSpoilers) }
+    var spoilers by remember { mutableStateOf(model.spoilers) }
 
     var draftRating by remember { mutableStateOf(model.initialRating) }
 
@@ -153,7 +150,7 @@ fun VerdictSheet(
                             text = textFieldValue.text,
                             marks = marks,
                         ),
-                        hasSpoilers = hasSpoilers,
+                        hasSpoilers = spoilers.checked,
                     ),
                 )
 
@@ -220,7 +217,10 @@ fun VerdictSheet(
                             .heightIn(min = 120.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                            .padding(
+                                horizontal = 16.dp,
+                                vertical = 14.dp,
+                            ),
                     ) {
                         if (textFieldValue.text.isEmpty()) {
                             SoftcoverText(
@@ -268,49 +268,25 @@ fun VerdictSheet(
             Spacer(modifier = Modifier.height(8.dp))
 
             SoftcoverText(
-                text = "Select text, then tap B, i or Spoiler",
+                text = "Select text, then tap Bold, Italic or Spoiler",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    SoftcoverText(
-                        text = "Contains spoilers",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    SoftcoverText(
-                        text = "Readers will need to tap to reveal the whole review.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Toggle(
-                    model = ToggleUiModel(
-                        key = "spoilers",
-                        checked = hasSpoilers,
-                        description = "Contains spoilers",
-                        variant = ToggleVariant.Switch,
-                    ),
-                    onEvent = { event ->
-                        when (event) {
-                            is ToggleEvent.Toggled -> hasSpoilers = event.checked
-                        }
-                    },
-                )
-            }
+            ToggleRow(
+                model = spoilers,
+                onEvent = { event ->
+                    when (event) {
+                        is ToggleEvent.Toggled -> spoilers = spoilers.copy(checked = event.checked)
+                    }
+                },
+                titleStyle = MaterialTheme.typography.titleSmall,
+                glossStyle = MaterialTheme.typography.bodySmall,
+                titleGap = 2.dp,
+                switchGap = 12.dp,
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
         }

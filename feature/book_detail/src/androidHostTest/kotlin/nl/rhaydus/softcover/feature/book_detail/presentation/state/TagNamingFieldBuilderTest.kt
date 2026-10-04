@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import nl.rhaydus.softcover.core.component.button.PillButtonContent
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
-import nl.rhaydus.softcover.core.component.field.TextFieldImeAction
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import org.junit.jupiter.api.Nested
@@ -86,7 +85,7 @@ class TagNamingFieldBuilderTest {
         }
 
         @Test
-        fun `asks the keyboard for a Done action`() {
+        fun `is submittable from the keyboard`() {
             // ----- Arrange -----
             val input = "cozy"
 
@@ -98,7 +97,7 @@ class TagNamingFieldBuilderTest {
             )
 
             // ----- Assert -----
-            field.imeAction shouldBe TextFieldImeAction.Done
+            field.variant.shouldBeInstanceOf<TextFieldVariant.Pill>().submittable shouldBe true
         }
 
         @Test

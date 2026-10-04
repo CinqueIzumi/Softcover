@@ -14,14 +14,14 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S8-4–S8-6 committed. SL-3b blocked on F34, SL-12 on S9-3; F33 open.
-- **Next:** S8-C-controls.
+- **State:** S8 is done (controls closed, step file deleted, #275 ticked). SP added after S10 (absorbs old S11-5). SL-3b blocked on F34, SL-12 on S9-3; F33 open.
+- **Next:** `steps/s9-statistics.md` S9-1.
 - **Follow-ups (user to schedule):** the foundation `shimmer` paints fixed `Color.LightGray` / `White`, not theme roles, so network-latency shimmers are a light-grey block on the dark theme — foundation upstream candidate. Book detail hero `Cover` moves and grows when the fetch lands. `ReviewsSection` masks on `loadingBookDetails || loadingReviews`.
 - **Later:** `BookDetailUiState` KDoc cites "(R9)" on ~20 lines — S11 sweep.
-- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified.
+- **Open questions:** ktlint's `no-unused-imports` never runs: `.editorconfig` sets `ktlint_standard = disabled` and `nl.rhaydus:ktlint-rules` has no equivalent — re-enable that rule or add one? Pre-existing glommed `),)` in `BookList.kt:403-436` (`add(DesktopContextMenuItem(`) — fix on the next touch? #275 PF line vs PF-7 copy — reword? Sweep ~60 old tests (AAA, `) }`)? Debug screens (`MotionDebugScreen`, `ShareCardDebugScreen`) build models in composition / file-level `*UiModel`s — exempt (README § Out of scope) or fix, and record which in `component-contract.md` § 7? `buildLibraryTabEntries` (settings) shows a tab twice if `draftTabOrder` holds a duplicate id (pre-existing) — de-duplicate? On device: TalkBack on the lens toggle should announce the selected segment as "selected, tab", not "disabled" — unverified. On device: Numeral select-all on focus versus the tap's cursor placement. Add an SP checkbox to #275?
 - **Visual checks:** accepted shifts go in [`visual-checks.md`](visual-checks.md), one line per step.
-- **Verification:** `styleCheck`, `checkModuleGraph` (JDK 21) and `testAndroidHostTest` for :core:{component,uibinding}, :orchestration, :feature:{book_detail,reading,onboarding,library,lists,scan} pass.
-- **Uncommitted:** nothing.
+- **Verification:** JDK 21. Host tests for every touched module passed. Full `styleCheck` passed after the fix round.
+- **Uncommitted:** the S8 controls change (`:core:component`, `:core:uibinding`, feature call sites and tests), tracker and step docs (`s8-controls.md` deleted, `sp-spacing-scale.md` new), one reviewer memory.
 
 ## Local verification
 
@@ -68,11 +68,12 @@ every sub-step's Verify.
 | S7 | — (book cards) | S7-1–S7-7, S7-C1–C5 | [x] |
 | SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-13, app-wide; SL-1–SL-7 before S7-2 | [ ] |
 | S8 | — (screen states) | S8-1–S8-3, S8-C-a–C-c | [x] |
-| S8 | [steps/s8-controls.md](steps/s8-controls.md) | S8-4–S8-6, S8-C-controls | [ ] |
+| S8 | — (controls) | S8-4–S8-6, S8-C-controls | [x] |
 | S9 | [steps/s9-statistics.md](steps/s9-statistics.md) | S9-1–S9-4 | [ ] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
-| S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-5 | [ ] |
+| SP | [steps/sp-spacing-scale.md](steps/sp-spacing-scale.md) | SP-1–SP-5, SP-C; after S10, before S11 | [ ] |
+| S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-4 | [ ] |
 | S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |
 
 ## Decisions

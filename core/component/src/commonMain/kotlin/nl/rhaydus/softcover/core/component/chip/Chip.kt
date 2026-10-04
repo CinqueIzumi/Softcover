@@ -1,5 +1,8 @@
 package nl.rhaydus.softcover.core.component.chip
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
@@ -11,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -29,10 +33,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerCover
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 
 private val ChipShape = RoundedCornerShape(percent = 50)
@@ -54,78 +59,12 @@ fun Chip(
 ) {
     ChipScaffold(
         model = model,
-        style = chipStyleFor(
-            tone = model.tone,
+        style = model.tone.style(
+            scheme = MaterialTheme.colorScheme,
             selected = model.selected,
         ),
         onEvent = onEvent,
         modifier = modifier,
-    )
-}
-
-@Composable
-private fun chipStyleFor(
-    tone: ChipTone,
-    selected: Boolean,
-): ChipStyle = when (tone) {
-    ChipTone.Tonal -> tonalStyle(selected = selected)
-    ChipTone.Choice -> if (selected) {
-        ChipStyle(
-            container = MaterialTheme.colorScheme.primary,
-            ink = MaterialTheme.colorScheme.onPrimary,
-            weight = FontWeight.SemiBold,
-        )
-    } else {
-        tonalStyle(selected = false)
-    }
-
-    ChipTone.Filled -> ChipStyle(
-        container = MaterialTheme.colorScheme.primary,
-        ink = MaterialTheme.colorScheme.onPrimary,
-        weight = FontWeight.SemiBold,
-    )
-
-    ChipTone.Container -> ChipStyle(
-        container = MaterialTheme.colorScheme.primaryContainer,
-        ink = MaterialTheme.colorScheme.onPrimaryContainer,
-        weight = FontWeight.SemiBold,
-    )
-
-    ChipTone.Outlined -> ChipStyle(
-        container = Color.Transparent,
-        ink = MaterialTheme.colorScheme.onSurfaceVariant,
-        weight = FontWeight.Medium,
-        border = ChipBorder.Solid(color = MaterialTheme.colorScheme.outlineVariant),
-        mutedInk = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-
-    ChipTone.Dashed -> ChipStyle(
-        container = Color.Transparent,
-        ink = MaterialTheme.colorScheme.primary,
-        weight = FontWeight.SemiBold,
-        border = ChipBorder.Dashed(color = MaterialTheme.colorScheme.primary),
-    )
-
-    ChipTone.Spoiler -> ChipStyle(
-        container = MaterialTheme.colorScheme.spoilerCover,
-        ink = Color.Transparent,
-        weight = FontWeight.Medium,
-    )
-}
-
-@Composable
-private fun tonalStyle(selected: Boolean): ChipStyle = if (selected) {
-    ChipStyle(
-        container = MaterialTheme.colorScheme.secondaryContainer,
-        ink = MaterialTheme.colorScheme.onSecondaryContainer,
-        weight = FontWeight.SemiBold,
-    )
-} else {
-    ChipStyle(
-        container = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ink = MaterialTheme.colorScheme.onSurface,
-        weight = FontWeight.Medium,
-        mutedInk = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
 
@@ -136,13 +75,29 @@ private fun ChipScaffold(
     onEvent: (ChipEvent) -> Unit,
     modifier: Modifier,
 ) {
+    val playMotion = playDecorativeMotion()
+    val colorSpec = if (playMotion) tween<Color>(durationMillis = 220) else snap()
+    val container by animateColorAsState(
+        targetValue = style.container,
+        animationSpec = colorSpec,
+        label = "ChipContainer",
+    )
+    val ink by animateColorAsState(
+        targetValue = style.ink,
+        animationSpec = colorSpec,
+        label = "ChipInk",
+    )
+    val animatedStyle = style.copy(
+        container = container,
+        ink = ink,
+    )
     val tappable = model.tone != ChipTone.Spoiler
     val selectable = model.tone == ChipTone.Tonal || model.tone == ChipTone.Choice
 
     val rowModifier = modifier
         .clip(ChipShape)
-        .background(style.container)
-        .thenChipBorder(border = style.border)
+        .background(animatedStyle.container)
+        .thenChipBorder(border = animatedStyle.border)
         .then(if (selectable) Modifier.semantics { selected = model.selected } else Modifier)
         .chipInteraction(interaction = model.interaction) {
             onEvent(ChipEvent.Clicked(key = model.key))
@@ -155,19 +110,19 @@ private fun ChipScaffold(
     ) {
         ChipLeadingSlot(
             leading = model.leading,
-            style = style,
+            style = animatedStyle,
             tappable = tappable,
             onToggle = { onEvent(ChipEvent.SpoilerToggled(key = model.key)) },
         )
 
         ChipLabel(
             model = model,
-            style = style,
+            style = animatedStyle,
         )
 
         ChipTrailingSlot(
             trailing = model.trailing,
-            style = style,
+            style = animatedStyle,
             tappable = tappable,
             onDismiss = { onEvent(ChipEvent.Dismissed(key = model.key)) },
         )
@@ -199,7 +154,7 @@ private fun Modifier.chipInteraction(
     onClick: () -> Unit,
 ): Modifier = when (interaction) {
     ChipInteraction.Clickable -> pointerHandCursor().pressScaleClickable(onClick = onClick)
-    ChipInteraction.Disabled -> alpha(ChipDimensions.disabledAlpha)
+    ChipInteraction.Disabled -> alpha(DISABLED_ALPHA)
     ChipInteraction.Inert -> this
 }
 
@@ -256,7 +211,10 @@ private fun ChipLabel(
             Modifier
                 .clip(RoundedCornerShape(2.dp))
                 .background(MaterialTheme.colorScheme.spoilerEditorHighlight)
-                .padding(horizontal = 3.dp, vertical = 1.dp)
+                .padding(
+                    horizontal = 3.dp,
+                    vertical = 1.dp,
+                )
         } else {
             Modifier
         },

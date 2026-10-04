@@ -3,14 +3,11 @@ package nl.rhaydus.softcover.feature.library.presentation.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
@@ -18,8 +15,8 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.component.control.Toggle
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
+import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
@@ -32,7 +29,6 @@ import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSortChi
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeTitlesToggleChangedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSetListRankedAction
 import nl.rhaydus.softcover.feature.library.presentation.state.ArrangeMakeOrderedUiModel
-import nl.rhaydus.softcover.feature.library.presentation.state.ArrangeTitlesToggleUiModel
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 /**
@@ -85,9 +81,14 @@ internal fun LibraryArrangeSheet(
         state.arrangeTitlesToggle?.let { titlesToggle ->
             Spacer(modifier = Modifier.height(16.dp))
 
-            ShowTitlesToggleRow(
+            ToggleRow(
                 model = titlesToggle,
-                onCheckedChange = { show -> runAction(OnArrangeTitlesToggleChangedAction(show = show)) },
+                onEvent = { event ->
+                    when (event) {
+                        is ToggleEvent.Toggled -> runAction(OnArrangeTitlesToggleChangedAction(show = event.checked))
+                    }
+                },
+                titleStyle = MaterialTheme.editorialTypography.body,
             )
         }
 
@@ -129,33 +130,6 @@ private fun LayoutChipRow(
                 onEvent = { event -> if (event is ChipEvent.Clicked) onChipEvent(event.key) },
             )
         }
-    }
-}
-
-@Composable
-private fun ShowTitlesToggleRow(
-    model: ArrangeTitlesToggleUiModel,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        SoftcoverText(
-            text = model.label,
-            style = MaterialTheme.editorialTypography.body,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-
-        Toggle(
-            model = model.toggle,
-            onEvent = { event ->
-                when (event) {
-                    is ToggleEvent.Toggled -> onCheckedChange(event.checked)
-                }
-            },
-        )
     }
 }
 

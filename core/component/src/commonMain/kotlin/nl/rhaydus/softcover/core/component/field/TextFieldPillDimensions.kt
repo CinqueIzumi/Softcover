@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.core.component.field
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.Typography
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -12,46 +12,33 @@ internal data class TextFieldPillDimensions(
     val height: Dp,
     val horizontalPadding: Dp,
     val iconSize: Dp,
-    val placeholderAlpha: Float,
-    val size: TextFieldPillSize,
-) {
-    @Composable
-    fun container(): Color = when (size) {
-        TextFieldPillSize.Compact -> MaterialTheme.colorScheme.surfaceContainer
-        TextFieldPillSize.Regular,
-        TextFieldPillSize.Large -> MaterialTheme.colorScheme.surfaceContainerHigh
-    }
+    val textStyle: TextStyle,
+)
 
-    @Composable
-    fun textStyle(): TextStyle = when (size) {
-        TextFieldPillSize.Compact -> MaterialTheme.typography.bodyMedium
-        TextFieldPillSize.Regular -> MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
-        TextFieldPillSize.Large -> MaterialTheme.typography.bodyLarge
-    }
-}
-
-internal fun TextFieldPillSize.dimensions(): TextFieldPillDimensions = when (this) {
+internal fun TextFieldPillSize.dimensions(typography: Typography): TextFieldPillDimensions = when (this) {
     TextFieldPillSize.Compact -> TextFieldPillDimensions(
         height = 42.dp,
         horizontalPadding = 14.dp,
         iconSize = 18.dp,
-        placeholderAlpha = 1f,
-        size = this,
+        textStyle = typography.bodyMedium,
     )
 
     TextFieldPillSize.Regular -> TextFieldPillDimensions(
         height = 48.dp,
         horizontalPadding = 14.dp,
         iconSize = 20.dp,
-        placeholderAlpha = 0.6f,
-        size = this,
+        textStyle = typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
     )
 
     TextFieldPillSize.Large -> TextFieldPillDimensions(
         height = 52.dp,
         horizontalPadding = 18.dp,
         iconSize = 20.dp,
-        placeholderAlpha = 1f,
-        size = this,
+        textStyle = typography.bodyLarge,
     )
+}
+
+internal fun TextFieldPillTone.container(colorScheme: ColorScheme): Color = when (this) {
+    TextFieldPillTone.Container -> colorScheme.surfaceContainer
+    TextFieldPillTone.ContainerHigh -> colorScheme.surfaceContainerHigh
 }

@@ -1,12 +1,11 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
-import nl.rhaydus.softcover.core.component.control.ToggleUiModel
-import nl.rhaydus.softcover.core.component.control.ToggleVariant
+import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 
 internal data class ArrangeSheetSnapshot(
     val resultCount: Int,
-    val titlesToggle: ArrangeTitlesToggleUiModel?,
+    val titlesToggle: ToggleRowUiModel?,
     val makeOrdered: ArrangeMakeOrderedUiModel?,
 ) {
     companion object {
@@ -28,14 +27,11 @@ internal data class ArrangeSheetSnapshot(
                 titlesToggle = gridLayout
                     ?.takeIf { it.chip != LibraryLayoutChip.LIST }
                     ?.let { layout ->
-                        ArrangeTitlesToggleUiModel(
-                            label = "Show titles & authors",
-                            toggle = ToggleUiModel(
-                                key = "show-titles",
-                                checked = layout.showsTitles,
-                                description = "Show titles & authors",
-                                variant = ToggleVariant.Switch,
-                            ),
+                        ToggleRowUiModel(
+                            key = "show-titles",
+                            title = "Show titles & authors",
+                            gloss = null,
+                            checked = layout.showsTitles,
                         )
                     },
                 makeOrdered = unrankedList?.let { list ->

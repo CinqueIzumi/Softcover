@@ -15,7 +15,6 @@ primitives among them).
 | S11-2 | R11 holdouts | [ ] |
 | S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | [ ] |
 | S11-4 | Minimal-shape audit of every `*UiModel` (below) | [ ] |
-| S11-5 | Inline every hoisted `.dp` constant (below) | [ ] |
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
 ## S11-1 — R10 sweep
@@ -62,10 +61,3 @@ styles. A component whose look depends on no data moves to the data-free-primiti
 parameters with defaults, no model). A data-driven model keeps the smallest contract-fitting shape: content
 fields plus a small style axis, with overridable defaulted fields, not one surface-named variant per call
 site. Propose per family, then stop for approval.
-
-## S11-5 — Inline hoisted `.dp` constants
-
-Apply `docs/reference/code-style.md`'s "`.dp` values stay inline" rule to every file with a file-level
-`private val X = N.dp` (`git grep -l "^private val .*\.dp$" -- '*.kt'`; 30 files, 66 vals at planning).
-Also inline `BarSpec`-style private vals whose only job is holding dp values. One brief per module group;
-done when the grep is empty.

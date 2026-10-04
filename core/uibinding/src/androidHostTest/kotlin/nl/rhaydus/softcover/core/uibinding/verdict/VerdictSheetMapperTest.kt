@@ -159,7 +159,7 @@ class VerdictSheetMapperTest {
 
             // ----- Assert -----
             result.initialRating.shouldBeNull()
-            result.initialHasSpoilers shouldBe false
+            result.spoilers.checked shouldBe false
         }
 
         @Test
@@ -175,7 +175,7 @@ class VerdictSheetMapperTest {
             )
 
             // ----- Assert -----
-            result.initialHasSpoilers shouldBe true
+            result.spoilers.checked shouldBe true
         }
 
         @Test

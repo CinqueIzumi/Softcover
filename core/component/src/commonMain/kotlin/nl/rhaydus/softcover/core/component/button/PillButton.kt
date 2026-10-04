@@ -5,15 +5,17 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,15 +31,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
+import nl.rhaydus.softcover.core.component.shape.PillShape
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 
-private val PillShape = RoundedCornerShape(percent = 50)
-
 /**
  * A fixed-height, fully-rounded action button. A menu it opens belongs to the caller: the pill is only
- * its anchor. Width comes from the caller's [modifier]; the content stays centred.
+ * its anchor. An icon-only pill is a fixed circle; a label pill takes its width from [modifier], with the
+ * content centred. The tap area is at least 48dp either way, wider than the painted pill.
  */
 @Composable
 fun PillButton(
@@ -45,10 +48,14 @@ fun PillButton(
     onEvent: (PillButtonEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val style = pillButtonStyleFor(tone = model.tone)
+    val style = model.tone.style(scheme = MaterialTheme.colorScheme)
     val height = PillButtonDimensions.heightFor(size = model.size)
     val isIconOnly = model.content is PillButtonContent.IconOnly
     val pillModifier = modifier
+        .minimumInteractiveComponentSize()
+        .pillButtonInteraction(interaction = model.interaction) {
+            onEvent(PillButtonEvent.Clicked(key = model.key))
+        }
         .height(height)
         .let { base -> if (isIconOnly) base.width(height) else base }
         .clip(PillShape)
@@ -64,9 +71,6 @@ fun PillButton(
                 base
             }
         }
-        .pillButtonInteraction(interaction = model.interaction) {
-            onEvent(PillButtonEvent.Clicked(key = model.key))
-        }
 
     when (val content = model.content) {
         is PillButtonContent.Label -> Row(
@@ -77,7 +81,6 @@ fun PillButton(
             PillButtonLabel(
                 content = content,
                 style = style,
-                indicator = model.indicator,
             )
         }
 
@@ -96,33 +99,32 @@ fun PillButton(
     }
 }
 
-@Composable
-private fun pillButtonStyleFor(tone: PillButtonTone): PillButtonStyle = when (tone) {
+internal fun PillButtonTone.style(scheme: ColorScheme): PillButtonStyle = when (this) {
     PillButtonTone.Tonal -> PillButtonStyle(
-        container = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ink = MaterialTheme.colorScheme.onSurface,
+        container = scheme.surfaceContainerHigh,
+        ink = scheme.onSurface,
     )
 
     PillButtonTone.Accent -> PillButtonStyle(
-        container = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ink = MaterialTheme.colorScheme.primary,
+        container = scheme.surfaceContainerHigh,
+        ink = scheme.primary,
     )
 
     PillButtonTone.Filled -> PillButtonStyle(
-        container = MaterialTheme.colorScheme.primary,
-        ink = MaterialTheme.colorScheme.onPrimary,
+        container = scheme.primary,
+        ink = scheme.onPrimary,
     )
 
     PillButtonTone.Outlined -> PillButtonStyle(
         container = Color.Transparent,
-        ink = MaterialTheme.colorScheme.onSurface,
-        iconTint = MaterialTheme.colorScheme.primary,
-        border = MaterialTheme.colorScheme.outlineVariant,
+        ink = scheme.onSurface,
+        iconTint = scheme.primary,
+        border = scheme.outlineVariant,
     )
 
     PillButtonTone.Quiet -> PillButtonStyle(
-        container = MaterialTheme.colorScheme.surfaceContainer,
-        ink = MaterialTheme.colorScheme.onSurfaceVariant,
+        container = scheme.surfaceContainer,
+        ink = scheme.onSurfaceVariant,
     )
 }
 
@@ -137,7 +139,7 @@ private fun Modifier.pillButtonInteraction(
         .semantics { role = Role.Button }
 
     PillButtonInteraction.Disabled -> this
-        .alpha(PillButtonDimensions.DISABLED_ALPHA)
+        .alpha(DISABLED_ALPHA)
         .semantics(mergeDescendants = true) {
             role = Role.Button
             disabled()
@@ -145,10 +147,9 @@ private fun Modifier.pillButtonInteraction(
 }
 
 @Composable
-private fun PillButtonLabel(
+private fun RowScope.PillButtonLabel(
     content: PillButtonContent.Label,
     style: PillButtonStyle,
-    indicator: Boolean,
 ) {
     content.leadingIcon?.let { icon ->
         PillButtonGlyph(
@@ -166,16 +167,20 @@ private fun PillButtonLabel(
         color = style.ink,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(
+            weight = 1f,
+            fill = false,
+        ),
     )
 
-    if (indicator) {
+    if (content.indicator) {
         Spacer(modifier = Modifier.width(PillButtonDimensions.iconGap))
 
         Box(
             modifier = Modifier
                 .size(PillButtonDimensions.indicatorSize)
                 .background(
-                    color = MaterialTheme.colorScheme.inversePrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     shape = CircleShape,
                 ),
         )

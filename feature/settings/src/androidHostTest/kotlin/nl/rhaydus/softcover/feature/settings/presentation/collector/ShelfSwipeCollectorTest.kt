@@ -107,7 +107,7 @@ class ShelfSwipeCollectorTest {
                 // ----- Assert -----
                 stateFlow.value.displayToggleRows
                     .first { it.key == DisplayToggle.SHELF_SWIPE }
-                    .toggle.checked shouldBe false
+                    .row.checked shouldBe false
                 job.cancel()
             }
 

@@ -1,12 +1,15 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen.section
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.control.ToggleEvent
+import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.mapper.displayToggleActionFor
@@ -30,18 +33,22 @@ internal fun DisplaySection(
         SettingsRowGroup {
             state.displayToggleRows.forEach { displayToggleRow ->
                 row {
-                    SettingsToggleRow(
-                        label = displayToggleRow.label,
-                        gloss = displayToggleRow.gloss,
-                        toggle = displayToggleRow.toggle,
-                        onCheckedChange = {
-                            runAction(
-                                displayToggleActionFor(
-                                    key = displayToggleRow.key,
-                                    newValue = it,
-                                ),
-                            )
+                    ToggleRow(
+                        model = displayToggleRow.row,
+                        onEvent = { event ->
+                            when (event) {
+                                is ToggleEvent.Toggled -> runAction(
+                                    displayToggleActionFor(
+                                        key = displayToggleRow.key,
+                                        newValue = event.checked,
+                                    ),
+                                )
+                            }
                         },
+                        contentPadding = PaddingValues(
+                            horizontal = 4.dp,
+                            vertical = 16.dp,
+                        ),
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.uibinding.verdict
 
+import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
@@ -75,6 +76,11 @@ fun Book.toVerdictSheetUiModel(
         ),
         initialRating = userBook?.rating?.takeIf { it > 0.0 },
         initialReview = review ?: RichTextUiModel.EMPTY,
-        initialHasSpoilers = userBook?.reviewHasSpoilers == true,
+        spoilers = ToggleRowUiModel(
+            key = "spoilers",
+            title = "Contains spoilers",
+            gloss = "Readers will need to tap to reveal the whole review.",
+            checked = userBook?.reviewHasSpoilers == true,
+        ),
     )
 }

@@ -8,6 +8,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipUiModel
+import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
@@ -109,7 +110,7 @@ internal data class LibraryUiState(
     val arrangeSortHeader: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Sort"),
 
     /** The Arrange sheet's titles toggle; null when the layout is a list. */
-    val arrangeTitlesToggle: ArrangeTitlesToggleUiModel? = null,
+    val arrangeTitlesToggle: ToggleRowUiModel? = null,
 
     /** The Arrange sheet's "make ordered" affordance; null unless the shelf is an unranked custom list. */
     val arrangeMakeOrdered: ArrangeMakeOrderedUiModel? = null,

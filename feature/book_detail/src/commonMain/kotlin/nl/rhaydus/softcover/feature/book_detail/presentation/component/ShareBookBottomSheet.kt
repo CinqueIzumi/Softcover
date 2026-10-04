@@ -130,7 +130,7 @@ internal fun ShareBookBottomSheet(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (body.hasVariantToggle) {
+            if (body.variantToggle != null) {
                 SegmentedControl(
                     model = body.variantToggle,
                     onEvent = { event ->

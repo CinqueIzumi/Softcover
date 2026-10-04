@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.core.component.progress
 
-import nl.rhaydus.softcover.core.component.field.TextFieldImeAction
-import nl.rhaydus.softcover.core.component.field.TextFieldKeyboard
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 
@@ -14,6 +12,4 @@ fun progressTimeField(
     text = text,
     placeholder = "0",
     variant = TextFieldVariant.Numeral(charCount = 2),
-    keyboard = TextFieldKeyboard.Number,
-    imeAction = TextFieldImeAction.Done,
 )

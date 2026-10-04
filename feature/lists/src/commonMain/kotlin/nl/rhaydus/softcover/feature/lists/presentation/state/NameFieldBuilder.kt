@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.lists.presentation.state
 
-import nl.rhaydus.softcover.core.component.field.TextFieldImeAction
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 
@@ -12,8 +11,7 @@ internal fun nameFieldFor(
     key = "list-name",
     text = name,
     placeholder = "Summer reads",
-    variant = TextFieldVariant.Hero,
-    imeAction = TextFieldImeAction.Done,
+    variant = TextFieldVariant.Hero(submittable = true),
     enabled = enabled,
     autoFocus = true,
 )

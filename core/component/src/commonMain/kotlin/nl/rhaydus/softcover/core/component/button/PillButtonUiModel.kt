@@ -10,7 +10,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * Everything [PillButton] renders: a fixed-height pill coloured by [tone], gated by [interaction].
  *
  * @property key Identity — [PillButtonEvent.Clicked] carries it back so one handler can serve several pills.
- * @property indicator A trailing dot marking that something behind the pill is active.
  */
 @Immutable
 data class PillButtonUiModel(
@@ -19,7 +18,6 @@ data class PillButtonUiModel(
     val tone: PillButtonTone = PillButtonTone.Tonal,
     val size: PillButtonSize = PillButtonSize.Regular,
     val interaction: PillButtonInteraction = PillButtonInteraction.Clickable,
-    val indicator: Boolean = false,
 ) {
     companion object : UiModelPreviews<PillButtonUiModel> {
         override val previews: ImmutableList<PillButtonUiModel> = persistentListOf(
@@ -64,9 +62,16 @@ data class PillButtonUiModel(
                 content = PillButtonContent.Label(
                     text = "Filter",
                     leadingIcon = SoftcoverIcon.FilterList,
+                    indicator = true,
                 ),
                 tone = PillButtonTone.Quiet,
-                indicator = true,
+            ),
+            PillButtonUiModel(
+                key = "regular-tonal",
+                content = PillButtonContent.Label(
+                    text = "Sort",
+                    leadingIcon = SoftcoverIcon.Sort,
+                ),
             ),
             PillButtonUiModel(
                 key = "disabled",

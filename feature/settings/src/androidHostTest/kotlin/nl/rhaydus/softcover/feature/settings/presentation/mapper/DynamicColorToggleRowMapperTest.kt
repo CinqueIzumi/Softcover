@@ -26,7 +26,7 @@ class DynamicColorToggleRowMapperTest {
             val result = dynamicColorToggleRowFor(checked = true)
 
             // ----- Assert -----
-            result.toggle.checked shouldBe true
+            result.row.checked shouldBe true
         }
 
         @Test
@@ -35,7 +35,7 @@ class DynamicColorToggleRowMapperTest {
             val result = dynamicColorToggleRowFor(checked = false)
 
             // ----- Assert -----
-            result.toggle.checked shouldBe false
+            result.row.checked shouldBe false
         }
     }
 }

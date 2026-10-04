@@ -27,13 +27,13 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
- * The one flat row anatomy behind [SettingsMenuRow], [SettingsToggleRow] and [SettingsSelectableRow]:
+ * The one flat row anatomy behind [SettingsMenuRow] and [SettingsSelectableRow]:
  * an optional [leading] slot, [title] over an optional [secondary] line, and an optional [trailing]
  * slot, at 16dp vertical / 4dp horizontal padding with a 4dp title→secondary gap and a 16dp gap before
  * [trailing]. [interactionSource] doubles as the row's selectability switch: `null` renders no press
  * treatment (the Copyable menu row); non-null drives `pointerHandCursor()` + `pressScale` + an animated
  * `surfaceContainer` wash gated on `playDecorativeMotion()`, wrapping the caller's [semantics] modifier
- * (`toggleable` / `selectable` / `clickable`, built against the same [interactionSource]).
+ * (`selectable` / `clickable`, built against the same [interactionSource]).
  * [selectionContainer] wraps [title] for the row whose only affordance is copying its text.
  */
 @Composable

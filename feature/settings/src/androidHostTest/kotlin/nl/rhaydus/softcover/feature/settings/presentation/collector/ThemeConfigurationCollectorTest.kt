@@ -59,10 +59,12 @@ class ThemeConfigurationCollectorTest {
         fun `sets useFloatingBarChecked to true when FLOATING configuration emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.FLOATING))
@@ -76,10 +78,12 @@ class ThemeConfigurationCollectorTest {
         fun `sets useFloatingBarChecked to false when DOCKED configuration emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.DOCKED))
@@ -93,10 +97,12 @@ class ThemeConfigurationCollectorTest {
         fun `updates useFloatingBarChecked to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.FLOATING))
@@ -111,10 +117,12 @@ class ThemeConfigurationCollectorTest {
         fun `does not change useFloatingBarChecked before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act & Assert -----
             stateFlow.value.useFloatingBarChecked shouldBe true
@@ -129,10 +137,12 @@ class ThemeConfigurationCollectorTest {
                 dropDownExpanded = true,
             )
             val collector = ThemeConfigurationCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.DOCKED))
@@ -147,10 +157,12 @@ class ThemeConfigurationCollectorTest {
         fun `retains last emitted useFloatingBarChecked after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
             themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.DOCKED))
             job.cancel()
 
@@ -162,10 +174,12 @@ class ThemeConfigurationCollectorTest {
         fun `sets themeMode to the emitted configuration's themeMode`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             themeConfigFlow.emit(ThemeConfiguration(themeMode = ThemeMode.DARK))
@@ -179,10 +193,12 @@ class ThemeConfigurationCollectorTest {
         fun `sets colorPalette to the emitted configuration's colorPalette`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
-            val job = launch { collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            ) }
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
 
             // ----- Act -----
             themeConfigFlow.emit(ThemeConfiguration(colorPalette = ColorPalette.SEA))
@@ -197,10 +213,12 @@ class ThemeConfigurationCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val collector = ThemeConfigurationCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 themeConfigFlow.emit(ThemeConfiguration(bottomBarStyle = BottomBarStyle.FLOATING))
@@ -208,7 +226,7 @@ class ThemeConfigurationCollectorTest {
                 // ----- Assert -----
                 stateFlow.value.displayToggleRows
                     .first { it.key == DisplayToggle.FLOATING_BOTTOM_BAR }
-                    .toggle.checked shouldBe true
+                    .row.checked shouldBe true
                 job.cancel()
             }
 
@@ -217,16 +235,18 @@ class ThemeConfigurationCollectorTest {
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val collector = ThemeConfigurationCollector()
-                val job = launch { collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                ) }
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
 
                 // ----- Act -----
                 themeConfigFlow.emit(ThemeConfiguration(useDynamicColor = true))
 
                 // ----- Assert -----
-                stateFlow.value.dynamicColorToggleRow.toggle.checked shouldBe true
+                stateFlow.value.dynamicColorToggleRow.row.checked shouldBe true
                 job.cancel()
             }
     }

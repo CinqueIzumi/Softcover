@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.component.verdict
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
@@ -20,15 +21,15 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
  * labels, and a secondary delete action only when there is a review to delete), and the verdict the draft
  * starts from.
  *
- * The three `initial*` fields seed the sheet's local draft once; later changes to the model do not
- * reset what the reader has typed.
+ * [initialRating], [initialReview] and [spoilers] seed the sheet's local draft once; later changes to the
+ * model do not reset what the reader has typed.
  */
 @Immutable
 data class VerdictSheetUiModel(
     val scaffold: SheetScaffoldUiModel,
     val initialRating: Double?,
     val initialReview: RichTextUiModel,
-    val initialHasSpoilers: Boolean,
+    val spoilers: ToggleRowUiModel,
     val reviewLabel: SectionHeaderUiModel.Label = SectionHeaderUiModel.Label(eyebrow = "In your words"),
 ) {
     companion object : UiModelPreviews<VerdictSheetUiModel> {
@@ -48,6 +49,13 @@ data class VerdictSheetUiModel(
                 secondary = if (canDelete) SheetFooterButton(label = "Delete review") else null,
             ),
             layout = SheetLayout.Pinned,
+        )
+
+        private fun fixtureSpoilers(checked: Boolean): ToggleRowUiModel = ToggleRowUiModel(
+            key = "spoilers",
+            title = "Contains spoilers",
+            gloss = "Readers will need to tap to reveal the whole review.",
+            checked = checked,
         )
 
         private val fixtureCover = CoverUiModel(
@@ -71,7 +79,7 @@ data class VerdictSheetUiModel(
                 ),
                 initialRating = null,
                 initialReview = RichTextUiModel.EMPTY,
-                initialHasSpoilers = false,
+                spoilers = fixtureSpoilers(checked = false),
             ),
             VerdictSheetUiModel(
                 scaffold = fixtureScaffold(
@@ -85,7 +93,7 @@ data class VerdictSheetUiModel(
                 ),
                 initialRating = 4.5,
                 initialReview = RichTextUiModel.previews.first(),
-                initialHasSpoilers = true,
+                spoilers = fixtureSpoilers(checked = true),
             ),
         )
     }

@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.state
 
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
-import nl.rhaydus.softcover.core.component.field.TextFieldImeAction
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
 import nl.rhaydus.softcover.core.component.field.TextFieldVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -18,8 +17,8 @@ internal fun tagNamingFieldFor(
     variant = TextFieldVariant.Pill(
         leadingIcon = SoftcoverIcon.Edit,
         trailing = addPill.takeIf { input.isNotBlank() },
+        submittable = true,
     ),
-    imeAction = TextFieldImeAction.Done,
 )
 
 /**

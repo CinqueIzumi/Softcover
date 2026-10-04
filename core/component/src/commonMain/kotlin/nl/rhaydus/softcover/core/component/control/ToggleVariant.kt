@@ -12,9 +12,6 @@ sealed interface ToggleVariant {
         val style: ToggleIconStyle,
     ) : ToggleVariant
 
-    /** The platform switch; its row text stays with the caller. */
+    /** The platform switch; the visible label stays with the caller. */
     data object Switch : ToggleVariant
-
-    /** A switch that only shows [ToggleUiModel.checked]: it takes no input and has no semantics, so a surrounding row owns the tap. */
-    data object DisplaySwitch : ToggleVariant
 }

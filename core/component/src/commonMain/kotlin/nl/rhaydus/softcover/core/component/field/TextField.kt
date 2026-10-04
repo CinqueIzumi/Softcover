@@ -35,7 +35,7 @@ fun TextField(
             modifier = modifier,
         )
 
-        TextFieldVariant.Hero -> HeroTextField(
+        is TextFieldVariant.Hero -> HeroTextField(
             model = model,
             onEvent = onEvent,
             focusRequester = focusRequester,

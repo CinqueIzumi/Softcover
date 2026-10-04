@@ -15,7 +15,7 @@ class TextFieldUiModelTest {
             // ----- Assert -----
             variants.any { it is TextFieldVariant.Pill } shouldBe true
             variants.any { it is TextFieldVariant.Outlined } shouldBe true
-            variants.any { it == TextFieldVariant.Hero } shouldBe true
+            variants.any { it is TextFieldVariant.Hero } shouldBe true
             variants.any { it is TextFieldVariant.Numeral } shouldBe true
         }
 

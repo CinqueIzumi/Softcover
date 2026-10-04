@@ -80,19 +80,22 @@ internal fun shareSheetBodyFor(
         shareLabel = if (isSharing) "Sharing…" else "Share",
         saveToGalleryLabel = if (isSavingToGallery) "Saving to gallery…" else "Save to gallery",
         isBusy = isSharing || isSavingToGallery,
-        hasVariantToggle = hasUpdateCard,
-        variantToggle = SegmentedControlUiModel(
-            options = ShareCardVariant.entries
-                .map { option ->
-                    SegmentUiModel(
-                        key = option,
-                        label = option.label,
-                        enabled = (isSharing || isSavingToGallery).not(),
-                    )
-                }
-                .toImmutableList(),
-            selected = variant,
-        ),
+        variantToggle = if (hasUpdateCard) {
+            SegmentedControlUiModel(
+                options = ShareCardVariant.entries
+                    .map { option ->
+                        SegmentUiModel(
+                            key = option,
+                            label = option.label,
+                            enabled = (isSharing || isSavingToGallery).not(),
+                        )
+                    }
+                    .toImmutableList(),
+                selected = variant,
+            )
+        } else {
+            null
+        },
     )
 
 internal fun shareSheetScaffoldFor(

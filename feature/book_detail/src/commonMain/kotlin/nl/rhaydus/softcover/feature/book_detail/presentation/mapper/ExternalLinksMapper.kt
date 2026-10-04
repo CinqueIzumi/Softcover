@@ -1,10 +1,9 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import nl.rhaydus.softcover.core.component.button.PillButtonContent
 import nl.rhaydus.softcover.core.component.button.PillButtonTone
 import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
+import nl.rhaydus.softcover.core.component.button.toPillButtonSet
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.ExternalLinksUiModel
@@ -16,28 +15,23 @@ internal fun BookEdition?.toExternalLinksUiModel(): ExternalLinksUiModel? {
     } ?: return null
 
     return ExternalLinksUiModel(
-        pills = persistentListOf(
+        links = listOf(
             externalLinkPill(
                 key = BOOKSHOP_KEY,
                 label = "Bookshop",
                 icon = SoftcoverIcon.Storefront,
-            ),
+            ) to "https://bookshop.org/search?keywords=$isbn",
             externalLinkPill(
                 key = AMAZON_KEY,
                 label = "Amazon",
                 icon = SoftcoverIcon.ShoppingBag,
-            ),
+            ) to "https://www.amazon.com/s?k=$isbn",
             externalLinkPill(
                 key = OPEN_LIBRARY_KEY,
                 label = "OpenLibrary",
                 icon = SoftcoverIcon.LibraryBooks,
-            ),
-        ),
-        urlByKey = persistentMapOf(
-            BOOKSHOP_KEY to "https://bookshop.org/search?keywords=$isbn",
-            AMAZON_KEY to "https://www.amazon.com/s?k=$isbn",
-            OPEN_LIBRARY_KEY to "https://openlibrary.org/search?isbn=$isbn",
-        ),
+            ) to "https://openlibrary.org/search?isbn=$isbn",
+        ).toPillButtonSet(),
     )
 }
 

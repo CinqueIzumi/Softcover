@@ -17,15 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.button.PillButton
-import nl.rhaydus.softcover.core.component.button.PillButtonEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnExternalLinkClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 /**
- * The "Find it" section (The Book lens): outlined pills that hand the matching search URL to
- * [OnExternalLinkClickAction]. Absent until the edition has an ISBN.
+ * The "Find it" section (The Book lens): one outlined pill per search link. Absent until the edition has an
+ * ISBN.
  */
 @Composable
 internal fun ExternalLinksSection(
@@ -58,16 +57,12 @@ internal fun ExternalLinksSection(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    knownLinks.pills.forEach { pill ->
+                    knownLinks.links.pills.forEach { pill ->
                         key(pill.key) {
                             PillButton(
                                 model = pill,
                                 onEvent = { event ->
-                                    if (event is PillButtonEvent.Clicked) {
-                                        knownLinks.urlByKey[event.key]?.let { url ->
-                                            runAction(OnExternalLinkClickAction(url = url))
-                                        }
-                                    }
+                                    runAction(OnExternalLinkClickAction(key = event.key))
                                 },
                             )
                         }

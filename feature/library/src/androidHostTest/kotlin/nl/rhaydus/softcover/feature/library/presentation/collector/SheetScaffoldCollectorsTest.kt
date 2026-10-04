@@ -145,7 +145,7 @@ class SheetScaffoldCollectorsTest {
             stateFlow.value = LibraryUiState(arrangeDraft = gridDraft)
 
             // ----- Assert -----
-            stateFlow.value.arrangeTitlesToggle.shouldNotBeNull().toggle.checked shouldBe false
+            stateFlow.value.arrangeTitlesToggle.shouldNotBeNull().checked shouldBe false
         }
 
         @Test

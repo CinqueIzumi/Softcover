@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.screen.section
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -13,8 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import nl.rhaydus.softcover.core.component.control.Toggle
-import nl.rhaydus.softcover.core.component.control.ToggleUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -28,37 +25,6 @@ internal val PREVIEW_TILE_MAX_WIDTH = 128.dp
 
 /** The gap between picker tiles along a row. */
 internal val PREVIEW_TILE_GAP = 14.dp
-
-/** One flat [SettingsRow] toggle: [label] over [gloss] on the left, a [Toggle] switch on the right. */
-@Composable
-internal fun SettingsToggleRow(
-    label: String,
-    gloss: String,
-    toggle: ToggleUiModel,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-
-    SettingsRow(
-        title = label,
-        secondary = gloss,
-        trailing = {
-            Toggle(
-                model = toggle,
-                onEvent = {},
-            )
-        },
-        interactionSource = interactionSource,
-        semantics = Modifier.toggleable(
-            value = toggle.checked,
-            interactionSource = interactionSource,
-            indication = null,
-            enabled = toggle.enabled,
-            role = Role.Switch,
-            onValueChange = onCheckedChange,
-        ),
-    )
-}
 
 /**
  * One flat, radio-semantics [SettingsRow], shared by the date-notation rows (label + today's example,
