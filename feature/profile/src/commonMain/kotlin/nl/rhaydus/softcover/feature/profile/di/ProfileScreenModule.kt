@@ -5,6 +5,7 @@ import nl.rhaydus.softcover.core.preferences.di.preferencesModule
 import nl.rhaydus.softcover.core.presentation.di.presentationModule
 import nl.rhaydus.softcover.core.profile.di.profileModule
 import nl.rhaydus.softcover.feature.profile.presentation.collector.HideUntaggedAuthorsCollector
+import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileChartsCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ProfileCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.ReadingLifeCollector
 import nl.rhaydus.softcover.feature.profile.presentation.collector.RecentlyLovedCardsCollector
@@ -38,6 +39,7 @@ val profileScreenModule = module {
     factory { UserInformationCollector() } bind ProfileCollector::class
     factory { ReadingLifeCollector() } bind ProfileCollector::class
     factory { RecentlyLovedCardsCollector() } bind ProfileCollector::class
+    factory { ProfileChartsCollector() } bind ProfileCollector::class
     factory { HideUntaggedAuthorsCollector() } bind ProfileCollector::class
     factory { YearMetricToggleCollector() } bind ProfileCollector::class
 }

@@ -50,6 +50,9 @@ import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAu
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnYearMetricSelectedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AuthorRepresentationSection
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.GenreRankingSection
@@ -157,6 +160,7 @@ internal actual fun ProfileScreenLayout(
 
             GenreRankingSection(
                 genres = state.readingLife?.genres ?: GenreBreakdown(),
+                genreRanking = state.genreRanking,
                 isLoading = readingLifeLoading,
                 header = state.genreRankingHeader,
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -166,6 +170,9 @@ internal actual fun ProfileScreenLayout(
 
             AuthorRepresentationSection(
                 authorDemographics = state.authorDemographics,
+                genderChart = state.genderChart,
+                bipocChart = state.bipocChart,
+                lgbtqChart = state.lgbtqChart,
                 hideUntaggedAuthors = state.hideUntaggedAuthors,
                 hideUntaggedAuthorsToggle = state.hideUntaggedAuthorsToggle,
                 canHideUntaggedAuthors = state.hasUntaggedAuthors,
@@ -337,6 +344,8 @@ private fun ProfileScreenDarkPreview() {
     }
 }
 
+private val PreviewReadingLife = profileReadingLifePreview()
+
 private val ProfileScreenPreviewState = ProfileUiState(
     isLoading = false,
     userProfileData = UserProfileData(
@@ -349,5 +358,10 @@ private val ProfileScreenPreviewState = ProfileUiState(
         averageRating = 4.2,
         readingStreak = 31,
     ),
-    readingLife = profileReadingLifePreview(),
+    readingLife = PreviewReadingLife,
+    authorDemographics = PreviewReadingLife.authorDemographics,
+    genreRanking = genreRankingUiModel(PreviewReadingLife.genres),
+    genderChart = genderChartUiModel(PreviewReadingLife.authorDemographics.genderSlices),
+    bipocChart = demographicChartUiModel(PreviewReadingLife.authorDemographics.bipocBreakdown),
+    lgbtqChart = demographicChartUiModel(PreviewReadingLife.authorDemographics.lgbtqBreakdown),
 )

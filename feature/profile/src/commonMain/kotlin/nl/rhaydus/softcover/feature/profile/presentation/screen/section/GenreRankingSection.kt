@@ -1,44 +1,27 @@
 package nl.rhaydus.softcover.feature.profile.presentation.screen.section
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.chart.RankedBars
+import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
-import nl.rhaydus.softcover.core.profile.domain.model.GenreSlice
-import kotlin.math.roundToInt
-
-private val GENRE_BAR_ALPHAS = listOf(1f, 0.82f, 0.64f, 0.48f, 0.34f)
-private val GENRE_BAR_HEIGHT = 10.dp
-private const val GENRE_TRACK_ALPHA = 0.14f
-private const val GENRE_BAR_MIN_FRACTION = 0.015f
-private const val GENRE_SKELETON_ROWS = 3
 
 /**
  * "The genres you read most" — one horizontal bar per genre, each filled against its own full-width
  * **100% track**, so a bar's length reads directly as the share of the reader's books carrying that
- * genre. Reads the [GenreSlice]s in the order [GenreBreakdown.slices] already ranks them (the domain
- * layer keeps the top five and drops the rest).
+ * genre. Draws [genreRanking], built from [GenreBreakdown.slices] in the order the domain already
+ * ranks them (the domain layer keeps the top five and drops the rest).
  *
  * Deliberately **not** the stacked proportion bar this section used before 3.1.1. A stacked bar
  * asserts a partition of a whole, and these shares are not parts of a whole: genres overlap, so five
@@ -46,13 +29,14 @@ private const val GENRE_SKELETON_ROWS = 3
  * track is the shape that survives that — each bar is read against 100%, never against its
  * neighbours, so there is no whole to be a remainder of and no "gap" left to correct.
  *
- * Rank is carried by the stepping alphas this section has always used (§2.1: monochrome `primary`,
- * shape carries the data, alpha carries emphasis) rather than by bar length alone, so two genres
- * within a point of each other still read as first and second.
+ * Rank is carried by the stepping tones of [genreRanking] (monochrome `primary`, alpha carries
+ * emphasis) rather than by bar length alone, so two genres within a point of each other still read as
+ * first and second.
  */
 @Composable
 internal fun GenreRankingSection(
     genres: GenreBreakdown,
+    genreRanking: RankedBarsUiModel,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
     modifier: Modifier = Modifier,
@@ -69,10 +53,7 @@ internal fun GenreRankingSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            GenreRankedBars(
-                slices = genres.slices,
-                isLoading = isLoading,
-            )
+            RankedBars(model = genreRanking)
 
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -105,112 +86,4 @@ private fun genreScopeCaption(taggedBookCount: Int): String {
 
     return "Your five most-read genres, each as a share of your books — $scope. " +
         "A book tagged with several counts toward each, so these overlap and don't total 100%."
-}
-
-@Composable
-private fun GenreRankedBars(
-    slices: List<GenreSlice>,
-    isLoading: Boolean,
-) {
-    val rows = slices.take(GENRE_BAR_ALPHAS.size)
-
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        // Keeps the section from collapsing to its intro alone through the first load: with no slices
-        // yet there is nothing to draw, and an empty Column would leave a bare headline that then
-        // jumps as the data lands. The skeleton reserves the tracks only, not the name/percentage rows
-        // above them, so the section still grows on arrival - this softens the jump rather than
-        // removing it, which is the same trade the legend-less loading state made before it.
-        if (rows.isEmpty()) {
-            repeat(GENRE_SKELETON_ROWS) { index ->
-                GenreBarTrack(
-                    fraction = 0f,
-                    alpha = GENRE_BAR_ALPHAS[index],
-                    isLoading = isLoading,
-                )
-            }
-        } else {
-            rows.forEachIndexed { index, slice ->
-                GenreRankedBar(
-                    slice = slice,
-                    alpha = GENRE_BAR_ALPHAS[index],
-                    isLoading = isLoading,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun GenreRankedBar(
-    slice: GenreSlice,
-    alpha: Float,
-    isLoading: Boolean,
-) {
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SoftcoverText(
-                text = slice.name,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            SoftcoverText(
-                text = "${(slice.fraction * PERCENTAGE_MULTIPLIER).roundToInt()}%",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        GenreBarTrack(
-            fraction = slice.fraction.toFloat(),
-            alpha = alpha,
-            isLoading = isLoading,
-        )
-    }
-}
-
-// The fill is floored so a genre that rounds to a visible percentage still draws something, and
-// capped at the full track so a share can never overrun it. Unlike the stacked bar this replaced,
-// the floor costs nothing from a neighbour — each track is its own 100%.
-@Composable
-private fun GenreBarTrack(
-    fraction: Float,
-    alpha: Float,
-    isLoading: Boolean,
-) {
-    val shape = RoundedCornerShape(3.dp)
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(GENRE_BAR_HEIGHT)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = GENRE_TRACK_ALPHA))
-            .shimmer(shape = shape, isLoading = isLoading),
-    ) {
-        if (fraction > 0f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(
-                        fraction.coerceIn(
-                            GENRE_BAR_MIN_FRACTION,
-                            1f,
-                        ),
-                    )
-                    .fillMaxHeight()
-                    .clip(shape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha)),
-            )
-        }
-    }
 }

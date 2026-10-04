@@ -24,6 +24,11 @@ import nl.rhaydus.softcover.core.component.callout.CalloutActionUiModel
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstUiModel
+import nl.rhaydus.softcover.core.component.chart.ChartTone
+import nl.rhaydus.softcover.core.component.chart.ProportionChart
+import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
+import nl.rhaydus.softcover.core.component.chart.RankedBars
+import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTile
 import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileUiModel
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTile
@@ -229,6 +234,34 @@ internal val chromeEntries: ImmutableList<GalleryEntry> = persistentListOf(
         ),
     ),
     galleryEntry(
+        name = "RankedBars",
+        family = GalleryFamily.STATISTIC,
+        blurb = "Horizontal bars, each measured against its own full-width track; while loading " +
+            "the rows keep their layout and mask.",
+        previews = RankedBarsUiModel,
+        label = { model -> if (model.isLoading) "Loading" else "${model.rows.size} rows" },
+        content = { model, modifier ->
+            RankedBars(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
+        name = "ProportionChart",
+        family = GalleryFamily.STATISTIC,
+        blurb = "A stacked bar of parts of a whole with its legend beneath; an Unknown segment " +
+            "renders muted and a zero segment draws nothing.",
+        previews = ProportionChartUiModel,
+        label = ::proportionChartFixtureLabel,
+        content = { model, modifier ->
+            ProportionChart(
+                model = model,
+                modifier = modifier,
+            )
+        },
+    ),
+    galleryEntry(
         name = "StatNumber",
         family = GalleryFamily.STATISTIC,
         blurb = "A number bound to live state: it tweens between values, holds tabular figures " +
@@ -383,4 +416,11 @@ private fun statTileFixtureLabel(model: StatTileUiModel): String {
     }
 
     return if (model.stat.isLoading) "$variant, loading" else variant
+}
+
+private fun proportionChartFixtureLabel(model: ProportionChartUiModel): String = when {
+    model.isLoading -> "Loading"
+    model.segments.any { it.fraction == 0f } -> "Zero segment"
+    model.segments.any { it.tone == ChartTone.Unknown } -> "With Unknown"
+    else -> "Known segments"
 }

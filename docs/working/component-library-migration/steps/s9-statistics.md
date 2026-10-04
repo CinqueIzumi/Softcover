@@ -13,8 +13,8 @@ both themes in the gallery.
 | Sub | Scope | Status |
 |---|---|---|
 | S9-1 | Stat tiles | [x] |
-| S9-2 | Chart models and the first charts | [ ] |
-| S9-3 | The remaining charts and legends | [ ] |
+| S9-2 | `ChartTone`, `RankedBars`, `ProportionChart` | [x] |
+| S9-3 | `ColumnChart`, the ratings stat model | [ ] |
 | S9-4 | Progress | [ ] |
 | S9-C | Convergence pass over the family (family-procedure.md § Phase 3) | [ ] |
 
@@ -30,6 +30,20 @@ S9-1 (approved 2026-10-05):
 - Moves to S9-4: `FeaturedProgressStat` — a progress readout, not a tile.
 - Mapper feature-local in profile: `readingAtlasUiModel(profileData: UserProfileData?)` → feature-local `ReadingAtlasUiModel(hero, volumes, rating, streak)`; null builds the loading state. `ProfileUiState.readingAtlas` defaults to it; `UserInformationCollector` rebuilds it. `ReadingAtlasSection` takes `readingAtlas`, drops `userProfileData`.
 - The rating tile's "★" stays unit text (UI preserved).
+
+S9-2 / S9-3 chart model (approved 2026-10-05):
+
+- Package `core/component/chart/`, gallery family Statistics. Three components, one per anatomy (§ 7.6 test); no umbrella `Chart`, no separate `Legend`. All inert (no event).
+- Out of the family: `MiniBar` (thumbnail text rules, stays in `control/`); `ReadingLifeRidgeline`, `ReadingLifeGenreRanking`, `ReadingLifeGenreRow` (share-card private, already model-fed; `ReadingLifeFooterStat` precedent); `RatingsAverageRow` (stat row, stays in the section — S9-3 moves its `StatNumberUiModel` onto `ProfileUiState`).
+- `ChartTone` enum, shared by every chart: `Lead`/`Second`/`Third`/`Fourth`/`Fifth` = `primary` at 1/.82/.64/.48/.34, `Unknown` = `onSurfaceVariant` at .22; resolved in one `when`. The mapper sets a tone per mark; no raw alpha in feature code.
+- Accepted tone snaps (visual, log in `visual-checks.md`): demographic "No" and ratings half-stars .55 → `Fourth` (.48); year zero column .24 → `Fifth` (.34).
+- `RankedBars(model, modifier)` + `RankedBarsUiModel(rows: ImmutableList<RankedBarUiModel>, isLoading)`, `RankedBarUiModel(label, share: String, fraction: Float, tone)`. Replaces `GenreRankedBars` / `GenreRankedBar` / `GenreBarTrack`. Track stays the full 100%, fill floored at 1.5%.
+- `ProportionChart(model, modifier)` — stacked bar plus its legend — + `ProportionChartUiModel(segments: ImmutableList<ProportionSegmentUiModel>, isLoading)`, `ProportionSegmentUiModel(label, share: String, fraction: Float, tone)`. Replaces `GenderProportionBar` / `GenderLegend` / `DemographicProportionBar` / `DemographicLegend` / `DemographicLegendRow`. A zero-fraction segment draws nothing in the bar but keeps its legend row; the mapper always adds Yes/No and adds Unknown only when its count > 0.
+- `ColumnChart(model, modifier)` + `ColumnChartUiModel(columns: ImmutableList<ColumnUiModel>, isLoading)`, `ColumnUiModel(fraction: Float, tone, label: String?, value: String?)`. Replaces `YearColumnChart` and `RatingsHistogramChart`. Harmonised metrics (accepted visual shift on ratings): 96 dp plot, 12 dp minimum bar, 3 dp corners, 20 dp bar capped to the slot, zero column = 3 dp `Fifth` stub; the 16 dp value-label row renders only when some column has a `value`. The half-star narrow width is dropped (half-stars read by tone and the missing label) — user confirms in the gallery.
+- Loading (R12): `RankedBars` renders 3 loading rows (label stand-in "Genre name", share "00%", masked track); `ProportionChart` a masked full-width bar + 3 legend rows (stand-in text, masked swatches); `ColumnChart` its real columns masked. Loading counts are written in the mapper's loading model. Replaces the `.shimmer` blocks — visual change, log it.
+- Mappers feature-local in profile (one feature); all percentages, peak and metric selection move out of composition. New `ProfileUiState` fields `genreRanking`, `genderChart`, `bipocChart`, `lgbtqChart` (S9-2), the year and ratings `ColumnChartUiModel`s (S9-3); each rebuilt wherever `readingLife`, the hide-untagged switch or the year-metric toggle changes — one writer per field.
+- `/dataviz`: text in text tokens, legend on the stack, 2 dp segment gaps, bars ≤ 24 dp — already met; no hover/tap layer (none today, mobile). User checks chart colours in both themes in the gallery.
+- Split: S9-2 = `ChartTone`, `RankedBars`, `ProportionChart` (genres, gender, BIPOC, LGBTQ+). S9-3 = `ColumnChart` (years, ratings), `RatingsAverageRow`'s stat model, the `RATING_FRACTION_DIGITS` move.
 
 ## S9-1 — Stat tiles (7 → `StatTile` + `StatTileUiModel`)
 

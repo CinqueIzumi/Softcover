@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.profile.presentation.state
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
+import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.control.SegmentedControlUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -14,6 +16,9 @@ import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.ReadingLife
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.toRatingsHistogramHeader
@@ -38,6 +43,19 @@ internal data class ProfileUiState(
     val isLoading: Boolean = true,
 
     val readingAtlas: ReadingAtlasUiModel = readingAtlasUiModel(null),
+
+    /**
+     * The author breakdown the section's captions and empty checks read: every author by default, or
+     * only the ones tagged for each attribute once [hideUntaggedAuthors] is on. Written by
+     * `ProfileChartsCollector` together with the charts so the two never disagree.
+     */
+    val authorDemographics: AuthorDemographics = AuthorDemographics(),
+
+    /** Mapped by `ProfileChartsCollector`, which also decides when they stop loading. */
+    val genreRanking: RankedBarsUiModel = genreRankingUiModel(null),
+    val genderChart: ProportionChartUiModel = genderChartUiModel(null),
+    val bipocChart: ProportionChartUiModel = demographicChartUiModel(null),
+    val lgbtqChart: ProportionChartUiModel = demographicChartUiModel(null),
 
     val readingAtlasHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Reading atlas"),
     val theReaderHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "The reader"),
@@ -75,19 +93,6 @@ internal data class ProfileUiState(
      */
     val hasRecentlyLoved: Boolean
         get() = readingLife?.recentlyLoved.orEmpty().isNotEmpty()
-
-    /**
-     * The author breakdown as the section should render it: every author by default, or - once
-     * [hideUntaggedAuthors] is on - only the ones tagged for each attribute, with the percentages
-     * renormalised per bar. Derived here rather than in the render so the two layouts (mobile and
-     * desktop) can't disagree about which reading they show.
-     */
-    val authorDemographics: AuthorDemographics
-        get() = if (hideUntaggedAuthors) {
-            allAuthorDemographics.excludingUntaggedAuthors()
-        } else {
-            allAuthorDemographics
-        }
 
     /**
      * Whether any of the three breakdowns actually has an untagged bucket to drop. Reads the
