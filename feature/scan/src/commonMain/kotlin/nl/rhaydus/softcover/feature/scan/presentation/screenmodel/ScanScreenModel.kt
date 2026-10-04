@@ -28,5 +28,9 @@ internal class ScanScreenModel(
         mainDispatcher = dispatchers.main,
     )
 
+    init {
+        startInitializers()
+    }
+
     fun runAction(action: ScanAction) = dispatch(action)
 }
