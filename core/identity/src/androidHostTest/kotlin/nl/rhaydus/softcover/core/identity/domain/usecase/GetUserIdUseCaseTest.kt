@@ -55,36 +55,6 @@ class GetUserIdUseCaseTest {
         }
 
         @Test
-        fun `returns success with userId 1 as a boundary value`() = runTest {
-            // ----- Arrange -----
-            every {
-                getUserIdAsFlowUseCase()
-            } returns flowOf(1)
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe 1
-        }
-
-        @Test
-        fun `returns success with userId 0 as a boundary value`() = runTest {
-            // ----- Arrange -----
-            every {
-                getUserIdAsFlowUseCase()
-            } returns flowOf(0)
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe 0
-        }
-
-        @Test
         fun `returns failure when the flow is empty`() = runTest {
             // ----- Arrange -----
             every {

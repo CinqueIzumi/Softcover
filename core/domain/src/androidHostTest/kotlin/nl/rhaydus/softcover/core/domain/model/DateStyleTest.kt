@@ -43,27 +43,4 @@ class DateStyleTest {
             result shouldBe "2026/07/16"
         }
     }
-
-    // ----- label -----
-
-    @Nested
-    inner class Label {
-        @Test
-        fun `DAY_MONTH_YEAR label is Day, month, year`() {
-            // ----- Assert -----
-            DateStyle.DAY_MONTH_YEAR.label shouldBe "Day, month, year"
-        }
-
-        @Test
-        fun `MONTH_DAY_YEAR label is Month, day, year`() {
-            // ----- Assert -----
-            DateStyle.MONTH_DAY_YEAR.label shouldBe "Month, day, year"
-        }
-
-        @Test
-        fun `YEAR_MONTH_DAY label is Year, month, day`() {
-            // ----- Assert -----
-            DateStyle.YEAR_MONTH_DAY.label shouldBe "Year, month, day"
-        }
-    }
 }

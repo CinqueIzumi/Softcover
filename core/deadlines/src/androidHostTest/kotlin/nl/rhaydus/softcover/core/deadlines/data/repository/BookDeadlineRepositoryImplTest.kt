@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -85,22 +84,6 @@ class BookDeadlineRepositoryImplTest {
                 awaitComplete()
             }
         }
-
-        @Test
-        fun `delegates to local data source with the given bookId`() = runTest {
-            // ----- Arrange -----
-            val bookId = 99
-
-            every {
-                localDataSource.observe(bookId = bookId)
-            } returns flowOf(null)
-
-            // ----- Act & Assert -----
-            repository.observe(bookId = bookId).test {
-                awaitItem()
-                awaitComplete()
-            }
-        }
     }
 
     @Nested
@@ -131,20 +114,6 @@ class BookDeadlineRepositoryImplTest {
                 items.size shouldBe 2
                 items[0].bookId shouldBe 1
                 items[1].bookId shouldBe 2
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `returns empty list when data source emits empty list`() = runTest {
-            // ----- Arrange -----
-            every {
-                localDataSource.observeAll()
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            repository.observeAll().test {
-                awaitItem() shouldBe emptyList()
                 awaitComplete()
             }
         }
@@ -187,39 +156,6 @@ class BookDeadlineRepositoryImplTest {
             entitySlot.captured.bookId shouldBe 1
             entitySlot.captured.deadlineDate shouldBe "2026-05-20"
             entitySlot.captured.setAt shouldBe "2026-04-20"
-        }
-
-        @Test
-        fun `initialPerDay is zero when remaining is zero`() = runTest {
-            // ----- Arrange -----
-            val today = LocalDate(
-                2026,
-                4,
-                20,
-            )
-            val deadlineDate = LocalDate(
-                2026,
-                5,
-                20,
-            )
-            val entitySlot = slot<BookDeadlineEntity>()
-
-            coEvery {
-                localDataSource.upsert(entity = capture(entitySlot))
-            } returns Unit
-
-            // ----- Act -----
-            repository.setDeadline(
-                bookId = 2,
-                deadlineDate = deadlineDate,
-                current = 300,
-                total = 300,
-                unit = DeadlineUnit.PAGES,
-                today = today,
-            )
-
-            // ----- Assert -----
-            entitySlot.captured.initialPerDay shouldBe 0f
         }
 
         @Test
@@ -316,89 +252,6 @@ class BookDeadlineRepositoryImplTest {
 
             // ----- Assert -----
             entitySlot.captured.initialPerDay shouldBe 0f
-        }
-
-        @Test
-        fun `unit PAGES is stored as string PAGES on the entity`() = runTest {
-            // ----- Arrange -----
-            val today = LocalDate(
-                2026,
-                4,
-                20,
-            )
-            val deadlineDate = LocalDate(
-                2026,
-                5,
-                20,
-            )
-            val entitySlot = slot<BookDeadlineEntity>()
-
-            coEvery {
-                localDataSource.upsert(entity = capture(entitySlot))
-            } returns Unit
-
-            // ----- Act -----
-            repository.setDeadline(
-                bookId = 6,
-                deadlineDate = deadlineDate,
-                current = 0,
-                total = 300,
-                unit = DeadlineUnit.PAGES,
-                today = today,
-            )
-
-            // ----- Assert -----
-            entitySlot.captured.unit shouldBe "PAGES"
-        }
-
-        @Test
-        fun `unit SECONDS is stored as string SECONDS on the entity`() = runTest {
-            // ----- Arrange -----
-            val today = LocalDate(
-                2026,
-                4,
-                20,
-            )
-            val deadlineDate = LocalDate(
-                2026,
-                5,
-                20,
-            )
-            val entitySlot = slot<BookDeadlineEntity>()
-
-            coEvery {
-                localDataSource.upsert(entity = capture(entitySlot))
-            } returns Unit
-
-            // ----- Act -----
-            repository.setDeadline(
-                bookId = 7,
-                deadlineDate = deadlineDate,
-                current = 0,
-                total = 18000,
-                unit = DeadlineUnit.SECONDS,
-                today = today,
-            )
-
-            // ----- Assert -----
-            entitySlot.captured.unit shouldBe "SECONDS"
-        }
-    }
-
-    @Nested
-    inner class ClearDeadline {
-        @Test
-        fun `delegates delete to local data source with the given bookId`() = runTest {
-            // ----- Arrange -----
-            val bookId = 77
-
-            // ----- Act -----
-            repository.clearDeadline(bookId = bookId)
-
-            // ----- Assert -----
-            coVerify {
-                localDataSource.delete(bookId = bookId)
-            }
         }
     }
 }

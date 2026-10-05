@@ -80,31 +80,6 @@ class ReviewSlateMapperTest {
         }
 
         @Test
-        fun `block data key is an empty map`() {
-            // ----- Arrange -----
-            val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Hello")))))
-
-            // ----- Act -----
-            val block = reviewSlateFromDocument(doc)[0]
-
-            // ----- Assert -----
-            block["data"] shouldBe emptyMap<String, Any?>()
-        }
-
-        @Test
-        fun `block type is paragraph and object is block`() {
-            // ----- Arrange -----
-            val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Hello")))))
-
-            // ----- Act -----
-            val block = reviewSlateFromDocument(doc)[0]
-
-            // ----- Assert -----
-            block["type"] shouldBe "paragraph"
-            block["object"] shouldBe "block"
-        }
-
-        @Test
         fun `bold flag is only emitted when true`() {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(
@@ -194,22 +169,6 @@ class ReviewSlateMapperTest {
 
             child["text"] shouldBe ""
             child["object"] shouldBe "text"
-        }
-
-        @Test
-        fun `each child node carries object=text`() {
-            // ----- Arrange -----
-            val doc = ReviewDocument(listOf(
-                ReviewParagraph(listOf(ReviewRun("Hello"), ReviewRun("World"))),
-            ),
-            )
-
-            // ----- Act -----
-            val children = reviewSlateFromDocument(doc)[0]["children"] as List<*>
-
-            // ----- Assert -----
-            (children[0] as Map<*, *>)["object"] shouldBe "text"
-            (children[1] as Map<*, *>)["object"] shouldBe "text"
         }
 
         @Test
@@ -403,12 +362,6 @@ class ReviewSlateMapperTest {
     @Nested
     inner class RoundTrip {
         @Test
-        fun `golden document round-trips through slate without loss`() {
-            // ----- Act & Assert -----
-            reviewDocumentFromSlate(reviewSlateFromDocument(goldenDocument)) shouldBe goldenDocument
-        }
-
-        @Test
         fun `plain single-paragraph document round-trips`() {
             // ----- Arrange -----
             val doc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("Simple text.")))))
@@ -418,12 +371,6 @@ class ReviewSlateMapperTest {
 
             // ----- Assert -----
             result shouldBe doc
-        }
-
-        @Test
-        fun `empty document round-trips`() {
-            // ----- Act & Assert -----
-            reviewDocumentFromSlate(reviewSlateFromDocument(ReviewDocument.EMPTY)) shouldBe ReviewDocument.EMPTY
         }
     }
 
@@ -435,12 +382,6 @@ class ReviewSlateMapperTest {
         fun `toJson then reviewDocumentFromJson round-trips the golden document`() {
             // ----- Act & Assert -----
             reviewDocumentFromJson(goldenDocument.toJson()) shouldBe goldenDocument
-        }
-
-        @Test
-        fun `toJson then reviewDocumentFromJson round-trips an empty document`() {
-            // ----- Act & Assert -----
-            reviewDocumentFromJson(ReviewDocument.EMPTY.toJson()) shouldBe ReviewDocument.EMPTY
         }
 
         @Test

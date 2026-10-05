@@ -40,39 +40,19 @@ class LibraryTabTest {
         }
 
         @Test
-        fun `returns the default sort mode for the All tab id`() {
+        fun `returns the default sort mode for every other tab id`() {
             // ----- Arrange -----
-            val allTabId = LibraryTab.All.id
+            val otherTabIds = listOf(
+                LibraryTab.All.id,
+                LibraryTab.Status.of(UserBookStatus.WANT_TO_READ).id,
+                LibraryTab.CustomList.idFor(listId = 99),
+            )
 
             // ----- Act -----
-            val result = LibraryTab.defaultSortMode(tabId = allTabId)
+            val results = otherTabIds.map { LibraryTab.defaultSortMode(tabId = it) }
 
             // ----- Assert -----
-            result shouldBe LibrarySortMode.Default
-        }
-
-        @Test
-        fun `returns the default sort mode for a non-Read status tab id`() {
-            // ----- Arrange -----
-            val wantToReadTabId = LibraryTab.Status.of(UserBookStatus.WANT_TO_READ).id
-
-            // ----- Act -----
-            val result = LibraryTab.defaultSortMode(tabId = wantToReadTabId)
-
-            // ----- Assert -----
-            result shouldBe LibrarySortMode.Default
-        }
-
-        @Test
-        fun `returns the default sort mode for a custom-list tab id`() {
-            // ----- Arrange -----
-            val customListTabId = LibraryTab.CustomList.idFor(listId = 99)
-
-            // ----- Act -----
-            val result = LibraryTab.defaultSortMode(tabId = customListTabId)
-
-            // ----- Assert -----
-            result shouldBe LibrarySortMode.Default
+            results.toSet() shouldBe setOf(LibrarySortMode.Default)
         }
     }
 }

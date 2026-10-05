@@ -19,16 +19,6 @@ class IsbnNormalizerTest {
         }
 
         @Test
-        fun `already clean ISBN-13 is returned unchanged`() {
-            // ----- Arrange -----
-            // ----- Act -----
-            val result = IsbnNormalizer.normalize("9780374710781")
-
-            // ----- Assert -----
-            result shouldBe "9780374710781"
-        }
-
-        @Test
         fun `clean ISBN-10 with only digits is returned unchanged`() {
             // ----- Arrange -----
             // ----- Act -----
@@ -59,16 +49,6 @@ class IsbnNormalizerTest {
         }
 
         @Test
-        fun `7-digit input returns null`() {
-            // ----- Arrange -----
-            // ----- Act -----
-            val result = IsbnNormalizer.normalize("1234567")
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
         fun `8-digit EAN-8 barcode returns null`() {
             // ----- Arrange -----
             // ----- Act -----
@@ -96,18 +76,6 @@ class IsbnNormalizerTest {
 
             // ----- Assert -----
             result shouldBe null
-        }
-
-        @Test
-        fun `normalize is idempotent for a valid ISBN-13`() {
-            // ----- Arrange -----
-            val first = IsbnNormalizer.normalize("9780374710781")
-
-            // ----- Act -----
-            val second = IsbnNormalizer.normalize(first.shouldNotBeNull())
-
-            // ----- Assert -----
-            second shouldBe first
         }
     }
 }

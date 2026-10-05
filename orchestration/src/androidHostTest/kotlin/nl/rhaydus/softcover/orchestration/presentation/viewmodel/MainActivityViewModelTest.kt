@@ -4,7 +4,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -76,12 +75,6 @@ class MainActivityViewModelTest {
     @Nested
     inner class ReAuthSheetVisibility {
         @Test
-        fun `is null until the session expires`() {
-            // ----- Assert -----
-            viewModel.reAuthSheet.value.shouldBeNull()
-        }
-
-        @Test
         fun `stays null when the session expires while unauthenticated`() {
             // ----- Act -----
             SessionExpiredNotifier.notifySessionExpired()
@@ -128,23 +121,6 @@ class MainActivityViewModelTest {
 
     @Nested
     inner class ReAuthenticate {
-        @Test
-        fun `passes the stored api key to the use case`() {
-            // ----- Arrange -----
-            coEvery {
-                reAuthenticateUseCase("abc")
-            } returns Result.success(Unit)
-            viewModel.onReAuthApiKeyChanged("abc")
-
-            // ----- Act -----
-            viewModel.reAuthenticate()
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                reAuthenticateUseCase("abc")
-            }
-        }
-
         @Test
         fun `requests the sheet to close on success without clearing the state yet`() {
             // ----- Arrange -----

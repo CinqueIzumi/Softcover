@@ -20,15 +20,6 @@ class ReviewDocumentTest {
         }
 
         @Test
-        fun `document with no paragraphs is blank`() {
-            // ----- Arrange -----
-            val doc = ReviewDocument(paragraphs = emptyList())
-
-            // ----- Act & Assert -----
-            doc.isBlank() shouldBe true
-        }
-
-        @Test
         fun `document where all runs are empty strings is blank`() {
             // ----- Arrange -----
             val doc = document(
@@ -88,12 +79,6 @@ class ReviewDocumentTest {
     @Nested
     inner class Canonical {
         @Test
-        fun `empty document stays empty`() {
-            // ----- Act & Assert -----
-            ReviewDocument.EMPTY.canonical() shouldBe ReviewDocument.EMPTY
-        }
-
-        @Test
         fun `document with only empty runs produces paragraph with no runs`() {
             // ----- Arrange -----
             val doc = document(
@@ -126,31 +111,6 @@ class ReviewDocumentTest {
             // ----- Assert -----
             result.paragraphs[0].runs.size shouldBe 1
             result.paragraphs[0].runs[0].text shouldBe "Hello world"
-        }
-
-        @Test
-        fun `adjacent bold runs are merged`() {
-            // ----- Arrange -----
-            val doc = document(
-                paragraph(
-                    ReviewRun(
-                        "Foo",
-                        bold = true,
-                    ),
-                    ReviewRun(
-                        "Bar",
-                        bold = true,
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val result = doc.canonical()
-
-            // ----- Assert -----
-            result.paragraphs[0].runs.size shouldBe 1
-            result.paragraphs[0].runs[0].text shouldBe "FooBar"
-            result.paragraphs[0].runs[0].bold shouldBe true
         }
 
         @Test

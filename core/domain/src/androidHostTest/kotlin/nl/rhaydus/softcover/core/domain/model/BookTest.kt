@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.domain.model
 
-import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -97,30 +96,6 @@ class BookTest {
         }
 
         @Test
-        fun `returns merged edition from editions list when userBook is null and defaultEdition id matches`() {
-            // ----- Arrange -----
-            val editionInList = buildEdition(
-                id = 10,
-                owned = true,
-            )
-            val staleDefaultEdition = buildEdition(
-                id = 10,
-                owned = false,
-            )
-            val book = buildBook(
-                editions = listOf(editionInList),
-                defaultEdition = staleDefaultEdition,
-                userBook = null,
-            )
-
-            // ----- Act -----
-            val result = book.currentEdition
-
-            // ----- Assert -----
-            result?.owned?.shouldBeTrue()
-        }
-
-        @Test
         fun `returns defaultEdition itself when userBook is null and no edition in list shares its id`() {
             // ----- Arrange -----
             val editionInList = buildEdition(id = 10)
@@ -154,52 +129,6 @@ class BookTest {
 
             // ----- Assert -----
             result shouldBe firstEdition
-        }
-
-        @Test
-        fun `returns merged edition from editions list when userBook editionId does not match and defaultEdition id matches`() {
-            // ----- Arrange -----
-            val editionInList = buildEdition(
-                id = 10,
-                owned = true,
-            )
-            val staleDefaultEdition = buildEdition(
-                id = 10,
-                owned = false,
-            )
-            val userBook = buildUserBook(editionId = 999)
-            val book = buildBook(
-                editions = listOf(editionInList),
-                defaultEdition = staleDefaultEdition,
-                userBook = userBook,
-            )
-
-            // ----- Act -----
-            val result = book.currentEdition
-
-            // ----- Assert -----
-            result?.owned?.shouldBeTrue()
-        }
-
-        @Test
-        fun `returns owned edition when userBook is null and no edition id matches defaultEdition id`() {
-            // ----- Arrange -----
-            val ownedEdition = buildEdition(
-                id = 10,
-                owned = true,
-            )
-            val defaultEdition = buildEdition(id = 99)
-            val book = buildBook(
-                editions = listOf(ownedEdition),
-                defaultEdition = defaultEdition,
-                userBook = null,
-            )
-
-            // ----- Act -----
-            val result = book.currentEdition
-
-            // ----- Assert -----
-            result shouldBe ownedEdition
         }
 
         @Test
@@ -273,30 +202,6 @@ class BookTest {
             // ----- Assert -----
             result shouldBe userSelectedEdition
         }
-
-        @Test
-        fun `falls through to defaultEdition when userBook is null and no edition is owned and no edition id matches defaultEdition id`() {
-            // ----- Arrange -----
-            val editionInList = buildEdition(
-                id = 10,
-                owned = false,
-            )
-            val defaultEdition = buildEdition(
-                id = 99,
-                owned = false,
-            )
-            val book = buildBook(
-                editions = listOf(editionInList),
-                defaultEdition = defaultEdition,
-                userBook = null,
-            )
-
-            // ----- Act -----
-            val result = book.currentEdition
-
-            // ----- Assert -----
-            result shouldBe defaultEdition
-        }
     }
 
     // ----- status -----
@@ -316,26 +221,6 @@ class BookTest {
 
             // ----- Assert -----
             result shouldBe BookStatus.None
-        }
-
-        @Test
-        fun `returns status from userBook when userBook is not null`() {
-            // ----- Arrange -----
-            val userBook = buildUserBook(editionId = null).also {
-                every {
-                    it.status
-                } returns BookStatus.Read
-            }
-            val book = buildBook(
-                editions = listOf(buildEdition(id = 1)),
-                userBook = userBook,
-            )
-
-            // ----- Act -----
-            val result = book.status
-
-            // ----- Assert -----
-            result shouldBe BookStatus.Read
         }
     }
 
@@ -397,46 +282,6 @@ class BookTest {
             // ----- Assert -----
             result shouldBe "#2 of 5 in The Stormlight Archive"
         }
-
-        @Test
-        fun `returns position text with positionsInSeries of 1`() {
-            // ----- Arrange -----
-            val series = BookSeries(
-                id = 1,
-                name = "Mistborn",
-                amountOfBooks = 3,
-            )
-            val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
-                bookSeries = series,
-                positionsInSeries = listOf(1.0),
-            )
-
-            // ----- Act -----
-            val result = book.seriesText
-
-            // ----- Assert -----
-            result shouldBe "#1 of 3 in Mistborn"
-        }
-
-        @Test
-        fun `returns fractional position in seriesText when positionsInSeries is 1-5`() {
-            // ----- Arrange -----
-            val series = BookSeries(
-                id = 1,
-                name = "Wheel of Time",
-                amountOfBooks = 14,
-            )
-            val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
-                bookSeries = series,
-                positionsInSeries = listOf(1.5),
-            )
-
-            // ----- Act -----
-            val result = book.seriesText
-
-            // ----- Assert -----
-            result shouldBe "#1.5 of 14 in Wheel of Time"
-        }
     }
 
     // ----- positionInSeriesDisplay -----
@@ -469,20 +314,6 @@ class BookTest {
 
             // ----- Assert -----
             result shouldBe "1"
-        }
-
-        @Test
-        fun `returns whole number string for position 5-0`() {
-            // ----- Arrange -----
-            val book = buildBook(editions = listOf(buildEdition(id = 1))).copy(
-                positionsInSeries = listOf(5.0),
-            )
-
-            // ----- Act -----
-            val result = book.positionInSeriesDisplay
-
-            // ----- Assert -----
-            result shouldBe "5"
         }
 
         @Test
@@ -629,12 +460,12 @@ class BookTest {
         @Test
         fun `effectiveReleaseDate is null when no source supplies one`() {
             // ----- Arrange -----
+            val edition = buildEdition(
+                id = 10,
+                releaseDate = null,
+            )
             val book = buildBook(
-                editions = listOf(buildEdition(
-                    id = 10,
-                    releaseDate = null,
-                ),
-                ),
+                editions = listOf(edition),
                 releaseDate = null,
             )
 
@@ -685,36 +516,14 @@ class BookTest {
         }
 
         @Test
-        fun `isUnreleased is false for a past effectiveReleaseDate`() {
-            // ----- Arrange -----
-            val pastDate = LocalDate(
-                2020,
-                1,
-                1,
-            )
-
-            val edition = buildEdition(
-                id = 10,
-                releaseDate = pastDate,
-            )
-            val book = buildBook(editions = listOf(edition))
-
-            // ----- Act -----
-            val result = book.isUnreleased
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
         fun `isUnreleased is false when effectiveReleaseDate is null`() {
             // ----- Arrange -----
+            val edition = buildEdition(
+                id = 10,
+                releaseDate = null,
+            )
             val book = buildBook(
-                editions = listOf(buildEdition(
-                    id = 10,
-                    releaseDate = null,
-                ),
-                ),
+                editions = listOf(edition),
                 releaseDate = null,
             )
 

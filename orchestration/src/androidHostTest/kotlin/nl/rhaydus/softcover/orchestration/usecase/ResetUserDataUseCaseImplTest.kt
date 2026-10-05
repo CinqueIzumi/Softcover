@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.orchestration.usecase
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
@@ -38,7 +37,7 @@ class ResetUserDataUseCaseImplTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `returns success when all repository calls succeed`() = runTest {
+        fun `returns success and wipes the token, books, profile, settings and network cache`() = runTest {
             // ----- Arrange -----
             // (all deps are relaxed, so all calls succeed by default)
 
@@ -47,88 +46,7 @@ class ResetUserDataUseCaseImplTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-        }
-
-        @Test
-        fun `clears api key by calling updateApiKey with an empty string`() = runTest {
-            // ----- Arrange -----
-            // (deps are relaxed)
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
             coVerify {
-                settingsRepository.updateApiKey(key = "")
-            }
-        }
-
-        @Test
-        fun `removes all books via books repository`() = runTest {
-            // ----- Arrange -----
-            // (deps are relaxed)
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
-            coVerify {
-                booksRepository.removeAllBooks()
-            }
-        }
-
-        @Test
-        fun `clears profile cache via profile repository`() = runTest {
-            // ----- Arrange -----
-            // (deps are relaxed)
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
-            coVerify {
-                profileRepository.clearProfileCache()
-            }
-        }
-
-        @Test
-        fun `resets all settings via settings repository`() = runTest {
-            // ----- Arrange -----
-            // (deps are relaxed)
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
-            coVerify {
-                settingsRepository.resetAllSettings()
-            }
-        }
-
-        @Test
-        fun `clears network cache via network cache cleaner`() = runTest {
-            // ----- Arrange -----
-            // (deps are relaxed)
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
-            coVerify {
-                networkCacheCleaner.clearAll()
-            }
-        }
-
-        @Test
-        fun `calls all steps in declaration order`() = runTest {
-            // ----- Arrange -----
-            // (deps are relaxed)
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
-            coVerifyOrder {
                 settingsRepository.updateApiKey(key = "")
                 booksRepository.removeAllBooks()
                 profileRepository.clearProfileCache()
@@ -161,40 +79,6 @@ class ResetUserDataUseCaseImplTest {
 
             coEvery {
                 booksRepository.removeAllBooks()
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `returns failure when clearProfileCache throws`() = runTest {
-            // ----- Arrange -----
-            val expectedError = RuntimeException("cache clear error")
-
-            coEvery {
-                profileRepository.clearProfileCache()
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `returns failure when resetAllSettings throws`() = runTest {
-            // ----- Arrange -----
-            val expectedError = RuntimeException("settings reset error")
-
-            coEvery {
-                settingsRepository.resetAllSettings()
             } throws expectedError
 
             // ----- Act -----

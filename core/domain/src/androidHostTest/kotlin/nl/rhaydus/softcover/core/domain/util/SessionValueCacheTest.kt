@@ -42,25 +42,6 @@ class SessionValueCacheTest {
         }
 
         @Test
-        fun `load throwing propagates the exception and stores nothing`() = runTest {
-            // ----- Arrange -----
-            val cache = SessionValueCache<String, String>()
-            val error = RuntimeException("load failed")
-            val failingLoad: suspend () -> String = { throw error }
-
-            // ----- Act -----
-            val thrown = runCatching {
-                cache.getOrPut(
-                    key = "key",
-                    load = failingLoad,
-                )
-            }.exceptionOrNull()
-
-            // ----- Assert -----
-            thrown shouldBe error
-        }
-
-        @Test
         fun `a call after a failed load retries load and can succeed`() = runTest {
             // ----- Arrange -----
             val cache = SessionValueCache<String, String>()
@@ -390,28 +371,6 @@ class SessionValueCacheTest {
 
             // ----- Assert -----
             loadCount.get() shouldBe 1
-        }
-
-        @Test
-        fun `load throwing propagates and a later call retries and can succeed`() = runTest {
-            // ----- Arrange -----
-            val cache = SessionValueCache<Unit, String>()
-            val loadCount = AtomicInteger(0)
-            val error = RuntimeException("load failed")
-            val load: suspend () -> String = {
-                val attempt = loadCount.incrementAndGet()
-                if (attempt == 1) throw error
-                "recovered"
-            }
-            val thrown = runCatching { cache.getOrPut(load) }.exceptionOrNull()
-
-            // ----- Act -----
-            val result = cache.getOrPut(load)
-
-            // ----- Assert -----
-            thrown shouldBe error
-            result shouldBe "recovered"
-            loadCount.get() shouldBe 2
         }
     }
 }

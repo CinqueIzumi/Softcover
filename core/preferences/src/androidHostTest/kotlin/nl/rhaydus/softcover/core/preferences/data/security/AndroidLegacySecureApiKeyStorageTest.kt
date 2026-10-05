@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.core.preferences.data.security
 
 import android.content.Context
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -10,7 +11,8 @@ import io.mockk.verify
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.common.AppDispatchers
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -36,6 +38,8 @@ class AndroidLegacySecureApiKeyStorageTest {
 
     @BeforeEach
     fun setUp() {
+        clearAllMocks()
+
         context = mockk {
             every {
                 filesDir
@@ -52,10 +56,6 @@ class AndroidLegacySecureApiKeyStorageTest {
         secretKey = mockk()
         keyStore = mockk(relaxed = true)
         decryptCipher = mockk(relaxed = true)
-
-        mockkStatic(Cipher::class)
-        mockkStatic(KeyStore::class)
-        mockkStatic(KeyGenerator::class)
 
         every {
             KeyStore.getInstance("AndroidKeyStore")
@@ -77,9 +77,20 @@ class AndroidLegacySecureApiKeyStorageTest {
         } returns mockk(relaxed = true)
     }
 
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun mockCryptoStatics() {
+            mockkStatic(Cipher::class)
+            mockkStatic(KeyStore::class)
+            mockkStatic(KeyGenerator::class)
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun unmockCryptoStatics() {
+            unmockkAll()
+        }
     }
 
     private fun buildStorage(): AndroidLegacySecureApiKeyStorage =

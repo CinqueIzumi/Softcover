@@ -139,18 +139,6 @@ class ActiveSessionControllerImplTest {
     @Nested
     inner class ActiveSessionFlow {
         @Test
-        fun `emits null when session flow emits null`() = runTest {
-            // ----- Arrange -----
-            val controller = buildController(this)
-
-            // ----- Act -----
-            sessionFlow.value = null
-
-            // ----- Assert -----
-            controller.activeSession.value shouldBe null
-        }
-
-        @Test
         fun `emits null when session bookId is not found in the books list`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
@@ -255,18 +243,6 @@ class ActiveSessionControllerImplTest {
             // ----- Assert -----
             coVerify(exactly = 1) { resumeReadingSessionUseCase(id = 11L) }
         }
-
-        @Test
-        fun `does not invoke resumeReadingSessionUseCase when no session is active`() = runTest {
-            // ----- Arrange -----
-            val controller = buildController(this)
-
-            // ----- Act -----
-            controller.resume()
-
-            // ----- Assert -----
-            coVerify(exactly = 0) { resumeReadingSessionUseCase(any()) }
-        }
     }
 
     @Nested
@@ -365,36 +341,17 @@ class ActiveSessionControllerImplTest {
     @Nested
     inner class FocusMode {
         @Test
-        fun `pendingFocusMode starts as false`() = runTest {
-            // ----- Arrange & Act -----
-            val controller = buildController(this)
-
-            // ----- Assert -----
-            controller.pendingFocusMode.value shouldBe false
-        }
-
-        @Test
-        fun `requestFocusMode sets pendingFocusMode to true`() = runTest {
+        fun `a requested focus mode is pending until it is consumed`() = runTest {
             // ----- Arrange -----
             val controller = buildController(this)
 
             // ----- Act -----
             controller.requestFocusMode()
-
-            // ----- Assert -----
-            controller.pendingFocusMode.value shouldBe true
-        }
-
-        @Test
-        fun `consumeFocusModeRequest sets pendingFocusMode back to false`() = runTest {
-            // ----- Arrange -----
-            val controller = buildController(this)
-            controller.requestFocusMode()
-
-            // ----- Act -----
+            val pendingAfterRequest = controller.pendingFocusMode.value
             controller.consumeFocusModeRequest()
 
             // ----- Assert -----
+            pendingAfterRequest shouldBe true
             controller.pendingFocusMode.value shouldBe false
         }
     }

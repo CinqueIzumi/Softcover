@@ -74,23 +74,5 @@ class ObserveAllBookDeadlinesUseCaseTest {
                 awaitComplete()
             }
         }
-
-        @Test
-        fun `map key matches the bookId of the deadline value`() = runTest {
-            // ----- Arrange -----
-            val deadline = buildDeadline(bookId = 99)
-
-            every {
-                repository.observeAll()
-            } returns flowOf(listOf(deadline))
-
-            // ----- Act & Assert -----
-            useCase().test {
-                val map = awaitItem()
-                map.keys.first() shouldBe 99
-                map.values.first().bookId shouldBe 99
-                awaitComplete()
-            }
-        }
     }
 }

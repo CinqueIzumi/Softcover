@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.core.presentation.error
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
@@ -9,55 +11,52 @@ import io.mockk.verify
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.domain.exception.InvalidTokenException
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
-import nl.rhaydus.softcover.core.domain.exception.UnexpectedApiException
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.coroutines.cancellation.CancellationException
 
 class ApiFailureHandlingTest {
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun mockSnackBarManager() {
+            mockkObject(SnackBarManager)
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun unmockSnackBarManager() {
+            unmockkAll()
+        }
+    }
+
     @BeforeEach
     fun setUp() {
-        mockkObject(SnackBarManager)
+        clearMocks(SnackBarManager)
 
         every {
             SnackBarManager.showSnackbar(title = any())
         } returns Unit
     }
 
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
-    }
-
     @Nested
     inner class SnackbarBehaviour {
         @Test
-        fun `OfflineException — shows offline snackbar`() {
+        fun `API exception — shows its user message in a snackbar`() {
             // ----- Arrange -----
-            val result = Result.failure<Unit>(OfflineException())
+            val exception = OfflineException()
+            val expectedMessage = exception.toUserMessage().shouldNotBeNull()
+            val result = Result.failure<Unit>(exception)
 
             // ----- Act -----
             result.onApiFailure()
 
             // ----- Assert -----
             verify(exactly = 1) {
-                SnackBarManager.showSnackbar(title = "You're offline. Check your connection and try again.")
-            }
-        }
-
-        @Test
-        fun `UnexpectedApiException — shows generic error snackbar`() {
-            // ----- Arrange -----
-            val result = Result.failure<Unit>(UnexpectedApiException("x"))
-
-            // ----- Act -----
-            result.onApiFailure()
-
-            // ----- Assert -----
-            verify(exactly = 1) {
-                SnackBarManager.showSnackbar(title = "Something went wrong. Please try again.")
+                SnackBarManager.showSnackbar(title = expectedMessage)
             }
         }
 

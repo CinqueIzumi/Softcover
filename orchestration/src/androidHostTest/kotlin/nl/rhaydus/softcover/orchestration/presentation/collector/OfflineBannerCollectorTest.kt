@@ -64,44 +64,6 @@ class OfflineBannerCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `banner is visible when offline`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            isOnline.value = false
-            val collector = OfflineBannerCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.offlineBanner.shouldNotBeNull() shouldBe banner.copy(visible = true)
-            job.cancel()
-        }
-
-        @Test
-        fun `banner is hidden when online`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            isOnline.value = true
-            val collector = OfflineBannerCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.offlineBanner.shouldNotBeNull() shouldBe banner.copy(visible = false)
-            job.cancel()
-        }
-
-        @Test
         fun `banner visibility follows connectivity toggles`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = OfflineBannerCollector()

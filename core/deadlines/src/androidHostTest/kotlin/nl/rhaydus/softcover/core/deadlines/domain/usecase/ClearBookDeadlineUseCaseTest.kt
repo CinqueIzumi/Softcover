@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.deadlines.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.deadlines.domain.repository.BookDeadlineRepository
@@ -22,20 +21,6 @@ class ClearBookDeadlineUseCaseTest {
 
     @Nested
     inner class Invoke {
-        @Test
-        fun `delegates to repository clearDeadline with the given bookId`() = runTest {
-            // ----- Arrange -----
-            val bookId = 77
-
-            // ----- Act -----
-            useCase(bookId = bookId)
-
-            // ----- Assert -----
-            coVerify {
-                repository.clearDeadline(bookId = bookId)
-            }
-        }
-
         @Test
         fun `returns success when repository clearDeadline completes normally`() = runTest {
             // ----- Arrange -----

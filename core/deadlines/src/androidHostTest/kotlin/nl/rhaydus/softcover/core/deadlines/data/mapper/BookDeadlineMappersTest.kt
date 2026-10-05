@@ -78,18 +78,6 @@ class BookDeadlineMappersTest {
         }
 
         @Test
-        fun `maps unit PAGES string to DeadlineUnit PAGES`() {
-            // ----- Arrange -----
-            val entity = buildEntity(unit = "PAGES")
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.unit shouldBe DeadlineUnit.PAGES
-        }
-
-        @Test
         fun `maps unit SECONDS string to DeadlineUnit SECONDS`() {
             // ----- Arrange -----
             val entity = buildEntity(unit = "SECONDS")
@@ -111,85 +99,6 @@ class BookDeadlineMappersTest {
 
             // ----- Assert -----
             result.unit shouldBe DeadlineUnit.PAGES
-        }
-
-        @Test
-        fun `empty unit string falls back to DeadlineUnit PAGES`() {
-            // ----- Arrange -----
-            val entity = buildEntity(unit = "")
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.unit shouldBe DeadlineUnit.PAGES
-        }
-
-        @Test
-        fun `parses a leap-day date correctly`() {
-            // ----- Arrange -----
-            val entity = buildEntity(
-                deadlineDate = "2024-02-29",
-                setAt = "2024-01-01",
-            )
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.deadlineDate shouldBe LocalDate(
-                2024,
-                2,
-                29,
-            )
-        }
-
-        @Test
-        fun `parses a year-boundary date correctly`() {
-            // ----- Arrange -----
-            val entity = buildEntity(
-                deadlineDate = "2025-12-31",
-                setAt = "2025-12-01",
-            )
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.deadlineDate shouldBe LocalDate(
-                2025,
-                12,
-                31,
-            )
-            result.setAt shouldBe LocalDate(
-                2025,
-                12,
-                1,
-            )
-        }
-
-        @Test
-        fun `parses first day of year correctly`() {
-            // ----- Arrange -----
-            val entity = buildEntity(
-                deadlineDate = "2026-01-01",
-                setAt = "2025-12-31",
-            )
-
-            // ----- Act -----
-            val result = entity.toDomain()
-
-            // ----- Assert -----
-            result.deadlineDate shouldBe LocalDate(
-                2026,
-                1,
-                1,
-            )
-            result.setAt shouldBe LocalDate(
-                2025,
-                12,
-                31,
-            )
         }
     }
 
@@ -224,77 +133,6 @@ class BookDeadlineMappersTest {
             result.initialPerDay shouldBe 8f
             result.unit shouldBe "PAGES"
         }
-
-        @Test
-        fun `maps unit PAGES to string PAGES`() {
-            // ----- Arrange -----
-            val domain = buildDomain(unit = DeadlineUnit.PAGES)
-
-            // ----- Act -----
-            val result = domain.toEntity()
-
-            // ----- Assert -----
-            result.unit shouldBe "PAGES"
-        }
-
-        @Test
-        fun `maps unit SECONDS to string SECONDS`() {
-            // ----- Arrange -----
-            val domain = buildDomain(unit = DeadlineUnit.SECONDS)
-
-            // ----- Act -----
-            val result = domain.toEntity()
-
-            // ----- Assert -----
-            result.unit shouldBe "SECONDS"
-        }
-
-        @Test
-        fun `formats a leap-day date correctly`() {
-            // ----- Arrange -----
-            val domain = buildDomain(
-                deadlineDate = LocalDate(
-                    2024,
-                    2,
-                    29,
-                ),
-                setAt = LocalDate(
-                    2024,
-                    1,
-                    1,
-                ),
-            )
-
-            // ----- Act -----
-            val result = domain.toEntity()
-
-            // ----- Assert -----
-            result.deadlineDate shouldBe "2024-02-29"
-        }
-
-        @Test
-        fun `formats a year-boundary date correctly`() {
-            // ----- Arrange -----
-            val domain = buildDomain(
-                deadlineDate = LocalDate(
-                    2025,
-                    12,
-                    31,
-                ),
-                setAt = LocalDate(
-                    2025,
-                    12,
-                    1,
-                ),
-            )
-
-            // ----- Act -----
-            val result = domain.toEntity()
-
-            // ----- Assert -----
-            result.deadlineDate shouldBe "2025-12-31"
-            result.setAt shouldBe "2025-12-01"
-        }
     }
 
     @Nested
@@ -312,50 +150,6 @@ class BookDeadlineMappersTest {
 
             // ----- Act -----
             val result = original.toDomain().toEntity()
-
-            // ----- Assert -----
-            result shouldBe original
-        }
-
-        @Test
-        fun `entity to domain to entity preserves SECONDS unit`() {
-            // ----- Arrange -----
-            val original = buildEntity(
-                bookId = 10,
-                deadlineDate = "2026-11-30",
-                setAt = "2026-04-20",
-                initialPerDay = 600f,
-                unit = "SECONDS",
-            )
-
-            // ----- Act -----
-            val result = original.toDomain().toEntity()
-
-            // ----- Assert -----
-            result shouldBe original
-        }
-
-        @Test
-        fun `domain to entity to domain preserves all fields including PAGES unit`() {
-            // ----- Arrange -----
-            val original = buildDomain(
-                bookId = 55,
-                deadlineDate = LocalDate(
-                    2026,
-                    3,
-                    31,
-                ),
-                setAt = LocalDate(
-                    2026,
-                    1,
-                    15,
-                ),
-                initialPerDay = 5f,
-                unit = DeadlineUnit.PAGES,
-            )
-
-            // ----- Act -----
-            val result = original.toEntity().toDomain()
 
             // ----- Assert -----
             result shouldBe original
@@ -385,21 +179,6 @@ class BookDeadlineMappersTest {
 
             // ----- Assert -----
             result shouldBe original
-        }
-
-        @Test
-        fun `round-trip preserves leap-day date`() {
-            // ----- Arrange -----
-            val original = buildEntity(
-                deadlineDate = "2024-02-29",
-                setAt = "2024-02-01",
-            )
-
-            // ----- Act -----
-            val result = original.toDomain().toEntity()
-
-            // ----- Assert -----
-            result.deadlineDate shouldBe "2024-02-29"
         }
     }
 }

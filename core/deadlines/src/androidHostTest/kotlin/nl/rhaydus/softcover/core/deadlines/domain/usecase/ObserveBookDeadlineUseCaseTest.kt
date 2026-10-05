@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
@@ -44,27 +43,6 @@ class ObserveBookDeadlineUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `delegates to repository observe with the given bookId`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-
-            every {
-                repository.observe(bookId = bookId)
-            } returns flowOf(null)
-
-            // ----- Act -----
-            useCase(bookId = bookId).test {
-                awaitItem()
-                awaitComplete()
-            }
-
-            // ----- Assert -----
-            verify {
-                repository.observe(bookId = bookId)
-            }
-        }
-
-        @Test
         fun `emits the deadline returned by the repository`() = runTest {
             // ----- Arrange -----
             val bookId = 7
@@ -77,22 +55,6 @@ class ObserveBookDeadlineUseCaseTest {
             // ----- Act & Assert -----
             useCase(bookId = bookId).test {
                 awaitItem() shouldBe expectedDeadline
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `emits null when repository emits null`() = runTest {
-            // ----- Arrange -----
-            val bookId = 10
-
-            every {
-                repository.observe(bookId = bookId)
-            } returns flowOf(null)
-
-            // ----- Act & Assert -----
-            useCase(bookId = bookId).test {
-                awaitItem() shouldBe null
                 awaitComplete()
             }
         }

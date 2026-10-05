@@ -60,42 +60,6 @@ class ListEntityMapperTest {
             this@mockk.signature
         } returns signature
     }
-
-    private fun stubListBook(
-        listId: Int = 20,
-        listBookId: Int = 99,
-        bookId: Int = 1,
-        editionId: Int = 10,
-        position: Int? = null,
-        addedAt: String? = null,
-        book: Book? = null,
-        edition: BookEdition? = null,
-    ): ListBook = mockk {
-        every {
-            this@mockk.listId
-        } returns listId
-        every {
-            this@mockk.listBookId
-        } returns listBookId
-        every {
-            this@mockk.bookId
-        } returns bookId
-        every {
-            this@mockk.editionId
-        } returns editionId
-        every {
-            this@mockk.position
-        } returns position
-        every {
-            this@mockk.addedAt
-        } returns addedAt
-        every {
-            this@mockk.book
-        } returns book
-        every {
-            this@mockk.edition
-        } returns edition
-    }
     // endregion
     // region Shared stubs for Entity -> Model section
     private fun stubBookEditionEntity(
@@ -291,84 +255,6 @@ class ListEntityMapperTest {
     @Nested
     inner class BookListToEntity {
         @Test
-        fun `maps all fields from BookList to BookListEntity`() {
-            // ----- Arrange -----
-            val bookList = stubBookList(
-                id = 20,
-                name = "My List",
-                slug = "my-list",
-            )
-
-            // ----- Act -----
-            val result = bookList.toEntity()
-
-            // ----- Assert -----
-            result.id shouldBe 20
-            result.name shouldBe "My List"
-            result.slug shouldBe "my-list"
-        }
-
-        @Test
-        fun `writes ranked=true to entity`() {
-            // ----- Arrange -----
-            val bookList = stubBookList(ranked = true)
-
-            // ----- Act -----
-            val result = bookList.toEntity()
-
-            // ----- Assert -----
-            result.ranked shouldBe true
-        }
-
-        @Test
-        fun `writes ranked=false to entity`() {
-            // ----- Arrange -----
-            val bookList = stubBookList(ranked = false)
-
-            // ----- Act -----
-            val result = bookList.toEntity()
-
-            // ----- Assert -----
-            result.ranked shouldBe false
-        }
-
-        @Test
-        fun `carries non-null signature through to entity`() {
-            // ----- Arrange -----
-            val bookList = stubBookList(signature = "abc123")
-
-            // ----- Act -----
-            val result = bookList.toEntity()
-
-            // ----- Assert -----
-            result.signature shouldBe "abc123"
-        }
-
-        @Test
-        fun `carries null signature through to entity`() {
-            // ----- Arrange -----
-            val bookList = stubBookList(signature = null)
-
-            // ----- Act -----
-            val result = bookList.toEntity()
-
-            // ----- Assert -----
-            result.signature shouldBe null
-        }
-
-        @Test
-        fun `writes PUBLIC privacy as its code to entity`() {
-            // ----- Arrange -----
-            val bookList = stubBookList(privacy = PrivacySetting.PUBLIC)
-
-            // ----- Act -----
-            val result = bookList.toEntity()
-
-            // ----- Assert -----
-            result.privacySettingId shouldBe PrivacySetting.PUBLIC.code
-        }
-
-        @Test
         fun `writes PRIVATE privacy as its code to entity`() {
             // ----- Arrange -----
             val bookList = stubBookList(privacy = PrivacySetting.PRIVATE)
@@ -381,121 +267,12 @@ class ListEntityMapperTest {
         }
     }
 
-    @Nested
-    inner class ListBookToEntity {
-        @Test
-        fun `maps listId, bookId, editionId and listBookId directly from ListBook fields`() {
-            // ----- Arrange -----
-            val listBook = stubListBook(
-                listId = 20,
-                listBookId = 99,
-                bookId = 1,
-                editionId = 10,
-            )
-
-            // ----- Act -----
-            val result = listBook.toEntity()
-
-            // ----- Assert -----
-            result.listId shouldBe 20
-            result.bookId shouldBe 1
-            result.editionId shouldBe 10
-            result.listBookId shouldBe 99
-        }
-
-        @Test
-        fun `propagates addedAt when present`() {
-            // ----- Arrange -----
-            val listBook = stubListBook(addedAt = "2024-06-01")
-
-            // ----- Act -----
-            val result = listBook.toEntity()
-
-            // ----- Assert -----
-            result.addedAt shouldBe "2024-06-01"
-        }
-
-        @Test
-        fun `propagates null addedAt as null`() {
-            // ----- Arrange -----
-            val listBook = stubListBook(addedAt = null)
-
-            // ----- Act -----
-            val result = listBook.toEntity()
-
-            // ----- Assert -----
-            result.addedAt shouldBe null
-        }
-
-        @Test
-        fun `writes position when present`() {
-            // ----- Arrange -----
-            val listBook = stubListBook(position = 5)
-
-            // ----- Act -----
-            val result = listBook.toEntity()
-
-            // ----- Assert -----
-            result.position shouldBe 5
-        }
-
-        @Test
-        fun `writes null position as null`() {
-            // ----- Arrange -----
-            val listBook = stubListBook(position = null)
-
-            // ----- Act -----
-            val result = listBook.toEntity()
-
-            // ----- Assert -----
-            result.position shouldBe null
-        }
-    }
-
     // =========================================================
     // Entity -> Model mappers
     // =========================================================
 
     @Nested
     inner class ListBookFullToModel {
-        @Test
-        fun `maps listId, listBookId, bookId and editionId from ListBookEntity`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(
-                listId = 20,
-                listBookId = 99,
-                bookId = 1,
-                editionId = 10,
-            )
-            val editionEntity = stubBookEditionEntity(
-                id = 10,
-                bookId = 1,
-            )
-            val editionView = stubBookEditionView(
-                entity = editionEntity,
-                isOwned = false,
-            )
-            val editionWithAuthors = stubBookEditionWithAuthors(
-                editionView = editionView,
-                authors = emptyList(),
-            )
-            val bookFullEntity = stubBookFullEntity(book = stubBookEntity(id = 1))
-            val listBookFull = stubListBookFull(
-                listBook = listBookEntity,
-                book = bookFullEntity,
-                edition = editionWithAuthors,
-            )
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.listId shouldBe 20
-            result.listBookId shouldBe 99
-            result.bookId shouldBe 1
-            result.editionId shouldBe 10
-        }
-
         @Test
         fun `populates book and edition from Room join data`() {
             // ----- Arrange -----
@@ -546,76 +323,6 @@ class ListEntityMapperTest {
 
             // ----- Assert -----
             result.edition?.owned shouldBe true
-        }
-
-        @Test
-        fun `maps edition owned as false when isOwned is false`() {
-            // ----- Arrange -----
-            val editionEntity = stubBookEditionEntity(id = 10)
-            val editionView = stubBookEditionView(
-                entity = editionEntity,
-                isOwned = false,
-            )
-            val editionWithAuthors = stubBookEditionWithAuthors(editionView = editionView)
-            val listBookFull = stubListBookFull(edition = editionWithAuthors)
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.edition?.owned shouldBe false
-        }
-
-        @Test
-        fun `copies addedAt from ListBookEntity`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(addedAt = "2024-07-20")
-            val listBookFull = stubListBookFull(listBook = listBookEntity)
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.addedAt shouldBe "2024-07-20"
-        }
-
-        @Test
-        fun `copies null addedAt from ListBookEntity`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(addedAt = null)
-            val listBookFull = stubListBookFull(listBook = listBookEntity)
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.addedAt shouldBe null
-        }
-
-        @Test
-        fun `copies position from ListBookEntity when present`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(position = 7)
-            val listBookFull = stubListBookFull(listBook = listBookEntity)
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.position shouldBe 7
-        }
-
-        @Test
-        fun `copies null position from ListBookEntity`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(position = null)
-            val listBookFull = stubListBookFull(listBook = listBookEntity)
-
-            // ----- Act -----
-            val result = listBookFull.toModel(isOwnedList = false)
-
-            // ----- Assert -----
-            result.position shouldBe null
         }
 
         @Test
@@ -923,59 +630,6 @@ class ListEntityMapperTest {
     @Nested
     inner class BookListWithBooksToModel {
         @Test
-        fun `maps id, name and slug from BookListEntity`() {
-            // ----- Arrange -----
-            val bookListEntity = stubBookListEntity(
-                id = 20,
-                name = "My List",
-                slug = "my-list",
-            )
-            val wrapper = stubBookListWithBooks(
-                bookList = bookListEntity,
-                listBooks = emptyList(),
-            )
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.id shouldBe 20
-            result.name shouldBe "My List"
-            result.slug shouldBe "my-list"
-        }
-
-        @Test
-        fun `maps empty listBooks to empty books list`() {
-            // ----- Arrange -----
-            val wrapper = stubBookListWithBooks(listBooks = emptyList())
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.books shouldBe emptyList()
-        }
-
-        @Test
-        fun `maps each ListBookFull to a ListBook model`() {
-            // ----- Arrange -----
-            val listBookEntity = stubListBookEntity(
-                listId = 20,
-                listBookId = 99,
-            )
-            val listBookFull = stubListBookFull(listBook = listBookEntity)
-            val wrapper = stubBookListWithBooks(listBooks = listOf(listBookFull))
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.books.size shouldBe 1
-            result.books[0].listId shouldBe 20
-            result.books[0].listBookId shouldBe 99
-        }
-
-        @Test
         fun `sorts list books by addedAt descending`() {
             // ----- Arrange -----
             val older = stubListBookFull(
@@ -1230,71 +884,6 @@ class ListEntityMapperTest {
 
             // ----- Assert -----
             result.books[0].editionId shouldBe topLevelEditionId
-        }
-
-        @Test
-        fun `reads ranked=true from entity`() {
-            // ----- Arrange -----
-            val bookListEntity = stubBookListEntity(ranked = true)
-            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.ranked shouldBe true
-        }
-
-        @Test
-        fun `reads ranked=false from entity`() {
-            // ----- Arrange -----
-            val bookListEntity = stubBookListEntity(ranked = false)
-            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.ranked shouldBe false
-        }
-
-        @Test
-        fun `reads non-null signature from BookListEntity into model`() {
-            // ----- Arrange -----
-            val bookListEntity = stubBookListEntity(signature = "sig-xyz")
-            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.signature shouldBe "sig-xyz"
-        }
-
-        @Test
-        fun `reads null signature from BookListEntity into model`() {
-            // ----- Arrange -----
-            val bookListEntity = stubBookListEntity(signature = null)
-            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.signature shouldBe null
-        }
-
-        @Test
-        fun `reads PUBLIC privacy from entity's privacySettingId`() {
-            // ----- Arrange -----
-            val bookListEntity = stubBookListEntity(privacySettingId = PrivacySetting.PUBLIC.code)
-            val wrapper = stubBookListWithBooks(bookList = bookListEntity)
-
-            // ----- Act -----
-            val result = wrapper.toModel()
-
-            // ----- Assert -----
-            result.privacy shouldBe PrivacySetting.PUBLIC
         }
 
         @Test

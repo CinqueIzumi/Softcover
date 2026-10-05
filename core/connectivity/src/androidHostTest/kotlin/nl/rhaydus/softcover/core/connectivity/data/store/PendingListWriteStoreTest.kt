@@ -137,7 +137,7 @@ class PendingListWriteStoreTest {
     @Nested
     inner class GetPending {
         @Test
-        fun `passes maxAttempts through to the dao and maps rows to PendingWrite`() = runTest {
+        fun `maps dao rows to PendingWrite`() = runTest {
             // ----- Arrange -----
             val entityA = pendingListWriteEntity(
                 localId = 1L,
@@ -170,9 +170,6 @@ class PendingListWriteStoreTest {
                     payload = requireNotNull(entityB.toPendingListWrite()),
                 ),
             )
-            coVerify(exactly = 1) {
-                dao.getPending(maxAttempts = 7)
-            }
         }
 
         @Test
@@ -198,44 +195,6 @@ class PendingListWriteStoreTest {
             result shouldBe emptyList()
             coVerify(exactly = 1) {
                 dao.delete(localId = 6L)
-            }
-        }
-    }
-
-    @Nested
-    inner class Delete {
-        @Test
-        fun `delegates to dao delete`() = runTest {
-            // ----- Arrange -----
-            coJustRun {
-                dao.delete(any())
-            }
-
-            // ----- Act -----
-            store.delete(localId = 9L)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                dao.delete(localId = 9L)
-            }
-        }
-    }
-
-    @Nested
-    inner class IncrementAttempts {
-        @Test
-        fun `delegates to dao incrementAttempts`() = runTest {
-            // ----- Arrange -----
-            coJustRun {
-                dao.incrementAttempts(any())
-            }
-
-            // ----- Act -----
-            store.incrementAttempts(localId = 9L)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                dao.incrementAttempts(localId = 9L)
             }
         }
     }

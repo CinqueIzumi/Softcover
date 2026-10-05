@@ -57,25 +57,13 @@ class BookInitialCoverTest {
         }
 
         @Test
-        fun `passes the book series text through unchanged`() {
+        fun `carries the book title, rating and series text`() {
             // ----- Arrange -----
             val seriesText = "#1-2 of 6 in Dune Chronicles"
-            val book = stubBook(seriesText = seriesText)
-
-            // ----- Act -----
-            val result = BookInitialCover.fromBook(book = book)
-
-            // ----- Assert -----
-            result.seriesText shouldBe seriesText
-        }
-
-        @Test
-        fun `copies the title and rating from the book`() {
-            // ----- Arrange -----
             val book = stubBook(
                 title = "Hyperion",
                 rating = 4.25,
-                seriesText = null,
+                seriesText = seriesText,
             )
 
             // ----- Act -----
@@ -84,6 +72,7 @@ class BookInitialCoverTest {
             // ----- Assert -----
             result.title shouldBe "Hyperion"
             result.rating shouldBe 4.25
+            result.seriesText shouldBe seriesText
         }
     }
 
