@@ -51,25 +51,6 @@ class ShelfSwipeCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates shelfSwipeEnabled when flow emits a value`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ShelfSwipeCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            shelfSwipeFlow.emit(false)
-
-            // ----- Assert -----
-            stateFlow.value.shelfSwipeEnabled shouldBe false
-            job.cancel()
-        }
-
-        @Test
         fun `updates shelfSwipeEnabled to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ShelfSwipeCollector()
@@ -86,65 +67,6 @@ class ShelfSwipeCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.shelfSwipeEnabled shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change shelfSwipeEnabled before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ShelfSwipeCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act & Assert -----
-            stateFlow.value.shelfSwipeEnabled shouldBe LibraryUiState().shelfSwipeEnabled
-            job.cancel()
-        }
-
-        @Test
-        fun `retains the last emitted value after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ShelfSwipeCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            shelfSwipeFlow.emit(false)
-            job.cancel()
-
-            // ----- Act & Assert -----
-            stateFlow.value.shelfSwipeEnabled shouldBe false
-        }
-
-        @Test
-        fun `preserves other state fields when updating shelfSwipeEnabled`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isLoading = false,
-                isArrangeSheetExpanded = true,
-                shelfSwipeEnabled = true,
-            )
-            val collector = ShelfSwipeCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            shelfSwipeFlow.emit(false)
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isArrangeSheetExpanded shouldBe true
-            stateFlow.value.shelfSwipeEnabled shouldBe false
             job.cancel()
         }
     }

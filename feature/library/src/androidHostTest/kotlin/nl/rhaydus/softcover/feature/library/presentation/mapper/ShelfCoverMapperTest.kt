@@ -45,28 +45,6 @@ class ShelfCoverMapperTest {
         }
 
         @Test
-        fun `two editions of one book get distinct keys`() {
-            // ----- Arrange -----
-            val first = stubEdition(
-                id = 7,
-                bookId = 12,
-                title = null,
-            )
-            val second = stubEdition(
-                id = 8,
-                bookId = 12,
-                title = null,
-            )
-
-            // ----- Act -----
-            val firstKey = first.toShelfEditionCover().sharedTransitionKey
-            val secondKey = second.toShelfEditionCover().sharedTransitionKey
-
-            // ----- Assert -----
-            (firstKey == secondKey) shouldBe false
-        }
-
-        @Test
         fun `the coverless title is the edition title, empty when null`() {
             // ----- Arrange -----
             val titled = stubEdition(

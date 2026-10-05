@@ -33,30 +33,11 @@ class OnExitSelectionModeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `leaves selection mode and clears the selection`() = runTest {
+        fun `leaves selection mode, clears the selection and dismisses every bulk surface`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 selectionMode = true,
                 selectedBookIds = setOf(1, 2),
-            )
-
-            // ----- Act -----
-            OnExitSelectionModeAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.selectionMode shouldBe false
-            stateFlow.value.selectedBookIds shouldBe emptySet()
-        }
-
-        @Test
-        fun `dismisses every bulk sheet and menu and forgets in-flight list mutations`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                selectionMode = true,
-                selectedBookIds = setOf(1),
                 isBulkMoveMenuExpanded = true,
                 isBulkRemoveSheetShown = true,
                 isBulkAddToListSheetShown = true,
@@ -70,6 +51,8 @@ class OnExitSelectionModeActionTest {
             )
 
             // ----- Assert -----
+            stateFlow.value.selectionMode shouldBe false
+            stateFlow.value.selectedBookIds shouldBe emptySet()
             stateFlow.value.isBulkMoveMenuExpanded shouldBe false
             stateFlow.value.isBulkRemoveSheetShown shouldBe false
             stateFlow.value.isBulkAddToListSheetShown shouldBe false

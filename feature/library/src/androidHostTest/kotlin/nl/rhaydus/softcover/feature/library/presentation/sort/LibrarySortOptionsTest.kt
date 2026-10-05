@@ -213,22 +213,6 @@ class LibrarySortOptionsTest {
     @Nested
     inner class AllTab {
         @Test
-        fun `excludes MANUAL and ORDER regardless of content`() {
-            // ----- Arrange -----
-            val state = LibraryUiState()
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = LibraryTab.All,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.MANUAL) shouldBe false
-            result.contains(LibrarySortMode.ORDER) shouldBe false
-        }
-
-        @Test
         fun `with no books excludes PROGRESS, DEADLINE_URGENCY, and DATE_FINISHED`() {
             // ----- Arrange -----
             val state = LibraryUiState(
@@ -301,31 +285,6 @@ class LibrarySortOptionsTest {
         }
 
         @Test
-        fun `with a tracked deadline includes DEADLINE_URGENCY`() {
-            // ----- Arrange -----
-            val state = LibraryUiState(
-                booksByTab = mapOf(
-                    LibraryTab.All.id to listOf(
-                        buildBook(
-                            id = 1,
-                            status = BookStatus.WantToRead,
-                        ),
-                    ),
-                ),
-                deadlines = mapOf(1 to buildDeadline(bookId = 1)),
-            )
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = LibraryTab.All,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.DEADLINE_URGENCY) shouldBe true
-        }
-
-        @Test
         fun `with in-progress, finished, and deadline books includes all three content-gated modes but never MANUAL or ORDER`() {
             // ----- Arrange -----
             val state = LibraryUiState(
@@ -374,22 +333,6 @@ class LibrarySortOptionsTest {
         private val tab = LibraryTab.Status.of(UserBookStatus.DID_NOT_FINISH)
 
         @Test
-        fun `excludes MANUAL and ORDER`() {
-            // ----- Arrange -----
-            val state = LibraryUiState()
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.MANUAL) shouldBe false
-            result.contains(LibrarySortMode.ORDER) shouldBe false
-        }
-
-        @Test
         fun `with no books excludes the content-gated modes`() {
             // ----- Arrange -----
             val state = LibraryUiState(
@@ -412,51 +355,11 @@ class LibrarySortOptionsTest {
                 LibrarySortMode.RELEASE_DATE,
             )
         }
-
-        @Test
-        fun `content gating still applies off the tab's raw book list`() {
-            // ----- Arrange -----
-            val state = LibraryUiState(
-                booksByTab = mapOf(
-                    tab.id to listOf(
-                        buildBook(
-                            id = 1,
-                            status = BookStatus.Read,
-                        ),
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.DATE_FINISHED) shouldBe true
-        }
     }
 
     @Nested
     inner class OrdinaryStatusTab {
         private val tab = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING)
-
-        @Test
-        fun `includes MANUAL but excludes ORDER`() {
-            // ----- Arrange -----
-            val state = LibraryUiState()
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.MANUAL) shouldBe true
-            result.contains(LibrarySortMode.ORDER) shouldBe false
-        }
 
         @Test
         fun `with no books excludes PROGRESS, DEADLINE_URGENCY, and DATE_FINISHED`() {
@@ -481,56 +384,6 @@ class LibrarySortOptionsTest {
                 LibrarySortMode.RELEASE_DATE,
                 LibrarySortMode.MANUAL,
             )
-        }
-
-        @Test
-        fun `with an in-progress book includes PROGRESS alongside MANUAL`() {
-            // ----- Arrange -----
-            val state = LibraryUiState(
-                booksByTab = mapOf(
-                    tab.id to listOf(
-                        buildBook(
-                            id = 1,
-                            status = BookStatus.Reading,
-                        ),
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.PROGRESS) shouldBe true
-            result.contains(LibrarySortMode.MANUAL) shouldBe true
-        }
-
-        @Test
-        fun `with a tracked deadline includes DEADLINE_URGENCY`() {
-            // ----- Arrange -----
-            val state = LibraryUiState(
-                booksByTab = mapOf(
-                    tab.id to listOf(
-                        buildBook(
-                            id = 5,
-                            status = BookStatus.WantToRead,
-                        ),
-                    ),
-                ),
-                deadlines = mapOf(5 to buildDeadline(bookId = 5)),
-            )
-
-            // ----- Act -----
-            val result = librarySortOptions(
-                tab = tab,
-                state = state,
-            )
-
-            // ----- Assert -----
-            result.contains(LibrarySortMode.DEADLINE_URGENCY) shouldBe true
         }
 
         @Test

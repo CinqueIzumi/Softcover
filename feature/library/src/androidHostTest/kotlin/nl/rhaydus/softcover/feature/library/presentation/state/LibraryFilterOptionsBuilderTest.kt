@@ -25,17 +25,6 @@ class LibraryFilterOptionsBuilderTest {
     @Nested
     inner class BuildBookFilterOptions {
         @Test
-        fun `returns empty options when book list is empty`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = buildBookFilterOptions(books = emptyList())
-
-            // ----- Assert -----
-            result.isEmpty shouldBe true
-        }
-
-        @Test
         fun `returns distinct tags sorted by name lowercase`() {
             // ----- Arrange -----
             val book1 = buildBook(
@@ -327,20 +316,6 @@ class LibraryFilterOptionsBuilderTest {
     @Nested
     inner class BuildEditionFilterOptions {
         @Test
-        fun `returns empty options when edition list is empty`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = buildEditionFilterOptions(
-                editions = emptyList(),
-                bookByBookId = emptyMap(),
-            )
-
-            // ----- Assert -----
-            result.isEmpty shouldBe true
-        }
-
-        @Test
         fun `tags sourced from parent books via bookByBookId`() {
             // ----- Arrange -----
             val edition = buildEdition(
@@ -360,44 +335,6 @@ class LibraryFilterOptionsBuilderTest {
 
             // ----- Assert -----
             result.tags.map { it.id } shouldBe listOf(tagFiction.id)
-        }
-
-        @Test
-        fun `excludes non-Genre tags from tag facets`() {
-            // ----- Arrange -----
-            val tagGenre = Tag(
-                id = 1,
-                name = "Fantasy",
-                category = TagCategory.GENRE,
-            )
-            val tagMood = Tag(
-                id = 3,
-                name = "Hopeful",
-                category = TagCategory.MOOD,
-            )
-            val tagWarning = Tag(
-                id = 4,
-                name = "Violence",
-                category = TagCategory.CONTENT_WARNING,
-            )
-
-            val book = buildBook(
-                id = 10,
-                tags = listOf(tagGenre, tagMood, tagWarning),
-            )
-            val edition = buildEdition(
-                id = 1,
-                bookId = 10,
-            )
-
-            // ----- Act -----
-            val result = buildEditionFilterOptions(
-                editions = listOf(edition),
-                bookByBookId = mapOf(10 to book),
-            )
-
-            // ----- Assert -----
-            result.tags.map { it.id } shouldBe listOf(tagGenre.id)
         }
 
         @Test

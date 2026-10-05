@@ -33,19 +33,17 @@ class OnSelectBookRangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `empty bookIds — no state change`() = runTest {
+        fun `empty bookIds leaves the state untouched`() = runTest {
             // ----- Arrange -----
             val initialState = LibraryUiState(
                 selectionMode = false,
                 selectedBookIds = emptySet(),
-                isRearranging = false,
+                isRearranging = true,
             )
             stateFlow.value = initialState
 
-            val action = OnSelectBookRangeAction(bookIds = emptyList())
-
             // ----- Act -----
-            action.execute(
+            OnSelectBookRangeAction(bookIds = emptyList()).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
@@ -55,69 +53,23 @@ class OnSelectBookRangeActionTest {
         }
 
         @Test
-        fun `non-empty bookIds — sets selectionMode to true`() = runTest {
+        fun `non-empty bookIds enter selection mode, add to the selection and leave rearrange mode`() = runTest {
             // ----- Arrange -----
-            val action = OnSelectBookRangeAction(bookIds = listOf(1, 2, 3))
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(10),
+                isRearranging = true,
+            )
 
             // ----- Act -----
-            action.execute(
+            OnSelectBookRangeAction(bookIds = listOf(20, 30)).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
             stateFlow.value.selectionMode shouldBe true
-        }
-
-        @Test
-        fun `non-empty bookIds — adds ids to selectedBookIds`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(selectedBookIds = setOf(10))
-
-            val action = OnSelectBookRangeAction(bookIds = listOf(20, 30))
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.selectedBookIds shouldBe setOf(10, 20, 30)
-        }
-
-        @Test
-        fun `non-empty bookIds — clears isRearranging`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isRearranging = true)
-
-            val action = OnSelectBookRangeAction(bookIds = listOf(5))
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.isRearranging shouldBe false
-        }
-
-        @Test
-        fun `empty bookIds — does not change isRearranging`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isRearranging = true)
-
-            val action = OnSelectBookRangeAction(bookIds = emptyList())
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isRearranging shouldBe true
         }
     }
 }

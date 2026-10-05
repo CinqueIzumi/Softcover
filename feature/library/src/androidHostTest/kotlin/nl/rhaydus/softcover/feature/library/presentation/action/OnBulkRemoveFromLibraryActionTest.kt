@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -80,12 +81,15 @@ class OnBulkRemoveFromLibraryActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `null explicitBookIds — invokes use case for each selected book`() = runTest {
+        fun `null explicitBookIds removes only the selected books and then leaves selection mode`() = runTest {
             // ----- Arrange -----
             val selectedBook = buildBook(id = 1)
+            val unselectedBook = buildBook(id = 2)
             stateFlow.value = LibraryUiState(
+                selectionMode = true,
                 selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(selectedBook)),
+                booksByTab = mapOf(tabKey to listOf(selectedBook, unselectedBook)),
+                isBulkRemoveSheetShown = true,
             )
 
             coEvery {
@@ -103,63 +107,16 @@ class OnBulkRemoveFromLibraryActionTest {
 
             // ----- Assert -----
             coVerify(exactly = 1) { removeBookFromLibraryUseCase(book = selectedBook) }
-        }
-
-        @Test
-        fun `null explicitBookIds — does not invoke use case for books outside the selection`() = runTest {
-            // ----- Arrange -----
-            val selectedBook = buildBook(id = 1)
-            val unselectedBook = buildBook(id = 2)
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(selectedBook, unselectedBook)),
-            )
-
-            coEvery {
-                removeBookFromLibraryUseCase(book = selectedBook)
-            } returns Result.success(Unit)
-
-            val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             coVerify(exactly = 0) { removeBookFromLibraryUseCase(book = unselectedBook) }
+
+            stateFlow.value.selectionMode shouldBe false
+            stateFlow.value.selectedBookIds shouldBe emptySet()
+            stateFlow.value.bulkActionInProgress shouldBe false
+            stateFlow.value.isBulkRemoveCloseRequested shouldBe true
         }
 
         @Test
-        fun `non-null explicitBookIds — invokes use case for the explicit book`() = runTest {
-            // ----- Arrange -----
-            val explicitBook = buildBook(id = 99)
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1, 2),
-                booksByTab = mapOf(tabKey to listOf(buildBook(id = 1), buildBook(id = 2), explicitBook)),
-            )
-
-            coEvery {
-                removeBookFromLibraryUseCase(book = explicitBook)
-            } returns Result.success(Unit)
-
-            val action = OnBulkRemoveFromLibraryAction(explicitBookIds = setOf(99))
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { removeBookFromLibraryUseCase(book = explicitBook) }
-        }
-
-        @Test
-        fun `non-null explicitBookIds — does not invoke use case for the currently selected books`() = runTest {
+        fun `non-null explicitBookIds removes only the explicit book, not the current selection`() = runTest {
             // ----- Arrange -----
             val selectedBook1 = buildBook(id = 1)
             val selectedBook2 = buildBook(id = 2)
@@ -183,6 +140,7 @@ class OnBulkRemoveFromLibraryActionTest {
             )
 
             // ----- Assert -----
+            coVerify(exactly = 1) { removeBookFromLibraryUseCase(book = explicitBook) }
             coVerify(exactly = 0) { removeBookFromLibraryUseCase(book = selectedBook1) }
             coVerify(exactly = 0) { removeBookFromLibraryUseCase(book = selectedBook2) }
         }
@@ -222,35 +180,7 @@ class OnBulkRemoveFromLibraryActionTest {
         }
 
         @Test
-        fun `requests the bulk remove sheet to close and clears progress when the removal succeeds`() = runTest {
-            // ----- Arrange -----
-            val book = buildBook(id = 1)
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
-                isBulkRemoveSheetShown = true,
-            )
-
-            coEvery {
-                removeBookFromLibraryUseCase(book = book)
-            } returns Result.success(Unit)
-
-            val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = stubDependencies(),
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isBulkRemoveCloseRequested shouldBe true
-            stateFlow.value.isBulkRemoveSheetShown shouldBe true
-            stateFlow.value.bulkActionInProgress shouldBe false
-        }
-
-        @Test
-        fun `requests the bulk remove sheet to close and clears progress when the removal fails`() = runTest {
+        fun `a failed removal shows a snackbar and still requests the sheet to close`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
@@ -275,13 +205,17 @@ class OnBulkRemoveFromLibraryActionTest {
             )
 
             // ----- Assert -----
+            verify(exactly = 1) {
+                SnackBarManager.showSnackbar(title = "Couldn't remove 1 book — try again.")
+            }
+
             stateFlow.value.isBulkRemoveCloseRequested shouldBe true
             stateFlow.value.isBulkRemoveSheetShown shouldBe true
             stateFlow.value.bulkActionInProgress shouldBe false
         }
 
         @Test
-        fun `no books resolved — requests the close without starting progress`() = runTest {
+        fun `no books resolved requests the close without starting progress`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 selectedBookIds = emptySet(),

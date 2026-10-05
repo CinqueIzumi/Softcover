@@ -33,25 +33,6 @@ class OnBulkRemoveSheetExpandedChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `showing the sheet sets the shown flag and leaves no close request pending`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isBulkRemoveSheetShown = false,
-                isBulkRemoveCloseRequested = true,
-            )
-
-            // ----- Act -----
-            OnBulkRemoveSheetExpandedChangeAction(shown = true).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isBulkRemoveSheetShown shouldBe true
-            stateFlow.value.isBulkRemoveCloseRequested shouldBe false
-        }
-
-        @Test
         fun `hiding the sheet after its animated dismiss clears the shown flag and the close request`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(

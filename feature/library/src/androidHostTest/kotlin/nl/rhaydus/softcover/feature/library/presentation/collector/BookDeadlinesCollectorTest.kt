@@ -70,48 +70,6 @@ class BookDeadlinesCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets state deadlines when flow emits a map`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val deadline1 = buildDeadline(bookId = 1)
-            val deadline2 = buildDeadline(bookId = 2)
-            val expectedMap = mapOf(1 to deadline1, 2 to deadline2)
-
-            val collector = BookDeadlinesCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            deadlinesFlow.emit(expectedMap)
-
-            // ----- Assert -----
-            stateFlow.value.deadlines shouldBe expectedMap
-            job.cancel()
-        }
-
-        @Test
-        fun `sets state deadlines to empty map when flow emits empty map`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = BookDeadlinesCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            deadlinesFlow.emit(emptyMap())
-
-            // ----- Assert -----
-            stateFlow.value.deadlines shouldBe emptyMap()
-            job.cancel()
-        }
-
-        @Test
         fun `updates deadlines to the latest emitted map`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val firstMap = mapOf(1 to buildDeadline(bookId = 1))
@@ -131,42 +89,6 @@ class BookDeadlinesCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.deadlines shouldBe secondMap
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change deadlines before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = BookDeadlinesCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act & Assert -----
-            stateFlow.value.deadlines shouldBe emptyMap()
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves other state fields when updating deadlines`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isLoading = false)
-            val collector = BookDeadlinesCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            deadlinesFlow.emit(mapOf(1 to buildDeadline(bookId = 1)))
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
             job.cancel()
         }
     }

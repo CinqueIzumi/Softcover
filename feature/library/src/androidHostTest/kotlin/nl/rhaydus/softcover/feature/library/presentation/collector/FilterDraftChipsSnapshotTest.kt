@@ -96,28 +96,6 @@ class FilterDraftChipsSnapshotTest {
         }
 
         @Test
-        fun `compute counts only the draft's tab entry in booksByTab when its filters are empty`() {
-            // ----- Arrange -----
-            val snapshot = FilterDraftChipsSnapshot(
-                draft = LibraryFilterDraft(tabId = "all"),
-                filterChipsByTab = emptyMap(),
-                booksByTab = mapOf("all" to List(3) { mockk() }),
-                editionsByTab = emptyMap(),
-                addedAtByTab = emptyMap(),
-                bookByBookId = emptyMap(),
-                sortModeByTab = emptyMap(),
-                sortDirectionByTab = emptyMap(),
-                searchQuery = "",
-            )
-
-            // ----- Act -----
-            val selection = snapshot.compute()
-
-            // ----- Assert -----
-            selection?.resultCount shouldBe 3
-        }
-
-        @Test
         fun `compute derives resultCount from the draft's own uncommitted filters, not an empty default`() {
             // ----- Arrange -----
             val matchingBook = mockk<Book>(relaxed = true).also {

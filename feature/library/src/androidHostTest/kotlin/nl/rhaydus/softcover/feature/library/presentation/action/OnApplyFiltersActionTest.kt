@@ -5,7 +5,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterDraft
@@ -58,37 +57,19 @@ class OnApplyFiltersActionTest {
         }
 
         @Test
-        fun `sets the tab's entry to the non-empty draft filters`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilters(formats = setOf("ebook"))
-            stateFlow.value = LibraryUiState(
-                filtersByTab = emptyMap(),
-                filterDraft = LibraryFilterDraft(
-                    tabId = tabId,
-                    filters = draft,
-                ),
-            )
-
-            // ----- Act -----
-            OnApplyFiltersAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab[tabId] shouldBe draft
-        }
-
-        @Test
-        fun `replaces an existing non-empty entry for the tab`() = runTest {
+        fun `replaces the tab's entry with the draft filters and leaves other tabs alone`() = runTest {
             // ----- Arrange -----
             val previous = LibraryFilters(formats = setOf("paperback"))
             val draft = LibraryFilters(
                 formats = setOf("ebook"),
                 owned = true,
             )
+            val otherFilters = LibraryFilters(releaseYears = setOf(2020))
             stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(tabId to previous),
+                filtersByTab = mapOf(
+                    tabId to previous,
+                    otherTabId to otherFilters,
+                ),
                 filterDraft = LibraryFilterDraft(
                     tabId = tabId,
                     filters = draft,
@@ -102,76 +83,14 @@ class OnApplyFiltersActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.filtersByTab[tabId] shouldBe draft
+            stateFlow.value.filtersByTab shouldBe mapOf(
+                tabId to draft,
+                otherTabId to otherFilters,
+            )
         }
 
         @Test
-        fun `removes the tab entry when the applied filters are empty`() = runTest {
-            // ----- Arrange -----
-            val previous = LibraryFilters(formats = setOf("ebook"))
-            stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(tabId to previous),
-                filterDraft = LibraryFilterDraft(
-                    tabId = tabId,
-                    filters = LibraryFilters(),
-                ),
-            )
-
-            // ----- Act -----
-            OnApplyFiltersAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab.containsKey(tabId) shouldBe false
-        }
-
-        @Test
-        fun `applying empty filters to a tab with no existing entry is a no-op`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                filtersByTab = emptyMap(),
-                filterDraft = LibraryFilterDraft(
-                    tabId = tabId,
-                    filters = LibraryFilters(),
-                ),
-            )
-
-            // ----- Act -----
-            OnApplyFiltersAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab shouldBe emptyMap()
-        }
-
-        @Test
-        fun `does not touch other tabs' filters when setting a non-empty entry`() = runTest {
-            // ----- Arrange -----
-            val otherFilters = LibraryFilters(releaseYears = setOf(2020))
-            stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(otherTabId to otherFilters),
-                filterDraft = LibraryFilterDraft(
-                    tabId = tabId,
-                    filters = LibraryFilters(formats = setOf("ebook")),
-                ),
-            )
-
-            // ----- Act -----
-            OnApplyFiltersAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab[otherTabId] shouldBe otherFilters
-        }
-
-        @Test
-        fun `does not touch other tabs' filters when clearing to an empty entry`() = runTest {
+        fun `removes the tab's entry when the draft filters are empty and leaves other tabs alone`() = runTest {
             // ----- Arrange -----
             val ownFilters = LibraryFilters(formats = setOf("ebook"))
             val otherFilters = LibraryFilters(releaseYears = setOf(2020))
@@ -194,29 +113,6 @@ class OnApplyFiltersActionTest {
 
             // ----- Assert -----
             stateFlow.value.filtersByTab shouldBe mapOf(otherTabId to otherFilters)
-        }
-
-        @Test
-        fun `does not clobber unrelated state fields`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                searchQuery = "kotlin",
-                gridLayout = LibraryGridLayout.LIST_COMPACT,
-                filterDraft = LibraryFilterDraft(
-                    tabId = tabId,
-                    filters = LibraryFilters(formats = setOf("ebook")),
-                ),
-            )
-
-            // ----- Act -----
-            OnApplyFiltersAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.searchQuery shouldBe "kotlin"
-            stateFlow.value.gridLayout shouldBe LibraryGridLayout.LIST_COMPACT
         }
     }
 }

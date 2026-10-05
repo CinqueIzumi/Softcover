@@ -71,29 +71,7 @@ class OnArrangeSortChipClickedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.arrangeDraft?.sortMode shouldBe LibrarySortMode.TITLE
-            stateFlow.value.arrangeDraft?.sortDirection shouldBe SortDirection.DESCENDING
-        }
-
-        @Test
-        fun `tapping the already-active mode a second time flips direction back`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryArrangeDraft(
-                tabId = tabId,
-                sortMode = LibrarySortMode.TITLE,
-                sortDirection = SortDirection.DESCENDING,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-            stateFlow.value = LibraryUiState(arrangeDraft = draft)
-
-            // ----- Act -----
-            OnArrangeSortChipClickedAction(mode = LibrarySortMode.TITLE).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.arrangeDraft?.sortDirection shouldBe SortDirection.ASCENDING
+            stateFlow.value.arrangeDraft shouldBe draft.copy(sortDirection = SortDirection.DESCENDING)
         }
 
         @Test
@@ -104,28 +82,6 @@ class OnArrangeSortChipClickedActionTest {
                 sortMode = LibrarySortMode.TITLE,
                 sortDirection = SortDirection.DESCENDING,
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-            stateFlow.value = LibraryUiState(arrangeDraft = draft)
-
-            // ----- Act -----
-            OnArrangeSortChipClickedAction(mode = LibrarySortMode.RATING).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.arrangeDraft?.sortMode shouldBe LibrarySortMode.RATING
-            stateFlow.value.arrangeDraft?.sortDirection shouldBe LibrarySortMode.RATING.defaultDirection
-        }
-
-        @Test
-        fun `leaves gridLayout and tabId untouched`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryArrangeDraft(
-                tabId = tabId,
-                sortMode = LibrarySortMode.TITLE,
-                sortDirection = SortDirection.ASCENDING,
-                gridLayout = LibraryGridLayout.LIST_LARGE,
             )
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
 

@@ -2,12 +2,9 @@ package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.collector.shelvesSheetRowsFor
-import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -15,17 +12,13 @@ class LibrarySheetScaffoldBuilderTest {
     @Nested
     inner class ArrangeSheetScaffoldFor {
         @Test
-        fun `primary button shows the result count and dismisses the sheet`() {
+        fun `primary button dismisses the sheet`() {
             // ----- Act -----
             val model = arrangeSheetScaffoldFor(resultCount = 7)
 
             // ----- Assert -----
             val footer = model.footer.shouldNotBeNull()
-            footer.primary.shouldNotBeNull().label.contains(formatBookCount(count = 7)) shouldBe true
             footer.primary.shouldNotBeNull().dismissesSheet shouldBe true
-            footer.secondary shouldBe null
-            (footer is SheetFooterUiModel.Stacked) shouldBe true
-            model.layout shouldBe SheetLayout.Scrolling
         }
     }
 
@@ -57,7 +50,7 @@ class LibrarySheetScaffoldBuilderTest {
         }
 
         @Test
-        fun `primary shows the result count, dismisses the sheet and layout is inline`() {
+        fun `primary button dismisses the sheet`() {
             // ----- Act -----
             val model = filterSheetScaffoldFor(
                 resultCount = 1,
@@ -66,10 +59,7 @@ class LibrarySheetScaffoldBuilderTest {
 
             // ----- Assert -----
             val footer = model.footer.shouldNotBeNull()
-            footer.primary.shouldNotBeNull().label.contains(formatBookCount(count = 1)) shouldBe true
             footer.primary.shouldNotBeNull().dismissesSheet shouldBe true
-            (footer is SheetFooterUiModel.Inline) shouldBe true
-            model.layout shouldBe SheetLayout.Pinned
         }
     }
 
@@ -99,18 +89,6 @@ class LibrarySheetScaffoldBuilderTest {
             // ----- Assert -----
             none shouldBe "Show 0 titles"
             many shouldBe "Show 12 titles"
-        }
-    }
-
-    @Nested
-    inner class ShelvesSheetScaffold {
-        @Test
-        fun `has no footer`() {
-            // ----- Act -----
-            val model = shelvesSheetScaffold()
-
-            // ----- Assert -----
-            model.footer shouldBe null
         }
     }
 
@@ -162,18 +140,6 @@ class LibrarySheetScaffoldBuilderTest {
             // ----- Assert -----
             one.header.section.headlineText shouldBe "Remove 1 book?"
             many.header.section.headlineText shouldBe "Remove 4 books?"
-        }
-
-        @Test
-        fun `zero books uses the plural`() {
-            // ----- Act -----
-            val model = bulkRemoveSheetScaffoldFor(
-                bookCount = 0,
-                inProgress = false,
-            )
-
-            // ----- Assert -----
-            model.header.section.headlineText shouldBe "Remove 0 books?"
         }
     }
 
@@ -265,19 +231,6 @@ class LibrarySheetScaffoldBuilderTest {
             // ----- Assert -----
             rows[0].leadingIcon shouldBe rows[1].leadingIcon
             (rows[2].leadingIcon == rows[0].leadingIcon) shouldBe false
-        }
-
-        @Test
-        fun `no visible tabs gives no rows`() {
-            // ----- Act -----
-            val rows = shelvesSheetRowsFor(
-                visibleTabs = emptyList(),
-                selectedTabId = allTab.id,
-                tabStatsByTab = emptyMap(),
-            )
-
-            // ----- Assert -----
-            rows shouldBe emptyList()
         }
     }
 }

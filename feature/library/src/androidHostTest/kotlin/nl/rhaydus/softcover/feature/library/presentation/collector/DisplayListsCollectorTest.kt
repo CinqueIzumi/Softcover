@@ -112,31 +112,6 @@ class DisplayListsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `populates displayBooksByTab when booksByTab is set in state`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val tabId = LibraryTab.Status.of(UserBookStatus.CURRENTLY_READING).id
-            val book = buildBook(
-                id = 1,
-                title = "Kotlin in Action",
-            )
-            val collector = DisplayListsCollector()
-
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(booksByTab = mapOf(tabId to listOf(book)))
-
-            // ----- Assert -----
-            stateFlow.value.displayBooksByTab[tabId] shouldBe listOf(book)
-            job.cancel()
-        }
-
-        @Test
         fun `populates displayEditionsByTab when editionsByTab is set in state`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val listTabId = LibraryTab.CustomList(
@@ -370,27 +345,6 @@ class DisplayListsCollectorTest {
             val refAfterSecond = stateFlow.value.displayBooksByTab[tabId]
             refAfterSecond shouldBe listOf(book)
             (refAfterSecond === refAfterFirst) shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `displayBooksByTab is not set before first state emission beyond initial`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val collector = DisplayListsCollector()
-
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            // No action — asserting on initial state.
-
-            // ----- Assert -----
-            // Initial LibraryUiState() has empty booksByTab, so displayBooksByTab is also empty
-            stateFlow.value.displayBooksByTab shouldBe emptyMap()
             job.cancel()
         }
     }

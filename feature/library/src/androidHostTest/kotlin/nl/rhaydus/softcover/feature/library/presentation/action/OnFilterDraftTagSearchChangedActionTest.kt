@@ -49,90 +49,15 @@ class OnFilterDraftTagSearchChangedActionTest {
 
             // ----- Assert -----
             stateFlow.value.filterDraft shouldBe null
-        }
-
-        @Test
-        fun `sets the draft's tag search to the given query`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(
-                tabId = tabId,
-                filters = LibraryFilters(),
-                tagSearch = "",
-            )
-            stateFlow.value = LibraryUiState(filterDraft = draft)
-
-            // ----- Act -----
-            OnFilterDraftTagSearchChangedAction(query = "kotlin").execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft?.tagSearch shouldBe "kotlin"
-        }
-
-        @Test
-        fun `clears the draft's tag search when given an empty query`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(
-                tabId = tabId,
-                filters = LibraryFilters(),
-                tagSearch = "kotlin",
-            )
-            stateFlow.value = LibraryUiState(filterDraft = draft)
-
-            // ----- Act -----
-            OnFilterDraftTagSearchChangedAction(query = "").execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft?.tagSearch shouldBe ""
-        }
-
-        @Test
-        fun `writes the query into the tag search field`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(
-                tabId = tabId,
-                filters = LibraryFilters(),
-                tagSearch = "",
-            )
-            stateFlow.value = LibraryUiState(filterDraft = draft)
-
-            // ----- Act -----
-            OnFilterDraftTagSearchChangedAction(query = "kotlin").execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.tagSearchField.text shouldBe "kotlin"
-        }
-
-        @Test
-        fun `leaves the tag search field untouched when no draft is open`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(filterDraft = null)
-
-            // ----- Act -----
-            OnFilterDraftTagSearchChangedAction(query = "kotlin").execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.tagSearchField.text shouldBe ""
         }
 
         @Test
-        fun `leaves filters and tabId untouched`() = runTest {
+        fun `sets the draft's tag search and the tag search field to the given query`() = runTest {
             // ----- Arrange -----
-            val filters = LibraryFilters(formats = setOf("Hardcover"))
             val draft = LibraryFilterDraft(
                 tabId = tabId,
-                filters = filters,
+                filters = LibraryFilters(formats = setOf("Hardcover")),
                 tagSearch = "",
             )
             stateFlow.value = LibraryUiState(filterDraft = draft)
@@ -144,8 +69,8 @@ class OnFilterDraftTagSearchChangedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.filterDraft?.filters shouldBe filters
-            stateFlow.value.filterDraft?.tabId shouldBe tabId
+            stateFlow.value.filterDraft shouldBe draft.copy(tagSearch = "kotlin")
+            stateFlow.value.tagSearchField.text shouldBe "kotlin"
         }
     }
 }

@@ -46,6 +46,7 @@ class LibrarySortTest {
         inner class Title {
             @Test
             fun `sorts editions by title ascending case-insensitively`() {
+                // ----- Arrange -----
                 val editions = listOf(
                     buildEdition(
                         id = 1,
@@ -61,15 +62,16 @@ class LibrarySortTest {
                     ),
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(mode = LibrarySortMode.TITLE)
 
-                result[0].title shouldBe "alpha Edition"
-                result[1].title shouldBe "Middle Edition"
-                result[2].title shouldBe "Zebra Edition"
+                // ----- Assert -----
+                result.map { it.title } shouldBe listOf("alpha Edition", "Middle Edition", "Zebra Edition")
             }
 
             @Test
             fun `null title sorts before non-null`() {
+                // ----- Arrange -----
                 val editions = listOf(
                     buildEdition(
                         id = 1,
@@ -81,14 +83,16 @@ class LibrarySortTest {
                     ),
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(mode = LibrarySortMode.TITLE)
 
-                result[0].id shouldBe 2
-                result[1].id shouldBe 1
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(2, 1)
             }
 
             @Test
             fun `sorts editions by title descending when direction is DESCENDING`() {
+                // ----- Arrange -----
                 val editions = listOf(
                     buildEdition(
                         id = 1,
@@ -104,14 +108,14 @@ class LibrarySortTest {
                     ),
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(
                     mode = LibrarySortMode.TITLE,
                     direction = SortDirection.DESCENDING,
                 )
 
-                result[0].title shouldBe "Zebra Edition"
-                result[1].title shouldBe "Middle Edition"
-                result[2].title shouldBe "alpha Edition"
+                // ----- Assert -----
+                result.map { it.title } shouldBe listOf("Zebra Edition", "Middle Edition", "alpha Edition")
             }
         }
 
@@ -119,6 +123,7 @@ class LibrarySortTest {
         inner class Author {
             @Test
             fun `sorts editions by first author name ascending`() {
+                // ----- Arrange -----
                 val editions = listOf(
                     buildEdition(
                         id = 1,
@@ -140,42 +145,11 @@ class LibrarySortTest {
                     ),
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(mode = LibrarySortMode.AUTHOR)
 
-                result[0].id shouldBe 2
-                result[1].id shouldBe 1
-            }
-
-            @Test
-            fun `sorts editions by first author name descending when direction is DESCENDING`() {
-                val editions = listOf(
-                    buildEdition(
-                        id = 1,
-                        authors = listOf(
-                            Author(
-                                id = 1,
-                                name = "Adams",
-                            ),
-                        ),
-                    ),
-                    buildEdition(
-                        id = 2,
-                        authors = listOf(
-                            Author(
-                                id = 2,
-                                name = "Tolkien",
-                            ),
-                        ),
-                    ),
-                )
-
-                val result = editions.applyEditionSort(
-                    mode = LibrarySortMode.AUTHOR,
-                    direction = SortDirection.DESCENDING,
-                )
-
-                result[0].id shouldBe 2
-                result[1].id shouldBe 1
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(2, 1)
             }
         }
 
@@ -183,6 +157,7 @@ class LibrarySortTest {
         inner class PageCount {
             @Test
             fun `sorts editions by page count descending`() {
+                // ----- Arrange -----
                 val editions = listOf(
                     buildEdition(
                         id = 1,
@@ -198,15 +173,16 @@ class LibrarySortTest {
                     ),
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(mode = LibrarySortMode.PAGE_COUNT)
 
-                result[0].id shouldBe 2
-                result[1].id shouldBe 1
-                result[2].id shouldBe 3
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(2, 1, 3)
             }
 
             @Test
             fun `sorts editions by fewest pages first when direction is ASCENDING`() {
+                // ----- Arrange -----
                 val editions = listOf(
                     buildEdition(
                         id = 1,
@@ -218,13 +194,14 @@ class LibrarySortTest {
                     ),
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(
                     mode = LibrarySortMode.PAGE_COUNT,
                     direction = SortDirection.ASCENDING,
                 )
 
-                result[0].id shouldBe 2
-                result[1].id shouldBe 1
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(2, 1)
             }
         }
 
@@ -232,6 +209,7 @@ class LibrarySortTest {
         inner class ReleaseDate {
             @Test
             fun `sorts editions by release date ascending`() {
+                // ----- Arrange -----
                 val editions = listOf(
                     buildEdition(id = 1).copy(
                         releaseDate = LocalDate(
@@ -256,15 +234,16 @@ class LibrarySortTest {
                     ),
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(mode = LibrarySortMode.RELEASE_DATE)
 
-                result[0].id shouldBe 2
-                result[1].id shouldBe 3
-                result[2].id shouldBe 1
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(2, 3, 1)
             }
 
             @Test
             fun `edition with null release date sorts last`() {
+                // ----- Arrange -----
                 val withDate = buildEdition(id = 1).copy(
                     releaseDate = LocalDate(
                         2020,
@@ -274,221 +253,138 @@ class LibrarySortTest {
                 )
                 val nullDate = buildEdition(id = 2).copy(releaseDate = null)
 
-                val editions = listOf(nullDate, withDate)
+                // ----- Act -----
+                val result = listOf(nullDate, withDate).applyEditionSort(mode = LibrarySortMode.RELEASE_DATE)
 
-                val result = editions.applyEditionSort(mode = LibrarySortMode.RELEASE_DATE)
-
-                result[0].id shouldBe 1
-                result[1].id shouldBe 2
-            }
-
-            @Test
-            fun `sorts editions by newest release date first when direction is DESCENDING`() {
-                val editions = listOf(
-                    buildEdition(id = 1).copy(
-                        releaseDate = LocalDate(
-                            2021,
-                            1,
-                            15,
-                        ),
-                    ),
-                    buildEdition(id = 2).copy(
-                        releaseDate = LocalDate(
-                            2023,
-                            5,
-                            1,
-                        ),
-                    ),
-                    buildEdition(id = 3).copy(
-                        releaseDate = LocalDate(
-                            2022,
-                            9,
-                            30,
-                        ),
-                    ),
-                )
-
-                val result = editions.applyEditionSort(
-                    mode = LibrarySortMode.RELEASE_DATE,
-                    direction = SortDirection.DESCENDING,
-                )
-
-                result[0].id shouldBe 2
-                result[1].id shouldBe 3
-                result[2].id shouldBe 1
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(1, 2)
             }
         }
 
         @Nested
         inner class DateAdded {
+            private val editions = listOf(
+                buildEdition(id = 1),
+                buildEdition(id = 2),
+                buildEdition(id = 3),
+            )
+
             @Test
             fun `default direction DESCENDING sorts newest-added first`() {
-                val editions = listOf(
-                    buildEdition(id = 1),
-                    buildEdition(id = 2),
-                    buildEdition(id = 3),
-                )
-
+                // ----- Arrange -----
                 val addedAt = mapOf(
                     1 to "2025-01-15T10:00:00Z",
                     2 to "2025-03-20T08:30:00Z",
                     3 to "2024-11-05T14:00:00Z",
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(
                     mode = LibrarySortMode.DATE_ADDED,
                     addedAtByEditionId = addedAt,
                 )
 
-                result[0].id shouldBe 2
-                result[1].id shouldBe 1
-                result[2].id shouldBe 3
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(2, 1, 3)
             }
 
             @Test
             fun `ASCENDING direction sorts oldest-added first`() {
-                val editions = listOf(
-                    buildEdition(id = 1),
-                    buildEdition(id = 2),
-                    buildEdition(id = 3),
-                )
-
+                // ----- Arrange -----
                 val addedAt = mapOf(
                     1 to "2025-01-15T10:00:00Z",
                     2 to "2025-03-20T08:30:00Z",
                     3 to "2024-11-05T14:00:00Z",
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(
                     mode = LibrarySortMode.DATE_ADDED,
                     direction = SortDirection.ASCENDING,
                     addedAtByEditionId = addedAt,
                 )
 
-                result[0].id shouldBe 3
-                result[1].id shouldBe 1
-                result[2].id shouldBe 2
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(3, 1, 2)
             }
 
             @Test
             fun `edition absent from map sorts last in ASCENDING`() {
-                val editions = listOf(
-                    buildEdition(id = 1),
-                    buildEdition(id = 2),
-                    buildEdition(id = 3),
-                )
-
+                // ----- Arrange -----
                 val addedAt = mapOf(
                     1 to "2025-01-15T10:00:00Z",
                     2 to "2025-03-20T08:30:00Z",
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(
                     mode = LibrarySortMode.DATE_ADDED,
                     direction = SortDirection.ASCENDING,
                     addedAtByEditionId = addedAt,
                 )
 
-                result[0].id shouldBe 1
-                result[1].id shouldBe 2
-                result[2].id shouldBe 3
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(1, 2, 3)
             }
 
             @Test
             fun `edition absent from map sorts first in DESCENDING`() {
-                val editions = listOf(
-                    buildEdition(id = 1),
-                    buildEdition(id = 2),
-                    buildEdition(id = 3),
-                )
-
+                // ----- Arrange -----
                 val addedAt = mapOf(
                     1 to "2025-01-15T10:00:00Z",
                     2 to "2025-03-20T08:30:00Z",
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(
                     mode = LibrarySortMode.DATE_ADDED,
                     direction = SortDirection.DESCENDING,
                     addedAtByEditionId = addedAt,
                 )
 
-                result[0].id shouldBe 3
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(3, 2, 1)
             }
 
             @Test
             fun `null addedAt value collapses to the missing-entry sentinel`() {
-                val editions = listOf(
-                    buildEdition(id = 1),
-                    buildEdition(id = 2),
-                )
-
+                // ----- Arrange -----
                 val addedAt = mapOf<Int, String?>(
                     1 to "2025-01-15T10:00:00Z",
                     2 to null,
+                    3 to "2025-02-01T10:00:00Z",
                 )
 
+                // ----- Act -----
                 val result = editions.applyEditionSort(
                     mode = LibrarySortMode.DATE_ADDED,
                     direction = SortDirection.ASCENDING,
                     addedAtByEditionId = addedAt,
                 )
 
-                result[0].id shouldBe 1
-                result[1].id shouldBe 2
-            }
-
-            @Test
-            fun `empty addedAtByEditionId map with ASCENDING preserves input order`() {
-                val editions = listOf(buildEdition(id = 1), buildEdition(id = 2))
-
-                val result = editions.applyEditionSort(
-                    mode = LibrarySortMode.DATE_ADDED,
-                    direction = SortDirection.ASCENDING,
-                    addedAtByEditionId = emptyMap(),
-                )
-
-                result[0].id shouldBe 1
-                result[1].id shouldBe 2
+                // ----- Assert -----
+                result.map { it.id } shouldBe listOf(1, 3, 2)
             }
         }
 
         @Nested
         inner class UnchangedModes {
             @Test
-            fun `DATE_FINISHED returns list unchanged`() {
-                val editions = listOf(buildEdition(id = 1), buildEdition(id = 2))
+            fun `modes without an in-memory edition sort return the list unchanged`() {
+                // ----- Arrange -----
+                val editions = listOf(buildEdition(id = 2), buildEdition(id = 1))
+                val modes = listOf(
+                    LibrarySortMode.DATE_FINISHED,
+                    LibrarySortMode.RATING,
+                    LibrarySortMode.PROGRESS,
+                    LibrarySortMode.DEADLINE_URGENCY,
+                )
 
-                val result = editions.applyEditionSort(mode = LibrarySortMode.DATE_FINISHED)
+                // ----- Act -----
+                val results = modes.map { editions.applyEditionSort(mode = it) }
 
-                result shouldBe editions
-            }
-
-            @Test
-            fun `RATING returns list unchanged`() {
-                val editions = listOf(buildEdition(id = 1), buildEdition(id = 2))
-
-                val result = editions.applyEditionSort(mode = LibrarySortMode.RATING)
-
-                result shouldBe editions
-            }
-
-            @Test
-            fun `PROGRESS returns list unchanged`() {
-                val editions = listOf(buildEdition(id = 1), buildEdition(id = 2))
-
-                val result = editions.applyEditionSort(mode = LibrarySortMode.PROGRESS)
-
-                result shouldBe editions
-            }
-
-            @Test
-            fun `DEADLINE_URGENCY returns list unchanged`() {
-                val editions = listOf(buildEdition(id = 1), buildEdition(id = 2))
-
-                val result = editions.applyEditionSort(mode = LibrarySortMode.DEADLINE_URGENCY)
-
-                result shouldBe editions
+                // ----- Assert -----
+                results shouldBe modes.map { editions }
             }
         }
     }

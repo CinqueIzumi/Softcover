@@ -52,25 +52,6 @@ class DateStyleCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates dateStyle when flow emits a value`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = DateStyleCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            dateStyleFlow.emit(DateStyle.MONTH_DAY_YEAR)
-
-            // ----- Assert -----
-            stateFlow.value.dateStyle shouldBe DateStyle.MONTH_DAY_YEAR
-            job.cancel()
-        }
-
-        @Test
         fun `updates dateStyle to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = DateStyleCollector()
@@ -87,65 +68,6 @@ class DateStyleCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.dateStyle shouldBe DateStyle.YEAR_MONTH_DAY
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change dateStyle before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = DateStyleCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act & Assert -----
-            stateFlow.value.dateStyle shouldBe DateStyle.DAY_MONTH_YEAR
-            job.cancel()
-        }
-
-        @Test
-        fun `retains the last emitted DateStyle after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = DateStyleCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            dateStyleFlow.emit(DateStyle.MONTH_DAY_YEAR)
-            job.cancel()
-
-            // ----- Act & Assert -----
-            stateFlow.value.dateStyle shouldBe DateStyle.MONTH_DAY_YEAR
-        }
-
-        @Test
-        fun `preserves all other state fields when updating dateStyle`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isLoading = false,
-                isArrangeSheetExpanded = true,
-                dateStyle = DateStyle.DAY_MONTH_YEAR,
-            )
-            val collector = DateStyleCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            dateStyleFlow.emit(DateStyle.MONTH_DAY_YEAR)
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isArrangeSheetExpanded shouldBe true
-            stateFlow.value.dateStyle shouldBe DateStyle.MONTH_DAY_YEAR
             job.cancel()
         }
     }

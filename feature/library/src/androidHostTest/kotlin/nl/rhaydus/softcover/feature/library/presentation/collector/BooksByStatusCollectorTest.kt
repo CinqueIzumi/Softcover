@@ -144,30 +144,6 @@ class BooksByStatusCollectorTest {
         }
 
         @Test
-        fun `each status queries with its own default sort when none is persisted`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange & Act -----
-                val job = launchCollector()
-
-                // ----- Assert -----
-                verify {
-                    getSortedBooksByStatusUseCase(
-                        status = UserBookStatus.READ,
-                        mode = LibrarySortMode.DATE_FINISHED,
-                        direction = LibrarySortMode.DATE_FINISHED.defaultDirection,
-                    )
-                }
-                verify {
-                    getSortedBooksByStatusUseCase(
-                        status = UserBookStatus.WANT_TO_READ,
-                        mode = LibrarySortMode.Default,
-                        direction = LibrarySortMode.Default.defaultDirection,
-                    )
-                }
-                job.cancel()
-            }
-
-        @Test
         fun `a persisted sort applies only to its own status tab`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val job = launchCollector()

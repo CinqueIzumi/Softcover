@@ -55,18 +55,6 @@ class LibraryEmptyStateMapperTest {
         }
 
         @Test
-        fun `all tab interpolates its label into the body`() {
-            // ----- Arrange -----
-            val tab = LibraryTab.All
-
-            // ----- Act -----
-            val result = tab.toEmptyStateUiModel()
-
-            // ----- Assert -----
-            result.body.orEmpty() shouldContain tab.label
-        }
-
-        @Test
         fun `every non did not finish tab shares the same title`() {
             // ----- Arrange -----
             val tabs = listOf(

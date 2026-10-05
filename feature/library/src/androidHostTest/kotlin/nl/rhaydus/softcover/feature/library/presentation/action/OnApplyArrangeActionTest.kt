@@ -87,44 +87,10 @@ class OnApplyArrangeActionTest {
         }
 
         @Test
-        fun `resets isRearranging regardless of prior state`() = runTest {
+        fun `commits the draft sort and layout and leaves rearrange mode`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 isRearranging = true,
-                arrangeDraft = LibraryArrangeDraft(
-                    tabId = tabId,
-                    sortMode = LibrarySortMode.TITLE,
-                    sortDirection = SortDirection.ASCENDING,
-                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-                ),
-            )
-
-            coEvery {
-                setLibrarySortUseCase(
-                    tabId = any(),
-                    mode = any(),
-                    direction = any(),
-                )
-            } returns Result.success(Unit)
-
-            coEvery {
-                setLibraryGridLayoutUseCase(newLayout = any())
-            } returns Result.success(Unit)
-
-            // ----- Act -----
-            OnApplyArrangeAction().execute(
-                dependencies = stubDependencies(),
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isRearranging shouldBe false
-        }
-
-        @Test
-        fun `happy path invokes both use cases with the exact draft values`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
                 arrangeDraft = LibraryArrangeDraft(
                     tabId = tabId,
                     sortMode = LibrarySortMode.RATING,
@@ -152,6 +118,8 @@ class OnApplyArrangeActionTest {
             )
 
             // ----- Assert -----
+            stateFlow.value.isRearranging shouldBe false
+
             coVerify(exactly = 1) {
                 setLibrarySortUseCase(
                     tabId = tabId,

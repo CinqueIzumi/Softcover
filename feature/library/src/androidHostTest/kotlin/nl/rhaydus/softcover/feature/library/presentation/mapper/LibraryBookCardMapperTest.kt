@@ -260,21 +260,6 @@ class LibraryBookCardMapperTest {
         }
 
         @Test
-        fun `grid progress carries the stored progress as the bar fraction`() {
-            // ----- Arrange -----
-            val book = stubBook(
-                status = BookStatus.Reading,
-                progress = 42f,
-            )
-
-            // ----- Act -----
-            val progress = book.card(LibraryGridLayout.GRID_TWO_COLUMNS).decorations.progress
-
-            // ----- Assert -----
-            progress.shouldBeInstanceOf<BookCardProgress.Value>().fraction shouldBe 0.42f
-        }
-
-        @Test
         fun `grid progress passes out-of-range progress through raw`() {
             // ----- Arrange -----
             val book = stubBook(

@@ -96,23 +96,6 @@ class ShelfRearrangeRulesTest {
             // ----- Assert -----
             result shouldBe null
         }
-
-        @Test
-        fun `returns null for a custom list tab`() {
-            // ----- Act -----
-            val result = bookReorderStatusFor(
-                tab = LibraryTab.CustomList(
-                    listId = 1,
-                    listName = "Favourites",
-                ),
-                sortMode = LibrarySortMode.MANUAL,
-                selectionMode = false,
-                isRearranging = true,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
     }
 
     @Nested

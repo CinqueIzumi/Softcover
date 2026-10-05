@@ -54,12 +54,12 @@ class OnArrangeTitlesToggleChangedActionTest {
         }
 
         @Test
-        fun `show=false switches a titled grid to cover-only`() = runTest {
+        fun `show=false switches a titled grid to cover-only and leaves sort and tab untouched`() = runTest {
             // ----- Arrange -----
             val draft = LibraryArrangeDraft(
                 tabId = tabId,
-                sortMode = LibrarySortMode.TITLE,
-                sortDirection = SortDirection.ASCENDING,
+                sortMode = LibrarySortMode.RATING,
+                sortDirection = SortDirection.DESCENDING,
                 gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
             )
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
@@ -71,7 +71,7 @@ class OnArrangeTitlesToggleChangedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.arrangeDraft?.gridLayout shouldBe LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY
+            stateFlow.value.arrangeDraft shouldBe draft.copy(gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY)
         }
 
         @Test
@@ -114,29 +114,6 @@ class OnArrangeTitlesToggleChangedActionTest {
 
             // ----- Assert -----
             stateFlow.value.arrangeDraft?.gridLayout shouldBe LibraryGridLayout.LIST_LARGE
-        }
-
-        @Test
-        fun `leaves sortMode, sortDirection and tabId untouched`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryArrangeDraft(
-                tabId = tabId,
-                sortMode = LibrarySortMode.RATING,
-                sortDirection = SortDirection.DESCENDING,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-            stateFlow.value = LibraryUiState(arrangeDraft = draft)
-
-            // ----- Act -----
-            OnArrangeTitlesToggleChangedAction(show = false).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.arrangeDraft shouldBe draft.copy(
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY,
-            )
         }
     }
 }

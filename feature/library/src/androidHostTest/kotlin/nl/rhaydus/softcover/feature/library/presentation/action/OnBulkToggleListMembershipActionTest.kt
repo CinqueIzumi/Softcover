@@ -128,43 +128,7 @@ class OnBulkToggleListMembershipActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `NONE adds every selected book to the list`() = runTest {
-            // ----- Arrange -----
-            val first = stubBook(id = 1)
-            val second = stubBook(id = 2)
-            stateFlow.value = stateWith(
-                list = stubList(),
-                selected = listOf(first, second),
-            )
-
-            // ----- Act -----
-            OnBulkToggleListMembershipAction(
-                listId = listId,
-                currentMembership = ListMembership.NONE,
-            ).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                addBookToListUseCase(
-                    listId = listId,
-                    bookId = 1,
-                    edition = edition,
-                )
-            }
-            coVerify(exactly = 1) {
-                addBookToListUseCase(
-                    listId = listId,
-                    bookId = 2,
-                    edition = edition,
-                )
-            }
-        }
-
-        @Test
-        fun `PARTIAL adds only the books not already on the list`() = runTest {
+        fun `PARTIAL adds only the books not already on the list and releases the list afterwards`() = runTest {
             // ----- Arrange -----
             val onList = stubBook(id = 1)
             val missing = stubBook(id = 2)
@@ -197,6 +161,7 @@ class OnBulkToggleListMembershipActionTest {
                     edition = edition,
                 )
             }
+            stateFlow.value.listsBeingMutated shouldBe emptySet()
         }
 
         @Test
@@ -271,10 +236,11 @@ class OnBulkToggleListMembershipActionTest {
         @Test
         fun `an unknown list does nothing`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateWith(
+            val initialState = stateWith(
                 list = stubList(),
                 selected = listOf(stubBook(id = 1)),
             )
+            stateFlow.value = initialState
 
             // ----- Act -----
             OnBulkToggleListMembershipAction(
@@ -293,6 +259,13 @@ class OnBulkToggleListMembershipActionTest {
                     edition = any(),
                 )
             }
+            coVerify(exactly = 0) {
+                removeBookFromListUseCase(
+                    listId = any(),
+                    bookId = any(),
+                )
+            }
+            stateFlow.value shouldBe initialState
         }
 
         @Test
@@ -317,27 +290,6 @@ class OnBulkToggleListMembershipActionTest {
                     edition = any(),
                 )
             }
-            stateFlow.value.listsBeingMutated shouldBe emptySet()
-        }
-
-        @Test
-        fun `the list is no longer marked as mutating once the action finishes`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = stateWith(
-                list = stubList(),
-                selected = listOf(stubBook(id = 1)),
-            )
-
-            // ----- Act -----
-            OnBulkToggleListMembershipAction(
-                listId = listId,
-                currentMembership = ListMembership.NONE,
-            ).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.listsBeingMutated shouldBe emptySet()
         }
 

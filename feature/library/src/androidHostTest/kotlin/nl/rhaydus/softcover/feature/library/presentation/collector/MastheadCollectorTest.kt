@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,11 +80,16 @@ class MastheadCollectorTest {
         }
 
         @Test
-        fun `a visible tab absent from tabStatsByTab gets the count-shaped stand-in subtitle`() = runTest(UnconfinedTestDispatcher()) {
+        fun `zero count produces an empty message chosen by the tab type`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
+            val emptyStats = LibraryTabStats(
+                itemCount = 0,
+                totalPages = 0,
+            )
+            val tabs = listOf(readTab, wantToReadTab, currentlyReadingTab, customListTab)
             stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(LibraryTab.All),
-                tabStatsByTab = emptyMap(),
+                visibleTabs = tabs,
+                tabStatsByTab = tabs.associate { it.id to emptyStats },
             )
             val collector = MastheadCollector()
 
@@ -96,121 +102,16 @@ class MastheadCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.mastheads.getValue(LibraryTab.All.id).subtitle shouldBe MASTHEAD_SUBTITLE_STAND_IN
+            val mastheads = stateFlow.value.mastheads
+            mastheads.mapValues { it.value.subtitle } shouldBe mapOf(
+                readTab.id to "Nothing finished yet — the page is still open.",
+                wantToReadTab.id to "No titles set aside — discover one next.",
+                currentlyReadingTab.id to "No book open — pick one up.",
+                customListTab.id to "No titles yet — your story starts here.",
+            )
+            mastheads.values.none { it.isLoading } shouldBe true
             job.cancel()
         }
-
-        @Test
-        fun `zero count on the Read tab produces the finished-shelf empty message`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(readTab),
-                    tabStatsByTab = mapOf(
-                        readTab.id to LibraryTabStats(
-                            itemCount = 0,
-                            totalPages = 0,
-                        ),
-                    ),
-                )
-                val collector = MastheadCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.mastheads.getValue(readTab.id).subtitle shouldBe "Nothing finished yet — the page is still open."
-                job.cancel()
-            }
-
-        @Test
-        fun `zero count on the Want to Read tab produces the wishlist empty message`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(wantToReadTab),
-                    tabStatsByTab = mapOf(
-                        wantToReadTab.id to LibraryTabStats(
-                            itemCount = 0,
-                            totalPages = 0,
-                        ),
-                    ),
-                )
-                val collector = MastheadCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.mastheads.getValue(wantToReadTab.id).subtitle shouldBe "No titles set aside — discover one next."
-                job.cancel()
-            }
-
-        @Test
-        fun `zero count on the Currently Reading tab produces the open-book empty message`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(currentlyReadingTab),
-                    tabStatsByTab = mapOf(
-                        currentlyReadingTab.id to LibraryTabStats(
-                            itemCount = 0,
-                            totalPages = 0,
-                        ),
-                    ),
-                )
-                val collector = MastheadCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.mastheads.getValue(currentlyReadingTab.id).subtitle shouldBe "No book open — pick one up."
-                job.cancel()
-            }
-
-        @Test
-        fun `zero count on a non-status tab produces the generic empty message`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(customListTab),
-                    tabStatsByTab = mapOf(
-                        customListTab.id to LibraryTabStats(
-                            itemCount = 0,
-                            totalPages = 0,
-                        ),
-                    ),
-                )
-                val collector = MastheadCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.mastheads.getValue(customListTab.id).subtitle shouldBe "No titles yet — your story starts here."
-                job.cancel()
-            }
 
         @Test
         fun `formatted count includes the page count when totalPages is positive`() =
@@ -269,35 +170,6 @@ class MastheadCollectorTest {
             }
 
         @Test
-        fun `fallbackMasthead subtitle is the count-shaped stand-in regardless of loading state`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(readTab),
-                    tabStatsByTab = mapOf(
-                        readTab.id to LibraryTabStats(
-                            itemCount = 5,
-                            totalPages = 250,
-                        ),
-                    ),
-                    isLoading = false,
-                )
-                val collector = MastheadCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.fallbackMasthead.subtitle shouldBe MASTHEAD_SUBTITLE_STAND_IN
-                job.cancel()
-            }
-
-        @Test
         fun `only the visible tabs whose stats have not landed are loading`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
@@ -326,35 +198,6 @@ class MastheadCollectorTest {
                     readTab.id to false,
                     wantToReadTab.id to true,
                 )
-                job.cancel()
-            }
-
-        @Test
-        fun `a zero-item tab whose stats landed is not loading and shows its empty message`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(readTab),
-                    tabStatsByTab = mapOf(
-                        readTab.id to LibraryTabStats(
-                            itemCount = 0,
-                            totalPages = 0,
-                        ),
-                    ),
-                )
-                val collector = MastheadCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.mastheads.getValue(readTab.id).isLoading shouldBe false
-                stateFlow.value.mastheads.getValue(readTab.id).subtitle shouldBe "Nothing finished yet — the page is still open."
                 job.cancel()
             }
 
@@ -391,103 +234,30 @@ class MastheadCollectorTest {
         }
 
         @Test
-        fun `isLoading true sets the refreshing eyebrow and a disabled Refreshing action`() =
+        fun `the refresh action is disabled and the eyebrow changes only while loading`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 stateFlow.value = LibraryUiState(
                     visibleTabs = listOf(readTab),
-                    tabStatsByTab = mapOf(
-                        readTab.id to LibraryTabStats(
-                            itemCount = 5,
-                            totalPages = 0,
-                        ),
-                    ),
                     isLoading = true,
                 )
                 val collector = MastheadCollector()
-
-                // ----- Act -----
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
                 }
-
-                // ----- Assert -----
-                stateFlow.value.mastheads.getValue(readTab.id).eyebrow shouldBe "Refreshing your shelf…"
-                stateFlow.value.fallbackMasthead.eyebrow shouldBe "Refreshing your shelf…"
-                stateFlow.value.mastheadRefresh.label shouldBe "Refreshing…"
+                val loadingEyebrow = stateFlow.value.mastheads.getValue(readTab.id).eyebrow
                 stateFlow.value.mastheadRefresh.enabled shouldBe false
-                job.cancel()
-            }
-
-        @Test
-        fun `isLoading false sets the collection eyebrow and an enabled Refresh action`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(readTab),
-                    tabStatsByTab = mapOf(
-                        readTab.id to LibraryTabStats(
-                            itemCount = 5,
-                            totalPages = 0,
-                        ),
-                    ),
-                    isLoading = false,
-                )
-                val collector = MastheadCollector()
 
                 // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
+                stateFlow.value = stateFlow.value.copy(isLoading = false)
 
                 // ----- Assert -----
-                stateFlow.value.mastheads.getValue(readTab.id).eyebrow shouldBe "Your collection"
-                stateFlow.value.fallbackMasthead.eyebrow shouldBe "Your collection"
-                stateFlow.value.mastheadRefresh.label shouldBe "Refresh"
                 stateFlow.value.mastheadRefresh.enabled shouldBe true
+                stateFlow.value.mastheads.getValue(readTab.id).eyebrow shouldNotBe loadingEyebrow
                 job.cancel()
             }
-
-        @Test
-        fun `recomputes the tab's masthead when its stats change`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(readTab),
-                tabStatsByTab = mapOf(
-                    readTab.id to LibraryTabStats(
-                        itemCount = 0,
-                        totalPages = 0,
-                    ),
-                ),
-            )
-            val collector = MastheadCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            stateFlow.value.mastheads.getValue(readTab.id).subtitle shouldBe "Nothing finished yet — the page is still open."
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                tabStatsByTab = mapOf(
-                    readTab.id to LibraryTabStats(
-                        itemCount = 4,
-                        totalPages = 0,
-                    ),
-                ),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.mastheads.getValue(readTab.id).subtitle shouldBe "4 titles"
-            job.cancel()
-        }
     }
 }

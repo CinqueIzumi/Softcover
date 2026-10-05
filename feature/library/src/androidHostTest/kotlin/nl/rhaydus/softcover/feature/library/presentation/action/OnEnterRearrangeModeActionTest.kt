@@ -33,59 +33,23 @@ class OnEnterRearrangeModeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isRearranging to true`() = runTest {
+        fun `enters rearrange mode and leaves selection mode with the selection cleared`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isRearranging = false)
-
-            val action = OnEnterRearrangeModeAction()
+            stateFlow.value = LibraryUiState(
+                isRearranging = false,
+                selectionMode = true,
+                selectedBookIds = setOf(1, 2, 3),
+            )
 
             // ----- Act -----
-            action.execute(
+            OnEnterRearrangeModeAction().execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
             stateFlow.value.isRearranging shouldBe true
-        }
-
-        @Test
-        fun `clears selectionMode when entering rearrange mode`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                selectionMode = true,
-                selectedBookIds = setOf(1, 2, 3),
-            )
-
-            val action = OnEnterRearrangeModeAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.selectionMode shouldBe false
-        }
-
-        @Test
-        fun `clears selectedBookIds when entering rearrange mode`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                selectionMode = true,
-                selectedBookIds = setOf(1, 2, 3),
-            )
-
-            val action = OnEnterRearrangeModeAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.selectedBookIds shouldBe emptySet()
         }
     }

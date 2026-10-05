@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import org.junit.jupiter.api.Nested
@@ -44,7 +43,6 @@ class LibraryFilterChipsBuilderTest {
 
             // ----- Assert -----
             chips.ownershipChips.chips.map { it.key } shouldBe listOf("owned:true", "owned:false")
-            chips.ownershipChips.chips.map { it.label } shouldBe listOf("Owned", "Unowned")
             chips.ownershipChips["owned:true"] shouldBe LibraryFilterValue.Owned(owned = true)
             chips.ownershipChips["owned:false"] shouldBe LibraryFilterValue.Owned(owned = false)
         }
@@ -72,7 +70,6 @@ class LibraryFilterChipsBuilderTest {
             // ----- Assert -----
             chips.formatChips.chips.map { it.key } shouldBe
                 listOf("format:hardcover", "format:ebook", "format:audiobook")
-            chips.formatChips.chips.map { it.label } shouldBe listOf("hardcover", "ebook", "audiobook")
             chips.formatChips["format:hardcover"] shouldBe LibraryFilterValue.Format(value = "hardcover")
         }
 
@@ -86,7 +83,6 @@ class LibraryFilterChipsBuilderTest {
 
             // ----- Assert -----
             chips.releaseYearChips.chips.map { it.key } shouldBe listOf("releaseYear:2021", "releaseYear:2019")
-            chips.releaseYearChips.chips.map { it.label } shouldBe listOf("2021", "2019")
             chips.releaseYearChips["releaseYear:2021"] shouldBe LibraryFilterValue.ReleaseYear(year = 2021)
         }
 
@@ -100,7 +96,6 @@ class LibraryFilterChipsBuilderTest {
 
             // ----- Assert -----
             chips.readYearChips.chips.map { it.key } shouldBe listOf("readYear:2022", "readYear:2020")
-            chips.readYearChips.chips.map { it.label } shouldBe listOf("2022", "2020")
             chips.readYearChips["readYear:2022"] shouldBe LibraryFilterValue.ReadYear(year = 2022)
         }
 
@@ -196,29 +191,7 @@ class LibraryFilterChipsBuilderTest {
             // ----- Assert -----
             val allChips = chips.ownershipChips.chips + chips.formatChips.chips + chips.releaseYearChips.chips +
                 chips.readYearChips.chips + chips.tagChips.chips + chips.ratingChips.chips
-            allChips.map { it.tone } shouldBe allChips.map { ChipTone.Tonal }
             allChips.map { it.selected } shouldBe allChips.map { false }
-        }
-    }
-
-    @Nested
-    inner class RoundedRatingThreshold {
-        @Test
-        fun `integer threshold collapses to a whole number`() {
-            // ----- Act -----
-            val result = roundedRatingThreshold(threshold = 4.0)
-
-            // ----- Assert -----
-            result shouldBe "4"
-        }
-
-        @Test
-        fun `fractional threshold keeps the fractional digit`() {
-            // ----- Act -----
-            val result = roundedRatingThreshold(threshold = 3.5)
-
-            // ----- Assert -----
-            result shouldBe "3.5"
         }
     }
 }

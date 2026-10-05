@@ -268,25 +268,6 @@ class LibraryDisplayDerivationTest {
         }
 
         @Test
-        fun `empty filters short-circuits chip filter and returns the search-filtered list`() {
-            // ----- Arrange -----
-            val book = buildBook(
-                id = 1,
-                rating = 1.0,
-            )
-
-            // ----- Act -----
-            val result = computeDisplayBooks(
-                raw = listOf(book),
-                query = "",
-                filters = LibraryFilters(),
-            )
-
-            // ----- Assert -----
-            result shouldBe listOf(book)
-        }
-
-        @Test
         fun `non-empty filters keep only books matching all active facets`() {
             // ----- Arrange -----
             val ebookEdition = buildEdition(
@@ -355,85 +336,6 @@ class LibraryDisplayDerivationTest {
 
             // ----- Assert -----
             result shouldBe listOf(matchingBook)
-        }
-
-        @Test
-        fun `owned filter keeps only books with at least one owned edition`() {
-            // ----- Arrange -----
-            val ownedBook = buildBook(
-                id = 1,
-                editions = listOf(
-                    buildEdition(
-                        id = 10,
-                        owned = true,
-                    ),
-                ),
-            )
-            val unownedBook = buildBook(
-                id = 2,
-                editions = listOf(
-                    buildEdition(
-                        id = 11,
-                        owned = false,
-                    ),
-                ),
-            )
-
-            // ----- Act -----
-            val result = computeDisplayBooks(
-                raw = listOf(ownedBook, unownedBook),
-                query = "",
-                filters = LibraryFilters(owned = true),
-            )
-
-            // ----- Assert -----
-            result shouldBe listOf(ownedBook)
-        }
-
-        @Test
-        fun `ratingMin filter keeps only books meeting or exceeding the threshold`() {
-            // ----- Arrange -----
-            val highRated = buildBook(
-                id = 1,
-                rating = 4.5,
-            )
-            val lowRated = buildBook(
-                id = 2,
-                rating = 2.0,
-            )
-
-            // ----- Act -----
-            val result = computeDisplayBooks(
-                raw = listOf(highRated, lowRated),
-                query = "",
-                filters = LibraryFilters(ratingMin = 4.0),
-            )
-
-            // ----- Assert -----
-            result shouldBe listOf(highRated)
-        }
-
-        @Test
-        fun `releaseYears filter keeps only books whose release year is in the set`() {
-            // ----- Arrange -----
-            val book2020 = buildBook(
-                id = 1,
-                releaseYear = 2020,
-            )
-            val book2019 = buildBook(
-                id = 2,
-                releaseYear = 2019,
-            )
-
-            // ----- Act -----
-            val result = computeDisplayBooks(
-                raw = listOf(book2020, book2019),
-                query = "",
-                filters = LibraryFilters(releaseYears = setOf(2020)),
-            )
-
-            // ----- Assert -----
-            result shouldBe listOf(book2020)
         }
     }
 
@@ -549,37 +451,6 @@ class LibraryDisplayDerivationTest {
         }
 
         @Test
-        fun `TITLE ASCENDING sort orders editions alphabetically`() {
-            // ----- Arrange -----
-            val editionC = buildEdition(
-                id = 1,
-                title = "Cherry",
-            )
-            val editionA = buildEdition(
-                id = 2,
-                title = "Apple",
-            )
-            val editionB = buildEdition(
-                id = 3,
-                title = "Banana",
-            )
-
-            // ----- Act -----
-            val result = computeDisplayEditions(
-                raw = listOf(editionC, editionA, editionB),
-                query = "",
-                mode = LibrarySortMode.TITLE,
-                direction = SortDirection.ASCENDING,
-                addedAtByEditionId = emptyMap(),
-                filters = LibraryFilters(),
-                bookByBookId = emptyMap(),
-            )
-
-            // ----- Assert -----
-            result.map { it.title } shouldBe listOf("Apple", "Banana", "Cherry")
-        }
-
-        @Test
         fun `TITLE DESCENDING sort orders editions in reverse alphabetical order`() {
             // ----- Arrange -----
             val editionC = buildEdition(
@@ -608,30 +479,6 @@ class LibraryDisplayDerivationTest {
 
             // ----- Assert -----
             result.map { it.title } shouldBe listOf("Cherry", "Banana", "Apple")
-        }
-
-        @Test
-        fun `empty filters short-circuits chip filter and returns sorted list`() {
-            // ----- Arrange -----
-            val edition = buildEdition(
-                id = 1,
-                title = "Solo Edition",
-                owned = false,
-            )
-
-            // ----- Act -----
-            val result = computeDisplayEditions(
-                raw = listOf(edition),
-                query = "",
-                mode = LibrarySortMode.TITLE,
-                direction = SortDirection.ASCENDING,
-                addedAtByEditionId = emptyMap(),
-                filters = LibraryFilters(),
-                bookByBookId = emptyMap(),
-            )
-
-            // ----- Assert -----
-            result shouldBe listOf(edition)
         }
 
         @Test
@@ -731,77 +578,6 @@ class LibraryDisplayDerivationTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-        }
-
-        @Test
-        fun `ratingMin filter resolves rating via the parent book, defaulting unresolved editions to 0`() {
-            // ----- Arrange -----
-            val highRatedBook = buildBook(
-                id = 100,
-                rating = 4.5,
-            )
-            val highRatedEdition = buildEdition(
-                id = 1,
-                bookId = 100,
-                title = "High Rated",
-            )
-            val orphanEdition = buildEdition(
-                id = 2,
-                bookId = 999,
-                title = "Orphan",
-            )
-
-            // ----- Act -----
-            val result = computeDisplayEditions(
-                raw = listOf(highRatedEdition, orphanEdition),
-                query = "",
-                mode = LibrarySortMode.TITLE,
-                direction = SortDirection.ASCENDING,
-                addedAtByEditionId = emptyMap(),
-                filters = LibraryFilters(ratingMin = 4.0),
-                bookByBookId = mapOf(100 to highRatedBook),
-            )
-
-            // ----- Assert -----
-            result shouldBe listOf(highRatedEdition)
-        }
-
-        @Test
-        fun `releaseYears filter prefers the parent book's release year over the edition's own`() {
-            // ----- Arrange -----
-            val book2020 = buildBook(
-                id = 100,
-                releaseYear = 2020,
-            )
-            val editionUnderBook = buildEdition(
-                id = 1,
-                bookId = 100,
-                title = "Under Book",
-                releaseYear = 2019,
-            )
-            val orphanEdition2020 = buildEdition(
-                id = 2,
-                bookId = 999,
-                title = "Orphan",
-                releaseYear = 2020,
-            )
-
-            // ----- Act -----
-            val result = computeDisplayEditions(
-                raw = listOf(editionUnderBook, orphanEdition2020),
-                query = "",
-                mode = LibrarySortMode.TITLE,
-                direction = SortDirection.ASCENDING,
-                addedAtByEditionId = emptyMap(),
-                filters = LibraryFilters(releaseYears = setOf(2020)),
-                bookByBookId = mapOf(100 to book2020),
-            )
-
-            // ----- Assert -----
-            // Both match (editionUnderBook resolves 2020 via its book despite its own releaseYear
-            // being 2019; orphanEdition2020 has no book so falls back to its own releaseYear).
-            // TITLE ASCENDING sorts "Orphan" before "Under Book".
-            result shouldBe listOf(orphanEdition2020, editionUnderBook)
         }
     }
 

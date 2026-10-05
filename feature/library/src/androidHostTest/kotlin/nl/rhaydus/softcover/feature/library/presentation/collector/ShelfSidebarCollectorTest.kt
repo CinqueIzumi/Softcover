@@ -104,63 +104,10 @@ class ShelfSidebarCollectorTest {
             val allRows = sidebar.sections.flatMap { it.rows }
             allRows.single { it.selected }.key shouldBe READING_TAB.id
         }
-
-        @Test
-        fun `every row is long-pressable`() {
-            // ----- Act -----
-            val sidebar = shelfSidebarFor(
-                visibleTabs = listOf(ALL_TAB, READING_TAB, LIST_TAB),
-                selectedTabId = ALL_TAB.id,
-                shelvesSidebarLabel = SHELVES_LABEL,
-                listsSidebarLabel = LISTS_LABEL,
-            )
-
-            // ----- Assert -----
-            sidebar.sections.flatMap { it.rows }.all { it.longPressable } shouldBe true
-        }
-
-        @Test
-        fun `no custom lists means no lists section at all`() {
-            // ----- Act -----
-            val sidebar = shelfSidebarFor(
-                visibleTabs = listOf(ALL_TAB),
-                selectedTabId = ALL_TAB.id,
-                shelvesSidebarLabel = SHELVES_LABEL,
-                listsSidebarLabel = LISTS_LABEL,
-            )
-
-            // ----- Assert -----
-            sidebar.sections.none { it.label == LISTS_LABEL } shouldBe true
-        }
     }
 
     @Nested
     inner class OnLaunch {
-        @Test
-        fun `sets shelfSidebar from the current visibleTabs and selectedTabId on launch`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                stateFlow.value = LibraryUiState(
-                    visibleTabs = listOf(ALL_TAB, LIST_TAB),
-                    selectedTabId = LIST_TAB.id,
-                )
-                val collector = ShelfSidebarCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.shelfSidebar.sections.size shouldBe 2
-                stateFlow.value.shelfSidebar.sections.flatMap { it.rows }
-                    .single { it.selected }.key shouldBe LIST_TAB.id
-                job.cancel()
-            }
-
         @Test
         fun `a change to visibleTabs recomputes shelfSidebar`() = runTest(testDispatcher) {
             // ----- Arrange -----

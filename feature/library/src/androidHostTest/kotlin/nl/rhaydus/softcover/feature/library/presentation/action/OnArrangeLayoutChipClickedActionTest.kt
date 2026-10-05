@@ -55,12 +55,12 @@ class OnArrangeLayoutChipClickedActionTest {
         }
 
         @Test
-        fun `switching chip preserves titles shown`() = runTest {
+        fun `switching chip preserves titles shown and leaves sort and tab untouched`() = runTest {
             // ----- Arrange -----
             val draft = LibraryArrangeDraft(
                 tabId = tabId,
-                sortMode = LibrarySortMode.TITLE,
-                sortDirection = SortDirection.ASCENDING,
+                sortMode = LibrarySortMode.RATING,
+                sortDirection = SortDirection.DESCENDING,
                 gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS,
             )
             stateFlow.value = LibraryUiState(arrangeDraft = draft)
@@ -72,7 +72,7 @@ class OnArrangeLayoutChipClickedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.arrangeDraft?.gridLayout shouldBe LibraryGridLayout.GRID_TWO_COLUMNS
+            stateFlow.value.arrangeDraft shouldBe draft.copy(gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS)
         }
 
         @Test
@@ -115,27 +115,6 @@ class OnArrangeLayoutChipClickedActionTest {
 
             // ----- Assert -----
             stateFlow.value.arrangeDraft?.gridLayout shouldBe LibraryGridLayout.LIST_LARGE
-        }
-
-        @Test
-        fun `leaves sortMode, sortDirection and tabId untouched`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryArrangeDraft(
-                tabId = tabId,
-                sortMode = LibrarySortMode.RATING,
-                sortDirection = SortDirection.DESCENDING,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-            stateFlow.value = LibraryUiState(arrangeDraft = draft)
-
-            // ----- Act -----
-            OnArrangeLayoutChipClickedAction(chip = LibraryLayoutChip.GRID_THREE).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.arrangeDraft shouldBe draft.copy(gridLayout = LibraryGridLayout.GRID_THREE_COLUMNS)
         }
     }
 }

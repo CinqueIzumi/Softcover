@@ -68,18 +68,6 @@ class LibraryFilterValueTest {
             // ----- Assert -----
             result.formats shouldBe setOf("ebook")
         }
-
-        @Test
-        fun `removes format when already present`() {
-            // ----- Arrange -----
-            val filters = LibraryFilters(formats = setOf("ebook"))
-
-            // ----- Act -----
-            val result = filters.toggle(value = LibraryFilterValue.Format("ebook"))
-
-            // ----- Assert -----
-            result.formats shouldBe emptySet()
-        }
     }
 
     @Nested
@@ -94,18 +82,6 @@ class LibraryFilterValueTest {
 
             // ----- Assert -----
             result.releaseYears shouldBe setOf(2021)
-        }
-
-        @Test
-        fun `removes year when already present`() {
-            // ----- Arrange -----
-            val filters = LibraryFilters(releaseYears = setOf(2021))
-
-            // ----- Act -----
-            val result = filters.toggle(value = LibraryFilterValue.ReleaseYear(2021))
-
-            // ----- Assert -----
-            result.releaseYears shouldBe emptySet()
         }
     }
 

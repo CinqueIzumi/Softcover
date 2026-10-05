@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.chip.ChipTone
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -40,10 +39,7 @@ class LibraryArrangeChipsBuilderTest {
 
             // ----- Assert -----
             result.layoutChips.chips.map { it.key } shouldBe listOf("layout:GRID_TWO", "layout:GRID_THREE", "layout:LIST")
-            result.layoutChips.chips.map { it.label } shouldBe listOf("Grid · 2", "Grid · 3", "List")
-            result.layoutChips.chips.map { it.tone } shouldBe listOf(ChipTone.Choice, ChipTone.Choice, ChipTone.Choice)
             result.layoutChips.chips.map { it.selected } shouldBe listOf(false, true, false)
-            result.sortHeader shouldBe SectionHeaderUiModel.Label(eyebrow = "Sort by · Currently Reading")
         }
 
         @Test
@@ -94,7 +90,6 @@ class LibraryArrangeChipsBuilderTest {
 
             // ----- Assert -----
             val titleChip = result.sortChips.chips.single { it.key == "sort:TITLE" }
-            titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
             titleChip.trailing shouldBe ChipTrailing.Icon(
                 icon = SoftcoverIcon.ArrowDropUp,
@@ -123,7 +118,6 @@ class LibraryArrangeChipsBuilderTest {
 
             // ----- Assert -----
             val titleChip = result.sortChips.chips.single { it.key == "sort:TITLE" }
-            titleChip.tone shouldBe ChipTone.Choice
             titleChip.selected shouldBe true
             titleChip.trailing shouldBe ChipTrailing.Icon(
                 icon = SoftcoverIcon.ArrowDropDown,
@@ -152,7 +146,6 @@ class LibraryArrangeChipsBuilderTest {
 
             // ----- Assert -----
             val manualChip = result.sortChips.chips.single { it.key == "sort:MANUAL" }
-            manualChip.tone shouldBe ChipTone.Choice
             manualChip.selected shouldBe true
             manualChip.trailing shouldBe null
         }
@@ -178,7 +171,6 @@ class LibraryArrangeChipsBuilderTest {
 
             // ----- Assert -----
             val authorChip = result.sortChips.chips.single { it.key == "sort:AUTHOR" }
-            authorChip.tone shouldBe ChipTone.Choice
             authorChip.selected shouldBe false
             authorChip.trailing shouldBe null
         }
@@ -215,7 +207,6 @@ class LibraryArrangeChipsBuilderTest {
 
             // ----- Assert -----
             result.sortChips.chips.first().key shouldBe "sort:ORDER"
-            result.sortChips.chips.first().tone shouldBe ChipTone.Choice
             result.sortChips.chips.first().selected shouldBe true
         }
 

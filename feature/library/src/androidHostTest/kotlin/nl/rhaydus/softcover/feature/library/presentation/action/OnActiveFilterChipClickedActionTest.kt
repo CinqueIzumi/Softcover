@@ -42,29 +42,7 @@ class OnActiveFilterChipClickedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `the clear-all key clears the tab's filters, same as OnClearFiltersAction`() = runTest {
-            // ----- Arrange -----
-            val activeFilters = LibraryFilters(formats = setOf("ebook"))
-
-            stateFlow.value = LibraryUiState(filtersByTab = mapOf(tabId to activeFilters))
-
-            val action = OnActiveFilterChipClickedAction(
-                tabId = tabId,
-                key = LIBRARY_CLEAR_ALL_CHIP_KEY,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab.containsKey(tabId) shouldBe false
-        }
-
-        @Test
-        fun `the clear-all key does not affect other tabs' filters`() = runTest {
+        fun `the clear-all key clears the tab's filters and leaves other tabs alone`() = runTest {
             // ----- Arrange -----
             val otherFilters = LibraryFilters(releaseYears = setOf(2021))
 
@@ -87,11 +65,11 @@ class OnActiveFilterChipClickedActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.filtersByTab[otherTabId] shouldBe otherFilters
+            stateFlow.value.filtersByTab shouldBe mapOf(otherTabId to otherFilters)
         }
 
         @Test
-        fun `a known chip key toggles the resolved filter value off, same as OnToggleFilterValueAction`() = runTest {
+        fun `a known chip key toggles the resolved filter value off`() = runTest {
             // ----- Arrange -----
             val value = LibraryFilterValue.Format(value = "ebook")
             val chip = ChipUiModel(
@@ -134,38 +112,6 @@ class OnActiveFilterChipClickedActionTest {
             val action = OnActiveFilterChipClickedAction(
                 tabId = tabId,
                 key = "format:unknown",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab[tabId] shouldBe existing
-        }
-
-        @Test
-        fun `a key present in another tab's active filter chips but not this tab's is a no-op`() = runTest {
-            // ----- Arrange -----
-            val value = LibraryFilterValue.Format(value = "ebook")
-            val chip = ChipUiModel(
-                key = "format:ebook",
-                label = "ebook",
-            )
-            val existing = LibraryFilters(formats = setOf("ebook"))
-
-            stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(tabId to existing),
-                activeFilterChipsByTab = mapOf(
-                    otherTabId to LibraryActiveFilterChips(chips = listOf(chip to value).toChipSet()),
-                ),
-            )
-
-            val action = OnActiveFilterChipClickedAction(
-                tabId = tabId,
-                key = "format:ebook",
             )
 
             // ----- Act -----

@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** TP-0…TP-4 committed. SL-3b blocked on F34.
-- **Next:** TP-5 (`feature:library`, `steps/tp-test-prune.md` § Procedure), then TP-6…TP-8 alike: split >10k-line modules by package, no approval stops; reviewer plus an unused-import grep on each diff; commit each.
+- **State:** TP-0…TP-5 committed. SL-3b blocked on F34.
+- **Next:** TP-6 (`feature:explore`, `steps/tp-test-prune.md` § Procedure), then TP-7…TP-8 back to back in the same session (user, 2026-10-06: no approval stops, no handoff between TP steps unless context fills): split >10k-line modules by package; reviewer plus an unused-import grep on each diff; commit each.
 - **Open questions:** 19 deleted pure-`setState` action tests — user may want some back. `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
-- **Verification:** `styleCheck` and TP-1…TP-4 module tests passed (TP-4: 524 tests, 0 failures); reviewer found no lost coverage in TP-4.
+- **Verification:** TP-1…TP-5 module tests passed (TP-5: 539 tests, 0 failures); TP-5 reviewer's two lost-coverage findings restored. TP-5 gated per module (`detektAndroidHostTest`, root `ktlintCheck` clean in `feature/library`) because other TP agents were mid-edit; run a full `styleCheck` after TP-8.
 - **Uncommitted:** none.
 
 ## Local verification

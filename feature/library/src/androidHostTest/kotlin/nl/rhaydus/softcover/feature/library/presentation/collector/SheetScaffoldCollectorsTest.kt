@@ -236,25 +236,6 @@ class SheetScaffoldCollectorsTest {
         }
 
         @Test
-        fun `re-maps when the in-flight flag clears`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            launchCollector(BulkRemoveSheetCollector())
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                bulkActionInProgress = true,
-            )
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(bulkActionInProgress = false)
-
-            // ----- Assert -----
-            stateFlow.value.bulkRemoveSheet shouldBe bulkRemoveSheetScaffoldFor(
-                bookCount = 1,
-                inProgress = false,
-            )
-        }
-
-        @Test
         fun `a close request flags the sheet without changing its content`() = runTest(testDispatcher) {
             // ----- Arrange -----
             launchCollector(BulkRemoveSheetCollector())
@@ -353,20 +334,6 @@ class SheetScaffoldCollectorsTest {
                 tabStatsByTab = tabStatsByTab,
             )
             stateFlow.value.shelvesSheetGroup.rows.map { it.selected } shouldBe listOf(false, true)
-        }
-
-        @Test
-        fun `the group dismisses the sheet itself when a row is selected`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            launchCollector(ShelvesSheetCollector())
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(LibraryTab.All),
-                selectedTabId = LibraryTab.All.id,
-            )
-
-            // ----- Assert -----
         }
     }
 }

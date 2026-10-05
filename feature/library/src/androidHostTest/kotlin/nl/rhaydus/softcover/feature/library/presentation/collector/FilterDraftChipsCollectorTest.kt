@@ -51,25 +51,6 @@ class FilterDraftChipsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `filterSheetSelection stays null while the sheet is closed`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val collector = FilterDraftChipsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState()
-
-            // ----- Assert -----
-            stateFlow.value.filterSheetSelection shouldBe null
-            job.cancel()
-        }
-
-        @Test
         fun `filterSheet footer follows the selection's result count and clear-all state`() =
             runTest(testDispatcher) {
                 // ----- Arrange -----
@@ -121,39 +102,6 @@ class FilterDraftChipsCollectorTest {
             stateFlow.value.filterSheet shouldBe seeded
             job.cancel()
         }
-
-        @Test
-        fun `opening the sheet with a draft populates filterSheetSelection for the matching tab`() =
-            runTest(testDispatcher) {
-                // ----- Arrange -----
-                val chips = LibraryFilterChips(
-                    formatChips = listOf(
-                        ChipUiModel(
-                            key = "format:ebook",
-                            label = "ebook",
-                        ) to LibraryFilterValue.Format(value = "ebook"),
-                    ).toChipSet(),
-                )
-                val collector = FilterDraftChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = LibraryUiState(
-                    filterDraft = LibraryFilterDraft(tabId = "all"),
-                    filterChipsByTab = mapOf("all" to chips),
-                    booksByTab = mapOf("all" to List(2) { mockk() }),
-                )
-
-                // ----- Assert -----
-                stateFlow.value.filterSheetSelection?.formatChips?.map { it.key } shouldBe listOf("format:ebook")
-                stateFlow.value.filterSheetSelection?.resultCount shouldBe 2
-                job.cancel()
-            }
 
         @Test
         fun `editing the draft's tagSearch recomputes which tag chips remain`() = runTest(testDispatcher) {

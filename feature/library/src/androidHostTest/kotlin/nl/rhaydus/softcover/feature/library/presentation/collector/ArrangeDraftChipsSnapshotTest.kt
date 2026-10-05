@@ -1,9 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.chip.ChipTone
-import nl.rhaydus.softcover.core.component.chip.ChipTrailing
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -35,39 +32,6 @@ class ArrangeDraftChipsSnapshotTest {
 
             // ----- Assert -----
             result shouldBe LibraryArrangeChips.Empty
-        }
-
-        @Test
-        fun `compute delegates to buildLibraryArrangeChips once the draft is present`() {
-            // ----- Arrange -----
-            val draft = LibraryArrangeDraft(
-                tabId = readingTab.id,
-                sortMode = LibrarySortMode.TITLE,
-                sortDirection = SortDirection.ASCENDING,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-            val snapshot = ArrangeDraftChipsSnapshot(
-                draft = draft,
-                visibleTabs = listOf(readingTab),
-                customLists = emptyList(),
-                booksByTab = emptyMap(),
-                deadlines = emptyMap(),
-            )
-
-            // ----- Act -----
-            val result = snapshot.compute()
-
-            // ----- Assert -----
-            val layoutChip = result.layoutChips.chips.first { it.key == "layout:GRID_TWO" }
-            layoutChip.tone shouldBe ChipTone.Choice
-            layoutChip.selected shouldBe true
-            val titleChip = result.sortChips.chips.first { it.key == "sort:TITLE" }
-            titleChip.tone shouldBe ChipTone.Choice
-            titleChip.selected shouldBe true
-            titleChip.trailing shouldBe ChipTrailing.Icon(
-                icon = SoftcoverIcon.ArrowDropUp,
-                description = "Ascending",
-            )
         }
 
         @Test

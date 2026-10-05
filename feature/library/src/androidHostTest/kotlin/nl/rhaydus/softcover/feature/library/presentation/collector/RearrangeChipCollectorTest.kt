@@ -48,30 +48,6 @@ class RearrangeChipCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `rearrangeChipByTab gets an entry for a tab that qualifies for rearranging`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val collector = RearrangeChipCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(readingTab),
-                sortModeByTab = mapOf(readingTab.id to LibrarySortMode.MANUAL),
-                booksByTab = mapOf(readingTab.id to List(2) { mockk() }),
-                displayBooksByTab = mapOf(readingTab.id to List(2) { mockk() }),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.rearrangeChipFor(readingTab.id)?.label shouldBe "Reorder"
-            job.cancel()
-        }
-
-        @Test
         fun `a tab present in displayBooksByTab but absent from booksByTab gets no chip`() = runTest(testDispatcher) {
             // ----- Arrange -----
             val collector = RearrangeChipCollector()
@@ -86,29 +62,6 @@ class RearrangeChipCollectorTest {
             stateFlow.value = LibraryUiState(
                 visibleTabs = listOf(readingTab),
                 sortModeByTab = mapOf(readingTab.id to LibrarySortMode.MANUAL),
-                displayBooksByTab = mapOf(readingTab.id to List(2) { mockk() }),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.rearrangeChipFor(readingTab.id) shouldBe null
-            job.cancel()
-        }
-
-        @Test
-        fun `a tab that does not qualify has no entry in rearrangeChipByTab`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val collector = RearrangeChipCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(readingTab),
-                sortModeByTab = mapOf(readingTab.id to LibrarySortMode.TITLE),
                 displayBooksByTab = mapOf(readingTab.id to List(2) { mockk() }),
             )
 
@@ -150,29 +103,6 @@ class RearrangeChipCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.rearrangeChipFor(customListTab.id)?.label shouldBe "Reorder"
-            job.cancel()
-        }
-
-        @Test
-        fun `isRearranging replaces every visible tab's chip label with Done`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val collector = RearrangeChipCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(LibraryTab.All, readingTab),
-                isRearranging = true,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.rearrangeChipFor(LibraryTab.All.id)?.label shouldBe "Done"
-            stateFlow.value.rearrangeChipFor(readingTab.id)?.label shouldBe "Done"
             job.cancel()
         }
 

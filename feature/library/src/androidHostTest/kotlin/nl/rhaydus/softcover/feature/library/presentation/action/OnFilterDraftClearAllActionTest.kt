@@ -52,7 +52,7 @@ class OnFilterDraftClearAllActionTest {
         }
 
         @Test
-        fun `resets the draft's facet selections to empty`() = runTest {
+        fun `resets the draft's facet selections and keeps its tag search query`() = runTest {
             // ----- Arrange -----
             val draft = LibraryFilterDraft(
                 tabId = tabId,
@@ -61,25 +61,6 @@ class OnFilterDraftClearAllActionTest {
                     owned = true,
                     ratingMin = 4.0,
                 ),
-            )
-            stateFlow.value = LibraryUiState(filterDraft = draft)
-
-            // ----- Act -----
-            OnFilterDraftClearAllAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft?.filters shouldBe LibraryFilters()
-        }
-
-        @Test
-        fun `leaves the tag search query untouched`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(
-                tabId = tabId,
-                filters = LibraryFilters(formats = setOf("Hardcover")),
                 tagSearch = "kotlin",
             )
             stateFlow.value = LibraryUiState(filterDraft = draft)
@@ -91,45 +72,7 @@ class OnFilterDraftClearAllActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.filterDraft?.tagSearch shouldBe "kotlin"
-        }
-
-        @Test
-        fun `leaves tabId untouched`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(
-                tabId = tabId,
-                filters = LibraryFilters(formats = setOf("Hardcover")),
-            )
-            stateFlow.value = LibraryUiState(filterDraft = draft)
-
-            // ----- Act -----
-            OnFilterDraftClearAllAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft?.tabId shouldBe tabId
-        }
-
-        @Test
-        fun `is idempotent when the draft's filters are already empty`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(
-                tabId = tabId,
-                filters = LibraryFilters(),
-            )
-            stateFlow.value = LibraryUiState(filterDraft = draft)
-
-            // ----- Act -----
-            OnFilterDraftClearAllAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft shouldBe draft
+            stateFlow.value.filterDraft shouldBe draft.copy(filters = LibraryFilters())
         }
     }
 }

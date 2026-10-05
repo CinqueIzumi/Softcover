@@ -17,41 +17,42 @@ class LibraryStandInsTest {
     inner class StandInCards {
         @Test
         fun `the cards of a layout have distinct keys`() {
-            // ----- Act & Assert -----
-            LibraryGridLayout.entries.forEach { layout ->
-                val keys = layout.standInCards().map { it.key }
+            // ----- Arrange -----
+            val keysPerLayout = LibraryGridLayout.entries.map { layout -> layout.standInCards().map { it.key } }
 
-                keys.distinct() shouldBe keys
+            // ----- Act -----
+            val distinctKeysPerLayout = keysPerLayout.map { it.distinct() }
+
+            // ----- Assert -----
+            distinctKeysPerLayout shouldBe keysPerLayout
+        }
+
+        @Test
+        fun `every stand-in is a loading card whose cover, where it has one, is loading with no source`() {
+            // ----- Arrange -----
+            val layouts = LibraryGridLayout.entries.filterNot { it == LibraryGridLayout.LIST_COMPACT }
+
+            // ----- Act -----
+            val cardsPerLayout = layouts.map { it.standInCards() }
+
+            // ----- Assert -----
+            cardsPerLayout.flatten().forEach { card ->
+                card.isLoading shouldBe true
+                val cover = card.standInCover().shouldNotBeNull()
+
+                cover.isLoading shouldBe true
+                cover.source.shouldBeNull()
             }
         }
 
         @Test
-        fun `every stand-in is a loading card, which the card renders inert`() {
-            // ----- Act & Assert -----
-            LibraryGridLayout.entries.forEach { layout ->
-                layout.standInCards().forEach { card ->
-                    card.isLoading shouldBe true
-                }
-            }
-        }
+        fun `the compact list stand-ins are loading coverless rows`() {
+            // ----- Act -----
+            val cards = LibraryGridLayout.LIST_COMPACT.standInCards()
 
-        @Test
-        fun `every covered stand-in card's cover is loading and has no source`() {
-            // ----- Act & Assert -----
-            LibraryGridLayout.entries.filterNot { it == LibraryGridLayout.LIST_COMPACT }.forEach { layout ->
-                layout.standInCards().forEach { card ->
-                    val cover = card.standInCover().shouldNotBeNull()
-
-                    cover.isLoading shouldBe true
-                    cover.source.shouldBeNull()
-                }
-            }
-        }
-
-        @Test
-        fun `the compact list stand-ins are coverless rows`() {
-            // ----- Act & Assert -----
-            LibraryGridLayout.LIST_COMPACT.standInCards().forEach { card ->
+            // ----- Assert -----
+            cards.forEach { card ->
+                card.isLoading shouldBe true
                 card.standInCover().shouldBeNull()
             }
         }
@@ -68,9 +69,12 @@ class LibraryStandInsTest {
                 LibraryGridLayout.LIST_LARGE to BookCardVariant.Row::class,
             )
 
-            // ----- Act & Assert -----
-            LibraryGridLayout.entries.forEach { layout ->
-                layout.standInCards().forEach { card ->
+            // ----- Act -----
+            val cardsPerLayout = LibraryGridLayout.entries.associateWith { it.standInCards() }
+
+            // ----- Assert -----
+            cardsPerLayout.forEach { (layout, cards) ->
+                cards.forEach { card ->
                     card.variant::class shouldBe expected.getValue(layout)
                 }
             }
@@ -78,11 +82,15 @@ class LibraryStandInsTest {
 
         @Test
         fun `list layouts get rows of the matching size`() {
-            // ----- Act & Assert -----
-            LibraryGridLayout.LIST_COMPACT.standInCards().forEach { card ->
+            // ----- Act -----
+            val compactCards = LibraryGridLayout.LIST_COMPACT.standInCards()
+            val largeCards = LibraryGridLayout.LIST_LARGE.standInCards()
+
+            // ----- Assert -----
+            compactCards.forEach { card ->
                 card.variant.shouldBeInstanceOf<BookCardVariant.Row>().size shouldBe BookCardVariant.Row.Size.Compact
             }
-            LibraryGridLayout.LIST_LARGE.standInCards().forEach { card ->
+            largeCards.forEach { card ->
                 card.variant.shouldBeInstanceOf<BookCardVariant.Row>().size shouldBe BookCardVariant.Row.Size.Large
             }
         }

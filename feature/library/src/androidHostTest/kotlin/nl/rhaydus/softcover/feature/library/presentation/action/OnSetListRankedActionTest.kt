@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.library.presentation.action
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -72,9 +71,15 @@ class OnSetListRankedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `ranked=true happy path — sort switched to ORDER before ranked use case, no snackbar`() =
+        fun `ranked=true switches the sort to ORDER, writes ranked and nudges the open draft, with no snackbar`() =
             runTest {
                 // ----- Arrange -----
+                val openDraft = LibraryArrangeDraft(
+                    tabId = tabId,
+                    sortMode = LibrarySortMode.DATE_ADDED,
+                    sortDirection = SortDirection.DESCENDING,
+                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+                )
                 stateFlow.value = LibraryUiState(
                     customLists = listOf(
                         BookList(
@@ -84,6 +89,7 @@ class OnSetListRankedActionTest {
                             books = emptyList(),
                         ),
                     ),
+                    arrangeDraft = openDraft,
                 )
 
                 coEvery {
@@ -105,28 +111,41 @@ class OnSetListRankedActionTest {
                 )
 
                 // ----- Assert -----
-                coVerifyOrder {
+                coVerify(exactly = 1) {
                     setLibrarySortUseCase(
                         tabId = tabId,
                         mode = LibrarySortMode.ORDER,
                         direction = SortDirection.ASCENDING,
                     )
+                }
 
+                coVerify(exactly = 1) {
                     setListRankedUseCase(
                         listId = listId,
                         ranked = true,
                     )
                 }
 
+                stateFlow.value.arrangeDraft shouldBe openDraft.copy(
+                    sortMode = LibrarySortMode.ORDER,
+                    sortDirection = SortDirection.ASCENDING,
+                )
+
                 verify(exactly = 0) { SnackBarManager.showSnackbar(title = any()) }
             }
 
         @Test
-        fun `ranked=true failure path — rolls back to previous sort mode and direction, snackbar names enable manual ordering and list`() =
+        fun `ranked=true failure rolls the sort and the open draft back and names the list in the snackbar`() =
             runTest {
                 // ----- Arrange -----
                 val previousMode = LibrarySortMode.DATE_ADDED
                 val previousDirection = SortDirection.DESCENDING
+                val openDraft = LibraryArrangeDraft(
+                    tabId = tabId,
+                    sortMode = previousMode,
+                    sortDirection = previousDirection,
+                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+                )
 
                 stateFlow.value = LibraryUiState(
                     sortModeByTab = mapOf(tabId to previousMode),
@@ -139,6 +158,7 @@ class OnSetListRankedActionTest {
                             books = emptyList(),
                         ),
                     ),
+                    arrangeDraft = openDraft,
                 )
 
                 coEvery {
@@ -172,6 +192,8 @@ class OnSetListRankedActionTest {
                     )
                 }
 
+                stateFlow.value.arrangeDraft shouldBe openDraft
+
                 verify {
                     SnackBarManager.showSnackbar(
                         title = match { title ->
@@ -182,8 +204,14 @@ class OnSetListRankedActionTest {
             }
 
         @Test
-        fun `ranked=false happy path — no sort switch, only the ranked use case called`() = runTest {
+        fun `ranked=false writes only the ranked flag and leaves the sort and the open draft alone`() = runTest {
             // ----- Arrange -----
+            val openDraft = LibraryArrangeDraft(
+                tabId = tabId,
+                sortMode = LibrarySortMode.DATE_ADDED,
+                sortDirection = SortDirection.DESCENDING,
+                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
+            )
             stateFlow.value = LibraryUiState(
                 customLists = listOf(
                     BookList(
@@ -193,6 +221,7 @@ class OnSetListRankedActionTest {
                         books = emptyList(),
                     ),
                 ),
+                arrangeDraft = openDraft,
             )
 
             coEvery {
@@ -220,6 +249,8 @@ class OnSetListRankedActionTest {
                     ranked = false,
                 )
             }
+
+            stateFlow.value.arrangeDraft shouldBe openDraft
 
             coVerify(exactly = 0) {
                 setLibrarySortUseCase(
@@ -321,53 +352,6 @@ class OnSetListRankedActionTest {
         }
 
         @Test
-        fun `ranked=true with an open arrangeDraft for this tab nudges the draft's sort to ORDER`() = runTest {
-            // ----- Arrange -----
-            val openDraft = LibraryArrangeDraft(
-                tabId = tabId,
-                sortMode = LibrarySortMode.DATE_ADDED,
-                sortDirection = SortDirection.DESCENDING,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-
-            stateFlow.value = LibraryUiState(
-                customLists = listOf(
-                    BookList(
-                        id = listId,
-                        name = listName,
-                        slug = "favourites",
-                        books = emptyList(),
-                    ),
-                ),
-                arrangeDraft = openDraft,
-            )
-
-            coEvery {
-                setListRankedUseCase(
-                    listId = any(),
-                    ranked = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnSetListRankedAction(
-                listId = listId,
-                ranked = true,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = stubDependencies(),
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.arrangeDraft shouldBe openDraft.copy(
-                sortMode = LibrarySortMode.ORDER,
-                sortDirection = SortDirection.ASCENDING,
-            )
-        }
-
-        @Test
         fun `ranked=true with an open arrangeDraft for a different tab leaves the draft untouched`() = runTest {
             // ----- Arrange -----
             val otherTabDraft = LibraryArrangeDraft(
@@ -410,160 +394,5 @@ class OnSetListRankedActionTest {
             // ----- Assert -----
             stateFlow.value.arrangeDraft shouldBe otherTabDraft
         }
-
-        @Test
-        fun `ranked=false does not touch an open arrangeDraft for this tab`() = runTest {
-            // ----- Arrange -----
-            val openDraft = LibraryArrangeDraft(
-                tabId = tabId,
-                sortMode = LibrarySortMode.DATE_ADDED,
-                sortDirection = SortDirection.DESCENDING,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-
-            stateFlow.value = LibraryUiState(
-                customLists = listOf(
-                    BookList(
-                        id = listId,
-                        name = listName,
-                        slug = "favourites",
-                        books = emptyList(),
-                    ),
-                ),
-                arrangeDraft = openDraft,
-            )
-
-            coEvery {
-                setListRankedUseCase(
-                    listId = any(),
-                    ranked = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnSetListRankedAction(
-                listId = listId,
-                ranked = false,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = stubDependencies(),
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.arrangeDraft shouldBe openDraft
-        }
-
-        @Test
-        fun `ranked=true failure path with an open arrangeDraft for this tab rolls the draft back to the previous sort`() =
-            runTest {
-                // ----- Arrange -----
-                val previousMode = LibrarySortMode.DATE_ADDED
-                val previousDirection = SortDirection.DESCENDING
-
-                val openDraft = LibraryArrangeDraft(
-                    tabId = tabId,
-                    sortMode = LibrarySortMode.DATE_ADDED,
-                    sortDirection = SortDirection.DESCENDING,
-                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-                )
-
-                stateFlow.value = LibraryUiState(
-                    sortModeByTab = mapOf(tabId to previousMode),
-                    sortDirectionByTab = mapOf(tabId to previousDirection),
-                    customLists = listOf(
-                        BookList(
-                            id = listId,
-                            name = listName,
-                            slug = "favourites",
-                            books = emptyList(),
-                        ),
-                    ),
-                    arrangeDraft = openDraft,
-                )
-
-                coEvery {
-                    setListRankedUseCase(
-                        listId = any(),
-                        ranked = any(),
-                    )
-                } returns Result.failure(RuntimeException("server error"))
-
-                every {
-                    SnackBarManager.showSnackbar(title = any())
-                } returns Unit
-
-                val action = OnSetListRankedAction(
-                    listId = listId,
-                    ranked = true,
-                )
-
-                // ----- Act -----
-                action.execute(
-                    dependencies = stubDependencies(),
-                    scope = scope,
-                )
-
-                // ----- Assert -----
-                stateFlow.value.arrangeDraft shouldBe openDraft.copy(
-                    sortMode = previousMode,
-                    sortDirection = previousDirection,
-                )
-            }
-
-        @Test
-        fun `ranked=true failure path with an open arrangeDraft for a different tab leaves the draft untouched`() =
-            runTest {
-                // ----- Arrange -----
-                val previousMode = LibrarySortMode.DATE_ADDED
-                val previousDirection = SortDirection.DESCENDING
-
-                val otherTabDraft = LibraryArrangeDraft(
-                    tabId = "list-99",
-                    sortMode = LibrarySortMode.DATE_ADDED,
-                    sortDirection = SortDirection.DESCENDING,
-                    gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-                )
-
-                stateFlow.value = LibraryUiState(
-                    sortModeByTab = mapOf(tabId to previousMode),
-                    sortDirectionByTab = mapOf(tabId to previousDirection),
-                    customLists = listOf(
-                        BookList(
-                            id = listId,
-                            name = listName,
-                            slug = "favourites",
-                            books = emptyList(),
-                        ),
-                    ),
-                    arrangeDraft = otherTabDraft,
-                )
-
-                coEvery {
-                    setListRankedUseCase(
-                        listId = any(),
-                        ranked = any(),
-                    )
-                } returns Result.failure(RuntimeException("server error"))
-
-                every {
-                    SnackBarManager.showSnackbar(title = any())
-                } returns Unit
-
-                val action = OnSetListRankedAction(
-                    listId = listId,
-                    ranked = true,
-                )
-
-                // ----- Act -----
-                action.execute(
-                    dependencies = stubDependencies(),
-                    scope = scope,
-                )
-
-                // ----- Assert -----
-                stateFlow.value.arrangeDraft shouldBe otherTabDraft
-            }
     }
 }

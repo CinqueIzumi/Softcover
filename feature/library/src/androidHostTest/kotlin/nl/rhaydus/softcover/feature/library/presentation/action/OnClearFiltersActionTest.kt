@@ -37,63 +37,25 @@ class OnClearFiltersActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `removes the tab's entry from filtersByTab`() = runTest {
+        fun `removes the tab's entry and leaves other tabs' filters alone`() = runTest {
             // ----- Arrange -----
-            val activeFilters = LibraryFilters(formats = setOf("ebook"))
-
-            stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(tabId to activeFilters),
-            )
-            val action = OnClearFiltersAction(tabId = tabId)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab.containsKey(tabId) shouldBe false
-        }
-
-        @Test
-        fun `does not affect other tabs' filters`() = runTest {
-            // ----- Arrange -----
-            val activeFilters = LibraryFilters(formats = setOf("ebook"))
             val otherFilters = LibraryFilters(releaseYears = setOf(2021))
 
             stateFlow.value = LibraryUiState(
                 filtersByTab = mapOf(
-                    tabId to activeFilters,
+                    tabId to LibraryFilters(formats = setOf("ebook")),
                     otherTabId to otherFilters,
                 ),
             )
-            val action = OnClearFiltersAction(tabId = tabId)
 
             // ----- Act -----
-            action.execute(
+            OnClearFiltersAction(tabId = tabId).execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
-            stateFlow.value.filtersByTab[otherTabId] shouldBe otherFilters
-        }
-
-        @Test
-        fun `is a no-op when the tab has no filters set`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(filtersByTab = emptyMap())
-            val action = OnClearFiltersAction(tabId = tabId)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab shouldBe emptyMap()
+            stateFlow.value.filtersByTab shouldBe mapOf(otherTabId to otherFilters)
         }
     }
 }

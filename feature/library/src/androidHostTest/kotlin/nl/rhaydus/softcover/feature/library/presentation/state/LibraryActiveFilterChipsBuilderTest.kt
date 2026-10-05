@@ -1,10 +1,9 @@
 package nl.rhaydus.softcover.feature.library.presentation.state
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.chip.ChipTone
+import io.kotest.matchers.types.shouldBeInstanceOf
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
-import nl.rhaydus.softcover.core.component.chip.ChipUiModel
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.Tag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -13,10 +12,6 @@ class LibraryActiveFilterChipsBuilderTest {
     private val tagFiction = Tag(
         id = 1,
         name = "Fiction",
-    )
-    private val tagScifi = Tag(
-        id = 2,
-        name = "Sci-Fi",
     )
 
     @Nested
@@ -49,7 +44,7 @@ class LibraryActiveFilterChipsBuilderTest {
         }
 
         @Test
-        fun `more than one active filter adds a Tonal clearAll chip with the reserved key`() {
+        fun `more than one active filter adds a clearAll chip with the reserved key`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
                 formats = setOf("ebook"),
@@ -60,11 +55,7 @@ class LibraryActiveFilterChipsBuilderTest {
             val result = buildLibraryActiveFilterChips(filters = filters)
 
             // ----- Assert -----
-            result.clearAll shouldBe ChipUiModel(
-                key = LIBRARY_CLEAR_ALL_CHIP_KEY,
-                label = "Clear all",
-                tone = ChipTone.Tonal,
-            )
+            result.clearAll.shouldNotBeNull().key shouldBe LIBRARY_CLEAR_ALL_CHIP_KEY
         }
 
         @Test
@@ -91,20 +82,6 @@ class LibraryActiveFilterChipsBuilderTest {
                 "owned:true",
                 "rating:4.0",
             )
-        }
-
-        @Test
-        fun `builds one tag chip per tag labelled with the tag name`() {
-            // ----- Arrange -----
-            val filters = LibraryFilters(tags = setOf(tagFiction, tagScifi))
-
-            // ----- Act -----
-            val result = buildLibraryActiveFilterChips(filters = filters)
-
-            // ----- Assert -----
-            result.chips.chips.map { it.key }.toSet() shouldBe setOf("tag:1", "tag:2")
-            result.chips["tag:1"] shouldBe LibraryFilterValue.Tag(tag = tagFiction)
-            result.chips["tag:2"] shouldBe LibraryFilterValue.Tag(tag = tagScifi)
         }
 
         @Test
@@ -169,7 +146,7 @@ class LibraryActiveFilterChipsBuilderTest {
         }
 
         @Test
-        fun `every chip uses a Container tone with a trailing close icon naming the filter it removes`() {
+        fun `every chip's trailing close action names the filter it removes`() {
             // ----- Arrange -----
             val filters = LibraryFilters(
                 tags = setOf(tagFiction),
@@ -181,11 +158,8 @@ class LibraryActiveFilterChipsBuilderTest {
 
             // ----- Assert -----
             result.chips.chips.forEach { chip ->
-                chip.tone shouldBe ChipTone.Container
-                chip.trailing shouldBe ChipTrailing.Icon(
-                    icon = SoftcoverIcon.Close,
-                    description = "Remove filter ${chip.label}",
-                )
+                chip.trailing.shouldBeInstanceOf<ChipTrailing.Icon>().description shouldBe
+                    "Remove filter ${chip.label}"
             }
         }
 

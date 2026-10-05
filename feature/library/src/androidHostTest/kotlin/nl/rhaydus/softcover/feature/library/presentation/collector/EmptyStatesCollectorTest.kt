@@ -22,18 +22,6 @@ class EmptyStatesCollectorTest {
     @Nested
     inner class EmptyStatesFor {
         @Test
-        fun `no tabs yields an empty map`() {
-            // ----- Arrange -----
-            val tabs = emptyList<LibraryTab>()
-
-            // ----- Act -----
-            val result = emptyStatesFor(visibleTabs = tabs)
-
-            // ----- Assert -----
-            result shouldBe emptyMap()
-        }
-
-        @Test
         fun `yields one entry per tab keyed by tab id`() {
             // ----- Arrange -----
             val dnf = LibraryTab.Status.of(UserBookStatus.DID_NOT_FINISH)

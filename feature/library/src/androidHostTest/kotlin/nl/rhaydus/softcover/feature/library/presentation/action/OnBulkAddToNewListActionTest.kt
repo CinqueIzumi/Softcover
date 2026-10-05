@@ -111,7 +111,7 @@ class OnBulkAddToNewListActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `empty selection — reopens the sheet without any use case calls`() = runTest {
+        fun `empty selection reopens the sheet without any use case calls or snackbar`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 selectedBookIds = emptySet(),
@@ -139,36 +139,13 @@ class OnBulkAddToNewListActionTest {
                     edition = any(),
                 )
             }
-        }
-
-        @Test
-        fun `empty selection — shows no snackbar`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = emptySet(),
-                booksByTab = emptyMap(),
-            )
-
-            val action = OnBulkAddToNewListAction(
-                listId = listId,
-                listName = listName,
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             verify(exactly = 0) {
                 SnackBarManager.showSnackbar(title = any())
             }
         }
 
         @Test
-        fun `non-empty selection with resolvable editions — adds each book with the correct arguments`() = runTest {
+        fun `adds each selected book to a list missing from customLists, reopens the sheet and shows no snackbar`() = runTest {
             // ----- Arrange -----
             val firstBook = buildBook(id = 1)
             val secondBook = buildBook(id = 2)
@@ -212,79 +189,16 @@ class OnBulkAddToNewListActionTest {
                     edition = secondBook.defaultEdition.shouldNotBeNull(),
                 )
             }
-        }
-
-        @Test
-        fun `non-empty selection with resolvable editions — reopens the sheet and shows no snackbar`() = runTest {
-            // ----- Arrange -----
-            val book = buildBook(id = 1)
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
-            )
-
-            coEvery {
-                addBookToListUseCase(
-                    listId = any(),
-                    bookId = any(),
-                    edition = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnBulkAddToNewListAction(
-                listId = listId,
-                listName = listName,
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isBulkAddToListSheetShown shouldBe true
             verify(exactly = 0) {
                 SnackBarManager.showSnackbar(title = any())
             }
+
+            stateFlow.value.isBulkAddToListSheetShown shouldBe true
+            stateFlow.value.listsBeingMutated shouldBe emptySet()
         }
 
         @Test
-        fun `non-empty selection with resolvable editions — clears the list from listsBeingMutated`() = runTest {
-            // ----- Arrange -----
-            val book = buildBook(id = 1)
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
-            )
-
-            coEvery {
-                addBookToListUseCase(
-                    listId = any(),
-                    bookId = any(),
-                    edition = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnBulkAddToNewListAction(
-                listId = listId,
-                listName = listName,
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            (listId in stateFlow.value.listsBeingMutated) shouldBe false
-        }
-
-        @Test
-        fun `book with no edition is skipped and never reaches the use case`() = runTest {
+        fun `a book with no edition never reaches the use case and counts as a failure`() = runTest {
             // ----- Arrange -----
             val editionlessBook = buildBook(
                 id = 1,
@@ -315,33 +229,6 @@ class OnBulkAddToNewListActionTest {
                     edition = any(),
                 )
             }
-        }
-
-        @Test
-        fun `book with no edition counts as a failure and shows the failure snackbar`() = runTest {
-            // ----- Arrange -----
-            val editionlessBook = buildBook(
-                id = 1,
-                edition = null,
-            )
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(editionlessBook)),
-            )
-
-            val action = OnBulkAddToNewListAction(
-                listId = listId,
-                listName = listName,
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             verify(exactly = 1) {
                 SnackBarManager.showSnackbar(
                     title = match { title -> title.contains(listName) },
@@ -384,83 +271,6 @@ class OnBulkAddToNewListActionTest {
                     title = match { title -> title.contains(listName) },
                 )
             }
-        }
-
-        @Test
-        fun `all adds succeed with no missing editions — no snackbar is shown`() = runTest {
-            // ----- Arrange -----
-            val firstBook = buildBook(id = 1)
-            val secondBook = buildBook(id = 2)
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1, 2),
-                booksByTab = mapOf(tabKey to listOf(firstBook, secondBook)),
-            )
-
-            coEvery {
-                addBookToListUseCase(
-                    listId = any(),
-                    bookId = any(),
-                    edition = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnBulkAddToNewListAction(
-                listId = listId,
-                listName = listName,
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            verify(exactly = 0) {
-                SnackBarManager.showSnackbar(title = any())
-            }
-        }
-
-        @Test
-        fun `empty customLists does not block adding books or reopening the sheet`() = runTest {
-            // ----- Arrange -----
-            val book = buildBook(id = 1)
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(book)),
-                customLists = emptyList(),
-            )
-
-            coEvery {
-                addBookToListUseCase(
-                    listId = any(),
-                    bookId = any(),
-                    edition = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnBulkAddToNewListAction(
-                listId = listId,
-                listName = listName,
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                addBookToListUseCase(
-                    listId = listId,
-                    bookId = book.id,
-                    edition = book.defaultEdition.shouldNotBeNull(),
-                )
-            }
-            stateFlow.value.isBulkAddToListSheetShown shouldBe true
         }
     }
 }

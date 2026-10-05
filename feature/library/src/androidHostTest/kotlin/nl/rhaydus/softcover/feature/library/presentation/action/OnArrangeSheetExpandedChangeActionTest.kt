@@ -39,58 +39,6 @@ class OnArrangeSheetExpandedChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isArrangeSheetExpanded to true when expanded is true`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isArrangeSheetExpanded = false)
-            val action = OnArrangeSheetExpandedChangeAction(expanded = true)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isArrangeSheetExpanded shouldBe true
-        }
-
-        @Test
-        fun `sets isArrangeSheetExpanded to false when expanded is false`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isArrangeSheetExpanded = true)
-            val action = OnArrangeSheetExpandedChangeAction(expanded = false)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isArrangeSheetExpanded shouldBe false
-        }
-
-        @Test
-        fun `preserves other state fields when updating isArrangeSheetExpanded`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isLoading = false,
-                isArrangeSheetExpanded = false,
-            )
-            val action = OnArrangeSheetExpandedChangeAction(expanded = true)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isArrangeSheetExpanded shouldBe true
-        }
-
-        @Test
         fun `opening seeds arrangeDraft from the selected tab's committed sort and layout`() = runTest {
             // ----- Arrange -----
             val selectedTabId = LibraryTab.CustomList.idFor(listId = 42)
@@ -110,6 +58,7 @@ class OnArrangeSheetExpandedChangeActionTest {
             )
 
             // ----- Assert -----
+            stateFlow.value.isArrangeSheetExpanded shouldBe true
             stateFlow.value.arrangeDraft shouldBe LibraryArrangeDraft(
                 tabId = selectedTabId,
                 sortMode = LibrarySortMode.TITLE,
@@ -139,6 +88,7 @@ class OnArrangeSheetExpandedChangeActionTest {
             )
 
             // ----- Assert -----
+            stateFlow.value.isArrangeSheetExpanded shouldBe false
             stateFlow.value.arrangeDraft.shouldBeNull()
         }
     }

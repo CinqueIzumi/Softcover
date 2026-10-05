@@ -33,35 +33,29 @@ class OnTabSelectedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `updates selectedTabId to the new tab`() = runTest {
+        fun `switches tab and collapses selection mode and rearranging`() = runTest {
             // ----- Arrange -----
-            val action = OnTabSelectedAction(tabId = "want-to-read")
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = setOf(1, 2),
+                isRearranging = true,
+                isBulkRemoveSheetShown = true,
+                listsBeingMutated = setOf(5),
+            )
 
             // ----- Act -----
-            action.execute(
+            OnTabSelectedAction(tabId = "want-to-read").execute(
                 dependencies = dependencies,
                 scope = scope,
             )
 
             // ----- Assert -----
             stateFlow.value.selectedTabId shouldBe "want-to-read"
-        }
-
-        @Test
-        fun `clears isRearranging when switching tabs`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(isRearranging = true)
-
-            val action = OnTabSelectedAction(tabId = "read")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
+            stateFlow.value.selectionMode shouldBe false
+            stateFlow.value.selectedBookIds shouldBe emptySet()
             stateFlow.value.isRearranging shouldBe false
+            stateFlow.value.isBulkRemoveSheetShown shouldBe false
+            stateFlow.value.listsBeingMutated shouldBe emptySet()
         }
     }
 }

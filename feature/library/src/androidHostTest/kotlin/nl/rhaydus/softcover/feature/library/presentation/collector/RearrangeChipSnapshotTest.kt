@@ -1,9 +1,6 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.chip.ChipLeading
-import nl.rhaydus.softcover.core.component.chip.ChipTone
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
@@ -170,49 +167,6 @@ class RearrangeChipSnapshotTest {
 
             // ----- Assert -----
             chipByTab.keys shouldBe setOf(LibraryTab.All.id, dnfTab.id, customListTab.id)
-        }
-
-        @Test
-        fun `isRearranging chip is labelled Done and selected`() {
-            // ----- Arrange -----
-            val snapshot = RearrangeChipSnapshot(
-                visibleTabs = listOf(readingTab),
-                sortModeByTab = mapOf(readingTab.id to LibrarySortMode.MANUAL),
-                displayBookCountByTab = mapOf(readingTab.id to 2),
-                displayEditionCountByTab = emptyMap(),
-                rankedCustomListIds = emptySet(),
-                isRearranging = true,
-            )
-
-            // ----- Act -----
-            val chip = snapshot.compute().getValue(readingTab.id)
-
-            // ----- Assert -----
-            chip.label shouldBe "Done"
-            chip.tone shouldBe ChipTone.Tonal
-            chip.selected shouldBe true
-            chip.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.DragHandle)
-        }
-
-        @Test
-        fun `idle rearrange chip is labelled Reorder and not selected`() {
-            // ----- Arrange -----
-            val snapshot = RearrangeChipSnapshot(
-                visibleTabs = listOf(readingTab),
-                sortModeByTab = mapOf(readingTab.id to LibrarySortMode.MANUAL),
-                displayBookCountByTab = mapOf(readingTab.id to 2),
-                displayEditionCountByTab = emptyMap(),
-                rankedCustomListIds = emptySet(),
-                isRearranging = false,
-            )
-
-            // ----- Act -----
-            val chip = snapshot.compute().getValue(readingTab.id)
-
-            // ----- Assert -----
-            chip.label shouldBe "Reorder"
-            chip.tone shouldBe ChipTone.Tonal
-            chip.selected shouldBe false
         }
 
         @Test

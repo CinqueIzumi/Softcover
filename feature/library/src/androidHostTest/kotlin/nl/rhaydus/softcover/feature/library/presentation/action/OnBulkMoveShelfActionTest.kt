@@ -1,11 +1,13 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -92,95 +94,42 @@ class OnBulkMoveShelfActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `null explicitBookIds — invokes use case for each selected book`() = runTest {
+        fun `null explicitBookIds moves only the selected books and then leaves selection mode`() = runTest {
             // ----- Arrange -----
             val selectedBook = buildBook(id = 1)
+            val unselectedBook = buildBook(id = 2)
             stateFlow.value = LibraryUiState(
+                selectionMode = true,
                 selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(selectedBook)),
+                booksByTab = mapOf(tabKey to listOf(selectedBook, unselectedBook)),
+                isBulkMoveMenuExpanded = true,
             )
 
             coEvery {
                 markBookAsReadUseCase(book = selectedBook)
             } returns Result.success(ShelfMutationOutcome.Applied)
 
-            val action = OnBulkMoveShelfAction(
+            // ----- Act -----
+            OnBulkMoveShelfAction(
                 status = UserBookStatus.READ,
                 explicitBookIds = null,
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
+            ).execute(
+                dependencies = stubDependencies(),
                 scope = scope,
             )
 
             // ----- Assert -----
             coVerify(exactly = 1) { markBookAsReadUseCase(book = selectedBook) }
-        }
-
-        @Test
-        fun `null explicitBookIds — does not invoke use case for books outside the selection`() = runTest {
-            // ----- Arrange -----
-            val selectedBook = buildBook(id = 1)
-            val unselectedBook = buildBook(id = 2)
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1),
-                booksByTab = mapOf(tabKey to listOf(selectedBook, unselectedBook)),
-            )
-
-            coEvery {
-                markBookAsReadUseCase(book = selectedBook)
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnBulkMoveShelfAction(
-                status = UserBookStatus.READ,
-                explicitBookIds = null,
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             coVerify(exactly = 0) { markBookAsReadUseCase(book = unselectedBook) }
+
+            stateFlow.value.selectionMode shouldBe false
+            stateFlow.value.selectedBookIds shouldBe emptySet()
+            stateFlow.value.bulkActionInProgress shouldBe false
+            stateFlow.value.isBulkMoveMenuExpanded shouldBe false
         }
 
         @Test
-        fun `non-null explicitBookIds — invokes use case for the explicit book`() = runTest {
-            // ----- Arrange -----
-            val explicitBook = buildBook(id = 99)
-            stateFlow.value = LibraryUiState(
-                selectedBookIds = setOf(1, 2),
-                booksByTab = mapOf(tabKey to listOf(buildBook(id = 1), buildBook(id = 2), explicitBook)),
-            )
-
-            coEvery {
-                markBookAsReadUseCase(book = explicitBook)
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnBulkMoveShelfAction(
-                status = UserBookStatus.READ,
-                explicitBookIds = setOf(99),
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { markBookAsReadUseCase(book = explicitBook) }
-        }
-
-        @Test
-        fun `non-null explicitBookIds — does not invoke use case for the currently selected books`() = runTest {
+        fun `non-null explicitBookIds moves only the explicit book, not the current selection`() = runTest {
             // ----- Arrange -----
             val selectedBook1 = buildBook(id = 1)
             val selectedBook2 = buildBook(id = 2)
@@ -194,21 +143,126 @@ class OnBulkMoveShelfActionTest {
                 markBookAsReadUseCase(book = explicitBook)
             } returns Result.success(ShelfMutationOutcome.Applied)
 
-            val action = OnBulkMoveShelfAction(
+            // ----- Act -----
+            OnBulkMoveShelfAction(
                 status = UserBookStatus.READ,
                 explicitBookIds = setOf(99),
-            )
-            val dependencies = stubDependencies()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
+            ).execute(
+                dependencies = stubDependencies(),
                 scope = scope,
             )
 
             // ----- Assert -----
+            coVerify(exactly = 1) { markBookAsReadUseCase(book = explicitBook) }
             coVerify(exactly = 0) { markBookAsReadUseCase(book = selectedBook1) }
             coVerify(exactly = 0) { markBookAsReadUseCase(book = selectedBook2) }
+        }
+
+        @Test
+        fun `CURRENTLY_READING routes to the reading use case`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+            )
+
+            coEvery {
+                markBookAsReadingUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.CURRENTLY_READING).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { markBookAsReadingUseCase(book = book) }
+            coVerify(exactly = 0) { markBookAsReadUseCase(book = any()) }
+            coVerify(exactly = 0) { markBookAsWantToReadUseCase(book = any()) }
+        }
+
+        @Test
+        fun `WANT_TO_READ routes to the want-to-read use case`() = runTest {
+            // ----- Arrange -----
+            val book = buildBook(id = 1)
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = setOf(1),
+                booksByTab = mapOf(tabKey to listOf(book)),
+            )
+
+            coEvery {
+                markBookAsWantToReadUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.WANT_TO_READ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { markBookAsWantToReadUseCase(book = book) }
+            coVerify(exactly = 0) { markBookAsReadUseCase(book = any()) }
+            coVerify(exactly = 0) { markBookAsReadingUseCase(book = any()) }
+        }
+
+        @Test
+        fun `a failed move still moves the other books, shows a snackbar and ends the bulk action`() = runTest {
+            // ----- Arrange -----
+            val failingBook = buildBook(id = 1)
+            val okBook = buildBook(id = 2)
+            stateFlow.value = LibraryUiState(
+                selectionMode = true,
+                selectedBookIds = setOf(1, 2),
+                booksByTab = mapOf(tabKey to listOf(failingBook, okBook)),
+            )
+
+            coEvery {
+                markBookAsReadUseCase(book = failingBook)
+            } returns Result.failure(RuntimeException("boom"))
+            coEvery {
+                markBookAsReadUseCase(book = okBook)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+            every {
+                SnackBarManager.showSnackbar(title = any())
+            } returns mockk(relaxed = true)
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.READ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { markBookAsReadUseCase(book = okBook) }
+            verify(exactly = 1) {
+                SnackBarManager.showSnackbar(title = "Couldn't move 1 book — try again.")
+            }
+
+            stateFlow.value.selectionMode shouldBe false
+            stateFlow.value.bulkActionInProgress shouldBe false
+        }
+
+        @Test
+        fun `no books resolved closes the move menu without starting progress`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                selectedBookIds = emptySet(),
+                isBulkMoveMenuExpanded = true,
+            )
+
+            // ----- Act -----
+            OnBulkMoveShelfAction(status = UserBookStatus.READ).execute(
+                dependencies = stubDependencies(),
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isBulkMoveMenuExpanded shouldBe false
+            stateFlow.value.bulkActionInProgress shouldBe false
+            coVerify(exactly = 0) { markBookAsReadUseCase(book = any()) }
         }
     }
 }

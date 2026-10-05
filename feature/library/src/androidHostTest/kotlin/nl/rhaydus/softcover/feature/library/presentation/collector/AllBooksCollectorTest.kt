@@ -274,22 +274,6 @@ class AllBooksCollectorTest {
             }
 
         @Test
-        fun `queries with the default sort of the All tab when none is persisted`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange & Act -----
-                val job = launchCollector()
-
-                // ----- Assert -----
-                verify {
-                    getSortedAllUserBooksUseCase(
-                        mode = LibrarySortMode.Default,
-                        direction = LibrarySortMode.Default.defaultDirection,
-                    )
-                }
-                job.cancel()
-            }
-
-        @Test
         fun `re-queries when the persisted All tab sort changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val job = launchCollector()

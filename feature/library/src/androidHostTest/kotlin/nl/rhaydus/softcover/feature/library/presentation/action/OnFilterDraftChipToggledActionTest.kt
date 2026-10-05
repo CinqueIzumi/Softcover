@@ -26,18 +26,11 @@ class OnFilterDraftChipToggledActionTest {
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     private val tabId = "list-10"
-    private val otherTabId = "list-99"
     private val formatKey = "format:Hardcover"
     private val formatValue = LibraryFilterValue.Format(value = "Hardcover")
     private val formatChip = ChipUiModel(
         key = formatKey,
         label = "Hardcover",
-    )
-    private val ownedKey = "owned:true"
-    private val ownedValue = LibraryFilterValue.Owned(owned = true)
-    private val ownedChip = ChipUiModel(
-        key = ownedKey,
-        label = "Owned",
     )
 
     @BeforeEach
@@ -143,89 +136,6 @@ class OnFilterDraftChipToggledActionTest {
 
             // ----- Assert -----
             stateFlow.value.filterDraft?.filters?.formats shouldBe emptySet()
-        }
-
-        @Test
-        fun `toggling a single-select facet value on then off clears it back to null`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(
-                tabId = tabId,
-                filters = LibraryFilters(),
-            )
-            stateFlow.value = LibraryUiState(
-                filterDraft = draft,
-                filterChipsByTab = mapOf(
-                    tabId to LibraryFilterChips(ownershipChips = listOf(ownedChip to ownedValue).toChipSet()),
-                ),
-            )
-
-            // ----- Act -----
-            OnFilterDraftChipToggledAction(key = ownedKey).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft?.filters?.owned shouldBe true
-
-            // ----- Act -----
-            OnFilterDraftChipToggledAction(key = ownedKey).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft?.filters?.owned shouldBe null
-        }
-
-        @Test
-        fun `leaves tagSearch and tabId untouched`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(
-                tabId = tabId,
-                filters = LibraryFilters(),
-                tagSearch = "kotlin",
-            )
-            stateFlow.value = LibraryUiState(
-                filterDraft = draft,
-                filterChipsByTab = mapOf(
-                    tabId to LibraryFilterChips(formatChips = listOf(formatChip to formatValue).toChipSet()),
-                ),
-            )
-
-            // ----- Act -----
-            OnFilterDraftChipToggledAction(key = formatKey).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft?.tabId shouldBe tabId
-            stateFlow.value.filterDraft?.tagSearch shouldBe "kotlin"
-        }
-
-        @Test
-        fun `a key present in another tab's chips but not the draft's tab is a no-op`() = runTest {
-            // ----- Arrange -----
-            val draft = LibraryFilterDraft(
-                tabId = tabId,
-                filters = LibraryFilters(),
-            )
-            stateFlow.value = LibraryUiState(
-                filterDraft = draft,
-                filterChipsByTab = mapOf(
-                    otherTabId to LibraryFilterChips(formatChips = listOf(formatChip to formatValue).toChipSet()),
-                ),
-            )
-
-            // ----- Act -----
-            OnFilterDraftChipToggledAction(key = formatKey).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterDraft shouldBe draft
         }
     }
 }

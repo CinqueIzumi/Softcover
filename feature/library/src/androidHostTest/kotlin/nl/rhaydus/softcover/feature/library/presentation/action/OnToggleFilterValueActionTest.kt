@@ -5,7 +5,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryFilterValue
@@ -39,9 +38,11 @@ class OnToggleFilterValueActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `adds filter value when tab has no filters yet`() = runTest {
+        fun `adds filter value when tab has no filters yet and leaves other tabs alone`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = LibraryUiState(filtersByTab = emptyMap())
+            val otherFilters = LibraryFilters(releaseYears = setOf(2020))
+
+            stateFlow.value = LibraryUiState(filtersByTab = mapOf(otherTabId to otherFilters))
 
             val action = OnToggleFilterValueAction(
                 tabId = tabId,
@@ -56,6 +57,7 @@ class OnToggleFilterValueActionTest {
 
             // ----- Assert -----
             stateFlow.value.filtersByTab[tabId]?.formats shouldBe setOf("ebook")
+            stateFlow.value.filtersByTab[otherTabId] shouldBe otherFilters
         }
 
         @Test
@@ -91,76 +93,6 @@ class OnToggleFilterValueActionTest {
             val action = OnToggleFilterValueAction(
                 tabId = tabId,
                 value = LibraryFilterValue.Format("ebook"),
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab.containsKey(tabId) shouldBe false
-        }
-
-        @Test
-        fun `sets tab entry when resulting filters are non-empty after toggle`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(filtersByTab = emptyMap())
-
-            val tag = Tag(
-                id = 1,
-                name = "Fiction",
-            )
-            val action = OnToggleFilterValueAction(
-                tabId = tabId,
-                value = LibraryFilterValue.Tag(tag),
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab.containsKey(tabId) shouldBe true
-        }
-
-        @Test
-        fun `does not touch other tabs filters`() = runTest {
-            // ----- Arrange -----
-            val otherFilters = LibraryFilters(releaseYears = setOf(2020))
-
-            stateFlow.value = LibraryUiState(
-                filtersByTab = mapOf(otherTabId to otherFilters),
-            )
-
-            val action = OnToggleFilterValueAction(
-                tabId = tabId,
-                value = LibraryFilterValue.Format("ebook"),
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filtersByTab[otherTabId] shouldBe otherFilters
-        }
-
-        @Test
-        fun `toggling RatingMin to same value clears it and removes tab entry when only filter`() = runTest {
-            // ----- Arrange -----
-            val existing = LibraryFilters(ratingMin = 4.0)
-
-            stateFlow.value = LibraryUiState(filtersByTab = mapOf(tabId to existing))
-
-            val action = OnToggleFilterValueAction(
-                tabId = tabId,
-                value = LibraryFilterValue.RatingMin(4.0),
             )
 
             // ----- Act -----

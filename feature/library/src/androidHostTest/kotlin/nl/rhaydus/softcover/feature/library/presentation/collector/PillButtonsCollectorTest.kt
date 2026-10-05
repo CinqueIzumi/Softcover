@@ -43,47 +43,6 @@ class PillButtonsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `a tab with filters gets an active filter pill`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = PillButtonsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(
-                visibleTabs = listOf(readingTab),
-                filtersByTab = mapOf(readingTab.id to LibraryFilters(formats = setOf("Paperback"))),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.filterPillByTab[readingTab.id] shouldBe filterPillButton(active = true)
-            job.cancel()
-        }
-
-        @Test
-        fun `a tab without filters gets an inactive filter pill`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = PillButtonsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = LibraryUiState(visibleTabs = listOf(readingTab))
-
-            // ----- Assert -----
-            stateFlow.value.filterPillByTab[readingTab.id] shouldBe filterPillButton(active = false)
-            job.cancel()
-        }
-
-        @Test
         fun `each visible tab is judged by its own filters`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = PillButtonsCollector()
@@ -124,26 +83,6 @@ class PillButtonsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.selectionPills shouldBe LibrarySelectionPills.of(bulkActionInProgress = true)
-            job.cancel()
-        }
-
-        @Test
-        fun `selectionPills return to clickable when the bulk action finishes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = PillButtonsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            stateFlow.value = stateFlow.value.copy(bulkActionInProgress = true)
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(bulkActionInProgress = false)
-
-            // ----- Assert -----
-            stateFlow.value.selectionPills shouldBe LibrarySelectionPills.of(bulkActionInProgress = false)
             job.cancel()
         }
     }

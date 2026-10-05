@@ -52,25 +52,6 @@ class GridLayoutCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates gridLayout when flow emits a value`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = GridLayoutCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            gridLayoutFlow.emit(LibraryGridLayout.GRID_THREE_COLUMNS)
-
-            // ----- Assert -----
-            stateFlow.value.gridLayout shouldBe LibraryGridLayout.GRID_THREE_COLUMNS
-            job.cancel()
-        }
-
-        @Test
         fun `updates gridLayout to the latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = GridLayoutCollector()
@@ -87,65 +68,6 @@ class GridLayoutCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.gridLayout shouldBe LibraryGridLayout.LIST_LARGE
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change gridLayout before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = GridLayoutCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act & Assert -----
-            stateFlow.value.gridLayout shouldBe LibraryGridLayout.GRID_TWO_COLUMNS
-            job.cancel()
-        }
-
-        @Test
-        fun `retains the last emitted layout after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = GridLayoutCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            gridLayoutFlow.emit(LibraryGridLayout.LIST_COMPACT)
-            job.cancel()
-
-            // ----- Act & Assert -----
-            stateFlow.value.gridLayout shouldBe LibraryGridLayout.LIST_COMPACT
-        }
-
-        @Test
-        fun `preserves other state fields when updating gridLayout`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = LibraryUiState(
-                isLoading = false,
-                isArrangeSheetExpanded = true,
-                gridLayout = LibraryGridLayout.GRID_TWO_COLUMNS,
-            )
-            val collector = GridLayoutCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            gridLayoutFlow.emit(LibraryGridLayout.GRID_THREE_COLUMNS)
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-            stateFlow.value.isArrangeSheetExpanded shouldBe true
-            stateFlow.value.gridLayout shouldBe LibraryGridLayout.GRID_THREE_COLUMNS
             job.cancel()
         }
     }
