@@ -36,22 +36,6 @@ class BookDetailSheetScaffoldBuilderTest {
         }
 
         @Test
-        fun `wraps the title in plain segments so the description reads as one sentence`() {
-            // ----- Act -----
-            val segments = tagEditorSheetScaffoldFor(
-                bookTitle = "Dune",
-                cover = null,
-            ).header.section.description.shouldNotBeNull()
-
-            // ----- Assert -----
-            segments.size shouldBe 3
-            (segments.first() is HeaderTextSegment.Plain) shouldBe true
-            (segments[1] is HeaderTextSegment.Emphasised) shouldBe true
-            (segments.last() is HeaderTextSegment.Plain) shouldBe true
-            segments.joinToString(separator = "") { it.text }.contains("on Dune.") shouldBe true
-        }
-
-        @Test
         fun `shows the cover as a jacket trailing when a cover is given`() {
             // ----- Arrange -----
             val cover = mockk<CoverUiModel>()
@@ -80,40 +64,10 @@ class BookDetailSheetScaffoldBuilderTest {
             // ----- Assert -----
             result.header.trailing.shouldBeNull()
         }
-
-        @Test
-        fun `has no footer`() {
-            // ----- Arrange -----
-            val cover: CoverUiModel? = null
-
-            // ----- Act -----
-            val result = tagEditorSheetScaffoldFor(
-                bookTitle = "Dune",
-                cover = cover,
-            )
-
-            // ----- Assert -----
-            result.footer.shouldBeNull()
-        }
     }
 
     @Nested
     inner class EditionSheetScaffoldFor {
-        @Test
-        fun `the primary dismisses the sheet itself so the save click does not have to`() {
-            // ----- Act -----
-            val result = editionSheetScaffoldFor(
-                bookTitle = "Dune",
-                currentEdition = buildEdition(id = 1),
-                selectedEdition = buildEdition(id = 2),
-                cover = null,
-                isLoading = false,
-            )
-
-            // ----- Assert -----
-            result.footer.shouldNotBeNull().primary.shouldNotBeNull().dismissesSheet shouldBe true
-        }
-
         @Test
         fun `enables the primary when the selection differs from the current edition`() {
             // ----- Arrange -----
@@ -298,21 +252,6 @@ class BookDetailSheetScaffoldBuilderTest {
         )
 
         @Test
-        fun `carries the card and uses the book title as the display name`() {
-            // ----- Act -----
-            val result = shareSheetFor(
-                card = card,
-                bookTitle = "Dune",
-                variant = ShareCardVariant.BOOK,
-                hasUpdateCard = false,
-            )
-
-            // ----- Assert -----
-            result.card shouldBe card
-            result.displayName shouldBe "Dune"
-        }
-
-        @Test
         fun `names the book in the scaffold description for each variant`() {
             // ----- Act -----
             val book = shareSheetFor(
@@ -369,21 +308,6 @@ class BookDetailSheetScaffoldBuilderTest {
             val toggle = result.variantToggle.shouldNotBeNull()
             toggle.options.map { it.key } shouldBe ShareCardVariant.entries.toList()
             toggle.selected shouldBe ShareCardVariant.MY_UPDATE
-        }
-
-        @Test
-        fun `variant toggle labels each option with its variant label`() {
-            // ----- Act -----
-            val result = shareSheetFor(
-                card = card,
-                bookTitle = "Dune",
-                variant = ShareCardVariant.BOOK,
-                hasUpdateCard = true,
-            )
-
-            // ----- Assert -----
-            val toggle = result.variantToggle.shouldNotBeNull()
-            toggle.options.map { it.label } shouldBe ShareCardVariant.entries.map { it.label }
         }
     }
 }

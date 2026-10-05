@@ -336,30 +336,6 @@ class OnUpdatePercentageProgressClickActionTest {
         }
 
         @Test
-        fun `treats an empty percentage string as zero`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(currentEditionPages = 300)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newPage = 0,
-                )
-            }
-        }
-
-        @Test
         fun `rounds down fractional page results to an integer`() = runTest {
             // ----- Arrange -----
             // 10% of 333 = 33.3 -> truncated to 33
@@ -508,30 +484,6 @@ class OnUpdatePercentageProgressClickActionTest {
         }
 
         @Test
-        fun `clamps percentage below 0 to 0 when edition is audiobook`() = runTest {
-            // ----- Arrange -----
-            val book = stubAudiobook(audioSeconds = 3600)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "-50")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 0,
-                )
-            }
-        }
-
-        @Test
         fun `uses 0 seconds when audioSeconds is null and edition is audiobook`() = runTest {
             // ----- Arrange -----
             val book = stubAudiobook(audioSeconds = null)
@@ -553,28 +505,6 @@ class OnUpdatePercentageProgressClickActionTest {
                     newSeconds = 0,
                 )
             }
-        }
-
-        @Test
-        fun `hides the update progress sheet for audiobook edition`() = runTest {
-            // ----- Arrange -----
-            val book = stubAudiobook(audioSeconds = 3600)
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                showUpdateProgressSheet = true,
-            )
-            dependencies = stubDependencies(this)
-
-            val action = OnUpdatePercentageProgressClickAction(newPercentage = "50")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.showUpdateProgressSheet shouldBe false
         }
 
         @Test

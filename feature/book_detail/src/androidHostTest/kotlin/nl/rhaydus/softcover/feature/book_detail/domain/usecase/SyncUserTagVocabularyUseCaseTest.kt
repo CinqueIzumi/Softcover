@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.usecase
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -93,27 +92,6 @@ class SyncUserTagVocabularyUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `wraps the exception in the Result rather than propagating it`() = runTest {
-            // ----- Arrange -----
-            val userId = 1
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                userTagVocabularyRepository.syncFromRemote(userId = userId)
-            } throws IllegalStateException("server error")
-
-            // ----- Act -----
-            val result = runCatching { useCase() }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull().shouldNotBeNull().isFailure shouldBe true
         }
     }
 }

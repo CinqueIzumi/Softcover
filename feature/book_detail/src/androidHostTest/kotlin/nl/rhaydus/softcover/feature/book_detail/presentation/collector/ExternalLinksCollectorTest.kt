@@ -80,30 +80,6 @@ class ExternalLinksCollectorTest {
         }
 
         @Test
-        fun `externalLinks follows the displayed edition when it changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ExternalLinksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            stateFlow.value = BookDetailUiState(
-                previewEdition = buildEdition(id = 1).copy(isbn13 = "9780306406157"),
-            )
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                previewEdition = buildEdition(id = 2).copy(isbn13 = "9781234567897"),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.externalLinks.shouldNotBeNull().map { it.key } shouldBe listOf(BOOKSHOP_KEY, AMAZON_KEY, OPEN_LIBRARY_KEY)
-            job.cancel()
-        }
-
-        @Test
         fun `externalLinks clears when the new edition has no ISBN`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ExternalLinksCollector()

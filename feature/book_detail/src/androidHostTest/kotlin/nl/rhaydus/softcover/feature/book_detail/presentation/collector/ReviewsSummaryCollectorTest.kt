@@ -60,15 +60,6 @@ class ReviewsSummaryCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `leaves the summary null while the book has not loaded`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Act -----
-            launchCollector()
-
-            // ----- Assert -----
-            stateFlow.value.reviewsSummary shouldBe null
-        }
-
-        @Test
         fun `sets the summary once the book arrives`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             launchCollector()
@@ -83,29 +74,6 @@ class ReviewsSummaryCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.reviewsSummary shouldBe "4.2 across 87 ratings"
-        }
-
-        @Test
-        fun `updates the summary when the ratings change`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(
-                book = stubBook(
-                    rating = 4.2,
-                    ratingsCount = 87,
-                ),
-            )
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                book = stubBook(
-                    rating = 3.5,
-                    ratingsCount = 90,
-                ),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.reviewsSummary shouldBe "3.5 across 90 ratings"
         }
 
         @Test

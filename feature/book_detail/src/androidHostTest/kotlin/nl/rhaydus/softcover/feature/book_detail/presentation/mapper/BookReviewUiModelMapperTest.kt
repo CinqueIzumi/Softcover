@@ -43,18 +43,6 @@ class BookReviewUiModelMapperTest {
         }
 
         @Test
-        fun `formats a fractional rating with one decimal`() {
-            // ----- Arrange -----
-            val review = review(rating = 3.5)
-
-            // ----- Act -----
-            val model = review.toBookReviewUiModel()
-
-            // ----- Assert -----
-            model.rating shouldBe "3.5"
-        }
-
-        @Test
         fun `maps a missing rating to null`() {
             // ----- Arrange -----
             val review = review(rating = null)
@@ -134,18 +122,6 @@ class BookReviewUiModelMapperTest {
             model.id shouldBe 12
             model.isLoading shouldBe false
             model.isSpoilerGated shouldBe true
-        }
-
-        @Test
-        fun `does not gate a review without spoilers`() {
-            // ----- Arrange -----
-            val review = review(hasSpoilers = false)
-
-            // ----- Act -----
-            val model = review.toBookReviewUiModel()
-
-            // ----- Assert -----
-            model.isSpoilerGated shouldBe false
         }
     }
 }

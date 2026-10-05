@@ -89,39 +89,6 @@ class OnNewEditionSaveClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `leaves closing the edit edition sheet to its own animated dismiss`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook()
-            val book = stubBook(userBook = userBook)
-            val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                editions = listOf(edition),
-                selectedEditionId = edition.id,
-                showEditEditionSheet = true,
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                updateBookEditionUseCase(
-                    userBook = userBook,
-                    newEditionId = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnNewEditionSaveClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe true
-        }
-
-        @Test
         fun `clears selectedEditionId when userBook is present`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
@@ -152,64 +119,6 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.selectedEditionId shouldBe null
-        }
-
-        @Test
-        fun `clears selectedEditionId when userBook is null`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(userBook = null)
-            val edition = stubEdition(id = 77)
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                editions = listOf(edition),
-                selectedEditionId = edition.id,
-                showEditEditionSheet = true,
-            )
-            dependencies = stubDependencies(this)
-
-            val action = OnNewEditionSaveClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.selectedEditionId shouldBe null
-        }
-
-        @Test
-        fun `sets loadingBookDetails to true then false around the use case call`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook()
-            val book = stubBook(userBook = userBook)
-            val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                editions = listOf(edition),
-                selectedEditionId = edition.id,
-                loadingBookDetails = false,
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                updateBookEditionUseCase(
-                    userBook = userBook,
-                    newEditionId = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnNewEditionSaveClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.loadingBookDetails shouldBe false
         }
 
         @Test
@@ -408,40 +317,6 @@ class OnNewEditionSaveClickActionTest {
         }
 
         @Test
-        fun `clears scannedEditionId when userBook is present`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook()
-            val book = stubBook(userBook = userBook)
-            val edition = stubEdition(id = 99)
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                editions = listOf(edition),
-                selectedEditionId = edition.id,
-                scannedEditionId = 42,
-                showEditEditionSheet = true,
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                updateBookEditionUseCase(
-                    userBook = userBook,
-                    newEditionId = 99,
-                )
-            } returns Result.success(Unit)
-
-            val action = OnNewEditionSaveClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.scannedEditionId shouldBe null
-        }
-
-        @Test
         fun `clears loadingBookDetails after use case fails`() = runTest {
             // ----- Arrange -----
             val userBook = stubUserBook()
@@ -472,39 +347,6 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.loadingBookDetails shouldBe false
-        }
-
-        @Test
-        fun `still leaves the edit edition sheet to its animated dismiss when use case fails`() = runTest {
-            // ----- Arrange -----
-            val userBook = stubUserBook()
-            val book = stubBook(userBook = userBook)
-            val edition = stubEdition()
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                editions = listOf(edition),
-                selectedEditionId = edition.id,
-                showEditEditionSheet = true,
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                updateBookEditionUseCase(
-                    userBook = userBook,
-                    newEditionId = any(),
-                )
-            } returns Result.failure(RuntimeException("edition update failed"))
-
-            val action = OnNewEditionSaveClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe true
         }
 
         @Test

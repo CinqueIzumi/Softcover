@@ -48,18 +48,6 @@ class BookReviewTest {
         }
 
         @Test
-        fun `returns null when reviewedAt is an empty string`() {
-            // ----- Arrange -----
-            val review = buildReview(reviewedAt = "")
-
-            // ----- Act -----
-            val result = review.getReviewedMonthYear()
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
         fun `formats valid ISO-8601 date-time as abbreviated month and year`() {
             // ----- Arrange -----
             val review = buildReview(reviewedAt = "2024-05-15T10:23:45")
@@ -69,18 +57,6 @@ class BookReviewTest {
 
             // ----- Assert -----
             result shouldBe "May 2024"
-        }
-
-        @Test
-        fun `formats a different valid ISO-8601 date-time as abbreviated month and year`() {
-            // ----- Arrange -----
-            val review = buildReview(reviewedAt = "2023-09-03T00:00:00")
-
-            // ----- Act -----
-            val result = review.getReviewedMonthYear()
-
-            // ----- Assert -----
-            result shouldBe "Sep 2023"
         }
     }
 }

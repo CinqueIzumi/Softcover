@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.usecase
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -70,29 +69,6 @@ class RecordAppliedTagsUseCaseTest {
         }
 
         @Test
-        fun `records an empty tag list without error`() = runTest {
-            // ----- Arrange -----
-            val userId = 4
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                userTagVocabularyRepository.record(
-                    userId = userId,
-                    tags = emptyList(),
-                )
-            } returns Unit
-
-            // ----- Act -----
-            val result = useCase(tags = emptyList())
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-        }
-
-        @Test
         fun `returns failure and never calls the repository when GetUserIdUseCase returns failure`() = runTest {
             // ----- Arrange -----
             val idError = RuntimeException("no user id")
@@ -140,31 +116,6 @@ class RecordAppliedTagsUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `wraps the exception in the Result rather than propagating it`() = runTest {
-            // ----- Arrange -----
-            val userId = 1
-            val tags = listOf(stubUserTag())
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                userTagVocabularyRepository.record(
-                    userId = userId,
-                    tags = tags,
-                )
-            } throws IllegalStateException("server error")
-
-            // ----- Act -----
-            val result = runCatching { useCase(tags = tags) }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull().shouldNotBeNull().isFailure shouldBe true
         }
     }
 }

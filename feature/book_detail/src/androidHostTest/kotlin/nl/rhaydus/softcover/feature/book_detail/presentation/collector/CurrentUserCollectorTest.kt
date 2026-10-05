@@ -72,16 +72,6 @@ class CurrentUserCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `leaves the identity null while there is no profile`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Act -----
-            launchCollector()
-
-            // ----- Assert -----
-            stateFlow.value.currentUsername shouldBe null
-            stateFlow.value.currentUserAvatarUrl shouldBe null
-        }
-
-        @Test
         fun `publishes the username and avatar of the profile`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             launchCollector()

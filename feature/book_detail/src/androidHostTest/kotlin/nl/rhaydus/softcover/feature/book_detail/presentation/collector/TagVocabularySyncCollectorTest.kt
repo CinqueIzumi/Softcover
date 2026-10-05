@@ -136,28 +136,5 @@ class TagVocabularySyncCollectorTest {
             coVerify(exactly = 1) { syncUserTagVocabularyUseCase() }
             job.cancel()
         }
-
-        @Test
-        fun `does not sync when the sheet closes without ever having opened`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            coEvery {
-                syncUserTagVocabularyUseCase()
-            } returns Result.success(Unit)
-            val dependencies = stubDependencies(this)
-            val collector = TagVocabularySyncCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(showTagEditorSheet = false)
-
-            // ----- Assert -----
-            coVerify(exactly = 0) { syncUserTagVocabularyUseCase() }
-            job.cancel()
-        }
     }
 }

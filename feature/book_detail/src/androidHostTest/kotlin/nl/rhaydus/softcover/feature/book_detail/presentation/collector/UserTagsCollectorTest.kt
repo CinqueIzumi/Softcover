@@ -70,10 +70,11 @@ class UserTagsCollectorTest {
         fun `loads userTags when book is shelved`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 10)
-            val tags = listOf(UserTag(
-                name = "fantasy",
-                category = TagCategory.GENRE,
-            ),
+            val tags = listOf(
+                UserTag(
+                    name = "fantasy",
+                    category = TagCategory.GENRE,
+                ),
             )
 
             coEvery {
@@ -117,32 +118,14 @@ class UserTagsCollectorTest {
         }
 
         @Test
-        fun `does not load userTags when book is null`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = UserTagsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = null)
-
-            // ----- Assert -----
-            stateFlow.value.userTags shouldBe emptyList()
-            job.cancel()
-        }
-
-        @Test
         fun `preserves existing userTags when failure occurs`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 3)
-            val existingTags = listOf(UserTag(
-                name = "sci-fi",
-                category = TagCategory.GENRE,
-            ),
+            val existingTags = listOf(
+                UserTag(
+                    name = "sci-fi",
+                    category = TagCategory.GENRE,
+                ),
             )
             stateFlow.value = stateFlow.value.copy(userTags = existingTags)
 
@@ -171,15 +154,17 @@ class UserTagsCollectorTest {
             // ----- Arrange -----
             val bookA = stubShelvedBook(id = 1)
             val bookB = stubShelvedBook(id = 2)
-            val tagsA = listOf(UserTag(
-                name = "horror",
-                category = TagCategory.GENRE,
-            ),
+            val tagsA = listOf(
+                UserTag(
+                    name = "horror",
+                    category = TagCategory.GENRE,
+                ),
             )
-            val tagsB = listOf(UserTag(
-                name = "comedy",
-                category = TagCategory.GENRE,
-            ),
+            val tagsB = listOf(
+                UserTag(
+                    name = "comedy",
+                    category = TagCategory.GENRE,
+                ),
             )
 
             coEvery {
@@ -209,48 +194,14 @@ class UserTagsCollectorTest {
         }
 
         @Test
-        fun `does not reload tags when the same book id emits again`() = runTest(UnconfinedTestDispatcher()) {
+        fun `keeps the loaded userTags when the book goes away`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubShelvedBook(id = 1)
-            val tags = listOf(UserTag(
-                name = "mystery",
-                category = TagCategory.GENRE,
-            ),
-            )
-
-            coEvery {
-                getUserTagsUseCase(bookId = 1)
-            } returns Result.success(tags)
-
-            val collector = UserTagsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            stateFlow.value = stateFlow.value.copy(book = book)
-            stateFlow.value.userTags shouldBe tags
-
-            // ----- Act -----
-            // Emit a state change that preserves the same book id
-            stateFlow.value = stateFlow.value.copy(showTagEditorSheet = true)
-
-            // ----- Assert -----
-            // userTags unchanged — no second call to getUserTagsUseCase
-            stateFlow.value.userTags shouldBe tags
-            job.cancel()
-        }
-
-        @Test
-        fun `clears userTags when book transitions from shelved to null`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val book = stubShelvedBook(id = 1)
-            val tags = listOf(UserTag(
-                name = "romance",
-                category = TagCategory.GENRE,
-            ),
+            val tags = listOf(
+                UserTag(
+                    name = "romance",
+                    category = TagCategory.GENRE,
+                ),
             )
 
             coEvery {

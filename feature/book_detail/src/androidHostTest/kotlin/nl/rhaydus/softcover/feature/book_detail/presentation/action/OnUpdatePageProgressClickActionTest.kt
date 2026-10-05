@@ -197,30 +197,6 @@ class OnUpdatePageProgressClickActionTest {
         }
 
         @Test
-        fun `treats an empty page string as zero`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            val action = OnUpdatePageProgressClickAction(newPage = "")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newPage = 0,
-                )
-            }
-        }
-
-        @Test
         fun `does nothing when book in state is null`() = runTest {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(
@@ -244,30 +220,6 @@ class OnUpdatePageProgressClickActionTest {
                     any(),
                     any(),
                     any(),
-                )
-            }
-        }
-
-        @Test
-        fun `treats a decimal page string as zero because toIntOrNull returns null for decimals`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            val action = OnUpdatePageProgressClickAction(newPage = "10.5")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newPage = 0,
                 )
             }
         }

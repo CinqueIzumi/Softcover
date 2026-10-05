@@ -66,22 +66,6 @@ class UserTagVocabularyRepositoryImplTest {
                 awaitComplete()
             }
         }
-
-        @Test
-        fun `emits an empty list when the local data source has no rows for the user`() = runTest {
-            // ----- Arrange -----
-            val userId = 7
-
-            every {
-                localDataSource.observe(userId = userId)
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            repository.observe(userId = userId).test {
-                awaitItem() shouldBe emptyList()
-                awaitComplete()
-            }
-        }
     }
 
     @Nested
@@ -107,50 +91,10 @@ class UserTagVocabularyRepositoryImplTest {
                 )
             }
         }
-
-        @Test
-        fun `replaces with an empty list when remote returns no tags`() = runTest {
-            // ----- Arrange -----
-            val userId = 7
-
-            coEvery {
-                remoteDataSource.fetchUserVocabulary(userId = userId)
-            } returns emptyList()
-
-            // ----- Act -----
-            repository.syncFromRemote(userId = userId)
-
-            // ----- Assert -----
-            coVerify {
-                localDataSource.replaceAll(
-                    userId = userId,
-                    entities = emptyList(),
-                )
-            }
-        }
     }
 
     @Nested
     inner class Record {
-        @Test
-        fun `maps the given tags to entities with usageCount forced to 1 and inserts them if absent`() = runTest {
-            // ----- Arrange -----
-            val userId = 7
-            val tags = listOf(stubUserTag("Cozy"), stubUserTag("Dark"))
-            val expectedEntities = tags.map { it.toVocabularyEntity(userId = userId).copy(usageCount = 1) }
-
-            // ----- Act -----
-            repository.record(
-                userId = userId,
-                tags = tags,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                localDataSource.insertIfAbsent(entities = expectedEntities)
-            }
-        }
-
         @Test
         fun `forces usageCount to 1 even when the incoming tag count is the tag's global popularity`() = runTest {
             // ----- Arrange -----
@@ -175,23 +119,6 @@ class UserTagVocabularyRepositoryImplTest {
                         ),
                     ),
                 )
-            }
-        }
-
-        @Test
-        fun `inserts an empty list when given no tags`() = runTest {
-            // ----- Arrange -----
-            val userId = 7
-
-            // ----- Act -----
-            repository.record(
-                userId = userId,
-                tags = emptyList(),
-            )
-
-            // ----- Assert -----
-            coVerify {
-                localDataSource.insertIfAbsent(entities = emptyList())
             }
         }
     }

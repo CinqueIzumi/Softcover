@@ -18,22 +18,6 @@ class TagNamingFieldBuilderTest {
     @Nested
     inner class TagNamingFieldFor {
         @Test
-        fun `carries the draft text through unchanged`() {
-            // ----- Arrange -----
-            val input = "  slow burn "
-
-            // ----- Act -----
-            val field = tagNamingFieldFor(
-                input = input,
-                category = TagCategory.TAG,
-                addPill = addPill,
-            )
-
-            // ----- Assert -----
-            field.text shouldBe input
-        }
-
-        @Test
         fun `shows the Add pill for a non-blank draft`() {
             // ----- Arrange -----
             val input = "cozy"
@@ -51,23 +35,6 @@ class TagNamingFieldBuilderTest {
         }
 
         @Test
-        fun `hides the Add pill for an empty draft`() {
-            // ----- Arrange -----
-            val input = ""
-
-            // ----- Act -----
-            val field = tagNamingFieldFor(
-                input = input,
-                category = TagCategory.MOOD,
-                addPill = addPill,
-            )
-
-            // ----- Assert -----
-            val variant = field.variant.shouldBeInstanceOf<TextFieldVariant.Pill>()
-            variant.trailing shouldBe null
-        }
-
-        @Test
         fun `hides the Add pill for a whitespace-only draft`() {
             // ----- Arrange -----
             val input = "   "
@@ -82,22 +49,6 @@ class TagNamingFieldBuilderTest {
             // ----- Assert -----
             val variant = field.variant.shouldBeInstanceOf<TextFieldVariant.Pill>()
             variant.trailing shouldBe null
-        }
-
-        @Test
-        fun `is submittable from the keyboard`() {
-            // ----- Arrange -----
-            val input = "cozy"
-
-            // ----- Act -----
-            val field = tagNamingFieldFor(
-                input = input,
-                category = TagCategory.MOOD,
-                addPill = addPill,
-            )
-
-            // ----- Assert -----
-            field.submittable shouldBe true
         }
 
         @Test
@@ -120,25 +71,6 @@ class TagNamingFieldBuilderTest {
 
             // ----- Assert -----
             placeholders.toSet().size shouldBe categories.size
-        }
-
-        @Test
-        fun `does not repeat the word tag in the placeholder of the plain Tag category`() {
-            // ----- Arrange -----
-            val category = TagCategory.TAG
-
-            // ----- Act -----
-            val field = tagNamingFieldFor(
-                input = "",
-                category = category,
-                addPill = addPill,
-            )
-
-            // ----- Assert -----
-            field.placeholder.contains(
-                "Tag tag",
-                ignoreCase = true,
-            ) shouldBe false
         }
     }
 
@@ -168,18 +100,6 @@ class TagNamingFieldBuilderTest {
             // ----- Assert -----
             result.tagNamingField.placeholder shouldBe state.tagNamingField.placeholder
             result.tagNamingField.variant shouldBe state.tagNamingField.variant
-        }
-
-        @Test
-        fun `clears the naming field text when the draft is emptied`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState().withTagDraft(input = "slow burn")
-
-            // ----- Act -----
-            val result = state.withTagDraft(input = "")
-
-            // ----- Assert -----
-            result.tagNamingField.text shouldBe ""
         }
     }
 }

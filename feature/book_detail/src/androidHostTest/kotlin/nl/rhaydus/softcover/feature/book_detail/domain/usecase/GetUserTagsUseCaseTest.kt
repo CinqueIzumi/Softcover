@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.domain.usecase
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -65,31 +64,6 @@ class GetUserTagsUseCaseTest {
         }
 
         @Test
-        fun `returns success with empty list when repository returns no tags`() = runTest {
-            // ----- Arrange -----
-            val bookId = 10
-            val userId = 3
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                userTagsRepository.getUserTags(
-                    userId = userId,
-                    bookId = bookId,
-                )
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = useCase(bookId = bookId)
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe emptyList()
-        }
-
-        @Test
         fun `returns failure when repository throws`() = runTest {
             // ----- Arrange -----
             val bookId = 5
@@ -137,31 +111,6 @@ class GetUserTagsUseCaseTest {
                     any(),
                 )
             }
-        }
-
-        @Test
-        fun `wraps the exception in the Result rather than propagating it`() = runTest {
-            // ----- Arrange -----
-            val bookId = 3
-            val userId = 1
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                userTagsRepository.getUserTags(
-                    userId = userId,
-                    bookId = bookId,
-                )
-            } throws IllegalStateException("server error")
-
-            // ----- Act -----
-            val result = runCatching { useCase(bookId = bookId) }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull().shouldNotBeNull().isFailure shouldBe true
         }
     }
 }

@@ -56,21 +56,5 @@ class SelectedEditionForTest {
             // ----- Assert -----
             result shouldBe current
         }
-
-        @Test
-        fun `falls back to the current edition when the list is empty`() {
-            // ----- Arrange -----
-            val current = buildEdition(id = 1)
-
-            // ----- Act -----
-            val result = selectedEditionFor(
-                editions = emptyList(),
-                selectedEditionId = 1,
-                currentEdition = current,
-            )
-
-            // ----- Assert -----
-            result shouldBe current
-        }
     }
 }

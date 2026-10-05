@@ -107,38 +107,6 @@ class OnRemoveUserTagActionTest {
         }
 
         @Test
-        fun `results in empty list when removing the only tag`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            val onlyTag = UserTag(
-                name = "mystery",
-                category = TagCategory.GENRE,
-            )
-            stateFlow.value = stateFlow.value.copy(
-                book = stubBook(id = 1),
-                userTags = listOf(onlyTag),
-            )
-
-            coEvery {
-                saveUserTagsUseCase(
-                    bookId = 1,
-                    tags = emptyList(),
-                )
-            } returns Result.success(emptyList())
-
-            val action = OnRemoveUserTagAction(tag = onlyTag)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.userTags shouldBe emptyList()
-        }
-
-        @Test
         fun `does not remove a tag with the same name but a different category`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)

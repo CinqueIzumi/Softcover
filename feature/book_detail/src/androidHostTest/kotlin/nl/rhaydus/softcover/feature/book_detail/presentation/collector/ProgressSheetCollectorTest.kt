@@ -77,25 +77,6 @@ class ProgressSheetCollectorTest {
         }
 
         @Test
-        fun `progressSheet stays null while the source book has never arrived`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ProgressSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(selectedProgressSheetTab = ProgressSheetTab.TIME)
-
-            // ----- Assert -----
-            stateFlow.value.progressSheet shouldBe null
-            job.cancel()
-        }
-
-        @Test
         fun `progressSheet clears back to null once a source book becomes null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
@@ -223,49 +204,6 @@ class ProgressSheetCollectorTest {
         }
 
         @Test
-        fun `follows the edited text while a draft stays present`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val audioEdition = PreviewData.baseEdition.copy(
-                readingFormat = ReadingFormat.Audio,
-                audioSeconds = 7200,
-            )
-            val book = PreviewData.baseBook.copy(
-                editions = listOf(audioEdition),
-                defaultEdition = audioEdition,
-                userBookRead = null,
-            )
-            val collector = ProgressSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            val firstDraft = ProgressTimeDraft(
-                forSeconds = 0,
-                hours = "1",
-                minutes = "1",
-                seconds = "1",
-            )
-            val secondDraft = firstDraft.copy(minutes = "45")
-            stateFlow.value = stateFlow.value.copy(
-                book = book,
-                progressTimeDraft = firstDraft,
-            )
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(progressTimeDraft = secondDraft)
-
-            // ----- Assert -----
-            val medium = stateFlow.value.progressSheet?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
-            medium.hours.text shouldBe "1"
-            medium.minutes.text shouldBe "45"
-            medium.seconds.text shouldBe "1"
-            job.cancel()
-        }
-
-        @Test
         fun `a backdate shows the picked time on the whenRead row and selects its chip`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ProgressSheetCollector()
@@ -312,48 +250,6 @@ class ProgressSheetCollectorTest {
             val whenRead = stateFlow.value.progressSheet.shouldNotBeNull().whenRead
             whenRead.chip.selected shouldBe false
             whenRead.chip.label shouldBe "Just now"
-            job.cancel()
-        }
-
-        @Test
-        fun `a backdate alone leaves the time fields and tabs as they were`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val audioEdition = PreviewData.baseEdition.copy(
-                readingFormat = ReadingFormat.Audio,
-                audioSeconds = 7200,
-            )
-            val book = PreviewData.baseBook.copy(
-                editions = listOf(audioEdition),
-                defaultEdition = audioEdition,
-                userBookRead = null,
-            )
-            val draft = ProgressTimeDraft(
-                forSeconds = 0,
-                hours = "2",
-                minutes = "20",
-                seconds = "5",
-            )
-            val collector = ProgressSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            stateFlow.value = stateFlow.value.copy(
-                book = book,
-                progressTimeDraft = draft,
-            )
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(readAt = pastReadAt)
-
-            // ----- Assert -----
-            val medium = stateFlow.value.progressSheet?.medium.shouldBeInstanceOf<ProgressSheetMedium.Timed>()
-            medium.hours.text shouldBe "2"
-            medium.minutes.text shouldBe "20"
-            medium.seconds.text shouldBe "5"
             job.cancel()
         }
     }

@@ -82,25 +82,6 @@ class OnClearMutationFailureActionTest {
         }
 
         @Test
-        fun `clears both ids when both are given`() = runTest {
-            // ----- Arrange -----
-            val action = OnClearMutationFailureAction(
-                bookId = 2,
-                editionId = 20,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.failedMutationBookIds shouldBe setOf(1)
-            stateFlow.value.failedMutationEditionIds shouldBe setOf(10)
-        }
-
-        @Test
         fun `leaves the failures untouched for an id that was not failing`() = runTest {
             // ----- Arrange -----
             val action = OnClearMutationFailureAction(bookId = 99)

@@ -62,18 +62,6 @@ class EditionSheetCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `leaves editionSheet null while there is no book`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(previewEdition = buildEdition(id = 1))
-
-            // ----- Act -----
-            launchCollector()
-
-            // ----- Assert -----
-            stateFlow.value.editionSheet.shouldBeNull()
-        }
-
-        @Test
         fun `leaves editionSheet null while there is no displayed edition`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(book = offShelfBook("Dune"))

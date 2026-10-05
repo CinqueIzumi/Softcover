@@ -132,48 +132,5 @@ class LensToggleCollectorTest {
             stateFlow.value.lensToggle.selected shouldBe BookDetailLens.YOURS
             job.cancel()
         }
-
-        @Test
-        fun `follows the selected lens when it changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook(userBook = mockk()))
-            val collector = LensToggleCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(selectedLens = BookDetailLens.YOURS)
-
-            // ----- Assert -----
-            stateFlow.value.lensToggle.selected shouldBe BookDetailLens.YOURS
-            job.cancel()
-        }
-
-        @Test
-        fun `enables Yours once the book gains a user copy`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook(userBook = null))
-            val collector = LensToggleCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = stubBook(userBook = mockk()))
-
-            // ----- Assert -----
-            stateFlow.value.lensToggle shouldBe lensToggleFor(
-                selectedLens = BookDetailLens.THE_BOOK,
-                yoursEnabled = true,
-            )
-            job.cancel()
-        }
     }
 }

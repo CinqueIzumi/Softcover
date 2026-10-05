@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** TP-0…TP-3 done and committed; TP-2 found and fixed a trending-order bug (`ad3896a1`). TP-4 (`feature:book_detail`) was in flight at handoff: three test-writers on `presentation/action`, `presentation/collector`, and the rest; their edits are the uncommitted `feature/book_detail` test changes. SL-3b blocked on F34.
-- **Next:** TP-4 close-out — check `git diff --stat feature/book_detail`; if agents left a package unaudited, brief a test-writer for it; then `:feature:book_detail:testAndroidHostTest`, `styleCheck`, reviewer, commit. Then TP-5…TP-8 (split modules >10k test lines by package; one test-writer per package set). No approval stops; commit per sub-step.
-- **Open questions:** `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
-- **Verification:** `styleCheck` (JDK 21) and every TP-1…TP-3 module's `testAndroidHostTest` passed at the TP-2 commit; full suite passed at `0130e401`.
+- **State:** TP-0…TP-4 committed. SL-3b blocked on F34.
+- **Next:** TP-5 (`feature:library`, `steps/tp-test-prune.md` § Procedure), then TP-6…TP-8 alike: split >10k-line modules by package, no approval stops; reviewer plus an unused-import grep on each diff; commit each.
+- **Open questions:** 19 deleted pure-`setState` action tests — user may want some back. `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
+- **Verification:** `styleCheck` and TP-1…TP-4 module tests passed (TP-4: 524 tests, 0 failures); reviewer found no lost coverage in TP-4.
 - **Uncommitted:** none.
 
 ## Local verification

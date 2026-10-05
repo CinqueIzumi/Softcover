@@ -56,18 +56,6 @@ class TagEditorSheetCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `leaves tagEditorSheet null while there is no book`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
-
-            // ----- Act -----
-            launchCollector()
-
-            // ----- Assert -----
-            stateFlow.value.tagEditorSheet.shouldBeNull()
-        }
-
-        @Test
         fun `builds tagEditorSheet from the book title and cover`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val cover = mockk<CoverUiModel>()
@@ -83,22 +71,6 @@ class TagEditorSheetCollectorTest {
             stateFlow.value.tagEditorSheet shouldBe tagEditorSheetScaffoldFor(
                 bookTitle = "Dune",
                 cover = cover,
-            )
-        }
-
-        @Test
-        fun `updates tagEditorSheet when the book title changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = bookTitled("Dune"))
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = bookTitled("Emma"))
-
-            // ----- Assert -----
-            stateFlow.value.tagEditorSheet shouldBe tagEditorSheetScaffoldFor(
-                bookTitle = "Emma",
-                cover = null,
             )
         }
 

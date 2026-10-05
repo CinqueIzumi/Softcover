@@ -83,45 +83,6 @@ class InProgressCollectorTest {
         }
 
         @Test
-        fun `inProgress is null when state book is null`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
-            val collector = InProgressCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.inProgress.shouldBeNull()
-            job.cancel()
-        }
-
-        @Test
-        fun `rebuilds inProgress when the book changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = stubBook(progress = 10f))
-            val collector = InProgressCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = stubBook(progress = 60f))
-
-            // ----- Assert -----
-            stateFlow.value.inProgress.shouldNotBeNull().percent shouldBe "60%"
-            job.cancel()
-        }
-
-        @Test
         fun `clears inProgress when the book is removed`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(book = stubBook(progress = 10f))

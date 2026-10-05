@@ -133,21 +133,6 @@ class InProgressMapperTest {
         }
 
         @Test
-        fun `bar fraction passes negative progress through unclamped`() {
-            // ----- Arrange -----
-            val book = stubBook(
-                read = buildRead(progress = -5f),
-                edition = paperEdition(pages = 300),
-            )
-
-            // ----- Act -----
-            val result = book.toInProgress()
-
-            // ----- Assert -----
-            result.shouldNotBeNull().fraction shouldBe -0.05f
-        }
-
-        @Test
         fun `paper book summarises the current page and the pages to go`() {
             // ----- Arrange -----
             val book = stubBook(

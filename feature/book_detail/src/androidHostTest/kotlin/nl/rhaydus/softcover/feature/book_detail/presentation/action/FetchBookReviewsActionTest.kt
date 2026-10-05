@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -164,30 +163,6 @@ class FetchBookReviewsActionTest {
 
             // ----- Assert -----
             stateFlow.value.reviews shouldBe emptyList()
-        }
-
-        @Test
-        fun `invokes use case with the bookId provided to the action constructor`() = runTest {
-            // ----- Arrange -----
-            val bookId = 99
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                getTopBookReviewsUseCase(bookId = bookId)
-            } returns Result.success(emptyList())
-
-            val action = FetchBookReviewsAction(bookId = bookId)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                getTopBookReviewsUseCase(bookId = bookId)
-            }
         }
     }
 }

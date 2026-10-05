@@ -104,40 +104,6 @@ class OnToggleUserTagSpoilerActionTest {
         }
 
         @Test
-        fun `flips spoiler from true to false on the matching tag`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            val tag = UserTag(
-                name = "death",
-                category = TagCategory.CONTENT_WARNING,
-                spoiler = true,
-            )
-            stateFlow.value = stateFlow.value.copy(
-                book = stubBook(id = 1),
-                userTags = listOf(tag),
-            )
-            val toggled = tag.copy(spoiler = false)
-
-            coEvery {
-                saveUserTagsUseCase(
-                    bookId = 1,
-                    tags = listOf(toggled),
-                )
-            } returns Result.success(listOf(toggled))
-
-            val action = OnToggleUserTagSpoilerAction(tag = tag)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.userTags.first().spoiler shouldBe false
-        }
-
-        @Test
         fun `does not mutate other tags in the list`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)

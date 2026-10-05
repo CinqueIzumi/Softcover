@@ -126,51 +126,5 @@ class OnDeleteReviewActionTest {
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds shouldBe setOf(1, 2, 42)
         }
-
-        @Test
-        fun `leaves verdictSheetContext untouched on success`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-
-            coEvery {
-                updateBookReviewUseCase(
-                    book = book,
-                    review = ReviewDocument.EMPTY,
-                    hasSpoilers = false,
-                )
-            } returns Result.success(Unit)
-
-            // ----- Act -----
-            OnDeleteReviewAction(book = book).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheetContext shouldBe VerdictSheetContext.EDIT
-        }
-
-        @Test
-        fun `leaves verdictSheetContext untouched on failure`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-
-            coEvery {
-                updateBookReviewUseCase(
-                    book = book,
-                    review = ReviewDocument.EMPTY,
-                    hasSpoilers = false,
-                )
-            } returns Result.failure(RuntimeException("api error"))
-
-            // ----- Act -----
-            OnDeleteReviewAction(book = book).execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheetContext shouldBe VerdictSheetContext.EDIT
-        }
     }
 }

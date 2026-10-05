@@ -82,61 +82,6 @@ class OnMarkBookAsReadClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `invokes use case with the book provided to the action constructor`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(
-                    book = book,
-                    editionId = any(),
-                )
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                markBookAsReadUseCase(
-                    book = book,
-                    editionId = any(),
-                )
-            }
-        }
-
-        @Test
-        fun `does not add book id to failedMutationBookIds when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(
-                    book = book,
-                    editionId = any(),
-                )
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
-        }
-
-        @Test
         fun `adds book id to failedMutationBookIds when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
@@ -159,31 +104,6 @@ class OnMarkBookAsReadClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
-        }
-
-        @Test
-        fun `stores job in bookMutationJobs after execute returns`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(
-                    book = book,
-                    editionId = any(),
-                )
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            localVariablesFlow.value.bookMutationJobs.containsKey(42) shouldBe true
         }
 
         @Test
@@ -223,28 +143,6 @@ class OnMarkBookAsReadClickActionTest {
             priorJob.isCancelled shouldBe true
             localVariablesFlow.value.bookMutationJobs[bookId] shouldBe localVariablesFlow.value.bookMutationJobs[bookId]
             localVariablesFlow.value.bookMutationJobs.containsKey(bookId) shouldBe true
-        }
-
-        @Test
-        fun `completes without throwing when use case fails`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(
-                    book = book,
-                    editionId = any(),
-                )
-            } returns Result.failure(RuntimeException("network failure"))
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act & Assert -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
         }
 
         @Test

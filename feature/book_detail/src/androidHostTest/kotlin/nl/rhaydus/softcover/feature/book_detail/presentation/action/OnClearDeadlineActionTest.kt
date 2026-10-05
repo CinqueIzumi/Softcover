@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
-import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -109,32 +108,6 @@ class OnClearDeadlineActionTest {
             coVerify(exactly = 0) {
                 clearBookDeadlineUseCase(bookId = any())
             }
-        }
-
-        @Test
-        fun `state is not mutated when book is present`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 5)
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                loadingBookDetails = false,
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                clearBookDeadlineUseCase(bookId = 5)
-            } returns Result.success(Unit)
-
-            val action = OnClearDeadlineAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.loadingBookDetails shouldBe false
         }
     }
 }

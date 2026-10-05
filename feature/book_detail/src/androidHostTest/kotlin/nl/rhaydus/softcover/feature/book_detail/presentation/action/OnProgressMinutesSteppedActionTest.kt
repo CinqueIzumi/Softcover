@@ -5,13 +5,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.uibinding.progress.ProgressTimeDraft
-import nl.rhaydus.softcover.core.uibinding.progress.toProgressSheetUiModel
 import nl.rhaydus.softcover.feature.book_detail.presentation.event.BookDetailEvent
 import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDetailDependencies
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
@@ -55,18 +52,6 @@ class OnProgressMinutesSteppedActionTest {
         seconds = "5",
     )
 
-    private fun audiobookAt(currentSeconds: Int): Book {
-        val audioEdition = PreviewData.baseEdition.copy(
-            readingFormat = ReadingFormat.Audio,
-            audioSeconds = 7200,
-        )
-
-        return bookAt(currentSeconds = currentSeconds).copy(
-            editions = listOf(audioEdition),
-            defaultEdition = audioEdition,
-        )
-    }
-
     @Nested
     inner class Execute {
         @Test
@@ -98,22 +83,6 @@ class OnProgressMinutesSteppedActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressTimeDraft shouldBe draftWithMinutes("3")
-        }
-
-        @Test
-        fun `steps minutes down by one`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = bookAt(currentSeconds = 3725))
-            val action = OnProgressMinutesSteppedAction(delta = -1)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.progressTimeDraft shouldBe draftWithMinutes("1")
         }
 
         @Test
@@ -190,43 +159,6 @@ class OnProgressMinutesSteppedActionTest {
 
             // ----- Assert -----
             stateFlow.value.progressTimeDraft shouldBe draftWithMinutes("3")
-        }
-
-        @Test
-        fun `leaves a paged progress sheet unchanged`() = runTest {
-            // ----- Arrange -----
-            val paged = bookAt(currentSeconds = 3725)
-            val sheet = paged.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
-            stateFlow.value = BookDetailUiState(
-                book = paged,
-                progressSheet = sheet,
-            )
-            val action = OnProgressMinutesSteppedAction(delta = 1)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.progressSheet shouldBe sheet
-        }
-
-        @Test
-        fun `keeps progressSheet null when no sheet has been derived yet`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = audiobookAt(currentSeconds = 3725))
-            val action = OnProgressMinutesSteppedAction(delta = 1)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.progressSheet shouldBe null
         }
     }
 }

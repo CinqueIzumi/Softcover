@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.collector
 
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -50,54 +49,18 @@ class ChooseListsCollectorTest {
         id = id,
         name = name,
         slug = slug,
-        books = listOf(ListBook(
-            listBookId = id,
-            listId = id,
-            bookId = bookId,
-            editionId = 1,
-        ),
+        books = listOf(
+            ListBook(
+                listBookId = id,
+                listId = id,
+                bookId = bookId,
+                editionId = 1,
+            ),
         ),
     )
 
     @Nested
     inner class OnLaunch {
-        @Test
-        fun `chooseListsSheet is populated for a single book once the book and lists have arrived`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val book = PreviewData.baseBook
-            val ownedList = buildList(
-                id = 1,
-                name = "Owned",
-                slug = "owned",
-                bookId = book.id,
-            )
-            val customList = buildList(
-                id = 2,
-                name = "Winter reading",
-                slug = "winter-reading",
-                bookId = book.id,
-            )
-
-            val collector = ChooseListsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                book = book,
-                userLists = listOf(ownedList, customList),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.chooseListsSheet shouldNotBe null
-            stateFlow.value.chooseListsSheet?.scaffold?.header?.section?.headlineText shouldBe "Shelve ${book.title}"
-            job.cancel()
-        }
-
         @Test
         fun `a book with no editions takes its cover from the default edition`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
@@ -144,7 +107,7 @@ class ChooseListsCollectorTest {
         }
 
         @Test
-        fun `the built-in Owned list is excluded from rows`() = runTest(UnconfinedTestDispatcher()) {
+        fun `titles the sheet after the book and leaves the built-in Owned list out of the rows`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             val ownedList = buildList(
@@ -178,6 +141,7 @@ class ChooseListsCollectorTest {
             val rowIds = stateFlow.value.chooseListsSheet?.rows.orEmpty().map { it.listId }
             rowIds shouldNotContain ownedList.id
             rowIds shouldBe listOf(customList.id)
+            stateFlow.value.chooseListsSheet?.scaffold?.header?.section?.headlineText shouldBe "Shelve ${book.title}"
             job.cancel()
         }
 

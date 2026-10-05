@@ -100,24 +100,6 @@ class VerdictReviewCollectorTest {
         }
 
         @Test
-        fun `is Empty when the rating is zero and there is no review`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val book = stubBook(
-                userBook = stubUserBook(
-                    reviewDocument = null,
-                    rating = 0.0,
-                ),
-            )
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = book)
-
-            // ----- Assert -----
-            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Empty
-        }
-
-        @Test
         fun `is Empty when the rating is zero and the review is blank`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook(
@@ -246,25 +228,6 @@ class VerdictReviewCollectorTest {
                 hasSpoilers = false,
             )
         }
-
-        @Test
-        fun `updates when the review changes on a later book emission`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val firstDocument = buildReviewDocument(text = "First impression.")
-            val secondDocument = buildReviewDocument(text = "Revised after a reread.")
-            stateFlow.value = stateFlow.value.copy(book = stubBook(userBook = stubUserBook(reviewDocument = firstDocument)))
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = stubBook(userBook = stubUserBook(reviewDocument = secondDocument)))
-
-            // ----- Assert -----
-            stateFlow.value.verdictBlock shouldBe VerdictBlockUiModel.Filled(
-                rating = null,
-                review = secondDocument.toRichTextUiModel(),
-                hasSpoilers = false,
-            )
-        }
     }
 
     @Nested
@@ -276,18 +239,6 @@ class VerdictReviewCollectorTest {
 
             // ----- Act -----
             stateFlow.value = stateFlow.value.copy(book = stubBook(userBook = null))
-
-            // ----- Assert -----
-            stateFlow.value.verdictBlock.shouldBeNull()
-        }
-
-        @Test
-        fun `is null when there is no book`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = null)
 
             // ----- Assert -----
             stateFlow.value.verdictBlock.shouldBeNull()

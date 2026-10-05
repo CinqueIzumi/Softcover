@@ -70,40 +70,6 @@ class OnProgressTabClickActionTest {
         }
 
         @Test
-        fun `sets selectedProgressSheetTab to PERCENTAGE when tab is PERCENTAGE`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(selectedProgressSheetTab = ProgressSheetTab.PAGE)
-            dependencies = stubDependencies(this)
-            val action = OnProgressTabClickAction(tab = ProgressSheetTab.PERCENTAGE)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.selectedProgressSheetTab shouldBe ProgressSheetTab.PERCENTAGE
-        }
-
-        @Test
-        fun `does not mutate any other state field when updating the selected tab`() = runTest {
-            // ----- Arrange -----
-            val initialState = stateFlow.value
-            dependencies = stubDependencies(this)
-            val action = OnProgressTabClickAction(tab = ProgressSheetTab.PERCENTAGE)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState.copy(selectedProgressSheetTab = ProgressSheetTab.PERCENTAGE)
-        }
-
-        @Test
         fun `invokes setLastUsedProgressUnitUseCase with PAGE when tab is PAGE`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)

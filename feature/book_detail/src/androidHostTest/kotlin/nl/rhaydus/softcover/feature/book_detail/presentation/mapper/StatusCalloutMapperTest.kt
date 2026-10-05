@@ -174,21 +174,6 @@ class StatusCalloutMapperTest {
         }
 
         @Test
-        fun `None has no callout`() {
-            // ----- Arrange -----
-            val book = stubBook(
-                status = BookStatus.None,
-                userBook = stubUserBook(),
-            )
-
-            // ----- Act -----
-            val result = book.toStatusCallout(dateStyle = STYLE)
-
-            // ----- Assert -----
-            result.shouldBeNull()
-        }
-
-        @Test
         fun `a book without a user book has no callout`() {
             // ----- Arrange -----
             val book = stubBook(

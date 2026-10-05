@@ -210,22 +210,6 @@ class ReadingUpdateShareCardMapperTest {
         }
 
         @Test
-        fun `returns null when status is None`() {
-            // ----- Arrange -----
-            val book = buildBook(userBook = buildUserBook(status = BookStatus.None))
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
         fun `returns null when status is DidNotFinish`() {
             // ----- Arrange -----
             val book = buildBook(userBook = buildUserBook(status = BookStatus.DidNotFinish))
@@ -246,22 +230,6 @@ class ReadingUpdateShareCardMapperTest {
 
     @Nested
     inner class FinishedBook {
-        @Test
-        fun `is Finished when status is Read`() {
-            // ----- Arrange -----
-            val book = buildBook(userBook = buildUserBook(status = BookStatus.Read))
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>()
-        }
-
         @Test
         fun `ratingStars carries rating 4-5 unchanged — not halved`() {
             // ----- Arrange -----
@@ -316,22 +284,6 @@ class ReadingUpdateShareCardMapperTest {
     @Nested
     inner class ReadingBook {
         @Test
-        fun `is Reading when status is Reading`() {
-            // ----- Arrange -----
-            val book = buildBook(userBook = buildUserBook(status = BookStatus.Reading))
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>()
-        }
-
-        @Test
         fun `progressLabel includes page and percentage when currentPage and edition pages are present`() {
             // ----- Arrange -----
             val edition = buildEdition(pages = 400)
@@ -352,52 +304,6 @@ class ReadingUpdateShareCardMapperTest {
 
             // ----- Assert -----
             result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "p. 100 of 400 · 25%"
-        }
-
-        @Test
-        fun `progressLabel uses middle dot U+00B7 as separator`() {
-            // ----- Arrange -----
-            val edition = buildEdition(pages = 300)
-            val book = buildBook(
-                userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(
-                    currentPage = 150,
-                    progress = 50f,
-                ),
-            )
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = edition,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "p. 150 of 300 · 50%"
-        }
-
-        @Test
-        fun `progressLabel concrete case — page 61 of 195 rounds to 31 percent`() {
-            // ----- Arrange -----
-            val edition = buildEdition(pages = 195)
-            val book = buildBook(
-                userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(
-                    currentPage = 61,
-                    progress = 31f,
-                ),
-            )
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = edition,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "p. 61 of 195 · 31%"
         }
 
         @Test
@@ -469,51 +375,6 @@ class ReadingUpdateShareCardMapperTest {
         }
 
         @Test
-        fun `progressLabel falls back to percentage-only when progress is 100`() {
-            // ----- Arrange -----
-            val book = buildBook(
-                userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(
-                    currentPage = null,
-                    progress = 100f,
-                ),
-            )
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "100%"
-        }
-
-        @Test
-        fun `progressLabel percentage is rounded`() {
-            // ----- Arrange -----
-            val edition = buildEdition(pages = 100)
-            val book = buildBook(
-                userBook = buildUserBook(status = BookStatus.Reading),
-                userBookRead = buildUserBookRead(
-                    currentPage = 33,
-                    progress = 33f,
-                ),
-            )
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = edition,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Reading>().progressLabel shouldBe "p. 33 of 100 · 33%"
-        }
-
-        @Test
         fun `progressLabel shows time and percentage for audiobook when currentSeconds and audioSeconds are present`() {
             // ----- Arrange -----
             val edition = buildAudiobookEdition(audioSeconds = 7200)
@@ -580,27 +441,6 @@ class ReadingUpdateShareCardMapperTest {
 
     @Nested
     inner class Review {
-        @Test
-        fun `review is the ReviewDocument mapped to rich text for finished book`() {
-            // ----- Arrange -----
-            val reviewDoc = ReviewDocument(listOf(ReviewParagraph(listOf(ReviewRun("A great read")))))
-            val book = buildBook(userBook = buildUserBook(reviewDocument = reviewDoc))
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result.shouldBeInstanceOf<ReadingUpdateShareCardUiModel.Finished>().review shouldBe RichTextUiModel(
-                paragraphs = persistentListOf(
-                    RichTextParagraph(runs = persistentListOf(RichTextRun(text = "A great read"))),
-                ),
-            )
-        }
-
         @Test
         fun `inline spoiler runs are preserved in the rich text — masking happens at render time`() {
             // ----- Arrange -----
@@ -744,22 +584,6 @@ class ReadingUpdateShareCardMapperTest {
             // ----- Assert -----
             result?.avatarUrl shouldBe null
         }
-
-        @Test
-        fun `avatarUrl is null when null`() {
-            // ----- Arrange -----
-            val book = buildBook()
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result?.avatarUrl shouldBe null
-        }
     }
 
     // ----- cover resolution -----
@@ -818,25 +642,6 @@ class ReadingUpdateShareCardMapperTest {
             // ----- Act -----
             val result = book.toReadingUpdateShareCardUiModel(
                 edition = edition,
-                username = "reader",
-                avatarUrl = null,
-            )
-
-            // ----- Assert -----
-            result?.coverUrl shouldBe "https://book.cover/img.jpg"
-        }
-
-        @Test
-        fun `cover falls back to book coverUrl when no edition is provided and defaultEdition is null`() {
-            // ----- Arrange -----
-            val book = buildBook(
-                coverUrl = "https://book.cover/img.jpg",
-                defaultEdition = null,
-            )
-
-            // ----- Act -----
-            val result = book.toReadingUpdateShareCardUiModel(
-                edition = null,
                 username = "reader",
                 avatarUrl = null,
             )

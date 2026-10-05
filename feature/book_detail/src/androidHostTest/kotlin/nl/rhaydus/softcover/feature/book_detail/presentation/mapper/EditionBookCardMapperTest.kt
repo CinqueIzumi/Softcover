@@ -6,7 +6,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
-import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
@@ -49,7 +48,7 @@ class EditionBookCardMapperTest {
     @Nested
     inner class ToEditionCard {
         @Test
-        fun `keys the card by edition id with a standard row that taps`() {
+        fun `keys the card by its edition id`() {
             // ----- Arrange -----
             val edition = buildEdition(id = 42)
 
@@ -58,8 +57,6 @@ class EditionBookCardMapperTest {
 
             // ----- Assert -----
             card.key shouldBe BookCardKey.Edition(editionId = 42)
-            card.row().size shouldBe BookCardVariant.Row.Size.Standard
-            card.decorations.pressBehaviour shouldBe BookCardDecorations.Press.Tap
         }
 
         @Test
@@ -297,18 +294,6 @@ class EditionBookCardMapperTest {
 
             // ----- Assert -----
             header.shouldBeInstanceOf<SectionHeaderUiModel.Label>().eyebrow shouldBe "7 EDITIONS"
-        }
-
-        @Test
-        fun `carries a zero count`() {
-            // ----- Arrange -----
-            val count = 0
-
-            // ----- Act -----
-            val header = editionCountHeaderFor(count = count)
-
-            // ----- Assert -----
-            header.shouldBeInstanceOf<SectionHeaderUiModel.Label>().eyebrow shouldBe "0 EDITIONS"
         }
     }
 }

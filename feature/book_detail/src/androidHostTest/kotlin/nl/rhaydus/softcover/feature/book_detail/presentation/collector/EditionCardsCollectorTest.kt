@@ -47,7 +47,7 @@ class EditionCardsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `maps one card per edition in filteredEditions order`() = runTest(UnconfinedTestDispatcher()) {
+        fun `maps one card per edition in filteredEditions order and counts them in the header`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = BookDetailUiState(
                 editions = listOf(
@@ -72,6 +72,7 @@ class EditionCardsCollectorTest {
                 BookCardKey.Edition(editionId = 1),
                 BookCardKey.Edition(editionId = 2),
             )
+            headerEyebrow() shouldBe "3 EDITIONS"
             job.cancel()
         }
 
@@ -177,32 +178,6 @@ class EditionCardsCollectorTest {
             // ----- Assert -----
             headerEyebrow() shouldBe "0 EDITIONS"
             stateFlow.value.editionCards.size shouldBe 0
-            job.cancel()
-        }
-
-        @Test
-        fun `header counts every published card`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(
-                editions = listOf(
-                    buildEdition(id = 1),
-                    buildEdition(id = 2),
-                    buildEdition(id = 3),
-                ),
-            )
-            val collector = EditionCardsCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            headerEyebrow() shouldBe "3 EDITIONS"
-            stateFlow.value.editionCards.size shouldBe 3
             job.cancel()
         }
 

@@ -63,72 +63,6 @@ class OnSaveVerdictActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `leaves verdictSheetContext untouched after a successful save`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            val review = stubReview()
-            dependencies = stubDependencies()
-
-            coEvery {
-                saveBookVerdictUseCase(
-                    book = book,
-                    rating = 4.0,
-                    review = review.toReviewDocument(),
-                    hasSpoilers = false,
-                )
-            } returns Result.success(Unit)
-
-            val action = OnSaveVerdictAction(
-                book = book,
-                rating = 4.0,
-                review = review,
-                hasSpoilers = false,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheetContext shouldBe VerdictSheetContext.EDIT
-        }
-
-        @Test
-        fun `leaves verdictSheetContext untouched after a failed save`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            val review = stubReview()
-            dependencies = stubDependencies()
-
-            coEvery {
-                saveBookVerdictUseCase(
-                    book = book,
-                    rating = 4.0,
-                    review = review.toReviewDocument(),
-                    hasSpoilers = false,
-                )
-            } returns Result.failure(RuntimeException("api error"))
-
-            val action = OnSaveVerdictAction(
-                book = book,
-                rating = 4.0,
-                review = review,
-                hasSpoilers = false,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheetContext shouldBe VerdictSheetContext.EDIT
-        }
-
-        @Test
         fun `invokes use case with the book, rating, review and hasSpoilers provided to the action constructor`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
@@ -199,39 +133,6 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
-        }
-
-        @Test
-        fun `adds book id to failedMutationBookIds when use case fails`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-            val review = stubReview()
-            dependencies = stubDependencies()
-
-            coEvery {
-                saveBookVerdictUseCase(
-                    book = book,
-                    rating = null,
-                    review = review.toReviewDocument(),
-                    hasSpoilers = false,
-                )
-            } returns Result.failure(RuntimeException("api error"))
-
-            val action = OnSaveVerdictAction(
-                book = book,
-                rating = null,
-                review = review,
-                hasSpoilers = false,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
         }
 
         @Test

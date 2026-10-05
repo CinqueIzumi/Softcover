@@ -13,7 +13,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.tagNamingFieldFor
-import nl.rhaydus.softcover.feature.book_detail.presentation.state.withTagDraft
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -60,75 +59,6 @@ class TagNamingFieldCollectorTest {
             )
             stateFlow.value.tagNamingField.variant shouldBe expected.variant
             stateFlow.value.tagNamingField.placeholder shouldBe expected.placeholder
-            job.cancel()
-        }
-
-        @Test
-        fun `placeholder follows the category once it changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = TagNamingFieldCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.CONTENT_WARNING)
-
-            // ----- Assert -----
-            val expected = tagNamingFieldFor(
-                input = stateFlow.value.tagEditorInput,
-                category = TagCategory.CONTENT_WARNING,
-                addPill = stateFlow.value.tagAddPill,
-            )
-            stateFlow.value.tagNamingField.placeholder shouldBe expected.placeholder
-            job.cancel()
-        }
-
-        @Test
-        fun `drops the Add pill again once the draft is cleared`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = TagNamingFieldCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            stateFlow.value = stateFlow.value.copy(tagEditorInput = "cozy")
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(tagEditorInput = "")
-
-            // ----- Assert -----
-            val expected = tagNamingFieldFor(
-                input = "",
-                category = stateFlow.value.tagEditorCategory,
-                addPill = stateFlow.value.tagAddPill,
-            )
-            stateFlow.value.tagNamingField.variant shouldBe expected.variant
-            job.cancel()
-        }
-
-        @Test
-        fun `leaves the text written by the draft action untouched`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = TagNamingFieldCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.withTagDraft(input = "cozy")
-
-            // ----- Assert -----
-            stateFlow.value.tagNamingField.text shouldBe "cozy"
             job.cancel()
         }
 

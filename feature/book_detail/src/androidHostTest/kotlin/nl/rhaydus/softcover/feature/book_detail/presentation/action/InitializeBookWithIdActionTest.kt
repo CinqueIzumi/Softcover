@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -130,31 +129,6 @@ class InitializeBookWithIdActionTest {
             stateFlow.value.loadingBookDetails shouldBe false
             stateFlow.value.editions shouldBe emptyList()
             localVariablesFlow.value.editionsLoadedForBookId shouldBe null
-        }
-
-        @Test
-        fun `invokes use case with the id provided to the action constructor`() = runTest {
-            // ----- Arrange -----
-            val bookId = 99
-            val expectedBook = stubBook(id = bookId)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                fetchBookByIdUseCase(id = bookId)
-            } returns Result.success(expectedBook)
-
-            val action = InitializeBookWithIdAction(id = bookId)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                fetchBookByIdUseCase(id = bookId)
-            }
         }
 
         @Test

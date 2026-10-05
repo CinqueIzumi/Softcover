@@ -63,50 +63,5 @@ class OnFabClickActionTest {
             // ----- Assert -----
             stateFlow.value.fabMenuExpanded shouldBe false
         }
-
-        @Test
-        fun `leaves all other state fields unchanged when toggling fabMenuExpanded`() = runTest {
-            // ----- Arrange -----
-            val initialState = BookDetailUiState(
-                fabMenuExpanded = false,
-                loadingBookDetails = false,
-                showEditEditionSheet = true,
-                showUpdateProgressSheet = true,
-            )
-            stateFlow.value = initialState
-            val action = OnFabClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.loadingBookDetails shouldBe initialState.loadingBookDetails
-            stateFlow.value.book shouldBe initialState.book
-            stateFlow.value.showEditEditionSheet shouldBe initialState.showEditEditionSheet
-            stateFlow.value.showUpdateProgressSheet shouldBe initialState.showUpdateProgressSheet
-        }
-
-        @Test
-        fun `toggles fabMenuExpanded back to original value on two consecutive calls`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(fabMenuExpanded = false)
-            val action = OnFabClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.fabMenuExpanded shouldBe false
-        }
     }
 }

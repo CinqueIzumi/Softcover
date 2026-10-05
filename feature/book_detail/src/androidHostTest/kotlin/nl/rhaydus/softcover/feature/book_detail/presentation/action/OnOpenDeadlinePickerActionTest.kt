@@ -168,22 +168,5 @@ class OnOpenDeadlinePickerActionTest {
             // ----- Assert -----
             stateFlow.value.fabMenuExpanded shouldBe false
         }
-
-        @Test
-        fun `does not change other state fields`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(loadingBookDetails = false)
-            dependencies = stubDependencies(this)
-            val action = OnOpenDeadlinePickerAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.loadingBookDetails shouldBe false
-        }
     }
 }

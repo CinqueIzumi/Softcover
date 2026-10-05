@@ -70,32 +70,6 @@ class OnRevealReviewSpoilerActionTest {
         }
 
         @Test
-        fun `keeps an already revealed review revealed`() = runTest {
-            // ----- Arrange -----
-            val revealed = review(
-                id = 1,
-                isSpoilerGated = false,
-            )
-            val unrevealed = review(id = 2)
-            stateFlow.value = BookDetailUiState(
-                reviews = persistentListOf(
-                    revealed,
-                    unrevealed,
-                ),
-            )
-            val action = OnRevealReviewSpoilerAction(reviewId = 2)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.reviews.map { it.isSpoilerGated } shouldBe listOf(false, false)
-        }
-
-        @Test
         fun `leaves the reviews untouched when no id matches`() = runTest {
             // ----- Arrange -----
             val reviews = persistentListOf(review(id = 1), review(id = 2))
@@ -110,26 +84,6 @@ class OnRevealReviewSpoilerActionTest {
 
             // ----- Assert -----
             stateFlow.value.reviews shouldBe reviews
-        }
-
-        @Test
-        fun `changes nothing but the matching review`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(reviews = persistentListOf(review(id = 5)))
-            val action = OnRevealReviewSpoilerAction(reviewId = 5)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            val expected = review(
-                id = 5,
-                isSpoilerGated = false,
-            )
-            stateFlow.value.reviews shouldBe listOf(expected)
         }
     }
 }

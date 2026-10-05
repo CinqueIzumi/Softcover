@@ -23,18 +23,6 @@ class LensToggleModelTest {
         }
 
         @Test
-        fun `marks the given lens as selected`() {
-            // ----- Arrange & Act -----
-            val result = lensToggleFor(
-                selectedLens = BookDetailLens.YOURS,
-                yoursEnabled = true,
-            )
-
-            // ----- Assert -----
-            result.selected shouldBe BookDetailLens.YOURS
-        }
-
-        @Test
         fun `enables Yours when the book has a user copy`() {
             // ----- Arrange & Act -----
             val result = lensToggleFor(

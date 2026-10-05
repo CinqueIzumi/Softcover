@@ -138,32 +138,5 @@ class ShelveControlHeaderCollectorTest {
                 stateFlow.value.shelveControlHeader shouldBe SectionHeaderUiModel.Inline(eyebrow = "Shelve this book")
                 job.cancel()
             }
-
-        @Test
-        fun `re-derives shelveControlHeader when failedMutationBookIds changes for the same book`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = BookDetailUiState(
-                    book = stubBook(id = 1),
-                    failedMutationBookIds = emptySet(),
-                )
-                val collector = ShelveControlHeaderCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(failedMutationBookIds = setOf(1))
-
-                // ----- Assert -----
-                stateFlow.value.shelveControlHeader shouldBe SectionHeaderUiModel.Inline(
-                    eyebrow = "Couldn't save — tap to retry",
-                    tone = SectionHeaderTone.Error,
-                )
-                job.cancel()
-            }
     }
 }

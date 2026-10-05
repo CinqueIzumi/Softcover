@@ -140,30 +140,6 @@ class OnShowEditEditionSheetClickActionTest {
         }
 
         @Test
-        fun `sets showEditEditionSheet to true immediately on first open`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-            val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                getEditionsByBookIdUseCase(bookId = bookId)
-            } returns Result.success(emptyList())
-
-            val action = OnShowEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.showEditEditionSheet shouldBe true
-        }
-
-        @Test
         fun `populates editions and clears loadingEditions after successful fetch`() = runTest {
             // ----- Arrange -----
             val bookId = 42
@@ -291,30 +267,6 @@ class OnShowEditEditionSheetClickActionTest {
         }
 
         @Test
-        fun `does not change loadingEditions on memoized second open`() = runTest {
-            // ----- Arrange -----
-            val bookId = 5
-            val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                loadingEditions = false,
-            )
-            localVariablesFlow.value = BookDetailLocalVariables(editionsLoadedForBookId = bookId)
-            dependencies = stubDependencies(this)
-
-            val action = OnShowEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.loadingEditions shouldBe false
-        }
-
-        @Test
         fun `clears loadingEditions and keeps sheet open after use case failure`() = runTest {
             // ----- Arrange -----
             val bookId = 99
@@ -337,33 +289,6 @@ class OnShowEditEditionSheetClickActionTest {
             // ----- Assert -----
             stateFlow.value.loadingEditions shouldBe false
             stateFlow.value.showEditEditionSheet shouldBe true
-        }
-
-        @Test
-        fun `does not populate editions after use case failure`() = runTest {
-            // ----- Arrange -----
-            val bookId = 99
-            val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(
-                book = book,
-                editions = emptyList(),
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                getEditionsByBookIdUseCase(bookId = bookId)
-            } returns Result.failure(RuntimeException("network error"))
-
-            val action = OnShowEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.editions shouldBe emptyList()
         }
 
         @Test
@@ -408,50 +333,6 @@ class OnShowEditEditionSheetClickActionTest {
             stateFlow.value.showEditEditionSheet shouldBe false
             coVerify(exactly = 0) {
                 getEditionsByBookIdUseCase(bookId = any())
-            }
-        }
-
-        @Test
-        fun `does not modify local variables when book in state is null`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = BookDetailUiState(book = null)
-            dependencies = stubDependencies(this)
-
-            val action = OnShowEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            localVariablesFlow.value shouldBe BookDetailLocalVariables()
-        }
-
-        @Test
-        fun `invokes use case with the book id from state`() = runTest {
-            // ----- Arrange -----
-            val bookId = 13
-            val book = stubBook(id = bookId)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                getEditionsByBookIdUseCase(bookId = bookId)
-            } returns Result.success(emptyList())
-
-            val action = OnShowEditEditionSheetClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                getEditionsByBookIdUseCase(bookId = bookId)
             }
         }
     }

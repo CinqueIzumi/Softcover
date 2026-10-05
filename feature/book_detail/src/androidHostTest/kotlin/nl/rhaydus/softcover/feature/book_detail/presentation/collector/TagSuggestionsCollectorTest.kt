@@ -62,35 +62,6 @@ class TagSuggestionsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `writes tagSuggestions computed from the vocabulary and editor state`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val fantasy = stubTag(
-                name = "Fantasy",
-                count = 5,
-            )
-            val horror = stubTag(
-                name = "Horror",
-                count = 1,
-            )
-            vocabularyFlow.value = listOf(fantasy, horror)
-
-            val collector = TagSuggestionsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
-
-            // ----- Assert -----
-            stateFlow.value.tagSuggestions shouldBe listOf(fantasy, horror)
-            job.cancel()
-        }
-
-        @Test
         fun `recomputes when the editor input changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val fantasy = stubTag(name = "Fantasy")
@@ -196,33 +167,6 @@ class TagSuggestionsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.tagSuggestions shouldBe listOf(fantasy, horror)
-            job.cancel()
-        }
-
-        @Test
-        fun `an unrelated state change does not affect tagSuggestions`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            // showTagEditorSheet is not part of the input/category/appliedTags projection, so the
-            // distinctUntilChanged on that projection should suppress a redundant recompute.
-            val fantasy = stubTag(name = "Fantasy")
-            vocabularyFlow.value = listOf(fantasy)
-
-            val collector = TagSuggestionsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            stateFlow.value = stateFlow.value.copy(tagEditorCategory = TagCategory.GENRE)
-            stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(showTagEditorSheet = true)
-
-            // ----- Assert -----
-            stateFlow.value.tagSuggestions shouldBe listOf(fantasy)
             job.cancel()
         }
     }

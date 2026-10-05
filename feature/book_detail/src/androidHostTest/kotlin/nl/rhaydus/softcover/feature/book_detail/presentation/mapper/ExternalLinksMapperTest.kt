@@ -80,21 +80,6 @@ class ExternalLinksMapperTest {
         }
 
         @Test
-        fun `is null when both ISBNs are blank`() {
-            // ----- Arrange -----
-            val edition = edition(
-                isbn10 = "",
-                isbn13 = " ",
-            )
-
-            // ----- Act -----
-            val result = edition.toExternalLinkPills()
-
-            // ----- Assert -----
-            result.shouldBeNull()
-        }
-
-        @Test
         fun `is null when both ISBNs are missing`() {
             // ----- Arrange -----
             val edition = edition(

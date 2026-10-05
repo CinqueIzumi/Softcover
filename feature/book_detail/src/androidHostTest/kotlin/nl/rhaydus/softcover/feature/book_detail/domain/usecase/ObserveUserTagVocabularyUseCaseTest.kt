@@ -62,32 +62,6 @@ class ObserveUserTagVocabularyUseCaseTest {
         }
 
         @Test
-        fun `forwards every emission from the repository's flow`() = runTest {
-            // ----- Arrange -----
-            val userId = 3
-            val firstEmission = listOf(stubUserTag("Fantasy"))
-            val secondEmission = listOf(stubUserTag("Fantasy"), stubUserTag("Horror"))
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            every {
-                userTagVocabularyRepository.observe(userId = userId)
-            } returns flowOf(
-                firstEmission,
-                secondEmission,
-            )
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem() shouldBe firstEmission
-                awaitItem() shouldBe secondEmission
-                awaitComplete()
-            }
-        }
-
-        @Test
         fun `emits an empty list without crashing when user id resolution fails`() = runTest {
             // ----- Arrange -----
             coEvery {

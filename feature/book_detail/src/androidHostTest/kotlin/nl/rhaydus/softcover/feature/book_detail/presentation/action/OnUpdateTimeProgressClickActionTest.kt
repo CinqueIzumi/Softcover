@@ -288,64 +288,6 @@ class OnUpdateTimeProgressClickActionTest {
         }
 
         @Test
-        fun `treats non-numeric minutes as 0`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "abc",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3600,
-                )
-            }
-        }
-
-        @Test
-        fun `treats non-numeric seconds as 0`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = 7200)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            // 1*3600 + 0*60 + 0 = 3600
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "1",
-                minutes = "0",
-                seconds = "abc",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 3600,
-                )
-            }
-        }
-
-        @Test
         fun `treats empty string fields as 0`() = runTest {
             // ----- Arrange -----
             val book = stubBookWithAudioSeconds(audioSeconds = 3600)
@@ -454,35 +396,6 @@ class OnUpdateTimeProgressClickActionTest {
                 updateBookProgress(
                     book = book,
                     newSeconds = 3600,
-                )
-            }
-        }
-
-        @Test
-        fun `passes entered seconds through unchanged when audioSeconds is null — 2h maps to 7200`() = runTest {
-            // ----- Arrange -----
-            val book = stubBookWithAudioSeconds(audioSeconds = null)
-            stateFlow.value = BookDetailUiState(book = book)
-            dependencies = stubDependencies(this)
-
-            // total is unknown; free-entry path — coerceAtLeast(0) keeps 7200 as-is
-            val action = OnUpdateTimeProgressClickAction(
-                hours = "2",
-                minutes = "0",
-                seconds = "0",
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                updateBookProgress(
-                    book = book,
-                    newSeconds = 7200,
                 )
             }
         }

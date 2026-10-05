@@ -106,21 +106,6 @@ class VerdictSheetCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `verdictSheet is null when the context is null`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                book = stubBook(),
-                verdictSheetContext = null,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheet shouldBe null
-        }
-
-        @Test
         fun `verdictSheet is null when the context is set but the book is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             launchCollector()
@@ -176,27 +161,6 @@ class VerdictSheetCollectorTest {
         }
 
         @Test
-        fun `verdictSheet follows the context when it switches`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val book = stubBook()
-            launchCollector()
-            stateFlow.value = stateFlow.value.copy(
-                book = book,
-                verdictSheetContext = VerdictSheetContext.FINISHED,
-            )
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(verdictSheetContext = VerdictSheetContext.EDIT)
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheet shouldBe book.toVerdictSheetUiModel(
-                context = VerdictSheetContext.EDIT,
-                review = null,
-                cover = null,
-            )
-        }
-
-        @Test
         fun `verdictSheet picks up a cover that resolves after the sheet opened`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = stubBook()
@@ -215,29 +179,6 @@ class VerdictSheetCollectorTest {
                 context = VerdictSheetContext.FINISHED,
                 review = null,
                 cover = cover,
-            )
-        }
-
-        @Test
-        fun `verdictSheet picks up a review that changes while the sheet is open`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val firstDocument = buildReviewDocument(text = "First impression.")
-            val secondDocument = buildReviewDocument(text = "Revised after a reread.")
-            stateFlow.value = stateFlow.value.copy(
-                book = stubBook(reviewDocument = firstDocument),
-                verdictSheetContext = VerdictSheetContext.EDIT,
-            )
-            launchCollector()
-            val revisedBook = stubBook(reviewDocument = secondDocument)
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(book = revisedBook)
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheet shouldBe revisedBook.toVerdictSheetUiModel(
-                context = VerdictSheetContext.EDIT,
-                review = secondDocument.toRichTextUiModel(),
-                cover = null,
             )
         }
     }

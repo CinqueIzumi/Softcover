@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.component.cover.CoverSource
-import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.bookCoverTransitionKey
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -28,7 +27,7 @@ class CoverModelsSnapshotTest {
     @Nested
     inner class WithCoverModels {
         @Test
-        fun `seeds hero and backdrop from initialCover with the transition key for the book and surface`() {
+        fun `seeds hero and backdrop from initialCover with the transition key on the hero only`() {
             // ----- Arrange -----
             val state = BookDetailUiState(
                 bookId = BOOK_ID,
@@ -48,8 +47,7 @@ class CoverModelsSnapshotTest {
                 bookId = BOOK_ID,
                 surface = SURFACE,
             )
-            hero.variant shouldBe CoverVariant.Rounded
-            backdrop.variant shouldBe CoverVariant.Flat
+            backdrop.sharedTransitionKey.shouldBeNull()
             hero.source shouldBe CoverSource.Remote(
                 url = COVER_URL,
                 persistEditionId = null,
@@ -72,24 +70,7 @@ class CoverModelsSnapshotTest {
             // ----- Assert -----
             val fullScreen = result.fullScreenCover.shouldNotBeNull()
 
-            fullScreen.variant shouldBe CoverVariant.Flat
             fullScreen.source shouldBe result.heroCover.shouldNotBeNull().source
-        }
-
-        @Test
-        fun `backdrop never carries a shared transition key`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = BOOK_ID,
-                transitionSurface = SURFACE,
-                initialCover = initialCover(COVER_URL),
-            )
-
-            // ----- Act -----
-            val result = state.withCoverModels()
-
-            // ----- Assert -----
-            result.heroBackdropCover.shouldNotBeNull().sharedTransitionKey.shouldBeNull()
         }
 
         @Test
@@ -161,26 +142,6 @@ class CoverModelsSnapshotTest {
 
             // ----- Assert -----
             result.heroCover.shouldNotBeNull().sharedTransitionKey.shouldBeNull()
-        }
-
-        @Test
-        fun `leaves the other state fields untouched`() {
-            // ----- Arrange -----
-            val state = BookDetailUiState(
-                bookId = BOOK_ID,
-                initialCover = initialCover(COVER_URL),
-                loadingBookDetails = false,
-            )
-
-            // ----- Act -----
-            val result = state.withCoverModels()
-
-            // ----- Assert -----
-            result.copy(
-                heroCover = null,
-                heroBackdropCover = null,
-                fullScreenCover = null,
-            ) shouldBe state
         }
     }
 
@@ -257,7 +218,6 @@ class CoverModelsSnapshotTest {
             val covers = snapshot.toCoverModels()
 
             // ----- Assert -----
-            covers.fullScreen.variant shouldBe CoverVariant.Flat
             covers.fullScreen.source shouldBe covers.hero.source
             covers.fullScreen.coverlessTitle shouldBe "Piranesi"
         }

@@ -4,7 +4,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Job
@@ -75,30 +74,6 @@ class OnRemoveBookClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `invokes use case with the book provided to the action constructor`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                removeBookFromLibraryUseCase(book = book)
-            } returns Result.success(Unit)
-
-            val action = OnRemoveBookClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                removeBookFromLibraryUseCase(book = book)
-            }
-        }
-
-        @Test
         fun `sends RefreshDetailBookEvent when use case succeeds`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
@@ -145,28 +120,6 @@ class OnRemoveBookClickActionTest {
         }
 
         @Test
-        fun `does not add book id to failedMutationBookIds when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                removeBookFromLibraryUseCase(book = book)
-            } returns Result.success(Unit)
-
-            val action = OnRemoveBookClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
-        }
-
-        @Test
         fun `adds book id to failedMutationBookIds when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
@@ -186,28 +139,6 @@ class OnRemoveBookClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
-        }
-
-        @Test
-        fun `stores job in bookMutationJobs after execute returns`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                removeBookFromLibraryUseCase(book = book)
-            } returns Result.success(Unit)
-
-            val action = OnRemoveBookClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            localVariablesFlow.value.bookMutationJobs.containsKey(42) shouldBe true
         }
 
         @Test
@@ -243,25 +174,6 @@ class OnRemoveBookClickActionTest {
             // ----- Assert -----
             priorJob.isCancelled shouldBe true
             localVariablesFlow.value.bookMutationJobs.containsKey(bookId) shouldBe true
-        }
-
-        @Test
-        fun `completes without throwing when use case fails`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                removeBookFromLibraryUseCase(book = book)
-            } returns Result.failure(RuntimeException("network failure"))
-
-            val action = OnRemoveBookClickAction(book = book)
-
-            // ----- Act & Assert -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
         }
     }
 }

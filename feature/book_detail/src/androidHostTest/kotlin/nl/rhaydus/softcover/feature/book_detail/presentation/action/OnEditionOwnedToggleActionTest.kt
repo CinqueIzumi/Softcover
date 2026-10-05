@@ -143,37 +143,6 @@ class OnEditionOwnedToggleActionTest {
         }
 
         @Test
-        fun `does not add edition id to failedMutationEditionIds when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            val edition = stubEdition(
-                id = 99,
-                owned = false,
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                setEditionAsOwnedUseCase(
-                    edition = edition,
-                    owned = true,
-                )
-            } returns Result.success(Unit)
-
-            val action = OnEditionOwnedToggleAction(
-                edition = edition,
-                owned = true,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.failedMutationEditionIds.contains(99) shouldBe false
-        }
-
-        @Test
         fun `adds edition id to failedMutationEditionIds when use case fails`() = runTest {
             // ----- Arrange -----
             val edition = stubEdition(
@@ -202,37 +171,6 @@ class OnEditionOwnedToggleActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationEditionIds.contains(99) shouldBe true
-        }
-
-        @Test
-        fun `stores job in editionMutationJobs after execute returns`() = runTest {
-            // ----- Arrange -----
-            val edition = stubEdition(
-                id = 99,
-                owned = false,
-            )
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                setEditionAsOwnedUseCase(
-                    edition = edition,
-                    owned = true,
-                )
-            } returns Result.success(Unit)
-
-            val action = OnEditionOwnedToggleAction(
-                edition = edition,
-                owned = true,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            localVariablesFlow.value.editionMutationJobs.containsKey(99) shouldBe true
         }
 
         @Test
@@ -277,31 +215,6 @@ class OnEditionOwnedToggleActionTest {
             // ----- Assert -----
             priorJob.isCancelled shouldBe true
             localVariablesFlow.value.editionMutationJobs.containsKey(editionId) shouldBe true
-        }
-
-        @Test
-        fun `completes without throwing when use case fails`() = runTest {
-            // ----- Arrange -----
-            val edition = stubEdition(owned = true)
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                setEditionAsOwnedUseCase(
-                    edition = edition,
-                    owned = false,
-                )
-            } returns Result.failure(RuntimeException("network error"))
-
-            val action = OnEditionOwnedToggleAction(
-                edition = edition,
-                owned = false,
-            )
-
-            // ----- Act & Assert -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
         }
     }
 }

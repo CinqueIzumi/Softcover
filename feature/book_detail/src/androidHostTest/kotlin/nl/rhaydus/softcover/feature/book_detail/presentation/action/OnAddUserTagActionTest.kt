@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -91,36 +92,16 @@ class OnAddUserTagActionTest {
         }
 
         @Test
-        fun `does nothing when name is empty`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(book = stubBook())
-            val initialState = stateFlow.value
-            val action = OnAddUserTagAction(
-                name = "",
-                category = TagCategory.TAG,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState
-        }
-
-        @Test
         fun `does nothing when tag with same name and category already present (exact case)`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
-                userTags = listOf(UserTag(
-                    name = "Horror",
-                    category = TagCategory.GENRE,
-                ),
+                userTags = listOf(
+                    UserTag(
+                        name = "Horror",
+                        category = TagCategory.GENRE,
+                    ),
                 ),
             )
             val initialTags = stateFlow.value.userTags
@@ -145,10 +126,11 @@ class OnAddUserTagActionTest {
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(),
-                userTags = listOf(UserTag(
-                    name = "horror",
-                    category = TagCategory.GENRE,
-                ),
+                userTags = listOf(
+                    UserTag(
+                        name = "horror",
+                        category = TagCategory.GENRE,
+                    ),
                 ),
             )
             val initialTags = stateFlow.value.userTags
@@ -208,14 +190,13 @@ class OnAddUserTagActionTest {
         }
 
         @Test
-        fun `appends trimmed new tag optimistically`() = runTest {
+        fun `saves the trimmed tag to Hardcover`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(book = stubBook(id = 1))
-            val savedResult = listOf(UserTag(
+            val trimmedTag = UserTag(
                 name = "epic",
                 category = TagCategory.TAG,
-            ),
             )
 
             coEvery {
@@ -223,7 +204,7 @@ class OnAddUserTagActionTest {
                     bookId = 1,
                     tags = any(),
                 )
-            } returns Result.success(savedResult)
+            } returns Result.success(listOf(trimmedTag))
 
             val action = OnAddUserTagAction(
                 name = "  epic  ",
@@ -237,7 +218,12 @@ class OnAddUserTagActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.userTags shouldBe savedResult
+            coVerify {
+                saveUserTagsUseCase(
+                    bookId = 1,
+                    tags = listOf(trimmedTag),
+                )
+            }
         }
 
         @Test
@@ -300,34 +286,6 @@ class OnAddUserTagActionTest {
         }
 
         @Test
-        fun `does not set newlyAddedTagKey when the tag is a no-op duplicate`() = runTest {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(
-                book = stubBook(),
-                userTags = listOf(UserTag(
-                    name = "Horror",
-                    category = TagCategory.GENRE,
-                ),
-                ),
-                newlyAddedTagKey = null,
-            )
-            val action = OnAddUserTagAction(
-                name = "Horror",
-                category = TagCategory.GENRE,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.newlyAddedTagKey shouldBe null
-        }
-
-        @Test
         fun `overwrites userTags with the server canonical response on success`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
@@ -366,10 +324,11 @@ class OnAddUserTagActionTest {
         fun `rolls back to previous userTags on save failure`() = runTest {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
-            val originalTags = listOf(UserTag(
-                name = "sci-fi",
-                category = TagCategory.GENRE,
-            ),
+            val originalTags = listOf(
+                UserTag(
+                    name = "sci-fi",
+                    category = TagCategory.GENRE,
+                ),
             )
             stateFlow.value = stateFlow.value.copy(
                 book = stubBook(id = 1),
