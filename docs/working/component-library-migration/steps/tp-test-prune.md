@@ -37,7 +37,7 @@ the reason for each and the expected change in file count, test count and time. 
 | TP-3 | `core:preferences`, `core:database`, `core:domain`, `core:deadlines`, `core:connectivity`, `core:presentation`, `core:identity`, `core:notification`, `orchestration` — 85 files, 787 → 424 tests, 12.6 s | [x] |
 | TP-4 | `feature:book_detail` — 110 files, 807 → 524 tests, 4.4 → 3.1 s | [x] |
 | TP-5 | `feature:library` — 84 → 80 files, 784 → 539 tests, 4.8 → 3.7 s | [x] |
-| TP-6 | `feature:explore` — 76 files, 515 tests, 7.1 s | [ ] |
+| TP-6 | `feature:explore` — 76 → 61 files, 515 → 302 tests, 7.1 → 4.1 s | [x] |
 | TP-7 | `feature:settings`, `feature:app_update`, `feature:onboarding` — 68 files, 366 tests, 5.8 s | [ ] |
 | TP-8 | `feature:reading`, `feature:profile`, `feature:scan`, `feature:lists`, `feature:session` — 74 files, 590 tests, 8.6 s | [ ] |
 

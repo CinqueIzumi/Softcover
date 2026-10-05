@@ -148,25 +148,6 @@ class BecauseYouReadGenreSheetCollectorTest {
         }
 
         @Test
-        fun `the group dismisses the sheet itself on selection, also after a rewrite`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = BecauseYouReadGenreSheetCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(becauseYouReadGenreOptions = listOf("Horror"))
-
-                // ----- Assert -----
-                job.cancel()
-            }
-
-        @Test
         fun `rewrites the rows when the genre changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
@@ -186,25 +167,6 @@ class BecauseYouReadGenreSheetCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.becauseYouReadGenreGroup.rows.map { it.selected } shouldBe listOf(false, false, true)
-            job.cancel()
-        }
-
-        @Test
-        fun `rewrites the rows when the options change`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = BecauseYouReadGenreSheetCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(becauseYouReadGenreOptions = listOf("Romance", "Horror"))
-
-            // ----- Assert -----
-            stateFlow.value.becauseYouReadGenreGroup.rows.map { it.key } shouldBe listOf(null, "Romance", "Horror")
             job.cancel()
         }
     }

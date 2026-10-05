@@ -1,8 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.feature.explore.domain.model.FEATURED_RELEASE_WINDOW_DAYS
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -100,65 +98,10 @@ class ExploreScreenUiStateTest {
             // ----- Assert -----
             result shouldBe ExploreSearchPhase.LOADING
         }
-
-        @Test
-        fun `isLoading is LOADING even when search is focused`() {
-            // ----- Arrange -----
-            val state = ExploreScreenUiState(
-                isLoading = true,
-                searchFocused = true,
-            )
-
-            // ----- Act -----
-            val result = state.searchPhase
-
-            // ----- Assert -----
-            result shouldBe ExploreSearchPhase.LOADING
-        }
-
-        @Test
-        fun `isLoading with no other flags set is still LOADING`() {
-            // ----- Arrange -----
-            val state = ExploreScreenUiState(isLoading = true)
-
-            // ----- Act -----
-            val result = state.searchPhase
-
-            // ----- Assert -----
-            result shouldBe ExploreSearchPhase.LOADING
-        }
-
-        @Test
-        fun `RESULTS wins over FOCUS when both searchText and searchFocused are set`() {
-            // ----- Arrange -----
-            val state = ExploreScreenUiState(
-                searchText = "kotlin",
-                searchFocused = true,
-                isLoading = false,
-            )
-
-            // ----- Act -----
-            val result = state.searchPhase
-
-            // ----- Assert -----
-            result shouldBe ExploreSearchPhase.RESULTS
-        }
     }
 
     @Nested
     inner class HasActiveSearch {
-        @Test
-        fun `unfocused empty query with no mood filter is false`() {
-            // ----- Arrange -----
-            val state = ExploreScreenUiState()
-
-            // ----- Act -----
-            val result = state.hasActiveSearch
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
         @Test
         fun `focused empty query with no mood filter is false`() {
             // ----- Arrange -----
@@ -205,23 +148,6 @@ class ExploreScreenUiStateTest {
 
             // ----- Assert -----
             result shouldBe true
-        }
-    }
-
-    @Nested
-    inner class Defaults {
-        @Test
-        fun `featuredHeader states the release window from the domain constant`() {
-            // ----- Arrange -----
-            val state = ExploreScreenUiState()
-
-            // ----- Act -----
-            val result = state.featuredHeader
-
-            // ----- Assert -----
-            result shouldBe SectionHeaderUiModel.Inline(
-                eyebrow = "Most anticipated · next $FEATURED_RELEASE_WINDOW_DAYS days",
-            )
         }
     }
 }

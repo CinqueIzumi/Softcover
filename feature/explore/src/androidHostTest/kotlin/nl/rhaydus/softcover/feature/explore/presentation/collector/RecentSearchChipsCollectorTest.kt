@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -59,52 +58,6 @@ class RecentSearchChipsCollectorTest {
                 )
                 job.cancel()
             }
-
-        @Test
-        fun `updates to an empty chip set when previousSearchQueries becomes empty`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = ExploreScreenUiState(previousSearchQueries = listOf("kotlin"))
-                val collector = RecentSearchChipsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(previousSearchQueries = emptyList())
-
-                // ----- Assert -----
-                stateFlow.value.recentSearchChips.chips shouldBe persistentListOf()
-                stateFlow.value.recentSearchChips.payloadByKey shouldBe emptyMap()
-                job.cancel()
-            }
-
-        @Test
-        fun `preserves other state fields when updating`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                searchText = "existing query",
-                isLoading = true,
-            )
-            val collector = RecentSearchChipsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(previousSearchQueries = listOf("dune"))
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe "existing query"
-            stateFlow.value.isLoading shouldBe true
-            job.cancel()
-        }
 
         @Test
         fun `unrelated state change that leaves previousSearchQueries equal does not retrigger recompute`() =

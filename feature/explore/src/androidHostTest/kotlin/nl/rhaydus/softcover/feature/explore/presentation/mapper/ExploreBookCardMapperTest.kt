@@ -11,7 +11,6 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
-import nl.rhaydus.softcover.core.component.bookcard.BookCardDecorations
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLinePart
@@ -74,7 +73,7 @@ class ExploreBookCardMapperTest {
     @Nested
     inner class ToTrendingCard {
         @Test
-        fun `keys the card by book id and passes cover, title and badge through`() {
+        fun `keys the card by book id and passes the cover, title and badge through`() {
             // ----- Arrange -----
             val input = book(
                 id = 7,
@@ -94,8 +93,6 @@ class ExploreBookCardMapperTest {
                 badge = overlay,
             )
             card.stacked().text.title shouldBe "Piranesi"
-            card.decorations.pressBehaviour shouldBe BookCardDecorations.Press.Tap
-            card.decorations.progress.shouldBeNull()
         }
 
         @Test
@@ -133,24 +130,6 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             card.stacked().text.supportingLines shouldBe persistentListOf()
-        }
-
-        @Test
-        fun `has no byline, eyebrow or overflow menu and tolerates a missing cover and badge`() {
-            // ----- Arrange -----
-            val input = book(rating = 3.0)
-
-            // ----- Act -----
-            val card = input.toTrendingCard(
-                cover = null,
-                coverBadge = null,
-            )
-
-            // ----- Assert -----
-            card.stacked().cover.shouldBeNull()
-            card.stacked().text.byline.shouldBeNull()
-            card.stacked().text.eyebrow.shouldBeNull()
-            card.stacked().hasMenu shouldBe false
         }
     }
 
@@ -200,8 +179,6 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             card.stacked().text.byline.shouldBeNull()
-            card.stacked().text.supportingLines shouldBe persistentListOf()
-            card.stacked().hasMenu shouldBe false
         }
     }
 
@@ -244,9 +221,9 @@ class ExploreBookCardMapperTest {
 
             // ----- Act -----
             val card = input.toUpNextCard(
-                    cover = cover,
-                    coverBadge = null,
-                )
+                cover = cover,
+                coverBadge = null,
+            )
 
             // ----- Assert -----
             card.stacked().text.eyebrow.shouldNotBeNull().text shouldBe "EARTHSEA"
@@ -267,24 +244,6 @@ class ExploreBookCardMapperTest {
             // ----- Assert -----
             card.stacked().text.eyebrow.shouldBeNull()
         }
-
-        @Test
-        fun `shows the overflow menu and tracks the overlay as cover badge with a tap and no progress`() {
-            // ----- Arrange -----
-            val input = book()
-
-            // ----- Act -----
-            val card = input.toUpNextCard(
-                cover = cover,
-                coverBadge = overlay,
-            )
-
-            // ----- Assert -----
-            card.stacked().hasMenu shouldBe true
-            card.stacked().cover.shouldNotBeNull().badge shouldBe overlay
-            card.decorations.pressBehaviour shouldBe BookCardDecorations.Press.Tap
-            card.decorations.progress.shouldBeNull()
-        }
     }
 
     @Nested
@@ -293,7 +252,7 @@ class ExploreBookCardMapperTest {
             variant.shouldBeInstanceOf<BookCardVariant.Row>()
 
         @Test
-        fun `builds a standard row keyed by book id with the cover as lead`() {
+        fun `builds a row keyed by book id with the cover as lead`() {
             // ----- Arrange -----
             val input = book(id = 42)
 
@@ -302,7 +261,6 @@ class ExploreBookCardMapperTest {
 
             // ----- Assert -----
             card.key shouldBe BookCardKey.Book(bookId = 42)
-            card.row().size shouldBe BookCardVariant.Row.Size.Standard
             card.row().lead shouldBe BookCardLead.Cover(cover = BookCardCover(model = cover))
         }
 

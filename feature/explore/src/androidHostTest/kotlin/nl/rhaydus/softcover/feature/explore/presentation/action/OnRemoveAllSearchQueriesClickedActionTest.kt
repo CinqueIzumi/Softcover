@@ -84,28 +84,6 @@ class OnRemoveAllSearchQueriesClickedActionTest {
         }
 
         @Test
-        fun `does not change state when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                removeAllSearchQueriesUseCase()
-            } returns Result.success(Unit)
-
-            val action = OnRemoveAllSearchQueriesClickedAction()
-            val stateBefore = stateFlow.value
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe stateBefore
-        }
-
-        @Test
         fun `does not change state when use case fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)

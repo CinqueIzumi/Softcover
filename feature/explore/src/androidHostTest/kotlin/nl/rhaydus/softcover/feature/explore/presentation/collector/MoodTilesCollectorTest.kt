@@ -74,28 +74,6 @@ class MoodTilesCollectorTest {
         }
 
         @Test
-        fun `empties moodTiles when moodTags becomes empty`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(
-                moodTags = listOf(cosy),
-                loadingMoodTags = false,
-            )
-            val job = launch {
-                MoodTilesCollector().onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(moodTags = emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.moodTiles shouldBe persistentListOf()
-            job.cancel()
-        }
-
-        @Test
         fun `emits four loading stand-in tiles while the first load has no tags`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(
@@ -114,29 +92,6 @@ class MoodTilesCollectorTest {
             // ----- Assert -----
             stateFlow.value.moodTiles.size shouldBe 4
             stateFlow.value.moodTiles.all { it.isLoading } shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `replaces the stand-ins with the real tiles once the tags arrive`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val job = launch {
-                MoodTilesCollector().onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            stateFlow.value.moodTiles.size shouldBe 4
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                moodTags = listOf(cosy, dark),
-                loadingMoodTags = false,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.moodTiles.map { it.key } shouldBe listOf(1, 2)
-            stateFlow.value.moodTiles.none { it.isLoading } shouldBe true
             job.cancel()
         }
 

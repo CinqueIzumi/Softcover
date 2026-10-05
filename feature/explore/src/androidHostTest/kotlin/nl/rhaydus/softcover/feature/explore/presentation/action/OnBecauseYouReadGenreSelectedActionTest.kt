@@ -48,7 +48,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `optimistically sets the selected genre and clears the books before the persist call resolves`() = runTest(testDispatcher) {
+        fun `optimistically selects the genre, clears books and shows loading while persisting`() = runTest(testDispatcher) {
             // ----- Arrange -----
             stateFlow.value = ExploreScreenUiState(
                 becauseYouReadGenre = "Romance",
@@ -76,6 +76,7 @@ class OnBecauseYouReadGenreSelectedActionTest {
             // ----- Assert -----
             stateFlow.value.becauseYouReadGenre shouldBe "Fantasy"
             stateFlow.value.becauseYouReadBooks shouldBe emptyList()
+            stateFlow.value.loadingBecauseYouReadBooks shouldBe true
 
             gate.complete(Unit)
             job.join()
@@ -125,81 +126,6 @@ class OnBecauseYouReadGenreSelectedActionTest {
 
             // ----- Assert -----
             stateFlow.value.becauseYouReadGenre shouldBe "Romance"
-        }
-
-        @Test
-        fun `sets loadingBecauseYouReadBooks true before calling the use case`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            val gate = CompletableDeferred<Unit>()
-
-            coEvery {
-                setBecauseYouReadGenreUseCase(genre = "Fantasy")
-            } coAnswers {
-                gate.await()
-                Result.success(Unit)
-            }
-
-            val action = OnBecauseYouReadGenreSelectedAction(genre = "Fantasy")
-
-            // ----- Act -----
-            val job = launch {
-                action.execute(
-                    dependencies = dependencies,
-                    scope = scope,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.loadingBecauseYouReadBooks shouldBe true
-
-            gate.complete(Unit)
-            job.join()
-        }
-
-        @Test
-        fun `calls setBecauseYouReadGenreUseCase with the constructor genre`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                setBecauseYouReadGenreUseCase(genre = "Fantasy")
-            } returns Result.success(Unit)
-
-            val action = OnBecauseYouReadGenreSelectedAction(genre = "Fantasy")
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                setBecauseYouReadGenreUseCase(genre = "Fantasy")
-            }
-        }
-
-        @Test
-        fun `calls setBecauseYouReadGenreUseCase with null to clear the override`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                becauseYouReadGenre = "Romance",
-                becauseYouReadGenreOptions = emptyList(),
-            )
-            coEvery {
-                setBecauseYouReadGenreUseCase(genre = null)
-            } returns Result.success(Unit)
-
-            val action = OnBecauseYouReadGenreSelectedAction(genre = null)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                setBecauseYouReadGenreUseCase(genre = null)
-            }
         }
 
         @Test

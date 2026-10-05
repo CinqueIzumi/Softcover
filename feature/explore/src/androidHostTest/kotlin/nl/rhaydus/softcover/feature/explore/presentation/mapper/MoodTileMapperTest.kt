@@ -51,10 +51,10 @@ class MoodTileMapperTest {
         }
 
         @Test
-        fun `cycles the ink Cosy, Dread, Neutral, HeartWrench by index`() {
+        fun `cycles the ink Cosy, Dread, Neutral, HeartWrench by index and repeats it from the fifth tile`() {
             // ----- Arrange -----
             val input = tag()
-            val indices = 0..3
+            val indices = 0..7
 
             // ----- Act -----
             val inks = indices.map { index -> input.toMoodTile(index = index).ink }
@@ -65,20 +65,6 @@ class MoodTileMapperTest {
                 MoodTileInk.Dread,
                 MoodTileInk.Neutral,
                 MoodTileInk.HeartWrench,
-            )
-        }
-
-        @Test
-        fun `repeats the ink cycle from the fifth tile onward`() {
-            // ----- Arrange -----
-            val input = tag()
-            val indices = 4..7
-
-            // ----- Act -----
-            val inks = indices.map { index -> input.toMoodTile(index = index).ink }
-
-            // ----- Assert -----
-            inks shouldBe listOf(
                 MoodTileInk.Cosy,
                 MoodTileInk.Dread,
                 MoodTileInk.Neutral,

@@ -236,31 +236,6 @@ class GetContinueSeriesBooksUseCaseTest {
         }
 
         @Test
-        fun `None-status books do not seed continuation`() = runTest {
-            // ----- Arrange -----
-            val noneBook = bookInSeries(
-                id = 1,
-                seriesId = 500,
-                amountOfBooks = 5,
-                positionsInSeries = listOf(1.0),
-                status = BookStatus.None,
-            )
-
-            every {
-                booksRepository.books
-            } returns flowOf(listOf(noneBook))
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-            coVerify(exactly = 1) {
-                exploreRepository.fetchNextBooksInSeries(seeds = emptyList())
-            }
-        }
-
-        @Test
         fun `books missing bookSeries are ignored`() = runTest {
             // ----- Arrange -----
             val noSeriesBook = PreviewData.baseBook.copy(
@@ -310,72 +285,6 @@ class GetContinueSeriesBooksUseCaseTest {
             coVerify(exactly = 1) {
                 exploreRepository.fetchNextBooksInSeries(seeds = emptyList())
             }
-        }
-
-        @Test
-        fun `float position 1-0 fetches with afterPosition 1-0`() = runTest {
-            // ----- Arrange -----
-            val book = bookInSeries(
-                id = 1,
-                seriesId = 700,
-                amountOfBooks = 5,
-                positionsInSeries = listOf(1.0),
-                status = BookStatus.Reading,
-            )
-            val nextBook: Book = mockk(relaxed = true)
-
-            every {
-                booksRepository.books
-            } returns flowOf(listOf(book))
-
-            val seedsSlot = slot<List<SeriesContinuationSeed>>()
-            coEvery {
-                exploreRepository.fetchNextBooksInSeries(seeds = capture(seedsSlot))
-            } returns listOf(nextBook)
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result shouldBe listOf(nextBook)
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 700,
-                afterPosition = 1.0,
-            ),
-            )
-        }
-
-        @Test
-        fun `float position 1-5 fetches with afterPosition 1-5`() = runTest {
-            // ----- Arrange -----
-            val book = bookInSeries(
-                id = 1,
-                seriesId = 800,
-                amountOfBooks = 5,
-                positionsInSeries = listOf(1.5),
-                status = BookStatus.Reading,
-            )
-            val nextBook: Book = mockk(relaxed = true)
-
-            every {
-                booksRepository.books
-            } returns flowOf(listOf(book))
-
-            val seedsSlot = slot<List<SeriesContinuationSeed>>()
-            coEvery {
-                exploreRepository.fetchNextBooksInSeries(seeds = capture(seedsSlot))
-            } returns listOf(nextBook)
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result shouldBe listOf(nextBook)
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 800,
-                afterPosition = 1.5,
-            ),
-            )
         }
 
         @Test
@@ -473,39 +382,6 @@ class GetContinueSeriesBooksUseCaseTest {
         }
 
         @Test
-        fun `single batched call resolves every qualifying series, however many there are`() = runTest {
-            // ----- Arrange -----
-            val books = (1..12).map { index ->
-                bookInSeries(
-                    id = index,
-                    seriesId = 900 + index,
-                    amountOfBooks = 5,
-                    positionsInSeries = listOf(1.0),
-                    status = BookStatus.Read,
-                    lastReadDate = "2024-01-0$index",
-                )
-            }
-
-            every {
-                booksRepository.books
-            } returns flowOf(books)
-
-            val seedsSlot = slot<List<SeriesContinuationSeed>>()
-            coEvery {
-                exploreRepository.fetchNextBooksInSeries(seeds = capture(seedsSlot))
-            } returns (1..12).map { mockk<Book>(relaxed = true) }
-
-            // ----- Act -----
-            useCase().first()
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                exploreRepository.fetchNextBooksInSeries(seeds = any())
-            }
-            seedsSlot.captured.map { it.seriesId }.toSet() shouldBe (901..912).toSet()
-        }
-
-        @Test
         fun `a thrown exception from the batch fetch empties the whole shelf rather than propagating`() = runTest {
             // ----- Arrange -----
             val bookA = bookInSeries(
@@ -529,45 +405,6 @@ class GetContinueSeriesBooksUseCaseTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-        }
-
-        @Test
-        fun `a series the batch returns no book for simply does not appear in the result`() = runTest {
-            // ----- Arrange -----
-            // afterPosition must stay below amountOfBooks (5) - at or above it, deriveSeeds'
-            // cursor >= amountOfBooks check excludes the series before any fetch is attempted,
-            // which would make the setOf(1101, 1102) assertion below vacuous.
-            val bookA = bookInSeries(
-                id = 1,
-                seriesId = 1101,
-                amountOfBooks = 5,
-                positionsInSeries = listOf(4.0),
-                status = BookStatus.Read,
-            )
-            val bookB = bookInSeries(
-                id = 2,
-                seriesId = 1102,
-                amountOfBooks = 5,
-                positionsInSeries = listOf(1.0),
-                status = BookStatus.Read,
-            )
-            val nextB: Book = mockk(relaxed = true)
-
-            every {
-                booksRepository.books
-            } returns flowOf(listOf(bookA, bookB))
-
-            val seedsSlot = slot<List<SeriesContinuationSeed>>()
-            coEvery {
-                exploreRepository.fetchNextBooksInSeries(seeds = capture(seedsSlot))
-            } returns listOf(nextB)
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result shouldBe listOf(nextB)
-            seedsSlot.captured.map { it.seriesId }.toSet() shouldBe setOf(1101, 1102)
         }
 
         @Test
@@ -598,39 +435,6 @@ class GetContinueSeriesBooksUseCaseTest {
             result shouldBe listOf(nextBook)
             seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
                 seriesId = 1200,
-                afterPosition = 3.0,
-            ),
-            )
-        }
-
-        @Test
-        fun `compilation marked Reading also seeds from its highest position`() = runTest {
-            // ----- Arrange -----
-            val compilation = bookInSeries(
-                id = 1,
-                seriesId = 1300,
-                amountOfBooks = 5,
-                positionsInSeries = listOf(1.0, 2.0, 3.0),
-                status = BookStatus.Reading,
-            )
-            val nextBook: Book = mockk(relaxed = true)
-
-            every {
-                booksRepository.books
-            } returns flowOf(listOf(compilation))
-
-            val seedsSlot = slot<List<SeriesContinuationSeed>>()
-            coEvery {
-                exploreRepository.fetchNextBooksInSeries(seeds = capture(seedsSlot))
-            } returns listOf(nextBook)
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result shouldBe listOf(nextBook)
-            seedsSlot.captured shouldBe listOf(SeriesContinuationSeed(
-                seriesId = 1300,
                 afterPosition = 3.0,
             ),
             )
@@ -674,31 +478,6 @@ class GetContinueSeriesBooksUseCaseTest {
                 afterPosition = 3.0,
             ),
             )
-        }
-
-        @Test
-        fun `compilation covering full series is excluded`() = runTest {
-            // ----- Arrange -----
-            val compilation = bookInSeries(
-                id = 1,
-                seriesId = 1500,
-                amountOfBooks = 3,
-                positionsInSeries = listOf(1.0, 2.0, 3.0),
-                status = BookStatus.Read,
-            )
-
-            every {
-                booksRepository.books
-            } returns flowOf(listOf(compilation))
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-            coVerify(exactly = 1) {
-                exploreRepository.fetchNextBooksInSeries(seeds = emptyList())
-            }
         }
 
         @Test

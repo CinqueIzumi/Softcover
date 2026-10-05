@@ -41,8 +41,11 @@ class ExploreStandInsTest {
     inner class StandInCards {
         @Test
         fun `every stand-in card's cover is loading and has no source`() {
+            // ----- Arrange -----
+            val lists = standInLists.values
+
             // ----- Act & Assert -----
-            standInLists.values.forEach { cards ->
+            lists.forEach { cards ->
                 cards.shouldNotBeEmpty()
                 cards.forEach { card ->
                     val cover = card.standInCover()
@@ -55,8 +58,11 @@ class ExploreStandInsTest {
 
         @Test
         fun `each stand-in list has distinct keys`() {
+            // ----- Arrange -----
+            val lists = standInLists.values
+
             // ----- Act & Assert -----
-            standInLists.values.forEach { cards ->
+            lists.forEach { cards ->
                 val keys = cards.map { it.key }
 
                 keys.distinct() shouldBe keys

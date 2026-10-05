@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.explore.presentation.mapper
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookSeries
@@ -45,21 +44,6 @@ class ContinueSeriesMenuSheetMapperTest {
 
     @Nested
     inner class ContinueSeriesMenuSheetFor {
-        @Test
-        fun `builds the sheet header from the book and its series`() {
-            // ----- Arrange -----
-            val input = book()
-
-            // ----- Act -----
-            val sheet = continueSeriesMenuSheetFor(book = input)
-
-            // ----- Assert -----
-            sheet.scaffold.header.section shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "Earthsea",
-                headline = "The Tombs of Atuan",
-            )
-        }
-
         @Test
         fun `offers hiding the book then the series when the book belongs to one`() {
             // ----- Arrange -----

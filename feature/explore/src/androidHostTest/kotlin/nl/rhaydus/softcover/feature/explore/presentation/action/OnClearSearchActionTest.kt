@@ -52,43 +52,14 @@ class OnClearSearchActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets searchFocused to false when it was previously true`() = runTest {
+        fun `leaves search entirely, dropping chrome, query, mood filter and in-flight fetch`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(searchFocused = true)
-
-            // ----- Act -----
-            OnClearSearchAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.searchFocused shouldBe false
-        }
-
-        @Test
-        fun `clears the query text and queried results`() = runTest {
-            // ----- Arrange -----
+            val queryJob = Job()
             stateFlow.value = stateFlow.value.copy(
+                searchFocused = true,
+                isSortMenuExpanded = true,
                 searchText = "dune",
                 queriedBooks = listOf(mockk()),
-            )
-
-            // ----- Act -----
-            OnClearSearchAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe ""
-            stateFlow.value.queriedBooks shouldBe emptyList()
-        }
-
-        @Test
-        fun `clears an active mood filter`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(
                 activeMoodFilter = MoodTag(
                     id = 1,
                     label = "Cozy",
@@ -96,21 +67,6 @@ class OnClearSearchActionTest {
                     bookCount = 10,
                 ),
             )
-
-            // ----- Act -----
-            OnClearSearchAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.activeMoodFilter shouldBe null
-        }
-
-        @Test
-        fun `cancels an active queryJob and resets searchResultsPage to 1`() = runTest {
-            // ----- Arrange -----
-            val queryJob = Job()
             localVariablesFlow.value = ExploreLocalVariables(
                 queryJob = queryJob,
                 searchResultsPage = 3,
@@ -123,13 +79,19 @@ class OnClearSearchActionTest {
             )
 
             // ----- Assert -----
+            val state = stateFlow.value
+            state.searchFocused shouldBe false
+            state.isSortMenuExpanded shouldBe false
+            state.searchText shouldBe ""
+            state.queriedBooks shouldBe emptyList()
+            state.activeMoodFilter shouldBe null
             queryJob.isCancelled shouldBe true
             localVariablesFlow.value.queryJob shouldBe null
             localVariablesFlow.value.searchResultsPage shouldBe 1
         }
 
         @Test
-        fun `calls clearSearchResultsUseCase exactly once`() = runTest {
+        fun `clears the persisted search results exactly once`() = runTest {
             // ----- Arrange -----
             stateFlow.value = stateFlow.value.copy(searchText = "dune")
 
@@ -143,21 +105,6 @@ class OnClearSearchActionTest {
             coVerify(exactly = 1) {
                 clearSearchResultsUseCase()
             }
-        }
-
-        @Test
-        fun `closes the sort menu when it was expanded`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(isSortMenuExpanded = true)
-
-            // ----- Act -----
-            OnClearSearchAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isSortMenuExpanded shouldBe false
         }
     }
 }

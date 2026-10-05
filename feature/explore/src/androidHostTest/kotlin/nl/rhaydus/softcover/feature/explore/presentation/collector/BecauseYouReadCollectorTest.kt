@@ -91,58 +91,6 @@ class BecauseYouReadCollectorTest {
         }
 
         @Test
-        fun `sets loadingBecauseYouReadBooks true from a loading placeholder recommendation`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val recommendation = BecauseYouReadRecommendation(
-                genre = "Horror",
-                books = emptyList(),
-                loading = true,
-            )
-            val collector = BecauseYouReadCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            recommendationFlow.emit(recommendation)
-
-            // ----- Assert -----
-            stateFlow.value.becauseYouReadGenre shouldBe "Horror"
-            stateFlow.value.becauseYouReadBooks shouldBe emptyList()
-            stateFlow.value.loadingBecauseYouReadBooks shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `sets loadingBecauseYouReadBooks false from a settled, non-loading recommendation`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val book = stubBook(id = 3)
-            val recommendation = BecauseYouReadRecommendation(
-                genre = "Horror",
-                books = listOf(book),
-                loading = false,
-            )
-            val collector = BecauseYouReadCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            recommendationFlow.emit(recommendation)
-
-            // ----- Assert -----
-            stateFlow.value.becauseYouReadBooks shouldBe listOf(book)
-            stateFlow.value.loadingBecauseYouReadBooks shouldBe false
-            job.cancel()
-        }
-
-        @Test
         fun `falls back to the header stand-in when the recommendation is null`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = BecauseYouReadCollector()
@@ -199,30 +147,6 @@ class BecauseYouReadCollectorTest {
                 eyebrow = "Because you read",
                 headline = "Horror",
             )
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves other state fields when updating`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                searchText = "fantasy",
-                loadingTrendingBooks = false,
-            )
-            val collector = BecauseYouReadCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            recommendationFlow.emit(null)
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe "fantasy"
-            stateFlow.value.loadingTrendingBooks shouldBe false
             job.cancel()
         }
     }

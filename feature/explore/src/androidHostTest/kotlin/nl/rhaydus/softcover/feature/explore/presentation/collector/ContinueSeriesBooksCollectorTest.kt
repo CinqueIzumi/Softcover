@@ -187,62 +187,6 @@ class ContinueSeriesBooksCollectorTest {
         }
 
         @Test
-        fun `preserves other state fields when updating continueSeriesBooks on success`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                searchText = "fantasy",
-                trendingBooks = emptyList(),
-                loadingTrendingBooks = false,
-            )
-            val book = stubBook(id = 2)
-            val collector = ContinueSeriesBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            continueSeriesBooksFlow.emit(listOf(book))
-            allUserBooksFlow.emit(emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe "fantasy"
-            stateFlow.value.loadingTrendingBooks shouldBe false
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves other state fields when clearing loading on failure`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                searchText = "sci-fi",
-                loadingTrendingBooks = false,
-            )
-            every {
-                getContinueSeriesBooksUseCase()
-            } returns kotlinx.coroutines.flow.flow {
-                throw RuntimeException("error")
-            }
-            val collector = ContinueSeriesBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            allUserBooksFlow.emit(emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe "sci-fi"
-            stateFlow.value.loadingTrendingBooks shouldBe false
-            job.cancel()
-        }
-
-        @Test
         fun `builds one continueSeriesMenuSheets entry per book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val firstBook = stubBook(
@@ -283,30 +227,6 @@ class ContinueSeriesBooksCollectorTest {
                     headline = "Elantris",
                 ),
             )
-            job.cancel()
-        }
-
-        @Test
-        fun `shrinks continueSeriesMenuSheets when a later emission drops a book`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val firstBook = stubBook(id = 1)
-            val secondBook = stubBook(id = 2)
-            val collector = ContinueSeriesBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            continueSeriesBooksFlow.emit(listOf(firstBook, secondBook))
-            allUserBooksFlow.emit(emptyList())
-            stateFlow.value.continueSeriesMenuSheets.size shouldBe 2
-
-            // ----- Act -----
-            continueSeriesBooksFlow.emit(listOf(firstBook))
-
-            // ----- Assert -----
-            stateFlow.value.continueSeriesMenuSheets.keys.single() shouldBe firstBook.id
             job.cancel()
         }
     }

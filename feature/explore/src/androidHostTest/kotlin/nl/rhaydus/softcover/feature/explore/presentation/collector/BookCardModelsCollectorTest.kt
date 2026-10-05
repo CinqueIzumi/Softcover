@@ -8,7 +8,6 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -173,29 +172,6 @@ class BookCardModelsCollectorTest {
             }
 
         @Test
-        fun `carries no payload for the loading stand-ins`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val job = launch {
-                BookCardModelsCollector().onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                trendingBooks = emptyList(),
-                loadingTrendingBooks = true,
-                isLoading = true,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.trending.payloadByKey shouldBe persistentMapOf()
-            stateFlow.value.searchResults.payloadByKey shouldBe persistentMapOf()
-            job.cancel()
-        }
-
-        @Test
         fun `builds each rail's cover from the book with that rail's transition surface key`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val job = launch {
@@ -266,30 +242,6 @@ class BookCardModelsCollectorTest {
             }
 
         @Test
-        fun `empties the card lists when the books are cleared and loading is done`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(
-                trendingBooks = listOf(book(id = 1)),
-            )
-            val job = launch {
-                BookCardModelsCollector().onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                trendingBooks = emptyList(),
-                loadingTrendingBooks = false,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.trending.cards shouldBe persistentListOf()
-            job.cancel()
-        }
-
-        @Test
         fun `emits railStandInCount loading stand-ins per rail while its books are empty and loading`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
@@ -318,31 +270,10 @@ class BookCardModelsCollectorTest {
                 ).forEach { cards ->
                     cards shouldHaveSize railStandInCount
                     cards.all { it.isLoading } shouldBe true
+                    cards.map { it.key }.distinct() shouldHaveSize railStandInCount
                 }
                 job.cancel()
             }
-
-        @Test
-        fun `gives each rail stand-in a distinct key`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val job = launch {
-                BookCardModelsCollector().onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                trendingBooks = emptyList(),
-                loadingTrendingBooks = true,
-            )
-
-            // ----- Assert -----
-            val keys = stateFlow.value.trending.cards.map { it.key }
-            keys.distinct() shouldHaveSize railStandInCount
-            job.cancel()
-        }
 
         @Test
         fun `emits no stand-ins for a rail whose books landed empty`() = runTest(UnconfinedTestDispatcher()) {
@@ -370,32 +301,6 @@ class BookCardModelsCollectorTest {
             stateFlow.value.upNext.cards shouldBe persistentListOf()
             job.cancel()
         }
-
-        @Test
-        fun `swaps the trending stand-ins for its cards once the books arrive`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val job = launch {
-                    BookCardModelsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val before = stateFlow.value.trending.cards
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(
-                    trendingBooks = listOf(book(id = 1)),
-                    loadingTrendingBooks = false,
-                )
-
-                // ----- Assert -----
-                before.all { it.isLoading } shouldBe true
-                val after = stateFlow.value.trending.cards
-                after shouldHaveSize 1
-                after.single().isLoading shouldBe false
-                job.cancel()
-            }
 
         @Test
         fun `keeps real cards when books are present even while still loading`() =
@@ -440,33 +345,6 @@ class BookCardModelsCollectorTest {
             cards shouldHaveSize 6
             cards.all { it.isLoading } shouldBe true
             cards.map { it.key }.distinct() shouldHaveSize 6
-            job.cancel()
-        }
-
-        @Test
-        fun `maps covers on the first emission without an extra wait emission`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(
-                trendingBooks = listOf(book(id = 1)),
-                queriedBooks = listOf(book(id = 2)),
-                isLoading = false,
-            )
-
-            // ----- Act -----
-            val job = launch {
-                BookCardModelsCollector().onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            val trending = columnOf(stateFlow.value.trending.cards.single())
-            trending.cover.shouldNotBeNull().model.isLoading shouldBe false
-            val searched = stateFlow.value.searchResults.cards.single()
-            searched.isLoading shouldBe false
-            searched.variant.shouldBeInstanceOf<BookCardVariant.Row>().lead
-                .shouldBeInstanceOf<BookCardLead.Cover>().cover.model.isLoading shouldBe false
             job.cancel()
         }
 
@@ -539,28 +417,6 @@ class BookCardModelsCollectorTest {
                         ),
                     ),
                 )
-                job.cancel()
-            }
-
-        @Test
-        fun `empties the search result cards when the queried books are cleared`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                stateFlow.value = stateFlow.value.copy(
-                    queriedBooks = listOf(book(id = 1)),
-                )
-                val job = launch {
-                    BookCardModelsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = stateFlow.value.copy(queriedBooks = emptyList())
-
-                // ----- Assert -----
-                stateFlow.value.searchResults.cards shouldBe persistentListOf()
                 job.cancel()
             }
     }

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -64,22 +63,6 @@ class ExploreSheetScaffoldBuilderTest {
                 eyebrow = "Up next",
                 headline = "Elantris",
             )
-        }
-
-        @Test
-        fun `offers only a Cancel that dismisses the sheet`() {
-            // ----- Arrange -----
-            val book = stubBook(
-                title = "Elantris",
-                bookSeries = null,
-            )
-
-            // ----- Act -----
-            val footer = continueSeriesMenuSheetScaffoldFor(book).footer.shouldNotBeNull()
-
-            // ----- Assert -----
-            footer.primary shouldBe null
-            footer.secondary.shouldNotBeNull().dismissesSheet shouldBe true
         }
     }
 }

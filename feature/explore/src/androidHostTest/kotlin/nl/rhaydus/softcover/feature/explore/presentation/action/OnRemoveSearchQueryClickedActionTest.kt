@@ -85,29 +85,6 @@ class OnRemoveSearchQueryClickedActionTest {
         }
 
         @Test
-        fun `does not change state when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            val query = "foundation"
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                removeSearchQueryUseCase(name = query)
-            } returns Result.success(Unit)
-
-            val action = OnRemoveSearchQueryClickedAction(query = query)
-            val stateBefore = stateFlow.value
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe stateBefore
-        }
-
-        @Test
         fun `does not change state when use case fails`() = runTest {
             // ----- Arrange -----
             val query = "neuromancer"

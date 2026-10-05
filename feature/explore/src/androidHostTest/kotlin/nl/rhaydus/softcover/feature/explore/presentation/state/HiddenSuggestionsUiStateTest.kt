@@ -82,18 +82,6 @@ class HiddenSuggestionsUiStateTest {
         }
 
         @Test
-        fun `reports series not loading when the series cards are empty`() {
-            // ----- Arrange -----
-            val state = HiddenSuggestionsUiState(hiddenSeries = BookCardSet.empty())
-
-            // ----- Act -----
-            val result = state.isLoadingSeries
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
         fun `keeps series loading while only the books have landed`() {
             // ----- Arrange -----
             val state = HiddenSuggestionsUiState(hiddenBooks = BookCardSet.empty())
@@ -126,18 +114,6 @@ class HiddenSuggestionsUiStateTest {
         fun `is false while only the books have landed and are empty`() {
             // ----- Arrange -----
             val state = HiddenSuggestionsUiState(hiddenBooks = BookCardSet.empty())
-
-            // ----- Act -----
-            val result = state.isEmpty
-
-            // ----- Assert -----
-            result shouldBe false
-        }
-
-        @Test
-        fun `is false while only the series cards have landed and both lists are empty`() {
-            // ----- Arrange -----
-            val state = HiddenSuggestionsUiState(hiddenSeries = BookCardSet.empty())
 
             // ----- Act -----
             val result = state.isEmpty

@@ -1,7 +1,7 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -66,36 +66,18 @@ class OnQueryChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `updates searchText in state with the new query`() = runTest {
+        fun `a non-empty query starts a debounced search and resets the stale search state`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            val newQuery = "dune"
-            val action = OnQueryChangeAction(
-                newQuery = newQuery,
-                searchDelay = 0.milliseconds,
+            stateFlow.value = stateFlow.value.copy(
+                searchError = "previous error",
+                activeMoodFilter = MoodTag(
+                    id = 1,
+                    label = "Cozy",
+                    slug = "cozy",
+                    bookCount = 10,
+                ),
             )
-
-            coEvery {
-                searchForNameUseCase(
-                    name = any(),
-                    sortMode = any(),
-                )
-            } returns Result.success(Unit)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe newQuery
-        }
-
-        @Test
-        fun `sets isLoading to true immediately after updating the search text`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
 
             coEvery {
                 searchForNameUseCase(
@@ -117,32 +99,15 @@ class OnQueryChangeActionTest {
 
             // ----- Assert -----
             // With a very large delay the launched job won't finish, so isLoading stays true
+            stateFlow.value.searchText shouldBe "kotlin"
             stateFlow.value.isLoading shouldBe true
+            stateFlow.value.searchError shouldBe null
+            stateFlow.value.activeMoodFilter shouldBe null
+            localVariablesFlow.value.queryJob.shouldNotBeNull()
         }
 
         @Test
-        fun `clears queriedBooks and sets isLoading false when query is empty`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(queriedBooks = listOf(mockk()))
-            val action = OnQueryChangeAction(
-                newQuery = "",
-                searchDelay = 0.milliseconds,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.queriedBooks shouldBe emptyList()
-            stateFlow.value.isLoading shouldBe false
-        }
-
-        @Test
-        fun `sets isLoading to false after search completes for a non-empty query`() = runTest {
+        fun `stops loading once the search for a non-empty query succeeds`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
 
@@ -166,39 +131,24 @@ class OnQueryChangeActionTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
+            stateFlow.value.searchError shouldBe null
         }
 
         @Test
-        fun `stores the queryJob in local variables for a non-empty query`() = runTest {
+        fun `an empty query drops the results, error, mood filter and search job`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-
-            coEvery {
-                searchForNameUseCase(
-                    name = any(),
-                    sortMode = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnQueryChangeAction(
-                newQuery = "test",
-                searchDelay = 1_000_000.milliseconds,
+            stateFlow.value = stateFlow.value.copy(
+                queriedBooks = listOf(mockk()),
+                searchError = "previous error",
+                activeMoodFilter = MoodTag(
+                    id = 1,
+                    label = "Cozy",
+                    slug = "cozy",
+                    bookCount = 10,
+                ),
             )
 
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            localVariablesFlow.value.queryJob shouldNotBe null
-        }
-
-        @Test
-        fun `clears queryJob in local variables when query is empty`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
             val action = OnQueryChangeAction(
                 newQuery = "",
                 searchDelay = 0.milliseconds,
@@ -211,35 +161,11 @@ class OnQueryChangeActionTest {
             )
 
             // ----- Assert -----
-            localVariablesFlow.value.queryJob shouldBe null
-        }
-
-        @Test
-        fun `successful search leaves searchError as null`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(searchError = "previous error")
-
-            coEvery {
-                searchForNameUseCase(
-                    name = any(),
-                    sortMode = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnQueryChangeAction(
-                newQuery = "dune",
-                searchDelay = 0.milliseconds,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
+            stateFlow.value.queriedBooks shouldBe emptyList()
+            stateFlow.value.isLoading shouldBe false
             stateFlow.value.searchError shouldBe null
+            stateFlow.value.activeMoodFilter shouldBe null
+            localVariablesFlow.value.queryJob shouldBe null
         }
 
         @Test
@@ -296,90 +222,6 @@ class OnQueryChangeActionTest {
             // ----- Assert -----
             stateFlow.value.searchError shouldBe "We couldn't load results. Please try again."
             stateFlow.value.isLoading shouldBe false
-        }
-
-        @Test
-        fun `empty query clears searchError`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(searchError = "previous error")
-
-            val action = OnQueryChangeAction(
-                newQuery = "",
-                searchDelay = 0.milliseconds,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.searchError shouldBe null
-        }
-
-        @Test
-        fun `a non-empty keystroke clears an active mood filter`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(
-                activeMoodFilter = MoodTag(
-                    id = 1,
-                    label = "Cozy",
-                    slug = "cozy",
-                    bookCount = 10,
-                ),
-            )
-
-            coEvery {
-                searchForNameUseCase(
-                    name = any(),
-                    sortMode = any(),
-                )
-            } returns Result.success(Unit)
-
-            val action = OnQueryChangeAction(
-                newQuery = "dune",
-                searchDelay = 0.milliseconds,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.activeMoodFilter shouldBe null
-        }
-
-        @Test
-        fun `clearing the query to empty also clears an active mood filter`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(
-                activeMoodFilter = MoodTag(
-                    id = 2,
-                    label = "Dark",
-                    slug = "dark",
-                    bookCount = 5,
-                ),
-            )
-
-            val action = OnQueryChangeAction(
-                newQuery = "",
-                searchDelay = 0.milliseconds,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.activeMoodFilter shouldBe null
         }
     }
 }

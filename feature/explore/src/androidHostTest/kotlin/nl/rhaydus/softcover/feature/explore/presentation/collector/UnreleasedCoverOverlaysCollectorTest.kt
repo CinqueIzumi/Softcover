@@ -139,10 +139,14 @@ class UnreleasedCoverOverlaysCollectorTest {
         }
 
         @Test
-        fun `collects an unreleased book from becauseYouReadBooks`() = runTest(UnconfinedTestDispatcher()) {
+        fun `collects unreleased books from every rail and the search results`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            val book = stubBook(id = 2)
-            stateFlow.value = ExploreScreenUiState(becauseYouReadBooks = listOf(book))
+            stateFlow.value = ExploreScreenUiState(
+                trendingBooks = listOf(stubBook(id = 1)),
+                becauseYouReadBooks = listOf(stubBook(id = 2)),
+                continueSeriesBooks = listOf(stubBook(id = 3)),
+                queriedBooks = listOf(stubBook(id = 4)),
+            )
             val collector = UnreleasedCoverOverlaysCollector()
 
             // ----- Act -----
@@ -154,47 +158,7 @@ class UnreleasedCoverOverlaysCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.unreleasedCoverOverlays.containsKey(2) shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `collects an unreleased book from continueSeriesBooks`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val book = stubBook(id = 3)
-            stateFlow.value = ExploreScreenUiState(continueSeriesBooks = listOf(book))
-            val collector = UnreleasedCoverOverlaysCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.unreleasedCoverOverlays.containsKey(3) shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `collects an unreleased book from queriedBooks`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val book = stubBook(id = 4)
-            stateFlow.value = ExploreScreenUiState(queriedBooks = listOf(book))
-            val collector = UnreleasedCoverOverlaysCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.unreleasedCoverOverlays.containsKey(4) shouldBe true
+            stateFlow.value.unreleasedCoverOverlays.keys shouldBe setOf(1, 2, 3, 4)
             job.cancel()
         }
 

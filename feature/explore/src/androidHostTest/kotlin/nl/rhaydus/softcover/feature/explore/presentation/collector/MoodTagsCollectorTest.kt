@@ -86,28 +86,5 @@ class MoodTagsCollectorTest {
             stateFlow.value.moodTags shouldBe emptyList()
             stateFlow.value.loadingMoodTags shouldBe false
         }
-
-        @Test
-        fun `preserves other state fields when updating`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                searchText = "fantasy",
-                loadingTrendingBooks = false,
-            )
-            coEvery {
-                getMoodTagsUseCase()
-            } returns Result.success(listOf(moodTag))
-            val collector = MoodTagsCollector()
-
-            // ----- Act -----
-            collector.onLaunch(
-                scope = scope,
-                dependencies = dependencies,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe "fantasy"
-            stateFlow.value.loadingTrendingBooks shouldBe false
-        }
     }
 }

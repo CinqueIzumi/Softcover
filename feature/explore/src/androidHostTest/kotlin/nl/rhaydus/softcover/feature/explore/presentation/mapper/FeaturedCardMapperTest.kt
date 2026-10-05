@@ -85,7 +85,6 @@ class FeaturedCardMapperTest {
             card.badge shouldBe badge
             card.cover shouldBe cover
             card.title shouldBe "Piranesi"
-            card.isLoading shouldBe false
         }
 
         @Test

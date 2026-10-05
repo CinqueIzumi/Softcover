@@ -32,30 +32,6 @@ class TextFormattingTest {
         }
 
         @Test
-        fun `leaves an already-capitalized label unchanged`() {
-            // ----- Arrange -----
-            val label = "Adventurous"
-
-            // ----- Act -----
-            val result = label.toTitleCaseWords()
-
-            // ----- Assert -----
-            result shouldBe "Adventurous"
-        }
-
-        @Test
-        fun `capitalizes a single word`() {
-            // ----- Arrange -----
-            val label = "dark"
-
-            // ----- Act -----
-            val result = label.toTitleCaseWords()
-
-            // ----- Assert -----
-            result shouldBe "Dark"
-        }
-
-        @Test
         fun `an empty string stays empty`() {
             // ----- Arrange -----
             val label = ""

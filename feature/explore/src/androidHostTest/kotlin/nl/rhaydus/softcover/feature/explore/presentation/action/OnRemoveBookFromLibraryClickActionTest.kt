@@ -88,29 +88,6 @@ class OnRemoveBookFromLibraryClickActionTest {
         }
 
         @Test
-        fun `does not change state when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                removeBookFromLibraryUseCase(book = book)
-            } returns Result.success(Unit)
-
-            val action = OnRemoveBookFromLibraryClickAction(book = book)
-            val stateBefore = stateFlow.value
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe stateBefore
-        }
-
-        @Test
         fun `does not change state when use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook()

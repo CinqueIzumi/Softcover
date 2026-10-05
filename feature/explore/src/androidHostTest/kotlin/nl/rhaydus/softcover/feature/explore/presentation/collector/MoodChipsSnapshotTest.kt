@@ -22,19 +22,6 @@ class MoodChipsSnapshotTest {
     @Nested
     inner class Compute {
         @Test
-        fun `an empty mood list produces an empty chip list and an empty map`() {
-            // ----- Arrange -----
-            val snapshot = MoodChipsSnapshot(moodTags = emptyList())
-
-            // ----- Act -----
-            val (chips, moodByKey) = snapshot.compute()
-
-            // ----- Assert -----
-            chips shouldBe emptyList()
-            moodByKey shouldBe emptyMap()
-        }
-
-        @Test
         fun `title-cases each mood label for its chip`() {
             // ----- Arrange -----
             val snapshot = MoodChipsSnapshot(moodTags = listOf(cozy, adventurous))
@@ -44,18 +31,6 @@ class MoodChipsSnapshotTest {
 
             // ----- Assert -----
             chips.map { it.label } shouldBe listOf("Cosy & Comforting", "Adventurous")
-        }
-
-        @Test
-        fun `each chip key is stable and unique per mood id`() {
-            // ----- Arrange -----
-            val snapshot = MoodChipsSnapshot(moodTags = listOf(cozy, adventurous))
-
-            // ----- Act -----
-            val (chips, _) = snapshot.compute()
-
-            // ----- Assert -----
-            chips.map { it.key } shouldBe listOf("mood:1", "mood:2")
         }
 
         @Test

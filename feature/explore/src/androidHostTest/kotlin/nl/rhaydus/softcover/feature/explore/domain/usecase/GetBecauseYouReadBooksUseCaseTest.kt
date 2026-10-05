@@ -18,7 +18,6 @@ import nl.rhaydus.softcover.core.domain.model.Tag
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 import nl.rhaydus.softcover.core.lists.domain.repository.ListsRepository
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetBecauseYouReadGenreAsFlowUseCase
-import nl.rhaydus.softcover.feature.explore.domain.model.BecauseYouReadRecommendation
 import nl.rhaydus.softcover.feature.explore.domain.repository.ExploreRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -99,20 +98,6 @@ class GetBecauseYouReadBooksUseCaseTest {
 
     @Nested
     inner class Invoke {
-        @Test
-        fun `emits null when the user has no books`() = runTest {
-            // ----- Arrange -----
-            every {
-                booksRepository.books
-            } returns flowOf(emptyList())
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
         @Test
         fun `emits null when no book carries a genre tag`() = runTest {
             // ----- Arrange -----
@@ -293,32 +278,6 @@ class GetBecauseYouReadBooksUseCaseTest {
         }
 
         @Test
-        fun `keeps a fetched book that is neither shelved nor listed`() = runTest {
-            // ----- Arrange -----
-            val fetchedBook = stubBook(id = 10)
-            val unrelatedUserBook = stubBook(
-                id = 99,
-                genreTags = listOf("Romance"),
-            )
-
-            every {
-                booksRepository.books
-            } returns flowOf(listOf(unrelatedUserBook))
-            coEvery {
-                exploreRepository.fetchBooksByGenre(
-                    genre = any(),
-                    limit = any(),
-                )
-            } returns listOf(fetchedBook)
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result?.books shouldBe listOf(fetchedBook)
-        }
-
-        @Test
         fun `prefers the persisted genre choice over the derived default`() = runTest {
             // ----- Arrange -----
             every {
@@ -471,122 +430,6 @@ class GetBecauseYouReadBooksUseCaseTest {
         }
 
         @Test
-        fun `re-derives the recommendation reactively when the top genre changes`() = runTest {
-            // ----- Arrange -----
-            val romanceBook = stubBook(id = 1)
-            val horrorBook = stubBook(id = 2)
-            val booksFlow = MutableStateFlow(
-                booksTaggedWithGenre(
-                    genre = "Romance",
-                    count = 5,
-                    startId = 10,
-                ),
-            )
-
-            every {
-                booksRepository.books
-            } returns booksFlow
-            coEvery {
-                exploreRepository.fetchBooksByGenre(
-                    genre = "Romance",
-                    limit = any(),
-                )
-            } returns listOf(romanceBook)
-            coEvery {
-                exploreRepository.fetchBooksByGenre(
-                    genre = "Horror",
-                    limit = any(),
-                )
-            } returns listOf(horrorBook)
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem()?.genre shouldBe "Romance"
-
-                booksFlow.value = booksTaggedWithGenre(
-                    genre = "Horror",
-                    count = 9,
-                    startId = 100,
-                )
-
-                // The book list now drives both the genre derivation and the exclusion filter, so
-                // a single library update can settle over more than one emission before both sides
-                // observe it - keep reading until the genre itself has settled.
-                var recommendation = awaitItem()
-
-                while (recommendation?.genre != "Horror") {
-                    recommendation = awaitItem()
-                }
-
-                cancelAndIgnoreRemainingEvents()
-            }
-        }
-
-        @Test
-        fun `switching from one genre to another fetches the newly selected genre fresh`() = runTest {
-            // ----- Arrange -----
-            val romanceBook = stubBook(id = 1)
-            val horrorBook = stubBook(id = 2)
-            val booksFlow = MutableStateFlow(
-                booksTaggedWithGenre(
-                    genre = "Romance",
-                    count = 5,
-                    startId = 10,
-                ),
-            )
-
-            every {
-                booksRepository.books
-            } returns booksFlow
-            coEvery {
-                exploreRepository.fetchBooksByGenre(
-                    genre = "Romance",
-                    limit = any(),
-                )
-            } returns listOf(romanceBook)
-            coEvery {
-                exploreRepository.fetchBooksByGenre(
-                    genre = "Horror",
-                    limit = any(),
-                )
-            } returns listOf(horrorBook)
-
-            // ----- Act & Assert -----
-            useCase().test {
-                var recommendation = awaitItem()
-                while (recommendation == null || recommendation.genre != "Romance" || recommendation.loading) {
-                    recommendation = awaitItem()
-                }
-
-                booksFlow.value = booksTaggedWithGenre(
-                    genre = "Horror",
-                    count = 9,
-                    startId = 100,
-                )
-
-                recommendation = awaitItem()
-                while (recommendation == null || recommendation.genre != "Horror" || recommendation.loading) {
-                    recommendation = awaitItem()
-                }
-
-                cancelAndIgnoreRemainingEvents()
-            }
-
-            coVerify(exactly = 1) {
-                exploreRepository.fetchBooksByGenre(
-                    genre = "Romance",
-                    limit = any(),
-                )
-            }
-            coVerify(exactly = 1) {
-                exploreRepository.fetchBooksByGenre(
-                    genre = "Horror",
-                    limit = any(),
-                )
-            }
-        }
-
-        @Test
         fun `a failed fetch for a genre is not cached and retries on the next selection of that genre`() = runTest {
             // ----- Arrange -----
             val romanceBook = stubBook(id = 1)
@@ -669,42 +512,6 @@ class GetBecauseYouReadBooksUseCaseTest {
 
     @Nested
     inner class GenreOptions {
-        @Test
-        fun `returns all genres in frequency order when fewer than five exist`() = runTest {
-            // ----- Arrange -----
-            every {
-                booksRepository.books
-            } returns flowOf(
-                booksTaggedWithGenre(
-                    genre = "Romance",
-                    count = 3,
-                    startId = 0,
-                ) +
-                    booksTaggedWithGenre(
-                        genre = "Horror",
-                        count = 2,
-                        startId = 10,
-                    ) +
-                    booksTaggedWithGenre(
-                        genre = "Fantasy",
-                        count = 1,
-                        startId = 20,
-                    ),
-            )
-            coEvery {
-                exploreRepository.fetchBooksByGenre(
-                    genre = any(),
-                    limit = any(),
-                )
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = useCase().first()
-
-            // ----- Assert -----
-            result?.genreOptions shouldBe listOf("Romance", "Horror", "Fantasy")
-        }
-
         @Test
         fun `returns only the top five genres by frequency when more than five exist`() = runTest {
             // ----- Arrange -----

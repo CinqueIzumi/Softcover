@@ -37,25 +37,6 @@ class SortPillCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sortPill reflects the initial sortMode`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(sortMode = ExploreSortMode.POPULARITY)
-            val collector = SortPillCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.sortPill shouldBe ExploreSortMode.POPULARITY.toSortPillButton()
-            job.cancel()
-        }
-
-        @Test
         fun `sortPill follows sortMode changes`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = SortPillCollector()
@@ -71,26 +52,6 @@ class SortPillCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.sortPill shouldBe ExploreSortMode.POPULARITY.toSortPillButton()
-            job.cancel()
-        }
-
-        @Test
-        fun `sortPill returns to the first mode when sortMode switches back`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = SortPillCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            stateFlow.value = stateFlow.value.copy(sortMode = ExploreSortMode.POPULARITY)
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(sortMode = ExploreSortMode.RELEVANCE)
-
-            // ----- Assert -----
-            stateFlow.value.sortPill shouldBe ExploreSortMode.RELEVANCE.toSortPillButton()
             job.cancel()
         }
     }

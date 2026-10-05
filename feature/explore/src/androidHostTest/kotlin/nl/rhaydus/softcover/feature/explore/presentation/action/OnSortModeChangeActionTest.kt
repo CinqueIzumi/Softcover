@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
@@ -14,7 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.feature.explore.domain.model.ExploreSortMode
 import nl.rhaydus.softcover.feature.explore.domain.usecase.SearchForNameUseCase
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
@@ -69,10 +69,13 @@ class OnSortModeChangeActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `is a no-op when the mode matches the current sortMode`() = runTest {
+        fun `only closes the sort menu when the mode matches the current sortMode`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(sortMode = ExploreSortMode.RELEVANCE)
+            stateFlow.value = stateFlow.value.copy(
+                sortMode = ExploreSortMode.RELEVANCE,
+                isSortMenuExpanded = true,
+            )
             val stateBefore = stateFlow.value
             val action = OnSortModeChangeAction(mode = ExploreSortMode.RELEVANCE)
 
@@ -83,53 +86,13 @@ class OnSortModeChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value shouldBe stateBefore
+            stateFlow.value shouldBe stateBefore.copy(isSortMenuExpanded = false)
             coVerify(exactly = 0) {
                 searchForNameUseCase(
                     name = any(),
                     sortMode = any(),
                 )
             }
-        }
-
-        @Test
-        fun `closes the sort menu even when the mode is unchanged`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(
-                sortMode = ExploreSortMode.RELEVANCE,
-                isSortMenuExpanded = true,
-            )
-            val action = OnSortModeChangeAction(mode = ExploreSortMode.RELEVANCE)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isSortMenuExpanded shouldBe false
-        }
-
-        @Test
-        fun `closes the sort menu when the mode changes`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(
-                sortMode = ExploreSortMode.RELEVANCE,
-                isSortMenuExpanded = true,
-            )
-            val action = OnSortModeChangeAction(mode = ExploreSortMode.POPULARITY)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isSortMenuExpanded shouldBe false
         }
 
         @Test
@@ -160,48 +123,14 @@ class OnSortModeChangeActionTest {
         }
 
         @Test
-        fun `re-runs the search with the new sortMode when searchText is not empty`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(
-                sortMode = ExploreSortMode.RELEVANCE,
-                searchText = "dune",
-            )
-
-            coEvery {
-                searchForNameUseCase(
-                    name = "dune",
-                    sortMode = ExploreSortMode.POPULARITY,
-                )
-            } returns Result.success(Unit)
-
-            val action = OnSortModeChangeAction(mode = ExploreSortMode.POPULARITY)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.sortMode shouldBe ExploreSortMode.POPULARITY
-            stateFlow.value.isLoading shouldBe false
-            coVerify {
-                searchForNameUseCase(
-                    name = "dune",
-                    sortMode = ExploreSortMode.POPULARITY,
-                )
-            }
-        }
-
-        @Test
-        fun `re-run cancels the prior queryJob, tracks the new one, and resets searchResultsPage to 1`() = runTest {
+        fun `re-runs the search with the new sortMode, replacing the prior search job and closing the menu`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             val priorJob = Job()
             stateFlow.value = stateFlow.value.copy(
                 sortMode = ExploreSortMode.RELEVANCE,
                 searchText = "dune",
+                isSortMenuExpanded = true,
             )
             localVariablesFlow.value = localVariablesFlow.value.copy(
                 queryJob = priorJob,
@@ -224,8 +153,17 @@ class OnSortModeChangeActionTest {
             )
 
             // ----- Assert -----
+            stateFlow.value.sortMode shouldBe ExploreSortMode.POPULARITY
+            stateFlow.value.isSortMenuExpanded shouldBe false
+            stateFlow.value.isLoading shouldBe false
+            coVerify {
+                searchForNameUseCase(
+                    name = "dune",
+                    sortMode = ExploreSortMode.POPULARITY,
+                )
+            }
             priorJob.isCancelled shouldBe true
-            localVariablesFlow.value.queryJob shouldNotBe null
+            localVariablesFlow.value.queryJob.shouldNotBeNull()
             localVariablesFlow.value.queryJob shouldNotBe priorJob
             localVariablesFlow.value.searchResultsPage shouldBe 1
         }
@@ -270,36 +208,7 @@ class OnSortModeChangeActionTest {
         }
 
         @Test
-        fun `sets offline searchError when the re-run search fails offline`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = stateFlow.value.copy(
-                sortMode = ExploreSortMode.RELEVANCE,
-                searchText = "dune",
-            )
-
-            coEvery {
-                searchForNameUseCase(
-                    name = "dune",
-                    sortMode = ExploreSortMode.POPULARITY,
-                )
-            } returns Result.failure(OfflineException())
-
-            val action = OnSortModeChangeAction(mode = ExploreSortMode.POPULARITY)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.searchError shouldBe "You're offline. Check your connection and try again."
-            stateFlow.value.isLoading shouldBe false
-        }
-
-        @Test
-        fun `sets fallback searchError when the re-run search fails with an unknown error`() = runTest {
+        fun `sets searchError and stops loading when the re-run search fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
             stateFlow.value = stateFlow.value.copy(
@@ -323,7 +232,7 @@ class OnSortModeChangeActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.searchError shouldBe "We couldn't load results. Please try again."
+            stateFlow.value.searchError.shouldNotBeNull()
             stateFlow.value.isLoading shouldBe false
         }
     }

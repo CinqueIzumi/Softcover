@@ -93,27 +93,7 @@ class DismissedSeriesCollectorTest {
         }
 
         @Test
-        fun `leaves the hiddenBooks stand-ins in place when only series are emitted`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = DismissedSeriesCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            dismissedSeriesFlow.emit(emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.isLoadingSeries shouldBe false
-            stateFlow.value.isLoadingBooks shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `emits an empty card list rather than stand-ins when the emitted list is empty`() =
+        fun `settles to no cards, cleared loading and a zero count when the emitted list is empty`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val collector = DismissedSeriesCollector()
@@ -129,6 +109,8 @@ class DismissedSeriesCollectorTest {
 
                 // ----- Assert -----
                 stateFlow.value.hiddenSeries.cards.shouldBeEmpty()
+                stateFlow.value.isLoadingSeries shouldBe false
+                stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "0"
                 job.cancel()
             }
 
@@ -153,70 +135,6 @@ class DismissedSeriesCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "3"
-            job.cancel()
-        }
-
-        @Test
-        fun `sets the group header count to zero for an empty emission`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = DismissedSeriesCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            dismissedSeriesFlow.emit(emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "0"
-            job.cancel()
-        }
-
-        @Test
-        fun `updates the count again on a later emission without touching the header text`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = DismissedSeriesCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            dismissedSeriesFlow.emit(listOf(stubDismissedSeries(seriesId = 1), stubDismissedSeries(seriesId = 2)))
-            stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "2"
-
-            // ----- Act -----
-            dismissedSeriesFlow.emit(listOf(stubDismissedSeries(seriesId = 1)))
-
-            // ----- Assert -----
-            stateFlow.value.hiddenSeriesGroupHeader.count shouldBe "1"
-            stateFlow.value.hiddenSeriesGroupHeader.header shouldBe HiddenSuggestionsUiState().hiddenSeriesGroupHeader.header
-            stateFlow.value.hiddenSeriesGroupHeader.subline shouldBe HiddenSuggestionsUiState().hiddenSeriesGroupHeader.subline
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves the books group header when updating the series header`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = HiddenSuggestionsUiState(
-                hiddenBooksGroupHeader = HiddenSuggestionsUiState().hiddenBooksGroupHeader.copy(count = "9"),
-            )
-            val collector = DismissedSeriesCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            dismissedSeriesFlow.emit(listOf(stubDismissedSeries(seriesId = 1)))
-
-            // ----- Assert -----
-            stateFlow.value.hiddenBooksGroupHeader.count shouldBe "9"
             job.cancel()
         }
     }

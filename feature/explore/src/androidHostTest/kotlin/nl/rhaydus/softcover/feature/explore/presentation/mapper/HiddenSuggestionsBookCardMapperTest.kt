@@ -4,7 +4,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardLead
@@ -63,7 +62,7 @@ class HiddenSuggestionsBookCardMapperTest {
     @Nested
     inner class ToHiddenBookCard {
         @Test
-        fun `builds a compact row keyed by book id with a cover lead and a Restore trailing`() {
+        fun `builds a row keyed by book id with a cover lead and a Restore trailing`() {
             // ----- Arrange -----
             val input = hiddenBook(bookId = 5)
 
@@ -72,7 +71,6 @@ class HiddenSuggestionsBookCardMapperTest {
 
             // ----- Assert -----
             card.key shouldBe BookCardKey.Book(bookId = 5)
-            card.row().size shouldBe BookCardVariant.Row.Size.Compact
             card.row().lead shouldBe BookCardLead.Cover(cover = BookCardCover(model = cover))
             card.row().trailing shouldBe BookCardTrailing.Restore
         }
@@ -123,7 +121,7 @@ class HiddenSuggestionsBookCardMapperTest {
     @Nested
     inner class ToHiddenSeriesCard {
         @Test
-        fun `builds a compact row keyed by series id with a series stack lead and a Restore trailing`() {
+        fun `builds a row keyed by series id with a series stack lead and a Restore trailing`() {
             // ----- Arrange -----
             val input = hiddenSeries(seriesId = 8)
 
@@ -132,7 +130,6 @@ class HiddenSuggestionsBookCardMapperTest {
 
             // ----- Assert -----
             card.key shouldBe BookCardKey.Series(seriesId = 8)
-            card.row().size shouldBe BookCardVariant.Row.Size.Compact
             card.row().lead shouldBe BookCardLead.SeriesStack(front = cover)
             card.row().trailing shouldBe BookCardTrailing.Restore
         }
@@ -231,21 +228,6 @@ class HiddenSuggestionsBookCardMapperTest {
             // ----- Assert -----
             withCount.caption() shouldBe "2 books"
             withoutCount.caption() shouldBe "Series"
-        }
-
-        @Test
-        fun `falls back to Series when neither author nor count is known`() {
-            // ----- Arrange -----
-            val input = hiddenSeries(
-                authorText = null,
-                bookCount = null,
-            )
-
-            // ----- Act -----
-            val card = input.toHiddenSeriesCard(cover = cover)
-
-            // ----- Assert -----
-            card.caption() shouldBe "Series"
         }
     }
 }

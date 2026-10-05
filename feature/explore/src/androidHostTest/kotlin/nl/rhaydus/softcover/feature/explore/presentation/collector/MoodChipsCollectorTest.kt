@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -61,51 +60,6 @@ class MoodChipsCollectorTest {
             stateFlow.value.moodChips.chips.map { it.key } shouldBe listOf("mood:1")
             stateFlow.value.moodChips.chips.map { it.label } shouldBe listOf("Cosy")
             stateFlow.value.moodChips.payloadByKey shouldBe mapOf("mood:1" to cozy)
-            job.cancel()
-        }
-
-        @Test
-        fun `updates to an empty chip set when moodTags becomes empty`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(moodTags = listOf(cozy))
-            val collector = MoodChipsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(moodTags = emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.moodChips.chips shouldBe persistentListOf()
-            stateFlow.value.moodChips.payloadByKey shouldBe emptyMap()
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves other state fields when updating`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ExploreScreenUiState(
-                searchText = "fantasy",
-                loadingTrendingBooks = false,
-            )
-            val collector = MoodChipsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(moodTags = listOf(cozy))
-
-            // ----- Assert -----
-            stateFlow.value.searchText shouldBe "fantasy"
-            stateFlow.value.loadingTrendingBooks shouldBe false
             job.cancel()
         }
 
