@@ -32,7 +32,7 @@ class AddBookToListUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `returns success when repository call completes without error`() = runTest {
+        fun `returns success and forwards the list, book and edition to the repository`() = runTest {
             // ----- Arrange -----
             val listId = 42
             val bookId = 7
@@ -55,31 +55,7 @@ class AddBookToListUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-        }
 
-        @Test
-        fun `delegates to repository with correct arguments`() = runTest {
-            // ----- Arrange -----
-            val listId = 42
-            val bookId = 7
-            val edition = stubEdition(id = 10)
-
-            coJustRun {
-                listsRepository.addBookToList(
-                    listId = listId,
-                    bookId = bookId,
-                    edition = edition,
-                )
-            }
-
-            // ----- Act -----
-            useCase(
-                listId = listId,
-                bookId = bookId,
-                edition = edition,
-            )
-
-            // ----- Assert -----
             coVerify(exactly = 1) {
                 listsRepository.addBookToList(
                     listId = listId,

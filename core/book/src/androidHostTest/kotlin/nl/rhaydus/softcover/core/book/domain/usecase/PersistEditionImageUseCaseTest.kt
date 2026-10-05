@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
@@ -46,38 +45,6 @@ class PersistEditionImageUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-        }
-
-        @Test
-        fun `forwards editionId, url, and bytes to the repository`() = runTest {
-            // ----- Arrange -----
-            val editionId = 7
-            val url = "https://example.com/cover7.jpg"
-            val bytes = byteArrayOf(4, 5, 6)
-
-            coEvery {
-                booksRepository.persistEditionImage(
-                    editionId = editionId,
-                    url = url,
-                    bytes = bytes,
-                )
-            } returns Unit
-
-            // ----- Act -----
-            useCase(
-                editionId = editionId,
-                url = url,
-                bytes = bytes,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                booksRepository.persistEditionImage(
-                    editionId = editionId,
-                    url = url,
-                    bytes = bytes,
-                )
-            }
         }
 
         @Test

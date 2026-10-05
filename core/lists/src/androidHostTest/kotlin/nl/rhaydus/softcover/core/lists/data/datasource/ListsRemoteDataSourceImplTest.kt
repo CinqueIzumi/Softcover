@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -16,7 +17,9 @@ import io.mockk.slot
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -67,14 +70,32 @@ class ListsRemoteDataSourceImplTest {
             apolloClient = apolloClient,
             appDispatchers = appDispatchers,
         )
-
-        mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
-        mockkStatic("nl.rhaydus.softcover.core.lists.data.mapper.ListMapperKt")
     }
 
     @AfterEach
     fun tearDown() {
-        unmockkAll()
+        clearAllMocks()
+    }
+
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun mockStaticsOnce() {
+            mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
+            mockkStatic("nl.rhaydus.softcover.core.lists.data.mapper.ListMapperKt")
+            mockkObject(GetUserBookListsQuery.Data.Me.List.Companion)
+            mockkObject(RemoveListBookMutation.Data.Delete_list_book.List.Companion)
+            mockkObject(CreateListMutation.Data.Insert_list.List.Companion)
+            mockkObject(MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion)
+            mockkObject(CreateListBookMutation.Data.Insert_list_book.List_book.Companion)
+            mockkObject(UpdateListMutation.Data.ListResponse.List.Companion)
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun unmockStaticsOnce() {
+            unmockkAll()
+        }
     }
 
     private fun stubBookEdition(id: Int = 10): BookEdition = mockk {
@@ -273,8 +294,6 @@ class ListsRemoteDataSourceImplTest {
             val listEntry = mockk<GetUserBookListsQuery.Data.Me.List>()
             val listFragment = mockk<ListFragment>()
 
-            mockkObject(GetUserBookListsQuery.Data.Me.List.Companion)
-
             coEvery {
                 apolloClient.safeQuery(query = any<GetUserBookListsQuery>())
             } returns queryData
@@ -379,15 +398,14 @@ class ListsRemoteDataSourceImplTest {
             // ----- Arrange -----
             val listBook = stubListBook(listBookId = 22)
             val expectedBookList = stubBookList()
+            val capturedMutation = slot<RemoveListBookMutation>()
             val mutationData = mockk<RemoveListBookMutation.Data>()
             val deleteListBook = mockk<RemoveListBookMutation.Data.Delete_list_book>()
             val listEntry = mockk<RemoveListBookMutation.Data.Delete_list_book.List>()
             val listFragment = mockk<ListFragment>()
 
-            mockkObject(RemoveListBookMutation.Data.Delete_list_book.List.Companion)
-
             coEvery {
-                apolloClient.safeMutation(mutation = any<RemoveListBookMutation>())
+                apolloClient.safeMutation(mutation = capture(capturedMutation))
             } returns mutationData
 
             every {
@@ -413,6 +431,8 @@ class ListsRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe expectedBookList
+
+            capturedMutation.captured.id shouldBe 22
         }
 
         @Test
@@ -421,8 +441,6 @@ class ListsRemoteDataSourceImplTest {
             val listBook = stubListBook(listBookId = 22)
             val mutationData = mockk<RemoveListBookMutation.Data>()
             val deleteListBook = mockk<RemoveListBookMutation.Data.Delete_list_book>()
-
-            mockkObject(RemoveListBookMutation.Data.Delete_list_book.List.Companion)
 
             coEvery {
                 apolloClient.safeMutation(mutation = any<RemoveListBookMutation>())
@@ -456,8 +474,6 @@ class ListsRemoteDataSourceImplTest {
             val insertList = mockk<CreateListMutation.Data.Insert_list>()
             val listEntry = mockk<CreateListMutation.Data.Insert_list.List>()
             val listFragment = mockk<ListFragment>()
-
-            mockkObject(CreateListMutation.Data.Insert_list.List.Companion)
 
             coEvery {
                 apolloClient.safeMutation(mutation = any<CreateListMutation>())
@@ -579,8 +595,6 @@ class ListsRemoteDataSourceImplTest {
             val mutationData = mockk<CreateListMutation.Data>()
             val insertList = mockk<CreateListMutation.Data.Insert_list>()
 
-            mockkObject(CreateListMutation.Data.Insert_list.List.Companion)
-
             coEvery {
                 apolloClient.safeMutation(mutation = any<CreateListMutation>())
             } returns mutationData
@@ -632,8 +646,6 @@ class ListsRemoteDataSourceImplTest {
             val listEntry = mockk<CreateListMutation.Data.Insert_list.List>()
             val listFragment = mockk<ListFragment>()
 
-            mockkObject(CreateListMutation.Data.Insert_list.List.Companion)
-
             coEvery {
                 apolloClient.safeMutation(mutation = capture(capturedMutation))
             } returns mutationData
@@ -682,14 +694,13 @@ class ListsRemoteDataSourceImplTest {
             // ----- Arrange -----
             val edition = stubBookEdition(id = 55)
             val expectedListBook = stubListBook()
+            val capturedMutation = slot<MarkEditionAsOwnedMutation>()
             val mutationData = mockk<MarkEditionAsOwnedMutation.Data>()
             val editionOwned = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned>()
             val listBookEntry = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned.List_book>()
 
-            mockkObject(MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion)
-
             coEvery {
-                apolloClient.safeMutation(mutation = any<MarkEditionAsOwnedMutation>())
+                apolloClient.safeMutation(mutation = capture(capturedMutation))
             } returns mutationData
 
             every {
@@ -715,6 +726,8 @@ class ListsRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe expectedListBook
+
+            capturedMutation.captured.id shouldBe 55
         }
 
         @Test
@@ -723,8 +736,6 @@ class ListsRemoteDataSourceImplTest {
             val edition = stubBookEdition(id = 55)
             val mutationData = mockk<MarkEditionAsOwnedMutation.Data>()
             val editionOwned = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned>()
-
-            mockkObject(MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion)
 
             coEvery {
                 apolloClient.safeMutation(mutation = any<MarkEditionAsOwnedMutation>())
@@ -751,8 +762,6 @@ class ListsRemoteDataSourceImplTest {
             val mutationData = mockk<MarkEditionAsOwnedMutation.Data>()
             val editionOwned = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned>()
             val listBookEntry = mockk<MarkEditionAsOwnedMutation.Data.Edition_owned.List_book>()
-
-            mockkObject(MarkEditionAsOwnedMutation.Data.Edition_owned.List_book.Companion)
 
             coEvery {
                 apolloClient.safeMutation(mutation = any<MarkEditionAsOwnedMutation>())
@@ -806,7 +815,7 @@ class ListsRemoteDataSourceImplTest {
         }
 
         @Test
-        fun `calls Apollo with clearedPositions equal to startPosition until start plus size`() = runTest {
+        fun `sends cleared positions and one update entry per list book id`() = runTest {
             // ----- Arrange -----
             val capturedMutation = slot<UpdateListBookPositionsMutation>()
             val mutationData = mockk<UpdateListBookPositionsMutation.Data>()
@@ -825,29 +834,7 @@ class ListsRemoteDataSourceImplTest {
             // ----- Assert -----
             capturedMutation.captured.listId shouldBe 7
             capturedMutation.captured.clearedPositions shouldBe listOf(3, 4, 5)
-        }
-
-        @Test
-        fun `sends one update entry per list book id with ascending positions`() = runTest {
-            // ----- Arrange -----
-            val capturedMutation = slot<UpdateListBookPositionsMutation>()
-            val mutationData = mockk<UpdateListBookPositionsMutation.Data>()
-
-            coEvery {
-                apolloClient.safeMutation(mutation = capture(capturedMutation))
-            } returns mutationData
-
-            // ----- Act -----
-            dataSource.updateListBookPositions(
-                listId = 7,
-                startPosition = 0,
-                orderedListBookIds = listOf(10, 20),
-            )
-
-            // ----- Assert -----
-            val updates = capturedMutation.captured.updates
-
-            updates.size shouldBe 2
+            capturedMutation.captured.updates.size shouldBe 3
         }
     }
 
@@ -860,14 +847,13 @@ class ListsRemoteDataSourceImplTest {
             val bookId = 3
             val editionId = 10
             val expectedListBook = stubListBook()
+            val capturedMutation = slot<CreateListBookMutation>()
             val mutationData = mockk<CreateListBookMutation.Data>()
             val insertListBook = mockk<CreateListBookMutation.Data.Insert_list_book>()
             val listBookEntry = mockk<CreateListBookMutation.Data.Insert_list_book.List_book>()
 
-            mockkObject(CreateListBookMutation.Data.Insert_list_book.List_book.Companion)
-
             coEvery {
-                apolloClient.safeMutation(mutation = any<CreateListBookMutation>())
+                apolloClient.safeMutation(mutation = capture(capturedMutation))
             } returns mutationData
 
             every {
@@ -897,6 +883,10 @@ class ListsRemoteDataSourceImplTest {
 
             // ----- Assert -----
             result shouldBe expectedListBook
+
+            capturedMutation.captured.listBook.list_id shouldBe listId
+            capturedMutation.captured.listBook.book_id shouldBe bookId
+            capturedMutation.captured.listBook.edition_id shouldBe Optional.Present(editionId)
         }
 
         @Test
@@ -957,8 +947,6 @@ class ListsRemoteDataSourceImplTest {
             val insertListBook = mockk<CreateListBookMutation.Data.Insert_list_book>()
             val listBookEntry = mockk<CreateListBookMutation.Data.Insert_list_book.List_book>()
 
-            mockkObject(CreateListBookMutation.Data.Insert_list_book.List_book.Companion)
-
             coEvery {
                 apolloClient.safeMutation(mutation = any<CreateListBookMutation>())
             } returns mutationData
@@ -1005,8 +993,6 @@ class ListsRemoteDataSourceImplTest {
             val listResponse = mockk<UpdateListMutation.Data.ListResponse>()
             val listEntry = mockk<UpdateListMutation.Data.ListResponse.List>()
             val listFragment = mockk<ListFragment>()
-
-            mockkObject(UpdateListMutation.Data.ListResponse.List.Companion)
 
             coEvery {
                 apolloClient.safeMutation(mutation = capture(capturedMutation))
@@ -1079,8 +1065,6 @@ class ListsRemoteDataSourceImplTest {
             // ----- Arrange -----
             val mutationData = mockk<UpdateListMutation.Data>()
             val listResponse = mockk<UpdateListMutation.Data.ListResponse>()
-
-            mockkObject(UpdateListMutation.Data.ListResponse.List.Companion)
 
             coEvery {
                 apolloClient.safeMutation(mutation = any<UpdateListMutation>())

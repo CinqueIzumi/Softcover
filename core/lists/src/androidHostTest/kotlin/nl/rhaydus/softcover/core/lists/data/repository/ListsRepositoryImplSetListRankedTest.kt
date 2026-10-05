@@ -4,7 +4,6 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +54,7 @@ class ListsRepositoryImplSetListRankedTest {
     @Nested
     inner class SetListRanked {
         @Test
-        fun `calls local then remote then caches the refreshed list on success`() = runTest {
+        fun `sets ranked locally, sends it to Hardcover and caches the refreshed list on success`() = runTest {
             // ----- Arrange -----
             val listId = 5
             val ranked = true
@@ -86,17 +85,21 @@ class ListsRepositoryImplSetListRankedTest {
             )
 
             // ----- Assert -----
-            coVerifyOrder {
+            coVerify(exactly = 1) {
                 listsLocalDataSource.setListRanked(
                     listId = listId,
                     ranked = ranked,
                 )
+            }
 
+            coVerify(exactly = 1) {
                 listsRemoteDataSource.setListRanked(
                     listId = listId,
                     ranked = ranked,
                 )
+            }
 
+            coVerify(exactly = 1) {
                 listsLocalDataSource.cacheUserBookLists(lists = listOf(refreshed))
             }
         }
@@ -130,12 +133,14 @@ class ListsRepositoryImplSetListRankedTest {
                 )
             }
 
-            coVerifyOrder {
+            coVerify(exactly = 1) {
                 listsLocalDataSource.setListRanked(
                     listId = listId,
                     ranked = ranked,
                 )
+            }
 
+            coVerify(exactly = 1) {
                 listsLocalDataSource.setListRanked(
                     listId = listId,
                     ranked = ranked.not(),

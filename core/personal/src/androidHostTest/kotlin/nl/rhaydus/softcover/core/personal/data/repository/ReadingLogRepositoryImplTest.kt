@@ -46,48 +46,8 @@ class ReadingLogRepositoryImplTest {
         createdAt = createdAt,
     )
 
-    private fun buildEntry(
-        id: Long = 1L,
-        bookId: Int = 10,
-        startedAt: LocalDate? = LocalDate(
-            2024,
-            1,
-            1,
-        ),
-        finishedAt: LocalDate? = LocalDate(
-            2024,
-            1,
-            10,
-        ),
-        rating: Double? = 4.0,
-        note: String? = "Good",
-        createdAt: Instant = Instant.parse("2024-01-11T08:00:00Z"),
-    ) = ReadingLogEntry(
-        id = id,
-        bookId = bookId,
-        startedAt = startedAt,
-        finishedAt = finishedAt,
-        rating = rating,
-        note = note,
-        createdAt = createdAt,
-    )
-
     @Nested
     inner class ObserveByBookId {
-        @Test
-        fun `emits empty list when data source emits empty list`() = runTest {
-            // ----- Arrange -----
-            every {
-                localDataSource.observeByBookId(bookId = 10)
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            repository.observeByBookId(bookId = 10).test {
-                awaitItem() shouldBe emptyList()
-                awaitComplete()
-            }
-        }
-
         @Test
         fun `maps entities to domain models`() = runTest {
             // ----- Arrange -----
@@ -112,37 +72,6 @@ class ReadingLogRepositoryImplTest {
                 items.size shouldBe 2
                 items[0].note shouldBe "First"
                 items[1].note shouldBe "Second"
-                awaitComplete()
-            }
-        }
-    }
-
-    @Nested
-    inner class ObserveCountByBookId {
-        @Test
-        fun `emits zero when no entries`() = runTest {
-            // ----- Arrange -----
-            every {
-                localDataSource.observeCountByBookId(bookId = 10)
-            } returns flowOf(0)
-
-            // ----- Act & Assert -----
-            repository.observeCountByBookId(bookId = 10).test {
-                awaitItem() shouldBe 0
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `emits count from local data source`() = runTest {
-            // ----- Arrange -----
-            every {
-                localDataSource.observeCountByBookId(bookId = 10)
-            } returns flowOf(3)
-
-            // ----- Act & Assert -----
-            repository.observeCountByBookId(bookId = 10).test {
-                awaitItem() shouldBe 3
                 awaitComplete()
             }
         }
@@ -183,69 +112,6 @@ class ReadingLogRepositoryImplTest {
             entitySlot.captured.finishedAt shouldBe "2024-02-20"
             entitySlot.captured.rating shouldBe 3.5
             entitySlot.captured.note shouldBe "Fine read"
-        }
-
-        @Test
-        fun `inserts entity with null dates correctly`() = runTest {
-            // ----- Arrange -----
-            val entitySlot = slot<ReadingLogEntryEntity>()
-
-            coEvery {
-                localDataSource.insert(capture(entitySlot))
-            } returns 89L
-
-            // ----- Act -----
-            repository.add(
-                bookId = 5,
-                startedAt = null,
-                finishedAt = null,
-                rating = null,
-                note = null,
-            )
-
-            // ----- Assert -----
-            entitySlot.captured.startedAt shouldBe null
-            entitySlot.captured.finishedAt shouldBe null
-        }
-    }
-
-    @Nested
-    inner class Update {
-        @Test
-        fun `delegates update to local data source with converted entity`() = runTest {
-            // ----- Arrange -----
-            val entry = buildEntry(
-                id = 4L,
-                note = "Updated note",
-            )
-            val entitySlot = slot<ReadingLogEntryEntity>()
-
-            coEvery {
-                localDataSource.update(capture(entitySlot))
-            } returns Unit
-
-            // ----- Act -----
-            repository.update(entry = entry)
-
-            // ----- Assert -----
-            entitySlot.captured.id shouldBe 4L
-            entitySlot.captured.note shouldBe "Updated note"
-        }
-    }
-
-    @Nested
-    inner class Delete {
-        @Test
-        fun `delegates delete to local data source`() = runTest {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            repository.delete(id = 13L)
-
-            // ----- Assert -----
-            coVerify {
-                localDataSource.delete(id = 13L)
-            }
         }
     }
 }

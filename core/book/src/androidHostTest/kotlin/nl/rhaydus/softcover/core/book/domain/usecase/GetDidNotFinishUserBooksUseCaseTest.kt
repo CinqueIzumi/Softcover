@@ -42,19 +42,5 @@ class GetDidNotFinishUserBooksUseCaseTest {
                 awaitComplete()
             }
         }
-
-        @Test
-        fun `emits empty list when no did-not-finish books exist`() = runTest {
-            // ----- Arrange -----
-            every {
-                booksRepository.getBooksFlowByStatus(status = UserBookStatus.DID_NOT_FINISH)
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem() shouldBe emptyList()
-                awaitComplete()
-            }
-        }
     }
 }

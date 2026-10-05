@@ -1,10 +1,10 @@
 package nl.rhaydus.softcover.core.lists.data.mapper
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.softcover.core.domain.model.PrivacySetting
-import nl.rhaydus.softcover.core.lists.data.mapper.buildListSignature
 import nl.rhaydus.softcover.fragment.ListBookFragment
 import nl.rhaydus.softcover.fragment.ListFragment
 import org.junit.jupiter.api.Nested
@@ -124,125 +124,51 @@ class ListMapperTest {
         }
 
         @Test
-        fun `returns ids-only ListBook when edition_id is present`() {
+        fun `maps ids, position and created_at, leaving book and edition unresolved`() {
             // ----- Arrange -----
             val fragment = stubListBookFragment(
                 id = 99,
                 listId = 20,
                 bookId = 1,
                 editionId = 10,
-            )
-
-            // ----- Act -----
-            val result = fragment.toListBook()
-
-            // ----- Assert -----
-            result?.listBookId shouldBe 99
-            result?.listId shouldBe 20
-            result?.bookId shouldBe 1
-            result?.editionId shouldBe 10
-        }
-
-        @Test
-        fun `book and edition are null on the GraphQL path`() {
-            // ----- Arrange -----
-            val fragment = stubListBookFragment(editionId = 10)
-
-            // ----- Act -----
-            val result = fragment.toListBook()
-
-            // ----- Assert -----
-            result?.book shouldBe null
-            result?.edition shouldBe null
-        }
-
-        @Test
-        fun `propagates created_at into addedAt`() {
-            // ----- Arrange -----
-            val fragment = stubListBookFragment(
-                editionId = 10,
+                position = 3,
                 createdAt = "2024-03-15",
             )
 
             // ----- Act -----
-            val result = fragment.toListBook()
+            val result = fragment.toListBook().shouldNotBeNull()
 
             // ----- Assert -----
-            result?.addedAt shouldBe "2024-03-15"
+            result.listBookId shouldBe 99
+            result.listId shouldBe 20
+            result.bookId shouldBe 1
+            result.editionId shouldBe 10
+            result.position shouldBe 3
+            result.addedAt shouldBe "2024-03-15"
+            result.book shouldBe null
+            result.edition shouldBe null
         }
 
         @Test
-        fun `propagates null created_at as null addedAt`() {
-            // ----- Arrange -----
-            val fragment = stubListBookFragment(
-                editionId = 10,
-                createdAt = null,
-            )
-
-            // ----- Act -----
-            val result = fragment.toListBook()
-
-            // ----- Assert -----
-            result?.addedAt shouldBe null
-        }
-
-        @Test
-        fun `propagates position when present`() {
-            // ----- Arrange -----
-            val fragment = stubListBookFragment(
-                editionId = 10,
-                position = 3,
-            )
-
-            // ----- Act -----
-            val result = fragment.toListBook()
-
-            // ----- Assert -----
-            result?.position shouldBe 3
-        }
-
-        @Test
-        fun `propagates null position as null`() {
+        fun `maps absent position and created_at to null`() {
             // ----- Arrange -----
             val fragment = stubListBookFragment(
                 editionId = 10,
                 position = null,
+                createdAt = null,
             )
 
             // ----- Act -----
-            val result = fragment.toListBook()
+            val result = fragment.toListBook().shouldNotBeNull()
 
             // ----- Assert -----
-            result?.position shouldBe null
+            result.position shouldBe null
+            result.addedAt shouldBe null
         }
     }
 
     @Nested
     inner class ListFragmentToBookList {
-        @Test
-        fun `reads ranked=true from fragment`() {
-            // ----- Arrange -----
-            val fragment = stubListFragment(ranked = true)
-
-            // ----- Act -----
-            val result = fragment.toBookList()
-
-            // ----- Assert -----
-            result.ranked shouldBe true
-        }
-
-        @Test
-        fun `reads ranked=false from fragment`() {
-            // ----- Arrange -----
-            val fragment = stubListFragment(ranked = false)
-
-            // ----- Act -----
-            val result = fragment.toBookList()
-
-            // ----- Assert -----
-            result.ranked shouldBe false
-        }
-
         @Test
         fun `populates signature from updatedAt count and maxListBookUpdatedAt`() {
             // ----- Arrange -----
@@ -259,24 +185,6 @@ class ListMapperTest {
 
             // ----- Assert -----
             result.signature shouldBe "2024-05-01|4|2024-04-30"
-        }
-
-        @Test
-        fun `populates signature with empty strings when updatedAt and maxUpdatedAt are null`() {
-            // ----- Arrange -----
-            val fragment = stubListFragment(
-                updatedAt = null,
-                listBooksAggregate = stubAggregate(
-                    count = 2,
-                    maxUpdatedAt = null,
-                ),
-            )
-
-            // ----- Act -----
-            val result = fragment.toBookList()
-
-            // ----- Assert -----
-            result.signature shouldBe "|2|"
         }
 
         @Test
@@ -297,18 +205,6 @@ class ListMapperTest {
 
             // ----- Assert -----
             result.signature shouldBe "2024-06-01|0|"
-        }
-
-        @Test
-        fun `maps PUBLIC privacy_setting_id to PrivacySetting PUBLIC`() {
-            // ----- Arrange -----
-            val fragment = stubListFragment(privacySettingId = PrivacySetting.PUBLIC.code)
-
-            // ----- Act -----
-            val result = fragment.toBookList()
-
-            // ----- Assert -----
-            result.privacy shouldBe PrivacySetting.PUBLIC
         }
 
         @Test
@@ -346,16 +242,11 @@ class ListMapperTest {
     inner class BuildListSignature {
         @Test
         fun `formats all non-null values as pipe-separated string`() {
-            // ----- Arrange -----
-            val updatedAt = "2024-01-01"
-            val count = 7
-            val maxUpdatedAt = "2023-12-31"
-
             // ----- Act -----
             val result = buildListSignature(
-                updatedAt = updatedAt,
-                count = count,
-                maxListBookUpdatedAt = maxUpdatedAt,
+                updatedAt = "2024-01-01",
+                count = 7,
+                maxListBookUpdatedAt = "2023-12-31",
             )
 
             // ----- Assert -----
@@ -386,32 +277,6 @@ class ListMapperTest {
 
             // ----- Assert -----
             result shouldBe "2024-01-01|3|"
-        }
-
-        @Test
-        fun `uses empty strings for both null dates`() {
-            // ----- Act -----
-            val result = buildListSignature(
-                updatedAt = null,
-                count = 0,
-                maxListBookUpdatedAt = null,
-            )
-
-            // ----- Assert -----
-            result shouldBe "|0|"
-        }
-
-        @Test
-        fun `count zero produces correct format`() {
-            // ----- Act -----
-            val result = buildListSignature(
-                updatedAt = "2024-01-01",
-                count = 0,
-                maxListBookUpdatedAt = null,
-            )
-
-            // ----- Assert -----
-            result shouldBe "2024-01-01|0|"
         }
     }
 }

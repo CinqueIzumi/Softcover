@@ -24,7 +24,7 @@ class RemoveBookFromListUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `returns success when repository call completes without error`() = runTest {
+        fun `returns success and forwards the list and book to the repository`() = runTest {
             // ----- Arrange -----
             val listId = 42
             val bookId = 7
@@ -44,28 +44,7 @@ class RemoveBookFromListUseCaseTest {
 
             // ----- Assert -----
             result.isSuccess shouldBe true
-        }
 
-        @Test
-        fun `delegates to repository with correct arguments`() = runTest {
-            // ----- Arrange -----
-            val listId = 42
-            val bookId = 7
-
-            coJustRun {
-                listsRepository.removeBookFromList(
-                    listId = listId,
-                    bookId = bookId,
-                )
-            }
-
-            // ----- Act -----
-            useCase(
-                listId = listId,
-                bookId = bookId,
-            )
-
-            // ----- Assert -----
             coVerify(exactly = 1) {
                 listsRepository.removeBookFromList(
                     listId = listId,

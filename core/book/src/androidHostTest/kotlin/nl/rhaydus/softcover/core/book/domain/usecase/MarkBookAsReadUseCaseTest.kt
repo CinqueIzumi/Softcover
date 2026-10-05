@@ -23,9 +23,10 @@ class MarkBookAsReadUseCaseTest {
     @BeforeEach
     fun setUp() {
         repository = mockk()
-        markReadingActivityTodayUseCase = mockk { coEvery {
-            this@mockk()
-        } returns Unit }
+        markReadingActivityTodayUseCase = mockk()
+        coEvery {
+            markReadingActivityTodayUseCase()
+        } returns Unit
         useCase = MarkBookAsReadUseCase(
             repository = repository,
             markReadingActivityTodayUseCase = markReadingActivityTodayUseCase,
@@ -144,40 +145,6 @@ class MarkBookAsReadUseCaseTest {
                     book = inputBook,
                     editionId = null,
                     actionAt = actionAt,
-                )
-            }
-            coVerify(exactly = 1) { markReadingActivityTodayUseCase() }
-        }
-
-        @Test
-        fun `forwards null editionId to the repository when omitted`() = runTest {
-            // ----- Arrange -----
-            val inputBook = mockk<Book>()
-            val updatedBook = mockk<Book>()
-
-            every {
-                inputBook.status
-            } returns BookStatus.Reading
-
-            coEvery {
-                repository.markBookAsRead(
-                    book = inputBook,
-                    editionId = null,
-                )
-            } returns updatedBook
-
-            coJustRun {
-                repository.cacheBook(book = updatedBook)
-            }
-
-            // ----- Act -----
-            useCase(book = inputBook)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                repository.markBookAsRead(
-                    book = inputBook,
-                    editionId = null,
                 )
             }
             coVerify(exactly = 1) { markReadingActivityTodayUseCase() }

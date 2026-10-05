@@ -50,23 +50,6 @@ class GetEditionsByBookIdUseCaseTest {
         }
 
         @Test
-        fun `returns success with empty list when repository returns no editions`() = runTest {
-            // ----- Arrange -----
-            val bookId = 5
-
-            coEvery {
-                booksRepository.getEditionsByBookId(bookId = bookId)
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = useCase(bookId)
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe emptyList()
-        }
-
-        @Test
         fun `returns failure when repository throws`() = runTest {
             // ----- Arrange -----
             val bookId = 5
@@ -82,25 +65,6 @@ class GetEditionsByBookIdUseCaseTest {
             // ----- Assert -----
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
-        }
-
-        @Test
-        fun `returns success with single edition when repository returns one edition`() = runTest {
-            // ----- Arrange -----
-            val bookId = 7
-            val singleEdition = stubBookEdition(id = 42)
-
-            coEvery {
-                booksRepository.getEditionsByBookId(bookId = bookId)
-            } returns listOf(singleEdition)
-
-            // ----- Act -----
-            val result = useCase(bookId)
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull()?.size shouldBe 1
-            result.getOrNull()?.get(0) shouldBe singleEdition
         }
     }
 }

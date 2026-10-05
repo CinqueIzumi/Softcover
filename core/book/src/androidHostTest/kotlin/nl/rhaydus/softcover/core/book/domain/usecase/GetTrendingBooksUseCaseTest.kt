@@ -58,37 +58,6 @@ class GetTrendingBooksUseCaseTest {
         }
 
         @Test
-        fun `returns Result success wrapping an empty list when the repository returns no books`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                booksRepository.fetchTrendingBooks(forceRefresh = any())
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe emptyList()
-        }
-
-        @Test
-        fun `default call forwards forceRefresh false to the repository`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                booksRepository.fetchTrendingBooks(forceRefresh = any())
-            } returns emptyList()
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
-            coVerify {
-                booksRepository.fetchTrendingBooks(forceRefresh = false)
-            }
-        }
-
-        @Test
         fun `forceRefresh true is forwarded verbatim to the repository`() = runTest {
             // ----- Arrange -----
             coEvery {

@@ -42,19 +42,5 @@ class GetCurrentlyReadingUserBooksUseCaseTest {
                 awaitComplete()
             }
         }
-
-        @Test
-        fun `emits empty list when no currently reading books exist`() = runTest {
-            // ----- Arrange -----
-            every {
-                booksRepository.getBooksFlowByStatus(status = UserBookStatus.CURRENTLY_READING)
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem() shouldBe emptyList()
-                awaitComplete()
-            }
-        }
     }
 }

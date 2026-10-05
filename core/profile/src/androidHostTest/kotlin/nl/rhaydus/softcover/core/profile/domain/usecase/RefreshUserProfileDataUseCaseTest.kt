@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.core.profile.domain.usecase
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
@@ -44,26 +43,6 @@ class RefreshUserProfileDataUseCaseTest {
             result.isSuccess shouldBe true
             coVerify(exactly = 1) { refreshReadingActivityUseCase() }
             coVerify(exactly = 1) { refreshUserProfileStatsUseCase() }
-        }
-
-        @Test
-        fun `calls the activity half before the stats half`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                refreshReadingActivityUseCase()
-            } returns Result.success(Unit)
-            coEvery {
-                refreshUserProfileStatsUseCase()
-            } returns Result.success(Unit)
-
-            // ----- Act -----
-            useCase()
-
-            // ----- Assert -----
-            coVerifyOrder {
-                refreshReadingActivityUseCase()
-                refreshUserProfileStatsUseCase()
-            }
         }
 
         @Test

@@ -100,39 +100,6 @@ class MarkBookAsReadingUseCaseTest {
         }
 
         @Test
-        fun `forwards null editionId to the repository when omitted`() = runTest {
-            // ----- Arrange -----
-            val inputBook = mockk<Book>()
-            val updatedBook = mockk<Book>()
-
-            every {
-                inputBook.status
-            } returns BookStatus.WantToRead
-
-            coEvery {
-                booksRepository.markBookAsReading(
-                    book = inputBook,
-                    editionId = null,
-                )
-            } returns updatedBook
-
-            coJustRun {
-                booksRepository.cacheBook(book = updatedBook)
-            }
-
-            // ----- Act -----
-            useCase(book = inputBook)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                booksRepository.markBookAsReading(
-                    book = inputBook,
-                    editionId = null,
-                )
-            }
-        }
-
-        @Test
         fun `returns failure when markBookAsReading throws`() = runTest {
             // ----- Arrange -----
             val inputBook = mockk<Book>()

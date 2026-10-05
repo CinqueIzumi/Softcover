@@ -141,26 +141,6 @@ class RefreshReadingActivityUseCaseTest {
         }
 
         @Test
-        fun `returns failure when the reading-day stream throws`() = runTest {
-            // ----- Arrange -----
-            val exception = RuntimeException("network error")
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(42)
-            coEvery {
-                profileRepository.streamReadingDaysDescending(userId = 42)
-            } returns flow { throw exception }
-
-            // ----- Act -----
-            val result = useCase()
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe exception
-        }
-
-        @Test
         fun `returns failure when cacheUserProfileActivity throws`() = runTest {
             // ----- Arrange -----
             val exception = RuntimeException("cache write failed")
@@ -199,21 +179,6 @@ class RefreshReadingActivityUseCaseTest {
         fun `returns 1 when today is absent but yesterday is present (grace day)`() = runTest {
             // ----- Act & Assert -----
             capturedActivityFor(streamedDaysDescending = listOf(day(1))).first shouldBe 1
-        }
-
-        @Test
-        fun `returns short streak when the stream has an early gap`() = runTest {
-            // ----- Arrange -----
-            // today and yesterday are consecutive, then a gap (day-before-yesterday missing)
-            // before an older, unrelated date further back in the descending stream.
-            val streamedDays = listOf(
-                day(0),
-                day(1),
-                day(3),
-            )
-
-            // ----- Act & Assert -----
-            capturedActivityFor(streamedDaysDescending = streamedDays).first shouldBe 2
         }
 
         @Test

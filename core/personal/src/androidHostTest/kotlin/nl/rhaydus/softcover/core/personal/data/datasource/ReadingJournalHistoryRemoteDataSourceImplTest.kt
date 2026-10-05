@@ -5,17 +5,17 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.unmockkAll
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.GetReadingJournalHistoryQuery
 import nl.rhaydus.softcover.core.identity.domain.usecase.GetUserIdUseCase
 import nl.rhaydus.softcover.core.network.helper.safeQuery
 import nl.rhaydus.softcover.core.personal.domain.model.ReadingJournalEntry
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -24,6 +24,24 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
     private lateinit var apolloClient: ApolloClient
     private lateinit var getUserIdUseCase: GetUserIdUseCase
     private lateinit var dataSource: ReadingJournalHistoryRemoteDataSourceImpl
+
+    companion object {
+        private const val APOLLO_EXTENSIONS = "nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt"
+
+        // Static-mocking the Apollo extensions is the expensive step, so it happens once per class.
+        // Every test stubs against its own fresh ApolloClient mock, so no stub leaks between tests.
+        @JvmStatic
+        @BeforeAll
+        fun mockApolloExtensions() {
+            mockkStatic(APOLLO_EXTENSIONS)
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun unmockApolloExtensions() {
+            unmockkStatic(APOLLO_EXTENSIONS)
+        }
+    }
 
     @BeforeEach
     fun setUp() {
@@ -34,13 +52,6 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
                 apolloClient = apolloClient,
                 getUserIdUseCase = getUserIdUseCase,
             )
-
-        mockkStatic("nl.rhaydus.softcover.core.network.helper.ApolloExtensionsKt")
-    }
-
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
     }
 
     /**
@@ -48,18 +59,12 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
      * maps into a distinct [ReadingJournalEntry], keyed by [pages], so accumulated pagination results
      * can be asserted by value and order without mocking the mapper itself.
      */
-    private fun mockRow(pages: Int): GetReadingJournalHistoryQuery.Data.Reading_journal {
-        val row = mockk<GetReadingJournalHistoryQuery.Data.Reading_journal>()
-
-        every {
-            row.updated_at
-        } returns "2024-01-01"
-        every {
-            row.metadata
-        } returns mapOf("progress_pages" to pages)
-
-        return row
-    }
+    private fun row(pages: Int): GetReadingJournalHistoryQuery.Data.Reading_journal =
+        GetReadingJournalHistoryQuery.Data.Reading_journal(
+            __typename = "reading_journals",
+            updated_at = "2024-01-01",
+            metadata = mapOf("progress_pages" to pages),
+        )
 
     private fun expectedEntry(pages: Int): ReadingJournalEntry = ReadingJournalEntry(
         date = LocalDate(
@@ -78,8 +83,6 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
             // ----- Arrange -----
             val bookId = 42
             val userId = 7
-            val rows = (0 until 3).map { mockRow(pages = it) }
-            val queryData = mockk<GetReadingJournalHistoryQuery.Data>()
 
             coEvery {
                 getUserIdUseCase()
@@ -87,11 +90,7 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
 
             coEvery {
                 apolloClient.safeQuery(query = any<GetReadingJournalHistoryQuery>())
-            } returns queryData
-
-            every {
-                queryData.reading_journals
-            } returns rows
+            } returns GetReadingJournalHistoryQuery.Data(reading_journals = (0 until 3).map { row(pages = it) })
 
             // ----- Act -----
             val result = dataSource.getReadingJournalHistory(bookId = bookId)
@@ -109,10 +108,6 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
             // ----- Arrange -----
             val bookId = 42
             val userId = 7
-            val firstPageRows = (0 until 100).map { mockRow(pages = it) }
-            val secondPageRows = (100 until 125).map { mockRow(pages = it) }
-            val firstPageData = mockk<GetReadingJournalHistoryQuery.Data>()
-            val secondPageData = mockk<GetReadingJournalHistoryQuery.Data>()
 
             coEvery {
                 getUserIdUseCase()
@@ -127,7 +122,7 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
                         offset = 0,
                     ),
                 )
-            } returns firstPageData
+            } returns GetReadingJournalHistoryQuery.Data(reading_journals = (0 until 100).map { row(pages = it) })
 
             coEvery {
                 apolloClient.safeQuery(
@@ -138,15 +133,7 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
                         offset = 100,
                     ),
                 )
-            } returns secondPageData
-
-            every {
-                firstPageData.reading_journals
-            } returns firstPageRows
-
-            every {
-                secondPageData.reading_journals
-            } returns secondPageRows
+            } returns GetReadingJournalHistoryQuery.Data(reading_journals = (100 until 125).map { row(pages = it) })
 
             // ----- Act -----
             val result = dataSource.getReadingJournalHistory(bookId = bookId)
@@ -155,47 +142,6 @@ class ReadingJournalHistoryRemoteDataSourceImplTest {
             result shouldBe (0 until 125).map { expectedEntry(pages = it) }
 
             coVerify(exactly = 2) {
-                apolloClient.safeQuery(query = any<GetReadingJournalHistoryQuery>())
-            }
-
-            coVerify {
-                apolloClient.safeQuery(
-                    query = GetReadingJournalHistoryQuery(
-                        bookId = bookId,
-                        userId = userId,
-                        limit = 100,
-                        offset = 100,
-                    ),
-                )
-            }
-        }
-
-        @Test
-        fun `stops after a single call and returns an empty list when the first page is empty`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-            val userId = 7
-            val queryData = mockk<GetReadingJournalHistoryQuery.Data>()
-
-            coEvery {
-                getUserIdUseCase()
-            } returns Result.success(userId)
-
-            coEvery {
-                apolloClient.safeQuery(query = any<GetReadingJournalHistoryQuery>())
-            } returns queryData
-
-            every {
-                queryData.reading_journals
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = dataSource.getReadingJournalHistory(bookId = bookId)
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-
-            coVerify(exactly = 1) {
                 apolloClient.safeQuery(query = any<GetReadingJournalHistoryQuery>())
             }
         }

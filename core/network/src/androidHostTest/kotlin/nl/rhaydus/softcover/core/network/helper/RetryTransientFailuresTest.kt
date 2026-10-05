@@ -145,13 +145,13 @@ class RetryTransientFailuresTest {
         @Test
         fun `Retry-After header overrides the computed exponential backoff`() = runTest {
             // ----- Arrange -----
+            val retryAfterHeader = HttpHeader(
+                "Retry-After",
+                "5",
+            )
             val retryAfterException = httpException(
                 statusCode = 429,
-                headers = listOf(HttpHeader(
-                    "Retry-After",
-                    "5",
-                ),
-                ),
+                headers = listOf(retryAfterHeader),
             )
             every {
                 apolloCall.toFlow()

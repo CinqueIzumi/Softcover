@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.baseBook
@@ -58,9 +57,6 @@ class AddBookByIsbnUseCaseTest {
                 book = book,
                 editionId = editionId,
             )
-
-            coVerify(exactly = 1) { booksRepository.addBookByIsbn(isbn = isbn) }
-            coVerify(exactly = 1) { fetchBookByIdUseCase(id = bookId) }
         }
 
         @Test

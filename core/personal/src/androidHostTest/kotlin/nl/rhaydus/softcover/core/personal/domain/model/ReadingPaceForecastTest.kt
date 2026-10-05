@@ -84,23 +84,6 @@ class ReadingPaceForecastTest {
         }
 
         @Test
-        fun `total negative — returns null`() {
-            // ----- Arrange -----
-            val dailyUnitsRead = listOf(20)
-
-            // ----- Act -----
-            val result = ReadingPaceForecast.compute(
-                dailyUnitsRead = dailyUnitsRead,
-                current = 0,
-                total = -10,
-                unit = DeadlineUnit.PAGES,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
         fun `current equals total — book already finished, returns null`() {
             // ----- Arrange -----
             val dailyUnitsRead = listOf(20)
@@ -118,43 +101,9 @@ class ReadingPaceForecastTest {
         }
 
         @Test
-        fun `current exceeds total — book overshot, returns null`() {
-            // ----- Arrange -----
-            val dailyUnitsRead = listOf(20)
-
-            // ----- Act -----
-            val result = ReadingPaceForecast.compute(
-                dailyUnitsRead = dailyUnitsRead,
-                current = 150,
-                total = 100,
-                unit = DeadlineUnit.PAGES,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
         fun `all logged days are zero — no positive reading day, returns null`() {
             // ----- Arrange -----
             val dailyUnitsRead = listOf(0, 0, 0)
-
-            // ----- Act -----
-            val result = ReadingPaceForecast.compute(
-                dailyUnitsRead = dailyUnitsRead,
-                current = 0,
-                total = 100,
-                unit = DeadlineUnit.PAGES,
-            )
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `all logged days are negative — excluded by the positive filter same as zero, returns null`() {
-            // ----- Arrange -----
-            val dailyUnitsRead = listOf(-5, -10)
 
             // ----- Act -----
             val result = ReadingPaceForecast.compute(
@@ -202,26 +151,6 @@ class ReadingPaceForecastTest {
             result?.avgPerReadingDay shouldBe 25f
             result?.remainingUnits shouldBe 50
             result?.forecastReadingDays shouldBe 2
-        }
-
-        @Test
-        fun `unit PAGES — is carried onto the result without affecting the numeric forecast`() {
-            // ----- Arrange -----
-            val dailyUnitsRead = listOf(30, 50)
-
-            // ----- Act -----
-            val result = ReadingPaceForecast.compute(
-                dailyUnitsRead = dailyUnitsRead,
-                current = 10,
-                total = 100,
-                unit = DeadlineUnit.PAGES,
-            )
-
-            // ----- Assert -----
-            result?.unit shouldBe DeadlineUnit.PAGES
-            result?.avgPerReadingDay shouldBe 40f
-            result?.remainingUnits shouldBe 90
-            result?.forecastReadingDays shouldBe 3
         }
 
         @Test

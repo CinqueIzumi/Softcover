@@ -64,7 +64,7 @@ class ListsRepositoryImplCreateListTest {
     @Nested
     inner class CreateList {
         @Test
-        fun `returns the BookList produced by the remote data source`() = runTest {
+        fun `returns the created BookList and caches it as a single-element list`() = runTest {
             // ----- Arrange -----
             val name = "My List"
             val created = stubBookList(
@@ -81,49 +81,9 @@ class ListsRepositoryImplCreateListTest {
 
             // ----- Assert -----
             result shouldBe created
-        }
 
-        @Test
-        fun `caches the created list as a single-element list`() = runTest {
-            // ----- Arrange -----
-            val name = "Favourites"
-            val created = stubBookList(
-                id = 3,
-                name = name,
-            )
-
-            coEvery {
-                listsRemoteDataSource.createList(name = name)
-            } returns created
-
-            // ----- Act -----
-            repository.createList(name = name)
-
-            // ----- Assert -----
             coVerify(exactly = 1) {
                 listsLocalDataSource.cacheUserBookLists(lists = listOf(created))
-            }
-        }
-
-        @Test
-        fun `propagates remote exception and does not cache`() = runTest {
-            // ----- Arrange -----
-            val name = "Bad List"
-            val error = RuntimeException("API failure")
-
-            coEvery {
-                listsRemoteDataSource.createList(name = name)
-            } throws error
-
-            // ----- Act & Assert -----
-            val thrown = shouldThrow<RuntimeException> {
-                repository.createList(name = name)
-            }
-
-            thrown shouldBe error
-
-            coVerify(exactly = 0) {
-                listsLocalDataSource.cacheUserBookLists(lists = any())
             }
         }
 

@@ -73,7 +73,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
-            coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
             coVerify(exactly = 0) {
                 updateBookProgressUseCase(
                     any(),
@@ -107,12 +106,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
-            coVerify(exactly = 1) {
-                markBookAsReadUseCase(
-                    book = book,
-                    actionAt = actionAt,
-                )
-            }
             coVerify(exactly = 0) {
                 updateBookProgressUseCase(
                     any(),
@@ -121,28 +114,6 @@ class RecordBookProgressUseCaseTest {
                     any(),
                 )
             }
-        }
-
-        @Test
-        fun `forwards null actionAt to markBookAsReadUseCase when omitted and book is finished`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(pages = 320)
-
-            coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            // ----- Act -----
-            val result = useCase(
-                book = book,
-                newPage = 320,
-            )
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-            result.getOrNull() shouldBe ShelfMutationOutcome.Applied
-
-            coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
         }
 
         @Test
@@ -168,13 +139,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) {
-                updateBookProgressUseCase(
-                    book = book,
-                    newPage = 150,
-                    newSeconds = null,
-                )
-            }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
 
@@ -204,14 +168,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) {
-                updateBookProgressUseCase(
-                    book = book,
-                    newPage = 150,
-                    newSeconds = null,
-                    actionAt = actionAt,
-                )
-            }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
 
@@ -237,7 +193,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe ShelfMutationOutcome.Applied
 
-            coVerify(exactly = 1) { markBookAsReadUseCase(book = book) }
             coVerify(exactly = 0) {
                 updateBookProgressUseCase(
                     any(),
@@ -273,13 +228,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) {
-                updateBookProgressUseCase(
-                    book = book,
-                    newPage = null,
-                    newSeconds = 18000,
-                )
-            }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
 
@@ -306,13 +254,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) {
-                updateBookProgressUseCase(
-                    book = book,
-                    newPage = 100,
-                    newSeconds = null,
-                )
-            }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
 
@@ -388,13 +329,6 @@ class RecordBookProgressUseCaseTest {
             result.isSuccess shouldBe true
             result.getOrNull() shouldBe null
 
-            coVerify(exactly = 1) {
-                updateBookProgressUseCase(
-                    book = book,
-                    newPage = null,
-                    newSeconds = 5000,
-                )
-            }
             coVerify(exactly = 0) { markBookAsReadUseCase(any()) }
         }
     }

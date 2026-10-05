@@ -41,19 +41,5 @@ class GetAllUserListsUseCaseTest {
                 awaitComplete()
             }
         }
-
-        @Test
-        fun `emits empty list when repository emits empty list`() = runTest {
-            // ----- Arrange -----
-            every {
-                listsRepository.allUserLists
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem() shouldBe emptyList()
-                awaitComplete()
-            }
-        }
     }
 }

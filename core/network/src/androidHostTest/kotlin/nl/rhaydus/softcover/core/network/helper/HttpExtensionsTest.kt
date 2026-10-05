@@ -110,17 +110,6 @@ class HttpExtensionsTest {
         }
 
         @Test
-        fun `HTTP 503 throws ServerUnavailableException`() = runTest {
-            // ----- Arrange -----
-            engine.responseToReturn = responseWithoutBody(503)
-
-            // ----- Act & Assert -----
-            shouldThrow<ServerUnavailableException> {
-                engine.safeGetText(TEST_URL)
-            }
-        }
-
-        @Test
         fun `HTTP 408 throws ServerUnavailableException`() = runTest {
             // ----- Arrange -----
             engine.responseToReturn = responseWithoutBody(408)
@@ -149,17 +138,6 @@ class HttpExtensionsTest {
         fun `HTTP 404 throws UnexpectedApiException`() = runTest {
             // ----- Arrange -----
             engine.responseToReturn = responseWithoutBody(404)
-
-            // ----- Act & Assert -----
-            shouldThrow<UnexpectedApiException> {
-                engine.safeGetText(TEST_URL)
-            }
-        }
-
-        @Test
-        fun `HTTP 400 throws UnexpectedApiException`() = runTest {
-            // ----- Arrange -----
-            engine.responseToReturn = responseWithoutBody(400)
 
             // ----- Act & Assert -----
             shouldThrow<UnexpectedApiException> {

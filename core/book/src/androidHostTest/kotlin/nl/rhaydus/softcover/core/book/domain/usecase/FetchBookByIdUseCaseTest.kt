@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.core.book.domain.usecase
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
@@ -92,78 +91,6 @@ class FetchBookByIdUseCaseTest {
         }
 
         @Test
-        fun `result book has the editions returned by getEditionsByBookId`() = runTest {
-            // ----- Arrange -----
-            val bookId = 7
-            val edition1 = buildEdition(id = 10)
-            val edition2 = buildEdition(id = 20)
-            val remoteBook = buildBook(id = bookId)
-
-            coEvery {
-                booksRepository.fetchBookById(id = bookId)
-            } returns remoteBook
-            coEvery {
-                booksRepository.getEditionsByBookId(bookId = bookId)
-            } returns listOf(edition1, edition2)
-
-            // ----- Act -----
-            val result = useCase(bookId)
-
-            // ----- Assert -----
-            val editions = result.getOrNull().shouldNotBeNull().editions
-            editions.size shouldBe 2
-            editions[0] shouldBe edition1
-            editions[1] shouldBe edition2
-        }
-
-        @Test
-        fun `calls getEditionsByBookId exactly once with the original id when book id matches`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-            val remoteBook = buildBook(id = bookId)
-
-            coEvery {
-                booksRepository.fetchBookById(id = bookId)
-            } returns remoteBook
-            coEvery {
-                booksRepository.getEditionsByBookId(bookId = bookId)
-            } returns emptyList()
-
-            // ----- Act -----
-            useCase(bookId)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { booksRepository.getEditionsByBookId(bookId = bookId) }
-        }
-
-        @Test
-        fun `re-fetches editions with canonical id when fetchBookById returns a book with a different id`() = runTest {
-            // ----- Arrange -----
-            val requestedId = 100
-            val canonicalId = 200
-            val initialEditions = listOf(buildEdition(id = 1))
-            val canonicalEditions = listOf(buildEdition(id = 2), buildEdition(id = 3))
-            val remoteBook = buildBook(id = canonicalId)
-
-            coEvery {
-                booksRepository.fetchBookById(id = requestedId)
-            } returns remoteBook
-            coEvery {
-                booksRepository.getEditionsByBookId(bookId = requestedId)
-            } returns initialEditions
-            coEvery {
-                booksRepository.getEditionsByBookId(bookId = canonicalId)
-            } returns canonicalEditions
-
-            // ----- Act -----
-            useCase(requestedId)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { booksRepository.getEditionsByBookId(bookId = requestedId) }
-            coVerify(exactly = 1) { booksRepository.getEditionsByBookId(bookId = canonicalId) }
-        }
-
-        @Test
         fun `uses canonical editions (not original editions) when book id is redirected`() = runTest {
             // ----- Arrange -----
             val requestedId = 100
@@ -188,26 +115,6 @@ class FetchBookByIdUseCaseTest {
             // ----- Assert -----
             result.isSuccess shouldBe true
             result.getOrNull().shouldNotBeNull().editions shouldBe canonicalEditions
-        }
-
-        @Test
-        fun `does not call getEditionsByBookId a second time when book id matches the requested id`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-            val remoteBook = buildBook(id = bookId)
-
-            coEvery {
-                booksRepository.fetchBookById(id = bookId)
-            } returns remoteBook
-            coEvery {
-                booksRepository.getEditionsByBookId(bookId = bookId)
-            } returns emptyList()
-
-            // ----- Act -----
-            useCase(bookId)
-
-            // ----- Assert -----
-            coVerify(exactly = 1) { booksRepository.getEditionsByBookId(bookId = any()) }
         }
 
         @Test

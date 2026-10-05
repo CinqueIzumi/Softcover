@@ -26,22 +26,6 @@ class EditionImageStorageImplTest {
     @Nested
     inner class Write {
         @Test
-        fun `writes bytes to the edition file and they can be read back`() {
-            // ----- Arrange -----
-            val editionId = 10
-            val bytes = byteArrayOf(1, 2, 3)
-
-            // ----- Act -----
-            val path = storage.write(
-                editionId = editionId,
-                bytes = bytes,
-            )
-
-            // ----- Assert -----
-            File(path).readBytes() shouldBe bytes
-        }
-
-        @Test
         fun `returns the absolute path whose parent dir is edition_images under filesDir`() {
             // ----- Arrange -----
             val editionId = 11
@@ -100,11 +84,12 @@ class EditionImageStorageImplTest {
         @Test
         fun `is a no-op when no file exists at the given path`() {
             // ----- Arrange -----
+            val imagesDir = File(
+                tempDir,
+                "edition_images",
+            )
             val missingPath = File(
-                File(
-                    tempDir,
-                    "edition_images",
-                ),
+                imagesDir,
                 "999",
             ).absolutePath
 

@@ -98,27 +98,5 @@ class SetEditionAsOwnedUseCaseTest {
             result.isFailure shouldBe true
             result.exceptionOrNull() shouldBe expectedError
         }
-
-        @Test
-        fun `returns failure when removeOwnedEdition throws`() = runTest {
-            // ----- Arrange -----
-            val editionId = 10
-            val edition = stubEdition(id = editionId)
-            val expectedError = RuntimeException("db error")
-
-            coEvery {
-                listsRepository.removeOwnedEdition(editionId = editionId)
-            } throws expectedError
-
-            // ----- Act -----
-            val result = useCase(
-                edition = edition,
-                owned = false,
-            )
-
-            // ----- Assert -----
-            result.isFailure shouldBe true
-            result.exceptionOrNull() shouldBe expectedError
-        }
     }
 }

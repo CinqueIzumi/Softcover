@@ -144,6 +144,30 @@ class RateLimitInterceptorTest {
             .build()
     }
 
+    private fun successResponseWith(
+        limit: Int? = null,
+        remaining: Int? = null,
+        retryAfterSeconds: Long? = null,
+    ): ApolloResponse<GetUserBookListsQuery.Data> = successResponseWithHeaders(
+        rateLimitHeaders(
+            limit = limit,
+            remaining = remaining,
+            retryAfterSeconds = retryAfterSeconds,
+        ),
+    )
+
+    private fun rateLimitedResponseWith(
+        limit: Int? = null,
+        remaining: Int? = null,
+        retryAfterSeconds: Long? = null,
+    ): ApolloResponse<GetUserBookListsQuery.Data> = tooManyRequestsResponse(
+        rateLimitHeaders(
+            limit = limit,
+            remaining = remaining,
+            retryAfterSeconds = retryAfterSeconds,
+        ),
+    )
+
     private fun tooManyRequestsResponse(headers: List<HttpHeader>): ApolloResponse<GetUserBookListsQuery.Data> =
         ApolloResponse.Builder(
             baseRequest.operation,
@@ -486,11 +510,11 @@ class RateLimitInterceptorTest {
 
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-            } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
-                limit = 5,
-                remaining = 4,
-            ),
-            ),
+            } returns flowOf(
+                successResponseWith(
+                    limit = 5,
+                    remaining = 4,
+                ),
             )
             interceptor.intercept(
                 baseRequest,
@@ -539,20 +563,20 @@ class RateLimitInterceptorTest {
                 // since a second request is still outstanding when the first response is adopted.
                 val responseA = flow {
                     delay(1.seconds)
-                    emit(successResponseWithHeaders(rateLimitHeaders(
-                        limit = 4,
-                        remaining = 3,
-                    ),
-                    ),
+                    emit(
+                        successResponseWith(
+                            limit = 4,
+                            remaining = 3,
+                        ),
                     )
                 }
                 val responseB = flow {
                     delay(10.seconds)
-                    emit(successResponseWithHeaders(rateLimitHeaders(
-                        limit = 4,
-                        remaining = 3,
-                    ),
-                    ),
+                    emit(
+                        successResponseWith(
+                            limit = 4,
+                            remaining = 3,
+                        ),
                     )
                 }
                 every {
@@ -560,14 +584,18 @@ class RateLimitInterceptorTest {
                 } returnsMany listOf(responseA, responseB)
 
                 // ----- Act — both acquire instantly (avail 4 -> 2) and go in flight together -----
-                val jobA = launch { interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {} }
-                val jobB = launch { interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {} }
+                val jobA = launch {
+                    interceptor.intercept(
+                        baseRequest,
+                        chain,
+                    ).collect {}
+                }
+                val jobB = launch {
+                    interceptor.intercept(
+                        baseRequest,
+                        chain,
+                    ).collect {}
+                }
                 runCurrent()
                 advanceTimeBy(1.seconds)
                 runCurrent() // responseA lands and is adopted while B is still outstanding (inFlight == 2)
@@ -606,11 +634,11 @@ class RateLimitInterceptorTest {
                 )
                 every {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
-                    limit = 10,
-                    remaining = 8,
-                ),
-                ),
+                } returns flowOf(
+                    successResponseWith(
+                        limit = 10,
+                        remaining = 8,
+                    ),
                 )
                 // Cold start: exactly one request can go before any response arrives. It is also the
                 // only one outstanding, so its response's higher remaining=8 must be trusted upward.
@@ -650,20 +678,20 @@ class RateLimitInterceptorTest {
 
             val responseA = flow {
                 delay(1.seconds)
-                emit(successResponseWithHeaders(rateLimitHeaders(
-                    limit = 8,
-                    remaining = 1,
-                ),
-                ),
+                emit(
+                    successResponseWith(
+                        limit = 8,
+                        remaining = 1,
+                    ),
                 )
             }
             val responseB = flow {
                 delay(10.seconds)
-                emit(successResponseWithHeaders(rateLimitHeaders(
-                    limit = 8,
-                    remaining = 1,
-                ),
-                ),
+                emit(
+                    successResponseWith(
+                        limit = 8,
+                        remaining = 1,
+                    ),
                 )
             }
             every {
@@ -671,14 +699,18 @@ class RateLimitInterceptorTest {
             } returnsMany listOf(responseA, responseB)
 
             // ----- Act — both acquire instantly (avail 8 -> 6) and go in flight together -----
-            val jobA = launch { interceptor.intercept(
-                baseRequest,
-                chain,
-            ).collect {} }
-            val jobB = launch { interceptor.intercept(
-                baseRequest,
-                chain,
-            ).collect {} }
+            val jobA = launch {
+                interceptor.intercept(
+                    baseRequest,
+                    chain,
+                ).collect {}
+            }
+            val jobB = launch {
+                interceptor.intercept(
+                    baseRequest,
+                    chain,
+                ).collect {}
+            }
             runCurrent()
             advanceTimeBy(1.seconds)
             runCurrent() // responseA lands and lowers availableTokens to 1 while B is still outstanding
@@ -723,21 +755,23 @@ class RateLimitInterceptorTest {
                 } returns failingResponse
 
                 // ----- Act — the response flow fails; inFlight must still be decremented back to 0 -----
-                runCatching { interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {} }
+                runCatching {
+                    interceptor.intercept(
+                        baseRequest,
+                        chain,
+                    ).collect {}
+                }
 
                 // ----- Act — a solo request with a higher reported remaining must still be trusted
                 // ----- upward; if the earlier failure had leaked inFlight, this would wrongly stay
                 // ----- untrusted -----
                 every {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
-                    limit = 4,
-                    remaining = 4,
-                ),
-                ),
+                } returns flowOf(
+                    successResponseWith(
+                        limit = 4,
+                        remaining = 4,
+                    ),
                 )
                 interceptor.intercept(
                     baseRequest,
@@ -784,10 +818,12 @@ class RateLimitInterceptorTest {
                 } returns neverCompletingResponse
 
                 // ----- Act — acquire a token and go in flight, then cancel before any response arrives -----
-                val job = launch { interceptor.intercept(
-                    baseRequest,
-                    chain,
-                ).collect {} }
+                val job = launch {
+                    interceptor.intercept(
+                        baseRequest,
+                        chain,
+                    ).collect {}
+                }
                 runCurrent()
                 job.cancelAndJoin()
 
@@ -795,11 +831,11 @@ class RateLimitInterceptorTest {
                 // ----- upward; if cancellation had leaked inFlight, this would wrongly stay untrusted -----
                 every {
                     chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-                } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
-                    limit = 4,
-                    remaining = 4,
-                ),
-                ),
+                } returns flowOf(
+                    successResponseWith(
+                        limit = 4,
+                        remaining = 4,
+                    ),
                 )
                 interceptor.intercept(
                     baseRequest,
@@ -877,12 +913,12 @@ class RateLimitInterceptorTest {
 
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-            } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
-                limit = 9,
-                remaining = 9,
-                retryAfterSeconds = 5,
-            ),
-            ),
+            } returns flowOf(
+                successResponseWith(
+                    limit = 9,
+                    remaining = 9,
+                    retryAfterSeconds = 5,
+                ),
             )
             interceptor.intercept(
                 baseRequest,
@@ -918,11 +954,11 @@ class RateLimitInterceptorTest {
 
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-            } returns flowOf(tooManyRequestsResponse(rateLimitHeaders(
-                limit = 10,
-                remaining = 8,
-            ),
-            ),
+            } returns flowOf(
+                rateLimitedResponseWith(
+                    limit = 10,
+                    remaining = 8,
+                ),
             )
             interceptor.intercept(
                 baseRequest,
@@ -953,11 +989,10 @@ class RateLimitInterceptorTest {
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
             } returns flowOf(
-                tooManyRequestsResponse(rateLimitHeaders(
+                rateLimitedResponseWith(
                     limit = 5,
                     remaining = 3,
                     retryAfterSeconds = 1,
-                ),
                 ),
             )
 
@@ -996,11 +1031,11 @@ class RateLimitInterceptorTest {
 
             every {
                 chain.proceed(any<ApolloRequest<GetUserBookListsQuery.Data>>())
-            } returns flowOf(successResponseWithHeaders(rateLimitHeaders(
-                limit = 10,
-                remaining = 1,
-            ),
-            ),
+            } returns flowOf(
+                successResponseWith(
+                    limit = 10,
+                    remaining = 1,
+                ),
             )
             // This is the exact scenario that produced the real 429: the server reports one token left.
             interceptor.intercept(

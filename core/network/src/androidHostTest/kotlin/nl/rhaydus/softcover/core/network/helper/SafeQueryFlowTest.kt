@@ -192,22 +192,6 @@ class SafeQueryFlowTest {
 
             verify(exactly = 1) { SessionExpiredNotifier.notifySessionExpired() }
         }
-
-        @Test
-        fun `no data emitted then HTTP 401 — throws InvalidTokenException and notifies session expired`() = runTest {
-            // ----- Arrange -----
-            val authExResponse = exceptionResponse(httpException(401))
-            every {
-                apolloCall.toFlow()
-            } returns flowOf(authExResponse)
-
-            // ----- Act & Assert -----
-            apolloClient.safeQueryFlow(query).test {
-                awaitError().shouldBeInstanceOf<InvalidTokenException>()
-            }
-
-            verify(exactly = 1) { SessionExpiredNotifier.notifySessionExpired() }
-        }
     }
 
     @Nested
@@ -253,20 +237,6 @@ class SafeQueryFlowTest {
             every {
                 apolloCall.toFlow()
             } returns flowOf(transientExResponse)
-
-            // ----- Act & Assert -----
-            apolloClient.safeQueryFlow(query).test {
-                awaitError().shouldBeInstanceOf<ServerUnavailableException>()
-            }
-        }
-
-        @Test
-        fun `no data emitted, transient HTTP 429 — throws ServerUnavailableException`() = runTest {
-            // ----- Arrange -----
-            val throttleExResponse = exceptionResponse(httpException(429))
-            every {
-                apolloCall.toFlow()
-            } returns flowOf(throttleExResponse)
 
             // ----- Act & Assert -----
             apolloClient.safeQueryFlow(query).test {

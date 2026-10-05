@@ -14,6 +14,8 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.ListWriteQueue
+import nl.rhaydus.softcover.core.domain.connectivity.PendingListWrite
+import nl.rhaydus.softcover.core.domain.connectivity.PendingListWriteKind
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.BookList
@@ -92,7 +94,7 @@ class ListsRepositoryImplOwnedEditionTest {
     @Nested
     inner class MarkEditionAsOwned {
         @Test
-        fun `optimistically caches placeholder with OPTIMISTIC_LIST_BOOK_ID when getOwnedListId returns non-null`() = runTest {
+        fun `caches a placeholder when the owned list is known, then swaps it for the real ListBook`() = runTest {
             // ----- Arrange -----
             val editionId = 10
             val bookId = 5
@@ -142,6 +144,14 @@ class ListsRepositoryImplOwnedEditionTest {
                     forceNetwork = false,
                 )
             }
+
+            coVerify {
+                listsLocalDataSource.removeOwnedListBookByEditionId(editionId = editionId)
+            }
+
+            coVerify {
+                listsLocalDataSource.cacheListBook(book = realListBook)
+            }
         }
 
         @Test
@@ -182,48 +192,6 @@ class ListsRepositoryImplOwnedEditionTest {
 
             coVerify {
                 listsRemoteDataSource.markEditionAsOwned(edition = edition)
-            }
-
-            coVerify {
-                listsLocalDataSource.cacheListBook(book = realListBook)
-            }
-        }
-
-        @Test
-        fun `on success removes optimistic entry and caches the real ListBook`() = runTest {
-            // ----- Arrange -----
-            val editionId = 10
-            val bookId = 5
-            val ownedListId = 99
-            val edition = stubEdition(
-                id = editionId,
-                bookId = bookId,
-            )
-            val realListBook = stubListBook(
-                listBookId = 42,
-                listId = ownedListId,
-                bookId = bookId,
-                editionId = editionId,
-            )
-
-            coEvery {
-                listsLocalDataSource.findOwnedListBookByEditionId(editionId = editionId)
-            } returns null
-
-            coEvery {
-                listsLocalDataSource.getOwnedListId()
-            } returns ownedListId
-
-            coEvery {
-                listsRemoteDataSource.markEditionAsOwned(edition = edition)
-            } returns realListBook
-
-            // ----- Act -----
-            repository.markEditionAsOwned(edition = edition)
-
-            // ----- Assert -----
-            coVerify {
-                listsLocalDataSource.removeOwnedListBookByEditionId(editionId = editionId)
             }
 
             coVerify {
@@ -412,15 +380,22 @@ class ListsRepositoryImplOwnedEditionTest {
                 listsRemoteDataSource.removeListBook(book = snapshot)
             } throws remoteError
 
+            val enqueuedWrites = mutableListOf<PendingListWrite>()
+
+            coJustRun {
+                listWriteQueue.enqueue(capture(enqueuedWrites))
+            }
+
             // ----- Act -----
             val caught = runCatching { repository.removeOwnedEdition(editionId = editionId) }
 
             // ----- Assert -----
             caught.exceptionOrNull() shouldBe remoteError
 
-            coVerify(exactly = 1) {
-                listWriteQueue.enqueue(payload = any())
-            }
+            enqueuedWrites.size shouldBe 1
+            enqueuedWrites[0].kind shouldBe PendingListWriteKind.REMOVE_LIST_BOOK
+            enqueuedWrites[0].listBookId shouldBe snapshot.listBookId
+            enqueuedWrites[0].editionId shouldBe editionId
 
             coVerify(exactly = 0) {
                 listsLocalDataSource.cacheListBook(book = any())

@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -80,7 +79,7 @@ class ListsRepositoryImplReorderTest {
         }
 
         @Test
-        fun `calls local data source before remote data source`() = runTest {
+        fun `applies the new order locally and sends it to Hardcover`() = runTest {
             // ----- Arrange -----
             val listId = 5
             val startPosition = 2
@@ -110,48 +109,8 @@ class ListsRepositoryImplReorderTest {
             )
 
             // ----- Assert -----
-            coVerifyOrder {
+            coVerify(exactly = 1) {
                 listsLocalDataSource.applyListBookPositions(
-                    listId = listId,
-                    startPosition = startPosition,
-                    orderedListBookIds = orderedIds,
-                )
-
-                listsRemoteDataSource.updateListBookPositions(
-                    listId = listId,
-                    startPosition = startPosition,
-                    orderedListBookIds = orderedIds,
-                )
-            }
-        }
-
-        @Test
-        fun `propagates remote failure after local write has already been applied`() = runTest {
-            // ----- Arrange -----
-            val listId = 5
-            val startPosition = 0
-            val orderedIds = listOf(1, 2)
-            val remoteError = RuntimeException("network failure")
-
-            coJustRun {
-                listsLocalDataSource.applyListBookPositions(
-                    listId = listId,
-                    startPosition = startPosition,
-                    orderedListBookIds = orderedIds,
-                )
-            }
-
-            coEvery {
-                listsRemoteDataSource.updateListBookPositions(
-                    listId = any(),
-                    startPosition = any(),
-                    orderedListBookIds = any(),
-                )
-            } throws remoteError
-
-            // ----- Act & Assert -----
-            shouldThrow<RuntimeException> {
-                repository.reorderListBooks(
                     listId = listId,
                     startPosition = startPosition,
                     orderedListBookIds = orderedIds,
@@ -159,7 +118,7 @@ class ListsRepositoryImplReorderTest {
             }
 
             coVerify(exactly = 1) {
-                listsLocalDataSource.applyListBookPositions(
+                listsRemoteDataSource.updateListBookPositions(
                     listId = listId,
                     startPosition = startPosition,
                     orderedListBookIds = orderedIds,

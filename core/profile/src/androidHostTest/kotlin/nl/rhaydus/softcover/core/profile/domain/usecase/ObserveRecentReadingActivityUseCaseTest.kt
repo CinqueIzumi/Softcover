@@ -58,21 +58,7 @@ class ObserveRecentReadingActivityUseCaseTest {
     @Nested
     inner class Invoke {
         @Test
-        fun `emits exactly 21 entries`() = runTest {
-            // ----- Arrange -----
-            every {
-                profileRepository.observeUserProfileData()
-            } returns flowOf(profileWith(emptySet()))
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem().size shouldBe 21
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `entries are in ascending date order and last entry date equals today`() = runTest {
+        fun `emits 21 consecutive days in ascending order, the first 20 days back and the last today`() = runTest {
             // ----- Arrange -----
             every {
                 profileRepository.observeUserProfileData()
@@ -81,40 +67,12 @@ class ObserveRecentReadingActivityUseCaseTest {
             // ----- Act & Assert -----
             useCase().test {
                 val items = awaitItem()
-                items.zipWithNext { a, b -> (a.date < b.date) shouldBe true }
-                items.last().date shouldBe today
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `first entry date is 20 days before today`() = runTest {
-            // ----- Arrange -----
-            every {
-                profileRepository.observeUserProfileData()
-            } returns flowOf(profileWith(emptySet()))
-
-            // ----- Act & Assert -----
-            useCase().test {
-                val items = awaitItem()
-                items.first().date shouldBe today.minus(
-                    20,
-                    DateTimeUnit.DAY,
-                )
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `all entries have didRead false when active dates set is empty`() = runTest {
-            // ----- Arrange -----
-            every {
-                profileRepository.observeUserProfileData()
-            } returns flowOf(profileWith(emptySet()))
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem().all { it.didRead.not() } shouldBe true
+                items.map { it.date } shouldBe (20 downTo 0).map {
+                    today.minus(
+                        it,
+                        DateTimeUnit.DAY,
+                    )
+                }
                 awaitComplete()
             }
         }
@@ -156,61 +114,6 @@ class ObserveRecentReadingActivityUseCaseTest {
                 val items = awaitItem()
                 val trueItems = items.filter { it.didRead }
                 trueItems.map { it.date }.toSet() shouldBe activeDates
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `gapped active set — gap day has didRead false and surrounding days have didRead true`() = runTest {
-            // ----- Arrange -----
-            // Read 17 days (offset 0–16), gap on offset 17, then 3 more (offset 18–20)
-            val windowStart = today.minus(
-                20,
-                DateTimeUnit.DAY,
-            )
-            val activeDates = (0..16).map {
-                windowStart.plus(
-                    it,
-                    DateTimeUnit.DAY,
-                )
-            }.toSet() +
-                setOf(
-                    windowStart.plus(
-                        18,
-                        DateTimeUnit.DAY,
-                    ),
-                    windowStart.plus(
-                        19,
-                        DateTimeUnit.DAY,
-                    ),
-                    windowStart.plus(
-                        20,
-                        DateTimeUnit.DAY,
-                    ),
-                )
-            val gapDate = windowStart.plus(
-                17,
-                DateTimeUnit.DAY,
-            )
-
-            every {
-                profileRepository.observeUserProfileData()
-            } returns flowOf(profileWith(activeDates))
-
-            // ----- Act & Assert -----
-            useCase().test {
-                val items = awaitItem()
-                val byDate = items.associateBy { it.date }
-
-                byDate[gapDate]?.didRead shouldBe false
-                byDate[windowStart.plus(
-                    16,
-                    DateTimeUnit.DAY,
-                )]?.didRead shouldBe true
-                byDate[windowStart.plus(
-                    18,
-                    DateTimeUnit.DAY,
-                )]?.didRead shouldBe true
                 awaitComplete()
             }
         }

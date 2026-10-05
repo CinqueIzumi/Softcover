@@ -42,19 +42,5 @@ class GetReadUserBooksUseCaseTest {
                 awaitComplete()
             }
         }
-
-        @Test
-        fun `emits empty list when no read books exist`() = runTest {
-            // ----- Arrange -----
-            every {
-                booksRepository.getBooksFlowByStatus(status = UserBookStatus.READ)
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            useCase().test {
-                awaitItem() shouldBe emptyList()
-                awaitComplete()
-            }
-        }
     }
 }

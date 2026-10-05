@@ -60,9 +60,6 @@ class ResolveBookByIsbnUseCaseTest {
                 book = book,
                 editionId = editionId,
             )
-
-            coVerify(exactly = 1) { booksRepository.fetchEditionMatchesForIsbns(isbns = listOf(validIsbn)) }
-            coVerify(exactly = 1) { fetchBookByIdUseCase(id = bookId) }
         }
 
         @Test

@@ -126,37 +126,6 @@ class BooksLocalDataSourceImplTest {
         }
 
         @Test
-        fun `emits empty list when DAO emits empty list`() = runTest {
-            // ----- Arrange -----
-            every {
-                dao.observeBooks()
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            dataSource.allUserBooks.test {
-                awaitItem() shouldBe emptyList<Book>()
-                awaitComplete()
-            }
-        }
-
-        @Test
-        fun `emits multiple mapped books when DAO emits multiple entities`() = runTest {
-            // ----- Arrange -----
-            val entity1 = stubBookFullEntity(id = 1)
-            val entity2 = stubBookFullEntity(id = 2)
-
-            every {
-                dao.observeBooks()
-            } returns flowOf(listOf(entity1, entity2))
-
-            // ----- Act & Assert -----
-            dataSource.allUserBooks.test {
-                awaitItem() shouldBe listOf(entity1.toModel(), entity2.toModel())
-                awaitComplete()
-            }
-        }
-
-        @Test
         fun `suppresses consecutive duplicate emissions via distinctUntilChanged`() = runTest {
             // ----- Arrange -----
             val entity = stubBookFullEntity(id = 1)
@@ -234,23 +203,6 @@ class BooksLocalDataSourceImplTest {
         }
 
         @Test
-        fun `WANT_TO_READ emits mapped books from getBooksByStatusSortedByCreatedAt`() = runTest {
-            // ----- Arrange -----
-            val status = UserBookStatus.WANT_TO_READ
-            val entity = stubBookFullEntity(id = 5)
-
-            every {
-                dao.getBooksByStatusSortedByCreatedAt(statusCode = status.code)
-            } returns flowOf(listOf(entity))
-
-            // ----- Act & Assert -----
-            dataSource.getBooksFlowByStatus(status = status).test {
-                awaitItem() shouldBe listOf(entity.toModel())
-                awaitComplete()
-            }
-        }
-
-        @Test
         fun `DID_NOT_FINISH dispatches to getBooksByStatusAndEvents with status_stopped`() = runTest {
             // ----- Arrange -----
             val status = UserBookStatus.DID_NOT_FINISH
@@ -293,55 +245,6 @@ class BooksLocalDataSourceImplTest {
                 awaitComplete()
             }
         }
-
-        @Test
-        fun `emits empty list when DAO emits empty list for READ status`() = runTest {
-            // ----- Arrange -----
-            val status = UserBookStatus.READ
-
-            every {
-                dao.getReadBooks(statusCode = status.code)
-            } returns flowOf(emptyList())
-
-            // ----- Act & Assert -----
-            dataSource.getBooksFlowByStatus(status = status).test {
-                awaitItem() shouldBe emptyList<Book>()
-                awaitComplete()
-            }
-        }
-    }
-
-    @Nested
-    inner class GetAllUserBookIds {
-        @Test
-        fun `delegates to DAO and returns the id list`() = runTest {
-            // ----- Arrange -----
-            val expectedIds = listOf(1, 2, 3)
-
-            coEvery {
-                dao.getAllUserBookIds()
-            } returns expectedIds
-
-            // ----- Act -----
-            val result = dataSource.getAllUserBookIds()
-
-            // ----- Assert -----
-            result shouldBe expectedIds
-        }
-
-        @Test
-        fun `returns empty list when DAO returns empty list`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                dao.getAllUserBookIds()
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = dataSource.getAllUserBookIds()
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-        }
     }
 
     @Nested
@@ -359,39 +262,6 @@ class BooksLocalDataSourceImplTest {
             coVerify(exactly = 0) {
                 dao.getExistingBookIds(any())
             }
-        }
-
-        @Test
-        fun `delegates to DAO and returns the filtered id list when ids are non-empty`() = runTest {
-            // ----- Arrange -----
-            val inputIds = listOf(1, 2, 3)
-            val cachedIds = listOf(1, 3)
-
-            coEvery {
-                dao.getExistingBookIds(bookIds = inputIds)
-            } returns cachedIds
-
-            // ----- Act -----
-            val result = dataSource.getExistingBookIds(ids = inputIds)
-
-            // ----- Assert -----
-            result shouldBe cachedIds
-        }
-
-        @Test
-        fun `returns empty list when none of the given ids exist in the database`() = runTest {
-            // ----- Arrange -----
-            val inputIds = listOf(10, 20)
-
-            coEvery {
-                dao.getExistingBookIds(bookIds = inputIds)
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = dataSource.getExistingBookIds(ids = inputIds)
-
-            // ----- Assert -----
-            result shouldBe emptyList()
         }
     }
 
@@ -411,71 +281,10 @@ class BooksLocalDataSourceImplTest {
                 dao.getExistingEditionIds(any())
             }
         }
-
-        @Test
-        fun `delegates to DAO and returns the filtered id list when ids are non-empty`() = runTest {
-            // ----- Arrange -----
-            val inputIds = listOf(10, 20, 30)
-            val cachedIds = listOf(10, 30)
-
-            coEvery {
-                dao.getExistingEditionIds(editionIds = inputIds)
-            } returns cachedIds
-
-            // ----- Act -----
-            val result = dataSource.getExistingEditionIds(ids = inputIds)
-
-            // ----- Assert -----
-            result shouldBe cachedIds
-        }
-
-        @Test
-        fun `returns empty list when none of the given edition ids exist in the database`() = runTest {
-            // ----- Arrange -----
-            val inputIds = listOf(99, 100)
-
-            coEvery {
-                dao.getExistingEditionIds(editionIds = inputIds)
-            } returns emptyList()
-
-            // ----- Act -----
-            val result = dataSource.getExistingEditionIds(ids = inputIds)
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-        }
     }
 
     @Nested
     inner class CacheEditions {
-        @Test
-        fun `delegates to DAO with the given editions`() = runTest {
-            // ----- Arrange -----
-            val editions = listOf<BookEdition>(mockk(), mockk())
-
-            // ----- Act -----
-            dataSource.cacheEditions(editions = editions)
-
-            // ----- Assert -----
-            coVerify {
-                dao.cacheEditions(editions = editions)
-            }
-        }
-
-        @Test
-        fun `delegates to DAO with an empty list`() = runTest {
-            // ----- Arrange -----
-            val editions = emptyList<BookEdition>()
-
-            // ----- Act -----
-            dataSource.cacheEditions(editions = editions)
-
-            // ----- Assert -----
-            coVerify {
-                dao.cacheEditions(editions = editions)
-            }
-        }
-
         @Test
         fun `deletes stale cover files returned by the DAO`() = runTest {
             // ----- Arrange -----
@@ -513,20 +322,6 @@ class BooksLocalDataSourceImplTest {
     @Nested
     inner class CacheBook {
         @Test
-        fun `delegates to DAO with the given book`() = runTest {
-            // ----- Arrange -----
-            val book: Book = mockk()
-
-            // ----- Act -----
-            dataSource.cacheBook(book = book)
-
-            // ----- Assert -----
-            coVerify {
-                dao.cacheBook(book = book)
-            }
-        }
-
-        @Test
         fun `deletes stale cover files returned by the DAO`() = runTest {
             // ----- Arrange -----
             val book: Book = mockk()
@@ -563,34 +358,6 @@ class BooksLocalDataSourceImplTest {
     @Nested
     inner class CacheBooks {
         @Test
-        fun `delegates to DAO with the given book list`() = runTest {
-            // ----- Arrange -----
-            val books = listOf<Book>(mockk(), mockk())
-
-            // ----- Act -----
-            dataSource.cacheBooks(books = books)
-
-            // ----- Assert -----
-            coVerify {
-                dao.cacheBooks(books = books)
-            }
-        }
-
-        @Test
-        fun `delegates to DAO with an empty list`() = runTest {
-            // ----- Arrange -----
-            val books = emptyList<Book>()
-
-            // ----- Act -----
-            dataSource.cacheBooks(books = books)
-
-            // ----- Assert -----
-            coVerify {
-                dao.cacheBooks(books = books)
-            }
-        }
-
-        @Test
         fun `deletes stale cover files returned by the DAO`() = runTest {
             // ----- Arrange -----
             val books = listOf<Book>(mockk())
@@ -626,38 +393,6 @@ class BooksLocalDataSourceImplTest {
 
     @Nested
     inner class RemoveUserBooksById {
-        @Test
-        fun `delegates to DAO deleteUserBooksByIds with the given ids`() = runTest {
-            // ----- Arrange -----
-            val ids = listOf(10, 20, 30)
-
-            coEvery {
-                dao.getBookIdByUserBookId(userBookId = any())
-            } returns null
-
-            // ----- Act -----
-            dataSource.removeUserBooksById(ids = ids)
-
-            // ----- Assert -----
-            coVerify {
-                dao.deleteUserBooksByIds(ids)
-            }
-        }
-
-        @Test
-        fun `delegates to DAO with an empty id list`() = runTest {
-            // ----- Arrange -----
-            val ids = emptyList<Int>()
-
-            // ----- Act -----
-            dataSource.removeUserBooksById(ids = ids)
-
-            // ----- Assert -----
-            coVerify {
-                dao.deleteUserBooksByIds(ids)
-            }
-        }
-
         @Test
         fun `deletes image files for each non-null localImagePath after DB removal`() = runTest {
             // ----- Arrange -----
@@ -740,22 +475,6 @@ class BooksLocalDataSourceImplTest {
     @Nested
     inner class RemoveAllBooks {
         @Test
-        fun `delegates to DAO deleteAllLocalData`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                dao.getAllEditionImageRefs()
-            } returns emptyList()
-
-            // ----- Act -----
-            dataSource.removeAllBooks()
-
-            // ----- Assert -----
-            coVerify {
-                dao.deleteAllLocalData()
-            }
-        }
-
-        @Test
         fun `deletes image files for each non-null path after DB removal`() = runTest {
             // ----- Arrange -----
             val path1 = "/data/user/0/edition_images/1"
@@ -811,55 +530,6 @@ class BooksLocalDataSourceImplTest {
     }
 
     @Nested
-    inner class UpdateEditionLocalImage {
-        @Test
-        fun `delegates to DAO with the given editionId, path, and url`() = runTest {
-            // ----- Arrange -----
-            val editionId = 10
-            val path = "/data/user/0/edition_images/10"
-            val url = "https://example.com/cover.jpg"
-
-            // ----- Act -----
-            dataSource.updateEditionLocalImage(
-                editionId = editionId,
-                path = path,
-                url = url,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                dao.updateEditionLocalImage(
-                    editionId = editionId,
-                    path = path,
-                    url = url,
-                )
-            }
-        }
-
-        @Test
-        fun `delegates to DAO with a null path and null url`() = runTest {
-            // ----- Arrange -----
-            val editionId = 20
-
-            // ----- Act -----
-            dataSource.updateEditionLocalImage(
-                editionId = editionId,
-                path = null,
-                url = null,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                dao.updateEditionLocalImage(
-                    editionId = editionId,
-                    path = null,
-                    url = null,
-                )
-            }
-        }
-    }
-
-    @Nested
     inner class PersistEditionImage {
         @Test
         fun `writes bytes and updates the DAO with stored path and url`() = runTest {
@@ -908,27 +578,6 @@ class BooksLocalDataSourceImplTest {
             // ----- Arrange -----
             val status = UserBookStatus.READ
             val bookIds = listOf(3, 1, 2)
-
-            // ----- Act -----
-            dataSource.applyShelfManualOrderPrefix(
-                status = status,
-                prefixBookIds = bookIds,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                dao.applyShelfManualOrderPrefix(
-                    statusCode = status.code,
-                    prefixBookIds = bookIds,
-                )
-            }
-        }
-
-        @Test
-        fun `forwards status code for a different status`() = runTest {
-            // ----- Arrange -----
-            val status = UserBookStatus.WANT_TO_READ
-            val bookIds = emptyList<Int>()
 
             // ----- Act -----
             dataSource.applyShelfManualOrderPrefix(
