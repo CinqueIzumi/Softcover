@@ -13,10 +13,9 @@ the file's one top-level class/interface/enum and ignores that the rest of
 the file is functions. `compileKotlin` passes; only `styleCheck` (run
 later in Verify) catches it.
 
-**Why:** unlike ktlint's one-type-per-file gate (see
-[[feedback_style_table_one_type_per_file]], which is about two co-located
-*types*), this fires with exactly one type present, purely because the
-enum's name differs from the file's name.
+**Why:** unlike ktlint's one-type-per-file gate, which is about two
+co-located *types*, this fires with exactly one type present, purely
+because the enum's name differs from the file's name.
 
 **How to apply:** when a file is named after its primary function/composable
 (`SettingsMenuRow.kt`) and also declares a small companion enum or sealed

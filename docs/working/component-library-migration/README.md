@@ -14,12 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SS done: `DeadlineRow` fixtures + gallery entry added, SS-C shifts in `visual-checks.md`, step file deleted, its smells list now `component-contract.md` § 7.6a. SL-3b blocked on F34.
-- **Next:** commit SS-C (awaiting the user's go-ahead), then TP-0 (`steps/tp-test-prune.md`).
-- **Open questions:** `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook?
-- **On device, unchecked:** lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
-- **Verification:** `testAndroidHostTest --continue` passed before the fixtures; `styleCheck` passed (JDK 21) after them.
-- **Uncommitted:** SS-C + review fixes — `core/component`, `core/uibinding`, all features (session: dp-inlining only), `orchestration`, `app` debug share screen; tests across those plus bracket-only edits in `core/{book,profile,network,domain,database}`, `feature/scan`; `docs/reference/design-system/`; tracker docs.
+- **State:** SS done and committed (`fcbead60`); its smells list is now `component-contract.md` § 7.6a. SL-3b blocked on F34.
+- **Next:** TP-0 — `steps/tp-test-prune.md` § Procedure (line 21): run the suite with timings and fill the sub-step table.
+- **Open questions:** `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
+- **Verification:** `styleCheck` (JDK 21) passed at `fcbead60`; `testAndroidHostTest --continue` last passed just before its fixture-only change (TP-0 reruns it).
+- **Uncommitted:** tracker `## Now` block; agent memory pruned after SS (two stale style-table / lookup-table memories deleted, indexes and one backlink updated).
 
 ## Local verification
 
