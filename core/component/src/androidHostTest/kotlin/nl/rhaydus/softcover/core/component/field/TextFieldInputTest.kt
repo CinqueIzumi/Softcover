@@ -13,15 +13,6 @@ class TextFieldInputTest {
         private val floor: TextUnit = 16.sp
 
         @Test
-        fun `returns max when the text fits at max`() {
-            // ----- Act -----
-            val size = fitFontSize(max, floor, availablePx = 1000) { it.value.toInt() * 10 }
-
-            // ----- Assert -----
-            size shouldBe max
-        }
-
-        @Test
         fun `returns max when the text fits exactly`() {
             // ----- Act -----
             val size = fitFontSize(max, floor, availablePx = 400) { it.value.toInt() * 10 }

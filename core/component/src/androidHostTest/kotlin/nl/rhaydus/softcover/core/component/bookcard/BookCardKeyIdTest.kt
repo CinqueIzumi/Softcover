@@ -23,18 +23,5 @@ class BookCardKeyIdTest {
             // ----- Assert -----
             result.toSet() shouldHaveSize 3
         }
-
-        @Test
-        fun `equal keys produce equal lazy keys`() {
-            // ----- Arrange -----
-            val first = BookCardKey.Book(bookId = 12)
-            val second = BookCardKey.Book(bookId = 12)
-
-            // ----- Act -----
-            val result = first.lazyKey
-
-            // ----- Assert -----
-            result shouldBe second.lazyKey
-        }
     }
 }

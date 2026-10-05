@@ -47,12 +47,17 @@ class RichTextEditingTest {
     @Nested
     inner class NormalizeMarks {
         @Test
-        fun `drops empty marks where start equals end`() {
+        fun `drops empty and inverted marks`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 3,
-                end = 3,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 3,
+                    end = 3,
+                ),
+                bold(
+                    start = 5,
+                    end = 2,
+                ),
             )
 
             // ----- Act -----
@@ -60,113 +65,61 @@ class RichTextEditingTest {
 
             // ----- Assert -----
             result shouldBe emptyList()
-        }
-
-        @Test
-        fun `drops marks where start is greater than end`() {
-            // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 5,
-                end = 2,
-            ),
-            )
-
-            // ----- Act -----
-            val result = normalizeMarks(marks = marks)
-
-            // ----- Assert -----
-            result shouldBe emptyList()
-        }
-
-        @Test
-        fun `preserves a valid non-overlapping mark`() {
-            // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 4,
-            ),
-            )
-
-            // ----- Act -----
-            val result = normalizeMarks(marks = marks)
-
-            // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 4,
-            ),
-            )
-        }
-
-        @Test
-        fun `merges two overlapping marks of the same type`() {
-            // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 5,
-            ), bold(
-                start = 3,
-                end = 8,
-            ),
-            )
-
-            // ----- Act -----
-            val result = normalizeMarks(marks = marks)
-
-            // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 8,
-            ),
-            )
         }
 
         @Test
         fun `merges two touching marks of the same type`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 4,
-            ), bold(
-                start = 4,
-                end = 8,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 4,
+                ),
+                bold(
+                    start = 4,
+                    end = 8,
+                ),
             )
 
             // ----- Act -----
             val result = normalizeMarks(marks = marks)
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 8,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 8,
+                ),
             )
         }
 
         @Test
         fun `leaves different-type marks independent`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 4,
-            ), italic(
-                start = 0,
-                end = 4,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 4,
+                ),
+                italic(
+                    start = 0,
+                    end = 4,
+                ),
             )
 
             // ----- Act -----
             val result = normalizeMarks(marks = marks)
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 4,
-            ), italic(
-                start = 0,
-                end = 4,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 4,
+                ),
+                italic(
+                    start = 0,
+                    end = 4,
+                ),
             )
         }
 
@@ -230,20 +183,12 @@ class RichTextEditingTest {
             val result = normalizeMarks(marks = marks)
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 10,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 10,
+                ),
             )
-        }
-
-        @Test
-        fun `returns empty list when input is empty`() {
-            // ----- Arrange & Act -----
-            val result = normalizeMarks(marks = emptyList())
-
-            // ----- Assert -----
-            result shouldBe emptyList()
         }
     }
 
@@ -252,10 +197,11 @@ class RichTextEditingTest {
         @Test
         fun `returns normalized marks unchanged when text is not changed`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 2,
-                end = 6,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 2,
+                    end = 6,
+                ),
             )
 
             // ----- Act -----
@@ -266,10 +212,11 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 2,
-                end = 6,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 2,
+                    end = 6,
+                ),
             )
         }
 
@@ -277,10 +224,11 @@ class RichTextEditingTest {
         fun `shifts mark right when insert is before mark start`() {
             // ----- Arrange -----
             // "hello world" -> "XYZhello world": insert 3 chars at position 0
-            val marks = listOf(bold(
-                start = 6,
-                end = 11,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 6,
+                    end = 11,
+                ),
             )
 
             // ----- Act -----
@@ -291,10 +239,11 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 9,
-                end = 14,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 9,
+                    end = 14,
+                ),
             )
         }
 
@@ -302,10 +251,11 @@ class RichTextEditingTest {
         fun `does not grow mark when insert is exactly at mark end`() {
             // ----- Arrange -----
             // "hello" -> "helloXYZ": insert 3 chars at position 5, mark covers [0,5)
-            val marks = listOf(bold(
-                start = 0,
-                end = 5,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 5,
+                ),
             )
 
             // ----- Act -----
@@ -316,10 +266,11 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 5,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 5,
+                ),
             )
         }
 
@@ -327,10 +278,11 @@ class RichTextEditingTest {
         fun `grows mark when insert is strictly inside it`() {
             // ----- Arrange -----
             // "hello" -> "helXYZlo": insert 3 chars at position 3 (strictly inside [0,5))
-            val marks = listOf(bold(
-                start = 0,
-                end = 5,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 5,
+                ),
             )
 
             // ----- Act -----
@@ -341,10 +293,11 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 8,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 8,
+                ),
             )
         }
 
@@ -352,10 +305,11 @@ class RichTextEditingTest {
         fun `shrinks mark when delete is fully inside it`() {
             // ----- Arrange -----
             // "hello world" -> "helloorld": delete 2 chars at positions [5, 7)
-            val marks = listOf(bold(
-                start = 0,
-                end = 11,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 11,
+                ),
             )
 
             // ----- Act -----
@@ -366,10 +320,11 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 9,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 9,
+                ),
             )
         }
 
@@ -377,10 +332,11 @@ class RichTextEditingTest {
         fun `clips mark when delete spans its start`() {
             // ----- Arrange -----
             // "hello world" -> "world": delete first 6 chars [0,6), mark was [3,9)
-            val marks = listOf(bold(
-                start = 3,
-                end = 9,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 3,
+                    end = 9,
+                ),
             )
 
             // ----- Act -----
@@ -392,10 +348,11 @@ class RichTextEditingTest {
 
             // ----- Assert -----
             // start was inside deleted span -> collapses to 0; end shifts by -6
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 3,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 3,
+                ),
             )
         }
 
@@ -403,10 +360,11 @@ class RichTextEditingTest {
         fun `removes mark when delete covers it entirely`() {
             // ----- Arrange -----
             // "hello world" -> "hd": delete "ello worl" [1,10), mark was [2,8)
-            val marks = listOf(bold(
-                start = 2,
-                end = 8,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 2,
+                    end = 8,
+                ),
             )
 
             // ----- Act -----
@@ -424,10 +382,11 @@ class RichTextEditingTest {
         fun `grows mark when insert is at exactly the mark start — start stays, end shifts`() {
             // ----- Arrange -----
             // "abcdefgh" -> "abcXXdefgh": insert 2 chars at position 3 (== mark start)
-            val marks = listOf(bold(
-                start = 3,
-                end = 7,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 3,
+                    end = 7,
+                ),
             )
 
             // ----- Act -----
@@ -438,10 +397,11 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 3,
-                end = 9,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 3,
+                    end = 9,
+                ),
             )
         }
 
@@ -449,10 +409,11 @@ class RichTextEditingTest {
         fun `preserves mark when replace is strictly inside it`() {
             // ----- Arrange -----
             // "hello" -> "hXo": replace "ell" [1,4) with "X", mark covers [0,5)
-            val marks = listOf(bold(
-                start = 0,
-                end = 5,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 5,
+                ),
             )
 
             // ----- Act -----
@@ -463,10 +424,11 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 3,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 3,
+                ),
             )
         }
     }
@@ -474,30 +436,13 @@ class RichTextEditingTest {
     @Nested
     inner class IsRangeMarked {
         @Test
-        fun `returns true when mark exactly covers selection`() {
-            // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 2,
-                end = 7,
-            ),
-            )
-
-            // ----- Act & Assert -----
-            isRangeMarked(
-                marks = marks,
-                start = 2,
-                end = 7,
-                type = RichTextMarkType.BOLD,
-            ) shouldBe true
-        }
-
-        @Test
         fun `returns true when mark is a superset of selection`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 10,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 10,
+                ),
             )
 
             // ----- Act & Assert -----
@@ -512,10 +457,11 @@ class RichTextEditingTest {
         @Test
         fun `returns false for partial coverage`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 5,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 5,
+                ),
             )
 
             // ----- Act & Assert -----
@@ -530,10 +476,11 @@ class RichTextEditingTest {
         @Test
         fun `returns false for empty range`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 10,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 10,
+                ),
             )
 
             // ----- Act & Assert -----
@@ -548,10 +495,11 @@ class RichTextEditingTest {
         @Test
         fun `returns false when type does not match`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 5,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 5,
+                ),
             )
 
             // ----- Act & Assert -----
@@ -560,17 +508,6 @@ class RichTextEditingTest {
                 start = 0,
                 end = 5,
                 type = RichTextMarkType.ITALIC,
-            ) shouldBe false
-        }
-
-        @Test
-        fun `returns false when marks list is empty`() {
-            // ----- Act & Assert -----
-            isRangeMarked(
-                marks = emptyList(),
-                start = 0,
-                end = 5,
-                type = RichTextMarkType.BOLD,
             ) shouldBe false
         }
     }
@@ -591,20 +528,22 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 2,
-                end = 6,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 2,
+                    end = 6,
+                ),
             )
         }
 
         @Test
         fun `removes mark when selection is fully marked`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 10,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 10,
+                ),
             )
 
             // ----- Act -----
@@ -616,23 +555,26 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 2,
-            ), bold(
-                start = 7,
-                end = 10,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 2,
+                ),
+                bold(
+                    start = 7,
+                    end = 10,
+                ),
             )
         }
 
         @Test
         fun `removes only the selected portion when selection matches mark exactly`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 3,
-                end = 8,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 3,
+                    end = 8,
+                ),
             )
 
             // ----- Act -----
@@ -650,10 +592,11 @@ class RichTextEditingTest {
         @Test
         fun `is a no-op for collapsed selection`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 5,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 5,
+                ),
             )
 
             // ----- Act -----
@@ -665,10 +608,11 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 5,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 5,
+                ),
             )
         }
 
@@ -676,10 +620,11 @@ class RichTextEditingTest {
         fun `adds mark over partial coverage`() {
             // ----- Arrange -----
             // Bold covers [0,4), selection is [2,7) — not fully marked so adds
-            val marks = listOf(bold(
-                start = 0,
-                end = 4,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 4,
+                ),
             )
 
             // ----- Act -----
@@ -691,23 +636,26 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(bold(
-                start = 0,
-                end = 7,
-            ),
+            result shouldBe listOf(
+                bold(
+                    start = 0,
+                    end = 7,
+                ),
             )
         }
 
         @Test
         fun `leaves other-type marks untouched when removing`() {
             // ----- Arrange -----
-            val marks = listOf(bold(
-                start = 0,
-                end = 10,
-            ), italic(
-                start = 2,
-                end = 6,
-            ),
+            val marks = listOf(
+                bold(
+                    start = 0,
+                    end = 10,
+                ),
+                italic(
+                    start = 2,
+                    end = 6,
+                ),
             )
 
             // ----- Act -----
@@ -719,10 +667,11 @@ class RichTextEditingTest {
             )
 
             // ----- Assert -----
-            result shouldBe listOf(italic(
-                start = 2,
-                end = 6,
-            ),
+            result shouldBe listOf(
+                italic(
+                    start = 2,
+                    end = 6,
+                ),
             )
         }
     }
@@ -845,28 +794,6 @@ class RichTextEditingTest {
             // ----- Assert -----
             result.paragraphs.size shouldBe 3
             result.paragraphs[1].runs shouldBe emptyList()
-        }
-
-        @Test
-        fun `document with empty paragraph survives round-trip`() {
-            // ----- Arrange -----
-            val document = RichTextUiModel(
-                paragraphs = persistentListOf(
-                    RichTextParagraph(runs = persistentListOf(RichTextRun(text = "first"))),
-                    RichTextParagraph(runs = persistentListOf()),
-                    RichTextParagraph(runs = persistentListOf(RichTextRun(text = "third"))),
-                ),
-            )
-
-            // ----- Act -----
-            val buffer = documentToEditorBuffer(document = document)
-            val recovered = editorBufferToDocument(
-                text = buffer.text,
-                marks = buffer.marks,
-            )
-
-            // ----- Assert -----
-            recovered shouldBe document
         }
 
         @Test

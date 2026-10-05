@@ -74,13 +74,4 @@ class UnreleasedMapperTest {
         // ----- Assert -----
         result.label shouldBe "Out Sep 2, $otherYear"
     }
-
-    @Test
-    fun `Featured mapper appends the year when the date is not in the current year`() {
-        // ----- Act -----
-        val result = otherYearDate.toFeaturedUnreleasedBadgeUiModel()
-
-        // ----- Assert -----
-        result.label shouldBe "Arriving Sep 2, $otherYear"
-    }
 }

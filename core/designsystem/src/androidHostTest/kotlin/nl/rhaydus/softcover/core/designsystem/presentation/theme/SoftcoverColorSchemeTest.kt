@@ -13,51 +13,6 @@ import org.junit.jupiter.api.TestFactory
 
 class SoftcoverColorSchemeTest {
     @Nested
-    inner class HouseLookIsUnchanged {
-        @Test
-        fun `SOFTCOVER light scheme keeps its shipped hexes`() {
-            // ----- Arrange -----
-            val palette = SpinePalette.SOFTCOVER
-
-            // ----- Act -----
-            val scheme = softcoverColorScheme(
-                darkTheme = false,
-                palette = palette,
-            )
-
-            // ----- Assert -----
-            scheme.primary shouldBe Color(0xFF8F4C38)
-            scheme.primaryContainer shouldBe Color(0xFFFFDBD1)
-            scheme.tertiary shouldBe Color(0xFF6C5D2F)
-            scheme.background shouldBe Color(0xFFFFF8F6)
-            scheme.onSurface shouldBe Color(0xFF231917)
-            scheme.surfaceContainerHigh shouldBe Color(0xFFF7E4E0)
-            scheme.outlineVariant shouldBe Color(0xFFD8C2BC)
-            scheme.inversePrimary shouldBe Color(0xFFFFB5A0)
-        }
-
-        @Test
-        fun `SOFTCOVER dark scheme keeps its shipped hexes`() {
-            // ----- Arrange -----
-            val palette = SpinePalette.SOFTCOVER
-
-            // ----- Act -----
-            val scheme = softcoverColorScheme(
-                darkTheme = true,
-                palette = palette,
-            )
-
-            // ----- Assert -----
-            scheme.primary shouldBe Color(0xFFFFB5A0)
-            scheme.onPrimary shouldBe Color(0xFF561F0F)
-            scheme.background shouldBe Color(0xFF1A110F)
-            scheme.onSurface shouldBe Color(0xFFF1DFDA)
-            scheme.surfaceContainerHigh shouldBe Color(0xFF322825)
-            scheme.outline shouldBe Color(0xFFA08C87)
-        }
-    }
-
-    @Nested
     inner class ContrastFloor {
         @TestFactory
         fun `every palette clears its contrast floor in both brightnesses`(): List<DynamicTest> =

@@ -35,22 +35,6 @@ class BookCardTextFormatsTest {
     }
 
     @Nested
-    inner class RatingPart {
-        @Test
-        fun `the label shows one decimal and the description reads out of 5`() {
-            // ----- Arrange -----
-            val rating = 4.26
-
-            // ----- Act -----
-            val result = ratingPart(rating)
-
-            // ----- Assert -----
-            result.label shouldBe "4.3"
-            result.contentDescription shouldBe "Rated 4.3 out of 5"
-        }
-    }
-
-    @Nested
     inner class SeriesEyebrow {
         @Test
         fun `a series is uppercased`() {

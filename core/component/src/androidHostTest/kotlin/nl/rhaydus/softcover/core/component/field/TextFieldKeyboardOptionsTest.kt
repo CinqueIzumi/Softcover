@@ -22,84 +22,40 @@ class TextFieldKeyboardOptionsTest {
     @Nested
     inner class ImeActionMapping {
         @Test
-        fun `a submittable pill offers Done`() {
+        fun `a submittable pill, outlined or hero field offers Done`() {
             // ----- Arrange -----
-            val field = model(
+            val fields = listOf(
                 TextFieldVariant.Pill(),
-                submittable = true,
-            )
-
-            // ----- Act -----
-            val options = field.keyboardOptions()
-
-            // ----- Assert -----
-            options.imeAction shouldBe ImeAction.Done
-        }
-
-        @Test
-        fun `a pill that is not submittable keeps the platform default action`() {
-            // ----- Arrange -----
-            val field = model(TextFieldVariant.Pill())
-
-            // ----- Act -----
-            val options = field.keyboardOptions()
-
-            // ----- Assert -----
-            options.imeAction shouldBe ImeAction.Default
-        }
-
-        @Test
-        fun `a submittable outlined field offers Done`() {
-            // ----- Arrange -----
-            val field = model(
                 TextFieldVariant.Outlined(),
-                submittable = true,
-            )
-
-            // ----- Act -----
-            val options = field.keyboardOptions()
-
-            // ----- Assert -----
-            options.imeAction shouldBe ImeAction.Done
-        }
-
-        @Test
-        fun `an outlined field that is not submittable keeps the platform default action`() {
-            // ----- Arrange -----
-            val field = model(TextFieldVariant.Outlined())
-
-            // ----- Act -----
-            val options = field.keyboardOptions()
-
-            // ----- Assert -----
-            options.imeAction shouldBe ImeAction.Default
-        }
-
-        @Test
-        fun `a submittable hero offers Done`() {
-            // ----- Arrange -----
-            val field = model(
                 TextFieldVariant.Hero,
-                submittable = true,
-            )
+            ).map {
+                model(
+                    it,
+                    submittable = true,
+                )
+            }
 
             // ----- Act -----
-            val options = field.keyboardOptions()
+            val actions = fields.map { it.keyboardOptions().imeAction }
 
             // ----- Assert -----
-            options.imeAction shouldBe ImeAction.Done
+            actions shouldBe List(3) { ImeAction.Done }
         }
 
         @Test
-        fun `a hero that is not submittable keeps the platform default action`() {
+        fun `a pill, outlined or hero field that is not submittable keeps the platform default action`() {
             // ----- Arrange -----
-            val field = model(TextFieldVariant.Hero)
+            val fields = listOf(
+                TextFieldVariant.Pill(),
+                TextFieldVariant.Outlined(),
+                TextFieldVariant.Hero,
+            ).map { model(it) }
 
             // ----- Act -----
-            val options = field.keyboardOptions()
+            val actions = fields.map { it.keyboardOptions().imeAction }
 
             // ----- Assert -----
-            options.imeAction shouldBe ImeAction.Default
+            actions shouldBe List(3) { ImeAction.Default }
         }
 
         @Test

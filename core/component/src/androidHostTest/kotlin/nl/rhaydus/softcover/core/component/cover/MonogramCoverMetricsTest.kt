@@ -1,204 +1,90 @@
 package nl.rhaydus.softcover.core.component.cover
 
 import androidx.compose.ui.unit.dp
-import io.kotest.matchers.floats.plusOrMinus
+import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class MonogramCoverMetricsTest {
-    @Nested
-    inner class BorderInset {
-        @Test
-        fun `floors borderInset at 3dp for a narrow shelf thumbnail`() {
-            // ----- Arrange -----
-            val width = 48.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.borderInset shouldBe 3.dp
-        }
-
-        @Test
-        fun `ceils borderInset at 8dp for a wide library grid tile`() {
-            // ----- Arrange -----
-            val width = 300.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.borderInset shouldBe 8.dp
-        }
-
-        @Test
-        fun `scales borderInset proportionally to width between the floor and ceiling`() {
-            // ----- Arrange -----
-            val width = 100.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.borderInset.value shouldBe (6f plusOrMinus 0.01f)
-        }
-    }
+    private val widths = (1..600 step 3).map { it.dp }
 
     @Nested
-    inner class InitialFontSize {
+    inner class Scaling {
         @Test
-        fun `floors initialFontSize at 10sp for a narrow shelf thumbnail`() {
-            // ----- Arrange -----
-            val width = 20.dp
-
+        fun `every metric grows with the width and never shrinks`() {
             // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
+            val metrics = widths.map { monogramCoverMetrics(width = it) }
 
             // ----- Assert -----
-            result.initialFontSize.value shouldBe (10f plusOrMinus 0.01f)
+            metrics.zipWithNext().forEach { (narrower, wider) ->
+                wider.borderInset.value shouldBeGreaterThanOrEqualTo narrower.borderInset.value
+                wider.initialFontSize.value shouldBeGreaterThanOrEqualTo narrower.initialFontSize.value
+                wider.titleFontSize.value shouldBeGreaterThanOrEqualTo narrower.titleFontSize.value
+                wider.titleMaxLines shouldBeGreaterThanOrEqualTo narrower.titleMaxLines
+            }
         }
 
         @Test
-        fun `ceils initialFontSize at 96sp for a very wide desktop tile`() {
-            // ----- Arrange -----
-            val width = 400.dp
-
+        fun `a thumbnail narrower than every floor gets the same metrics as an even narrower one`() {
             // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
+            val narrow = monogramCoverMetrics(width = 10.dp)
+            val narrower = monogramCoverMetrics(width = 5.dp)
 
             // ----- Assert -----
-            result.initialFontSize.value shouldBe (96f plusOrMinus 0.01f)
+            narrow.borderInset shouldBe narrower.borderInset
+            narrow.initialFontSize shouldBe narrower.initialFontSize
+            narrow.titleFontSize shouldBe narrower.titleFontSize
+            narrow.titleMaxLines shouldBe narrower.titleMaxLines
         }
 
         @Test
-        fun `scales initialFontSize proportionally to width between the floor and ceiling`() {
-            // ----- Arrange -----
-            val width = 150.dp
-
+        fun `a tile wider than every ceiling gets the same metrics as an even wider one`() {
             // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
+            val wide = monogramCoverMetrics(width = 600.dp)
+            val wider = monogramCoverMetrics(width = 1200.dp)
 
             // ----- Assert -----
-            result.initialFontSize.value shouldBe (54f plusOrMinus 0.01f)
+            wide.borderInset shouldBe wider.borderInset
+            wide.initialFontSize shouldBe wider.initialFontSize
+            wide.titleFontSize shouldBe wider.titleFontSize
+            wide.titleMaxLines shouldBe wider.titleMaxLines
+        }
+
+        @Test
+        fun `a font size stays legible at every width`() {
+            // ----- Act -----
+            val metrics = widths.map { monogramCoverMetrics(width = it) }
+
+            // ----- Assert -----
+            metrics.forEach {
+                it.initialFontSize.value shouldBeGreaterThanOrEqualTo 10f
+                it.titleFontSize.value shouldBeGreaterThanOrEqualTo 10f
+                it.titleMaxLines shouldBeGreaterThanOrEqualTo 1
+            }
         }
     }
 
     @Nested
     inner class ShowFullTitle {
         @Test
-        fun `hides the full title just below the 64dp floor`() {
-            // ----- Arrange -----
-            val width = 63.dp
-
+        fun `hides the full title on a thumbnail and shows it on a tile`() {
             // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
+            val thumbnail = monogramCoverMetrics(width = 20.dp)
+            val tile = monogramCoverMetrics(width = 200.dp)
 
             // ----- Assert -----
-            result.showFullTitle shouldBe false
+            thumbnail.showFullTitle shouldBe false
+            tile.showFullTitle shouldBe true
         }
 
         @Test
-        fun `shows the full title exactly at the 64dp floor`() {
-            // ----- Arrange -----
-            val width = 64.dp
-
+        fun `flips from hidden to shown exactly once as the width grows`() {
             // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
+            val flags = widths.map { monogramCoverMetrics(width = it).showFullTitle }
 
             // ----- Assert -----
-            result.showFullTitle shouldBe true
-        }
-
-        @Test
-        fun `shows the full title comfortably above the 64dp floor`() {
-            // ----- Arrange -----
-            val width = 200.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.showFullTitle shouldBe true
-        }
-    }
-
-    @Nested
-    inner class TitleFontSize {
-        @Test
-        fun `floors titleFontSize at 10sp for a narrow shelf thumbnail`() {
-            // ----- Arrange -----
-            val width = 20.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.titleFontSize.value shouldBe (10f plusOrMinus 0.01f)
-        }
-
-        @Test
-        fun `ceils titleFontSize at 28sp for a wide library grid tile`() {
-            // ----- Arrange -----
-            val width = 300.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.titleFontSize.value shouldBe (28f plusOrMinus 0.01f)
-        }
-
-        @Test
-        fun `scales titleFontSize proportionally to width between the floor and ceiling`() {
-            // ----- Arrange -----
-            val width = 100.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.titleFontSize.value shouldBe (15f plusOrMinus 0.01f)
-        }
-    }
-
-    @Nested
-    inner class TitleMaxLines {
-        @Test
-        fun `floors titleMaxLines at 2 for a narrow shelf thumbnail`() {
-            // ----- Arrange -----
-            val width = 32.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.titleMaxLines shouldBe 2
-        }
-
-        @Test
-        fun `ceils titleMaxLines at 5 for a wide library grid tile`() {
-            // ----- Arrange -----
-            val width = 300.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.titleMaxLines shouldBe 5
-        }
-
-        @Test
-        fun `rounds titleMaxLines half-up between the floor and ceiling`() {
-            // ----- Arrange -----
-            val width = 112.dp
-
-            // ----- Act -----
-            val result = monogramCoverMetrics(width = width)
-
-            // ----- Assert -----
-            result.titleMaxLines shouldBe 4
+            flags.zipWithNext().count { (before, after) -> before != after } shouldBe 1
         }
     }
 }

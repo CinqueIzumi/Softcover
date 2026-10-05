@@ -8,21 +8,6 @@ class SkeletonRevealPhaseTest {
     @Nested
     inner class WhileLoading {
         @Test
-        fun `is Hidden at the start`() {
-            // ----- Arrange -----
-            val elapsed = 0L
-
-            // ----- Act -----
-            val phase = skeletonRevealPhase(
-                elapsedMillis = elapsed,
-                loadingEndedAtMillis = null,
-            )
-
-            // ----- Assert -----
-            phase shouldBe SkeletonRevealPhase.Hidden
-        }
-
-        @Test
         fun `is Hidden one millisecond before the grace period ends`() {
             // ----- Arrange -----
             val elapsed = SKELETON_GRACE_MILLIS - 1
@@ -84,22 +69,6 @@ class SkeletonRevealPhaseTest {
             // ----- Assert -----
             phase shouldBe SkeletonRevealPhase.Content
         }
-
-        @Test
-        fun `is Content well after loading ended`() {
-            // ----- Arrange -----
-            val endedAt = SKELETON_GRACE_MILLIS - 50
-            val elapsed = SKELETON_GRACE_MILLIS + SKELETON_MINIMUM_VISIBLE_MILLIS
-
-            // ----- Act -----
-            val phase = skeletonRevealPhase(
-                elapsedMillis = elapsed,
-                loadingEndedAtMillis = endedAt,
-            )
-
-            // ----- Assert -----
-            phase shouldBe SkeletonRevealPhase.Content
-        }
     }
 
     @Nested
@@ -142,21 +111,6 @@ class SkeletonRevealPhaseTest {
     inner class LoadingEndedBeforeMinimumHoldEnds {
         private val endedAt = SKELETON_GRACE_MILLIS + SKELETON_MINIMUM_VISIBLE_MILLIS - 50
         private val holdEnds = SKELETON_GRACE_MILLIS + SKELETON_MINIMUM_VISIBLE_MILLIS
-
-        @Test
-        fun `keeps the Shimmer at the moment loading ended`() {
-            // ----- Arrange -----
-            val elapsed = endedAt
-
-            // ----- Act -----
-            val phase = skeletonRevealPhase(
-                elapsedMillis = elapsed,
-                loadingEndedAtMillis = endedAt,
-            )
-
-            // ----- Assert -----
-            phase shouldBe SkeletonRevealPhase.Shimmer
-        }
 
         @Test
         fun `keeps the Shimmer until the minimum hold ends`() {

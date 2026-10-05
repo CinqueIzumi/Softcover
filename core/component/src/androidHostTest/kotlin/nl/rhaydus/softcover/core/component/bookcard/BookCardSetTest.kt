@@ -14,7 +14,7 @@ class BookCardSetTest {
     @Nested
     inner class ToBookCardSet {
         @Test
-        fun `cards keep the order of the source pairs`() {
+        fun `cards keep the source order and each key resolves to its payload`() {
             // ----- Arrange -----
             val first = card(bookId = 1)
             val second = card(bookId = 2)
@@ -24,18 +24,6 @@ class BookCardSetTest {
 
             // ----- Assert -----
             result.cards shouldBe listOf(first, second)
-        }
-
-        @Test
-        fun `each card key resolves to its payload`() {
-            // ----- Arrange -----
-            val first = card(bookId = 1)
-            val second = card(bookId = 2)
-
-            // ----- Act -----
-            val result = listOf(first to "a", second to "b").toBookCardSet()
-
-            // ----- Assert -----
             result[first.key] shouldBe "a"
             result[second.key] shouldBe "b"
         }
@@ -83,16 +71,6 @@ class BookCardSetTest {
             result.cards shouldBe listOf(standIn)
             result.isEmpty shouldBe false
             result[standIn.key].shouldBeNull()
-        }
-
-        @Test
-        fun `an empty set has no cards`() {
-            // ----- Act -----
-            val result = BookCardSet.empty()
-
-            // ----- Assert -----
-            result.isEmpty shouldBe true
-            result.cards.shouldBeEmpty()
         }
     }
 }

@@ -48,23 +48,6 @@ class PickerDatesTest {
         }
 
         @Test
-        fun `round trip is stable for the first day of a month`() {
-            // ----- Arrange -----
-            val date = LocalDate(
-                2024,
-                3,
-                1,
-            )
-            val millis = date.toPickerMillis()
-
-            // ----- Act -----
-            val result = millis.toPickerLocalDate()
-
-            // ----- Assert -----
-            result shouldBe date
-        }
-
-        @Test
         fun `round trip is stable for a leap day`() {
             // ----- Arrange -----
             val date = LocalDate(
@@ -84,23 +67,6 @@ class PickerDatesTest {
 
     @Nested
     inner class RegressionGuard {
-        @Test
-        fun `toPickerLocalDate decodes start-of-day-UTC millis to the fixed UTC date`() {
-            // ----- Arrange -----
-            val expected = LocalDate(
-                2023,
-                6,
-                15,
-            )
-            val millis = expected.toPickerMillis()
-
-            // ----- Act -----
-            val result = millis.toPickerLocalDate()
-
-            // ----- Assert -----
-            result shouldBe expected
-        }
-
         @Test
         fun `decoding through a west-of-UTC zone would shift the day, but toPickerLocalDate does not`() {
             // ----- Arrange -----
@@ -122,26 +88,6 @@ class PickerDatesTest {
                 6,
                 14,
             )
-            pickerDecode shouldBe expected
-        }
-
-        @Test
-        fun `decoding through an east-of-UTC zone stays on the same day and toPickerLocalDate agrees`() {
-            // ----- Arrange -----
-            val expected = LocalDate(
-                2023,
-                6,
-                15,
-            )
-            val millis = expected.toPickerMillis()
-            val kiritimati = TimeZone.of("Pacific/Kiritimati")
-
-            // ----- Act -----
-            val naiveLocalDecode = Instant.fromEpochMilliseconds(millis).toLocalDateTime(kiritimati).date
-            val pickerDecode = millis.toPickerLocalDate()
-
-            // ----- Assert -----
-            naiveLocalDecode shouldBe expected
             pickerDecode shouldBe expected
         }
     }

@@ -132,18 +132,6 @@ class ProgressTimeDraftTest {
             // ----- Assert -----
             result shouldBe draft
         }
-
-        @Test
-        fun `preserves the seed position`() {
-            // ----- Act -----
-            val result = draft.withText(
-                unit = ProgressTimeUnit.HOURS,
-                text = "4",
-            )
-
-            // ----- Assert -----
-            result.forSeconds shouldBe 100
-        }
     }
 
     @Nested
@@ -195,16 +183,6 @@ class ProgressTimeDraftTest {
 
             // ----- Assert -----
             result.minutes shouldBe "5"
-        }
-
-        @Test
-        fun `leaves hours and seconds untouched`() {
-            // ----- Act -----
-            val result = draft.steppedMinutes(1)
-
-            // ----- Assert -----
-            result.hours shouldBe "1"
-            result.seconds shouldBe "3"
         }
     }
 

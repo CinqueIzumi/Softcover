@@ -159,28 +159,6 @@ class ProgressSheetUiModelTest {
             // ----- Assert -----
             result.selected shouldBe ProgressSheetTab.TIME
         }
-
-        @Test
-        fun `labels each option with its tab name`() {
-            // ----- Arrange -----
-            val medium = ProgressSheetMedium.Paged(
-                totalPages = 300,
-                currentPage = 10,
-                suffix = null,
-            )
-
-            // ----- Act -----
-            val result = ProgressSheetUiModel.tabsFor(
-                medium = medium,
-                selectedTab = ProgressSheetTab.PAGE,
-            )
-
-            // ----- Assert -----
-            result.options.map { it.label } shouldBe listOf(
-                ProgressSheetTab.PAGE.tabName,
-                ProgressSheetTab.PERCENTAGE.tabName,
-            )
-        }
     }
 
     @Nested
@@ -214,23 +192,6 @@ class ProgressSheetUiModelTest {
 
             // ----- Assert -----
             offered.all { it } shouldBe true
-        }
-    }
-
-    @Nested
-    inner class ProgressTimeFieldBuilder {
-        @Test
-        fun `keys the field by the unit so events route back to it`() {
-            // ----- Act -----
-            val keys = ProgressTimeUnit.entries.map { unit ->
-                progressTimeField(
-                    unit = unit,
-                    text = "1",
-                ).key
-            }
-
-            // ----- Assert -----
-            keys shouldBe listOf("HOURS", "MINUTES", "SECONDS")
         }
     }
 

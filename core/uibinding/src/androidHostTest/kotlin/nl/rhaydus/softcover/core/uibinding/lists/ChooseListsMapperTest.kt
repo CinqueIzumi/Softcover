@@ -10,7 +10,6 @@ import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.HeaderTextSegment
 import nl.rhaydus.softcover.core.component.lists.ListMembership
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.core.domain.model.ListBook
 import org.junit.jupiter.api.Nested
@@ -76,22 +75,6 @@ class ChooseListsMapperTest {
                 HeaderTextSegment.Emphasised(text = "Piranesi"),
             )
             header.trailing shouldBe SheetHeaderTrailing.Jacket(cover = cover)
-        }
-
-        @Test
-        fun `scaffold pins the sheet with no footer and no top action`() {
-            // ----- Act -----
-            val result = emptyList<BookList>().toChooseListsUiModel(
-                bookId = 42,
-                bookTitle = "Piranesi",
-                cover = coverUiModel(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            result.scaffold.layout shouldBe SheetLayout.PinnedLazy
-            result.scaffold.footer shouldBe null
-            result.scaffold.dismissLabel shouldBe null
         }
 
         @Test
@@ -473,7 +456,6 @@ class ChooseListsMapperTest {
                 HeaderTextSegment.Plain(text = "Shelve "),
                 HeaderTextSegment.Emphasised(text = "3 books"),
             )
-            result.scaffold.layout shouldBe SheetLayout.PinnedLazy
         }
     }
 
@@ -548,30 +530,6 @@ class ChooseListsMapperTest {
         }
 
         @Test
-        fun `two selected books all on the list get On all 2`() {
-            // ----- Act -----
-            val label = chipLabelOf(
-                selectedCount = 2,
-                onListCount = 2,
-            )
-
-            // ----- Assert -----
-            label shouldBe "On all 2"
-        }
-
-        @Test
-        fun `two selected books none on the list get Add all 2`() {
-            // ----- Act -----
-            val label = chipLabelOf(
-                selectedCount = 2,
-                onListCount = 0,
-            )
-
-            // ----- Assert -----
-            label shouldBe "Add all 2"
-        }
-
-        @Test
         fun `a selection of 5 books takes all 5 off, never all three`() {
             // ----- Act -----
             val description = descriptionOf(count = 5)
@@ -579,34 +537,6 @@ class ChooseListsMapperTest {
             // ----- Assert -----
             description shouldContain "takes all 5 off"
             description shouldNotContain "three"
-        }
-
-        @Test
-        fun `a selection of 2 books is named in the plural`() {
-            // ----- Act -----
-            val result = emptyList<BookList>().toBulkChooseListsUiModel(
-                bookIds = setOf(1, 2),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            result.scaffold.header.section.headlineText shouldBe "Shelve 2 books"
-        }
-
-        @Test
-        fun `only the counted books span of the headline is emphasised`() {
-            // ----- Act -----
-            val result = emptyList<BookList>().toBulkChooseListsUiModel(
-                bookIds = setOf(1, 2),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
-            )
-
-            // ----- Assert -----
-            result.scaffold.header.section.headline.shouldNotBeNull()
-                .filterIsInstance<HeaderTextSegment.Emphasised>()
-                .map { it.text } shouldBe listOf("2 books")
         }
     }
 

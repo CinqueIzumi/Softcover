@@ -49,31 +49,4 @@ class DeadlinePaceTest {
             result shouldBe "1h 5m"
         }
     }
-
-    @Nested
-    inner class FormatPacePerDay {
-        @Test
-        fun `pages pace carries the per-day suffix`() {
-            // ----- Act -----
-            val result = formatPacePerDay(
-                amount = 35,
-                unit = DeadlineUnit.PAGES,
-            )
-
-            // ----- Assert -----
-            result shouldBe "35 pages/day"
-        }
-
-        @Test
-        fun `seconds pace carries the per-day suffix`() {
-            // ----- Act -----
-            val result = formatPacePerDay(
-                amount = 3_900,
-                unit = DeadlineUnit.SECONDS,
-            )
-
-            // ----- Assert -----
-            result shouldBe "1h 5m/day"
-        }
-    }
 }

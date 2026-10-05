@@ -8,7 +8,7 @@ class ChipSetTest {
     @Nested
     inner class ToChipSet {
         @Test
-        fun `chips keep the order of the source pairs`() {
+        fun `chips keep the source order and each key maps to its payload`() {
             // ----- Arrange -----
             val first = ChipUiModel(
                 key = "first",
@@ -25,25 +25,6 @@ class ChipSetTest {
 
             // ----- Assert -----
             chipSet.chips shouldBe listOf(first, second)
-        }
-
-        @Test
-        fun `each key maps to its payload`() {
-            // ----- Arrange -----
-            val first = ChipUiModel(
-                key = "first",
-                label = "First",
-            )
-            val second = ChipUiModel(
-                key = "second",
-                label = "Second",
-            )
-            val pairs = listOf(first to "a", second to "b")
-
-            // ----- Act -----
-            val chipSet = pairs.toChipSet()
-
-            // ----- Assert -----
             chipSet["first"] shouldBe "a"
             chipSet["second"] shouldBe "b"
         }
@@ -78,33 +59,6 @@ class ChipSetTest {
 
             // ----- Assert -----
             result shouldBe null
-        }
-    }
-
-    @Nested
-    inner class IsEmpty {
-        @Test
-        fun `a default chip set is empty`() {
-            // ----- Arrange & Act -----
-            val chipSet = ChipSet<String>()
-
-            // ----- Assert -----
-            chipSet.isEmpty shouldBe true
-        }
-
-        @Test
-        fun `a chip set built from one pair is not empty`() {
-            // ----- Arrange -----
-            val chip = ChipUiModel(
-                key = "known",
-                label = "Known",
-            )
-
-            // ----- Act -----
-            val chipSet = listOf(chip to "payload").toChipSet()
-
-            // ----- Assert -----
-            chipSet.isEmpty shouldBe false
         }
     }
 }

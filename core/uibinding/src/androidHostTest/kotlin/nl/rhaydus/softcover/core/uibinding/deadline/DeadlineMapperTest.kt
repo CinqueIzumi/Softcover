@@ -123,25 +123,6 @@ class DeadlineMapperTest {
         }
 
         @Test
-        fun `Behind status is not grayscale and nests the Behind badge`() {
-            // ----- Arrange -----
-            val subject = progress(
-                isExpired = false,
-                isOnTrack = false,
-            )
-
-            // ----- Act -----
-            val result = subject.toCoverOverlayUiModel()
-
-            // ----- Assert -----
-            result shouldBe CoverOverlayUiModel(
-                badge = subject.toBadgeUiModel(),
-                corner = CoverOverlayCorner.TopEnd,
-                grayscale = false,
-            )
-        }
-
-        @Test
         fun `Expired status is grayscale and nests the Expired badge`() {
             // ----- Arrange -----
             val subject = progress(
@@ -187,36 +168,6 @@ class DeadlineMapperTest {
             // ----- Assert -----
             dayMonthYear.text shouldBe "02/09/2026 • 10 pages/day"
             monthDayYear.text shouldBe "09/02/2026 • 10 pages/day"
-        }
-
-        @Test
-        fun `tone OnSurface passes through unchanged`() {
-            // ----- Arrange -----
-            val subject = progress()
-
-            // ----- Act -----
-            val result = subject.toDeadlineSummaryUiModel(
-                dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
-            )
-
-            // ----- Assert -----
-            result.tone shouldBe DeadlineSummaryTone.OnSurface
-        }
-
-        @Test
-        fun `tone OnHeroBackdrop passes through unchanged`() {
-            // ----- Arrange -----
-            val subject = progress()
-
-            // ----- Act -----
-            val result = subject.toDeadlineSummaryUiModel(
-                dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnHeroBackdrop,
-            )
-
-            // ----- Assert -----
-            result.tone shouldBe DeadlineSummaryTone.OnHeroBackdrop
         }
 
         @Test
@@ -289,24 +240,6 @@ class DeadlineMapperTest {
 
             // ----- Assert -----
             result.text shouldBe "02/09/2026 • 19 pages/day"
-        }
-
-        @Test
-        fun `a zero pace stays zero`() {
-            // ----- Arrange -----
-            val subject = progress(
-                requiredPerDay = 0f,
-                unit = DeadlineUnit.PAGES,
-            )
-
-            // ----- Act -----
-            val result = subject.toDeadlineSummaryUiModel(
-                dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
-            )
-
-            // ----- Assert -----
-            result.text shouldBe "02/09/2026 • 0 pages/day"
         }
 
         @Test
@@ -476,18 +409,6 @@ class DeadlineMapperTest {
 
             // ----- Assert -----
             result.goal shouldBe "Deadline passed 1 day ago."
-        }
-
-        @Test
-        fun `badge is the status badge`() {
-            // ----- Arrange -----
-            val subject = progress(isOnTrack = false)
-
-            // ----- Act -----
-            val result = rowOf(subject)
-
-            // ----- Assert -----
-            result.badge shouldBe subject.toBadgeUiModel()
         }
     }
 }

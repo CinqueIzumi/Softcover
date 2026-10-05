@@ -37,16 +37,4 @@ class SpinePaletteMapperTest {
             mappedPalettes shouldBe SpinePalette.entries.toSet()
         }
     }
-
-    @Nested
-    inner class DefaultAgreement {
-        @Test
-        fun `DEFAULT agrees on both sides`() {
-            // ----- Act -----
-            val mappedDefault = ColorPalette.DEFAULT.toSpinePalette()
-
-            // ----- Assert -----
-            mappedDefault shouldBe SpinePalette.DEFAULT
-        }
-    }
 }

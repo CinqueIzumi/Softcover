@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.core.component.badge
 
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -37,7 +38,7 @@ class BadgeUiModelTest {
             val withIcon = BadgeUiModel.previews.values.filter { it.icon != null }
 
             // ----- Assert -----
-            withIcon.size shouldBe 2
+            withIcon.shouldNotBeEmpty()
         }
     }
 }

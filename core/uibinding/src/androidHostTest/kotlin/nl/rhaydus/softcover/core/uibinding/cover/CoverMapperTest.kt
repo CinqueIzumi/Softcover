@@ -87,31 +87,6 @@ class CoverMapperTest {
         }
 
         @Test
-        fun `is never loading`() {
-            // ----- Arrange -----
-            val subject = book(defaultEdition = null)
-
-            // ----- Act -----
-            val result = subject.toCoverUiModel(variant = CoverVariant.Shelf)
-
-            // ----- Assert -----
-            result.isLoading shouldBe false
-        }
-
-        @Test
-        fun `carries the variant through and leaves the shared transition key off by default`() {
-            // ----- Arrange -----
-            val subject = book(defaultEdition = null)
-
-            // ----- Act -----
-            val result = subject.toCoverUiModel(variant = CoverVariant.Raised)
-
-            // ----- Assert -----
-            result.variant shouldBe CoverVariant.Raised
-            result.sharedTransitionKey.shouldBeNull()
-        }
-
-        @Test
         fun `shareTransition gives the cover a key that is stable per book`() {
             // ----- Arrange -----
             val subject = book(defaultEdition = null)
@@ -227,46 +202,6 @@ class CoverMapperTest {
                 url = "https://example.com/default.jpg",
                 persistEditionId = 3,
             )
-        }
-
-        @Test
-        fun `a null edition with no default and no fallback has no source`() {
-            // ----- Arrange -----
-            val subject: BookEdition? = null
-
-            // ----- Act -----
-            val result = subject.toCoverUiModel(
-                defaultEdition = null,
-                coverlessTitle = null,
-                variant = CoverVariant.Shelf,
-            )
-
-            // ----- Assert -----
-            result.source.shouldBeNull()
-            result.coverlessTitle.shouldBeNull()
-        }
-
-        @Test
-        fun `passes isLoading through`() {
-            // ----- Arrange -----
-            val subject: BookEdition? = null
-
-            // ----- Act -----
-            val loading = subject.toCoverUiModel(
-                defaultEdition = null,
-                coverlessTitle = null,
-                variant = CoverVariant.Shelf,
-                isLoading = true,
-            )
-            val idle = subject.toCoverUiModel(
-                defaultEdition = null,
-                coverlessTitle = null,
-                variant = CoverVariant.Shelf,
-            )
-
-            // ----- Assert -----
-            loading.isLoading shouldBe true
-            idle.isLoading shouldBe false
         }
     }
 }

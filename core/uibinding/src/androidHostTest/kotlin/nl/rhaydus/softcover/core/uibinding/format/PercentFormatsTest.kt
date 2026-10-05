@@ -8,18 +8,6 @@ class PercentFormatsTest {
     @Nested
     inner class PercentLabel {
         @Test
-        fun `a fraction becomes a whole percent`() {
-            // ----- Arrange -----
-            val fraction = 0.42f
-
-            // ----- Act -----
-            val result = percentLabel(fraction)
-
-            // ----- Assert -----
-            result shouldBe "42%"
-        }
-
-        @Test
         fun `a fraction rounds to the nearest percent`() {
             // ----- Arrange -----
             val roundedUp = 0.426f

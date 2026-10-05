@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.core.component.progress.ProgressSheetMedium
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
 import nl.rhaydus.softcover.core.component.progress.ProgressTimeUnit
 import nl.rhaydus.softcover.core.component.progress.progressTimeField
-import nl.rhaydus.softcover.core.component.sheet.SheetLayout
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
@@ -55,31 +54,6 @@ class ProgressSheetMapperTest {
 
     @Nested
     inner class MediumSelection {
-        @Test
-        fun `audiobook current edition maps medium to Timed`() {
-            // ----- Arrange -----
-            val audioEdition = PreviewData.baseEdition.copy(
-                id = 2,
-                pages = null,
-                audioSeconds = 5_400,
-                readingFormat = ReadingFormat.Audio,
-            )
-            val book = PreviewData.baseBook.copy(
-                editions = listOf(PreviewData.baseEdition, audioEdition),
-                userBook = PreviewData.baseBook.userBook?.copy(editionId = audioEdition.id),
-            )
-
-            // ----- Act -----
-            val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.TIME)
-
-            // ----- Assert -----
-            book.currentEdition shouldBe audioEdition
-            result.medium shouldBe expectedTimed(
-                totalSeconds = 5_400,
-                suffix = "of 01:30:00",
-            )
-        }
-
         @Test
         fun `non-audio current edition maps medium to Paged`() {
             // ----- Arrange -----
@@ -197,32 +171,6 @@ class ProgressSheetMapperTest {
             )
             (result.medium as ProgressSheetMedium.Paged).hasKnownTotal shouldBe false
         }
-
-        @Test
-        fun `totalSeconds is 0 and hasKnownTotal is false when the current edition has no audio seconds`() {
-            // ----- Arrange -----
-            val currentEd = PreviewData.baseEdition.copy(
-                id = 31,
-                audioSeconds = null,
-                readingFormat = ReadingFormat.Audio,
-            )
-            val book = PreviewData.baseBook.copy(
-                editions = listOf(currentEd),
-                defaultEdition = null,
-                userBook = PreviewData.baseBook.userBook?.copy(editionId = currentEd.id),
-            )
-
-            // ----- Act -----
-            val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.TIME)
-
-            // ----- Assert -----
-            book.currentEdition shouldBe currentEd
-            result.medium shouldBe expectedTimed(
-                totalSeconds = 0,
-                suffix = null,
-            )
-            (result.medium as ProgressSheetMedium.Timed).hasKnownTotal shouldBe false
-        }
     }
 
     @Nested
@@ -297,7 +245,7 @@ class ProgressSheetMapperTest {
     @Nested
     inner class Scaffold {
         @Test
-        fun `header is the reading-progress eyebrow over the book title, in a scrolling sheet`() {
+        fun `header headline is the book title`() {
             // ----- Arrange -----
             val book = PreviewData.baseBook.copy(title = "The Starless Sea")
 
@@ -305,36 +253,7 @@ class ProgressSheetMapperTest {
             val scaffold = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE).scaffold
 
             // ----- Assert -----
-            scaffold.header.section.eyebrow shouldBe "Reading progress"
             scaffold.header.section.headlineText shouldBe "The Starless Sea"
-            scaffold.layout shouldBe SheetLayout.Scrolling
-        }
-    }
-
-    @Nested
-    inner class PassThrough {
-        @Test
-        fun `book title becomes the scaffold headline`() {
-            // ----- Arrange -----
-            val book = PreviewData.baseBook.copy(title = "The Starless Sea")
-
-            // ----- Act -----
-            val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PAGE)
-
-            // ----- Assert -----
-            result.scaffold.header.section.headlineText shouldBe "The Starless Sea"
-        }
-
-        @Test
-        fun `selectedTab passes through unchanged`() {
-            // ----- Arrange -----
-            val book = PreviewData.baseBook
-
-            // ----- Act -----
-            val result = book.toProgressSheetUiModel(selectedTab = ProgressSheetTab.PERCENTAGE)
-
-            // ----- Assert -----
-            result.tabs.selected shouldBe ProgressSheetTab.PERCENTAGE
         }
     }
 

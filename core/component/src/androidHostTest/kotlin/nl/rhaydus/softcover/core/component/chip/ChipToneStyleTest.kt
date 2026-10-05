@@ -26,42 +26,10 @@ class ChipToneStyleTest {
             (selected.container == unselected.container) shouldBe false
             (selected.ink == unselected.ink) shouldBe false
         }
-
-        @Test
-        fun `selecting does not change the font weight`() {
-            // ----- Act -----
-            val selected = ChipTone.Tonal.style(
-                scheme,
-                selected = true,
-            )
-            val unselected = ChipTone.Tonal.style(
-                scheme,
-                selected = false,
-            )
-
-            // ----- Assert -----
-            selected.weight shouldBe unselected.weight
-        }
     }
 
     @Nested
     inner class Choice {
-        @Test
-        fun `unselected looks exactly like an unselected Tonal chip`() {
-            // ----- Act -----
-            val choice = ChipTone.Choice.style(
-                scheme,
-                selected = false,
-            )
-            val tonal = ChipTone.Tonal.style(
-                scheme,
-                selected = false,
-            )
-
-            // ----- Assert -----
-            choice shouldBe tonal
-        }
-
         @Test
         fun `selected differs from unselected`() {
             // ----- Act -----

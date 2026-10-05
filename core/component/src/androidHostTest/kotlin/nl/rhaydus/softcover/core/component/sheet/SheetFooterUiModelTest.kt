@@ -9,27 +9,20 @@ class SheetFooterUiModelTest {
     @Nested
     inner class StackedInvariant {
         @Test
-        fun `a stacked footer with only a primary is accepted`() {
+        fun `a stacked footer with just one of its two buttons is accepted`() {
             // ----- Act -----
-            val footer = SheetFooterUiModel.Stacked(
+            val primaryOnly = SheetFooterUiModel.Stacked(
                 primary = SheetFooterButton(label = "Save"),
                 secondary = null,
             )
-
-            // ----- Assert -----
-            footer.secondary shouldBe null
-        }
-
-        @Test
-        fun `a stacked footer with only a secondary is accepted`() {
-            // ----- Act -----
-            val footer = SheetFooterUiModel.Stacked(
+            val secondaryOnly = SheetFooterUiModel.Stacked(
                 primary = null,
                 secondary = SheetFooterButton(label = "Not now"),
             )
 
             // ----- Assert -----
-            footer.primary shouldBe null
+            primaryOnly.secondary shouldBe null
+            secondaryOnly.primary shouldBe null
         }
 
         @Test

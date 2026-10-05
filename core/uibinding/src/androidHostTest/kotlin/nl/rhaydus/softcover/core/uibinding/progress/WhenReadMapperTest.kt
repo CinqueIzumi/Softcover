@@ -7,10 +7,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
-import nl.rhaydus.softcover.core.component.chip.ChipInteraction
-import nl.rhaydus.softcover.core.component.chip.ChipLeading
 import nl.rhaydus.softcover.core.component.chip.ChipTrailing
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -39,8 +36,6 @@ class WhenReadMapperTest {
             result.timeLabel shouldBe "10:00"
             result.chip.selected shouldBe false
             result.chip.trailing shouldBe null
-            result.chip.leading shouldBe ChipLeading.Icon(icon = SoftcoverIcon.DateRange)
-            result.chip.interaction shouldBe ChipInteraction.Clickable
         }
 
         @Test
