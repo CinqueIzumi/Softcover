@@ -76,41 +76,24 @@ class DisplayToggleRowsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `checks the floating-bar row when the bottom bar style is FLOATING`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            themeConfigFlow.value = ThemeConfiguration(bottomBarStyle = BottomBarStyle.FLOATING)
-            val collector = DisplayToggleRowsCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            checkedByKey()[DisplayToggle.FLOATING_BOTTOM_BAR] shouldBe true
-            job.cancel()
-        }
-
-        @Test
-        fun `unchecks the floating-bar row when the bottom bar style is not FLOATING`() =
+        fun `checks the floating-bar row only while the bottom bar style is FLOATING`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val notFloating = BottomBarStyle.entries.first { it != BottomBarStyle.FLOATING }
-                themeConfigFlow.value = ThemeConfiguration(bottomBarStyle = notFloating)
                 val collector = DisplayToggleRowsCollector()
-
-                // ----- Act -----
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
                 }
+                val whileFloating = checkedByKey()[DisplayToggle.FLOATING_BOTTOM_BAR]
+
+                // ----- Act -----
+                themeConfigFlow.value = ThemeConfiguration(bottomBarStyle = notFloating)
 
                 // ----- Assert -----
+                whileFloating shouldBe true
                 checkedByKey()[DisplayToggle.FLOATING_BOTTOM_BAR] shouldBe false
                 job.cancel()
             }
@@ -122,124 +105,24 @@ class DisplayToggleRowsCollectorTest {
                 shelfSwipeFlow.value = false
                 readingStreakFlow.value = true
                 val collector = DisplayToggleRowsCollector()
-
-                // ----- Act -----
                 val job = launch {
                     collector.onLaunch(
                         scope = scope,
                         dependencies = dependencies,
                     )
                 }
-
-                // ----- Assert -----
-                checkedByKey()[DisplayToggle.SHELF_SWIPE] shouldBe false
-                checkedByKey()[DisplayToggle.READING_STREAK] shouldBe true
-                job.cancel()
-            }
-
-        @Test
-        fun `updates only the reading-streak row when that preference changes`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = DisplayToggleRowsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val before = checkedByKey()
+                val initial = checkedByKey()
 
                 // ----- Act -----
+                shelfSwipeFlow.value = true
                 readingStreakFlow.value = false
 
                 // ----- Assert -----
-                checkedByKey() shouldBe before + (DisplayToggle.READING_STREAK to false)
+                initial[DisplayToggle.SHELF_SWIPE] shouldBe false
+                initial[DisplayToggle.READING_STREAK] shouldBe true
+                checkedByKey()[DisplayToggle.SHELF_SWIPE] shouldBe true
+                checkedByKey()[DisplayToggle.READING_STREAK] shouldBe false
                 job.cancel()
             }
-
-        @Test
-        fun `updates only the shelf-swipe row when that preference changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = DisplayToggleRowsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            val before = checkedByKey()
-
-            // ----- Act -----
-            shelfSwipeFlow.value = false
-
-            // ----- Assert -----
-            checkedByKey() shouldBe before + (DisplayToggle.SHELF_SWIPE to false)
-            job.cancel()
-        }
-
-        @Test
-        fun `updates only the floating-bar row when the theme configuration changes`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = DisplayToggleRowsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                val before = checkedByKey()
-                val notFloating = BottomBarStyle.entries.first { it != BottomBarStyle.FLOATING }
-
-                // ----- Act -----
-                themeConfigFlow.value = ThemeConfiguration(bottomBarStyle = notFloating)
-
-                // ----- Assert -----
-                checkedByKey() shouldBe before + (DisplayToggle.FLOATING_BOTTOM_BAR to false)
-                job.cancel()
-            }
-
-        @Test
-        fun `lists the rows the host platform supports, with reading streak last`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = DisplayToggleRowsCollector()
-
-                // ----- Act -----
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Assert -----
-                stateFlow.value.displayToggleRows.last().key shouldBe DisplayToggle.READING_STREAK
-                job.cancel()
-            }
-
-        @Test
-        fun `preserves other state fields when updating displayToggleRows`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = SettingsScreenUiState(
-                appVersionName = "1.2.3",
-                dropDownExpanded = true,
-            )
-            val collector = DisplayToggleRowsCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.appVersionName shouldBe "1.2.3"
-            stateFlow.value.dropDownExpanded shouldBe true
-            job.cancel()
-        }
     }
 }

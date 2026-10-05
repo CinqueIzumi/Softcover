@@ -38,7 +38,7 @@ the reason for each and the expected change in file count, test count and time. 
 | TP-4 | `feature:book_detail` — 110 files, 807 → 524 tests, 4.4 → 3.1 s | [x] |
 | TP-5 | `feature:library` — 84 → 80 files, 784 → 539 tests, 4.8 → 3.7 s | [x] |
 | TP-6 | `feature:explore` — 76 → 61 files, 515 → 302 tests, 7.1 → 4.1 s | [x] |
-| TP-7 | `feature:settings`, `feature:app_update`, `feature:onboarding` — 68 files, 366 tests, 5.8 s | [ ] |
+| TP-7 | `feature:settings`, `feature:app_update`, `feature:onboarding` — 68 → 49 files, 366 → 155 tests, 5.8 → 5.2 s | [x] |
 | TP-8 | `feature:reading`, `feature:profile`, `feature:scan`, `feature:lists`, `feature:session` — 74 files, 590 tests, 8.6 s | [ ] |
 
 ## TP-0 baseline

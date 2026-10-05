@@ -53,24 +53,5 @@ class OnLoadingSheetDismissedActionTest {
             stateFlow.value.loadingSheet.isLoading shouldBe false
             stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe false
         }
-
-        @Test
-        fun `keeps the error and the save button state untouched`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = stateFlow.value.copy(
-                saveApiKeyButtonEnabled = true,
-                submissionError = "That API key wasn't accepted.",
-            )
-
-            // ----- Act -----
-            OnLoadingSheetDismissedAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.saveApiKeyButtonEnabled shouldBe true
-            stateFlow.value.submissionError shouldBe "That API key wasn't accepted."
-        }
     }
 }

@@ -41,37 +41,6 @@ class OnSettingsCategorySelectedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets selectedCategory to the chosen category`() = runTest {
-            // ----- Arrange -----
-            val action = OnSettingsCategorySelectedAction(category = SettingsCategory.LIBRARY_TABS)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.selectedCategory shouldBe SettingsCategory.LIBRARY_TABS
-        }
-
-        @Test
-        fun `recomputes settingsSidebarSections so the matching row is selected`() = runTest {
-            // ----- Arrange -----
-            val action = OnSettingsCategorySelectedAction(category = SettingsCategory.ABOUT)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.settingsSidebar shouldBe
-                settingsSidebarFor(selectedCategory = SettingsCategory.ABOUT)
-        }
-
-        @Test
         fun `switching from one category to another moves the selection off the previous row`() = runTest {
             // ----- Arrange -----
             stateFlow.value = SettingsScreenUiState(
@@ -87,31 +56,10 @@ class OnSettingsCategorySelectedActionTest {
             )
 
             // ----- Assert -----
+            stateFlow.value.selectedCategory shouldBe SettingsCategory.ROADMAP
             val rows = stateFlow.value.settingsSidebar.sections.flatMap { it.rows }
             rows.single { it.selected }.key shouldBe
                 SettingsSidebarKey.Category(category = SettingsCategory.ROADMAP)
-        }
-
-        @Test
-        fun `re-selecting the already-selected category leaves it selected`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = SettingsScreenUiState(
-                selectedCategory = SettingsCategory.APPEARANCE,
-                settingsSidebar = settingsSidebarFor(selectedCategory = SettingsCategory.APPEARANCE),
-            )
-            val action = OnSettingsCategorySelectedAction(category = SettingsCategory.APPEARANCE)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.selectedCategory shouldBe SettingsCategory.APPEARANCE
-            stateFlow.value.settingsSidebar.sections[1].rows
-                .single { it.key == SettingsSidebarKey.Category(category = SettingsCategory.APPEARANCE) }
-                .selected shouldBe true
         }
     }
 }

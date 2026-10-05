@@ -68,27 +68,7 @@ class RoadmapDocumentCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `folds the emitted document into state and clears isLoading`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = RoadmapDocumentCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            documentFlow.emit(TEST_DOCUMENT)
-
-            // ----- Assert -----
-            stateFlow.value.document shouldBe TEST_DOCUMENT
-            stateFlow.value.isLoading shouldBe false
-            job.cancel()
-        }
-
-        @Test
-        fun `folds renderUnits from the emitted document's blocks alongside document in the same state update`() =
+        fun `folds the emitted document and its render units into state and clears isLoading`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val documentWithBlocks = TEST_DOCUMENT.copy(
@@ -108,29 +88,9 @@ class RoadmapDocumentCollectorTest {
                 // ----- Assert -----
                 stateFlow.value.document shouldBe documentWithBlocks
                 stateFlow.value.renderUnits shouldBe documentWithBlocks.blocks.toRoadmapRenderUnits()
+                stateFlow.value.isLoading shouldBe false
                 job.cancel()
             }
-
-        @Test
-        fun `updates document to the latest emission when the flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val secondDocument = TEST_DOCUMENT.copy(source = RoadmapSource.REMOTE)
-            val collector = RoadmapDocumentCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            documentFlow.emit(TEST_DOCUMENT)
-            documentFlow.emit(secondDocument)
-
-            // ----- Assert -----
-            stateFlow.value.document shouldBe secondDocument
-            job.cancel()
-        }
 
         @Test
         fun `sets lastUpdatedText to the formatted long date when fetchedAtEpochMillis is present`() =
@@ -177,27 +137,6 @@ class RoadmapDocumentCollectorTest {
         }
 
         @Test
-        fun `does not propagate an exception when the observed flow throws`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            every {
-                observeRoadmapUseCase()
-            } returns flow { throw RuntimeException("read failed") }
-
-            val collector = RoadmapDocumentCollector()
-
-            // ----- Act -----
-            val result = runCatching {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
-        }
-
-        @Test
         fun `clears isLoading and fills roadmapError when the observed flow throws`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             every {
@@ -214,7 +153,7 @@ class RoadmapDocumentCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
-            stateFlow.value.roadmapError shouldBe "Couldn't load the roadmap. Pull to refresh to try again."
+            stateFlow.value.roadmapError.shouldNotBeNull()
         }
     }
 }

@@ -15,10 +15,14 @@ class DisplayToggleActionMapperTest {
     inner class KeyToAction {
         @Test
         fun `maps FLOATING_BOTTOM_BAR to OnFloatingBarToggledAction carrying newValue`() {
+            // ----- Arrange -----
+            val key = DisplayToggle.FLOATING_BOTTOM_BAR
+            val newValue = true
+
             // ----- Act -----
             val result = displayToggleActionFor(
-                key = DisplayToggle.FLOATING_BOTTOM_BAR,
-                newValue = true,
+                key = key,
+                newValue = newValue,
             )
 
             // ----- Assert -----
@@ -28,10 +32,14 @@ class DisplayToggleActionMapperTest {
 
         @Test
         fun `maps SHELF_SWIPE to OnShelfSwipeToggledAction carrying newValue`() {
+            // ----- Arrange -----
+            val key = DisplayToggle.SHELF_SWIPE
+            val newValue = false
+
             // ----- Act -----
             val result = displayToggleActionFor(
-                key = DisplayToggle.SHELF_SWIPE,
-                newValue = false,
+                key = key,
+                newValue = newValue,
             )
 
             // ----- Assert -----
@@ -41,10 +49,14 @@ class DisplayToggleActionMapperTest {
 
         @Test
         fun `maps READING_STREAK to OnReadingStreakToggledAction carrying newValue`() {
+            // ----- Arrange -----
+            val key = DisplayToggle.READING_STREAK
+            val newValue = true
+
             // ----- Act -----
             val result = displayToggleActionFor(
-                key = DisplayToggle.READING_STREAK,
-                newValue = true,
+                key = key,
+                newValue = newValue,
             )
 
             // ----- Assert -----
@@ -54,10 +66,14 @@ class DisplayToggleActionMapperTest {
 
         @Test
         fun `maps DYNAMIC_COLOR to OnDynamicColorToggledAction carrying newValue`() {
+            // ----- Arrange -----
+            val key = DisplayToggle.DYNAMIC_COLOR
+            val newValue = false
+
             // ----- Act -----
             val result = displayToggleActionFor(
-                key = DisplayToggle.DYNAMIC_COLOR,
-                newValue = false,
+                key = key,
+                newValue = newValue,
             )
 
             // ----- Assert -----

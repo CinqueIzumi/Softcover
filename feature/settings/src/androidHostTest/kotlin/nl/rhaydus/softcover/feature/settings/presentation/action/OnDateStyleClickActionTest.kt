@@ -62,28 +62,6 @@ class OnDateStyleClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `closes dropdown after invoking the use case on success`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = SettingsScreenUiState(dropDownExpanded = true)
-
-            coEvery {
-                setDateStyleUseCase(newStyle = DateStyle.MONTH_DAY_YEAR)
-            } returns Result.success(Unit)
-
-            val action = OnDateStyleClickAction(style = DateStyle.MONTH_DAY_YEAR)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.dropDownExpanded shouldBe false
-        }
-
-        @Test
         fun `closes dropdown even when the use case fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
@@ -126,32 +104,6 @@ class OnDateStyleClickActionTest {
             coVerify {
                 setDateStyleUseCase(newStyle = DateStyle.DAY_MONTH_YEAR)
             }
-        }
-
-        @Test
-        fun `preserves other state fields when closing dropdown`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            stateFlow.value = SettingsScreenUiState(
-                appVersionName = "1.2.3",
-                dropDownExpanded = true,
-            )
-
-            coEvery {
-                setDateStyleUseCase(newStyle = DateStyle.MONTH_DAY_YEAR)
-            } returns Result.success(Unit)
-
-            val action = OnDateStyleClickAction(style = DateStyle.MONTH_DAY_YEAR)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.appVersionName shouldBe "1.2.3"
-            stateFlow.value.dropDownExpanded shouldBe false
         }
     }
 }

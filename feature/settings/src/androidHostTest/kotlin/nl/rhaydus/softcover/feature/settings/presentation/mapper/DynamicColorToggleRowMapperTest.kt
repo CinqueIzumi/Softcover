@@ -9,32 +9,15 @@ class DynamicColorToggleRowMapperTest {
     @Nested
     inner class Key {
         @Test
-        fun `keys the row DYNAMIC_COLOR`() {
+        fun `keys the row DYNAMIC_COLOR and carries checked through`() {
+            // ----- Arrange -----
+            val checked = false
+
             // ----- Act -----
-            val result = dynamicColorToggleRowFor(checked = true)
+            val result = dynamicColorToggleRowFor(checked = checked)
 
             // ----- Assert -----
             result.key shouldBe DisplayToggle.DYNAMIC_COLOR
-        }
-    }
-
-    @Nested
-    inner class CheckedValue {
-        @Test
-        fun `carries checked true through unchanged`() {
-            // ----- Act -----
-            val result = dynamicColorToggleRowFor(checked = true)
-
-            // ----- Assert -----
-            result.checked shouldBe true
-        }
-
-        @Test
-        fun `carries checked false through unchanged`() {
-            // ----- Act -----
-            val result = dynamicColorToggleRowFor(checked = false)
-
-            // ----- Assert -----
             result.checked shouldBe false
         }
     }

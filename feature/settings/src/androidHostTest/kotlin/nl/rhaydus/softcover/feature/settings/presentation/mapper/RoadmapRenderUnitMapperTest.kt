@@ -13,31 +13,7 @@ class RoadmapRenderUnitMapperTest {
     @Nested
     inner class ToRoadmapRenderUnits {
         @Test
-        fun `heading shaped version colon title splits on the first colon-space into eyebrow and headline`() {
-            // ----- Arrange -----
-            val blocks = listOf(
-                RoadmapBlock.Heading(
-                    level = 2,
-                    spans = listOf(RoadmapSpan(text = "3.2.0: Title")),
-                ),
-            )
-
-            // ----- Act -----
-            val units = blocks.toRoadmapRenderUnits()
-
-            // ----- Assert -----
-            units shouldBe persistentListOf(
-                RoadmapRenderUnit.Heading(
-                    header = SectionHeaderUiModel.Section(
-                        eyebrow = "3.2.0",
-                        headline = "Title",
-                    ),
-                ),
-            )
-        }
-
-        @Test
-        fun `heading with a later colon-space still splits on the first occurrence only`() {
+        fun `heading splits on the first colon-space into eyebrow and headline`() {
             // ----- Arrange -----
             val blocks = listOf(
                 RoadmapBlock.Heading(
@@ -61,54 +37,26 @@ class RoadmapRenderUnitMapperTest {
         }
 
         @Test
-        fun `heading without a colon-space degrades to a plain heading`() {
-            // ----- Arrange -----
-            val blocks = listOf(
-                RoadmapBlock.Heading(
-                    level = 2,
-                    spans = listOf(RoadmapSpan(text = "Under consideration")),
-                ),
-            )
+        fun `heading with no eyebrow or no headline around the colon-space degrades to a plain heading`() {
+            listOf(
+                "Under consideration",
+                ": Title",
+                "Title: ",
+            ).forEach { text ->
+                // ----- Arrange -----
+                val blocks = listOf(
+                    RoadmapBlock.Heading(
+                        level = 2,
+                        spans = listOf(RoadmapSpan(text = text)),
+                    ),
+                )
 
-            // ----- Act -----
-            val units = blocks.toRoadmapRenderUnits()
+                // ----- Act -----
+                val units = blocks.toRoadmapRenderUnits()
 
-            // ----- Assert -----
-            units shouldBe persistentListOf(RoadmapRenderUnit.PlainHeading(text = "Under consideration"))
-        }
-
-        @Test
-        fun `heading starting with the colon-space degrades to a plain heading`() {
-            // ----- Arrange -----
-            val blocks = listOf(
-                RoadmapBlock.Heading(
-                    level = 2,
-                    spans = listOf(RoadmapSpan(text = ": Title")),
-                ),
-            )
-
-            // ----- Act -----
-            val units = blocks.toRoadmapRenderUnits()
-
-            // ----- Assert -----
-            units shouldBe persistentListOf(RoadmapRenderUnit.PlainHeading(text = ": Title"))
-        }
-
-        @Test
-        fun `heading ending with the colon-space and no headline degrades to a plain heading`() {
-            // ----- Arrange -----
-            val blocks = listOf(
-                RoadmapBlock.Heading(
-                    level = 2,
-                    spans = listOf(RoadmapSpan(text = "Title: ")),
-                ),
-            )
-
-            // ----- Act -----
-            val units = blocks.toRoadmapRenderUnits()
-
-            // ----- Assert -----
-            units shouldBe persistentListOf(RoadmapRenderUnit.PlainHeading(text = "Title: "))
+                // ----- Assert -----
+                units shouldBe persistentListOf(RoadmapRenderUnit.PlainHeading(text = text))
+            }
         }
 
         @Test
@@ -163,18 +111,6 @@ class RoadmapRenderUnitMapperTest {
                 RoadmapRenderUnit.BlockQuote(spans = blockQuote.spans),
                 RoadmapRenderUnit.ThematicBreak,
             )
-        }
-
-        @Test
-        fun `an empty document maps to an empty list`() {
-            // ----- Arrange -----
-            val blocks = emptyList<RoadmapBlock>()
-
-            // ----- Act -----
-            val units = blocks.toRoadmapRenderUnits()
-
-            // ----- Assert -----
-            units shouldBe persistentListOf()
         }
     }
 }

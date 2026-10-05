@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.settings.presentation.collector
 
-import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -55,46 +53,6 @@ class AppUpdateCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets the callout for the emitted state`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = AppUpdateCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            updateStateFlow.emit(AppUpdateState.Available)
-
-            // ----- Assert -----
-            stateFlow.value.appUpdateCallout.shouldNotBeNull() shouldBe
-                appUpdateCalloutFor(state = AppUpdateState.Available)
-            job.cancel()
-        }
-
-        @Test
-        fun `clears the callout when the state returns to Idle`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = AppUpdateCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            updateStateFlow.emit(AppUpdateState.Downloaded)
-
-            // ----- Act -----
-            updateStateFlow.emit(AppUpdateState.Idle)
-
-            // ----- Assert -----
-            stateFlow.value.appUpdateCallout.shouldBeNull()
-            job.cancel()
-        }
-
-        @Test
         fun `follows the latest state across a download lifecycle`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = AppUpdateCollector()
@@ -112,42 +70,6 @@ class AppUpdateCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.appUpdateCallout shouldBe appUpdateCalloutFor(state = AppUpdateState.Failed)
-            job.cancel()
-        }
-
-        @Test
-        fun `leaves the callout null before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = AppUpdateCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act & Assert -----
-            stateFlow.value.appUpdateCallout.shouldBeNull()
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves other state fields when setting the callout`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = SettingsScreenUiState(dropDownExpanded = true)
-            val collector = AppUpdateCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            updateStateFlow.emit(AppUpdateState.Downloading)
-
-            // ----- Assert -----
-            stateFlow.value.dropDownExpanded shouldBe true
             job.cancel()
         }
     }

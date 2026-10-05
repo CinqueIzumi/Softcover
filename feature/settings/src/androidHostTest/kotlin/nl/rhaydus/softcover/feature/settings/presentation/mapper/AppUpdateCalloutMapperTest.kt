@@ -15,8 +15,11 @@ class AppUpdateCalloutMapperTest {
     inner class Idle {
         @Test
         fun `returns null so no callout is shown`() {
+            // ----- Arrange -----
+            val state = AppUpdateState.Idle
+
             // ----- Act -----
-            val result = appUpdateCalloutFor(state = AppUpdateState.Idle)
+            val result = appUpdateCalloutFor(state = state)
 
             // ----- Assert -----
             result.shouldBeNull()
@@ -26,49 +29,28 @@ class AppUpdateCalloutMapperTest {
     @Nested
     inner class Action {
         @Test
-        fun `offers a button when an update is available`() {
-            // ----- Act -----
-            val result = appUpdateCalloutFor(state = AppUpdateState.Available)
-
-            // ----- Assert -----
-            result.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Button>()
-        }
-
-        @Test
         fun `shows progress with no button while downloading`() {
+            // ----- Arrange -----
+            val state = AppUpdateState.Downloading
+
             // ----- Act -----
-            val result = appUpdateCalloutFor(state = AppUpdateState.Downloading)
+            val result = appUpdateCalloutFor(state = state)
 
             // ----- Assert -----
             result.shouldNotBeNull().callToAction shouldBe CalloutActionUiModel.Progress
         }
 
         @Test
-        fun `offers a button once the update is downloaded`() {
-            // ----- Act -----
-            val result = appUpdateCalloutFor(state = AppUpdateState.Downloaded)
-
-            // ----- Assert -----
-            result.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Button>()
-        }
-
-        @Test
-        fun `offers a button when the update failed`() {
-            // ----- Act -----
-            val result = appUpdateCalloutFor(state = AppUpdateState.Failed)
-
-            // ----- Assert -----
-            result.shouldNotBeNull().callToAction.shouldBeInstanceOf<CalloutActionUiModel.Button>()
-        }
-
-        @Test
-        fun `labels the button differently for each actionable state`() {
-            // ----- Act -----
-            val labels = listOf(
+        fun `offers a distinctly labelled button for each actionable state`() {
+            // ----- Arrange -----
+            val actionableStates = listOf(
                 AppUpdateState.Available,
                 AppUpdateState.Downloaded,
                 AppUpdateState.Failed,
-            ).map { state ->
+            )
+
+            // ----- Act -----
+            val labels = actionableStates.map { state ->
                 appUpdateCalloutFor(state = state)
                     .shouldNotBeNull()
                     .callToAction

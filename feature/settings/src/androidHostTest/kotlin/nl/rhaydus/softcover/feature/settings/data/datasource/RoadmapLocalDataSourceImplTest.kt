@@ -1,8 +1,8 @@
 package nl.rhaydus.softcover.feature.settings.data.datasource
 
 import app.cash.turbine.test
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -43,9 +43,9 @@ class RoadmapLocalDataSourceImplTest {
 
             // ----- Act & Assert -----
             dataSource.observeCachedRoadmap().test {
-                val document = awaitItem()
-                document?.source shouldBe RoadmapSource.CACHE
-                document?.fetchedAtEpochMillis shouldBe entity.fetchedAtEpochMillis
+                val document = awaitItem().shouldNotBeNull()
+                document.source shouldBe RoadmapSource.CACHE
+                document.fetchedAtEpochMillis shouldBe entity.fetchedAtEpochMillis
                 awaitComplete()
             }
         }
@@ -62,37 +62,6 @@ class RoadmapLocalDataSourceImplTest {
                 awaitItem() shouldBe null
                 awaitComplete()
             }
-        }
-    }
-
-    @Nested
-    inner class GetCachedAtEpochMillis {
-        @Test
-        fun `delegates to dao getFetchedAtEpochMillis`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                dao.getFetchedAtEpochMillis()
-            } returns 1_000L
-
-            // ----- Act -----
-            val result = dataSource.getCachedAtEpochMillis()
-
-            // ----- Assert -----
-            result shouldBe 1_000L
-        }
-
-        @Test
-        fun `returns null when the dao has no cached row`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                dao.getFetchedAtEpochMillis()
-            } returns null
-
-            // ----- Act -----
-            val result = dataSource.getCachedAtEpochMillis()
-
-            // ----- Assert -----
-            result shouldBe null
         }
     }
 

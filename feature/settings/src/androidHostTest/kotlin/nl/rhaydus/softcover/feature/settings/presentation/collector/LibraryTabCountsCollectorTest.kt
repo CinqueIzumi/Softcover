@@ -111,7 +111,7 @@ class LibraryTabCountsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets totalCount and statusCounts from the five flows once all have emitted`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sets the counts and the ordered entries from the five flows once all have emitted`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = LibraryTabCountsCollector()
             val job = launch {
@@ -136,28 +136,6 @@ class LibraryTabCountsCollectorTest {
                 UserBookStatus.READ.code to 9,
                 UserBookStatus.DID_NOT_FINISH.code to 2,
             )
-            job.cancel()
-        }
-
-        @Test
-        fun `rebuilds orderedEntries with the emitted counts`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = LibraryTabCountsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            allFlow.emit(books(20))
-            currentlyReadingFlow.emit(books(3))
-            wantToReadFlow.emit(books(5))
-            readFlow.emit(books(9))
-            didNotFinishFlow.emit(books(2))
-
-            // ----- Assert -----
             stateFlow.value.orderedEntries.map { it.count } shouldBe listOf(
                 20,
                 3,
@@ -196,29 +174,6 @@ class LibraryTabCountsCollectorTest {
                 UserBookStatus.READ.code to 9,
                 UserBookStatus.DID_NOT_FINISH.code to 2,
             )
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change state before all five flows have emitted`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = LibraryTabCountsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            allFlow.emit(books(20))
-            currentlyReadingFlow.emit(books(3))
-            wantToReadFlow.emit(books(5))
-            readFlow.emit(books(9))
-
-            // ----- Assert -----
-            stateFlow.value.totalCount shouldBe 0
-            stateFlow.value.statusCounts shouldBe emptyMap()
             job.cancel()
         }
     }

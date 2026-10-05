@@ -1,9 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import io.kotest.matchers.shouldBe
-import nl.rhaydus.softcover.core.domain.model.UserBookStatus
-import nl.rhaydus.softcover.core.presentation.model.LibraryTab
-import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -19,8 +16,11 @@ class LibraryVisibilitySettingsUiStateTest {
                 draftEnabledStatusCodes = setOf(99),
             )
 
+            // ----- Act -----
+            val isDirty = state.isDirty
+
             // ----- Assert -----
-            state.isDirty shouldBe false
+            isDirty shouldBe false
         }
 
         @Test
@@ -36,8 +36,11 @@ class LibraryVisibilitySettingsUiStateTest {
                 draftTabOrder = listOf("list-1", "status-2"),
             )
 
+            // ----- Act -----
+            val isDirty = state.isDirty
+
             // ----- Assert -----
-            state.isDirty shouldBe false
+            isDirty shouldBe false
         }
 
         @Test
@@ -53,8 +56,11 @@ class LibraryVisibilitySettingsUiStateTest {
                 draftTabOrder = listOf("list-10", "status-1"),
             )
 
+            // ----- Act -----
+            val isDirty = state.isDirty
+
             // ----- Assert -----
-            state.isDirty shouldBe true
+            isDirty shouldBe true
         }
 
         @Test
@@ -70,8 +76,11 @@ class LibraryVisibilitySettingsUiStateTest {
                 draftTabOrder = emptyList(),
             )
 
+            // ----- Act -----
+            val isDirty = state.isDirty
+
             // ----- Assert -----
-            state.isDirty shouldBe true
+            isDirty shouldBe true
         }
 
         @Test
@@ -87,29 +96,11 @@ class LibraryVisibilitySettingsUiStateTest {
                 draftTabOrder = emptyList(),
             )
 
-            // ----- Assert -----
-            state.isDirty shouldBe true
-        }
-    }
-
-    @Nested
-    inner class OrderedEntries {
-        @Test
-        fun `defaults to All followed by the four statuses in display order`() {
-            // ----- Arrange -----
-            val state = LibraryVisibilitySettingsUiState()
-
             // ----- Act -----
-            val ids = state.orderedEntries.map { it.id }
+            val isDirty = state.isDirty
 
             // ----- Assert -----
-            ids shouldBe listOf(
-                LibraryTabEntry.ALL_ID,
-                LibraryTab.Status.idFor(status = UserBookStatus.CURRENTLY_READING),
-                LibraryTab.Status.idFor(status = UserBookStatus.WANT_TO_READ),
-                LibraryTab.Status.idFor(status = UserBookStatus.READ),
-                LibraryTab.Status.idFor(status = UserBookStatus.DID_NOT_FINISH),
-            )
+            isDirty shouldBe true
         }
     }
 }

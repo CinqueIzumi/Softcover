@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.model
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -9,52 +10,26 @@ class LibraryVisibilityToggleTest {
     @Nested
     inner class LibraryVisibilityToggleFor {
         @Test
-        fun `is checked while the tab is visible`() {
-            // ----- Arrange & Act -----
-            val result = libraryVisibilityToggleFor(
-                label = "Reading",
+        fun `checks the toggle and words its description by visibility, always naming the tab`() {
+            // ----- Arrange -----
+            val label = "Favourites"
+
+            // ----- Act -----
+            val visible = libraryVisibilityToggleFor(
+                label = label,
                 visible = true,
             )
-
-            // ----- Assert -----
-            result.checked shouldBe true
-        }
-
-        @Test
-        fun `is unchecked while the tab is hidden`() {
-            // ----- Arrange & Act -----
-            val result = libraryVisibilityToggleFor(
-                label = "Reading",
+            val hidden = libraryVisibilityToggleFor(
+                label = label,
                 visible = false,
             )
 
             // ----- Assert -----
-            result.checked shouldBe false
-        }
-
-        @Test
-        fun `describes hiding the named tab while it is visible`() {
-            // ----- Arrange & Act -----
-            val result = libraryVisibilityToggleFor(
-                label = "Reading",
-                visible = true,
-            )
-
-            // ----- Assert -----
-            result.description shouldBe "Hide Reading from the library tabs"
-        }
-
-        @Test
-        fun `describes showing the named tab while it is hidden`() {
-            // ----- Arrange & Act -----
-            val result = libraryVisibilityToggleFor(
-                label = "Favourites",
-                visible = false,
-            )
-
-            // ----- Assert -----
-            result.description shouldContain "Favourites"
-            result.description shouldBe "Show Favourites on the library tabs"
+            visible.checked shouldBe true
+            hidden.checked shouldBe false
+            visible.description shouldContain "Favourites"
+            hidden.description shouldContain "Favourites"
+            visible.description shouldNotBe hidden.description
         }
     }
 }

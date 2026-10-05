@@ -54,7 +54,7 @@ class ThemeConfigurationCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `sets themeMode to the emitted configuration's themeMode`() = runTest(UnconfinedTestDispatcher()) {
+        fun `carries the emitted configuration into the theme state`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = ThemeConfigurationCollector()
             val job = launch {
@@ -65,50 +65,19 @@ class ThemeConfigurationCollectorTest {
             }
 
             // ----- Act -----
-            themeConfigFlow.emit(ThemeConfiguration(themeMode = ThemeMode.DARK))
+            themeConfigFlow.emit(
+                ThemeConfiguration(
+                    themeMode = ThemeMode.DARK,
+                    colorPalette = ColorPalette.SEA,
+                    useDynamicColor = true,
+                ),
+            )
 
             // ----- Assert -----
             stateFlow.value.themeMode shouldBe ThemeMode.DARK
-            job.cancel()
-        }
-
-        @Test
-        fun `sets colorPalette to the emitted configuration's colorPalette`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ThemeConfigurationCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            themeConfigFlow.emit(ThemeConfiguration(colorPalette = ColorPalette.SEA))
-
-            // ----- Assert -----
             stateFlow.value.colorPalette shouldBe ColorPalette.SEA
+            stateFlow.value.dynamicColorToggleRow.checked shouldBe true
             job.cancel()
         }
-
-        @Test
-        fun `recomputes dynamicColorToggleRow so its checked value follows the emitted configuration`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val collector = ThemeConfigurationCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                themeConfigFlow.emit(ThemeConfiguration(useDynamicColor = true))
-
-                // ----- Assert -----
-                stateFlow.value.dynamicColorToggleRow.checked shouldBe true
-                job.cancel()
-            }
     }
 }

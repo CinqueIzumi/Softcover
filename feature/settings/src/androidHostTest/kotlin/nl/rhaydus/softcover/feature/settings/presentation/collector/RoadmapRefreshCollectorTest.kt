@@ -65,7 +65,7 @@ class RoadmapRefreshCollectorTest {
         }
 
         @Test
-        fun `does not fill roadmapError when the use case fails`() = runTest {
+        fun `swallows a failed refresh without filling roadmapError`() = runTest {
             // ----- Arrange -----
             coEvery {
                 refreshRoadmapUseCase(force = false)
@@ -81,27 +81,6 @@ class RoadmapRefreshCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.roadmapError shouldBe null
-        }
-
-        @Test
-        fun `does not throw when the use case fails`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                refreshRoadmapUseCase(force = false)
-            } returns Result.failure(RuntimeException("network error"))
-
-            val collector = RoadmapRefreshCollector()
-
-            // ----- Act -----
-            val result = runCatching {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            result.isSuccess shouldBe true
         }
     }
 }

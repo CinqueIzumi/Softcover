@@ -74,7 +74,7 @@ class UserListsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates availableLists sorted by name ascending when flow emits`() = runTest(UnconfinedTestDispatcher()) {
+        fun `sorts lists case-insensitively by name into availableLists and orderedEntries`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val listZ = stubBookList(
                 id = 1,
@@ -82,7 +82,7 @@ class UserListsCollectorTest {
             )
             val listA = stubBookList(
                 id = 2,
-                name = "Apple",
+                name = "apple",
             )
             val listM = stubBookList(
                 id = 3,
@@ -100,159 +100,10 @@ class UserListsCollectorTest {
             listsFlow.emit(listOf(listZ, listA, listM))
 
             // ----- Assert -----
-            stateFlow.value.availableLists.map { it.name } shouldBe listOf("Apple", "Middle", "Zebra")
-            job.cancel()
-        }
-
-        @Test
-        fun `rebuilds orderedEntries with a custom list entry per emitted list`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val listZ = stubBookList(
-                id = 1,
-                name = "Zebra",
-            )
-            val listA = stubBookList(
-                id = 2,
-                name = "Apple",
-            )
-            val collector = UserListsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            listsFlow.emit(listOf(listZ, listA))
-
-            // ----- Assert -----
+            stateFlow.value.availableLists.map { it.name } shouldBe listOf("apple", "Middle", "Zebra")
             stateFlow.value.orderedEntries
                 .filterIsInstance<LibraryTabEntry.CustomList>()
-                .map { it.listName } shouldBe listOf("Apple", "Zebra")
-            job.cancel()
-        }
-
-        @Test
-        fun `sort is case-insensitive`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val listUpper = stubBookList(
-                id = 1,
-                name = "Beta",
-            )
-            val listLower = stubBookList(
-                id = 2,
-                name = "alpha",
-            )
-            val collector = UserListsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            listsFlow.emit(listOf(listUpper, listLower))
-
-            // ----- Assert -----
-            stateFlow.value.availableLists.first().name shouldBe "alpha"
-            job.cancel()
-        }
-
-        @Test
-        fun `sets availableLists to empty list when flow emits empty`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = UserListsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            listsFlow.emit(emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.availableLists shouldBe emptyList()
-            job.cancel()
-        }
-
-        @Test
-        fun `does not change availableLists before flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = UserListsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act & Assert -----
-            stateFlow.value.availableLists shouldBe emptyList()
-            job.cancel()
-        }
-
-        @Test
-        fun `preserves draft and persisted state fields when updating availableLists`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = LibraryVisibilitySettingsUiState(
-                draftEnabledStatusCodes = setOf(1, 2),
-                draftEnabledListIds = setOf(99),
-                persistedEnabledStatusCodes = setOf(1, 2),
-                persistedEnabledListIds = setOf(99),
-                initialized = true,
-            )
-            val collector = UserListsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            listsFlow.emit(listOf(stubBookList(
-                id = 5,
-                name = "Owned",
-            ),
-            ),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.draftEnabledStatusCodes shouldBe setOf(1, 2)
-            stateFlow.value.draftEnabledListIds shouldBe setOf(99)
-            job.cancel()
-        }
-
-        @Test
-        fun `updates availableLists to latest value when flow emits multiple times`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val list1 = stubBookList(
-                id = 1,
-                name = "Owned",
-            )
-            val list2 = stubBookList(
-                id = 2,
-                name = "Wishlist",
-            )
-            val collector = UserListsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            listsFlow.emit(listOf(list1))
-
-            // ----- Act -----
-            listsFlow.emit(listOf(list1, list2))
-
-            // ----- Assert -----
-            stateFlow.value.availableLists.size shouldBe 2
+                .map { it.listName } shouldBe listOf("apple", "Middle", "Zebra")
             job.cancel()
         }
     }

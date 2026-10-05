@@ -52,7 +52,7 @@ class LibraryTabEntryBuilderTest {
     @Nested
     inner class DefaultOrder {
         @Test
-        fun `returns default status order followed by lists sorted by name when draftTabOrder is empty`() {
+        fun `orders All, the statuses, then lists sorted case-insensitively by name without a draft order`() {
             // ----- Arrange -----
             val lists = listOf(
                 stubBookList(
@@ -61,7 +61,7 @@ class LibraryTabEntryBuilderTest {
                 ),
                 stubBookList(
                     id = 1,
-                    name = "Alpha",
+                    name = "alpha",
                 ),
                 stubBookList(
                     id = 2,
@@ -73,6 +73,16 @@ class LibraryTabEntryBuilderTest {
             val entries = build(availableLists = lists)
 
             // ----- Assert -----
+            entries.map { it::class } shouldBe listOf(
+                LibraryTabEntry.All::class,
+                LibraryTabEntry.Status::class,
+                LibraryTabEntry.Status::class,
+                LibraryTabEntry.Status::class,
+                LibraryTabEntry.Status::class,
+                LibraryTabEntry.CustomList::class,
+                LibraryTabEntry.CustomList::class,
+                LibraryTabEntry.CustomList::class,
+            )
             entries.filterIsInstance<LibraryTabEntry.Status>().map { it.status } shouldBe listOf(
                 UserBookStatus.CURRENTLY_READING,
                 UserBookStatus.WANT_TO_READ,
@@ -80,72 +90,10 @@ class LibraryTabEntryBuilderTest {
                 UserBookStatus.DID_NOT_FINISH,
             )
             entries.filterIsInstance<LibraryTabEntry.CustomList>().map { it.listName } shouldBe listOf(
-                "Alpha",
+                "alpha",
                 "Middle",
                 "Zebra",
             )
-        }
-
-        @Test
-        fun `list sort is case-insensitive`() {
-            // ----- Arrange -----
-            val lists = listOf(
-                stubBookList(
-                    id = 1,
-                    name = "Beta",
-                ),
-                stubBookList(
-                    id = 2,
-                    name = "alpha",
-                ),
-            )
-
-            // ----- Act -----
-            val entries = build(availableLists = lists)
-
-            // ----- Assert -----
-            entries.filterIsInstance<LibraryTabEntry.CustomList>().map { it.listName } shouldBe listOf(
-                "alpha",
-                "Beta",
-            )
-        }
-
-        @Test
-        fun `status entries always precede list entries`() {
-            // ----- Arrange -----
-            val lists = listOf(
-                stubBookList(
-                    id = 1,
-                    name = "MyList",
-                ),
-            )
-
-            // ----- Act -----
-            val entries = build(availableLists = lists)
-
-            // ----- Assert -----
-            val firstListIndex = entries.indexOfFirst { it is LibraryTabEntry.CustomList }
-            val lastStatusIndex = entries.indexOfLast { it is LibraryTabEntry.Status }
-            (lastStatusIndex < firstListIndex) shouldBe true
-        }
-
-        @Test
-        fun `first entry is All with count equal to totalCount`() {
-            // ----- Act -----
-            val entries = build(totalCount = 42)
-
-            // ----- Assert -----
-            entries[0].shouldBeInstanceOf<LibraryTabEntry.All>()
-            entries[0].count shouldBe 42
-        }
-
-        @Test
-        fun `returns only All and the four statuses when there are no lists`() {
-            // ----- Act -----
-            val entries = build()
-
-            // ----- Assert -----
-            entries.size shouldBe 5
         }
     }
 
@@ -185,13 +133,14 @@ class LibraryTabEntryBuilderTest {
 
         @Test
         fun `unknown ids are ignored`() {
-            // ----- Act -----
-            val entries = build(
-                draftTabOrder = listOf(
-                    "unknown-id-1",
-                    "unknown-id-2",
-                ),
+            // ----- Arrange -----
+            val unknownIds = listOf(
+                "unknown-id-1",
+                "unknown-id-2",
             )
+
+            // ----- Act -----
+            val entries = build(draftTabOrder = unknownIds)
 
             // ----- Assert -----
             entries.size shouldBe 5
@@ -279,8 +228,11 @@ class LibraryTabEntryBuilderTest {
 
         @Test
         fun `status missing from statusCounts counts as zero`() {
+            // ----- Arrange -----
+            val statusCounts = mapOf(UserBookStatus.READ.code to 4)
+
             // ----- Act -----
-            val entries = build(statusCounts = mapOf(UserBookStatus.READ.code to 4))
+            val entries = build(statusCounts = statusCounts)
 
             // ----- Assert -----
             entries
@@ -298,8 +250,11 @@ class LibraryTabEntryBuilderTest {
     inner class Toggles {
         @Test
         fun `status toggle checked follows draftEnabledStatusCodes`() {
+            // ----- Arrange -----
+            val enabledCodes = setOf(UserBookStatus.READ.code)
+
             // ----- Act -----
-            val entries = build(draftEnabledStatusCodes = setOf(UserBookStatus.READ.code))
+            val entries = build(draftEnabledStatusCodes = enabledCodes)
 
             // ----- Assert -----
             val byStatus = entries.filterIsInstance<LibraryTabEntry.Status>().associateBy { it.status }
@@ -309,23 +264,18 @@ class LibraryTabEntryBuilderTest {
         }
 
         @Test
-        fun `always-visible status has no toggle even when its code is enabled`() {
+        fun `entries that cannot be hidden have no toggle even when their code is enabled`() {
+            // ----- Arrange -----
+            val enabledCodes = setOf(UserBookStatus.CURRENTLY_READING.code)
+
             // ----- Act -----
-            val entries = build(draftEnabledStatusCodes = setOf(UserBookStatus.CURRENTLY_READING.code))
+            val entries = build(draftEnabledStatusCodes = enabledCodes)
 
             // ----- Assert -----
             val currentlyReading = entries
                 .filterIsInstance<LibraryTabEntry.Status>()
                 .single { it.status == UserBookStatus.CURRENTLY_READING }
             currentlyReading.statusVisibilityToggle.shouldBeNull()
-        }
-
-        @Test
-        fun `All entry has no toggle`() {
-            // ----- Act -----
-            val entries = build()
-
-            // ----- Assert -----
             entries[0].visibilityToggle.shouldBeNull()
         }
 

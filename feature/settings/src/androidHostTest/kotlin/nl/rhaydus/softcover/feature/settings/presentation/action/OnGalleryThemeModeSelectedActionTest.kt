@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.softcover.core.component.gallery.GalleryFamily
-import nl.rhaydus.softcover.core.domain.model.ColorPalette
 import nl.rhaydus.softcover.core.domain.model.ThemeMode
 import nl.rhaydus.softcover.feature.settings.presentation.event.ComponentGalleryEvent
 import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.ComponentGalleryDependencies
@@ -75,23 +73,6 @@ class OnGalleryThemeModeSelectedActionTest {
         }
 
         @Test
-        fun `selecting a different mode replaces the current themeModeOverride`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ComponentGalleryUiState(themeModeOverride = ThemeMode.DARK)
-            val dependencies = stubDependencies(this)
-            val action = OnGalleryThemeModeSelectedAction(mode = ThemeMode.LIGHT)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.themeModeOverride shouldBe ThemeMode.LIGHT
-        }
-
-        @Test
         fun `selecting the already-selected mode clears themeModeOverride back to null`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ComponentGalleryUiState(themeModeOverride = ThemeMode.DARK)
@@ -106,28 +87,6 @@ class OnGalleryThemeModeSelectedActionTest {
 
             // ----- Assert -----
             stateFlow.value.themeModeOverride shouldBe null
-        }
-
-        @Test
-        fun `does not touch selectedFamily or paletteOverride`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ComponentGalleryUiState(
-                selectedFamily = GalleryFamily.CHIP,
-                themeModeOverride = null,
-                paletteOverride = ColorPalette.VELLUM,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnGalleryThemeModeSelectedAction(mode = ThemeMode.DARK)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.selectedFamily shouldBe GalleryFamily.CHIP
-            stateFlow.value.paletteOverride shouldBe ColorPalette.VELLUM
         }
     }
 }
