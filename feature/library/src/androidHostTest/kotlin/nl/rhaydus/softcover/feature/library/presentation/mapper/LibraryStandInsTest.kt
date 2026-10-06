@@ -47,8 +47,11 @@ class LibraryStandInsTest {
 
         @Test
         fun `the compact list stand-ins are loading coverless rows`() {
+            // ----- Arrange -----
+            val layout = LibraryGridLayout.LIST_COMPACT
+
             // ----- Act -----
-            val cards = LibraryGridLayout.LIST_COMPACT.standInCards()
+            val cards = layout.standInCards()
 
             // ----- Assert -----
             cards.forEach { card ->
@@ -82,9 +85,13 @@ class LibraryStandInsTest {
 
         @Test
         fun `list layouts get rows of the matching size`() {
+            // ----- Arrange -----
+            val compactLayout = LibraryGridLayout.LIST_COMPACT
+            val largeLayout = LibraryGridLayout.LIST_LARGE
+
             // ----- Act -----
-            val compactCards = LibraryGridLayout.LIST_COMPACT.standInCards()
-            val largeCards = LibraryGridLayout.LIST_LARGE.standInCards()
+            val compactCards = compactLayout.standInCards()
+            val largeCards = largeLayout.standInCards()
 
             // ----- Assert -----
             compactCards.forEach { card ->

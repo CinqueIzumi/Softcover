@@ -10,15 +10,21 @@ class EditionStandInsTest {
     inner class EditionStandInCards {
         @Test
         fun `every stand-in is masked as loading`() {
+            // ----- Arrange -----
+            val cards = EDITION_STAND_IN_CARDS
+
             // ----- Act & Assert -----
-            EDITION_STAND_IN_CARDS.shouldNotBeEmpty()
-            EDITION_STAND_IN_CARDS.all { it.isLoading } shouldBe true
+            cards.shouldNotBeEmpty()
+            cards.all { it.isLoading } shouldBe true
         }
 
         @Test
         fun `every stand-in has a distinct key so the lazy list can hold them together`() {
+            // ----- Arrange -----
+            val cards = EDITION_STAND_IN_CARDS
+
             // ----- Act -----
-            val keys = EDITION_STAND_IN_CARDS.map { it.key }
+            val keys = cards.map { it.key }
 
             // ----- Assert -----
             keys.distinct() shouldBe keys

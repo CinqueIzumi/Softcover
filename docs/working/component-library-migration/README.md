@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** TP-0…TP-8 committed. SL-3b blocked on F34.
-- **Next:** TP close-out: commit the AAA-marker sweep over TP-1…TP-5 modules, run a full `styleCheck`, then delete `steps/tp-test-prune.md` and tick TP below. Stop there; SD needs the user's go. in the same session (user, 2026-10-06: no approval stops, no handoff between TP steps unless context fills): split >10k-line modules by package; reviewer plus an unused-import grep on each diff; commit each.
-- **Open questions:** 19 deleted pure-`setState` action tests — user may want some back. `OnDateDropdownExpandedChange` (settings) is dead code — delete? `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
-- **Verification:** TP-1…TP-8 module tests passed (TP-8: 368 tests, 0 failures); TP-5…TP-8 reviewer lost-coverage findings restored. TP-5…TP-8 gated per module (`detektAndroidHostTest`, root `ktlintCheck` clean in `feature/library`) because other TP agents were mid-edit; run a full `styleCheck` after TP-8.
+- **State:** TP done (5,208 → 3,315 tests, 69.5 → 48 s summed). SL-3b blocked on F34.
+- **Next:** SD-0 (`steps/sd-screen-dedup.md`), only once the user says go.
+- **Open questions:** pure-`setState` action tests deleted across TP — user may want some back. `OnDateDropdownExpandedChange` (settings) is dead code — delete? `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
+- **Verification:** full `testAndroidHostTest --continue` (3,315 tests, 0 failures) and `styleCheck` passed after TP-8 and the AAA-marker sweep; TP-5…TP-8 reviewer lost-coverage findings restored.
 - **Uncommitted:** none.
 
 ## Local verification
@@ -68,7 +68,7 @@ every sub-step's Verify.
 | S8 | — (controls) | S8-4–S8-6, S8-C-controls | [x] |
 | S9 | — (statistics & progress) | S9-1–S9-4, S9-C | [x] |
 | SS | — (simplicity audit) | SS-0–SS-11, SS-C; after S9, before PF / S10 | [x] |
-| TP | [steps/tp-test-prune.md](steps/tp-test-prune.md) | TP-0 timings, then per module group; after SS | [ ] |
+| TP | — (test prune) | TP-0 timings, TP-1–TP-8 per module group | [x] |
 | SD | [steps/sd-screen-dedup.md](steps/sd-screen-dedup.md) | SD-0 inventory, then per screen group; after TP, before PF / S10 | [ ] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |

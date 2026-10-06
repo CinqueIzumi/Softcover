@@ -34,9 +34,12 @@ class SortSqlTest {
 
         @Test
         fun `ends with the keyword of the requested direction`() {
-            // ----- Arrange & Act -----
-            val ascending = LibrarySortMode.DATE_FINISHED.toOrderByFragment(SortDirection.ASCENDING)
-            val descending = LibrarySortMode.DATE_FINISHED.toOrderByFragment(SortDirection.DESCENDING)
+            // ----- Arrange -----
+            val sortMode = LibrarySortMode.DATE_FINISHED
+
+            // ----- Act -----
+            val ascending = sortMode.toOrderByFragment(SortDirection.ASCENDING)
+            val descending = sortMode.toOrderByFragment(SortDirection.DESCENDING)
 
             // ----- Assert -----
             ascending shouldEndWith "ASC"
@@ -48,17 +51,23 @@ class SortSqlTest {
     inner class ErrorModes {
         @Test
         fun `MANUAL throws an error`() {
-            // ----- Assert -----
+            // ----- Arrange -----
+            val sortMode = LibrarySortMode.MANUAL
+
+            // ----- Act & Assert -----
             shouldThrow<IllegalStateException> {
-                LibrarySortMode.MANUAL.toOrderByFragment(SortDirection.ASCENDING)
+                sortMode.toOrderByFragment(SortDirection.ASCENDING)
             }
         }
 
         @Test
         fun `ORDER throws an error`() {
-            // ----- Assert -----
+            // ----- Arrange -----
+            val sortMode = LibrarySortMode.ORDER
+
+            // ----- Act & Assert -----
             shouldThrow<IllegalStateException> {
-                LibrarySortMode.ORDER.toOrderByFragment(SortDirection.ASCENDING)
+                sortMode.toOrderByFragment(SortDirection.ASCENDING)
             }
         }
     }

@@ -253,17 +253,22 @@ class BookDetailSheetScaffoldBuilderTest {
 
         @Test
         fun `names the book in the scaffold description for each variant`() {
+            // ----- Arrange -----
+            val bookTitle = "Dune"
+            val bookVariant = ShareCardVariant.BOOK
+            val updateVariant = ShareCardVariant.MY_UPDATE
+
             // ----- Act -----
             val book = shareSheetFor(
                 card = card,
-                bookTitle = "Dune",
-                variant = ShareCardVariant.BOOK,
+                bookTitle = bookTitle,
+                variant = bookVariant,
                 hasUpdateCard = true,
             )
             val update = shareSheetFor(
                 card = card,
-                bookTitle = "Dune",
-                variant = ShareCardVariant.MY_UPDATE,
+                bookTitle = bookTitle,
+                variant = updateVariant,
                 hasUpdateCard = true,
             )
 
@@ -275,17 +280,21 @@ class BookDetailSheetScaffoldBuilderTest {
 
         @Test
         fun `exposes the variant toggle only when an update card exists`() {
+            // ----- Arrange -----
+            val bookTitle = "Dune"
+            val variant = ShareCardVariant.BOOK
+
             // ----- Act -----
             val withUpdateCard = shareSheetFor(
                 card = card,
-                bookTitle = "Dune",
-                variant = ShareCardVariant.BOOK,
+                bookTitle = bookTitle,
+                variant = variant,
                 hasUpdateCard = true,
             )
             val withoutUpdateCard = shareSheetFor(
                 card = card,
-                bookTitle = "Dune",
-                variant = ShareCardVariant.BOOK,
+                bookTitle = bookTitle,
+                variant = variant,
                 hasUpdateCard = false,
             )
 
@@ -296,12 +305,18 @@ class BookDetailSheetScaffoldBuilderTest {
 
         @Test
         fun `variant toggle offers every variant and selects the current one`() {
+            // ----- Arrange -----
+            val card = card
+            val bookTitle = "Dune"
+            val variant = ShareCardVariant.MY_UPDATE
+            val hasUpdateCard = true
+
             // ----- Act -----
             val result = shareSheetFor(
                 card = card,
-                bookTitle = "Dune",
-                variant = ShareCardVariant.MY_UPDATE,
-                hasUpdateCard = true,
+                bookTitle = bookTitle,
+                variant = variant,
+                hasUpdateCard = hasUpdateCard,
             )
 
             // ----- Assert -----

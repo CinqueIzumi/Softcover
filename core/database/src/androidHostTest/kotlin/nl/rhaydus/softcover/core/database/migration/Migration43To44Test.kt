@@ -60,8 +60,11 @@ class Migration43To44Test {
     inner class DismissedContinueSeriesBooksColumns {
         @Test
         fun `bookTitle, coverUrl, authorText and seriesName columns exist after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val columns = columnNames("dismissed_continue_series_books")
@@ -102,8 +105,11 @@ class Migration43To44Test {
     inner class DismissedContinueSeriesColumns {
         @Test
         fun `seriesName and coverUrl columns exist after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val columns = columnNames("dismissed_continue_series")

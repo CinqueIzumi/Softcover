@@ -86,8 +86,11 @@ class Migration31To32Test {
     inner class TableRename {
         @Test
         fun `pending_user_book_writes table exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             tableExists("pending_user_book_writes").shouldBeTrue()
@@ -95,8 +98,11 @@ class Migration31To32Test {
 
         @Test
         fun `pending_progress_updates table no longer exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             tableExists("pending_progress_updates").shouldBeFalse()
@@ -107,8 +113,11 @@ class Migration31To32Test {
     inner class IndexRename {
         @Test
         fun `new unique index on pending_user_book_writes exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_pending_user_book_writes_userBookId_kind").shouldBeTrue()
@@ -116,8 +125,11 @@ class Migration31To32Test {
 
         @Test
         fun `old index on pending_progress_updates no longer exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_pending_progress_updates_userBookId_kind").shouldBeFalse()

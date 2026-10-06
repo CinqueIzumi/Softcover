@@ -9,8 +9,11 @@ class ToggleRowUiModelTest {
     inner class Previews {
         @Test
         fun `every fixture has a unique key`() {
+            // ----- Arrange -----
+            val fixtures = ToggleRowUiModel.previews.values
+
             // ----- Act -----
-            val keys = ToggleRowUiModel.previews.values.map { it.key }
+            val keys = fixtures.map { it.key }
 
             // ----- Assert -----
             keys.distinct() shouldBe keys
@@ -18,8 +21,11 @@ class ToggleRowUiModelTest {
 
         @Test
         fun `every ToggleRowVariant appears in at least one fixture`() {
+            // ----- Arrange -----
+            val fixtures = ToggleRowUiModel.previews.values
+
             // ----- Act -----
-            val variants = ToggleRowUiModel.previews.values.map { it.variant }
+            val variants = fixtures.map { it.variant }
 
             // ----- Assert -----
             variants.toSet() shouldBe ToggleRowVariant.entries.toSet()
@@ -27,10 +33,10 @@ class ToggleRowUiModelTest {
 
         @Test
         fun `fixtures cover checked, unchecked, with and without a gloss`() {
-            // ----- Act -----
+            // ----- Arrange -----
             val rows = ToggleRowUiModel.previews.values
 
-            // ----- Assert -----
+            // ----- Act & Assert -----
             rows.any { it.checked } shouldBe true
             rows.any { it.checked.not() } shouldBe true
             rows.any { it.gloss != null } shouldBe true

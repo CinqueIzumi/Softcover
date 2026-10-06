@@ -13,8 +13,11 @@ class LibrarySheetScaffoldBuilderTest {
     inner class ArrangeSheetScaffoldFor {
         @Test
         fun `primary button dismisses the sheet`() {
+            // ----- Arrange -----
+            val resultCount = 7
+
             // ----- Act -----
-            val model = arrangeSheetScaffoldFor(resultCount = 7)
+            val model = arrangeSheetScaffoldFor(resultCount = resultCount)
 
             // ----- Assert -----
             val footer = model.footer.shouldNotBeNull()
@@ -26,10 +29,14 @@ class LibrarySheetScaffoldBuilderTest {
     inner class FilterSheetScaffoldFor {
         @Test
         fun `Clear all is present but disabled while no filter is active`() {
+            // ----- Arrange -----
+            val resultCount = 3
+            val filtersActive = false
+
             // ----- Act -----
             val footer = filterSheetScaffoldFor(
-                resultCount = 3,
-                filtersActive = false,
+                resultCount = resultCount,
+                filtersActive = filtersActive,
             ).footer.shouldNotBeNull()
 
             // ----- Assert -----
@@ -39,10 +46,14 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `Clear all is enabled once a filter is active`() {
+            // ----- Arrange -----
+            val resultCount = 3
+            val filtersActive = true
+
             // ----- Act -----
             val footer = filterSheetScaffoldFor(
-                resultCount = 3,
-                filtersActive = true,
+                resultCount = resultCount,
+                filtersActive = filtersActive,
             ).footer.shouldNotBeNull()
 
             // ----- Assert -----
@@ -51,10 +62,14 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `primary button dismisses the sheet`() {
+            // ----- Arrange -----
+            val resultCount = 1
+            val filtersActive = true
+
             // ----- Act -----
             val model = filterSheetScaffoldFor(
-                resultCount = 1,
-                filtersActive = true,
+                resultCount = resultCount,
+                filtersActive = filtersActive,
             )
 
             // ----- Assert -----
@@ -67,8 +82,14 @@ class LibrarySheetScaffoldBuilderTest {
     inner class ShowResultsButton {
         @Test
         fun `arrange label singularises for one result`() {
+            // ----- Arrange -----
+            val resultCount = 1
+
             // ----- Act -----
-            val label = arrangeSheetScaffoldFor(resultCount = 1).footer.shouldNotBeNull().primary.shouldNotBeNull().label
+            val label = arrangeSheetScaffoldFor(resultCount = resultCount)
+                .footer.shouldNotBeNull()
+                .primary.shouldNotBeNull()
+                .label
 
             // ----- Assert -----
             label shouldBe "Show 1 title"
@@ -76,13 +97,17 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `filter label pluralises for zero and many results`() {
+            // ----- Arrange -----
+            val noResults = 0
+            val manyResults = 12
+
             // ----- Act -----
             val none = filterSheetScaffoldFor(
-                resultCount = 0,
+                resultCount = noResults,
                 filtersActive = true,
             ).footer.shouldNotBeNull().primary.shouldNotBeNull().label
             val many = filterSheetScaffoldFor(
-                resultCount = 12,
+                resultCount = manyResults,
                 filtersActive = true,
             ).footer.shouldNotBeNull().primary.shouldNotBeNull().label
 
@@ -96,10 +121,14 @@ class LibrarySheetScaffoldBuilderTest {
     inner class BulkRemoveSheetScaffoldFor {
         @Test
         fun `idle is not busy, Remove stays in the sheet and Cancel dismisses it`() {
+            // ----- Arrange -----
+            val bookCount = 3
+            val inProgress = false
+
             // ----- Act -----
             val model = bulkRemoveSheetScaffoldFor(
-                bookCount = 3,
-                inProgress = false,
+                bookCount = bookCount,
+                inProgress = inProgress,
             )
 
             // ----- Assert -----
@@ -112,10 +141,14 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `in progress marks the whole sheet busy rather than touching individual buttons`() {
+            // ----- Arrange -----
+            val bookCount = 3
+            val inProgress = true
+
             // ----- Act -----
             val model = bulkRemoveSheetScaffoldFor(
-                bookCount = 3,
-                inProgress = true,
+                bookCount = bookCount,
+                inProgress = inProgress,
             )
 
             // ----- Assert -----
@@ -127,13 +160,17 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `headline carries the count and singularises for one book`() {
+            // ----- Arrange -----
+            val oneBook = 1
+            val manyBooks = 4
+
             // ----- Act -----
             val one = bulkRemoveSheetScaffoldFor(
-                bookCount = 1,
+                bookCount = oneBook,
                 inProgress = false,
             )
             val many = bulkRemoveSheetScaffoldFor(
-                bookCount = 4,
+                bookCount = manyBooks,
                 inProgress = false,
             )
 
@@ -154,11 +191,16 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `maps each visible tab to a row keyed by its id, in order`() {
+            // ----- Arrange -----
+            val visibleTabs = listOf(allTab, readingTab, listTab)
+            val selectedTabId = allTab.id
+            val tabStatsByTab = emptyMap<String, LibraryTabStats>()
+
             // ----- Act -----
             val rows = shelvesSheetRowsFor(
-                visibleTabs = listOf(allTab, readingTab, listTab),
-                selectedTabId = allTab.id,
-                tabStatsByTab = emptyMap(),
+                visibleTabs = visibleTabs,
+                selectedTabId = selectedTabId,
+                tabStatsByTab = tabStatsByTab,
             )
 
             // ----- Assert -----
@@ -168,11 +210,16 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `only the selected tab's row is selected`() {
+            // ----- Arrange -----
+            val visibleTabs = listOf(allTab, readingTab)
+            val selectedTabId = readingTab.id
+            val tabStatsByTab = emptyMap<String, LibraryTabStats>()
+
             // ----- Act -----
             val rows = shelvesSheetRowsFor(
-                visibleTabs = listOf(allTab, readingTab),
-                selectedTabId = readingTab.id,
-                tabStatsByTab = emptyMap(),
+                visibleTabs = visibleTabs,
+                selectedTabId = selectedTabId,
+                tabStatsByTab = tabStatsByTab,
             )
 
             // ----- Assert -----
@@ -181,16 +228,21 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `count comes from the tab stats and falls back to zero when absent`() {
+            // ----- Arrange -----
+            val visibleTabs = listOf(allTab, readingTab)
+            val selectedTabId = allTab.id
+            val tabStatsByTab = mapOf(
+                allTab.id to LibraryTabStats(
+                    itemCount = 12,
+                    totalPages = 300,
+                ),
+            )
+
             // ----- Act -----
             val rows = shelvesSheetRowsFor(
-                visibleTabs = listOf(allTab, readingTab),
-                selectedTabId = allTab.id,
-                tabStatsByTab = mapOf(
-                    allTab.id to LibraryTabStats(
-                        itemCount = 12,
-                        totalPages = 300,
-                    ),
-                ),
+                visibleTabs = visibleTabs,
+                selectedTabId = selectedTabId,
+                tabStatsByTab = tabStatsByTab,
             )
 
             // ----- Assert -----
@@ -199,20 +251,25 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `count description spells the count out as titles and singularises for one`() {
+            // ----- Arrange -----
+            val visibleTabs = listOf(allTab, readingTab, listTab)
+            val selectedTabId = allTab.id
+            val tabStatsByTab = mapOf(
+                allTab.id to LibraryTabStats(
+                    itemCount = 12,
+                    totalPages = 0,
+                ),
+                readingTab.id to LibraryTabStats(
+                    itemCount = 1,
+                    totalPages = 0,
+                ),
+            )
+
             // ----- Act -----
             val rows = shelvesSheetRowsFor(
-                visibleTabs = listOf(allTab, readingTab, listTab),
-                selectedTabId = allTab.id,
-                tabStatsByTab = mapOf(
-                    allTab.id to LibraryTabStats(
-                        itemCount = 12,
-                        totalPages = 0,
-                    ),
-                    readingTab.id to LibraryTabStats(
-                        itemCount = 1,
-                        totalPages = 0,
-                    ),
-                ),
+                visibleTabs = visibleTabs,
+                selectedTabId = selectedTabId,
+                tabStatsByTab = tabStatsByTab,
             )
 
             // ----- Assert -----
@@ -221,11 +278,16 @@ class LibrarySheetScaffoldBuilderTest {
 
         @Test
         fun `custom lists get a different leading icon from shelves`() {
+            // ----- Arrange -----
+            val visibleTabs = listOf(allTab, readingTab, listTab)
+            val selectedTabId = allTab.id
+            val tabStatsByTab = emptyMap<String, LibraryTabStats>()
+
             // ----- Act -----
             val rows = shelvesSheetRowsFor(
-                visibleTabs = listOf(allTab, readingTab, listTab),
-                selectedTabId = allTab.id,
-                tabStatsByTab = emptyMap(),
+                visibleTabs = visibleTabs,
+                selectedTabId = selectedTabId,
+                tabStatsByTab = tabStatsByTab,
             )
 
             // ----- Assert -----

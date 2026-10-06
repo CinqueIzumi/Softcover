@@ -21,8 +21,11 @@ class PageMastheadUiModelTest {
 
         @Test
         fun `at least one fixture carries an eyebrow`() {
+            // ----- Arrange -----
+            val fixtures = PageMastheadUiModel.previews.values
+
             // ----- Act -----
-            val hasEyebrow = PageMastheadUiModel.previews.values.any { it.eyebrow != null }
+            val hasEyebrow = fixtures.any { it.eyebrow != null }
 
             // ----- Assert -----
             hasEyebrow shouldBe true
@@ -30,8 +33,11 @@ class PageMastheadUiModelTest {
 
         @Test
         fun `at least one fixture omits the eyebrow`() {
+            // ----- Arrange -----
+            val fixtures = PageMastheadUiModel.previews.values
+
             // ----- Act -----
-            val hasNoEyebrow = PageMastheadUiModel.previews.values.any { it.eyebrow == null }
+            val hasNoEyebrow = fixtures.any { it.eyebrow == null }
 
             // ----- Assert -----
             hasNoEyebrow shouldBe true

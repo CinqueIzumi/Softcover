@@ -1154,22 +1154,32 @@ class RateLimitInterceptorTest {
     inner class Construction {
         @Test
         fun `a zero refillTokensPerSecond is rejected at construction`() {
+            // ----- Arrange -----
+            val invalidRefillRate = 0.0
+            val scheduler = TestCoroutineScheduler()
+
+            // ----- Act & Assert -----
             shouldThrow<IllegalArgumentException> {
                 buildInterceptor(
                     fallbackBucketSize = 10,
-                    refillTokensPerSecond = 0.0,
-                    scheduler = TestCoroutineScheduler(),
+                    refillTokensPerSecond = invalidRefillRate,
+                    scheduler = scheduler,
                 )
             }
         }
 
         @Test
         fun `a negative refillTokensPerSecond is rejected at construction`() {
+            // ----- Arrange -----
+            val invalidRefillRate = -1.0
+            val scheduler = TestCoroutineScheduler()
+
+            // ----- Act & Assert -----
             shouldThrow<IllegalArgumentException> {
                 buildInterceptor(
                     fallbackBucketSize = 10,
-                    refillTokensPerSecond = -1.0,
-                    scheduler = TestCoroutineScheduler(),
+                    refillTokensPerSecond = invalidRefillRate,
+                    scheduler = scheduler,
                 )
             }
         }

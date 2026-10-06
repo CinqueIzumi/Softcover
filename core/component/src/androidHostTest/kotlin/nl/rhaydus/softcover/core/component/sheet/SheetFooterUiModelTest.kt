@@ -10,14 +10,18 @@ class SheetFooterUiModelTest {
     inner class StackedInvariant {
         @Test
         fun `a stacked footer with just one of its two buttons is accepted`() {
+            // ----- Arrange -----
+            val saveButton = SheetFooterButton(label = "Save")
+            val notNowButton = SheetFooterButton(label = "Not now")
+
             // ----- Act -----
             val primaryOnly = SheetFooterUiModel.Stacked(
-                primary = SheetFooterButton(label = "Save"),
+                primary = saveButton,
                 secondary = null,
             )
             val secondaryOnly = SheetFooterUiModel.Stacked(
                 primary = null,
-                secondary = SheetFooterButton(label = "Not now"),
+                secondary = notNowButton,
             )
 
             // ----- Assert -----
@@ -27,11 +31,15 @@ class SheetFooterUiModelTest {
 
         @Test
         fun `a stacked footer with neither button is rejected`() {
+            // ----- Arrange -----
+            val noPrimary: SheetFooterButton? = null
+            val noSecondary: SheetFooterButton? = null
+
             // ----- Act & Assert -----
             shouldThrow<IllegalArgumentException> {
                 SheetFooterUiModel.Stacked(
-                    primary = null,
-                    secondary = null,
+                    primary = noPrimary,
+                    secondary = noSecondary,
                 )
             }
         }
@@ -41,8 +49,11 @@ class SheetFooterUiModelTest {
     inner class Previews {
         @Test
         fun `every footer kind appears in the fixtures`() {
+            // ----- Arrange -----
+            val fixtures = SheetFooterUiModel.previews.values
+
             // ----- Act -----
-            val kinds = SheetFooterUiModel.previews.values.map { it::class }.toSet()
+            val kinds = fixtures.map { it::class }.toSet()
 
             // ----- Assert -----
             kinds shouldBe setOf(
@@ -53,8 +64,11 @@ class SheetFooterUiModelTest {
 
         @Test
         fun `fixtures cover a stacked footer with and without a secondary`() {
+            // ----- Arrange -----
+            val fixtures = SheetFooterUiModel.previews.values
+
             // ----- Act -----
-            val secondaryPresence = SheetFooterUiModel.previews.values
+            val secondaryPresence = fixtures
                 .filterIsInstance<SheetFooterUiModel.Stacked>()
                 .map { it.secondary != null }
                 .toSet()
@@ -65,8 +79,11 @@ class SheetFooterUiModelTest {
 
         @Test
         fun `fixtures cover an inline footer with a disabled primary`() {
+            // ----- Arrange -----
+            val fixtures = SheetFooterUiModel.previews.values
+
             // ----- Act -----
-            val primaryEnabledStates = SheetFooterUiModel.previews.values
+            val primaryEnabledStates = fixtures
                 .filterIsInstance<SheetFooterUiModel.Inline>()
                 .map { it.primary.enabled }
                 .toSet()

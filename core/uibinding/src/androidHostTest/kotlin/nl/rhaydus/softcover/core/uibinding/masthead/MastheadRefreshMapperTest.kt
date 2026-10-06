@@ -10,8 +10,11 @@ class MastheadRefreshMapperTest {
     inner class MastheadRefreshFor {
         @Test
         fun `reads Refreshing and is disabled while loading`() {
+            // ----- Arrange -----
+            val isLoading = true
+
             // ----- Act -----
-            val refresh = mastheadRefreshFor(isLoading = true)
+            val refresh = mastheadRefreshFor(isLoading = isLoading)
 
             // ----- Assert -----
             refresh shouldBe MastheadRefreshUiModel(
@@ -22,8 +25,11 @@ class MastheadRefreshMapperTest {
 
         @Test
         fun `reads Refresh and is enabled when not loading`() {
+            // ----- Arrange -----
+            val isLoading = false
+
             // ----- Act -----
-            val refresh = mastheadRefreshFor(isLoading = false)
+            val refresh = mastheadRefreshFor(isLoading = isLoading)
 
             // ----- Assert -----
             refresh shouldBe MastheadRefreshUiModel(

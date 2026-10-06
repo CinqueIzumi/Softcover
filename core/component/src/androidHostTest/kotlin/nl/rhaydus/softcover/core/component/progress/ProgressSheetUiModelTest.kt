@@ -165,8 +165,11 @@ class ProgressSheetUiModelTest {
     inner class Previews {
         @Test
         fun `fixtures include both a paged and a timed medium`() {
+            // ----- Arrange -----
+            val fixtures = ProgressSheetUiModel.previews.values
+
             // ----- Act -----
-            val media = ProgressSheetUiModel.previews.values.map { it.medium }
+            val media = fixtures.map { it.medium }
 
             // ----- Assert -----
             media.any { it is ProgressSheetMedium.Paged } shouldBe true
@@ -175,8 +178,11 @@ class ProgressSheetUiModelTest {
 
         @Test
         fun `fixtures include a medium with no known total for each medium`() {
+            // ----- Arrange -----
+            val fixtures = ProgressSheetUiModel.previews.values
+
             // ----- Act -----
-            val media = ProgressSheetUiModel.previews.values.map { it.medium }
+            val media = fixtures.map { it.medium }
 
             // ----- Assert -----
             media.any { it is ProgressSheetMedium.Paged && it.hasKnownTotal.not() } shouldBe true
@@ -185,8 +191,11 @@ class ProgressSheetUiModelTest {
 
         @Test
         fun `every fixture selects a tab its medium offers`() {
+            // ----- Arrange -----
+            val fixtures = ProgressSheetUiModel.previews.values
+
             // ----- Act -----
-            val offered = ProgressSheetUiModel.previews.values.map { model ->
+            val offered = fixtures.map { model ->
                 model.tabs.options.any { it.key == model.tabs.selected }
             }
 
@@ -199,12 +208,16 @@ class ProgressSheetUiModelTest {
     inner class TimedMedium {
         @Test
         fun `has a known total only when totalSeconds is positive`() {
+            // ----- Arrange -----
+            val positiveTotal = 1
+            val zeroTotal = 0
+
             // ----- Act -----
             val known = timed(
-                totalSeconds = 1,
+                totalSeconds = positiveTotal,
             )
             val unknown = timed(
-                totalSeconds = 0,
+                totalSeconds = zeroTotal,
             )
 
             // ----- Assert -----

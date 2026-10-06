@@ -242,11 +242,16 @@ class ListMapperTest {
     inner class BuildListSignature {
         @Test
         fun `formats all non-null values as pipe-separated string`() {
+            // ----- Arrange -----
+            val updatedAt = "2024-01-01"
+            val count = 7
+            val maxListBookUpdatedAt = "2023-12-31"
+
             // ----- Act -----
             val result = buildListSignature(
-                updatedAt = "2024-01-01",
-                count = 7,
-                maxListBookUpdatedAt = "2023-12-31",
+                updatedAt = updatedAt,
+                count = count,
+                maxListBookUpdatedAt = maxListBookUpdatedAt,
             )
 
             // ----- Assert -----
@@ -255,11 +260,16 @@ class ListMapperTest {
 
         @Test
         fun `uses empty string for null updatedAt`() {
+            // ----- Arrange -----
+            val updatedAt = null
+            val count = 3
+            val maxListBookUpdatedAt = "2024-01-01"
+
             // ----- Act -----
             val result = buildListSignature(
-                updatedAt = null,
-                count = 3,
-                maxListBookUpdatedAt = "2024-01-01",
+                updatedAt = updatedAt,
+                count = count,
+                maxListBookUpdatedAt = maxListBookUpdatedAt,
             )
 
             // ----- Assert -----
@@ -268,11 +278,16 @@ class ListMapperTest {
 
         @Test
         fun `uses empty string for null maxListBookUpdatedAt`() {
+            // ----- Arrange -----
+            val updatedAt = "2024-01-01"
+            val count = 3
+            val maxListBookUpdatedAt = null
+
             // ----- Act -----
             val result = buildListSignature(
-                updatedAt = "2024-01-01",
-                count = 3,
-                maxListBookUpdatedAt = null,
+                updatedAt = updatedAt,
+                count = count,
+                maxListBookUpdatedAt = maxListBookUpdatedAt,
             )
 
             // ----- Assert -----

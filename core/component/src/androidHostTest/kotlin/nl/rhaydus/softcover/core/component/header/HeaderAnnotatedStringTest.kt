@@ -16,9 +16,13 @@ class HeaderAnnotatedStringTest {
     inner class Build {
         @Test
         fun `no segments produce an empty string`() {
+            // ----- Arrange -----
+            val segments = emptyList<HeaderTextSegment>()
+            val colorScheme = colorScheme
+
             // ----- Act -----
             val result = headerAnnotatedString(
-                segments = emptyList(),
+                segments = segments,
                 colorScheme = colorScheme,
             )
 
@@ -28,12 +32,16 @@ class HeaderAnnotatedStringTest {
 
         @Test
         fun `plain segments concatenate with no styling`() {
+            // ----- Arrange -----
+            val segments = listOf(
+                HeaderTextSegment.Plain(text = "Shelve "),
+                HeaderTextSegment.Plain(text = "it"),
+            )
+            val colorScheme = colorScheme
+
             // ----- Act -----
             val result = headerAnnotatedString(
-                segments = listOf(
-                    HeaderTextSegment.Plain(text = "Shelve "),
-                    HeaderTextSegment.Plain(text = "it"),
-                ),
+                segments = segments,
                 colorScheme = colorScheme,
             )
 
@@ -44,13 +52,17 @@ class HeaderAnnotatedStringTest {
 
         @Test
         fun `an emphasised run is coloured primary over exactly its own range`() {
+            // ----- Arrange -----
+            val segments = listOf(
+                HeaderTextSegment.Plain(text = "Shelve "),
+                HeaderTextSegment.Emphasised(text = "Piranesi"),
+                HeaderTextSegment.Plain(text = " now"),
+            )
+            val colorScheme = colorScheme
+
             // ----- Act -----
             val result = headerAnnotatedString(
-                segments = listOf(
-                    HeaderTextSegment.Plain(text = "Shelve "),
-                    HeaderTextSegment.Emphasised(text = "Piranesi"),
-                    HeaderTextSegment.Plain(text = " now"),
-                ),
+                segments = segments,
                 colorScheme = colorScheme,
             )
 
@@ -64,13 +76,17 @@ class HeaderAnnotatedStringTest {
 
         @Test
         fun `two emphasised runs each get their own span`() {
+            // ----- Arrange -----
+            val segments = persistentListOf(
+                HeaderTextSegment.Emphasised(text = "A"),
+                HeaderTextSegment.Plain(text = "-"),
+                HeaderTextSegment.Emphasised(text = "B"),
+            )
+            val colorScheme = colorScheme
+
             // ----- Act -----
             val result = headerAnnotatedString(
-                segments = persistentListOf(
-                    HeaderTextSegment.Emphasised(text = "A"),
-                    HeaderTextSegment.Plain(text = "-"),
-                    HeaderTextSegment.Emphasised(text = "B"),
-                ),
+                segments = segments,
                 colorScheme = colorScheme,
             )
 

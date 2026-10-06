@@ -34,9 +34,12 @@ class LibraryGridLayoutMappingTest {
 
         @Test
         fun `the list chip ignores whether titles are shown because it has no cover-only sibling`() {
+            // ----- Arrange -----
+            val chip = LibraryLayoutChip.LIST
+
             // ----- Act -----
-            val shown = LibraryLayoutChip.LIST.toLayout(showTitles = true)
-            val hidden = LibraryLayoutChip.LIST.toLayout(showTitles = false)
+            val shown = chip.toLayout(showTitles = true)
+            val hidden = chip.toLayout(showTitles = false)
 
             // ----- Assert -----
             shown shouldBe LibraryGridLayout.LIST_LARGE
@@ -84,8 +87,11 @@ class LibraryGridLayoutMappingTest {
 
         @Test
         fun `requesting the titled-ness a layout already has leaves it unchanged`() {
+            // ----- Arrange -----
+            val layouts = LibraryGridLayout.entries
+
             // ----- Act -----
-            val result = LibraryGridLayout.entries.map { it.withTitlesShown(show = it.showsTitles) }
+            val result = layouts.map { it.withTitlesShown(show = it.showsTitles) }
 
             // ----- Assert -----
             result shouldBe LibraryGridLayout.entries

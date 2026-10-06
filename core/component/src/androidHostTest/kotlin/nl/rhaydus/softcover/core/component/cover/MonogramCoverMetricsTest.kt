@@ -13,8 +13,11 @@ class MonogramCoverMetricsTest {
     inner class Scaling {
         @Test
         fun `every metric grows with the width and never shrinks`() {
+            // ----- Arrange -----
+            val sampledWidths = widths
+
             // ----- Act -----
-            val metrics = widths.map { monogramCoverMetrics(width = it) }
+            val metrics = sampledWidths.map { monogramCoverMetrics(width = it) }
 
             // ----- Assert -----
             metrics.zipWithNext().forEach { (narrower, wider) ->
@@ -27,9 +30,13 @@ class MonogramCoverMetricsTest {
 
         @Test
         fun `a thumbnail narrower than every floor gets the same metrics as an even narrower one`() {
+            // ----- Arrange -----
+            val narrowWidth = 10.dp
+            val narrowerWidth = 5.dp
+
             // ----- Act -----
-            val narrow = monogramCoverMetrics(width = 10.dp)
-            val narrower = monogramCoverMetrics(width = 5.dp)
+            val narrow = monogramCoverMetrics(width = narrowWidth)
+            val narrower = monogramCoverMetrics(width = narrowerWidth)
 
             // ----- Assert -----
             narrow.borderInset shouldBe narrower.borderInset
@@ -40,9 +47,13 @@ class MonogramCoverMetricsTest {
 
         @Test
         fun `a tile wider than every ceiling gets the same metrics as an even wider one`() {
+            // ----- Arrange -----
+            val wideWidth = 600.dp
+            val widerWidth = 1200.dp
+
             // ----- Act -----
-            val wide = monogramCoverMetrics(width = 600.dp)
-            val wider = monogramCoverMetrics(width = 1200.dp)
+            val wide = monogramCoverMetrics(width = wideWidth)
+            val wider = monogramCoverMetrics(width = widerWidth)
 
             // ----- Assert -----
             wide.borderInset shouldBe wider.borderInset
@@ -53,8 +64,11 @@ class MonogramCoverMetricsTest {
 
         @Test
         fun `a font size stays legible at every width`() {
+            // ----- Arrange -----
+            val sampledWidths = widths
+
             // ----- Act -----
-            val metrics = widths.map { monogramCoverMetrics(width = it) }
+            val metrics = sampledWidths.map { monogramCoverMetrics(width = it) }
 
             // ----- Assert -----
             metrics.forEach {
@@ -69,9 +83,13 @@ class MonogramCoverMetricsTest {
     inner class ShowFullTitle {
         @Test
         fun `hides the full title on a thumbnail and shows it on a tile`() {
+            // ----- Arrange -----
+            val thumbnailWidth = 20.dp
+            val tileWidth = 200.dp
+
             // ----- Act -----
-            val thumbnail = monogramCoverMetrics(width = 20.dp)
-            val tile = monogramCoverMetrics(width = 200.dp)
+            val thumbnail = monogramCoverMetrics(width = thumbnailWidth)
+            val tile = monogramCoverMetrics(width = tileWidth)
 
             // ----- Assert -----
             thumbnail.showFullTitle shouldBe false
@@ -80,8 +98,11 @@ class MonogramCoverMetricsTest {
 
         @Test
         fun `flips from hidden to shown exactly once as the width grows`() {
+            // ----- Arrange -----
+            val sampledWidths = widths
+
             // ----- Act -----
-            val flags = widths.map { monogramCoverMetrics(width = it).showFullTitle }
+            val flags = sampledWidths.map { monogramCoverMetrics(width = it).showFullTitle }
 
             // ----- Assert -----
             flags.zipWithNext().count { (before, after) -> before != after } shouldBe 1

@@ -249,8 +249,12 @@ class StatsBookMapperTest {
     inner class ToPagesByMonth {
         @Test
         fun `returns all 12 months zero-filled when the list is empty`() {
+            // ----- Arrange -----
+            val books = emptyList<StatsBook>()
+            val currentYear = 2026
+
             // ----- Act -----
-            val result = emptyList<StatsBook>().toPagesByMonth(currentYear = 2026)
+            val result = books.toPagesByMonth(currentYear = currentYear)
 
             // ----- Assert -----
             result.size shouldBe 12
@@ -380,8 +384,11 @@ class StatsBookMapperTest {
     inner class ToRatingHalfStarBuckets {
         @Test
         fun `a 1_0 rating lands in the first bucket`() {
+            // ----- Arrange -----
+            val books = listOf(book(rating = 1.0))
+
             // ----- Act -----
-            val result = listOf(book(rating = 1.0)).toRatingHalfStarBuckets()
+            val result = books.toRatingHalfStarBuckets()
 
             // ----- Assert -----
             result shouldBe listOf(1, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -389,8 +396,11 @@ class StatsBookMapperTest {
 
         @Test
         fun `a 5_0 rating lands in the last bucket`() {
+            // ----- Arrange -----
+            val books = listOf(book(rating = 5.0))
+
             // ----- Act -----
-            val result = listOf(book(rating = 5.0)).toRatingHalfStarBuckets()
+            val result = books.toRatingHalfStarBuckets()
 
             // ----- Assert -----
             result shouldBe listOf(0, 0, 0, 0, 0, 0, 0, 0, 1)
@@ -398,8 +408,11 @@ class StatsBookMapperTest {
 
         @Test
         fun `a 0_5 rating folds down into the 1_0 bucket, since there is no dedicated bucket for it`() {
+            // ----- Arrange -----
+            val books = listOf(book(rating = 0.5))
+
             // ----- Act -----
-            val result = listOf(book(rating = 0.5)).toRatingHalfStarBuckets()
+            val result = books.toRatingHalfStarBuckets()
 
             // ----- Assert -----
             result shouldBe listOf(1, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -407,8 +420,11 @@ class StatsBookMapperTest {
 
         @Test
         fun `unrated books are not counted in any bucket`() {
+            // ----- Arrange -----
+            val books = listOf(book(rating = null))
+
             // ----- Act -----
-            val result = listOf(book(rating = null)).toRatingHalfStarBuckets()
+            val result = books.toRatingHalfStarBuckets()
 
             // ----- Assert -----
             result shouldBe List(9) { 0 }
@@ -609,8 +625,11 @@ class StatsBookMapperTest {
     inner class ToAuthorDemographics {
         @Test
         fun `empty book list returns empty gender slices, zero counts and empty breakdowns`() {
+            // ----- Arrange -----
+            val books = emptyList<StatsBook>()
+
             // ----- Act -----
-            val result = emptyList<StatsBook>().toAuthorDemographics()
+            val result = books.toAuthorDemographics()
 
             // ----- Assert -----
             result.genderSlices shouldBe emptyList()

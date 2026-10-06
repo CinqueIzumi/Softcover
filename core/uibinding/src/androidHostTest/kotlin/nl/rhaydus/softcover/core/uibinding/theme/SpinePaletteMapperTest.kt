@@ -11,12 +11,15 @@ class SpinePaletteMapperTest {
     inner class NameParity {
         @Test
         fun `every ColorPalette maps to the same-named SpinePalette`() {
-            ColorPalette.entries.forEach {
-                // ----- Act -----
-                val mapped = it.toSpinePalette()
+            // ----- Arrange -----
+            val palettes = ColorPalette.entries
 
-                // ----- Assert -----
-                mapped.name shouldBe it.name
+            // ----- Act -----
+            val mapped = palettes.associateWith { it.toSpinePalette() }
+
+            // ----- Assert -----
+            mapped.forEach { (palette, spinePalette) ->
+                spinePalette.name shouldBe palette.name
             }
         }
     }
@@ -30,8 +33,11 @@ class SpinePaletteMapperTest {
             // error. The reverse direction compiles happily: a `SpinePalette` entry added first,
             // with no `ColorPalette` ever mapping to it, is a look nothing can ever select. No
             // `when` can catch that — this set-equality assertion is what does.
+            // ----- Arrange -----
+            val palettes = ColorPalette.entries
+
             // ----- Act -----
-            val mappedPalettes = ColorPalette.entries.map { it.toSpinePalette() }.toSet()
+            val mappedPalettes = palettes.map { it.toSpinePalette() }.toSet()
 
             // ----- Assert -----
             mappedPalettes shouldBe SpinePalette.entries.toSet()

@@ -18,8 +18,11 @@ class DateStyleTest {
 
         @Test
         fun `formats date as day-slash-month-slash-year for DAY_MONTH_YEAR`() {
+            // ----- Arrange -----
+            val style = DateStyle.DAY_MONTH_YEAR
+
             // ----- Act -----
-            val result = DateStyle.DAY_MONTH_YEAR.format(date)
+            val result = style.format(date)
 
             // ----- Assert -----
             result shouldBe "16/07/2026"
@@ -27,8 +30,11 @@ class DateStyleTest {
 
         @Test
         fun `formats date as month-slash-day-slash-year for MONTH_DAY_YEAR`() {
+            // ----- Arrange -----
+            val style = DateStyle.MONTH_DAY_YEAR
+
             // ----- Act -----
-            val result = DateStyle.MONTH_DAY_YEAR.format(date)
+            val result = style.format(date)
 
             // ----- Assert -----
             result shouldBe "07/16/2026"
@@ -36,8 +42,11 @@ class DateStyleTest {
 
         @Test
         fun `formats date as year-slash-month-slash-day for YEAR_MONTH_DAY`() {
+            // ----- Arrange -----
+            val style = DateStyle.YEAR_MONTH_DAY
+
             // ----- Act -----
-            val result = DateStyle.YEAR_MONTH_DAY.format(date)
+            val result = style.format(date)
 
             // ----- Assert -----
             result shouldBe "2026/07/16"

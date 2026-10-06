@@ -130,8 +130,11 @@ class Migration35To36Test {
     inner class UserBooksTableRebuild {
         @Test
         fun `user_books has reviewSlateJson column after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("user_books").contains("reviewSlateJson").shouldBeTrue()
@@ -139,8 +142,11 @@ class Migration35To36Test {
 
         @Test
         fun `user_books does not have review column after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("user_books").contains("review").shouldBeFalse()
@@ -148,8 +154,11 @@ class Migration35To36Test {
 
         @Test
         fun `user_books has all expected columns after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("user_books").shouldContainExactlyInAnyOrder(
@@ -162,8 +171,11 @@ class Migration35To36Test {
 
         @Test
         fun `index_user_books_bookId exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_user_books_bookId").shouldBeTrue()
@@ -171,8 +183,11 @@ class Migration35To36Test {
 
         @Test
         fun `index_user_books_statusCode exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_user_books_statusCode").shouldBeTrue()
@@ -183,8 +198,11 @@ class Migration35To36Test {
     inner class PendingUserBookWritesTableRebuild {
         @Test
         fun `pending_user_book_writes has reviewSlateJson column after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("pending_user_book_writes").contains("reviewSlateJson").shouldBeTrue()
@@ -192,8 +210,11 @@ class Migration35To36Test {
 
         @Test
         fun `pending_user_book_writes does not have reviewBody column after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("pending_user_book_writes").contains("reviewBody").shouldBeFalse()
@@ -201,8 +222,11 @@ class Migration35To36Test {
 
         @Test
         fun `pending_user_book_writes has all expected columns after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("pending_user_book_writes").shouldContainExactlyInAnyOrder(
@@ -214,8 +238,11 @@ class Migration35To36Test {
 
         @Test
         fun `unique index on pending_user_book_writes exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_pending_user_book_writes_userBookId_kind").shouldBeTrue()

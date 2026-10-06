@@ -17,32 +17,39 @@ class ProgressTimeDraftTest {
     inner class WithText {
         @Test
         fun `replaces only the targeted unit`() {
+            // ----- Arrange -----
+            val replacement = "9"
+
             // ----- Act -----
             val hours = draft.withText(
                 unit = ProgressTimeUnit.HOURS,
-                text = "9",
+                text = replacement,
             )
             val minutes = draft.withText(
                 unit = ProgressTimeUnit.MINUTES,
-                text = "9",
+                text = replacement,
             )
             val seconds = draft.withText(
                 unit = ProgressTimeUnit.SECONDS,
-                text = "9",
+                text = replacement,
             )
 
             // ----- Assert -----
-            hours shouldBe draft.copy(hours = "9")
-            minutes shouldBe draft.copy(minutes = "9")
-            seconds shouldBe draft.copy(seconds = "9")
+            hours shouldBe draft.copy(hours = replacement)
+            minutes shouldBe draft.copy(minutes = replacement)
+            seconds shouldBe draft.copy(seconds = replacement)
         }
 
         @Test
         fun `keeps empty text so the field can be cleared`() {
+            // ----- Arrange -----
+            val unit = ProgressTimeUnit.MINUTES
+            val text = ""
+
             // ----- Act -----
             val result = draft.withText(
-                unit = ProgressTimeUnit.MINUTES,
-                text = "",
+                unit = unit,
+                text = text,
             )
 
             // ----- Assert -----
@@ -51,10 +58,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `clamps minutes above 59`() {
+            // ----- Arrange -----
+            val unit = ProgressTimeUnit.MINUTES
+            val text = "75"
+
             // ----- Act -----
             val result = draft.withText(
-                unit = ProgressTimeUnit.MINUTES,
-                text = "75",
+                unit = unit,
+                text = text,
             )
 
             // ----- Assert -----
@@ -63,10 +74,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `clamps seconds above 59`() {
+            // ----- Arrange -----
+            val unit = ProgressTimeUnit.SECONDS
+            val text = "99"
+
             // ----- Act -----
             val result = draft.withText(
-                unit = ProgressTimeUnit.SECONDS,
-                text = "99",
+                unit = unit,
+                text = text,
             )
 
             // ----- Assert -----
@@ -75,10 +90,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `does not clamp hours to 59`() {
+            // ----- Arrange -----
+            val unit = ProgressTimeUnit.HOURS
+            val text = "120"
+
             // ----- Act -----
             val result = draft.withText(
-                unit = ProgressTimeUnit.HOURS,
-                text = "120",
+                unit = unit,
+                text = text,
             )
 
             // ----- Assert -----
@@ -87,10 +106,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `normalises leading zeros`() {
+            // ----- Arrange -----
+            val unit = ProgressTimeUnit.SECONDS
+            val text = "07"
+
             // ----- Act -----
             val result = draft.withText(
-                unit = ProgressTimeUnit.SECONDS,
-                text = "07",
+                unit = unit,
+                text = text,
             )
 
             // ----- Assert -----
@@ -99,10 +122,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `clamps a negative value to zero`() {
+            // ----- Arrange -----
+            val unit = ProgressTimeUnit.MINUTES
+            val text = "-5"
+
             // ----- Act -----
             val result = draft.withText(
-                unit = ProgressTimeUnit.MINUTES,
-                text = "-5",
+                unit = unit,
+                text = text,
             )
 
             // ----- Assert -----
@@ -111,10 +138,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `ignores text that is not a number`() {
+            // ----- Arrange -----
+            val unit = ProgressTimeUnit.MINUTES
+            val text = "ab"
+
             // ----- Act -----
             val result = draft.withText(
-                unit = ProgressTimeUnit.MINUTES,
-                text = "ab",
+                unit = unit,
+                text = text,
             )
 
             // ----- Assert -----
@@ -123,10 +154,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `ignores a number too large for an int`() {
+            // ----- Arrange -----
+            val unit = ProgressTimeUnit.HOURS
+            val text = "99999999999"
+
             // ----- Act -----
             val result = draft.withText(
-                unit = ProgressTimeUnit.HOURS,
-                text = "99999999999",
+                unit = unit,
+                text = text,
             )
 
             // ----- Assert -----
@@ -138,8 +173,11 @@ class ProgressTimeDraftTest {
     inner class SteppedMinutes {
         @Test
         fun `adds a positive delta`() {
+            // ----- Arrange -----
+            val delta = 5
+
             // ----- Act -----
-            val result = draft.steppedMinutes(5)
+            val result = draft.steppedMinutes(delta)
 
             // ----- Assert -----
             result.minutes shouldBe "7"
@@ -147,8 +185,11 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `subtracts a negative delta`() {
+            // ----- Arrange -----
+            val delta = -1
+
             // ----- Act -----
-            val result = draft.steppedMinutes(-1)
+            val result = draft.steppedMinutes(delta)
 
             // ----- Assert -----
             result.minutes shouldBe "1"
@@ -156,8 +197,11 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `stops at zero`() {
+            // ----- Arrange -----
+            val delta = -10
+
             // ----- Act -----
-            val result = draft.steppedMinutes(-10)
+            val result = draft.steppedMinutes(delta)
 
             // ----- Assert -----
             result.minutes shouldBe "0"
@@ -165,8 +209,11 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `stops at 59 without carrying into hours`() {
+            // ----- Arrange -----
+            val delta = 100
+
             // ----- Act -----
-            val result = draft.steppedMinutes(100)
+            val result = draft.steppedMinutes(delta)
 
             // ----- Assert -----
             result.minutes shouldBe "59"
@@ -190,10 +237,14 @@ class ProgressTimeDraftTest {
     inner class Resolve {
         @Test
         fun `returns the stored draft when it was seeded from the current position`() {
+            // ----- Arrange -----
+            val stored = draft
+            val currentSeconds = 100
+
             // ----- Act -----
             val result = ProgressTimeDraft.resolve(
-                stored = draft,
-                currentSeconds = 100,
+                stored = stored,
+                currentSeconds = currentSeconds,
             )
 
             // ----- Assert -----
@@ -202,10 +253,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `seeds a fresh draft when nothing is stored`() {
+            // ----- Arrange -----
+            val stored = null
+            val currentSeconds = 3_725
+
             // ----- Act -----
             val result = ProgressTimeDraft.resolve(
-                stored = null,
-                currentSeconds = 3_725,
+                stored = stored,
+                currentSeconds = currentSeconds,
             )
 
             // ----- Assert -----
@@ -219,10 +274,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `discards a stored draft seeded from a different position`() {
+            // ----- Arrange -----
+            val stored = draft
+            val currentSeconds = 59
+
             // ----- Act -----
             val result = ProgressTimeDraft.resolve(
-                stored = draft,
-                currentSeconds = 59,
+                stored = stored,
+                currentSeconds = currentSeconds,
             )
 
             // ----- Assert -----
@@ -236,10 +295,14 @@ class ProgressTimeDraftTest {
 
         @Test
         fun `seeds zeros at position zero`() {
+            // ----- Arrange -----
+            val stored = null
+            val currentSeconds = 0
+
             // ----- Act -----
             val result = ProgressTimeDraft.resolve(
-                stored = null,
-                currentSeconds = 0,
+                stored = stored,
+                currentSeconds = currentSeconds,
             )
 
             // ----- Assert -----

@@ -16,8 +16,11 @@ import org.koin.test.verify.verify
 class SoftcoverModulesVerificationTest {
     @Test
     fun `softcover module graph resolves`() {
-        module { includes(softcoverModules) }
-            .verify(
+        // ----- Arrange -----
+        val graph = module { includes(softcoverModules) }
+
+        // ----- Act & Assert -----
+        graph.verify(
                 extraTypes = listOf(
                     Context::class,                // runtime androidContext()
                     AppVersionProvider::class,                     // supplied by :app appModule

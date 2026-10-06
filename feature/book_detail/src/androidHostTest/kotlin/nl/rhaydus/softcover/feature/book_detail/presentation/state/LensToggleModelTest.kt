@@ -9,10 +9,14 @@ class LensToggleModelTest {
     inner class LensToggleFor {
         @Test
         fun `offers both lenses with the book first`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
+            val selectedLens = BookDetailLens.THE_BOOK
+            val yoursEnabled = true
+
+            // ----- Act -----
             val result = lensToggleFor(
-                selectedLens = BookDetailLens.THE_BOOK,
-                yoursEnabled = true,
+                selectedLens = selectedLens,
+                yoursEnabled = yoursEnabled,
             )
 
             // ----- Assert -----
@@ -24,10 +28,14 @@ class LensToggleModelTest {
 
         @Test
         fun `enables Yours when the book has a user copy`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
+            val selectedLens = BookDetailLens.THE_BOOK
+            val yoursEnabled = true
+
+            // ----- Act -----
             val result = lensToggleFor(
-                selectedLens = BookDetailLens.THE_BOOK,
-                yoursEnabled = true,
+                selectedLens = selectedLens,
+                yoursEnabled = yoursEnabled,
             )
 
             // ----- Assert -----
@@ -36,10 +44,14 @@ class LensToggleModelTest {
 
         @Test
         fun `disables Yours when the book has no user copy`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
+            val selectedLens = BookDetailLens.THE_BOOK
+            val yoursEnabled = false
+
+            // ----- Act -----
             val result = lensToggleFor(
-                selectedLens = BookDetailLens.THE_BOOK,
-                yoursEnabled = false,
+                selectedLens = selectedLens,
+                yoursEnabled = yoursEnabled,
             )
 
             // ----- Assert -----
@@ -48,10 +60,14 @@ class LensToggleModelTest {
 
         @Test
         fun `keeps The Book enabled whatever the user copy state`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
+            val selectedLens = BookDetailLens.THE_BOOK
+            val yoursEnabled = false
+
+            // ----- Act -----
             val result = lensToggleFor(
-                selectedLens = BookDetailLens.THE_BOOK,
-                yoursEnabled = false,
+                selectedLens = selectedLens,
+                yoursEnabled = yoursEnabled,
             )
 
             // ----- Assert -----

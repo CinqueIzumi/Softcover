@@ -76,6 +76,9 @@ class MainActivityViewModelTest {
     inner class ReAuthSheetVisibility {
         @Test
         fun `stays null when the session expires while unauthenticated`() {
+            // ----- Arrange -----
+            viewModel.setUserAuthenticated(authenticated = false)
+
             // ----- Act -----
             SessionExpiredNotifier.notifySessionExpired()
 
@@ -85,8 +88,11 @@ class MainActivityViewModelTest {
 
         @Test
         fun `is shown when the session expires while authenticated`() {
+            // ----- Arrange -----
+            viewModel.setUserAuthenticated(authenticated = true)
+
             // ----- Act -----
-            showReAuthSheet()
+            SessionExpiredNotifier.notifySessionExpired()
 
             // ----- Assert -----
             viewModel.reAuthSheet.value.shouldNotBeNull()
@@ -111,8 +117,11 @@ class MainActivityViewModelTest {
 
         @Test
         fun `does not show the sheet by itself`() {
+            // ----- Arrange -----
+            val apiKey = "abc"
+
             // ----- Act -----
-            viewModel.onReAuthApiKeyChanged("abc")
+            viewModel.onReAuthApiKeyChanged(apiKey)
 
             // ----- Assert -----
             viewModel.reAuthSheet.value.shouldBeNull()

@@ -22,9 +22,12 @@ class SheetHeaderTrailingTest {
     inner class JacketStackCap {
         @Test
         fun `a stack of exactly the cap is accepted`() {
+            // ----- Arrange -----
+            val covers = covers(SheetHeaderTrailing.JacketStack.MAX_COVERS)
+
             // ----- Act -----
             val stack = SheetHeaderTrailing.JacketStack(
-                covers = covers(SheetHeaderTrailing.JacketStack.MAX_COVERS),
+                covers = covers,
             )
 
             // ----- Assert -----
@@ -33,18 +36,22 @@ class SheetHeaderTrailingTest {
 
         @Test
         fun `a stack one over the cap is rejected`() {
+            // ----- Arrange -----
+            val overCapCovers = covers(SheetHeaderTrailing.JacketStack.MAX_COVERS + 1)
+
             // ----- Act & Assert -----
             shouldThrow<IllegalArgumentException> {
-                SheetHeaderTrailing.JacketStack(
-                    covers = covers(SheetHeaderTrailing.JacketStack.MAX_COVERS + 1),
-                )
+                SheetHeaderTrailing.JacketStack(covers = overCapCovers)
             }
         }
 
         @Test
         fun `an empty stack is accepted`() {
+            // ----- Arrange -----
+            val noCovers = persistentListOf<CoverUiModel>()
+
             // ----- Act -----
-            val stack = SheetHeaderTrailing.JacketStack(covers = persistentListOf())
+            val stack = SheetHeaderTrailing.JacketStack(covers = noCovers)
 
             // ----- Assert -----
             stack.covers.size shouldBe 0

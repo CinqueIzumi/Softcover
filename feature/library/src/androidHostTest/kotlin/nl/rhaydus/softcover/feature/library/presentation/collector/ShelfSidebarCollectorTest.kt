@@ -58,12 +58,18 @@ class ShelfSidebarCollectorTest {
     inner class ShelfSidebarForFun {
         @Test
         fun `shelves-only tabs give one section`() {
+            // ----- Arrange -----
+            val visibleTabs = listOf(ALL_TAB, READING_TAB)
+            val selectedTabId = ALL_TAB.id
+            val shelvesSidebarLabel = SHELVES_LABEL
+            val listsSidebarLabel = LISTS_LABEL
+
             // ----- Act -----
             val sidebar = shelfSidebarFor(
-                visibleTabs = listOf(ALL_TAB, READING_TAB),
-                selectedTabId = ALL_TAB.id,
-                shelvesSidebarLabel = SHELVES_LABEL,
-                listsSidebarLabel = LISTS_LABEL,
+                visibleTabs = visibleTabs,
+                selectedTabId = selectedTabId,
+                shelvesSidebarLabel = shelvesSidebarLabel,
+                listsSidebarLabel = listsSidebarLabel,
             )
 
             // ----- Assert -----
@@ -74,12 +80,18 @@ class ShelfSidebarCollectorTest {
 
         @Test
         fun `shelves plus custom lists give two sections, with lists second`() {
+            // ----- Arrange -----
+            val visibleTabs = listOf(ALL_TAB, LIST_TAB)
+            val selectedTabId = ALL_TAB.id
+            val shelvesSidebarLabel = SHELVES_LABEL
+            val listsSidebarLabel = LISTS_LABEL
+
             // ----- Act -----
             val sidebar = shelfSidebarFor(
-                visibleTabs = listOf(ALL_TAB, LIST_TAB),
-                selectedTabId = ALL_TAB.id,
-                shelvesSidebarLabel = SHELVES_LABEL,
-                listsSidebarLabel = LISTS_LABEL,
+                visibleTabs = visibleTabs,
+                selectedTabId = selectedTabId,
+                shelvesSidebarLabel = shelvesSidebarLabel,
+                listsSidebarLabel = listsSidebarLabel,
             )
 
             // ----- Assert -----
@@ -92,12 +104,18 @@ class ShelfSidebarCollectorTest {
 
         @Test
         fun `selected follows selectedTabId`() {
+            // ----- Arrange -----
+            val visibleTabs = listOf(ALL_TAB, READING_TAB, LIST_TAB)
+            val selectedTabId = READING_TAB.id
+            val shelvesSidebarLabel = SHELVES_LABEL
+            val listsSidebarLabel = LISTS_LABEL
+
             // ----- Act -----
             val sidebar = shelfSidebarFor(
-                visibleTabs = listOf(ALL_TAB, READING_TAB, LIST_TAB),
-                selectedTabId = READING_TAB.id,
-                shelvesSidebarLabel = SHELVES_LABEL,
-                listsSidebarLabel = LISTS_LABEL,
+                visibleTabs = visibleTabs,
+                selectedTabId = selectedTabId,
+                shelvesSidebarLabel = shelvesSidebarLabel,
+                listsSidebarLabel = listsSidebarLabel,
             )
 
             // ----- Assert -----

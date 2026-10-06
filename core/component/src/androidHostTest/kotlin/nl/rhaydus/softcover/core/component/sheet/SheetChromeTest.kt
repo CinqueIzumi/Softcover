@@ -53,11 +53,16 @@ class SheetChromeTest {
 
         @Test
         fun `the chrome is locked once a dismiss has started`() {
+            // ----- Arrange -----
+            val canDismiss = true
+            val dismissStarted = true
+            val close = {}
+
             // ----- Act -----
             val chrome = chrome(
-                canDismiss = true,
-                dismissStarted = true,
-                close = {},
+                canDismiss = canDismiss,
+                dismissStarted = dismissStarted,
+                close = close,
             )
 
             // ----- Assert -----

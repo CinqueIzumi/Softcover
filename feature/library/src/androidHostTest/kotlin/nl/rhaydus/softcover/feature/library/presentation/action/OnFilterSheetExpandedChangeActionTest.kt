@@ -75,8 +75,11 @@ class OnFilterSheetExpandedChangeActionTest {
 
         @Test
         fun `opening with no committed filters seeds an inactive Clear all`() = runTest {
+            // ----- Arrange -----
+            val action = OnFilterSheetExpandedChangeAction(expanded = true)
+
             // ----- Act -----
-            OnFilterSheetExpandedChangeAction(expanded = true).execute(
+            action.execute(
                 dependencies = dependencies,
                 scope = scope,
             )

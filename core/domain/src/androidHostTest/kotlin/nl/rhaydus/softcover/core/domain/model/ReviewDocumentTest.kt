@@ -15,8 +15,11 @@ class ReviewDocumentTest {
     inner class IsBlank {
         @Test
         fun `EMPTY document is blank`() {
+            // ----- Arrange -----
+            val document = ReviewDocument.EMPTY
+
             // ----- Act & Assert -----
-            ReviewDocument.EMPTY.isBlank() shouldBe true
+            document.isBlank() shouldBe true
         }
 
         @Test

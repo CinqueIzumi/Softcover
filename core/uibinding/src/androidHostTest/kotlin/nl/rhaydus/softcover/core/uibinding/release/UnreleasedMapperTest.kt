@@ -29,8 +29,11 @@ class UnreleasedMapperTest {
 
     @Test
     fun `Compact mapper maps to a Compact release badge with an Out-prefixed compact date`() {
+        // ----- Arrange -----
+        val releaseDate = currentYearDate
+
         // ----- Act -----
-        val result = currentYearDate.toCompactUnreleasedBadgeUiModel()
+        val result = releaseDate.toCompactUnreleasedBadgeUiModel()
 
         // ----- Assert -----
         result shouldBe BadgeUiModel(
@@ -42,8 +45,11 @@ class UnreleasedMapperTest {
 
     @Test
     fun `Prominent mapper maps to a Compact release badge with a Releases-prefixed long date`() {
+        // ----- Arrange -----
+        val releaseDate = date
+
         // ----- Act -----
-        val result = date.toProminentUnreleasedBadgeUiModel()
+        val result = releaseDate.toProminentUnreleasedBadgeUiModel()
 
         // ----- Assert -----
         result shouldBe BadgeUiModel(
@@ -55,8 +61,11 @@ class UnreleasedMapperTest {
 
     @Test
     fun `Featured mapper maps to a Regular badge with an Arriving-prefixed compact date`() {
+        // ----- Arrange -----
+        val releaseDate = currentYearDate
+
         // ----- Act -----
-        val result = currentYearDate.toFeaturedUnreleasedBadgeUiModel()
+        val result = releaseDate.toFeaturedUnreleasedBadgeUiModel()
 
         // ----- Assert -----
         result shouldBe BadgeUiModel(
@@ -68,8 +77,11 @@ class UnreleasedMapperTest {
 
     @Test
     fun `Compact mapper appends the year when the date is not in the current year`() {
+        // ----- Arrange -----
+        val releaseDate = otherYearDate
+
         // ----- Act -----
-        val result = otherYearDate.toCompactUnreleasedBadgeUiModel()
+        val result = releaseDate.toCompactUnreleasedBadgeUiModel()
 
         // ----- Assert -----
         result.label shouldBe "Out Sep 2, $otherYear"

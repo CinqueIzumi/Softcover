@@ -34,8 +34,11 @@ class BadgeUiModelTest {
 
         @Test
         fun `at least one fixture carries a leading icon`() {
-            // ----- Arrange & Act -----
-            val withIcon = BadgeUiModel.previews.values.filter { it.icon != null }
+            // ----- Arrange -----
+            val fixtures = BadgeUiModel.previews.values
+
+            // ----- Act -----
+            val withIcon = fixtures.filter { it.icon != null }
 
             // ----- Assert -----
             withIcon.shouldNotBeEmpty()

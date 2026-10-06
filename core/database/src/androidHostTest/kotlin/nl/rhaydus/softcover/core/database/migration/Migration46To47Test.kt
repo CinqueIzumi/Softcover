@@ -60,16 +60,22 @@ class Migration46To47Test {
 
     @Test
     fun `migration runs cleanly from a real v46 database`() {
-        // ----- Act / Assert -----
-        migration.migrate(connection)
+        // ----- Arrange -----
+        val db = connection
+
+        // ----- Act & Assert -----
+        migration.migrate(db)
     }
 
     @Nested
     inner class DismissedContinueSeriesColumns {
         @Test
         fun `authorText and bookCount columns exist after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val columns = columnNames("dismissed_continue_series")

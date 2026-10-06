@@ -110,9 +110,13 @@ class RichTextMapperTest {
 
         @Test
         fun `EMPTY round-trips in both directions`() {
+            // ----- Arrange -----
+            val emptyDocument = ReviewDocument.EMPTY
+            val emptyUiModel = RichTextUiModel.EMPTY
+
             // ----- Act -----
-            val domainRoundTripped = ReviewDocument.EMPTY.toRichTextUiModel().toReviewDocument()
-            val uiRoundTripped = RichTextUiModel.EMPTY.toReviewDocument().toRichTextUiModel()
+            val domainRoundTripped = emptyDocument.toRichTextUiModel().toReviewDocument()
+            val uiRoundTripped = emptyUiModel.toReviewDocument().toRichTextUiModel()
 
             // ----- Assert -----
             domainRoundTripped shouldBe ReviewDocument.EMPTY

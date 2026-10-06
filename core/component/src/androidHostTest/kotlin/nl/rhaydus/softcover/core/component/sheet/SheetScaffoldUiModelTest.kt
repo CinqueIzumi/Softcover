@@ -9,8 +9,11 @@ class SheetScaffoldUiModelTest {
     inner class Previews {
         @Test
         fun `every SheetLayout value appears in at least one fixture`() {
+            // ----- Arrange -----
+            val fixtures = SheetScaffoldUiModel.previews.values
+
             // ----- Act -----
-            val coveredLayouts = SheetScaffoldUiModel.previews.values.map { it.layout }.toSet()
+            val coveredLayouts = fixtures.map { it.layout }.toSet()
 
             // ----- Assert -----
             coveredLayouts shouldBe SheetLayout.entries.toSet()
@@ -18,8 +21,11 @@ class SheetScaffoldUiModelTest {
 
         @Test
         fun `every header trailing kind appears in at least one fixture`() {
+            // ----- Arrange -----
+            val fixtures = SheetScaffoldUiModel.previews.values
+
             // ----- Act -----
-            val trailingKinds = SheetScaffoldUiModel.previews.values
+            val trailingKinds = fixtures
                 .mapNotNull { it.header.trailing }
                 .map { it::class }
                 .toSet()
@@ -34,8 +40,11 @@ class SheetScaffoldUiModelTest {
 
         @Test
         fun `fixtures cover a dismissible and a non-dismissible sheet`() {
+            // ----- Arrange -----
+            val fixtures = SheetScaffoldUiModel.previews.values
+
             // ----- Act -----
-            val dismissibleValues = SheetScaffoldUiModel.previews.values.map { it.dismissible }.toSet()
+            val dismissibleValues = fixtures.map { it.dismissible }.toSet()
 
             // ----- Assert -----
             dismissibleValues shouldBe setOf(true, false)
@@ -43,8 +52,11 @@ class SheetScaffoldUiModelTest {
 
         @Test
         fun `fixtures cover an idle and a busy sheet`() {
+            // ----- Arrange -----
+            val fixtures = SheetScaffoldUiModel.previews.values
+
             // ----- Act -----
-            val busyValues = SheetScaffoldUiModel.previews.values.map { it.busy }.toSet()
+            val busyValues = fixtures.map { it.busy }.toSet()
 
             // ----- Assert -----
             busyValues shouldBe setOf(true, false)
@@ -52,8 +64,11 @@ class SheetScaffoldUiModelTest {
 
         @Test
         fun `fixtures cover a sheet with and without a footer`() {
+            // ----- Arrange -----
+            val fixtures = SheetScaffoldUiModel.previews.values
+
             // ----- Act -----
-            val footerPresence = SheetScaffoldUiModel.previews.values.map { it.footer != null }.toSet()
+            val footerPresence = fixtures.map { it.footer != null }.toSet()
 
             // ----- Assert -----
             footerPresence shouldBe setOf(true, false)

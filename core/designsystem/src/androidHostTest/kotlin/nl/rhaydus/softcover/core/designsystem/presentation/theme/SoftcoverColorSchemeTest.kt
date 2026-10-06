@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.doubles.shouldBeGreaterThanOrEqual
-import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Nested
@@ -21,11 +20,13 @@ class SoftcoverColorSchemeTest {
                     dynamicTest(
                         "${palette.name} ${if (darkTheme) "dark" else "light"} clears its contrast floor",
                     ) {
+                        // ----- Arrange -----
                         val scheme = softcoverColorScheme(
                             darkTheme = darkTheme,
                             palette = palette,
                         )
 
+                        // ----- Act & Assert -----
                         assertPairPasses(
                             palette = palette,
                             darkTheme = darkTheme,

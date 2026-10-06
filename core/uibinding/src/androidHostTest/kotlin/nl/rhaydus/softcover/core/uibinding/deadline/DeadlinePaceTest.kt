@@ -10,10 +10,14 @@ class DeadlinePaceTest {
     inner class FormatUnitAmount {
         @Test
         fun `one page is singular`() {
+            // ----- Arrange -----
+            val amount = 1
+            val unit = DeadlineUnit.PAGES
+
             // ----- Act -----
             val result = formatUnitAmount(
-                amount = 1,
-                unit = DeadlineUnit.PAGES,
+                amount = amount,
+                unit = unit,
             )
 
             // ----- Assert -----
@@ -22,13 +26,17 @@ class DeadlinePaceTest {
 
         @Test
         fun `zero and many pages are plural`() {
+            // ----- Arrange -----
+            val noPages = 0
+            val manyPages = 35
+
             // ----- Act -----
             val zero = formatUnitAmount(
-                amount = 0,
+                amount = noPages,
                 unit = DeadlineUnit.PAGES,
             )
             val many = formatUnitAmount(
-                amount = 35,
+                amount = manyPages,
                 unit = DeadlineUnit.PAGES,
             )
 
@@ -39,10 +47,14 @@ class DeadlinePaceTest {
 
         @Test
         fun `seconds read as hours and minutes`() {
+            // ----- Arrange -----
+            val amount = 3_900
+            val unit = DeadlineUnit.SECONDS
+
             // ----- Act -----
             val result = formatUnitAmount(
-                amount = 3_900,
-                unit = DeadlineUnit.SECONDS,
+                amount = amount,
+                unit = unit,
             )
 
             // ----- Assert -----

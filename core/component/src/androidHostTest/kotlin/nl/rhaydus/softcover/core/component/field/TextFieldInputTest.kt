@@ -14,8 +14,11 @@ class TextFieldInputTest {
 
         @Test
         fun `returns max when the text fits exactly`() {
+            // ----- Arrange -----
+            val availablePx = 400
+
             // ----- Act -----
-            val size = fitFontSize(max, floor, availablePx = 400) { it.value.toInt() * 10 }
+            val size = fitFontSize(max, floor, availablePx = availablePx) { it.value.toInt() * 10 }
 
             // ----- Assert -----
             size shouldBe max
@@ -23,8 +26,11 @@ class TextFieldInputTest {
 
         @Test
         fun `shrinks below max when the text is too wide`() {
+            // ----- Arrange -----
+            val availablePx = 300
+
             // ----- Act -----
-            val size = fitFontSize(max, floor, availablePx = 300) { it.value.toInt() * 10 }
+            val size = fitFontSize(max, floor, availablePx = availablePx) { it.value.toInt() * 10 }
 
             // ----- Assert -----
             (size.value < max.value) shouldBe true
@@ -33,8 +39,11 @@ class TextFieldInputTest {
 
         @Test
         fun `never goes below the floor`() {
+            // ----- Arrange -----
+            val availablePx = 10
+
             // ----- Act -----
-            val size = fitFontSize(max, floor, availablePx = 10) { it.value.toInt() * 10 }
+            val size = fitFontSize(max, floor, availablePx = availablePx) { it.value.toInt() * 10 }
 
             // ----- Assert -----
             size shouldBe floor

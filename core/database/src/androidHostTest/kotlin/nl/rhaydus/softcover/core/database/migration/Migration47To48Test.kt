@@ -62,16 +62,22 @@ class Migration47To48Test {
 
     @Test
     fun `migration runs cleanly from a real v47 database`() {
-        // ----- Act / Assert -----
-        migration.migrate(connection)
+        // ----- Arrange -----
+        val db = connection
+
+        // ----- Act & Assert -----
+        migration.migrate(db)
     }
 
     @Nested
     inner class UserTagVocabularyColumns {
         @Test
         fun `user_tag_vocabulary table exists with expected columns after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val columns = columnNames("user_tag_vocabulary")
@@ -83,8 +89,11 @@ class Migration47To48Test {
 
         @Test
         fun `userId, category and name are non-null composite key columns`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val stmt = connection.prepare("PRAGMA table_info(user_tag_vocabulary)")
@@ -113,8 +122,11 @@ class Migration47To48Test {
 
         @Test
         fun `usageCount is non-null with a default of 0`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val stmt = connection.prepare("PRAGMA table_info(user_tag_vocabulary)")

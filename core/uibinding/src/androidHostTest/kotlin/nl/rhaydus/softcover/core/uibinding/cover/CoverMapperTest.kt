@@ -148,11 +148,16 @@ class CoverMapperTest {
     inner class UrlOverload {
         @Test
         fun `maps the url to a remote source titled and varianted as given`() {
+            // ----- Arrange -----
+            val url = "https://example.com/c.jpg"
+            val title = "Dune"
+            val variant = CoverVariant.Raised
+
             // ----- Act -----
             val result = coverUiModelFromUrl(
-                url = "https://example.com/c.jpg",
-                title = "Dune",
-                variant = CoverVariant.Raised,
+                url = url,
+                title = title,
+                variant = variant,
             )
 
             // ----- Assert -----
@@ -166,11 +171,16 @@ class CoverMapperTest {
 
         @Test
         fun `a null url has no source but keeps the title for the coverless fallback`() {
+            // ----- Arrange -----
+            val url = null
+            val title = "Dune"
+            val variant = CoverVariant.Shelf
+
             // ----- Act -----
             val result = coverUiModelFromUrl(
-                url = null,
-                title = "Dune",
-                variant = CoverVariant.Shelf,
+                url = url,
+                title = title,
+                variant = variant,
             )
 
             // ----- Assert -----

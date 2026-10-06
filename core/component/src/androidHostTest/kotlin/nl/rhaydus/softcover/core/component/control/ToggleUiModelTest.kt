@@ -9,8 +9,11 @@ class ToggleUiModelTest {
     inner class Previews {
         @Test
         fun `fixtures cover both variants`() {
+            // ----- Arrange -----
+            val fixtures = ToggleUiModel.previews.values
+
             // ----- Act -----
-            val variants = ToggleUiModel.previews.values.map { it.variant }
+            val variants = fixtures.map { it.variant }
 
             // ----- Assert -----
             variants.toSet() shouldBe ToggleVariant.entries.toSet()
@@ -18,10 +21,10 @@ class ToggleUiModelTest {
 
         @Test
         fun `fixtures cover checked, unchecked, enabled and disabled`() {
-            // ----- Act -----
+            // ----- Arrange -----
             val toggles = ToggleUiModel.previews.values
 
-            // ----- Assert -----
+            // ----- Act & Assert -----
             toggles.any { it.checked } shouldBe true
             toggles.any { it.checked.not() } shouldBe true
             toggles.any { it.enabled } shouldBe true

@@ -40,9 +40,16 @@ class OnClearMutationFailureActionTest {
     inner class Init {
         @Test
         fun `rejects an action with neither a book id nor an edition id`() {
+            // ----- Arrange -----
+            val noBookId: Int? = null
+            val noEditionId: Int? = null
+
             // ----- Act & Assert -----
             shouldThrow<IllegalArgumentException> {
-                OnClearMutationFailureAction()
+                OnClearMutationFailureAction(
+                    bookId = noBookId,
+                    editionId = noEditionId,
+                )
             }
         }
     }

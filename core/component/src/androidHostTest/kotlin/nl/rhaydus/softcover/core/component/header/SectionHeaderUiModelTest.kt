@@ -74,11 +74,16 @@ class SectionHeaderUiModelTest {
     inner class SectionConstructors {
         @Test
         fun `string constructor wraps headline and description as single plain segments`() {
+            // ----- Arrange -----
+            val eyebrow = "Lists"
+            val headline = "Halfway"
+            val description = "Almost there."
+
             // ----- Act -----
             val section = SectionHeaderUiModel.Section(
-                eyebrow = "Lists",
-                headline = "Halfway",
-                description = "Almost there.",
+                eyebrow = eyebrow,
+                headline = headline,
+                description = description,
             )
 
             // ----- Assert -----
@@ -88,8 +93,11 @@ class SectionHeaderUiModelTest {
 
         @Test
         fun `string constructor leaves absent headline and description null`() {
+            // ----- Arrange -----
+            val eyebrow = "Lists"
+
             // ----- Act -----
-            val section = SectionHeaderUiModel.Section(eyebrow = "Lists")
+            val section = SectionHeaderUiModel.Section(eyebrow = eyebrow)
 
             // ----- Assert -----
             section.headline shouldBe null
@@ -114,8 +122,11 @@ class SectionHeaderUiModelTest {
 
         @Test
         fun `headlineText is null without a headline`() {
+            // ----- Arrange -----
+            val eyebrow = "Lists"
+
             // ----- Act & Assert -----
-            SectionHeaderUiModel.Section(eyebrow = "Lists").headlineText shouldBe null
+            SectionHeaderUiModel.Section(eyebrow = eyebrow).headlineText shouldBe null
         }
     }
 
@@ -123,8 +134,11 @@ class SectionHeaderUiModelTest {
     inner class EmphasisFixtures {
         @Test
         fun `a Section fixture carries an emphasised headline run`() {
+            // ----- Arrange -----
+            val fixtures = SectionHeaderUiModel.previews.values
+
             // ----- Act -----
-            val hasEmphasis = SectionHeaderUiModel.previews.values
+            val hasEmphasis = fixtures
                 .filterIsInstance<SectionHeaderUiModel.Section>()
                 .any { section -> section.headline.orEmpty().any { it is HeaderTextSegment.Emphasised } }
 

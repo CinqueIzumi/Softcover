@@ -117,8 +117,11 @@ class Migration5To6Test {
     inner class UserBooksTableCreation {
         @Test
         fun `user_books table exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             tableExists("user_books").shouldBeTrue()
@@ -126,8 +129,11 @@ class Migration5To6Test {
 
         @Test
         fun `user_books has expected columns`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("user_books").shouldContainExactlyInAnyOrder(
@@ -139,8 +145,11 @@ class Migration5To6Test {
 
         @Test
         fun `index_user_books_bookId exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_user_books_bookId").shouldBeTrue()
@@ -148,8 +157,11 @@ class Migration5To6Test {
 
         @Test
         fun `index_user_books_statusCode exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_user_books_statusCode").shouldBeTrue()
@@ -160,8 +172,11 @@ class Migration5To6Test {
     inner class UserBookReadsTableCreation {
         @Test
         fun `user_book_reads table exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             tableExists("user_book_reads").shouldBeTrue()
@@ -169,8 +184,11 @@ class Migration5To6Test {
 
         @Test
         fun `user_book_reads has expected columns`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("user_book_reads").shouldContainExactlyInAnyOrder(
@@ -180,8 +198,11 @@ class Migration5To6Test {
 
         @Test
         fun `index_user_book_reads_userBookId exists after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             indexExists("index_user_book_reads_userBookId").shouldBeTrue()
@@ -192,8 +213,11 @@ class Migration5To6Test {
     inner class BooksTableRebuild {
         @Test
         fun `books table retains only the 8 denormalized columns`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("books").shouldContainExactlyInAnyOrder(
@@ -204,8 +228,11 @@ class Migration5To6Test {
 
         @Test
         fun `no userBook_ columns remain on books after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             val cols = columnNames("books")

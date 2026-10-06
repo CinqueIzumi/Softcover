@@ -443,11 +443,16 @@ class ChooseListsMapperTest {
 
         @Test
         fun `bulk header shelves the counted books`() {
+            // ----- Arrange -----
+            val bookIds = setOf(1, 2, 3)
+            val covers = emptyList<CoverUiModel>()
+            val listsBeingMutated = emptySet<Int>()
+
             // ----- Act -----
             val result = emptyList<BookList>().toBulkChooseListsUiModel(
-                bookIds = setOf(1, 2, 3),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
+                bookIds = bookIds,
+                covers = covers,
+                listsBeingMutated = listsBeingMutated,
             )
 
             // ----- Assert -----
@@ -475,11 +480,16 @@ class ChooseListsMapperTest {
 
         @Test
         fun `a single selected book is named as 1 book and taken off as it`() {
+            // ----- Arrange -----
+            val bookIds = setOf(7)
+            val covers = emptyList<CoverUiModel>()
+            val listsBeingMutated = emptySet<Int>()
+
             // ----- Act -----
             val result = emptyList<BookList>().toBulkChooseListsUiModel(
-                bookIds = setOf(7),
-                covers = emptyList(),
-                listsBeingMutated = emptySet(),
+                bookIds = bookIds,
+                covers = covers,
+                listsBeingMutated = listsBeingMutated,
             )
 
             // ----- Assert -----
@@ -507,10 +517,14 @@ class ChooseListsMapperTest {
 
         @Test
         fun `a single selected book on the list gets the singular On the list chip`() {
+            // ----- Arrange -----
+            val selectedCount = 1
+            val onListCount = 1
+
             // ----- Act -----
             val label = chipLabelOf(
-                selectedCount = 1,
-                onListCount = 1,
+                selectedCount = selectedCount,
+                onListCount = onListCount,
             )
 
             // ----- Assert -----
@@ -519,10 +533,14 @@ class ChooseListsMapperTest {
 
         @Test
         fun `a single selected book off the list gets the singular Add chip`() {
+            // ----- Arrange -----
+            val selectedCount = 1
+            val onListCount = 0
+
             // ----- Act -----
             val label = chipLabelOf(
-                selectedCount = 1,
-                onListCount = 0,
+                selectedCount = selectedCount,
+                onListCount = onListCount,
             )
 
             // ----- Assert -----
@@ -531,8 +549,11 @@ class ChooseListsMapperTest {
 
         @Test
         fun `a selection of 5 books takes all 5 off, never all three`() {
+            // ----- Arrange -----
+            val selectedCount = 5
+
             // ----- Act -----
-            val description = descriptionOf(count = 5)
+            val description = descriptionOf(count = selectedCount)
 
             // ----- Assert -----
             description shouldContain "takes all 5 off"

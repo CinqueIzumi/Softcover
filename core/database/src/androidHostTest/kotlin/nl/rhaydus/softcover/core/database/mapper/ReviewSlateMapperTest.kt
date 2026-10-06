@@ -75,8 +75,11 @@ class ReviewSlateMapperTest {
     inner class ReviewSlateFromDocument {
         @Test
         fun `golden document produces the exact golden slate`() {
+            // ----- Arrange -----
+            val document = goldenDocument
+
             // ----- Act & Assert -----
-            reviewSlateFromDocument(goldenDocument) shouldBe goldenSlate
+            reviewSlateFromDocument(document) shouldBe goldenSlate
         }
 
         @Test
@@ -190,8 +193,11 @@ class ReviewSlateMapperTest {
 
         @Test
         fun `empty document produces empty list`() {
+            // ----- Arrange -----
+            val document = ReviewDocument.EMPTY
+
             // ----- Act & Assert -----
-            reviewSlateFromDocument(ReviewDocument.EMPTY) shouldBe emptyList()
+            reviewSlateFromDocument(document) shouldBe emptyList()
         }
     }
 
@@ -201,26 +207,38 @@ class ReviewSlateMapperTest {
     inner class ReviewDocumentFromSlate {
         @Test
         fun `parses golden slate back to the expected canonical document`() {
+            // ----- Arrange -----
+            val slate = goldenSlate
+
             // ----- Act & Assert -----
-            reviewDocumentFromSlate(goldenSlate) shouldBe goldenDocument
+            reviewDocumentFromSlate(slate) shouldBe goldenDocument
         }
 
         @Test
         fun `null slate returns EMPTY`() {
+            // ----- Arrange -----
+            val slate: Any? = null
+
             // ----- Act & Assert -----
-            reviewDocumentFromSlate(null) shouldBe ReviewDocument.EMPTY
+            reviewDocumentFromSlate(slate) shouldBe ReviewDocument.EMPTY
         }
 
         @Test
         fun `non-list slate returns EMPTY`() {
+            // ----- Arrange -----
+            val slate = "not a list"
+
             // ----- Act & Assert -----
-            reviewDocumentFromSlate("not a list") shouldBe ReviewDocument.EMPTY
+            reviewDocumentFromSlate(slate) shouldBe ReviewDocument.EMPTY
         }
 
         @Test
         fun `empty slate list returns EMPTY`() {
+            // ----- Arrange -----
+            val slate = emptyList<Any?>()
+
             // ----- Act & Assert -----
-            reviewDocumentFromSlate(emptyList<Any?>()) shouldBe ReviewDocument.EMPTY
+            reviewDocumentFromSlate(slate) shouldBe ReviewDocument.EMPTY
         }
 
         @Test
@@ -380,20 +398,29 @@ class ReviewSlateMapperTest {
     inner class JsonSerialization {
         @Test
         fun `toJson then reviewDocumentFromJson round-trips the golden document`() {
+            // ----- Arrange -----
+            val document = goldenDocument
+
             // ----- Act & Assert -----
-            reviewDocumentFromJson(goldenDocument.toJson()) shouldBe goldenDocument
+            reviewDocumentFromJson(document.toJson()) shouldBe goldenDocument
         }
 
         @Test
         fun `reviewDocumentFromJson with null returns null`() {
+            // ----- Arrange -----
+            val json: String? = null
+
             // ----- Act & Assert -----
-            reviewDocumentFromJson(null) shouldBe null
+            reviewDocumentFromJson(json) shouldBe null
         }
 
         @Test
         fun `reviewDocumentFromJson with invalid JSON returns null`() {
+            // ----- Arrange -----
+            val json = "{not valid json{{"
+
             // ----- Act & Assert -----
-            reviewDocumentFromJson("{not valid json{{") shouldBe null
+            reviewDocumentFromJson(json) shouldBe null
         }
     }
 }

@@ -217,11 +217,16 @@ class CoverSourceResolverTest {
 
         @Test
         fun `when both editions are null, fallbackCoverUrl still resolves`() {
+            // ----- Arrange -----
+            val edition = null
+            val defaultEdition = null
+            val fallbackCoverUrl = "https://example.com/fallback.jpg"
+
             // ----- Act -----
             val result = resolveCoverSource(
-                edition = null,
-                defaultEdition = null,
-                fallbackCoverUrl = "https://example.com/fallback.jpg",
+                edition = edition,
+                defaultEdition = defaultEdition,
+                fallbackCoverUrl = fallbackCoverUrl,
             )
 
             // ----- Assert -----
@@ -238,11 +243,16 @@ class CoverSourceResolverTest {
     inner class NullRung {
         @Test
         fun `when edition, defaultEdition and fallbackCoverUrl are all null, result is null`() {
+            // ----- Arrange -----
+            val edition = null
+            val defaultEdition = null
+            val fallbackCoverUrl = null
+
             // ----- Act -----
             val result = resolveCoverSource(
-                edition = null,
-                defaultEdition = null,
-                fallbackCoverUrl = null,
+                edition = edition,
+                defaultEdition = defaultEdition,
+                fallbackCoverUrl = fallbackCoverUrl,
             )
 
             // ----- Assert -----

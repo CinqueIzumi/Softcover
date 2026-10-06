@@ -71,16 +71,22 @@ class Migration48To49Test {
 
     @Test
     fun `migration runs cleanly from a real v48 database`() {
-        // ----- Act / Assert -----
-        migration.migrate(connection)
+        // ----- Arrange -----
+        val db = connection
+
+        // ----- Act & Assert -----
+        migration.migrate(db)
     }
 
     @Nested
     inner class ActionAtColumn {
         @Test
         fun `pending_user_book_writes has actionAt column after migration`() {
+            // ----- Arrange -----
+            val db = connection
+
             // ----- Act -----
-            migration.migrate(connection)
+            migration.migrate(db)
 
             // ----- Assert -----
             columnNames("pending_user_book_writes").contains("actionAt").shouldBeTrue()

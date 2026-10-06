@@ -37,11 +37,14 @@ class UserBookStatusTest {
     inner class TogglableInLibrary {
         @Test
         fun `togglableInLibrary is every status except CURRENTLY_READING`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
+            val expected = UserBookStatus.entries - UserBookStatus.CURRENTLY_READING
+
+            // ----- Act -----
             val result = UserBookStatus.togglableInLibrary
 
             // ----- Assert -----
-            result shouldContainExactlyInAnyOrder UserBookStatus.entries - UserBookStatus.CURRENTLY_READING
+            result shouldContainExactlyInAnyOrder expected
         }
     }
 

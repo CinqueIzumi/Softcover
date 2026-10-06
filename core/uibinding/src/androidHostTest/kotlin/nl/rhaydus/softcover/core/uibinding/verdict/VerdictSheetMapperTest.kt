@@ -25,11 +25,16 @@ class VerdictSheetMapperTest {
     inner class ContextCopy {
         @Test
         fun `FINISHED writes the finished prompt copy naming the book`() {
+            // ----- Arrange -----
+            val context = VerdictSheetContext.FINISHED
+            val noReview: RichTextUiModel? = null
+            val noCover: CoverUiModel? = null
+
             // ----- Act -----
             val result = book.toVerdictSheetUiModel(
-                VerdictSheetContext.FINISHED,
-                review = null,
-                cover = null,
+                context,
+                review = noReview,
+                cover = noCover,
             )
 
             // ----- Assert -----
@@ -41,11 +46,16 @@ class VerdictSheetMapperTest {
 
         @Test
         fun `EDIT writes the edit copy naming the book with no description`() {
+            // ----- Arrange -----
+            val context = VerdictSheetContext.EDIT
+            val noReview: RichTextUiModel? = null
+            val noCover: CoverUiModel? = null
+
             // ----- Act -----
             val result = book.toVerdictSheetUiModel(
-                VerdictSheetContext.EDIT,
-                review = null,
-                cover = null,
+                context,
+                review = noReview,
+                cover = noCover,
             )
 
             // ----- Assert -----
@@ -60,11 +70,15 @@ class VerdictSheetMapperTest {
     inner class DeleteSecondary {
         @Test
         fun `EDIT with a non-blank review offers Delete`() {
+            // ----- Arrange -----
+            val context = VerdictSheetContext.EDIT
+            val noCover: CoverUiModel? = null
+
             // ----- Act -----
             val result = book.toVerdictSheetUiModel(
-                VerdictSheetContext.EDIT,
-                review,
-                cover = null,
+                context,
+                review = review,
+                cover = noCover,
             )
 
             // ----- Assert -----
@@ -73,11 +87,15 @@ class VerdictSheetMapperTest {
 
         @Test
         fun `FINISHED never offers Delete even with a review`() {
+            // ----- Arrange -----
+            val context = VerdictSheetContext.FINISHED
+            val noCover: CoverUiModel? = null
+
             // ----- Act -----
             val result = book.toVerdictSheetUiModel(
-                VerdictSheetContext.FINISHED,
-                review,
-                cover = null,
+                context,
+                review = review,
+                cover = noCover,
             )
 
             // ----- Assert -----
@@ -86,11 +104,16 @@ class VerdictSheetMapperTest {
 
         @Test
         fun `EDIT with a null review offers no Delete`() {
+            // ----- Arrange -----
+            val context = VerdictSheetContext.EDIT
+            val noReview: RichTextUiModel? = null
+            val noCover: CoverUiModel? = null
+
             // ----- Act -----
             val result = book.toVerdictSheetUiModel(
-                VerdictSheetContext.EDIT,
-                review = null,
-                cover = null,
+                context,
+                review = noReview,
+                cover = noCover,
             )
 
             // ----- Assert -----
@@ -99,11 +122,16 @@ class VerdictSheetMapperTest {
 
         @Test
         fun `EDIT with a blank review offers no Delete`() {
+            // ----- Arrange -----
+            val context = VerdictSheetContext.EDIT
+            val review = RichTextUiModel(paragraphs = persistentListOf())
+            val cover = null
+
             // ----- Act -----
             val result = book.toVerdictSheetUiModel(
-                context = VerdictSheetContext.EDIT,
-                review = RichTextUiModel(paragraphs = persistentListOf()),
-                cover = null,
+                context = context,
+                review = review,
+                cover = cover,
             )
 
             // ----- Assert -----
@@ -180,14 +208,18 @@ class VerdictSheetMapperTest {
 
         @Test
         fun `null review seeds an empty review and a given review is passed through`() {
+            // ----- Arrange -----
+            val context = VerdictSheetContext.EDIT
+            val noReview: RichTextUiModel? = null
+
             // ----- Act -----
             val empty = book.toVerdictSheetUiModel(
-                VerdictSheetContext.EDIT,
-                review = null,
+                context,
+                review = noReview,
                 cover = null,
             )
             val given = book.toVerdictSheetUiModel(
-                VerdictSheetContext.EDIT,
+                context,
                 review,
                 cover = null,
             )
@@ -202,10 +234,14 @@ class VerdictSheetMapperTest {
     inner class Trailing {
         @Test
         fun `cover becomes the header jacket`() {
+            // ----- Arrange -----
+            val context = VerdictSheetContext.FINISHED
+            val noReview: RichTextUiModel? = null
+
             // ----- Act -----
             val result = book.toVerdictSheetUiModel(
-                VerdictSheetContext.FINISHED,
-                review = null,
+                context,
+                review = noReview,
                 cover = cover,
             )
 
@@ -215,11 +251,16 @@ class VerdictSheetMapperTest {
 
         @Test
         fun `null cover leaves the header without trailing`() {
+            // ----- Arrange -----
+            val context = VerdictSheetContext.FINISHED
+            val noReview: RichTextUiModel? = null
+            val noCover: CoverUiModel? = null
+
             // ----- Act -----
             val result = book.toVerdictSheetUiModel(
-                VerdictSheetContext.FINISHED,
-                review = null,
-                cover = null,
+                context,
+                review = noReview,
+                cover = noCover,
             )
 
             // ----- Assert -----

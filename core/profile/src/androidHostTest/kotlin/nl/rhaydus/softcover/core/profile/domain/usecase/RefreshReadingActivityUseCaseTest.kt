@@ -171,14 +171,20 @@ class RefreshReadingActivityUseCaseTest {
     inner class ReadingStreak {
         @Test
         fun `returns 0 when the reading-day stream is empty`() = runTest {
+            // ----- Arrange -----
+            val streamedDays = emptyList<LocalDate>()
+
             // ----- Act & Assert -----
-            capturedActivityFor(streamedDaysDescending = emptyList()).first shouldBe 0
+            capturedActivityFor(streamedDaysDescending = streamedDays).first shouldBe 0
         }
 
         @Test
         fun `returns 1 when today is absent but yesterday is present (grace day)`() = runTest {
+            // ----- Arrange -----
+            val streamedDays = listOf(day(1))
+
             // ----- Act & Assert -----
-            capturedActivityFor(streamedDaysDescending = listOf(day(1))).first shouldBe 1
+            capturedActivityFor(streamedDaysDescending = streamedDays).first shouldBe 1
         }
 
         @Test

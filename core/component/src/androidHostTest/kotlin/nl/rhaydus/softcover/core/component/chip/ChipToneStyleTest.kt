@@ -12,12 +12,15 @@ class ChipToneStyleTest {
     inner class Tonal {
         @Test
         fun `selected and unselected pick different container and ink`() {
+            // ----- Arrange -----
+            val tone = ChipTone.Tonal
+
             // ----- Act -----
-            val selected = ChipTone.Tonal.style(
+            val selected = tone.style(
                 scheme,
                 selected = true,
             )
-            val unselected = ChipTone.Tonal.style(
+            val unselected = tone.style(
                 scheme,
                 selected = false,
             )
@@ -32,12 +35,15 @@ class ChipToneStyleTest {
     inner class Choice {
         @Test
         fun `selected differs from unselected`() {
+            // ----- Arrange -----
+            val tone = ChipTone.Choice
+
             // ----- Act -----
-            val selected = ChipTone.Choice.style(
+            val selected = tone.style(
                 scheme,
                 selected = true,
             )
-            val unselected = ChipTone.Choice.style(
+            val unselected = tone.style(
                 scheme,
                 selected = false,
             )
