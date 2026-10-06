@@ -340,10 +340,12 @@ val allowedApiDataEdges = setOf(
     ":feature:book_detail" to ":core:identity",
     ":feature:book_detail" to ":core:personal",
     ":feature:explore" to ":core:book",
+    ":feature:explore" to ":core:component",
     ":feature:explore" to ":core:identity",
     ":feature:explore" to ":core:lists",
     ":feature:explore" to ":core:preferences",
     ":feature:lists" to ":core:lists",
+    ":feature:onboarding" to ":core:component",
     ":feature:reading" to ":core:component",
     ":feature:settings" to ":core:preferences",
 

@@ -45,12 +45,9 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
-import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
-import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
@@ -64,7 +61,6 @@ internal actual fun OnboardingScreenLayout(
     runAction: (action: OnboardingAction) -> Unit,
     openUrl: (String) -> Unit,
     getCopiedText: () -> String,
-    onInitializingComplete: () -> Unit,
 ) {
     val pages = IntroScreen.entries
     val pagerState = rememberPagerState { pages.size }
@@ -125,17 +121,6 @@ internal actual fun OnboardingScreenLayout(
                 }
             }
         }
-
-        LoadingSheet(
-            model = state.loadingSheet,
-            onEvent = { event ->
-                when (event) {
-                    LoadingSheetEvent.LoaderFinished -> onInitializingComplete()
-
-                    LoadingSheetEvent.Dismissed -> runAction(OnLoadingSheetDismissedAction)
-                }
-            },
-        )
     }
 }
 
@@ -491,28 +476,6 @@ private fun FirstIntroScreenPreview() {
             runAction = {},
             getCopiedText = { "" },
             openUrl = {},
-            onInitializingComplete = {},
-        )
-    }
-}
-
-@StandardPreview
-@Composable
-private fun LoadingDialogIntroScreenPreview() {
-    SoftcoverTheme {
-        OnboardingScreenLayout(
-            state = OnboardingUiState().let {
-                it.copy(
-                    loadingSheet = it.loadingSheet.copy(
-                        isLoading = true,
-                        progress = 0.2f,
-                    ),
-                )
-            },
-            runAction = {},
-            getCopiedText = { "" },
-            openUrl = {},
-            onInitializingComplete = {},
         )
     }
 }

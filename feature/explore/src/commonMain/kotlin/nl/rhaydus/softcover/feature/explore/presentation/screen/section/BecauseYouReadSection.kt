@@ -2,21 +2,12 @@ package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
-import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
-import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
@@ -25,8 +16,6 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
-
-private val becauseYouReadListState = LazyListState()
 
 @Composable
 internal fun BecauseYouReadSection(
@@ -39,13 +28,9 @@ internal fun BecauseYouReadSection(
     isLoading: Boolean,
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
+    rail: @Composable ((BookCardEvent) -> Unit) -> Unit,
 ) {
-    // Collapses only once the fetch is done and there is nothing to show; any loading state keeps the
-    // header and rail footprint reserved.
     if (isLoading.not() && (genre == null || set.isEmpty)) return
-
-    // Stamped on mount - see TrendingSection's comment for why.
-    val entry = rememberStaggeredEntryCoordinator(key = "explore:because_you_read")
 
     val onCardEvent = rememberPrefetchingBookCardEventHandler(
         set = set,
@@ -74,24 +59,6 @@ internal fun BecauseYouReadSection(
             modifier = Modifier.padding(horizontal = 24.dp),
         )
 
-        LazyRow(
-            state = becauseYouReadListState,
-            contentPadding = PaddingValues(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            itemsIndexed(set.cards, key = { _, card -> card.key.lazyKey }) { index, card ->
-                BookCard(
-                    model = card,
-                    onEvent = onCardEvent,
-                    modifier = Modifier
-                        .width(118.dp)
-                        .bookCardStaggeredEntry(
-                            card = card,
-                            coordinator = entry,
-                            index = index,
-                        ),
-                )
-            }
-        }
+        rail(onCardEvent)
     }
 }

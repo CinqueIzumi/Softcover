@@ -34,49 +34,17 @@ internal fun DesktopDiscovery(
                 .padding(bottom = 24.dp + rememberBottomBarPadding()),
             verticalArrangement = Arrangement.spacedBy(40.dp),
         ) {
-            DesktopFeaturedSection(
-                book = state.featuredUpcomingRelease,
-                card = state.featuredCard,
+            DiscoverySections(
+                state = state,
+                runAction = runAction,
                 onBookClick = onBookClick,
-                runAction = runAction,
-            )
-
-            DesktopUpNextSection(
-                set = state.upNext,
-                menuSheets = state.continueSeriesMenuSheets,
-                header = state.upNextHeader,
-                onBookClick = onBookClick,
-                runAction = runAction,
-            )
-
-            DesktopBecauseYouReadSection(
-                genre = state.becauseYouReadGenre,
-                header = state.becauseYouReadHeader,
-                genreOptions = state.becauseYouReadGenreOptions,
-                genreSheet = state.becauseYouReadGenreSheet,
-                genreGroup = state.becauseYouReadGenreGroup,
-                set = state.becauseYouRead,
-                isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
-                onBookClick = onBookClick,
-                runAction = runAction,
-            )
-
-            DesktopTrendingSection(
-                set = state.trending,
-                header = state.trendingHeader,
-                onBookClick = onBookClick,
-            )
-
-            MoodGrid(
-                tiles = state.moodTiles,
-                header = state.moodGridHeader,
-                runAction = runAction,
-            )
-
-            RecentSearchesSection(
-                chips = state.recentSearchChips,
-                runAction = runAction,
-            )
+            ) { rail, set, onCardEvent ->
+                ExploreCardRail(
+                    rail = rail,
+                    set = set,
+                    onCardEvent = onCardEvent,
+                )
+            }
         }
 
         DesktopVerticalScrollbar(

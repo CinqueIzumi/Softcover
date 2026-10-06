@@ -16,7 +16,7 @@ kotlin {
             api(project(":core:identity"))
             implementation(project(":core:database"))
             implementation(project(":core:network"))
-            implementation(project(":core:component"))
+            api(project(":core:component"))
             implementation(project(":core:designsystem"))
             implementation(project(":core:presentation"))
             implementation(project(":core:uibinding"))

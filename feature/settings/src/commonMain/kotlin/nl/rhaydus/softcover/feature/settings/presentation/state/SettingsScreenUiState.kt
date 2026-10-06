@@ -89,7 +89,7 @@ internal data class SettingsScreenUiState(
     ),
 
     val appearancePaneMasthead: PageMastheadUiModel = PageMastheadUiModel(
-        eyebrow = "Personalise",
+        eyebrow = "Personalisation",
         title = "Appearance",
         subtitle = "Make Softcover yours.",
     ),

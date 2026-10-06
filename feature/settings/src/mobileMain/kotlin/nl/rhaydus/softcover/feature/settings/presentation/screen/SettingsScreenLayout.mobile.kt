@@ -120,7 +120,7 @@ internal actual fun SettingsScreenLayout(
             SettingsRowGroup {
                 row {
                     SettingsMenuRow(
-                        title = "View user profile",
+                        title = "Your profile",
                         gloss = "Your shelves, stats and reading year",
                         icon = SoftcoverIcon.Account,
                         target = SettingsMenuRowTarget.SubPage(onClick = navigateToProfile),

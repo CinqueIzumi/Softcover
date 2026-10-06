@@ -23,7 +23,7 @@ data class PageMastheadUiModel(
         override val previews: ImmutableMap<String, PageMastheadUiModel> = persistentMapOf(
             "Regular, with eyebrow" to PageMastheadUiModel(
                 title = "Roadmap",
-                eyebrow = "Personalise",
+                eyebrow = "Personalisation",
                 subtitle = "What we're building next, and roughly when.",
             ),
             "Regular" to PageMastheadUiModel(

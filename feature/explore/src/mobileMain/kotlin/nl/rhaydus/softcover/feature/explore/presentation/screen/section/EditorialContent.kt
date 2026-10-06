@@ -64,49 +64,17 @@ internal fun EditorialContent(
                 ),
             verticalArrangement = Arrangement.spacedBy(36.dp),
         ) {
-            FeaturedSection(
-                book = state.featuredUpcomingRelease,
-                card = state.featuredCard,
+            DiscoverySections(
+                state = state,
+                runAction = runAction,
                 onBookClick = onBookClick,
-                runAction = runAction,
-            )
-
-            ContinueSeriesSection(
-                set = state.upNext,
-                menuSheets = state.continueSeriesMenuSheets,
-                header = state.upNextHeader,
-                onBookClick = onBookClick,
-                runAction = runAction,
-            )
-
-            BecauseYouReadSection(
-                genre = state.becauseYouReadGenre,
-                header = state.becauseYouReadHeader,
-                genreOptions = state.becauseYouReadGenreOptions,
-                genreSheet = state.becauseYouReadGenreSheet,
-                genreGroup = state.becauseYouReadGenreGroup,
-                set = state.becauseYouRead,
-                isLoading = state.loadingBecauseYouReadBooks && state.becauseYouReadBooks.isEmpty(),
-                onBookClick = onBookClick,
-                runAction = runAction,
-            )
-
-            TrendingSection(
-                set = state.trending,
-                header = state.trendingHeader,
-                onBookClick = onBookClick,
-            )
-
-            MoodGrid(
-                tiles = state.moodTiles,
-                header = state.moodGridHeader,
-                runAction = runAction,
-            )
-
-            RecentSearchesSection(
-                chips = state.recentSearchChips,
-                runAction = runAction,
-            )
+            ) { rail, set, onCardEvent ->
+                ExploreCardRail(
+                    rail = rail,
+                    set = set,
+                    onCardEvent = onCardEvent,
+                )
+            }
         }
     }
 }

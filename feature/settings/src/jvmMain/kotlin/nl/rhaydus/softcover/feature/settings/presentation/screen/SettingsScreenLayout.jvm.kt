@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -9,39 +10,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
+import nl.rhaydus.softcover.core.component.header.PageMasthead
+import nl.rhaydus.softcover.core.component.layout.DesktopScrollPage
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSettingsCategorySelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.AboutPane
-import nl.rhaydus.softcover.feature.settings.presentation.screen.section.AppearancePane
-import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryTabsPane
-import nl.rhaydus.softcover.feature.settings.presentation.screen.section.RoadmapPane
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsCategorySidebar
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.RoadmapUiState
 import nl.rhaydus.softcover.feature.settings.presentation.state.SettingsScreenUiState
 
-/**
- * Desktop renders the bespoke master–detail Settings surface.
- */
 internal actual val settingsUsesMasterDetail: Boolean = true
 
 /**
- * Desktop Settings: a category **source list** down the leading edge (the native desktop settings
- * idiom) beside a detail pane that swaps between Appearance, Library tabs, and About **inline** — no
- * push, no full-page swap. Mirrors desktop Library's `[ sidebar | content ]` shape. "Your profile" is
- * the one entry that still pushes full-screen (Profile is a separate feature). The Appearance pane
- * drives the shared [settingsRunAction]; the Library-tabs pane drives [libraryVisibilityState] /
- * [libraryVisibilityRunAction] (its model is hosted under the Settings lifecycle in
- * [SettingsScreen.Content]) and docks a
- * [LibraryVisibilitySaveBar][nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar]
- * at the pane's bottom; the About pane drives [openUrl] and its own `Roadmap` row (which selects the
- * `ROADMAP` category rather than pushing); the Roadmap pane drives [roadmapState] / [roadmapRunAction]
- * (its model is likewise hosted under the Settings lifecycle). The sub-page `navigateTo*` callbacks
- * (including [navigateToAbout] and [navigateToRoadmap]) are unused here (mobile pushes; desktop swaps) —
- * only [navigateToProfile], [navigateToHiddenSuggestions], and [navigateToComponentGallery] are wired,
- * the last one into the `About` pane's own version-footer easter egg (`component-contract.md` § 7.5).
+ * Desktop Settings: a category source list beside a detail pane that swaps categories inline. Only
+ * Profile, Hidden suggestions and the Component Gallery push a screen; the other `navigateTo*`
+ * callbacks are unused here.
  */
 @Composable
 internal actual fun SettingsScreenLayout(
@@ -84,38 +72,65 @@ internal actual fun SettingsScreenLayout(
                 .fillMaxHeight(),
         ) {
             when (selected) {
-                SettingsCategory.APPEARANCE -> AppearancePane(
-                    state = state,
-                    runAction = settingsRunAction,
-                )
+                SettingsCategory.APPEARANCE -> DesktopScrollPage(
+                    masthead = { PageMasthead(model = state.appearancePaneMasthead) },
+                ) {
+                    AppearanceSettingsContent(
+                        state = state,
+                        runAction = settingsRunAction,
+                        showUiScaleControl = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
 
-                SettingsCategory.LIBRARY_TABS -> LibraryTabsPane(
-                    state = libraryVisibilityState,
-                    runAction = libraryVisibilityRunAction,
-                    onCreateListClick = onCreateListClick,
-                )
-
-                SettingsCategory.ABOUT -> AboutPane(
-                    masthead = state.aboutPaneMasthead,
-                    versionLabel = state.versionLabel,
-                    creditsHeader = state.aboutCreditsHeader,
-                    sourceHeader = state.aboutSourceHeader,
-                    contactHeader = state.aboutContactHeader,
-                    appUpdateCallout = state.appUpdateCallout,
-                    onStartAppUpdate = onStartAppUpdate,
-                    openUrl = openUrl,
-                    onRoadmapClick = {
-                        settingsRunAction(OnSettingsCategorySelectedAction(category = SettingsCategory.ROADMAP))
+                SettingsCategory.LIBRARY_TABS -> DesktopScrollPage(
+                    bottomBar = {
+                        LibraryVisibilitySaveBar(
+                            isDirty = libraryVisibilityState.isDirty,
+                            isSaving = libraryVisibilityState.isSaving,
+                            onSave = { libraryVisibilityRunAction(OnSaveLibraryVisibilityAction()) },
+                        )
                     },
-                    onComponentGalleryUnlocked = navigateToComponentGallery,
-                    debugSection = debugSection,
-                )
+                ) {
+                    LibraryVisibilityContent(
+                        state = libraryVisibilityState,
+                        runAction = libraryVisibilityRunAction,
+                        onCreateListClick = onCreateListClick,
+                    )
+                }
 
-                SettingsCategory.ROADMAP -> RoadmapPane(
-                    state = roadmapState,
-                    runAction = roadmapRunAction,
-                    openUrl = openUrl,
-                )
+                SettingsCategory.ABOUT -> DesktopScrollPage(
+                    masthead = { PageMasthead(model = state.aboutPaneMasthead) },
+                ) {
+                    AboutContent(
+                        versionLabel = state.versionLabel,
+                        creditsHeader = state.aboutCreditsHeader,
+                        sourceHeader = state.aboutSourceHeader,
+                        contactHeader = state.aboutContactHeader,
+                        openUrl = openUrl,
+                        onRoadmapClick = {
+                            settingsRunAction(OnSettingsCategorySelectedAction(category = SettingsCategory.ROADMAP))
+                        },
+                        onComponentGalleryUnlocked = navigateToComponentGallery,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    AboutPane(
+                        appUpdateCallout = state.appUpdateCallout,
+                        onStartAppUpdate = onStartAppUpdate,
+                        debugSection = debugSection,
+                    )
+                }
+
+                SettingsCategory.ROADMAP -> DesktopScrollPage(
+                    masthead = { PageMasthead(model = roadmapState.masthead) },
+                ) {
+                    RoadmapContent(
+                        state = roadmapState,
+                        runAction = roadmapRunAction,
+                        openUrl = openUrl,
+                    )
+                }
             }
         }
     }

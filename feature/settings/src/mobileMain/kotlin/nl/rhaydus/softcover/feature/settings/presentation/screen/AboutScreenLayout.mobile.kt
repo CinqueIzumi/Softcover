@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.settings.presentation.screen
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -52,6 +53,7 @@ internal actual fun AboutScreenLayout(
             onComponentGalleryUnlocked = onComponentGalleryUnlocked,
             modifier = Modifier
                 .padding(innerPadding)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .cappedContentWidth()
                 .padding(

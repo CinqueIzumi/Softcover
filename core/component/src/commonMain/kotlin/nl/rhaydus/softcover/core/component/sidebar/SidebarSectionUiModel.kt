@@ -18,7 +18,7 @@ data class SidebarSectionUiModel<K>(
     companion object : UiModelPreviews<SidebarSectionUiModel<String>> {
         override val previews: ImmutableMap<String, SidebarSectionUiModel<String>> = persistentMapOf(
             "With label" to SidebarSectionUiModel(
-                label = SectionHeaderUiModel.Label(eyebrow = "Personalise"),
+                label = SectionHeaderUiModel.Label(eyebrow = "Personalisation"),
                 rows = SidebarRowUiModel.previews.values.toImmutableList(),
             ),
             "No label" to SidebarSectionUiModel(

@@ -14,10 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** TP done. All SD shapes approved; SD-P, SD-2, SD-3 done (tested, reviewed, closed out). SL-3b blocked on F34.
-- **Next:** SD-1 (Explore; its desktop rails use `bookCardStaggeredEntry`); then SD-4/5/6 in parallel.
-- **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.- **Verification:** jvm compile, `styleCheck` (JDK 21; detekt fails on JDK 26) and `projectHealth` (reading, book_detail) pass; `BookDetailUiStateTest` and new `CoverZoomStateTest` pass.
-- **Uncommitted:** SD-P (`core/component` jvmMain and build file, design-system docs, `components.md` budget); SD-2/SD-3 code, build files and tests in reading, library, book_detail; `allowedApiDataEdges` rows (signed off); `bookCardStaggeredEntry` + 5 call sites; chips `AnimatedContent`; tracker docs.
+- **State:** SD done (fix round built and reviewed clean). SL-15 logged. SL-3b blocked on F34.
+- **Next:** commit SD (ask first), then PF-1 per `steps/pf-premium-feel.md`.
+- **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
+- **Verification:** `checkModuleGraph`, `ktlintCheck`, `styleCheck` (JDK 21), `projectHealth` (explore, profile, settings, onboarding), jvm + android compiles passed after the fix round; `SearchResultsSectionTest` (7) passes.
+- **Uncommitted:** SD-1/4/5/6 + fix round (deletions staged), build files, `:core:component` sample copy, new test, tracker docs, deleted SD step file.
 
 ## Local verification
 
@@ -68,7 +69,7 @@ every sub-step's Verify.
 | S9 | — (statistics & progress) | S9-1–S9-4, S9-C | [x] |
 | SS | — (simplicity audit) | SS-0–SS-11, SS-C; after S9, before PF / S10 | [x] |
 | TP | — (test prune) | TP-0 timings, TP-1–TP-8 per module group | [x] |
-| SD | [steps/sd-screen-dedup.md](steps/sd-screen-dedup.md) | SD-0 inventory, then per screen group; after TP, before PF / S10 | [ ] |
+| SD | — (screen de-duplication) | SD-0 inventory, SD-P shell, SD-1–SD-6 per screen group | [x] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
 | SP | [steps/sp-spacing-scale.md](steps/sp-spacing-scale.md) | SP-1–SP-5, SP-C; after S10, before S11 | [ ] |

@@ -7,7 +7,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import nl.rhaydus.designsystem.util.rememberClipboardReader
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
+import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
+import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
@@ -29,23 +32,28 @@ object OnboardingScreen : Screen {
             state = state,
             runAction = screenModel::runAction,
             openUrl = uriHandler::openUri,
-            onInitializingComplete = {
-                sessionAuthenticator.setUserAuthenticated(authenticated = true)
-            },
             getCopiedText = clipboardReader::read,
+        )
+
+        LoadingSheet(
+            model = state.loadingSheet,
+            onEvent = { event ->
+                when (event) {
+                    LoadingSheetEvent.LoaderFinished -> {
+                        sessionAuthenticator.setUserAuthenticated(authenticated = true)
+                    }
+
+                    LoadingSheetEvent.Dismissed -> screenModel.runAction(OnLoadingSheetDismissedAction)
+                }
+            },
         )
     }
 }
 
-// The mobile actual keeps today's swipeable three-page HorizontalPager; the desktop actual collapses
-// it into a single centered editorial panel (intro + the shared API-key entry form). Wiring above
-// stays platform-agnostic. No default arguments — they are not allowed on an expect declaration, so
-// every argument is supplied explicitly at the single call site above.
 @Composable
 internal expect fun OnboardingScreenLayout(
     state: OnboardingUiState,
     runAction: (action: OnboardingAction) -> Unit,
     openUrl: (String) -> Unit,
     getCopiedText: () -> String,
-    onInitializingComplete: () -> Unit,
 )

@@ -23,23 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
-import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
+import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 
 /**
- * Desktop onboarding. The mobile three-page swipe flow collapses into one centered, scrolling
- * editorial panel: the same type-led "Welcome" hero used on mobile page 1 (sized down for the narrower,
- * centered panel — `editorialTypography.display`'s baked-in 45sp/44sp rather than mobile's oversized
- * 76sp override, since a full-bleed hero size reads as oversized once it is centered in a 520dp column
- * instead of bleeding to a phone's edges) above the shared [ApiKeyEntrySection] — no pager, no folio, no
- * top-bar chrome (those are mobile-pager-only concerns) and no separate Back/Skip footer: desktop keeps
- * a single "Save API key" button flow via the shared section. The whole surface paints an opaque
- * [Surface] background, and the [LoadingSheet] overlay still covers the setup progress.
+ * Desktop onboarding: the mobile three-page swipe flow collapses into one centered, scrolling panel,
+ * the first page's hero above the shared [ApiKeyEntrySection], with no pager, folio or Back/Skip footer.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -48,7 +40,6 @@ internal actual fun OnboardingScreenLayout(
     runAction: (action: OnboardingAction) -> Unit,
     openUrl: (String) -> Unit,
     getCopiedText: () -> String,
-    onInitializingComplete: () -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -73,7 +64,7 @@ internal actual fun OnboardingScreenLayout(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     SoftcoverText(
-                        text = "Welcome".uppercase(),
+                        text = state.pageHeaders.getValue(IntroScreen.FIRST).eyebrow.uppercase(),
                         style = MaterialTheme.editorialTypography.eyebrow,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.fillMaxWidth(),
@@ -128,16 +119,5 @@ internal actual fun OnboardingScreenLayout(
                     .padding(vertical = 4.dp),
             )
         }
-
-        LoadingSheet(
-            model = state.loadingSheet,
-            onEvent = { event ->
-                when (event) {
-                    LoadingSheetEvent.LoaderFinished -> onInitializingComplete()
-
-                    LoadingSheetEvent.Dismissed -> runAction(OnLoadingSheetDismissedAction)
-                }
-            },
-        )
     }
 }

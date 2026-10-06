@@ -24,7 +24,7 @@ internal fun settingsSidebarFor(selectedCategory: SettingsCategory): SidebarUiMo
             ),
         ),
         SidebarSectionUiModel(
-            label = SectionHeaderUiModel.Label(eyebrow = "Personalise"),
+            label = SectionHeaderUiModel.Label(eyebrow = "Personalisation"),
             rows = persistentListOf(
                 SidebarRowUiModel(
                     key = SettingsSidebarKey.Category(category = SettingsCategory.APPEARANCE),
@@ -38,11 +38,6 @@ internal fun settingsSidebarFor(selectedCategory: SettingsCategory): SidebarUiMo
                     icon = SoftcoverIcon.Shelf,
                     variant = SidebarRowVariant.Destination(selected = selectedCategory == SettingsCategory.LIBRARY_TABS),
                 ),
-            ),
-        ),
-        SidebarSectionUiModel(
-            label = SectionHeaderUiModel.Label(eyebrow = "Privacy"),
-            rows = persistentListOf(
                 SidebarRowUiModel(
                     key = SettingsSidebarKey.HiddenSuggestions,
                     label = "Hidden suggestions",
@@ -57,7 +52,7 @@ internal fun settingsSidebarFor(selectedCategory: SettingsCategory): SidebarUiMo
                 SidebarRowUiModel(
                     key = SettingsSidebarKey.Category(category = SettingsCategory.ABOUT),
                     label = "About",
-                    icon = SoftcoverIcon.Settings,
+                    icon = SoftcoverIcon.Info,
                     variant = SidebarRowVariant.Destination(selected = selectedCategory == SettingsCategory.ABOUT),
                 ),
                 SidebarRowUiModel(

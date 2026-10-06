@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.explore.presentation.screen.section
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,33 +9,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
-import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
-import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnLoadMoreSearchResultsAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnRetrySearchAction
-import nl.rhaydus.softcover.feature.explore.presentation.screen.SEARCH_RESULTS_LOAD_MORE_THRESHOLD
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ActiveSearchContent(
     state: ExploreScreenUiState,
@@ -49,102 +31,46 @@ internal fun ActiveSearchContent(
             .padding(contentPadding)
             .fillMaxSize(),
     ) {
-        if (state.searchError != null) {
-            InlineErrorState(
-                message = state.searchError,
-                onRetry = { runAction(OnRetrySearchAction) },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-                textStyle = MaterialTheme.editorialTypography.bodySmall,
-            )
+        SearchResultsSection(
+            state = state,
+            runAction = runAction,
+            onBookClick = onBookClick,
+        ) { onSearchResultEvent ->
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            ) {
+                SortChip(
+                    state = state,
+                    runAction = runAction,
+                )
+            }
 
-            return
-        }
+            val resultsListState = rememberLazyListState()
 
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-        ) {
-            SortChip(
+            LoadMoreSearchResultsEffect(
                 state = state,
+                lastVisibleIndex = { resultsListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index },
                 runAction = runAction,
             )
-        }
 
-        val resultsListState = rememberLazyListState()
-
-        val cards = state.searchResults.cards
-
-        val showsStandIns = cards.any(BookCardUiModel::isLoading)
-
-        // Feedback item 7: append the next page once the visible window nears the fetched end.
-        // There's no server-side total (Typesense returns no hit count), so `queriedBooksHasMore`
-        // is the only stop condition — the action itself is the re-entrancy guard (a no-op while a
-        // fetch is already in flight), so this can dispatch freely on every qualifying scroll frame.
-        LaunchedEffect(resultsListState, state.queriedBooks.size, state.queriedBooksHasMore, showsStandIns) {
-            val itemCount = state.queriedBooks.size
-            if (state.queriedBooksHasMore.not() || itemCount == 0 || showsStandIns) return@LaunchedEffect
-
-            snapshotFlow { resultsListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
-                .collect { lastVisibleIndex ->
-                    val nearEnd = lastVisibleIndex != null &&
-                        lastVisibleIndex >= itemCount - SEARCH_RESULTS_LOAD_MORE_THRESHOLD
-
-                    if (nearEnd) {
-                        runAction(OnLoadMoreSearchResultsAction)
-                    }
+            LazyColumn(
+                state = resultsListState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 20.dp),
+                contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
+            ) {
+                items(state.searchResults.cards, key = { it.key.lazyKey }) { card ->
+                    BookCard(
+                        model = card,
+                        onEvent = onSearchResultEvent,
+                    )
                 }
-        }
 
-        val onSearchResultEvent = rememberPrefetchingBookCardEventHandler(
-            set = state.searchResults,
-        ) { event, book ->
-            when (event) {
-                is BookCardEvent.Clicked -> onBookClick(
-                    book,
-                    null,
-                )
-
-                is BookCardEvent.TrailingClicked -> runAction(
-                    if (book.userBook != null) {
-                        OnRemoveBookFromLibraryClickAction(book = book)
-                    } else {
-                        OnAddBookToLibraryClickAction(book = book)
-                    },
-                )
-
-                is BookCardEvent.LongClicked,
-                is BookCardEvent.PressStarted,
-                is BookCardEvent.MenuClicked,
-                is BookCardEvent.ShakeEnded,
-                    -> Unit
-            }
-        }
-
-        LazyColumn(
-            state = resultsListState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-        ) {
-            items(cards, key = { it.key.lazyKey }) { card ->
-                BookCard(
-                    model = card,
-                    onEvent = onSearchResultEvent,
-                )
-            }
-
-            if (state.loadingMoreQueriedBooks && showsStandIns.not()) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularWavyProgressIndicator()
+                if (state.showsLoadingMoreIndicator) {
+                    item {
+                        LoadingMoreIndicator()
                     }
                 }
             }

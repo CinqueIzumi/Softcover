@@ -19,12 +19,8 @@ internal fun FeaturedSection(
     onBookClick: (Book, String?) -> Unit,
     runAction: (ExploreAction) -> Unit,
 ) {
-    // Terminal empty (no upcoming release to feature) collapses away with no reserved space; loading
-    // lays out the card's own footprint.
     if (card == null) return
 
-    // No section header above this one, unlike every rail below it: the card names itself with an
-    // inline SectionHeader on its own top row (see FeaturedCard).
     FeaturedCard(
         model = card,
         onEvent = { event ->
@@ -44,6 +40,6 @@ internal fun FeaturedSection(
                 }
             }
         },
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = Modifier.padding(horizontal = 24.dp),
     )
 }
