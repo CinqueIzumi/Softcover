@@ -38,22 +38,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import androidx.navigationevent.NavigationEventInfo
-import androidx.navigationevent.compose.NavigationBackHandler
-import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
-import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.component.chip.ChipEvent
-import nl.rhaydus.softcover.core.component.lists.ChooseListsBottomSheet
-import nl.rhaydus.softcover.core.component.lists.ChooseListsEvent
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
-import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -61,31 +49,19 @@ import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnActiveFilterChipClickedAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetExpandedChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveMenuExpandedChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkMoveShelfAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveFromLibraryAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveSheetExpandedChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkToggleListMembershipAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnExitRearrangeModeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnExitSelectionModeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnShelvesSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
-import nl.rhaydus.softcover.feature.library.presentation.component.LibraryArrangeSheet
-import nl.rhaydus.softcover.feature.library.presentation.component.LibraryControlLine
-import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
-import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryShelvesSheet
 import nl.rhaydus.softcover.feature.library.presentation.component.ShelfNeighbourRail
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.BookList
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.EditionList
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibraryActiveFilterChipsSection
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibraryEditModeBackHandlers
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibrarySearchAndControls
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibrarySelectionHeader
+import nl.rhaydus.softcover.feature.library.presentation.screen.section.LibrarySheets
 import nl.rhaydus.softcover.feature.library.presentation.screen.section.MastheadHeader
-import nl.rhaydus.softcover.feature.library.presentation.screen.section.SelectionHeader
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 @OptIn(
@@ -167,24 +143,10 @@ internal actual fun LibraryScreenLayout(
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = topAppBarState)
 
-    val haptics = LocalHaptics.current
-
-    val selectionBackState = rememberNavigationEventState(NavigationEventInfo.None)
-
-    NavigationBackHandler(
-        state = selectionBackState,
-        isBackEnabled = state.selectionMode,
-        onBackCancelled = {},
-        onBackCompleted = { runAction(OnExitSelectionModeAction()) },
-    )
-
-    val rearrangeBackState = rememberNavigationEventState(NavigationEventInfo.None)
-
-    NavigationBackHandler(
-        state = rearrangeBackState,
-        isBackEnabled = state.isRearranging,
-        onBackCancelled = {},
-        onBackCompleted = { runAction(OnExitRearrangeModeAction()) },
+    LibraryEditModeBackHandlers(
+        selectionMode = state.selectionMode,
+        isRearranging = state.isRearranging,
+        runAction = runAction,
     )
 
     Scaffold(
@@ -194,25 +156,11 @@ internal actual fun LibraryScreenLayout(
             modifier = Modifier.padding(it),
         ) {
             if (state.selectionMode) {
-                SelectionHeader(
+                LibrarySelectionHeader(
                     selectedCount = state.selectedBookIds.size,
                     pills = state.selectionPills,
                     isMoveMenuExpanded = state.isBulkMoveMenuExpanded,
-                    onExit = { runAction(OnExitSelectionModeAction()) },
-                    onMoveMenuExpandedChange = { expanded ->
-                        runAction(OnBulkMoveMenuExpandedChangeAction(expanded = expanded))
-                    },
-                    onMoveShelf = { status ->
-                        haptics.commit()
-
-                        runAction(OnBulkMoveShelfAction(status = status))
-                    },
-                    onAddToListClick = {
-                        runAction(OnBulkAddToListSheetShownAction(shown = true))
-                    },
-                    onRemoveClick = {
-                        runAction(OnBulkRemoveSheetExpandedChangeAction(shown = true))
-                    },
+                    runAction = runAction,
                 )
             } else {
                 val masthead = state.mastheadFor(currentTab?.id)
@@ -245,72 +193,17 @@ internal actual fun LibraryScreenLayout(
                     },
                 )
 
-                // Search is persistent (no toggle) per the redesign — always rendered outside selection mode.
-                Column {
-                    Spacer(modifier = Modifier.height(4.dp))
+                LibrarySearchAndControls(
+                    state = state,
+                    tab = currentTab,
+                    runAction = runAction,
+                )
 
-                    EditorialSearchField(
-                        query = state.searchQuery,
-                        onQueryChange = { query ->
-                            runAction(OnSearchQueryChangeAction(query = query))
-                        },
-                        onClearClick = {
-                            runAction(OnSearchQueryChangeAction(query = ""))
-                        },
-                        searchIcon = drawableIconResource(
-                            icon = SoftcoverIcon.Search,
-                            contentDescription = "Search",
-                        ),
-                        clearIcon = drawableIconResource(
-                            icon = SoftcoverIcon.Close,
-                            contentDescription = "Clear search",
-                        ),
-                        placeholder = "Search your collection",
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    LibraryControlLine(
-                        state = state,
-                        tab = currentTab,
-                        runAction = runAction,
-                    )
-                }
-
-                val activeFilterChips = currentTab?.id?.let { state.activeFilterChipsFor(tabId = it) }
-
-                AnimatedVisibility(
-                    visible = activeFilterChips != null && activeFilterChips.chips.isEmpty.not(),
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut(),
-                ) {
-                    val tabId = currentTab?.id
-                    val chips = activeFilterChips
-
-                    if (tabId != null && chips != null) {
-                        Column {
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            LibraryFilterChipRow(
-                                activeFilters = chips,
-                                onChipEvent = { event ->
-                                    when (event) {
-                                        is ChipEvent.Clicked ->
-                                            runAction(
-                                                OnActiveFilterChipClickedAction(
-                                                    tabId = tabId,
-                                                    key = event.key,
-                                                ),
-                                            )
-
-                                        is ChipEvent.Dismissed -> Unit
-                                        is ChipEvent.SpoilerToggled -> Unit
-                                    }
-                                },
-                            )
-                        }
-                    }
-                }
+                LibraryActiveFilterChipsSection(
+                    tabId = currentTab?.id,
+                    chips = currentTab?.id?.let { state.activeFilterChipsFor(tabId = it) },
+                    runAction = runAction,
+                )
 
                 // Hidden while rearranging because the pager is frozen then too — the rail promises a
                 // swipe that mode does not accept. Selection mode never reaches here: this whole
@@ -412,73 +305,12 @@ internal actual fun LibraryScreenLayout(
         )
     }
 
-    if (state.isArrangeSheetExpanded && currentTab != null) {
-        LibraryArrangeSheet(
-            state = state,
-            runAction = runAction,
-            onDismissRequest = {
-                runAction(OnArrangeSheetExpandedChangeAction(expanded = false))
-            },
-        )
-    }
-
-    if (state.isFilterSheetExpanded && currentTab != null) {
-        LibraryFilterSheet(
-            tabId = currentTab.id,
-            state = state,
-            runAction = runAction,
-            onDismissRequest = {
-                runAction(OnFilterSheetExpandedChangeAction(expanded = false))
-            },
-        )
-    }
-
-    if (state.isBulkRemoveSheetShown) {
-        SheetScaffold(
-            model = state.bulkRemoveSheet,
-            onEvent = { event ->
-                when (event) {
-                    SheetScaffoldEvent.PrimaryClicked -> {
-                        haptics.commit()
-
-                        runAction(OnBulkRemoveFromLibraryAction())
-                    }
-
-                    SheetScaffoldEvent.Dismissed -> runAction(OnBulkRemoveSheetExpandedChangeAction(shown = false))
-
-                    SheetScaffoldEvent.SecondaryClicked,
-                    SheetScaffoldEvent.HeaderActionClicked -> Unit
-                }
-            },
-            content = {},
-        )
-    }
-
-    val chooseListsSheet = state.chooseListsSheet
-
-    if (state.isBulkAddToListSheetShown && state.selectedBookIds.isNotEmpty() && chooseListsSheet != null) {
-        ChooseListsBottomSheet(
-            model = chooseListsSheet,
-            onEvent = { event ->
-                when (event) {
-                    is ChooseListsEvent.MembershipToggled -> {
-                        haptics.commit()
-
-                        runAction(
-                            OnBulkToggleListMembershipAction(
-                                listId = event.listId,
-                                currentMembership = event.membership,
-                            ),
-                        )
-                    }
-
-                    ChooseListsEvent.NewListRequested -> onCreateNewListClick()
-
-                    ChooseListsEvent.Dismissed -> runAction(OnBulkAddToListSheetShownAction(shown = false))
-                }
-            },
-        )
-    }
+    LibrarySheets(
+        state = state,
+        currentTabId = currentTab?.id,
+        runAction = runAction,
+        onCreateNewListClick = onCreateNewListClick,
+    )
 }
 
 @StandardPreview

@@ -284,6 +284,12 @@ internal data class BookDetailUiState(
     val heroTitle: String?
         get() = book?.title ?: initialCover?.title
 
+    val heroReleaseYear: Int?
+        get() = displayedEdition?.releaseYear.takeIf { it != -1 } ?: book?.releaseYear
+
+    val failedHeroEditionId: Int?
+        get() = book?.currentEdition?.id?.takeIf { it in failedMutationEditionIds }
+
     /** Null while unknown; blank when the book has no series. */
     val heroSeriesText: String?
         get() = book?.let { it.seriesText.orEmpty() } ?: initialCover?.seriesText

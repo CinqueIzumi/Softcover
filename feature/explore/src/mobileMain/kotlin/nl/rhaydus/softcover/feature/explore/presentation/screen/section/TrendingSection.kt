@@ -12,10 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
@@ -67,16 +67,11 @@ internal fun TrendingSection(
                     onEvent = onCardEvent,
                     modifier = Modifier
                         .width(118.dp)
-                        .let {
-                            if (card.isLoading) {
-                                it
-                            } else {
-                                it.staggeredEntry(
-                                    coordinator = entry,
-                                    index = index,
-                                )
-                            }
-                        },
+                        .bookCardStaggeredEntry(
+                            card = card,
+                            coordinator = entry,
+                            index = index,
+                        ),
                 )
             }
         }

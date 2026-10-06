@@ -25,36 +25,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
-import nl.rhaydus.designsystem.modifier.shakeOnError
-import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.bookDetailActionFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookHero
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensContent
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensToggle
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ScanEditionCallout
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveControlCard
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.bookDetailItems
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.lensItems
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 /**
- * Desktop Book Detail. On a wide surface (a full-screen pushed detail) it is a fixed identity sidebar
- * (cover, title, series, rating hero, and the shelve-control card) beside a scrolling narrative column
- * — a sticky lens toggle atop the Yours / The Book lens content (status/progress, your rating/tags/
- * review on Yours; about, tags, find-it, community reviews on The Book). In the narrower expanded
- * two-pane detail slot it collapses to a single scrolling column carrying the same sidebar content
- * inline above the narrative column. A static top strip holds the back/close control and the overflow
- * menu; there is no scroll-collapsing top bar. Every section, and the full set of modal overlays
- * ([BookDetailOverlays]), is shared shelf code — only the arrangement is desktop-specific. The whole
- * surface paints an opaque [Surface] background so a pushed detail never lets the screen beneath it
- * bleed through during the navigation transition.
+ * Desktop Book Detail. On a wide surface (a full-screen pushed detail) it is a fixed identity sidebar (cover, title,
+ * series, rating hero, the shelve-control card and the scan-edition callout) beside a scrolling narrative column — a
+ * sticky lens toggle atop the Yours / The Book lens content (status/progress, your rating/tags/review on Yours; about,
+ * tags, find-it, community reviews on The Book). In the narrower expanded two-pane detail slot it collapses to a single
+ * scrolling column carrying the same sidebar content inline above the narrative column. A static top strip holds the
+ * back/close control and the overflow menu; there is no scroll-collapsing top bar. Every section, and the full set of
+ * modal overlays ([BookDetailOverlays]), is shared shelf code — only the arrangement is desktop-specific. The whole
+ * surface paints an opaque [Surface] background so a pushed detail never lets the screen beneath it bleed through
+ * during the navigation transition.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -164,6 +159,15 @@ private fun TwoColumnContent(
                 celebrationKey = celebrationKey,
             )
 
+            state.scanEditionCallout?.let { scanEditionCallout ->
+                Spacer(modifier = Modifier.height(20.dp))
+
+                ScanEditionCallout(
+                    model = scanEditionCallout,
+                    runAction = runAction,
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp + bottomChromePadding()))
         }
 
@@ -198,21 +202,10 @@ private fun NarrativeColumn(
             contentPadding = PaddingValues(bottom = bottomChromePadding()),
             state = listState,
         ) {
-            stickyHeader {
-                LensToggle(
-                    model = state.lensToggle,
-                    onLensSelected = { runAction(OnLensSelectedAction(lens = it)) },
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            item {
-                LensContent(
-                    state = state,
-                    runAction = runAction,
-                )
-            }
+            lensItems(
+                state = state,
+                runAction = runAction,
+            )
         }
 
         DesktopVerticalScrollbar(
@@ -240,56 +233,12 @@ private fun SingleColumnContent(
             contentPadding = PaddingValues(bottom = bottomChromePadding()),
             state = listState,
         ) {
-            item {
-                BookHero(
-                    state = state,
-                    runAction = runAction,
-                    onCoverClick = onCoverClick,
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-            item {
-                ShelveControlCard(
-                    state = state,
-                    runAction = runAction,
-                    dateStyle = state.dateStyle,
-                    celebrationKey = celebrationKey,
-                )
-            }
-
-            state.scanEditionCallout?.let { scanEditionCallout ->
-                item { Spacer(modifier = Modifier.height(20.dp)) }
-
-                item {
-                    Callout(
-                        model = scanEditionCallout,
-                        onEvent = { event -> runAction(bookDetailActionFor(event)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                    )
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-            stickyHeader {
-                LensToggle(
-                    model = state.lensToggle,
-                    onLensSelected = { runAction(OnLensSelectedAction(lens = it)) },
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            item {
-                LensContent(
-                    state = state,
-                    runAction = runAction,
-                )
-            }
+            bookDetailItems(
+                state = state,
+                runAction = runAction,
+                celebrationKey = celebrationKey,
+                onCoverClick = onCoverClick,
+            )
         }
 
         DesktopVerticalScrollbar(
@@ -298,47 +247,6 @@ private fun SingleColumnContent(
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
                 .padding(vertical = 4.dp),
-        )
-    }
-}
-
-@Composable
-private fun BookHero(
-    state: BookDetailUiState,
-    runAction: (BookDetailAction) -> Unit,
-    onCoverClick: () -> Unit,
-) {
-    val currentEditionId = state.book?.currentEdition?.id
-
-    val editionMutationFailed =
-        currentEditionId != null && currentEditionId in state.failedMutationEditionIds
-
-    Box(
-        modifier = Modifier.shakeOnError(
-            trigger = editionMutationFailed,
-            onShakeEnd = {
-                if (currentEditionId != null) {
-                    runAction(
-                        OnClearMutationFailureAction(editionId = currentEditionId),
-                    )
-                }
-            },
-        ),
-    ) {
-        GeneralBookInfoSection(
-            edition = state.displayedEdition,
-            heroCover = state.heroCover,
-            backdropCover = state.heroBackdropCover,
-            isLoading = state.loadingBookDetails && state.book == null,
-            isExpired = state.deadlineRow?.isExpired == true,
-            rating = state.heroRating,
-            title = state.heroTitle,
-            seriesText = state.heroSeriesText,
-            releaseYear = state.displayedEdition?.releaseYear.takeIf { it != -1 }
-                ?: state.book?.releaseYear,
-            unreleasedBadge = state.unreleasedBadge,
-            ownedCoverBadge = state.ownedCoverBadge,
-            onCoverClick = onCoverClick,
         )
     }
 }

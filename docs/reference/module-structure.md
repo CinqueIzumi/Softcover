@@ -126,6 +126,7 @@ component/
 +              GalleryFixture  UiModelPreviews
 + header/      SectionHeader  PageMasthead
 +              MastheadRefreshAction(+UiModel, +Event)
++ layout/      DesktopScrollPage  (jvmMain; slot container, no UI model)
 + lists/       ChooseListsBottomSheet  ChooseListsUiModel/RowUiModel
 +              ChooseListsEvent  ListMembership
 + progress/    UpdateProgressBottomSheet  ProgressSheetUiModel

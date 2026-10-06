@@ -11,6 +11,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Page masthead** — `core:component/header` — a page's title block.
 - **Masthead refresh action** — `core:component/header` — trailing refresh button.
 - **Sidebar** — `core:component/sidebar` — a desktop source list of grouped, selectable rows.
+- **DesktopScrollPage** — `core:component/layout` (jvmMain) — the desktop scroll page shell with top bar, masthead and bottom bar slots; anatomy in `layout.md`.
 - **Editorial search field** — [detail](components/navigation.md#editorial-search-field) — persistent search pill for editorial headers.
 - **Bottom navigation** — [detail](components/navigation.md#bottom-navigation) — compact-width tab chrome, docked or floating.
 - **Navigation rail** — [detail](components/navigation.md#navigation-rail) — medium-width tab chrome.
@@ -41,7 +42,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 - **Cover** — `core:component/cover` — the app's only book-cover renderer; variant-driven, never blank.
 - **Coverless title cover** — `core:component/cover` — the monogram/title jacket `Cover` falls back to.
-- **Book card** — `core:component/bookcard` — the one book/series card (cover-only, column or row) for every list, rail and grid surface.
+- **Book card** — `core:component/bookcard` — the one book/series card (cover-only, column or row) for every list, rail and grid surface; `bookCardStaggeredEntry` skips the entry animation for stand-ins.
 - **Rhaydus shimmer image** — [detail](components/covers.md#rhaydus-shimmer-image) — the loader for every non-cover image.
 
 ## States & feedback

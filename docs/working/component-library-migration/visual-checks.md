@@ -54,3 +54,4 @@ shift; tick each during S12.
 - [ ] SS-10: book share card's rating now shows the ×2 verdict score, matching the verdict block.
 - [ ] SS-11: gallery drops DeadlineSummary "Expired" and TextField "Hero, long value"; palette tiles read "Selected" / "Unselected".
 - [ ] SS-C: share sheets lose Cancel (Share primary, Save secondary, close only on success); share card "p. 120 of 300 · 40%" and tag chips; library "Make this list ordered" as a text button (no ✶); explore chip gap and when-read stepper 9 → 8 dp, stepper icons; pace text ends "/day" ("0h 30m/day").
+- [ ] SD-2/3 (desktop): Reading rows enter staggered while loading; Library filter chips animate in and out, and on both platforms the last chips now fade while the row collapses (was an empty row shrinking); Library list stand-ins 12 → 6 (large) / 10 (compact); two-column book detail shows the scan-edition callout under the shelve card, 20 dp gap.

@@ -3,18 +3,11 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.IntSize
 import nl.rhaydus.designsystem.modifier.dismissOnEscape
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
@@ -34,15 +27,13 @@ internal actual fun FullScreenCoverScreenLayout(
     model: CoverUiModel,
     onNavigateUp: () -> Unit,
 ) {
-    var scale by remember { mutableFloatStateOf(MIN_SCALE) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    var containerSize by remember { mutableStateOf(IntSize.Zero) }
+    val zoomState = rememberCoverZoomState()
 
     FullScreenCoverViewer(
         model = model,
-        scale = scale,
-        offset = offset,
-        onSizeChanged = { containerSize = it },
+        scale = zoomState.scale,
+        offset = zoomState.offset,
+        onSizeChanged = { zoomState.containerSize = it },
         onNavigateUp = onNavigateUp,
         imageGestureModifier = Modifier
             .dismissOnEscape(onDismiss = onNavigateUp)
@@ -52,41 +43,21 @@ internal actual fun FullScreenCoverScreenLayout(
 
                 if (scrollY == 0f) return@onPointerEvent
 
-                val factor = if (scrollY < 0f) WHEEL_ZOOM_STEP else 1f / WHEEL_ZOOM_STEP
-
-                val newScale = (scale * factor).coerceIn(
-                    MIN_SCALE,
-                    MAX_SCALE,
-                )
-                scale = newScale
-
-                offset = clampCoverOffset(
-                    target = offset,
-                    currentScale = newScale,
-                    containerSize = containerSize,
-                )
+                zoomState.zoomBy(factor = if (scrollY < 0f) WHEEL_ZOOM_STEP else 1f / WHEEL_ZOOM_STEP)
             }
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->
                     change.consume()
 
-                    offset = clampCoverOffset(
-                        target = offset + dragAmount,
-                        currentScale = scale,
-                        containerSize = containerSize,
+                    zoomState.zoomBy(
+                        factor = 1f,
+                        pan = dragAmount,
                     )
                 }
             }
             .pointerInput(Unit) {
                 detectTapGestures(
-                    onDoubleTap = {
-                        if (scale > MIN_SCALE) {
-                            scale = MIN_SCALE
-                            offset = Offset.Zero
-                        } else {
-                            scale = DOUBLE_TAP_SCALE
-                        }
-                    },
+                    onDoubleTap = { zoomState.toggleDoubleTapZoom() },
                 )
             },
     )

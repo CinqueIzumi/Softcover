@@ -18,17 +18,27 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BookDetailUiStateTest {
-    private fun stubEdition(id: Int = 1): BookEdition = mockk<BookEdition>().also { mock ->
+    private fun stubEdition(
+        id: Int = 1,
+        releaseYear: Int = 0,
+    ): BookEdition = mockk<BookEdition>().also { mock ->
         every {
             mock.id
         } returns id
+        every {
+            mock.releaseYear
+        } returns releaseYear
     }
 
     private fun stubBook(
         userBook: UserBook?,
         currentEdition: BookEdition?,
         editions: List<BookEdition> = emptyList(),
+        releaseYear: Int = 0,
     ): Book = mockk<Book>().also { mock ->
+        every {
+            mock.releaseYear
+        } returns releaseYear
         every {
             mock.userBook
         } returns userBook
@@ -461,6 +471,136 @@ class BookDetailUiStateTest {
             state.heroTitle.shouldBeNull()
             state.heroSeriesText.shouldBeNull()
             state.heroRating.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class HeroReleaseYear {
+        @Test
+        fun `uses the displayed edition year when it is set`() {
+            // ----- Arrange -----
+            val edition = stubEdition(releaseYear = 2011)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = edition,
+                releaseYear = 1999,
+            )
+            val state = BookDetailUiState(book = book)
+
+            // ----- Act -----
+            val result = state.heroReleaseYear
+
+            // ----- Assert -----
+            result shouldBe 2011
+        }
+
+        @Test
+        fun `falls back to the book year when the edition year is -1`() {
+            // ----- Arrange -----
+            val edition = stubEdition(releaseYear = -1)
+            val book = stubBook(
+                userBook = null,
+                currentEdition = edition,
+                releaseYear = 1999,
+            )
+            val state = BookDetailUiState(book = book)
+
+            // ----- Act -----
+            val result = state.heroReleaseYear
+
+            // ----- Assert -----
+            result shouldBe 1999
+        }
+
+        @Test
+        fun `falls back to the book year when there is no edition`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = null,
+                releaseYear = 1999,
+            )
+            val state = BookDetailUiState(book = book)
+
+            // ----- Act -----
+            val result = state.heroReleaseYear
+
+            // ----- Assert -----
+            result shouldBe 1999
+        }
+
+        @Test
+        fun `is null when there is no book and no edition`() {
+            // ----- Arrange -----
+            val state = BookDetailUiState(
+                book = null,
+                initialCover = null,
+            )
+
+            // ----- Act -----
+            val result = state.heroReleaseYear
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+    }
+
+    @Nested
+    inner class FailedHeroEditionId {
+        @Test
+        fun `returns the current edition id when it is in failedMutationEditionIds`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = stubEdition(id = 7),
+            )
+            val state = BookDetailUiState(
+                book = book,
+                failedMutationEditionIds = setOf(
+                    7,
+                    8,
+                ),
+            )
+
+            // ----- Act -----
+            val result = state.failedHeroEditionId
+
+            // ----- Assert -----
+            result shouldBe 7
+        }
+
+        @Test
+        fun `is null when the current edition id is not in failedMutationEditionIds`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                userBook = null,
+                currentEdition = stubEdition(id = 7),
+            )
+            val state = BookDetailUiState(
+                book = book,
+                failedMutationEditionIds = setOf(8),
+            )
+
+            // ----- Act -----
+            val result = state.failedHeroEditionId
+
+            // ----- Assert -----
+            result.shouldBeNull()
+        }
+
+        @Test
+        fun `is null when there is no book`() {
+            // ----- Arrange -----
+            val state = BookDetailUiState(
+                book = null,
+                failedMutationEditionIds = setOf(7),
+            )
+
+            // ----- Act -----
+            val result = state.failedHeroEditionId
+
+            // ----- Assert -----
+            result.shouldBeNull()
         }
     }
 }

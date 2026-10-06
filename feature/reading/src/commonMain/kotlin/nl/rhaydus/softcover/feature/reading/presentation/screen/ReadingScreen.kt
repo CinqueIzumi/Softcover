@@ -1,7 +1,9 @@
 package nl.rhaydus.softcover.feature.reading.presentation.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -14,6 +16,8 @@ import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.LocalBookDetailPresenter
 import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.navigation.TabDestination
+import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
+import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenScreenModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
@@ -31,25 +35,29 @@ object ReadingScreen : Screen {
         val appNavigator = koinInject<AppNavigator>()
         val bookDetailPresenter = LocalBookDetailPresenter.current
 
-        ReadingScreenLayout(
-            state = state,
-            runAction = screenModel::runAction,
-            onBookClick = {
-                val destination = ScreenDestination.BookDetail(
-                    id = it.id,
-                    initialCover = BookInitialCover.fromBook(book = it),
-                )
+        val prefetcher = if (LocalInspectionMode.current) null else rememberBookDetailPrefetcher()
 
-                if (bookDetailPresenter != null) {
-                    bookDetailPresenter.open(destination)
-                } else {
-                    navigator.parent?.push(item = appNavigator.screen(destination))
-                }
-            },
-            onNavigateToSearch = {
-                tabNavigator.current = appNavigator.tab(TabDestination.EXPLORE)
-            },
-        )
+        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
+            ReadingScreenLayout(
+                state = state,
+                runAction = screenModel::runAction,
+                onBookClick = {
+                    val destination = ScreenDestination.BookDetail(
+                        id = it.id,
+                        initialCover = BookInitialCover.fromBook(book = it),
+                    )
+
+                    if (bookDetailPresenter != null) {
+                        bookDetailPresenter.open(destination)
+                    } else {
+                        navigator.parent?.push(item = appNavigator.screen(destination))
+                    }
+                },
+                onNavigateToSearch = {
+                    tabNavigator.current = appNavigator.tab(TabDestination.EXPLORE)
+                },
+            )
+        }
     }
 }
 

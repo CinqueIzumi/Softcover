@@ -9,6 +9,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -56,6 +62,46 @@ internal fun clampCoverOffset(
         ),
     )
 }
+
+@Stable
+internal class CoverZoomState {
+    var scale by mutableFloatStateOf(MIN_SCALE)
+        private set
+
+    var offset by mutableStateOf(Offset.Zero)
+        private set
+
+    var containerSize by mutableStateOf(IntSize.Zero)
+
+    fun toggleDoubleTapZoom() {
+        if (scale > MIN_SCALE) {
+            scale = MIN_SCALE
+            offset = Offset.Zero
+        } else {
+            scale = DOUBLE_TAP_SCALE
+        }
+    }
+
+    fun zoomBy(
+        factor: Float,
+        pan: Offset = Offset.Zero,
+    ) {
+        val newScale = (scale * factor).coerceIn(
+            MIN_SCALE,
+            MAX_SCALE,
+        )
+        scale = newScale
+
+        offset = clampCoverOffset(
+            target = offset + pan,
+            currentScale = newScale,
+            containerSize = containerSize,
+        )
+    }
+}
+
+@Composable
+internal fun rememberCoverZoomState(): CoverZoomState = remember { CoverZoomState() }
 
 /**
  * The full-screen cover viewer chrome shared by both platforms: a black surface, the cover scaled and

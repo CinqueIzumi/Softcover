@@ -11,40 +11,33 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
+import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
-import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
-import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
-import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
-import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnDismissPlanTodayAction
-import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.AlsoReadingHeader
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
-import nl.rhaydus.softcover.feature.reading.presentation.screen.section.FeaturedBookCard
-import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingBooksColumn
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingFeaturedSection
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingOverlays
+import nl.rhaydus.softcover.feature.reading.presentation.screen.section.rememberReadingCardEventHandler
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
 private val readingScrollState = ScrollState(initial = 0)
@@ -52,12 +45,9 @@ private val readingScrollState = ScrollState(initial = 0)
 /**
  * Desktop Reading: a static editorial header (greeting, subtitle, streak strip, explicit Refresh
  * control with hover/cursor affordances) above the scrolling currently-reading column, which carries
- * a persistent desktop scrollbar. No status-bar insets, no pager, and no pull-to-refresh — the
- * featured card, "also reading" list, progress sheet, and mark-as-read celebration all reuse the
- * shared shelf pieces ([FeaturedBookCard], `BookCard`, [ReadingOverlays],
- * [rememberMarkAsReadController]).
+ * a persistent desktop scrollbar. No status-bar insets, no pager, and no pull-to-refresh.
  *
- * The body is a non-lazy [verticalScroll] column rather than the shared lazy [ReadingBooksColumn]:
+ * The body is a non-lazy [verticalScroll] column rather than the lazy list the mobile layout uses:
  * the list is short and its items vary wildly in height (the tall featured card above short rows), so
  * a fully-measured [ScrollState] gives the scrollbar an exact extent and a stable thumb where a lazy
  * adapter's estimate would make it jump as the featured card scrolls out of view.
@@ -137,12 +127,6 @@ internal actual fun ReadingScreenLayout(
     }
 }
 
-/**
- * The desktop currently-reading column: the featured card (which fuses its own optional plan-today
- * nudge to its top edge) and the "also reading" rows, in a non-lazy [verticalScroll] so the
- * [DesktopVerticalScrollbar] thumb tracks the true content height. Mirrors the item order of the
- * shared [ReadingBooksColumn] (which the mobile layout uses lazily), reusing the same shared cards.
- */
 @Composable
 private fun DesktopReadingContent(
     state: ReadingScreenUiState,
@@ -151,74 +135,45 @@ private fun DesktopReadingContent(
     controller: MarkAsReadController,
     modifier: Modifier = Modifier,
 ) {
-    val featured = state.featuredBook
-    val isLoading = state.isLoadingFeatured
+    val onCardEvent = rememberReadingCardEventHandler(
+        alsoReading = state.alsoReading,
+        runAction = runAction,
+        onBookClick = onBookClick,
+    )
 
-    val isInspection = LocalInspectionMode.current
-    val prefetcher = if (isInspection) null else rememberBookDetailPrefetcher()
+    val entry = rememberStaggeredEntryCoordinator(key = "reading:rest")
 
     Box(modifier = modifier) {
-        CompositionLocalProvider(LocalBookDetailPrefetcher provides prefetcher) {
-            val onCardEvent = rememberPrefetchingBookCardEventHandler(
-                set = state.alsoReading,
-            ) { event, book ->
-                when (event) {
-                    is BookCardEvent.Clicked -> onBookClick(book)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(readingScrollState)
+                .padding(top = 8.dp, bottom = 24.dp + rememberBottomBarPadding()),
+        ) {
+            ReadingFeaturedSection(
+                state = state,
+                runAction = runAction,
+                onBookClick = onBookClick,
+                controller = controller,
+            )
 
-                    is BookCardEvent.TrailingClicked -> runAction(OnShowProgressSheetClickAction(book = book))
+            if (state.alsoReading.isEmpty.not()) {
+                AlsoReadingHeader(model = state.alsoReadingHeader)
 
-                    is BookCardEvent.ShakeEnded -> runAction(OnClearMutationFailureAction(bookId = book.id))
+                state.alsoReading.cards.forEachIndexed { index, card ->
+                    val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@forEachIndexed
 
-                    is BookCardEvent.LongClicked,
-                    is BookCardEvent.PressStarted,
-                    is BookCardEvent.MenuClicked,
-                        -> Unit
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(readingScrollState)
-                    .padding(top = 8.dp, bottom = 24.dp + rememberBottomBarPadding()),
-            ) {
-                FeaturedBookCard(
-                    book = featured,
-                    backdropCover = state.featuredBackdropCover,
-                    heroCover = state.featuredCover,
-                    progress = state.featuredProgress,
-                    deadlineCoverOverlay = state.deadlineCoverOverlays[featured.id],
-                    deadlineSummary = state.featuredDeadlineSummary,
-                    mutationFailed = featured.id in state.failedMutationBookIds,
-                    paceForecast = state.featuredBookPace,
-                    paceNudge = state.featuredPaceNudge,
-                    onDismissPlanToday = {
-                        runAction(OnDismissPlanTodayAction(bookId = featured.id))
-                    },
-                    runAction = runAction,
-                    onBookClick = onBookClick,
-                    modifier = controller.slideModifier(featured.id),
-                    isLoading = isLoading,
-                )
-
-                if (state.alsoReading.isEmpty.not()) {
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                        SectionHeader(model = state.alsoReadingHeader)
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    state.alsoReading.cards.forEach { card ->
-                        val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@forEach
-
-                        BookCard(
-                            model = card,
-                            onEvent = onCardEvent,
-                            modifier = controller.slideModifier(bookId),
-                        )
-                    }
+                    BookCard(
+                        model = card,
+                        onEvent = onCardEvent,
+                        modifier = Modifier
+                            .bookCardStaggeredEntry(
+                                card = card,
+                                coordinator = entry,
+                                index = index,
+                            )
+                            .then(controller.slideModifier(bookId)),
+                    )
                 }
             }
         }

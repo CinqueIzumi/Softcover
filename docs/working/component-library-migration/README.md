@@ -14,11 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** TP done (5,208 → 3,315 tests, 69.5 → 48 s summed). SL-3b blocked on F34.
-- **Next:** SD-0 (`steps/sd-screen-dedup.md`), only once the user says go.
-- **Open questions:** pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
-- **Verification:** full `testAndroidHostTest --continue` (3,315 tests, 0 failures) and `styleCheck` passed after TP-8 and the AAA-marker sweep; TP-5…TP-8 reviewer lost-coverage findings restored.
-- **Uncommitted:** none.
+- **State:** TP done. All SD shapes approved; SD-P, SD-2, SD-3 done (tested, reviewed, closed out). SL-3b blocked on F34.
+- **Next:** SD-1 (Explore; its desktop rails use `bookCardStaggeredEntry`); then SD-4/5/6 in parallel.
+- **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.- **Verification:** jvm compile, `styleCheck` (JDK 21; detekt fails on JDK 26) and `projectHealth` (reading, book_detail) pass; `BookDetailUiStateTest` and new `CoverZoomStateTest` pass.
+- **Uncommitted:** SD-P (`core/component` jvmMain and build file, design-system docs, `components.md` budget); SD-2/SD-3 code, build files and tests in reading, library, book_detail; `allowedApiDataEdges` rows (signed off); `bookCardStaggeredEntry` + 5 call sites; chips `AnimatedContent`; tracker docs.
 
 ## Local verification
 

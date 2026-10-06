@@ -1,12 +1,10 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,9 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.theme.StandardPreview
-import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
@@ -35,15 +31,9 @@ import nl.rhaydus.softcover.core.domain.model.BookSeries
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnClearMutationFailureAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.mapper.bookDetailActionFor
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookOverflowMenu
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.GeneralBookInfoSection
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensContent
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.LensToggle
-import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.ShelveControlCard
+import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.bookDetailItems
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
@@ -100,84 +90,12 @@ internal actual fun BookDetailScreenLayout(
                 .padding(innerPadding),
             state = lazyListState,
         ) {
-            item {
-                val currentEditionId = state.book?.currentEdition?.id
-
-                val editionMutationFailed =
-                    currentEditionId != null && currentEditionId in state.failedMutationEditionIds
-
-                Box(
-                    modifier = Modifier.shakeOnError(
-                        trigger = editionMutationFailed,
-                        onShakeEnd = {
-                            if (currentEditionId != null) {
-                                runAction(
-                                    OnClearMutationFailureAction(editionId = currentEditionId),
-                                )
-                            }
-                        },
-                    ),
-                ) {
-                    GeneralBookInfoSection(
-                        edition = state.displayedEdition,
-                        heroCover = state.heroCover,
-                        backdropCover = state.heroBackdropCover,
-                        isLoading = state.loadingBookDetails && state.book == null,
-                        isExpired = state.deadlineRow?.isExpired == true,
-                        rating = state.heroRating,
-                        title = state.heroTitle,
-                        seriesText = state.heroSeriesText,
-                        releaseYear = state.displayedEdition?.releaseYear.takeIf { it != -1 }
-                            ?: state.book?.releaseYear,
-                        unreleasedBadge = state.unreleasedBadge,
-                        ownedCoverBadge = state.ownedCoverBadge,
-                        onCoverClick = onCoverClick,
-                    )
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-            item {
-                ShelveControlCard(
-                    state = state,
-                    runAction = runAction,
-                    dateStyle = state.dateStyle,
-                    celebrationKey = celebrationKey,
-                )
-            }
-
-            state.scanEditionCallout?.let { scanEditionCallout ->
-                item { Spacer(modifier = Modifier.height(20.dp)) }
-
-                item {
-                    Callout(
-                        model = scanEditionCallout,
-                        onEvent = { event -> runAction(bookDetailActionFor(event)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                    )
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(20.dp)) }
-
-            stickyHeader {
-                LensToggle(
-                    model = state.lensToggle,
-                    onLensSelected = { lens -> runAction(OnLensSelectedAction(lens = lens)) },
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            item {
-                LensContent(
-                    state = state,
-                    runAction = runAction,
-                )
-            }
+            bookDetailItems(
+                state = state,
+                runAction = runAction,
+                celebrationKey = celebrationKey,
+                onCoverClick = onCoverClick,
+            )
 
             item { Spacer(modifier = Modifier.height(bottomChromePadding())) }
         }

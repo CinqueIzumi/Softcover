@@ -29,5 +29,9 @@ kotlin {
             api(libs.coil3)
             api(libs.kotlinx.datetime)
         }
+
+        jvmMain.dependencies {
+            api(libs.rhaydus.designsystemCore)
+        }
     }
 }
