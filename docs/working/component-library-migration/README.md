@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SD finished and committed (`089397df`); its step file is deleted. SL-15 logged. SL-3b blocked on F34.
-- **Next:** PF-1 per `steps/pf-premium-feel.md` § Sub-steps: audit every screen and sheet, write `premium-feel-audit.md`.
-- **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop single-column Profile layout and desktop search results after the SD fix round.
-- **Verification:** SD fix round: jvm + android compiles (explore, profile, settings, onboarding) and `styleCheck` (JDK 21) passed; reviewer clean. Earlier SD batch: `checkModuleGraph`, `projectHealth`, `SearchResultsSectionTest` (7) passed.
-- **Uncommitted:** this `## Now` rewrite only.
+- **State:** PF-1 done: `premium-feel-audit.md` holds 35 contract, 51 surface and 40 open-suggestion rows (9 marked bug), merged from seven parallel slice audits. C1 (`LocalHaptics` never provided, so six haptic sites are silent) is the top row. SL-15 logged. SL-3b blocked on F34.
+- **Next:** PF-2 per `steps/pf-premium-feel.md` § PF-2: walk the audit with the user tier by tier, recording a verdict on every row. Fix the audit's bug rows O6–O14 in this branch as soon as they are approved (see `## Decisions`); O14 and O15 need a device check first.
+- **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop single-column Profile layout and desktop search results after the SD fix round.
+- **Verification:** none needed (docs only, read-only audit). Last: SD fix round jvm + android compiles and `styleCheck` (JDK 21) passed; reviewer clean.
+- **Uncommitted:** `premium-feel-audit.md` (new), the PF-1 tick, this `## Now` and one decision line.
 
 ## Local verification
 
@@ -85,6 +85,7 @@ every sub-step's Verify.
 - Loading follows `component-contract.md` R12; SL retrofits the existing surfaces.
 - Every step builds the simplest shape: no style tables, single-variant fields or one-caller layers.
 - A step spanning several sessions splits into sub-steps, one session each, in the step file's `## Sub-steps`.
+- The premium-feel audit's bug rows (O6–O14) are fixed in this branch now, before S12, not held for PF-4.
 
 ## Baseline
 
