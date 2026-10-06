@@ -130,7 +130,6 @@ internal data class SettingsScreenUiState(
         examples = emptyMap(),
         selected = DateStyle.DAY_MONTH_YEAR,
     ),
-    val dropDownExpanded: Boolean = false,
     val appVersionName: String = "",
     val appVersionCode: Int = 0,
     val versionLabel: String = "Version $appVersionName ($appVersionCode)",
