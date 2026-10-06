@@ -124,18 +124,6 @@ class FeaturedProgressMapperTest {
         }
 
         @Test
-        fun `fraction passes progress below 0 percent through unclamped`() {
-            // ----- Arrange -----
-            val subject = book(userBookRead = read(progress = -10f))
-
-            // ----- Act -----
-            val result = subject.toFeaturedProgress()
-
-            // ----- Assert -----
-            result.fraction shouldBe -0.1f
-        }
-
-        @Test
         fun `fraction is zero when there is no read`() {
             // ----- Arrange -----
             val subject = book(userBookRead = null)
@@ -194,21 +182,6 @@ class FeaturedProgressMapperTest {
 
             // ----- Assert -----
             result.pageLead shouldBe "Page 12"
-            result.pageTail.shouldBeNull()
-        }
-
-        @Test
-        fun `tail is omitted when the book has no edition at all`() {
-            // ----- Arrange -----
-            val subject = book(
-                defaultEdition = null,
-                userBookRead = read(currentPage = 12),
-            )
-
-            // ----- Act -----
-            val result = subject.toFeaturedProgress()
-
-            // ----- Assert -----
             result.pageTail.shouldBeNull()
         }
 

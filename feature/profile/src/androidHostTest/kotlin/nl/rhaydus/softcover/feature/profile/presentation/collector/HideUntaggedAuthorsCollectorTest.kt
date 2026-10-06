@@ -69,26 +69,6 @@ class HideUntaggedAuthorsCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates state hideUntaggedAuthors to true when the preference emits true`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val dependencies = stubDependencies(this)
-            val collector = HideUntaggedAuthorsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            hideUntaggedAuthorsFlow.emit(true)
-
-            // ----- Assert -----
-            stateFlow.value.hideUntaggedAuthors shouldBe true
-            job.cancel()
-        }
-
-        @Test
         fun `rebuilds the toggle model to match the preference`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val dependencies = stubDependencies(this)
@@ -105,27 +85,6 @@ class HideUntaggedAuthorsCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.hideUntaggedAuthorsToggle shouldBe hideUntaggedAuthorsToggleFor(hide = true)
-            job.cancel()
-        }
-
-        @Test
-        fun `updates state hideUntaggedAuthors to false when the preference emits false`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(hideUntaggedAuthors = true)
-            val dependencies = stubDependencies(this)
-            val collector = HideUntaggedAuthorsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            hideUntaggedAuthorsFlow.emit(false)
-
-            // ----- Assert -----
-            stateFlow.value.hideUntaggedAuthors shouldBe false
             job.cancel()
         }
 

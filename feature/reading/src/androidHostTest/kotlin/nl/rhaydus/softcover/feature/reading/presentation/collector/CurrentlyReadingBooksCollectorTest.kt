@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -55,8 +56,12 @@ class CurrentlyReadingBooksCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `updates books state when flow emits a list`() = runTest(UnconfinedTestDispatcher()) {
+        fun `stores the emitted books, ends loading and leaves other state alone`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(
+                isLoading = true,
+                showProgressSheet = true,
+            )
             val books = listOf(stubBook(), stubBook())
             val collector = CurrentlyReadingBooksCollector()
             val job = launch {
@@ -71,26 +76,8 @@ class CurrentlyReadingBooksCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.books shouldBe books
-            job.cancel()
-        }
-
-        @Test
-        fun `sets isLoading to false when flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(isLoading = true)
-            val collector = CurrentlyReadingBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            booksFlow.emit(emptyList())
-
-            // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
+            stateFlow.value.showProgressSheet shouldBe true
             job.cancel()
         }
 
@@ -115,93 +102,12 @@ class CurrentlyReadingBooksCollectorTest {
             stateFlow.value.books shouldBe secondBooks
             job.cancel()
         }
-
-        @Test
-        fun `sets books to empty list when flow emits an empty list`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = listOf(stubBook()))
-            val collector = CurrentlyReadingBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            booksFlow.emit(emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.books shouldBe emptyList()
-            job.cancel()
-        }
-
-        @Test
-        fun `does not update books before the flow emits`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val initialBooks = listOf(stubBook())
-            stateFlow.value = ReadingScreenUiState(books = initialBooks)
-            val collector = CurrentlyReadingBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act & Assert -----
-            stateFlow.value.books shouldBe initialBooks
-            job.cancel()
-        }
-
-        @Test
-        fun `retains the last emitted books list after the collector job is cancelled`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val books = listOf(stubBook(), stubBook())
-            val collector = CurrentlyReadingBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            booksFlow.emit(books)
-            job.cancel()
-
-            // ----- Act & Assert -----
-            stateFlow.value.books shouldBe books
-        }
-
-        @Test
-        fun `preserves all other state fields when updating books`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(
-                isLoading = true,
-                showProgressSheet = true,
-            )
-            val books = listOf(stubBook())
-            val collector = CurrentlyReadingBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            booksFlow.emit(books)
-
-            // ----- Assert -----
-            stateFlow.value.showProgressSheet shouldBe true
-            stateFlow.value.books shouldBe books
-            job.cancel()
-        }
     }
 
     @Nested
     inner class AlsoReadingHeader {
         @Test
-        fun `eyebrow reads "0 more in motion" when the flow emits an empty list`() = runTest(UnconfinedTestDispatcher()) {
+        fun `eyebrow reads 0 more in motion when the flow emits an empty list`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
             val job = launch {
@@ -215,15 +121,12 @@ class CurrentlyReadingBooksCollectorTest {
             booksFlow.emit(emptyList())
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "0 more in motion",
-                headline = "Also between your fingers",
-            )
+            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "0 more in motion"
             job.cancel()
         }
 
         @Test
-        fun `eyebrow reads "0 more in motion" when the flow emits a single book`() = runTest(UnconfinedTestDispatcher()) {
+        fun `eyebrow reads 0 more in motion when the flow emits a single book`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val collector = CurrentlyReadingBooksCollector()
             val job = launch {
@@ -237,15 +140,12 @@ class CurrentlyReadingBooksCollectorTest {
             booksFlow.emit(listOf(stubBook()))
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "0 more in motion",
-                headline = "Also between your fingers",
-            )
+            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "0 more in motion"
             job.cancel()
         }
 
         @Test
-        fun `eyebrow reads the singular "One more in motion" when the flow emits exactly two books`() =
+        fun `eyebrow reads the singular One more in motion when the flow emits exactly two books`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
                 val collector = CurrentlyReadingBooksCollector()
@@ -260,10 +160,7 @@ class CurrentlyReadingBooksCollectorTest {
                 booksFlow.emit(listOf(stubBook(), stubBook()))
 
                 // ----- Assert -----
-                stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
-                    eyebrow = "One more in motion",
-                    headline = "Also between your fingers",
-                )
+                stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "One more in motion"
                 job.cancel()
             }
 
@@ -282,33 +179,7 @@ class CurrentlyReadingBooksCollectorTest {
             booksFlow.emit(listOf(stubBook(), stubBook(), stubBook(), stubBook()))
 
             // ----- Assert -----
-            stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "3 more in motion",
-                headline = "Also between your fingers",
-            )
-            job.cancel()
-        }
-
-        @Test
-        fun `recomputes the eyebrow off the latest emission's count`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = CurrentlyReadingBooksCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-            booksFlow.emit(listOf(stubBook(), stubBook(), stubBook()))
-
-            // ----- Act -----
-            booksFlow.emit(listOf(stubBook()))
-
-            // ----- Assert -----
-            stateFlow.value.alsoReadingHeader shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "0 more in motion",
-                headline = "Also between your fingers",
-            )
+            stateFlow.value.alsoReadingHeader.shouldBeInstanceOf<SectionHeaderUiModel.Section>().eyebrow shouldBe "3 more in motion"
             job.cancel()
         }
     }

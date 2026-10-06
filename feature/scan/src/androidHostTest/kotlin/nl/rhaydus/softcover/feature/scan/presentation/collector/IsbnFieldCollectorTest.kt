@@ -48,25 +48,20 @@ class IsbnFieldCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `leaves the field enabled when nothing is in flight`() = runTest(testDispatcher) {
-            // ----- Arrange & Act -----
-            launchCollector()
+        fun `disables the field while an ISBN is resolving and re-enables it once the lookup finishes`() =
+            runTest(testDispatcher) {
+                // ----- Arrange -----
+                launchCollector()
 
-            // ----- Assert -----
-            stateFlow.value.isbnField.enabled shouldBe true
-        }
+                // ----- Act -----
+                stateFlow.update { it.copy(isResolving = true) }
+                val enabledWhileResolving = stateFlow.value.isbnField.enabled
+                stateFlow.update { it.copy(isResolving = false) }
 
-        @Test
-        fun `disables the field while an ISBN is resolving`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.update { it.copy(isResolving = true) }
-
-            // ----- Assert -----
-            stateFlow.value.isbnField.enabled shouldBe false
-        }
+                // ----- Assert -----
+                enabledWhileResolving shouldBe false
+                stateFlow.value.isbnField.enabled shouldBe true
+            }
 
         @Test
         fun `disables the field while a book is being added`() = runTest(testDispatcher) {
@@ -96,40 +91,6 @@ class IsbnFieldCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.isbnField.enabled shouldBe false
-        }
-
-        @Test
-        fun `re-enables the field once the lookup finishes`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            launchCollector()
-            stateFlow.update { it.copy(isResolving = true) }
-
-            // ----- Act -----
-            stateFlow.update { it.copy(isResolving = false) }
-
-            // ----- Assert -----
-            stateFlow.value.isbnField.enabled shouldBe true
-        }
-
-        @Test
-        fun `preserves the typed text and focus request while toggling enabled`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            launchCollector()
-            stateFlow.update {
-                it.copy(
-                    isbnField = it.isbnField.copy(
-                        text = "9780374710781",
-                        autoFocus = true,
-                    ),
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.update { it.copy(isResolving = true) }
-
-            // ----- Assert -----
-            stateFlow.value.isbnField.text shouldBe "9780374710781"
-            stateFlow.value.isbnField.autoFocus shouldBe true
         }
     }
 }

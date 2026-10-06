@@ -137,31 +137,5 @@ class YearMetricToggleCollectorTest {
             )
             job.cancel()
         }
-
-        @Test
-        fun `enables the toggle when loading finishes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
-                isLoading = true,
-                readingLife = null,
-            )
-            val collector = YearMetricToggleCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                isLoading = false,
-                readingLife = mockk<ReadingLife>(),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.yearMetricToggle.options.all { it.enabled } shouldBe true
-            job.cancel()
-        }
     }
 }

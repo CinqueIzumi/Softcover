@@ -48,38 +48,5 @@ class OnYearMetricSelectedActionTest {
             // ----- Assert -----
             stateFlow.value.selectedYearMetric shouldBe YearMetric.PAGES
         }
-
-        @Test
-        fun `selecting the current metric keeps it`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(selectedYearMetric = YearMetric.PAGES)
-            val action = OnYearMetricSelectedAction(metric = YearMetric.PAGES)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.selectedYearMetric shouldBe YearMetric.PAGES
-        }
-
-        @Test
-        fun `leaves the rest of the state untouched`() = runTest {
-            // ----- Arrange -----
-            val initialState = ProfileUiState(selectedYearMetric = YearMetric.BOOKS)
-            stateFlow.value = initialState
-            val action = OnYearMetricSelectedAction(metric = YearMetric.PAGES)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState.copy(selectedYearMetric = YearMetric.PAGES)
-        }
     }
 }

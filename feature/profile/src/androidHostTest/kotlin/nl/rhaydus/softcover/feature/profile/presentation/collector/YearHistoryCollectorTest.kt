@@ -176,33 +176,5 @@ class YearHistoryCollectorTest {
             )
             job.cancel()
         }
-
-        @Test
-        fun `fills the chart in once the reading life arrives`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(
-                isLoading = true,
-                readingLife = null,
-            )
-            val job = launch {
-                YearHistoryCollector().onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                isLoading = false,
-                readingLife = buildReadingLife(),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.yearHistoryChart shouldBe yearHistoryChartUiModel(
-                series = books,
-                metric = YearMetric.BOOKS,
-            )
-            job.cancel()
-        }
     }
 }

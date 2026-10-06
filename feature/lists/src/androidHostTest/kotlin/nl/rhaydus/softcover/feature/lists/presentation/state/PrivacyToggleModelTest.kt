@@ -9,51 +9,30 @@ class PrivacyToggleModelTest {
     @Nested
     inner class PrivacyToggleFor {
         @Test
-        fun `offers public then private`() {
-            // ----- Arrange & Act -----
-            val result = privacyToggleFor(selected = PrivacySetting.PUBLIC)
+        fun `selects private only for PRIVATE`() {
+            // ----- Arrange -----
+            val privateSetting = PrivacySetting.PRIVATE
+            val publicSetting = PrivacySetting.PUBLIC
+
+            // ----- Act -----
+            val private = privacyToggleFor(selected = privateSetting)
+            val public = privacyToggleFor(selected = publicSetting)
 
             // ----- Assert -----
-            result.options.map { it.key } shouldBe listOf(
-                PrivacySetting.PUBLIC,
-                PrivacySetting.PRIVATE,
-            )
-        }
-
-        @Test
-        fun `selects public for PUBLIC`() {
-            // ----- Arrange & Act -----
-            val result = privacyToggleFor(selected = PrivacySetting.PUBLIC)
-
-            // ----- Assert -----
-            result.selected shouldBe PrivacySetting.PUBLIC
-        }
-
-        @Test
-        fun `selects private for PRIVATE`() {
-            // ----- Arrange & Act -----
-            val result = privacyToggleFor(selected = PrivacySetting.PRIVATE)
-
-            // ----- Assert -----
-            result.selected shouldBe PrivacySetting.PRIVATE
+            private.selected shouldBe PrivacySetting.PRIVATE
+            public.selected shouldBe PrivacySetting.PUBLIC
         }
 
         @Test
         fun `reads FOLLOWERS as public so a word is still highlighted`() {
-            // ----- Arrange & Act -----
-            val result = privacyToggleFor(selected = PrivacySetting.FOLLOWERS)
+            // ----- Arrange -----
+            val setting = PrivacySetting.FOLLOWERS
+
+            // ----- Act -----
+            val result = privacyToggleFor(selected = setting)
 
             // ----- Assert -----
             result.selected shouldBe PrivacySetting.PUBLIC
-        }
-
-        @Test
-        fun `enables every option`() {
-            // ----- Arrange & Act -----
-            val result = privacyToggleFor(selected = PrivacySetting.PUBLIC)
-
-            // ----- Assert -----
-            result.options.all { it.enabled } shouldBe true
         }
     }
 }

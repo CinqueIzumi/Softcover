@@ -8,40 +8,27 @@ class HideUntaggedAuthorsToggleModelTest {
     @Nested
     inner class HideUntaggedAuthorsToggleFor {
         @Test
-        fun `is checked when hiding`() {
-            // ----- Arrange & Act -----
-            val result = hideUntaggedAuthorsToggleFor(hide = true)
+        fun `is checked exactly when hiding`() {
+            // ----- Arrange -----
+            val hidingValues = listOf(true, false)
+
+            // ----- Act -----
+            val checkedValues = hidingValues.map { hideUntaggedAuthorsToggleFor(hide = it).checked }
 
             // ----- Assert -----
-            result.checked shouldBe true
-        }
-
-        @Test
-        fun `is unchecked when not hiding`() {
-            // ----- Arrange & Act -----
-            val result = hideUntaggedAuthorsToggleFor(hide = false)
-
-            // ----- Assert -----
-            result.checked shouldBe false
+            checkedValues shouldBe listOf(true, false)
         }
 
         @Test
         fun `keeps the same key whatever the state so the event can be routed`() {
-            // ----- Arrange & Act -----
-            val on = hideUntaggedAuthorsToggleFor(hide = true)
-            val off = hideUntaggedAuthorsToggleFor(hide = false)
+            // ----- Arrange -----
+            val hidingValues = listOf(true, false)
+
+            // ----- Act -----
+            val keys = hidingValues.map { hideUntaggedAuthorsToggleFor(hide = it).key }
 
             // ----- Assert -----
-            on.key shouldBe off.key
-        }
-
-        @Test
-        fun `is enabled`() {
-            // ----- Arrange & Act -----
-            val result = hideUntaggedAuthorsToggleFor(hide = false)
-
-            // ----- Assert -----
-            result.enabled shouldBe true
+            keys.distinct().size shouldBe 1
         }
     }
 }

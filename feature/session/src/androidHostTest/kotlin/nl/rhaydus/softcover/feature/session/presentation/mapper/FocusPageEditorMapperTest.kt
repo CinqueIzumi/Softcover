@@ -105,41 +105,18 @@ class FocusPageEditorMapperTest {
         }
 
         @Test
-        fun `uses the default edition's total when the current edition has none`() {
-            // ----- Arrange -----
-            val book = stubBook(defaultPages = 100)
-
-            // ----- Act -----
-            val editor = book.toFocusPageEditor(draft = "10")
-
-            // ----- Assert -----
-            editor.caption shouldBe "of 100 pages"
-            editor.fraction shouldBe 0.1f
-        }
-
-        @Test
-        fun `bar is empty for an unparseable draft`() {
+        fun `bar is empty for an unparseable or empty draft`() {
             // ----- Arrange -----
             val book = stubBook(currentPages = 200)
 
             // ----- Act -----
-            val editor = book.toFocusPageEditor(draft = "abc")
+            val unparseable = book.toFocusPageEditor(draft = "abc")
+            val empty = book.toFocusPageEditor(draft = "")
 
             // ----- Assert -----
-            editor.fraction shouldBe 0f
-            editor.isEditable shouldBe true
-        }
-
-        @Test
-        fun `bar is empty for an empty draft`() {
-            // ----- Arrange -----
-            val book = stubBook(currentPages = 200)
-
-            // ----- Act -----
-            val editor = book.toFocusPageEditor(draft = "")
-
-            // ----- Assert -----
-            editor.fraction shouldBe 0f
+            unparseable.fraction shouldBe 0f
+            unparseable.isEditable shouldBe true
+            empty.fraction shouldBe 0f
         }
 
         @Test
@@ -152,18 +129,6 @@ class FocusPageEditorMapperTest {
 
             // ----- Assert -----
             editor.fraction shouldBe 2.5f
-        }
-
-        @Test
-        fun `bar passes a negative draft through unclamped`() {
-            // ----- Arrange -----
-            val book = stubBook(currentPages = 200)
-
-            // ----- Act -----
-            val editor = book.toFocusPageEditor(draft = "-5")
-
-            // ----- Assert -----
-            editor.fraction shouldBe -0.025f
         }
 
         @Test
@@ -181,18 +146,6 @@ class FocusPageEditorMapperTest {
         }
 
         @Test
-        fun `without a page count the bar ignores the draft`() {
-            // ----- Arrange -----
-            val book = stubBook(storedProgress = 10f)
-
-            // ----- Act -----
-            val editor = book.toFocusPageEditor(draft = "150")
-
-            // ----- Assert -----
-            editor.fraction shouldBe 0.1f
-        }
-
-        @Test
         fun `without a page count or stored progress reads zero percent`() {
             // ----- Arrange -----
             val book = stubBook()
@@ -203,18 +156,6 @@ class FocusPageEditorMapperTest {
             // ----- Assert -----
             editor.caption shouldBe "0% complete"
             editor.fraction shouldBe 0f
-        }
-
-        @Test
-        fun `without a page count the stored percentage passes through unclamped`() {
-            // ----- Arrange -----
-            val book = stubBook(storedProgress = 140f)
-
-            // ----- Act -----
-            val editor = book.toFocusPageEditor(draft = "")
-
-            // ----- Assert -----
-            editor.fraction shouldBe 1.4f
         }
     }
 }

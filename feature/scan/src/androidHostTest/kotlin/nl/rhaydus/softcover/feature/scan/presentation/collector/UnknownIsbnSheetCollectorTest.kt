@@ -49,43 +49,18 @@ class UnknownIsbnSheetCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `derives the idle scaffold on launch when no book is being added`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            stateFlow.update { it.copy(unknownIsbnSheet = unknownIsbnSheetScaffoldFor(isAdding = true)) }
-
-            // ----- Act -----
-            launchCollector()
-
-            // ----- Assert -----
-            val sheet = stateFlow.value.unknownIsbnSheet
-            sheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
-        }
-
-        @Test
-        fun `isAddingBook true gives the adding scaffold`() = runTest(testDispatcher) {
+        fun `follows isAddingBook between the adding and idle scaffold`() = runTest(testDispatcher) {
             // ----- Arrange -----
             launchCollector()
 
             // ----- Act -----
             stateFlow.update { it.copy(isAddingBook = true) }
-
-            // ----- Assert -----
-            val sheet = stateFlow.value.unknownIsbnSheet
-            sheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = true)
-        }
-
-        @Test
-        fun `flipping isAddingBook back to false gives the idle scaffold`() = runTest(testDispatcher) {
-            // ----- Arrange -----
-            launchCollector()
-            stateFlow.update { it.copy(isAddingBook = true) }
-
-            // ----- Act -----
+            val whileAdding = stateFlow.value.unknownIsbnSheet
             stateFlow.update { it.copy(isAddingBook = false) }
 
             // ----- Assert -----
-            val sheet = stateFlow.value.unknownIsbnSheet
-            sheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
+            whileAdding shouldBe unknownIsbnSheetScaffoldFor(isAdding = true)
+            stateFlow.value.unknownIsbnSheet shouldBe unknownIsbnSheetScaffoldFor(isAdding = false)
         }
 
         @Test

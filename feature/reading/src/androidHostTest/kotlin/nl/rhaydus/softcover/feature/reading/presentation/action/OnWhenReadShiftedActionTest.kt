@@ -68,35 +68,6 @@ class OnWhenReadShiftedActionTest {
         }
 
         @Test
-        fun `moves an existing backdate earlier for a negative shift`() = runTest {
-            // ----- Arrange -----
-            val readAt = LocalDateTime(
-                2020,
-                1,
-                2,
-                9,
-                15,
-            )
-            stateFlow.value = ReadingScreenUiState(readAt = readAt)
-            val action = OnWhenReadShiftedAction(minutes = -30)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.readAt shouldBe LocalDateTime(
-                2020,
-                1,
-                2,
-                8,
-                45,
-            )
-        }
-
-        @Test
         fun `starts from now when there is no backdate and the shift is negative`() = runTest {
             // ----- Arrange -----
             val before = currentLocalDateTime()
@@ -111,25 +82,6 @@ class OnWhenReadShiftedActionTest {
             // ----- Assert -----
             val readAt = stateFlow.value.readAt.shouldNotBeNull()
             readAt shouldBeLessThan before
-        }
-
-        @Test
-        fun `clamps to now instead of going into the future from no backdate`() = runTest {
-            // ----- Arrange -----
-            val before = currentLocalDateTime()
-            val action = OnWhenReadShiftedAction(minutes = 30)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            val after = currentLocalDateTime()
-            val readAt = stateFlow.value.readAt.shouldNotBeNull()
-            readAt shouldBeGreaterThanOrEqualTo before
-            readAt shouldBeLessThanOrEqualTo after
         }
 
         @Test

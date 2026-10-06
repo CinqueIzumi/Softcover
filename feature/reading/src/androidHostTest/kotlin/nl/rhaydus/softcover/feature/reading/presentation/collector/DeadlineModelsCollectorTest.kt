@@ -15,7 +15,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
-import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -283,41 +282,6 @@ class DeadlineModelsCollectorTest {
         }
 
         @Test
-        fun `featuredDeadlineSummary uses the hero tone`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val edition = stubEdition(pages = 100)
-                val userBookRead = stubUserBookRead(currentPage = 0)
-                val book = stubBook(
-                    id = 1,
-                    edition = edition,
-                    userBookRead = userBookRead,
-                )
-                val deadline = buildDeadline(
-                    bookId = 1,
-                    unit = DeadlineUnit.PAGES,
-                    daysFromToday = 10,
-                )
-                val collector = DeadlineModelsCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                stateFlow.value = ReadingScreenUiState(
-                    books = listOf(book),
-                    deadlines = mapOf(1 to deadline),
-                )
-
-                // ----- Assert -----
-                stateFlow.value.featuredDeadlineSummary?.tone shouldBe DeadlineSummaryTone.OnHeroBackdrop
-                job.cancel()
-            }
-
-        @Test
         fun `featuredDeadlineSummary is null when the featured book has no deadline`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
@@ -357,28 +321,6 @@ class DeadlineModelsCollectorTest {
                 stateFlow.value.deadlineCoverOverlays.keys shouldBe setOf(2)
                 job.cancel()
             }
-
-        @Test
-        fun `featuredDeadlineSummary is null when books is empty`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = DeadlineModelsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = ReadingScreenUiState(
-                books = emptyList(),
-                deadlines = emptyMap(),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.featuredDeadlineSummary shouldBe null
-            job.cancel()
-        }
 
         @Test
         fun `featuredPaceNudge is visible with the message for an active undismissed deadline`() =

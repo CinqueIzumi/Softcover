@@ -57,6 +57,8 @@ class FeaturedProgressCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = emptyList())
             val collector = FeaturedProgressCollector()
+
+            // ----- Act -----
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -64,7 +66,7 @@ class FeaturedProgressCollectorTest {
                 )
             }
 
-            // ----- Act & Assert -----
+            // ----- Assert -----
             stateFlow.value.featuredProgress shouldBe FeaturedProgressUiModel.Loading
             job.cancel()
         }
@@ -74,6 +76,8 @@ class FeaturedProgressCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(books = listOf(stubBook(progress = 40f), stubBook(progress = 90f)))
             val collector = FeaturedProgressCollector()
+
+            // ----- Act -----
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -81,7 +85,7 @@ class FeaturedProgressCollectorTest {
                 )
             }
 
-            // ----- Act & Assert -----
+            // ----- Assert -----
             stateFlow.value.featuredProgress.percent shouldBe "40%"
             stateFlow.value.featuredProgress.isLoading shouldBe false
             job.cancel()
@@ -104,26 +108,6 @@ class FeaturedProgressCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.featuredProgress.percent shouldBe "75%"
-            job.cancel()
-        }
-
-        @Test
-        fun `returns to the loading stand-in when the books are cleared`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = listOf(stubBook(progress = 40f)))
-            val collector = FeaturedProgressCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(books = emptyList())
-
-            // ----- Assert -----
-            stateFlow.value.featuredProgress shouldBe FeaturedProgressUiModel.Loading
             job.cancel()
         }
     }

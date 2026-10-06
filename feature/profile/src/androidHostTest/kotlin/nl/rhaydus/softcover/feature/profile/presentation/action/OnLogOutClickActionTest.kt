@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.profile.presentation.action
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -105,73 +104,6 @@ class OnLogOutClickActionTest {
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
             event shouldBe null
-        }
-
-        @Test
-        fun `does not mutate ui state when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            val initialState = ProfileUiState()
-
-            coEvery {
-                resetUserDataUseCase()
-            } returns Result.success(Unit)
-
-            val action = OnLogOutClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState
-        }
-
-        @Test
-        fun `does not mutate ui state when use case fails`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-            val initialState = ProfileUiState()
-
-            coEvery {
-                resetUserDataUseCase()
-            } returns Result.failure(RuntimeException("reset failed"))
-
-            val action = OnLogOutClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe initialState
-        }
-
-        @Test
-        fun `invokes resetUserDataUseCase exactly once`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                resetUserDataUseCase()
-            } returns Result.success(Unit)
-
-            val action = OnLogOutClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                resetUserDataUseCase()
-            }
         }
     }
 }

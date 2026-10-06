@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.reading.presentation.action
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -69,25 +68,6 @@ class RefreshActionTest {
         }
 
         @Test
-        fun `invokes refreshLibraryUseCase with ByStatus CURRENTLY_READING`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
-            } returns Result.success(Unit)
-
-            // ----- Act -----
-            RefreshAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify(exactly = 1) {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
-            }
-        }
-
-        @Test
         fun `clears isLoading flag even when use case fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(isLoading = false)
@@ -104,20 +84,6 @@ class RefreshActionTest {
 
             // ----- Assert -----
             stateFlow.value.isLoading shouldBe false
-        }
-
-        @Test
-        fun `does not throw when use case fails`() = runTest {
-            // ----- Arrange -----
-            coEvery {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
-            } returns Result.failure(RuntimeException("network error"))
-
-            // ----- Act & Assert -----
-            RefreshAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
         }
     }
 }

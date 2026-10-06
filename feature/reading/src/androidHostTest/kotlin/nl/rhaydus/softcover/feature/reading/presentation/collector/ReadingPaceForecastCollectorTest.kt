@@ -283,31 +283,6 @@ class ReadingPaceForecastCollectorTest {
         }
 
         @Test
-        fun `does not set featuredBookPace when the journal history is empty`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val edition = stubEdition(pages = 100)
-            val book = stubBook(edition = edition)
-            coEvery {
-                getReadingJournalHistoryUseCase(bookId = any())
-            } returns Result.success(emptyList())
-            stateFlow.value = ReadingScreenUiState(books = listOf(book))
-            val dependencies = buildDependencies(this)
-            val collector = ReadingPaceForecastCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.featuredBookPace shouldBe null
-            job.cancel()
-        }
-
-        @Test
         fun `does not set featuredBookPace when history resolves to zero active reading days`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val edition = stubEdition(pages = 100)

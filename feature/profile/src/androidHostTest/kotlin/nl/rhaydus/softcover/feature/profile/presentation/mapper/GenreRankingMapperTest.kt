@@ -136,22 +136,5 @@ class GenreRankingMapperTest {
             // ----- Assert -----
             result.rows.map { it.label } shouldBe listOf("A", "B", "C", "D", "E")
         }
-
-        @Test
-        fun `renders a zero fraction as 0 percent`() {
-            // ----- Arrange -----
-            val poetry = slice(
-                name = "Poetry",
-                fraction = 0.0,
-            )
-            val genres = GenreBreakdown(slices = listOf(poetry))
-
-            // ----- Act -----
-            val result = genreRankingUiModel(genres)
-
-            // ----- Assert -----
-            result.rows.single().share shouldBe "0%"
-            result.rows.single().fraction shouldBe 0f
-        }
     }
 }

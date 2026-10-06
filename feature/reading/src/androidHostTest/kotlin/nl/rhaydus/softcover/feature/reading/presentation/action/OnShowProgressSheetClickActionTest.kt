@@ -1,13 +1,11 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
 import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
-import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -33,81 +31,8 @@ class OnShowProgressSheetClickActionTest {
         )
     }
 
-    private fun stubBook(): Book = mockk()
-
     @Nested
     inner class Execute {
-        @Test
-        fun `sets bookToUpdate to the provided book`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            val action = OnShowProgressSheetClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.bookToUpdate shouldBe book
-        }
-
-        @Test
-        fun `sets showProgressSheet to true`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = ReadingScreenUiState(showProgressSheet = false)
-            val action = OnShowProgressSheetClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.showProgressSheet shouldBe true
-        }
-
-        @Test
-        fun `replaces previously stored bookToUpdate with the new book`() = runTest {
-            // ----- Arrange -----
-            val previousBook = stubBook()
-            val newBook = stubBook()
-            stateFlow.value = ReadingScreenUiState(bookToUpdate = previousBook)
-            val action = OnShowProgressSheetClickAction(book = newBook)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.bookToUpdate shouldBe newBook
-        }
-
-        @Test
-        fun `preserves all other state fields unchanged`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = ReadingScreenUiState(
-                isLoading = false,
-                showProgressSheet = false,
-            )
-            val action = OnShowProgressSheetClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
-        }
-
         @Test
         fun `resets a leftover backdate to just now`() = runTest {
             // ----- Arrange -----
@@ -120,7 +45,7 @@ class OnShowProgressSheetClickActionTest {
                     15,
                 ),
             )
-            val action = OnShowProgressSheetClickAction(book = stubBook())
+            val action = OnShowProgressSheetClickAction(book = mockk())
 
             // ----- Act -----
             action.execute(

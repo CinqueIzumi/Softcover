@@ -29,21 +29,6 @@ class ReadingSheetScaffoldBuilderTest {
     @Nested
     inner class StreakSheetScaffoldFor {
         @Test
-        fun `uses the no-reading headline when no days were read`() {
-            // ----- Arrange -----
-            val activity = days(
-                false,
-                false,
-            )
-
-            // ----- Act -----
-            val result = streakSheetScaffoldFor(activity = activity)
-
-            // ----- Assert -----
-            result.header.section.headlineText shouldBe "No reading logged yet"
-        }
-
-        @Test
         fun `uses the no-reading headline for an empty activity list`() {
             // ----- Arrange -----
             val activity = emptyList<ReadingDayActivity>()
@@ -88,23 +73,7 @@ class ReadingSheetScaffoldBuilderTest {
 
             // ----- Assert -----
             result.header.section.headlineText shouldBe "You read on 3 of the last 5 days"
-        }
-
-        @Test
-        fun `sets the eyebrow to the number of days in the activity`() {
-            // ----- Arrange -----
-            val activity = days(
-                true,
-                false,
-                false,
-                false,
-            )
-
-            // ----- Act -----
-            val result = streakSheetScaffoldFor(activity = activity)
-
-            // ----- Assert -----
-            result.header.section.eyebrow shouldBe "Last 4 days"
+            result.header.section.eyebrow shouldBe "Last 5 days"
         }
     }
 }

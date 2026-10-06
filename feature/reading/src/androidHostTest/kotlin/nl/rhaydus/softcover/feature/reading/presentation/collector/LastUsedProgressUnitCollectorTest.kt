@@ -48,6 +48,8 @@ class LastUsedProgressUnitCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(ProgressUnit.PERCENTAGE)
             val collector = LastUsedProgressUnitCollector()
+
+            // ----- Act -----
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -65,6 +67,8 @@ class LastUsedProgressUnitCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(ProgressUnit.PAGE)
             val collector = LastUsedProgressUnitCollector()
+
+            // ----- Act -----
             val job = launch {
                 collector.onLaunch(
                     scope = scope,
@@ -82,6 +86,8 @@ class LastUsedProgressUnitCollectorTest {
             // ----- Arrange -----
             val dependencies = buildDependencies(ProgressUnit.TIME)
             val collector = LastUsedProgressUnitCollector()
+
+            // ----- Act -----
             val job = launch {
                 collector.onLaunch(
                     scope = scope,

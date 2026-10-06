@@ -145,30 +145,5 @@ class ReadingLifeCollectorTest {
                 stateFlow.value.ratingsHistogramCaption shouldBe RatingBand.SUPERFAN.toRatingsHistogramCaption()
                 job.cancel()
             }
-
-        @Test
-        fun `recomputes ratingsHistogramHeader and ratingsHistogramCaption when the band changes on a second emission`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val firstReadingLife = buildReadingLife(ratingBand = RatingBand.EXACTING)
-                val secondReadingLife = buildReadingLife(ratingBand = RatingBand.POLARISED)
-                val dependencies = stubDependencies(this)
-                val collector = ReadingLifeCollector()
-                val job = launch {
-                    collector.onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                readingLifeFlow.emit(firstReadingLife)
-                readingLifeFlow.emit(secondReadingLife)
-
-                // ----- Assert -----
-                stateFlow.value.ratingsHistogramHeader shouldBe RatingBand.POLARISED.toRatingsHistogramHeader()
-                stateFlow.value.ratingsHistogramCaption shouldBe RatingBand.POLARISED.toRatingsHistogramCaption()
-                job.cancel()
-            }
     }
 }

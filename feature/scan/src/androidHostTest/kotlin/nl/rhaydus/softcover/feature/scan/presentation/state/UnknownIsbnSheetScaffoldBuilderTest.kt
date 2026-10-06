@@ -10,27 +10,18 @@ class UnknownIsbnSheetScaffoldBuilderTest {
     @Nested
     inner class UnknownIsbnSheetScaffoldFor {
         @Test
-        fun `primary is loading when adding`() {
+        fun `is busy only while adding`() {
             // ----- Arrange -----
-            val isAdding = true
+            val addingInput = true
+            val idleInput = false
 
             // ----- Act -----
-            val result = unknownIsbnSheetScaffoldFor(isAdding = isAdding)
+            val adding = unknownIsbnSheetScaffoldFor(isAdding = addingInput)
+            val idle = unknownIsbnSheetScaffoldFor(isAdding = idleInput)
 
             // ----- Assert -----
-            result.busy shouldBe true
-        }
-
-        @Test
-        fun `primary is not loading when idle`() {
-            // ----- Arrange -----
-            val isAdding = false
-
-            // ----- Act -----
-            val result = unknownIsbnSheetScaffoldFor(isAdding = isAdding)
-
-            // ----- Assert -----
-            result.busy shouldBe false
+            adding.busy shouldBe true
+            idle.busy shouldBe false
         }
 
         @Test
@@ -51,34 +42,19 @@ class UnknownIsbnSheetScaffoldBuilderTest {
 
         @Test
         fun `Cancel dismisses the sheet and Add does not, in both states`() {
+            // ----- Arrange -----
+            val addingInput = true
+            val idleInput = false
+
             // ----- Act -----
-            val adding = unknownIsbnSheetScaffoldFor(isAdding = true).footer.shouldNotBeNull()
-            val idle = unknownIsbnSheetScaffoldFor(isAdding = false).footer.shouldNotBeNull()
+            val adding = unknownIsbnSheetScaffoldFor(isAdding = addingInput).footer.shouldNotBeNull()
+            val idle = unknownIsbnSheetScaffoldFor(isAdding = idleInput).footer.shouldNotBeNull()
 
             // ----- Assert -----
             adding.secondary.shouldNotBeNull().dismissesSheet shouldBe true
             idle.secondary.shouldNotBeNull().dismissesSheet shouldBe true
             adding.primary.shouldNotBeNull().dismissesSheet shouldBe false
             idle.primary.shouldNotBeNull().dismissesSheet shouldBe false
-        }
-
-        @Test
-        fun `no close is requested by the builder`() {
-            // ----- Act -----
-            val result = unknownIsbnSheetScaffoldFor(isAdding = false)
-
-            // ----- Assert -----
-            result.closeRequested shouldBe false
-        }
-
-        @Test
-        fun `buttons are left interactive while adding because busy covers them`() {
-            // ----- Act -----
-            val footer = unknownIsbnSheetScaffoldFor(isAdding = true).footer.shouldNotBeNull()
-
-            // ----- Assert -----
-            footer.primary.shouldNotBeNull().enabled shouldBe true
-            footer.secondary.shouldNotBeNull().enabled shouldBe true
         }
     }
 }

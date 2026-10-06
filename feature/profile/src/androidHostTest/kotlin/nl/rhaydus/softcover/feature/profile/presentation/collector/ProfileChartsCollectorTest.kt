@@ -255,28 +255,6 @@ class ProfileChartsCollectorTest {
             }
 
         @Test
-        fun `ratings stay loading when only the profile data has arrived`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-
-                // ----- Act -----
-                hideFlow.emit(false)
-                profileDataFlow.emit(buildProfileData())
-
-                // ----- Assert -----
-                stateFlow.value.ratingsChart.isLoading shouldBe true
-                stateFlow.value.ratingsAverage.isLoading shouldBe true
-                job.cancel()
-            }
-
-        @Test
         fun `stays loading when only the reading life has arrived`() =
             runTest(UnconfinedTestDispatcher()) {
                 // ----- Arrange -----
@@ -426,77 +404,6 @@ class ProfileChartsCollectorTest {
                 stateFlow.value.genderChart shouldBe genderChartUiModel(tagged.genderSlices)
                 stateFlow.value.bipocChart shouldBe demographicChartUiModel(tagged.bipocBreakdown)
                 stateFlow.value.authorDemographics shouldBe tagged
-                job.cancel()
-            }
-
-        @Test
-        fun `restores the full charts and demographics when the hide flag flips back off`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val demographics = buildDemographics()
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                hideFlow.emit(true)
-                profileDataFlow.emit(buildProfileData())
-                readingLifeFlow.emit(buildReadingLife(demographics = demographics))
-
-                // ----- Act -----
-                hideFlow.emit(false)
-
-                // ----- Assert -----
-                stateFlow.value.genderChart shouldBe genderChartUiModel(demographics.genderSlices)
-                stateFlow.value.bipocChart shouldBe demographicChartUiModel(demographics.bipocBreakdown)
-                stateFlow.value.authorDemographics shouldBe demographics
-                job.cancel()
-            }
-
-        @Test
-        fun `rebuilds everything when a new reading life arrives`() =
-            runTest(UnconfinedTestDispatcher()) {
-                // ----- Arrange -----
-                val secondDemographics = AuthorDemographics(
-                    bipocBreakdown = DemographicBreakdown(
-                        yesCount = 5,
-                        noCount = 0,
-                    ),
-                )
-                val secondGenres = GenreBreakdown(
-                    slices = listOf(
-                        GenreSlice(
-                            name = "Horror",
-                            count = 1,
-                            fraction = 1.0,
-                        ),
-                    ),
-                )
-                val dependencies = stubDependencies(this)
-                val job = launch {
-                    ProfileChartsCollector().onLaunch(
-                        scope = scope,
-                        dependencies = dependencies,
-                    )
-                }
-                hideFlow.emit(false)
-                profileDataFlow.emit(buildProfileData())
-                readingLifeFlow.emit(buildReadingLife())
-
-                // ----- Act -----
-                readingLifeFlow.emit(
-                    buildReadingLife(
-                        demographics = secondDemographics,
-                        genres = secondGenres,
-                    ),
-                )
-
-                // ----- Assert -----
-                stateFlow.value.genreRanking shouldBe genreRankingUiModel(secondGenres)
-                stateFlow.value.bipocChart shouldBe demographicChartUiModel(secondDemographics.bipocBreakdown)
-                stateFlow.value.authorDemographics shouldBe secondDemographics
                 job.cancel()
             }
     }

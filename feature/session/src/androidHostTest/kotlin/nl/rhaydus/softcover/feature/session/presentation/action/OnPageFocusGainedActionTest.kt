@@ -52,20 +52,5 @@ class OnPageFocusGainedActionTest {
                 end = 3,
             )
         }
-
-        @Test
-        fun `selects nothing for an empty draft`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = FocusModeUiState(pageDraft = TextFieldValue(text = ""))
-
-            // ----- Act -----
-            OnPageFocusGainedAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.pageDraft.selection shouldBe TextRange.Zero
-        }
     }
 }

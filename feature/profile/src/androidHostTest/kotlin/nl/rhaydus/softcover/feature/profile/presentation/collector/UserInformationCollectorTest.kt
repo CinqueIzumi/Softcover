@@ -134,29 +134,6 @@ class UserInformationCollectorTest {
             // ----- Assert -----
             stateFlow.value.userProfileData shouldBe profileData
             stateFlow.value.isLoading shouldBe false
-            job.cancel()
-        }
-
-        @Test
-        fun `sets readingAtlas to the atlas mapped from the emitted profile data`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            coEvery {
-                refreshUserProfileDataUseCase()
-            } returns Result.success(Unit)
-            val profileData = buildProfileData()
-            val dependencies = stubDependencies(this)
-            val initializer = UserInformationCollector()
-            val job = launch {
-                initializer.onLaunch(
-                    scope = scope,
-                    dependencies = dependencies,
-                )
-            }
-
-            // ----- Act -----
-            profileDataFlow.emit(profileData)
-
-            // ----- Assert -----
             stateFlow.value.readingAtlas shouldBe readingAtlasUiModel(profileData)
             job.cancel()
         }

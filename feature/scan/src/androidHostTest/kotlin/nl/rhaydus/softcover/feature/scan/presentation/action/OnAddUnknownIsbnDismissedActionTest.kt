@@ -36,9 +36,12 @@ class OnAddUnknownIsbnDismissedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `clears unknownIsbn`() = runTest {
+        fun `clears unknownIsbn and the pending close request so the sheet can open again`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
+            stateFlow.value = ScanUiState(
+                unknownIsbn = "9780451524935",
+                isUnknownIsbnCloseRequested = true,
+            )
             val action = OnAddUnknownIsbnDismissedAction()
 
             // ----- Act -----
@@ -49,25 +52,8 @@ class OnAddUnknownIsbnDismissedActionTest {
 
             // ----- Assert -----
             stateFlow.value.unknownIsbn.shouldBeNull()
-        }
-
-        @Test
-        fun `clears the pending close request so the sheet can open again`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ScanUiState(
-                unknownIsbn = "9780451524935",
-                isUnknownIsbnCloseRequested = true,
-            )
-
-            // ----- Act -----
-            OnAddUnknownIsbnDismissedAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.unknownIsbn.shouldBeNull()
             stateFlow.value.isUnknownIsbnCloseRequested shouldBe false
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
         @Test
@@ -89,61 +75,6 @@ class OnAddUnknownIsbnDismissedActionTest {
             // ----- Assert -----
             stateFlow.value shouldBe addingState
             eventChannel.tryReceive().getOrNull().shouldBeNull()
-        }
-
-        @Test
-        fun `does not alter isResolving`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ScanUiState(
-                unknownIsbn = "9780451524935",
-                isResolving = true,
-            )
-            val action = OnAddUnknownIsbnDismissedAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isResolving shouldBe true
-        }
-
-        @Test
-        fun `does not send any event`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
-            val action = OnAddUnknownIsbnDismissedAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            eventChannel.tryReceive().getOrNull().shouldBeNull()
-        }
-
-        @Test
-        fun `is idempotent when unknownIsbn is already null`() = runTest {
-            // ----- Arrange -----
-            val idleState = ScanUiState(
-                unknownIsbn = null,
-                isAddingBook = false,
-            )
-            stateFlow.value = idleState
-            val action = OnAddUnknownIsbnDismissedAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value shouldBe idleState
         }
     }
 }

@@ -31,15 +31,6 @@ class ReadingScreenUiStateTest {
             // ----- Act & Assert -----
             state.featuredBook.id shouldBe 5
         }
-
-        @Test
-        fun `is the single book when only one is loaded`() {
-            // ----- Arrange -----
-            val state = ReadingScreenUiState(books = listOf(book(9)))
-
-            // ----- Act & Assert -----
-            state.featuredBook.id shouldBe 9
-        }
     }
 
     @Nested

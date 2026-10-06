@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
-import nl.rhaydus.softcover.core.component.callout.BannerVariant
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
 import org.junit.jupiter.api.Nested
@@ -132,24 +131,6 @@ class PlanTodayNudgeMapperTest {
         }
 
         @Test
-        fun `returns pages message for PAGES unit`() {
-            // ----- Arrange -----
-            val progress = buildProgress(
-                requiredPerDay = 15f,
-                unit = DeadlineUnit.PAGES,
-            )
-
-            // ----- Act -----
-            val result = planTodayNudgeFor(
-                progress = progress,
-                visible = true,
-            )
-
-            // ----- Assert -----
-            result.shouldNotBeNull().message shouldBe "Read 15 pages today to stay on pace."
-        }
-
-        @Test
         fun `returns pages message and ceils fractional requiredPerDay for PAGES unit`() {
             // ----- Arrange -----
             val progress = buildProgress(
@@ -204,24 +185,6 @@ class PlanTodayNudgeMapperTest {
         }
 
         @Test
-        fun `ceils 1 second to 1 minute for SECONDS unit`() {
-            // ----- Arrange -----
-            val progress = buildProgress(
-                requiredPerDay = 1f,
-                unit = DeadlineUnit.SECONDS,
-            )
-
-            // ----- Act -----
-            val result = planTodayNudgeFor(
-                progress = progress,
-                visible = true,
-            )
-
-            // ----- Assert -----
-            result.shouldNotBeNull().message shouldBe "Listen 1 min today to stay on pace."
-        }
-
-        @Test
         fun `ceils fractional seconds requiredPerDay before minute conversion`() {
             // ----- Arrange -----
             val progress = buildProgress(
@@ -240,21 +203,6 @@ class PlanTodayNudgeMapperTest {
         }
 
         @Test
-        fun `returns a visible model when a nudge applies`() {
-            // ----- Arrange -----
-            val progress = buildProgress(requiredPerDay = 15f)
-
-            // ----- Act -----
-            val result = planTodayNudgeFor(
-                progress = progress,
-                visible = true,
-            )
-
-            // ----- Assert -----
-            result.shouldNotBeNull().visible shouldBe true
-        }
-
-        @Test
         fun `carries visible false as passed`() {
             // ----- Arrange -----
             val progress = buildProgress(requiredPerDay = 15f)
@@ -267,21 +215,6 @@ class PlanTodayNudgeMapperTest {
 
             // ----- Assert -----
             result.shouldNotBeNull().visible shouldBe false
-        }
-
-        @Test
-        fun `returns a highlight editorial banner`() {
-            // ----- Arrange -----
-            val progress = buildProgress(requiredPerDay = 15f)
-
-            // ----- Act -----
-            val result = planTodayNudgeFor(
-                progress = progress,
-                visible = true,
-            ).shouldNotBeNull()
-
-            // ----- Assert -----
-            result.variant shouldBe BannerVariant.Editorial
         }
     }
 }

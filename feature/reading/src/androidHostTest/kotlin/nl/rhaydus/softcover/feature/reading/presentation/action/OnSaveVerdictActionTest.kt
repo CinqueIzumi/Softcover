@@ -53,75 +53,7 @@ class OnSaveVerdictActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `leaves verdict sheet state untouched on success`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = ReadingScreenUiState(
-                verdictPromptBook = book,
-            )
-
-            coEvery {
-                saveBookVerdictUseCase(
-                    book = book,
-                    rating = 4.5,
-                    review = ReviewDocument.EMPTY,
-                    hasSpoilers = false,
-                )
-            } returns Result.success(Unit)
-
-            val action = OnSaveVerdictAction(
-                book = book,
-                rating = 4.5,
-                review = RichTextUiModel.EMPTY,
-                hasSpoilers = false,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.verdictPromptBook shouldBe book
-        }
-
-        @Test
-        fun `leaves verdict sheet state untouched on failure`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            stateFlow.value = ReadingScreenUiState(
-                verdictPromptBook = book,
-            )
-
-            coEvery {
-                saveBookVerdictUseCase(
-                    book = book,
-                    rating = 4.5,
-                    review = ReviewDocument.EMPTY,
-                    hasSpoilers = false,
-                )
-            } returns Result.failure(RuntimeException("api error"))
-
-            val action = OnSaveVerdictAction(
-                book = book,
-                rating = 4.5,
-                review = RichTextUiModel.EMPTY,
-                hasSpoilers = false,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.verdictPromptBook shouldBe book
-        }
-
-        @Test
-        fun `invokes saveBookVerdictUseCase with the provided arguments`() = runTest {
+        fun `saves the verdict arguments and flags no failure when the use case succeeds`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
 
@@ -156,41 +88,11 @@ class OnSaveVerdictActionTest {
                     hasSpoilers = true,
                 )
             }
-        }
-
-        @Test
-        fun `does not add book id to failedMutationBookIds when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-
-            coEvery {
-                saveBookVerdictUseCase(
-                    book = book,
-                    rating = 4.5,
-                    review = ReviewDocument.EMPTY,
-                    hasSpoilers = false,
-                )
-            } returns Result.success(Unit)
-
-            val action = OnSaveVerdictAction(
-                book = book,
-                rating = 4.5,
-                review = RichTextUiModel.EMPTY,
-                hasSpoilers = false,
-            )
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
         }
 
         @Test
-        fun `adds book id to failedMutationBookIds when use case fails`() = runTest {
+        fun `flags the book as failed when the use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
 

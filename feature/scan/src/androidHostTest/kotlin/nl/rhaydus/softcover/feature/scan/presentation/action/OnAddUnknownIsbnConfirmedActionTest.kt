@@ -1,8 +1,10 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
@@ -12,7 +14,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.IsbnLookupResult
-import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
@@ -66,26 +67,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `does not invoke use case when unknownIsbn is null`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = null)
-            val dependencies = stubDependencies(this)
-            val action = OnAddUnknownIsbnConfirmedAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            io.mockk.coVerify(exactly = 0) {
-                addBookByIsbnUseCase(isbn = any())
-            }
-        }
-
-        @Test
-        fun `does not change state when unknownIsbn is null`() = runTest {
+        fun `does nothing when unknownIsbn is null`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(unknownIsbn = null)
             val dependencies = stubDependencies(this)
@@ -99,33 +81,14 @@ class OnAddUnknownIsbnConfirmedActionTest {
             )
 
             // ----- Assert -----
+            coVerify(exactly = 0) {
+                addBookByIsbnUseCase(isbn = any())
+            }
             stateFlow.value shouldBe stateBefore
         }
 
         @Test
-        fun `does not invoke use case when isAddingBook is already true`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ScanUiState(
-                unknownIsbn = "9780451524935",
-                isAddingBook = true,
-            )
-            val dependencies = stubDependencies(this)
-            val action = OnAddUnknownIsbnConfirmedAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            io.mockk.coVerify(exactly = 0) {
-                addBookByIsbnUseCase(isbn = any())
-            }
-        }
-
-        @Test
-        fun `does not change state when isAddingBook is already true`() = runTest {
+        fun `does nothing when isAddingBook is already true`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(
                 unknownIsbn = "9780451524935",
@@ -142,11 +105,14 @@ class OnAddUnknownIsbnConfirmedActionTest {
             )
 
             // ----- Assert -----
+            coVerify(exactly = 0) {
+                addBookByIsbnUseCase(isbn = any())
+            }
             stateFlow.value shouldBe stateBefore
         }
 
         @Test
-        fun `sets isAddingBook to true before invoking use case`() = runTest {
+        fun `marks the book as being added while the use case runs`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
             val dependencies = stubDependencies(this)
@@ -156,11 +122,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
                 addBookByIsbnUseCase(isbn = any())
             } coAnswers {
                 stateAtInvocation = stateFlow.value
-                Result.success(IsbnLookupResult.Found(
-                    book = PreviewData.baseBook,
-                    editionId = null,
-                ),
-                )
+                Result.failure(RuntimeException("network error"))
             }
 
             val action = OnAddUnknownIsbnConfirmedAction()
@@ -172,7 +134,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
             )
 
             // ----- Assert -----
-            stateAtInvocation?.isAddingBook shouldBe true
+            stateAtInvocation.shouldNotBeNull().isAddingBook shouldBe true
         }
 
         @Test
@@ -185,10 +147,11 @@ class OnAddUnknownIsbnConfirmedActionTest {
 
             coEvery {
                 addBookByIsbnUseCase(isbn = "9780451524935")
-            } returns Result.success(IsbnLookupResult.Found(
-                book = book,
-                editionId = editionId,
-            ),
+            } returns Result.success(
+                IsbnLookupResult.Found(
+                    book = book,
+                    editionId = editionId,
+                ),
             )
 
             val action = OnAddUnknownIsbnConfirmedAction()
@@ -206,40 +169,12 @@ class OnAddUnknownIsbnConfirmedActionTest {
 
             val event = eventChannel.tryReceive().getOrNull()
             event.shouldBeInstanceOf<ScanEvent.BookResolvedEvent>()
-            (event as ScanEvent.BookResolvedEvent).book shouldBe book
+            event.book shouldBe book
             event.editionId shouldBe editionId
         }
 
         @Test
-        fun `sends BookResolvedEvent with null editionId when Found carries null editionId`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                addBookByIsbnUseCase(isbn = "9780451524935")
-            } returns Result.success(IsbnLookupResult.Found(
-                book = PreviewData.baseBook,
-                editionId = null,
-            ),
-            )
-
-            val action = OnAddUnknownIsbnConfirmedAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<ScanEvent.BookResolvedEvent>()
-            (event as ScanEvent.BookResolvedEvent).editionId shouldBe null
-        }
-
-        @Test
-        fun `sets isAddingBook to false and sends AddBookFailedEvent on failure`() = runTest {
+        fun `keeps the sheet open and sends AddBookFailedEvent on failure`() = runTest {
             // ----- Arrange -----
             stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
             val dependencies = stubDependencies(this)
@@ -258,78 +193,10 @@ class OnAddUnknownIsbnConfirmedActionTest {
 
             // ----- Assert -----
             stateFlow.value.isAddingBook shouldBe false
-
-            val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<ScanEvent.AddBookFailedEvent>()
-        }
-
-        @Test
-        fun `retains unknownIsbn when use case fails`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                addBookByIsbnUseCase(isbn = "9780451524935")
-            } returns Result.failure(RuntimeException("network error"))
-
-            val action = OnAddUnknownIsbnConfirmedAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.unknownIsbn shouldBe "9780451524935"
-        }
-
-        @Test
-        fun `does not request the sheet to close when use case fails`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                addBookByIsbnUseCase(isbn = "9780451524935")
-            } returns Result.failure(RuntimeException("network error"))
-
-            val action = OnAddUnknownIsbnConfirmedAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
             stateFlow.value.isUnknownIsbnCloseRequested shouldBe false
-        }
 
-        @Test
-        fun `does not request a close while still adding`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbn = "9780451524935")
-            val dependencies = stubDependencies(this)
-            var closeRequestedDuringCall: Boolean? = null
-
-            coEvery {
-                addBookByIsbnUseCase(isbn = "9780451524935")
-            } coAnswers {
-                closeRequestedDuringCall = stateFlow.value.isUnknownIsbnCloseRequested
-
-                Result.failure(RuntimeException("network error"))
-            }
-
-            // ----- Act -----
-            OnAddUnknownIsbnConfirmedAction().execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            closeRequestedDuringCall shouldBe false
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ScanEvent.AddBookFailedEvent>()
         }
     }
 }

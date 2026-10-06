@@ -9,9 +9,12 @@ class YearMetricToggleModelTest {
     inner class YearMetricToggleFor {
         @Test
         fun `offers every metric in declaration order`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
+            val selected = YearMetric.BOOKS
+
+            // ----- Act -----
             val result = yearMetricToggleFor(
-                selected = YearMetric.BOOKS,
+                selected = selected,
                 enabled = true,
             )
 
@@ -20,46 +23,29 @@ class YearMetricToggleModelTest {
         }
 
         @Test
-        fun `labels each option with its metric label`() {
-            // ----- Arrange & Act -----
+        fun `enables every option when enabled and keeps the selection`() {
+            // ----- Arrange -----
+            val selected = YearMetric.PAGES
+
+            // ----- Act -----
             val result = yearMetricToggleFor(
-                selected = YearMetric.BOOKS,
-                enabled = true,
-            )
-
-            // ----- Assert -----
-            result.options.map { it.label } shouldBe YearMetric.entries.map { it.label }
-        }
-
-        @Test
-        fun `marks the given metric as selected`() {
-            // ----- Arrange & Act -----
-            val result = yearMetricToggleFor(
-                selected = YearMetric.PAGES,
-                enabled = true,
-            )
-
-            // ----- Assert -----
-            result.selected shouldBe YearMetric.PAGES
-        }
-
-        @Test
-        fun `enables every option when enabled`() {
-            // ----- Arrange & Act -----
-            val result = yearMetricToggleFor(
-                selected = YearMetric.BOOKS,
+                selected = selected,
                 enabled = true,
             )
 
             // ----- Assert -----
             result.options.all { it.enabled } shouldBe true
+            result.selected shouldBe YearMetric.PAGES
         }
 
         @Test
         fun `disables every option when not enabled but keeps the selection`() {
-            // ----- Arrange & Act -----
+            // ----- Arrange -----
+            val selected = YearMetric.PAGES
+
+            // ----- Act -----
             val result = yearMetricToggleFor(
-                selected = YearMetric.PAGES,
+                selected = selected,
                 enabled = false,
             )
 

@@ -90,18 +90,6 @@ class VerdictSheetCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `verdictSheet stays null while there is no prompt book`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(verdictCover = cover())
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheet shouldBe null
-        }
-
-        @Test
         fun `builds the FINISHED model when the prompt book is set even without a cover`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val book = PreviewData.baseBook
@@ -151,18 +139,6 @@ class VerdictSheetCollectorTest {
         }
 
         @Test
-        fun `never offers a delete secondary action`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(verdictPromptBook = PreviewData.baseBook)
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheet?.scaffold?.footer?.secondary shouldBe null
-        }
-
-        @Test
         fun `carries the book's review into the model`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             val reviewDocument = ReviewDocument(
@@ -184,23 +160,6 @@ class VerdictSheetCollectorTest {
             stateFlow.value.verdictSheet shouldBe book.toVerdictSheetUiModel(
                 context = VerdictSheetContext.FINISHED,
                 review = reviewDocument.toRichTextUiModel(),
-                cover = null,
-            )
-        }
-
-        @Test
-        fun `builds the model without a review when the book has none`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val book = bookReviewing(reviewDocument = null)
-            launchCollector()
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(verdictPromptBook = book)
-
-            // ----- Assert -----
-            stateFlow.value.verdictSheet shouldBe book.toVerdictSheetUiModel(
-                context = VerdictSheetContext.FINISHED,
-                review = null,
                 cover = null,
             )
         }

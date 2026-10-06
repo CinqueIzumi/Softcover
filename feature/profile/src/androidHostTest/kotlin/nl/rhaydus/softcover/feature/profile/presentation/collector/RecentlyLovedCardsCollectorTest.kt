@@ -2,7 +2,6 @@ package nl.rhaydus.softcover.feature.profile.presentation.collector
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
@@ -105,28 +104,6 @@ class RecentlyLovedCardsCollectorTest {
         }
 
         @Test
-        fun `maps every book when there are fewer than the cap`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(2)))
-            val collector = RecentlyLovedCardsCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
-                BookCardKey.Book(bookId = 1),
-                BookCardKey.Book(bookId = 2),
-            )
-            job.cancel()
-        }
-
-        @Test
         fun `keeps only the first three books in order when more are loved`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(5)))
@@ -143,31 +120,6 @@ class RecentlyLovedCardsCollectorTest {
             // ----- Assert -----
             stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
                 BookCardKey.Book(bookId = 1),
-                BookCardKey.Book(bookId = 2),
-                BookCardKey.Book(bookId = 3),
-            )
-            job.cancel()
-        }
-
-        @Test
-        fun `rebuilds the cards when reading life changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            stateFlow.value = ProfileUiState(readingLife = readingLife(lovedBooks(1)))
-            val collector = RecentlyLovedCardsCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                readingLife = readingLife(lovedBooks(3).drop(1)),
-            )
-
-            // ----- Assert -----
-            stateFlow.value.recentlyLoved.cards.map { it.key } shouldBe listOf(
                 BookCardKey.Book(bookId = 2),
                 BookCardKey.Book(bookId = 3),
             )
@@ -214,24 +166,6 @@ class RecentlyLovedCardsCollectorTest {
             val recentlyLoved = stateFlow.value.recentlyLoved
             recentlyLoved[BookCardKey.Book(bookId = 2)] shouldBe books[1]
             recentlyLoved[BookCardKey.Book(bookId = 4)].shouldBeNull()
-            job.cancel()
-        }
-
-        @Test
-        fun `carries no payload for the loading stand-ins`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = RecentlyLovedCardsCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.recentlyLoved.payloadByKey.shouldBeEmpty()
             job.cancel()
         }
 

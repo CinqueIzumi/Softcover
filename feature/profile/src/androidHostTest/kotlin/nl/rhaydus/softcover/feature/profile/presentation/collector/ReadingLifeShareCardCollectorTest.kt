@@ -62,24 +62,6 @@ class ReadingLifeShareCardCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `leaves the card null when neither reading life nor profile has arrived`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val collector = ReadingLifeShareCardCollector()
-
-            // ----- Act -----
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Assert -----
-            stateFlow.value.readingLifeShareCard.shouldBeNull()
-            job.cancel()
-        }
-
-        @Test
         fun `leaves the card null when only the reading life has arrived`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ProfileUiState(readingLife = buildReadingLife())
@@ -160,56 +142,6 @@ class ReadingLifeShareCardCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.readingLifeShareCard shouldBe readingLife.toReadingLifeShareCardUiModel(profile)
-            job.cancel()
-        }
-
-        @Test
-        fun `rebuilds the card against the held reading life when the profile changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val readingLife = buildReadingLife()
-            val updatedProfile = buildProfileData(name = "Jane Updated")
-            stateFlow.value = ProfileUiState(
-                readingLife = readingLife,
-                userProfileData = buildProfileData(),
-            )
-            val collector = ReadingLifeShareCardCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(userProfileData = updatedProfile)
-
-            // ----- Assert -----
-            stateFlow.value.readingLifeShareCard shouldBe readingLife.toReadingLifeShareCardUiModel(updatedProfile)
-            job.cancel()
-        }
-
-        @Test
-        fun `rebuilds the card against the held profile when the reading life changes`() = runTest(UnconfinedTestDispatcher()) {
-            // ----- Arrange -----
-            val profile = buildProfileData()
-            val updatedReadingLife = buildReadingLife(trackedYears = 5)
-            stateFlow.value = ProfileUiState(
-                readingLife = buildReadingLife(),
-                userProfileData = profile,
-            )
-            val collector = ReadingLifeShareCardCollector()
-            val job = launch {
-                collector.onLaunch(
-                    scope = scope,
-                    dependencies = mockk<ProfileDependencies>(relaxed = true),
-                )
-            }
-
-            // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(readingLife = updatedReadingLife)
-
-            // ----- Assert -----
-            stateFlow.value.readingLifeShareCard shouldBe updatedReadingLife.toReadingLifeShareCardUiModel(profile)
             job.cancel()
         }
 

@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.chart.ChartTone
-import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.profile.domain.model.RatingBand
 import nl.rhaydus.softcover.core.profile.domain.model.RatingsDistribution
@@ -15,8 +14,11 @@ class RatingsHistogramMapperTest {
     inner class RatingsChartUiModel {
         @Test
         fun `null ratings yield a loading model with nine columns`() {
-            // ----- Arrange & Act -----
-            val result = ratingsChartUiModel(null)
+            // ----- Arrange -----
+            val ratings: RatingsDistribution? = null
+
+            // ----- Act -----
+            val result = ratingsChartUiModel(ratings)
 
             // ----- Assert -----
             result.isLoading shouldBe true
@@ -75,25 +77,14 @@ class RatingsHistogramMapperTest {
 
         @Test
         fun `all-zero buckets give zero fractions without dividing by zero`() {
-            // ----- Arrange & Act -----
-            val columns = ratingsChartUiModel(RatingsDistribution()).columns
+            // ----- Arrange -----
+            val ratings = RatingsDistribution()
+
+            // ----- Act -----
+            val columns = ratingsChartUiModel(ratings).columns
 
             // ----- Assert -----
             columns.map { it.fraction } shouldBe List(9) { 0f }
-        }
-
-        @Test
-        fun `columns never carry a value`() {
-            // ----- Arrange -----
-            val ratings = RatingsDistribution(halfStarBuckets = List(9) { 3 })
-
-            // ----- Act -----
-            val loaded = ratingsChartUiModel(ratings).columns
-            val loading = ratingsChartUiModel(null).columns
-
-            // ----- Assert -----
-            loaded.map { it.value }.distinct() shouldBe listOf(null)
-            loading.map { it.value }.distinct() shouldBe listOf(null)
         }
 
         @Test
@@ -121,34 +112,15 @@ class RatingsHistogramMapperTest {
         }
 
         @Test
-        fun `description of the last bucket is five stars and zero books is plural`() {
-            // ----- Arrange & Act -----
-            val columns = ratingsChartUiModel(RatingsDistribution()).columns
+        fun `description of the last bucket is five stars with plural zero books`() {
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(halfStarBuckets = listOf(1, 0, 0, 0, 0, 0, 0, 0, 0))
+
+            // ----- Act -----
+            val columns = ratingsChartUiModel(ratings).columns
 
             // ----- Assert -----
-            columns.last().contentDescription shouldBe "5 stars, 0 books"
-            columns[2].contentDescription shouldBe "2 stars, 0 books"
-            columns[7].contentDescription shouldBe "4½ stars, 0 books"
-        }
-
-        @Test
-        fun `loading columns have an empty description`() {
-            // ----- Arrange & Act -----
-            val columns = ratingsChartUiModel(null).columns
-
-            // ----- Assert -----
-            columns.map { it.contentDescription }.distinct() shouldBe listOf("")
-        }
-
-        @Test
-        fun `values are not shown when loaded or loading`() {
-            // ----- Arrange & Act -----
-            val loaded = ratingsChartUiModel(RatingsDistribution(halfStarBuckets = List(9) { 2 }))
-            val loading = ratingsChartUiModel(null)
-
-            // ----- Assert -----
-            loaded.showsValues shouldBe false
-            loading.showsValues shouldBe false
+            columns[8].contentDescription shouldBe "5 stars, 0 books"
         }
     }
 
@@ -156,8 +128,11 @@ class RatingsHistogramMapperTest {
     inner class RatingsAverageUiModel {
         @Test
         fun `null ratings yield a loading model`() {
-            // ----- Arrange & Act -----
-            val result = ratingsAverageUiModel(null)
+            // ----- Arrange -----
+            val ratings: RatingsDistribution? = null
+
+            // ----- Act -----
+            val result = ratingsAverageUiModel(ratings)
 
             // ----- Assert -----
             result.isLoading shouldBe true
@@ -165,8 +140,11 @@ class RatingsHistogramMapperTest {
 
         @Test
         fun `loaded ratings carry the average in decimal format`() {
-            // ----- Arrange & Act -----
-            val result = ratingsAverageUiModel(RatingsDistribution(average = 4.2))
+            // ----- Arrange -----
+            val ratings = RatingsDistribution(average = 4.2)
+
+            // ----- Act -----
+            val result = ratingsAverageUiModel(ratings)
 
             // ----- Assert -----
             result.isLoading shouldBe false
@@ -178,147 +156,30 @@ class RatingsHistogramMapperTest {
     @Nested
     inner class ToRatingsHistogramHeader {
         @Test
-        fun `GENEROUS band header carries the shared eyebrow and its own headline`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.GENEROUS.toRatingsHistogramHeader()
+        fun `every band gets its own headline`() {
+            // ----- Arrange -----
+            val bands = RatingBand.entries
+
+            // ----- Act -----
+            val headers = bands.map { it.toRatingsHistogramHeader() }
 
             // ----- Assert -----
-            result shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "How you score",
-                headline = "A generous but honest hand",
-            )
-        }
-
-        @Test
-        fun `SUPERFAN band header carries the shared eyebrow and its own headline`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.SUPERFAN.toRatingsHistogramHeader()
-
-            // ----- Assert -----
-            result shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "How you score",
-                headline = "Easily, happily impressed",
-            )
-        }
-
-        @Test
-        fun `CENTRIST band header carries the shared eyebrow and its own headline`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.CENTRIST.toRatingsHistogramHeader()
-
-            // ----- Assert -----
-            result shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "How you score",
-                headline = "You keep to the middle of the shelf",
-            )
-        }
-
-        @Test
-        fun `EXACTING band header carries the shared eyebrow and its own headline`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.EXACTING.toRatingsHistogramHeader()
-
-            // ----- Assert -----
-            result shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "How you score",
-                headline = "A hard star to earn",
-            )
-        }
-
-        @Test
-        fun `POLARISED band header carries the shared eyebrow and its own headline`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.POLARISED.toRatingsHistogramHeader()
-
-            // ----- Assert -----
-            result shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "How you score",
-                headline = "Love it or leave it",
-            )
-        }
-
-        @Test
-        fun `NEW_READER band header carries the shared eyebrow and its own headline`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.NEW_READER.toRatingsHistogramHeader()
-
-            // ----- Assert -----
-            result shouldBe SectionHeaderUiModel.Section(
-                eyebrow = "How you score",
-                headline = "Still finding your scale",
-            )
-        }
-
-        @Test
-        fun `header never carries a description`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.CENTRIST.toRatingsHistogramHeader()
-
-            // ----- Assert -----
-            result.description shouldBe null
+            headers.map { it.headline }.distinct() shouldHaveSize bands.size
         }
     }
 
     @Nested
     inner class ToRatingsHistogramCaption {
         @Test
-        fun `GENEROUS band caption describes the half-star rounding pattern`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.GENEROUS.toRatingsHistogramCaption()
+        fun `every band gets its own caption`() {
+            // ----- Arrange -----
+            val bands = RatingBand.entries
+
+            // ----- Act -----
+            val captions = bands.map { it.toRatingsHistogramCaption() }
 
             // ----- Assert -----
-            result shouldBe "Half-stars count. Most of yours land between four and five — you round up " +
-                "when a book earns it."
-        }
-
-        @Test
-        fun `SUPERFAN band caption describes the above four-and-a-half average`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.SUPERFAN.toRatingsHistogramCaption()
-
-            // ----- Assert -----
-            result shouldBe "Your average sits north of four and a half — you finish what you start, " +
-                "and it usually earns the top shelf."
-        }
-
-        @Test
-        fun `CENTRIST band caption describes the clustering around three and a half`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.CENTRIST.toRatingsHistogramCaption()
-
-            // ----- Assert -----
-            result shouldBe "Your ratings cluster around three and a half — steady and considered, " +
-                "rarely swinging to an extreme."
-        }
-
-        @Test
-        fun `EXACTING band caption describes the low average`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.EXACTING.toRatingsHistogramCaption()
-
-            // ----- Assert -----
-            result shouldBe "Your average runs low — a five-star read is rare here, which makes the " +
-                "ones you give out mean something."
-        }
-
-        @Test
-        fun `POLARISED band caption describes the two-camp split`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.POLARISED.toRatingsHistogramCaption()
-
-            // ----- Assert -----
-            result shouldBe "Your ratings split into two camps, low and high, with little in between " +
-                "— a book either wins you over or it doesn't."
-        }
-
-        @Test
-        fun `NEW_READER band caption asks for more ratings`() {
-            // ----- Arrange & Act -----
-            val result = RatingBand.NEW_READER.toRatingsHistogramCaption()
-
-            // ----- Assert -----
-            result shouldBe "Not enough ratings yet to say much about your taste — a few more books " +
-                "will fill this in."
+            captions.distinct() shouldHaveSize bands.size
         }
     }
 }

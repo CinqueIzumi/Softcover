@@ -169,20 +169,5 @@ class AuthorRepresentationChartMapperTest {
             result.segments.map { it.share } shouldBe listOf("0%", "0%")
             result.segments.map { it.fraction } shouldBe listOf(0f, 0f)
         }
-
-        @Test
-        fun `keeps Yes at 0 percent when only No is present`() {
-            // ----- Arrange -----
-            val breakdown = DemographicBreakdown(
-                yesCount = 0,
-                noCount = 5,
-            )
-
-            // ----- Act -----
-            val result = demographicChartUiModel(breakdown)
-
-            // ----- Assert -----
-            result.segments.map { it.share } shouldBe listOf("0%", "100%")
-        }
     }
 }

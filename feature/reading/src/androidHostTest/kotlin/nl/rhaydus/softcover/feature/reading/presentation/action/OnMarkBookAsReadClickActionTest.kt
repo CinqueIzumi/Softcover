@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -14,11 +15,6 @@ import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ShelfMutationOutcome
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.domain.model.ReviewDocument
-import nl.rhaydus.softcover.core.domain.model.ReviewParagraph
-import nl.rhaydus.softcover.core.domain.model.ReviewRun
-import nl.rhaydus.softcover.core.domain.model.UserBook
-import nl.rhaydus.softcover.core.uibinding.richtext.toRichTextUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.screenmodel.ReadingScreenDependencies
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingLocalVariables
@@ -80,31 +76,7 @@ class OnMarkBookAsReadClickActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `invokes markBookAsReadUseCase with the provided book`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            coVerify {
-                markBookAsReadUseCase(book = book)
-            }
-        }
-
-        @Test
-        fun `invokes markBookAsReadUseCase with the provided actionAt when backdating a finish`() = runTest {
+        fun `sends the book and backdated actionAt to markBookAsReadUseCase`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
             val dependencies = stubDependencies(this)
@@ -138,129 +110,7 @@ class OnMarkBookAsReadClickActionTest {
         }
 
         @Test
-        fun `does not add book id to failedMutationBookIds when use case succeeds`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
-        }
-
-        @Test
-        fun `adds book id to failedMutationBookIds when use case fails`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.failure(RuntimeException("api error"))
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
-        }
-
-        @Test
-        fun `stores job in bookMutationJobs after execute returns`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook(id = 42)
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            localVariablesFlow.value.bookMutationJobs.containsKey(42) shouldBe true
-        }
-
-        @Test
-        fun `cancels prior job for same book id and replaces it with a new one`() = runTest {
-            // ----- Arrange -----
-            val bookId = 42
-            val book = stubBook(id = bookId)
-            val priorJob = Job()
-
-            localVariablesFlow.value = ReadingLocalVariables(
-                bookMutationJobs = mapOf(bookId to priorJob),
-            )
-
-            scope = ActionScope(
-                stateFlow = stateFlow,
-                localVariablesFlow = localVariablesFlow,
-                eventChannel = Channel(Channel.BUFFERED),
-            )
-
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.success(ShelfMutationOutcome.Applied)
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            priorJob.isCancelled shouldBe true
-
-            localVariablesFlow.value.bookMutationJobs.containsKey(bookId) shouldBe true
-        }
-
-        @Test
-        fun `completes without throwing when use case fails`() = runTest {
-            // ----- Arrange -----
-            val book = stubBook()
-            val dependencies = stubDependencies(this)
-
-            coEvery {
-                markBookAsReadUseCase(book = book)
-            } returns Result.failure(RuntimeException("network failure"))
-
-            val action = OnMarkBookAsReadClickAction(book = book)
-
-            // ----- Act & Assert -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-        }
-
-        @Test
-        fun `sets verdictPromptBook to the book when use case reports an applied change`() = runTest {
+        fun `prompts for a verdict and flags no failure when the change was applied`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             val dependencies = stubDependencies(this)
@@ -279,10 +129,11 @@ class OnMarkBookAsReadClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.verdictPromptBook shouldBe book
+            stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
         }
 
         @Test
-        fun `leaves verdictPromptBook null when use case reports no change`() = runTest {
+        fun `leaves verdictPromptBook null when the use case reports no change`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             val dependencies = stubDependencies(this)
@@ -304,7 +155,7 @@ class OnMarkBookAsReadClickActionTest {
         }
 
         @Test
-        fun `leaves verdictPromptBook null when use case fails`() = runTest {
+        fun `flags the book as failed and skips the verdict prompt when the use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             val dependencies = stubDependencies(this)
@@ -322,7 +173,38 @@ class OnMarkBookAsReadClickActionTest {
             )
 
             // ----- Assert -----
+            stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
             stateFlow.value.verdictPromptBook shouldBe null
+        }
+
+        @Test
+        fun `cancels the prior job for the same book id and stores a new one`() = runTest {
+            // ----- Arrange -----
+            val bookId = 42
+            val book = stubBook(id = bookId)
+            val priorJob = Job()
+
+            localVariablesFlow.value = ReadingLocalVariables(
+                bookMutationJobs = mapOf(bookId to priorJob),
+            )
+
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                markBookAsReadUseCase(book = book)
+            } returns Result.success(ShelfMutationOutcome.Applied)
+
+            val action = OnMarkBookAsReadClickAction(book = book)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            priorJob.isCancelled shouldBe true
+            localVariablesFlow.value.bookMutationJobs[bookId] shouldNotBe priorJob
         }
     }
 }

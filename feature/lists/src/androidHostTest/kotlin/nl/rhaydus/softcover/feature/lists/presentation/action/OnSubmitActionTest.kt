@@ -1,13 +1,16 @@
 package nl.rhaydus.softcover.feature.lists.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.domain.model.BookList
+import nl.rhaydus.softcover.core.domain.model.PrivacySetting
 import nl.rhaydus.softcover.core.lists.domain.exception.ListNameTakenException
 import nl.rhaydus.softcover.feature.lists.domain.usecase.CreateListUseCase
 import nl.rhaydus.softcover.feature.lists.presentation.event.CreateListEvent
@@ -25,6 +28,18 @@ class OnSubmitActionTest {
     private lateinit var stateFlow: MutableStateFlow<CreateListUiState>
     private lateinit var scope: ActionScope<CreateListUiState, CreateListEvent, LocalCreateListVariables>
 
+    private val eventChannel = Channel<CreateListEvent>(Channel.BUFFERED)
+
+    private fun bookList(
+        id: Int,
+        name: String,
+    ) = BookList(
+        id = id,
+        name = name,
+        slug = name.lowercase(),
+        books = emptyList(),
+    )
+
     @BeforeEach
     fun setUp() {
         createListUseCase = mockk()
@@ -32,7 +47,7 @@ class OnSubmitActionTest {
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalCreateListVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
         dependencies = mockk<CreateListDependencies>(relaxed = true).also { mock ->
             every {
@@ -43,6 +58,49 @@ class OnSubmitActionTest {
 
     @Nested
     inner class Execute {
+        @Test
+        fun `does nothing when the name is blank`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState().withName(newName = "   ")
+
+            // ----- Act -----
+            OnSubmitAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                createListUseCase(
+                    name = any(),
+                    privacy = any(),
+                )
+            }
+            eventChannel.tryReceive().getOrNull() shouldBe null
+        }
+
+        @Test
+        fun `does nothing when already submitting`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState()
+                .withName(newName = "My List")
+                .withSubmitting(submitting = true)
+
+            // ----- Act -----
+            OnSubmitAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                createListUseCase(
+                    name = any(),
+                    privacy = any(),
+                )
+            }
+        }
+
         @Test
         fun `locks the name field while the list is being created`() = runTest {
             // ----- Arrange -----
@@ -56,7 +114,10 @@ class OnSubmitActionTest {
                 )
             } coAnswers {
                 enabledDuringCall = stateFlow.value.nameField.enabled
-                mockk<BookList>(relaxed = true)
+                bookList(
+                    id = 1,
+                    name = "Summer",
+                )
             }
 
             // ----- Act -----
@@ -70,16 +131,19 @@ class OnSubmitActionTest {
         }
 
         @Test
-        fun `unlocks the name field after a successful creation`() = runTest {
+        fun `creates the trimmed name with the default PUBLIC privacy and sends ListCreatedEvent`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = CreateListUiState().withName(newName = "Summer")
+            stateFlow.value = CreateListUiState().withName(newName = "  Favourites  ")
 
             coEvery {
                 createListUseCase(
-                    name = "Summer",
-                    privacy = any(),
+                    name = "Favourites",
+                    privacy = PrivacySetting.PUBLIC,
                 )
-            } returns mockk<BookList>(relaxed = true)
+            } returns bookList(
+                id = 42,
+                name = "Favourites",
+            )
 
             // ----- Act -----
             OnSubmitAction().execute(
@@ -88,12 +152,51 @@ class OnSubmitActionTest {
             )
 
             // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<CreateListEvent.ListCreatedEvent>()
+            event.listId shouldBe 42
+            event.name shouldBe "Favourites"
+            stateFlow.value.isSubmitting shouldBe false
             stateFlow.value.nameField.enabled shouldBe true
-            stateFlow.value.nameField.text shouldBe "Summer"
         }
 
         @Test
-        fun `unlocks the name field and keeps the text after a failure`() = runTest {
+        fun `creates the list with PRIVATE privacy after it was selected`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState().withName(newName = "Favourites")
+
+            OnPrivacySelectedAction(privacy = PrivacySetting.PRIVATE).execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            coEvery {
+                createListUseCase(
+                    name = "Favourites",
+                    privacy = PrivacySetting.PRIVATE,
+                )
+            } returns bookList(
+                id = 1,
+                name = "Favourites",
+            )
+
+            // ----- Act -----
+            OnSubmitAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                createListUseCase(
+                    name = "Favourites",
+                    privacy = PrivacySetting.PRIVATE,
+                )
+            }
+        }
+
+        @Test
+        fun `sends ListNameTakenEvent, unlocks the field and keeps the text when the name is taken`() = runTest {
             // ----- Arrange -----
             stateFlow.value = CreateListUiState().withName(newName = "Summer")
 
@@ -111,8 +214,35 @@ class OnSubmitActionTest {
             )
 
             // ----- Assert -----
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<CreateListEvent.ListNameTakenEvent>()
+            event.name shouldBe "Summer"
             stateFlow.value.nameField.enabled shouldBe true
             stateFlow.value.nameField.text shouldBe "Summer"
+        }
+
+        @Test
+        fun `sends ListCreationFailedEvent and unlocks the field on any other failure`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = CreateListUiState().withName(newName = "Summer")
+
+            coEvery {
+                createListUseCase(
+                    name = "Summer",
+                    privacy = any(),
+                )
+            } throws RuntimeException("API error")
+
+            // ----- Act -----
+            OnSubmitAction().execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<CreateListEvent.ListCreationFailedEvent>()
+            stateFlow.value.isSubmitting shouldBe false
+            stateFlow.value.nameField.enabled shouldBe true
         }
     }
 }

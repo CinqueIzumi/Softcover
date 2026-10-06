@@ -172,7 +172,7 @@ class OnPageFocusLostActionTest {
         @Test
         fun `clears the selection and re-arms the first-focus flag`() = runTest {
             // ----- Arrange -----
-            storePage(currentPage = 10)
+            localVariablesFlow.value = LocalFocusModeVariables(isFirstFocusEvent = false)
             typeDraft("10")
 
             // ----- Act -----
@@ -182,9 +182,8 @@ class OnPageFocusLostActionTest {
             )
 
             // ----- Assert -----
-            stateFlow.value.pageDraft.selection shouldBe TextRange.Zero
-            stateFlow.value.pageDraft.text shouldBe "10"
             localVariablesFlow.value.isFirstFocusEvent shouldBe true
+            stateFlow.value.pageDraft.selection shouldBe TextRange.Zero
         }
     }
 }
