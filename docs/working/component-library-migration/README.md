@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SD done (fix round built and reviewed clean). SL-15 logged. SL-3b blocked on F34.
-- **Next:** commit SD (ask first), then PF-1 per `steps/pf-premium-feel.md`.
-- **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery.
-- **Verification:** `checkModuleGraph`, `ktlintCheck`, `styleCheck` (JDK 21), `projectHealth` (explore, profile, settings, onboarding), jvm + android compiles passed after the fix round; `SearchResultsSectionTest` (7) passes.
-- **Uncommitted:** SD-1/4/5/6 + fix round (deletions staged), build files, `:core:component` sample copy, new test, tracker docs, deleted SD step file.
+- **State:** SD finished and committed (`089397df`); its step file is deleted. SL-15 logged. SL-3b blocked on F34.
+- **Next:** PF-1 per `steps/pf-premium-feel.md` § Sub-steps: audit every screen and sheet, write `premium-feel-audit.md`.
+- **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?); book detail hero `Cover` jumps on fetch. ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; library cold start shows stand-ins; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop single-column Profile layout and desktop search results after the SD fix round.
+- **Verification:** SD fix round: jvm + android compiles (explore, profile, settings, onboarding) and `styleCheck` (JDK 21) passed; reviewer clean. Earlier SD batch: `checkModuleGraph`, `projectHealth`, `SearchResultsSectionTest` (7) passed.
+- **Uncommitted:** this `## Now` rewrite only.
 
 ## Local verification
 

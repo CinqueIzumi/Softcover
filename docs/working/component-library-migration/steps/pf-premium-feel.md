@@ -8,9 +8,10 @@ PF-2.
 The app reads flat: state changes snap, presses give little feedback, and nothing responds to touch
 beyond the ripple. PF catalogues every moment where motion, haptics or depth would make it feel
 premium. It splits them into the ones that belong in the component contracts, which S11 builds in once,
-and the surface polish that ships after this PR as its own issue. **PF-1 to PF-6 change no UI.** The
-migration keeps today's UI unchanged so the S12 walkthrough against `main` stays a clean comparison; the
-copy swaps (PF-7) land after it.
+and the surface polish for single screens. **Every finding stays local and lands in this branch.** None
+becomes a GitHub issue. **PF-1 to PF-3, PF-5 and PF-6 change no UI.** The migration keeps today's UI
+unchanged so the S12 walkthrough against `main` stays a clean comparison; the surface polish (PF-4) and
+the copy swaps (PF-7) land after it.
 
 Much of the app's copy also reads as machine-written. PF-5 to PF-7 audit every user-facing string and
 swap the ones that sound AI-generated for plain, natural text.
@@ -22,7 +23,7 @@ swap the ones that sound AI-generated for plain, natural text.
 | PF-1 | Audit every screen and sheet, plus open suggestions for what's missing; write `premium-feel-audit.md` in this directory (shape below) | — | [ ] |
 | PF-2 | Walk the audit with the user: approve, cut or re-tier each finding | PF-1 | [ ] |
 | PF-3 | Write the approved contract-level findings into `s11-contract-retrofit.md` as new S11 sub-steps | PF-2 | [ ] |
-| PF-4 | File the approved surface-level findings as a new GitHub issue (ask the user first), linked from #275 | PF-2 | [ ] |
+| PF-4 | Apply the approved surface-level findings in this branch; delete `premium-feel-audit.md` | PF-3, S12-4 | [ ] |
 | PF-5 | Audit every user-facing string for AI-sounding copy; write `copy-audit.md` in this directory | — | [ ] |
 | PF-6 | Walk the copy audit with the user: approve, cut or reword each proposed replacement | PF-5 | [ ] |
 | PF-7 | Apply the approved replacements; delete `copy-audit.md` | PF-6, S12-4 | [ ] |
@@ -53,7 +54,7 @@ and the share flow. Look for:
 - **Open suggestions:** anything else that would make the app feel more complete or premium, beyond
   the categories above: missing features, states or affordances a polished reading app would have,
   rough edges, and additions worth making. These go in their own section of the audit, tiered like the
-  rest; most will be surface-level and land in PF-4's issue.
+  rest; most will be surface-level and land in PF-4.
 
 **Each finding records:** the moment (in user terms, then `file:line`), what happens today, the proposed
 touch, its tier (**contract**: a press modifier, a haptics `expect`/`actual`, motion tokens, a
@@ -74,11 +75,12 @@ each row of `premium-feel-audit.md`.
 Each approved contract-level finding becomes an S11 sub-step (S11-6 onward) in
 `s11-contract-retrofit.md`, with its scope, and its row in the `## Sub-steps` table.
 
-## PF-4 — Follow-up issue
+## PF-4 — Surface polish
 
-The surface-level findings outlive this directory, which S12 deletes. File them as one `kind:polish` GitHub issue
-per `.claude/rules/roadmap.md`, with the user's approval of its title, labels and milestone first. Link it
-from #275. Delete `premium-feel-audit.md` once both PF-3 and PF-4 have landed.
+The approved surface-level findings in `premium-feel-audit.md` are the work list; nothing is filed as a
+GitHub issue. After S12's walkthrough against `main`, one `softcover-implementer` brief per module group
+applies them, with tests through `softcover-test-writer`. Delete `premium-feel-audit.md` once PF-3 and
+PF-4 have both landed.
 
 ## PF-5 — Copy audit
 
