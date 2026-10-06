@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PF-1 done: `premium-feel-audit.md` holds 35 contract, 51 surface and 40 open-suggestion rows (9 marked bug), merged from seven parallel slice audits. C1 (`LocalHaptics` never provided, so six haptic sites are silent) is the top row. SL-15 logged. SL-3b blocked on F34.
-- **Next:** PF-2 per `steps/pf-premium-feel.md` § PF-2: walk the audit with the user tier by tier, recording a verdict on every row. Fix the audit's bug rows O6–O14 in this branch as soon as they are approved (see `## Decisions`); O14 and O15 need a device check first.
+- **State:** PF-2 done: every row of `premium-feel-audit.md` has a verdict. Cut: C22, O5, O29, O32, O35, O36. S30/S33/S40 fire `select`, not `commit`. C6/C27 foundation parts go to `foundation-upstream-candidates.md`. O38 goes to PF-5. Fix-now set widened (see `## Decisions`). SL-3b blocked on F34.
+- **Next:** fix the fix-now rows (O2, O6–O13, C26, S27, S35) via `softcover-implementer`, one batch per session; O14 and O15 after the user's device check. Then PF-3 per `steps/pf-premium-feel.md` § PF-3.
 - **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop single-column Profile layout and desktop search results after the SD fix round.
-- **Verification:** none needed (docs only, read-only audit). Last: SD fix round jvm + android compiles and `styleCheck` (JDK 21) passed; reviewer clean.
-- **Uncommitted:** `premium-feel-audit.md` (new), the PF-1 tick, this `## Now` and one decision line.
+- **Verification:** none needed (docs only, verdicts recorded). Last: SD fix round jvm + android compiles and `styleCheck` (JDK 21) passed; reviewer clean.
+- **Uncommitted:** audit verdicts, the PF-2 tick, the fix-now decision line and this `## Now`.
 
 ## Local verification
 
@@ -85,7 +85,7 @@ every sub-step's Verify.
 - Loading follows `component-contract.md` R12; SL retrofits the existing surfaces.
 - Every step builds the simplest shape: no style tables, single-variant fields or one-caller layers.
 - A step spanning several sessions splits into sub-steps, one session each, in the step file's `## Sub-steps`.
-- The premium-feel audit's bug rows (O6–O14) are fixed in this branch now, before S12, not held for PF-4.
+- The premium-feel audit's bug rows (O2, O6–O15, C26, S27, S35) are fixed in this branch now, before S12, not held for PF-4.
 
 ## Baseline
 

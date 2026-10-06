@@ -21,7 +21,7 @@ swap the ones that sound AI-generated for plain, natural text.
 | Sub | Scope | Runs after | Status |
 |---|---|---|---|
 | PF-1 | Audit every screen and sheet, plus open suggestions for what's missing; write `premium-feel-audit.md` in this directory (shape below) | — | [x] |
-| PF-2 | Walk the audit with the user: approve, cut or re-tier each finding | PF-1 | [ ] |
+| PF-2 | Walk the audit with the user: approve, cut or re-tier each finding | PF-1 | [x] |
 | PF-3 | Write the approved contract-level findings into `s11-contract-retrofit.md` as new S11 sub-steps | PF-2 | [ ] |
 | PF-4 | Apply the approved surface-level findings in this branch; delete `premium-feel-audit.md` | PF-3, S12-4 | [ ] |
 | PF-5 | Audit every user-facing string for AI-sounding copy; write `copy-audit.md` in this directory | — | [ ] |
