@@ -17,11 +17,13 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnAddBookToLibraryClickAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnClearSearchAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnLoadMoreSearchResultsAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRemoveBookFromLibraryClickAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRetrySearchAction
@@ -50,6 +52,18 @@ internal fun ColumnScope.SearchResultsSection(
                 .fillMaxSize()
                 .padding(horizontal = 24.dp),
             textStyle = MaterialTheme.editorialTypography.bodySmall,
+        )
+
+        return
+    }
+
+    if (state.showsNoSearchResults) {
+        EmptyState(
+            model = state.noSearchResultsEmptyState,
+            onEvent = { runAction(OnClearSearchAction) },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
         )
 
         return

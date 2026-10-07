@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.shimmer
@@ -35,6 +36,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 @Composable
 internal fun ShareEntryRow(
     isLoading: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -49,8 +51,14 @@ internal fun ShareEntryRow(
                 shape = shape,
                 isLoading = isLoading,
             )
-            .pointerHandCursor()
-            .pressScaleClickable(onClick = onClick)
+            .conditional(
+                condition = enabled,
+                ifTrue = {
+                    Modifier
+                        .pointerHandCursor()
+                        .pressScaleClickable(onClick = onClick)
+                },
+            )
             .padding(
                 horizontal = 18.dp,
                 vertical = 15.dp,

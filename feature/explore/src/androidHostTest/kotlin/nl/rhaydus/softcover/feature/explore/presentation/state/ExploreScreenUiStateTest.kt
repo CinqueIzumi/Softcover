@@ -1,6 +1,11 @@
 package nl.rhaydus.softcover.feature.explore.presentation.state
 
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import kotlinx.collections.immutable.persistentListOf
+import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
+import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -148,6 +153,115 @@ class ExploreScreenUiStateTest {
 
             // ----- Assert -----
             result shouldBe true
+        }
+    }
+
+    @Nested
+    inner class ShowsNoSearchResults {
+        @Test
+        fun `finished text search with no books and no cards is true`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(
+                searchText = "zzzz",
+                searchResults = BookCardSet.empty(),
+            )
+
+            // ----- Act -----
+            val result = state.showsNoSearchResults
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `finished mood search with no books and no cards is true`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(
+                activeMoodFilter = mood,
+                searchResults = BookCardSet.empty(),
+            )
+
+            // ----- Act -----
+            val result = state.showsNoSearchResults
+
+            // ----- Assert -----
+            result shouldBe true
+        }
+
+        @Test
+        fun `loading search is false`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(
+                searchText = "zzzz",
+                isLoading = true,
+                searchResults = BookCardSet.empty(),
+            )
+
+            // ----- Act -----
+            val result = state.showsNoSearchResults
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `search error is false`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(
+                searchText = "zzzz",
+                searchError = "offline",
+                searchResults = BookCardSet.empty(),
+            )
+
+            // ----- Act -----
+            val result = state.showsNoSearchResults
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `search with result cards is false`() {
+            // ----- Arrange -----
+            val card = BookCardUiModel.previews.values.first()
+            val state = ExploreScreenUiState(
+                searchText = "dune",
+                searchResults = BookCardSet.standIns(persistentListOf(card)),
+            )
+
+            // ----- Act -----
+            val result = state.showsNoSearchResults
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `search with queried books is false`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(
+                searchText = "dune",
+                queriedBooks = listOf(mockk<Book>()),
+                searchResults = BookCardSet.empty(),
+            )
+
+            // ----- Act -----
+            val result = state.showsNoSearchResults
+
+            // ----- Assert -----
+            result shouldBe false
+        }
+
+        @Test
+        fun `no active search is false even with no results`() {
+            // ----- Arrange -----
+            val state = ExploreScreenUiState(searchResults = BookCardSet.empty())
+
+            // ----- Act -----
+            val result = state.showsNoSearchResults
+
+            // ----- Assert -----
+            result shouldBe false
         }
     }
 }

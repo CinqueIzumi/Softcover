@@ -31,6 +31,7 @@ internal fun ColumnScope.ProfileReadingLife(
 
     ShareEntryRow(
         isLoading = state.isReadingLifeLoading,
+        enabled = state.readingLifeShareCard != null,
         onClick = onShareClick,
     )
 
@@ -78,6 +79,7 @@ internal fun ColumnScope.ProfileReadingLife(
         chart = state.ratingsChart,
         average = state.ratingsAverage,
         totalRatings = state.ratingsTotal,
+        averageLabel = state.ratingsAverageLabel,
         isLoading = state.isReadingLifeLoading,
         header = state.ratingsHistogramHeader,
         caption = state.ratingsHistogramCaption,

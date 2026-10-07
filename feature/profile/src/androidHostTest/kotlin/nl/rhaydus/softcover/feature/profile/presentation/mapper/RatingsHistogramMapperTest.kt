@@ -182,4 +182,43 @@ class RatingsHistogramMapperTest {
             captions.distinct() shouldHaveSize bands.size
         }
     }
+
+    @Nested
+    inner class RatingsAverageCaption {
+        @Test
+        fun `a single rating uses the singular unit`() {
+            // ----- Arrange -----
+            val totalRatings = 1
+
+            // ----- Act -----
+            val result = ratingsAverageCaption(totalRatings)
+
+            // ----- Assert -----
+            result shouldBe "AVERAGE ACROSS 1 BOOK"
+        }
+
+        @Test
+        fun `zero ratings use the plural unit`() {
+            // ----- Arrange -----
+            val totalRatings = 0
+
+            // ----- Act -----
+            val result = ratingsAverageCaption(totalRatings)
+
+            // ----- Assert -----
+            result shouldBe "AVERAGE ACROSS 0 BOOKS"
+        }
+
+        @Test
+        fun `many ratings use the plural unit`() {
+            // ----- Arrange -----
+            val totalRatings = 42
+
+            // ----- Act -----
+            val result = ratingsAverageCaption(totalRatings)
+
+            // ----- Assert -----
+            result shouldBe "AVERAGE ACROSS 42 BOOKS"
+        }
+    }
 }

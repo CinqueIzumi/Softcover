@@ -72,6 +72,12 @@ private fun ratingColumnDescription(
     return "$stars $starUnit, $count $bookUnit"
 }
 
+internal fun ratingsAverageCaption(totalRatings: Int): String {
+    val bookUnit = if (totalRatings == 1) "BOOK" else "BOOKS"
+
+    return "AVERAGE ACROSS $totalRatings $bookUnit"
+}
+
 internal fun ratingsAverageUiModel(ratings: RatingsDistribution?): StatNumberUiModel = StatNumberUiModel(
     value = ratings?.average ?: 0.0,
     format = StatNumberFormat.Decimal,

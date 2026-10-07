@@ -44,7 +44,7 @@ internal fun readingAtlasUiModel(profileData: UserProfileData?): ReadingAtlasUiM
                 format = StatNumberFormat.Plain,
                 isLoading = isLoading,
             ),
-            variant = StatTileVariant.Compact(unit = "days"),
+            variant = StatTileVariant.Compact(unit = if (profileData?.readingStreak == 1) "day" else "days"),
         ),
     )
 }

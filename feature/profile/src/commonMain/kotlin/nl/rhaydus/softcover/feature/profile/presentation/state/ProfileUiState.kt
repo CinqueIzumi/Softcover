@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.feature.profile.presentation.mapper.RECENTLY_LOVED_S
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genderChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.genreRankingUiModel
+import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageCaption
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsAverageUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.ratingsChartUiModel
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.readingAtlasUiModel
@@ -108,6 +109,9 @@ internal data class ProfileUiState(
 
     val ratingsTotal: Int
         get() = readingLife?.ratings?.totalRatings ?: 0
+
+    val ratingsAverageLabel: String
+        get() = ratingsAverageCaption(totalRatings = ratingsTotal)
 
     /**
      * Whether the reader has any loved reads to show. Read from [readingLife] rather than the mapped

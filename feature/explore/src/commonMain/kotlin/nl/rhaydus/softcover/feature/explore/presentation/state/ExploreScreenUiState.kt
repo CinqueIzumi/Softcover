@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.FEATURED_HEADER
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.SEARCH_RESULT_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.TRENDING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.UP_NEXT_STAND_IN_CARDS
+import nl.rhaydus.softcover.feature.explore.presentation.mapper.noSearchResultsEmptyState
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSortPillButton
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel
@@ -89,6 +90,7 @@ internal data class ExploreScreenUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val searchError: String? = null,
+    val noSearchResultsEmptyState: EmptyStateUiModel = noSearchResultsEmptyState(),
     val searchFocused: Boolean = false,
     val sortMode: ExploreSortMode = ExploreSortMode.RELEVANCE,
     // The sort control, mapped by `SortPillCollector` off [sortMode]; [isSortMenuExpanded] is the menu it anchors.
@@ -142,6 +144,12 @@ internal data class ExploreScreenUiState(
             searchFocused -> ExploreSearchPhase.FOCUS
             else -> ExploreSearchPhase.FEED
         }
+
+    val showsNoSearchResults: Boolean
+        get() = searchPhase == ExploreSearchPhase.RESULTS &&
+            searchError == null &&
+            queriedBooks.isEmpty() &&
+            searchResults.cards.isEmpty()
 
     /**
      * True while a text or mood search occupies the screen - [ExploreSearchPhase.LOADING] and

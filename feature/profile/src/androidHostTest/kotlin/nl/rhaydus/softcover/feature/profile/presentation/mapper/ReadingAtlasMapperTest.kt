@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.profile.presentation.mapper
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
 import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatTileVariant
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -65,6 +66,42 @@ class ReadingAtlasMapperTest {
                 value = 7.0,
                 format = StatNumberFormat.Plain,
             )
+        }
+
+        @Test
+        fun `a one day streak uses the singular unit`() {
+            // ----- Arrange -----
+            val profileData = buildProfileData().copy(readingStreak = 1)
+
+            // ----- Act -----
+            val result = readingAtlasUiModel(profileData)
+
+            // ----- Assert -----
+            (result.streak.variant as StatTileVariant.Compact).unit shouldBe "day"
+        }
+
+        @Test
+        fun `a zero day streak uses the plural unit`() {
+            // ----- Arrange -----
+            val profileData = buildProfileData().copy(readingStreak = 0)
+
+            // ----- Act -----
+            val result = readingAtlasUiModel(profileData)
+
+            // ----- Assert -----
+            (result.streak.variant as StatTileVariant.Compact).unit shouldBe "days"
+        }
+
+        @Test
+        fun `a multi day streak uses the plural unit`() {
+            // ----- Arrange -----
+            val profileData = buildProfileData()
+
+            // ----- Act -----
+            val result = readingAtlasUiModel(profileData)
+
+            // ----- Assert -----
+            (result.streak.variant as StatTileVariant.Compact).unit shouldBe "days"
         }
     }
 }

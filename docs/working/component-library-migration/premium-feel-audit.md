@@ -95,7 +95,7 @@ Grouped by screen and ranked within each group. These rows are PF-4's work list.
 | S24 | Book detail | **The full-screen cover jumps to 2.5×.** (`FullScreenCoverShelf.kt:49-56`, `.mobile.kt:23-35`) | No animation. No swipe to dismiss. | Animated zoom, swipe-down to dismiss, and soft edges. | M | approve |
 | S25 | Book detail | **The wide pane cuts between books.** (`BookDetailPaneHost.kt:33-47`, `BottomBarScreen.kt:163-184`) | `key(destination.id)` | A fade-through. | S | approve |
 | S26 | Book detail | **Shelve rows have no desktop affordances.** (`ShelveControlCard.kt:275-295`) | No hand cursor or hover. | Add both. | S | approve |
-| S27 | Explore | **A search with no results shows a blank list.** (`ActiveSearchContent.kt:64-75`, `DesktopSearchResults.kt:74-85`) | No empty state. | `EmptyState` with ways forward. | S | approve; bug, fix now |
+| S27 | Explore | **A search with no results shows a blank list.** (`ActiveSearchContent.kt:64-75`, `DesktopSearchResults.kt:74-85`) | No empty state. | `EmptyState` with ways forward. | S | fixed |
 | S28 | Explore | **Feed, focus and results cut.** (`ExploreScreenLayout.mobile.kt:120-140`, `.jvm.kt:114-126`) | `when (searchPhase)` | A fade-through, with the results settling upward. | S | approve |
 | S29 | Explore | **Dismissing an Up-next card makes the rail jump.** (`ExploreCardRail.kt:40`, desktop `:42`) | Undo jumps the same way. | `mutationAnimated` on the rail. | S | approve |
 | S30 | Explore | **The featured "Want to read" flips flatly.** (`FeaturedCard.kt:135-148`) | No transition or haptic. | Morph the label and fire `commit`. | S | approve with `select`, not `commit` |
@@ -103,7 +103,7 @@ Grouped by screen and ranked within each group. These rows are PF-4's work list.
 | S32 | Explore | **Search focus and dismiss rows ripple.** (`SearchFocusContent.kt:128,159`, `ContinueSeriesMenuSheet.kt:76`) | Plain `.clickable`. | A small press response. | S | approve |
 | S33 | Explore | **The result bookmark doesn't fill.** (`BookCardControls.kt:42-45`) | It changes colour only. | The C17 glyph pop, plus `commit` when adding. | S | approve with `select`, not `commit` |
 | S34 | Profile | **The page lands all at once.** (`ProfileReadingLife.kt:24-96`, `ReadingAtlasSection.kt:35-59`) | No stagger. | A one-time `StaggeredEntry` welcome. | S | approve |
-| S35 | Profile | **"Share your reading year" does nothing while loading.** (`ShareEntryRow.kt:48-53`) | It press-scales, then nothing happens. | Make it inert until the card exists, like the top-bar button. | S | approve; bug, fix now |
+| S35 | Profile | **"Share your reading year" does nothing while loading.** (`ShareEntryRow.kt:48-53`) | It press-scales, then nothing happens. | Make it inert until the card exists, like the top-bar button. | S | fixed |
 | S36 | Profile | **The bar never shows whose profile it is.** (`ProfileScreenLayout.mobile.kt:51-66`, `.jvm.kt:85-101`) | No scroll behaviour. | Lift the bar on scroll and fade the name into it. | M | approve |
 | S37 | Onboarding | **Sign-in cuts straight to the app.** (`OnboardingScreen.kt:42-44`, `LoadingSheet.kt:42-47`, `orch/App.kt:137-145`) | `key(authenticated)` swaps while the sheet is still open. Desktop shows a blank frame. | `commit`, then a crossfade. A wordmark on desktop's first frame. | M | approve |
 | S38 | Settings | **A dropped tab jumps into its slot.** (`ReorderableTabsGroup.kt:148-180`) | The offset resets to 0. | Spring the tab into its slot, and fire `drop` when it lands. | S | approve |
@@ -139,8 +139,8 @@ found during the sweep.
 | O9 | surface | **bug: A failed log-out is silent.** (`OnLogOutClickAction.kt`) | A snackbar, or keep the sheet busy. | S | fixed |
 | O10 | surface | **bug: Enter / Done doesn't submit the API key.** (`OnboardingShelf.kt:136-139`) | Route submit to the save action. | S | fixed |
 | O11 | surface | **bug: Save works on an empty key, and an empty paste clears the field.** (`OnboardingUiState.kt:21`, `OnboardingShelf.kt:118-124`) | Disable Save when the key is blank, and ignore an empty paste. | S | fixed |
-| O12 | surface | **bug: "1 days" and "across 1 books".** (`ReadingAtlasMapper.kt:47`, `RatingsHistogramSection.kt:125`) | Pluralise. | S | approve; fix now |
-| O13 | surface | **bug: Focus Mode pops during composition** when the session ends from the notification (`FocusModeScreen.kt:46-52`) | Pop from an effect so the exit animation plays. | S | approve; fix now |
+| O12 | surface | **bug: "1 days" and "across 1 books".** (`ReadingAtlasMapper.kt:47`, `RatingsHistogramSection.kt:125`) | Pluralise. | S | fixed |
+| O13 | surface | **bug: Focus Mode pops during composition** when the session ends from the notification (`FocusModeScreen.kt:46-52`) | Pop from an effect so the exit animation plays. | S | fixed |
 | O14 | surface | **bug?: System back with a pane book open** likely falls through the root navigator (`BookDetailPaneHost.kt`). Check on a tablet. | Back closes the pane. Esc does the same on desktop. | S | approve; device check, then fix now |
 | O15 | surface | **Offline banner content may jump** (`orch/RootScreen.kt:80-92`). Check on a device. | Tie the inset hand-off to the banner's animated height. | S | approve; device check, then fix now |
 | O16 | surface | **Ending a session says nothing.** (`FocusModeShelf.kt:189-193`) | A recap ("42 min · 18 pages") with a quick page update. | M | approve |

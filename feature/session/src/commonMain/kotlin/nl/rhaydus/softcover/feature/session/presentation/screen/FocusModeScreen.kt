@@ -1,7 +1,11 @@
 package nl.rhaydus.softcover.feature.session.presentation.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -43,13 +47,17 @@ object FocusModeScreen : Screen {
             }
         }
 
-        val current = active
+        var lastActive by remember { mutableStateOf<ActiveSession?>(null) }
 
-        if (current == null) {
-            navigator.pop()
+        if (active != null) lastActive = active
 
-            return
+        val isSessionEnded = active == null
+
+        LaunchedEffect(isSessionEnded) {
+            if (isSessionEnded && navigator.lastItem == this@FocusModeScreen) navigator.pop()
         }
+
+        val current = lastActive ?: return
 
         FocusModeScreenLayout(
             active = current,

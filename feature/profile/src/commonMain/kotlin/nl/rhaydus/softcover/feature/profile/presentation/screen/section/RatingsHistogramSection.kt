@@ -37,6 +37,7 @@ internal fun RatingsHistogramSection(
     chart: ColumnChartUiModel,
     average: StatNumberUiModel,
     totalRatings: Int,
+    averageLabel: String,
     isLoading: Boolean,
     header: SectionHeaderUiModel,
     caption: String,
@@ -56,7 +57,7 @@ internal fun RatingsHistogramSection(
         } else {
             RatingsAverageRow(
                 average = average,
-                totalRatings = totalRatings,
+                averageLabel = averageLabel,
                 isLoading = isLoading,
             )
 
@@ -78,7 +79,7 @@ internal fun RatingsHistogramSection(
 @Composable
 private fun RatingsAverageRow(
     average: StatNumberUiModel,
-    totalRatings: Int,
+    averageLabel: String,
     isLoading: Boolean,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -122,7 +123,7 @@ private fun RatingsAverageRow(
         Spacer(modifier = Modifier.width(20.dp))
 
         SoftcoverText(
-            text = "AVERAGE ACROSS $totalRatings BOOKS",
+            text = averageLabel,
             isLoading = isLoading,
             standIn = "AVERAGE ACROSS 00 BOOKS",
             style = MaterialTheme.editorialTypography.eyebrowSmall,
