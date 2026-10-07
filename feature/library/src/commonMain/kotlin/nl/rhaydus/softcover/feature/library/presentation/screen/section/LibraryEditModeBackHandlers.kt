@@ -14,21 +14,23 @@ internal fun LibraryEditModeBackHandlers(
     isRearranging: Boolean,
     runAction: (LibraryAction) -> Unit,
 ) {
-    val selectionBackState = rememberNavigationEventState(NavigationEventInfo.None)
+    if (selectionMode) {
+        val selectionBackState = rememberNavigationEventState(NavigationEventInfo.None)
 
-    NavigationBackHandler(
-        state = selectionBackState,
-        isBackEnabled = selectionMode,
-        onBackCancelled = {},
-        onBackCompleted = { runAction(OnExitSelectionModeAction()) },
-    )
+        NavigationBackHandler(
+            state = selectionBackState,
+            onBackCancelled = {},
+            onBackCompleted = { runAction(OnExitSelectionModeAction()) },
+        )
+    }
 
-    val rearrangeBackState = rememberNavigationEventState(NavigationEventInfo.None)
+    if (isRearranging) {
+        val rearrangeBackState = rememberNavigationEventState(NavigationEventInfo.None)
 
-    NavigationBackHandler(
-        state = rearrangeBackState,
-        isBackEnabled = isRearranging,
-        onBackCancelled = {},
-        onBackCompleted = { runAction(OnExitRearrangeModeAction()) },
-    )
+        NavigationBackHandler(
+            state = rearrangeBackState,
+            onBackCancelled = {},
+            onBackCompleted = { runAction(OnExitRearrangeModeAction()) },
+        )
+    }
 }

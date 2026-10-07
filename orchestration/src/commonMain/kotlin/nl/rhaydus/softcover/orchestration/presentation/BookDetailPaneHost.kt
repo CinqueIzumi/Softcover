@@ -3,7 +3,9 @@ package nl.rhaydus.softcover.orchestration.presentation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
-import androidx.compose.ui.Modifier
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import cafe.adriel.voyager.navigator.Navigator
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
@@ -30,6 +32,15 @@ internal fun BookDetailPaneHost(
     onClose: () -> Unit,
     overlayNavigator: Navigator,
 ) {
+    val backState = rememberNavigationEventState(NavigationEventInfo.None)
+
+    NavigationBackHandler(
+        state = backState,
+        isBackEnabled = true,
+        onBackCancelled = {},
+        onBackCompleted = onClose,
+    )
+
     key(destination.id) {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides null,

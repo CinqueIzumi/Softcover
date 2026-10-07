@@ -17,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -77,20 +79,43 @@ internal object RootScreen : Screen {
                         .consumeWindowInsets(innerPadding),
                 ) {
                     Column {
-                        state.offlineBanner?.let { offlineBanner ->
-                            Banner(
-                                model = offlineBanner,
-                                windowInsets = WindowInsets.statusBars,
+                        val bannerHeightPx = remember { mutableIntStateOf(0) }
+
+                        val statusBars = WindowInsets.statusBars
+
+                        val bannerCoveredInsets = remember(statusBars) {
+                            BannerCoveredInsets(
+                                coveredHeight = bannerHeightPx,
+                                statusBars = statusBars,
                             )
                         }
 
                         Box(
-                            modifier = if (state.offlineBanner?.visible == true) {
-                                Modifier.consumeWindowInsets(WindowInsets.statusBars)
-                            } else {
-                                Modifier
+                            modifier = Modifier.layout { measurable, constraints ->
+                                val placeable = measurable.measure(constraints)
+
+                                bannerHeightPx.intValue = placeable.height
+
+                                layout(
+                                    placeable.width,
+                                    placeable.height,
+                                ) {
+                                    placeable.place(
+                                        0,
+                                        0,
+                                    )
+                                }
                             },
                         ) {
+                            state.offlineBanner?.let { offlineBanner ->
+                                Banner(
+                                    model = offlineBanner,
+                                    windowInsets = statusBars,
+                                )
+                            }
+                        }
+
+                        Box(modifier = Modifier.consumeWindowInsets(bannerCoveredInsets)) {
                             Navigator(BottomBarScreen) { navigator ->
                                 LaunchedEffect(navigator) {
                                     // Push Focus Mode only once a session is actually present. On a
