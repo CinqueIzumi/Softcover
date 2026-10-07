@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PF-2 verdicts in `premium-feel-audit.md`. Fix-now batches 1–2 committed; batch 3 (O12, O13, S27, S35) done. O41 sheet-dismiss sweep added (approve). SL-3b blocked on F34.
-- **Next:** fix-now batch 4 — O2, C26 — via `softcover-implementer`. Then O14 and O15 after the user's device check; then PF-3 per `steps/pf-premium-feel.md` § PF-3.
-- **Open questions:** Share-your-year row: no disabled look when the card is null (failed load) — dim it? Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop single-column Profile layout and desktop search results after the SD fix round; onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving); Focus Mode exit from the notification; Explore no-results state.
-- **Verification:** `styleCheck` (JDK 21) and 13 new batch-3 tests passed; reviewer found no bugs.
-- **Uncommitted:** batch 3 code, tests, audit rows and this `## Now` refresh.
+- **State:** PF-2 verdicts in `premium-feel-audit.md`. Fix-now batches 1–4 done (4: O2, C26). O41 sweep approved. SL-3b blocked on F34.
+- **Next:** commit batch 4 (ask). Then O14, O15 after the user's device check; then PF-3 per `steps/pf-premium-feel.md`.
+- **Open questions:** Share-your-year row: no disabled look when the card is null (failed load) — dim it? Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop single-column Profile layout and desktop search results after the SD fix round; onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving); Focus Mode exit from the notification; Explore no-results state; Undo snackbar flows; snackbar above both bar styles.
+- **Verification:** `styleCheck` (JDK 21) and 56 batch-4 tests passed; reviewer findings fixed.
+- **Uncommitted:** batch 4 code, tests, docs, audit rows, this block.
 
 ## Local verification
 

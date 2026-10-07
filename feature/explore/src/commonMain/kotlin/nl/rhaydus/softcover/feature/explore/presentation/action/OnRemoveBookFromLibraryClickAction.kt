@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.feature.explore.presentation.action
 
 import nl.rhaydus.softcover.core.domain.model.Book
-import nl.rhaydus.softcover.core.presentation.error.onApiFailure
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreDependencies
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreLocalVariables
@@ -13,6 +12,6 @@ internal class OnRemoveBookFromLibraryClickAction(val book: Book) : ExploreActio
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        dependencies.removeBookFromLibraryUseCase(book = book).onApiFailure()
+        dependencies.undoableBookRemover.remove(books = listOf(book))
     }
 }

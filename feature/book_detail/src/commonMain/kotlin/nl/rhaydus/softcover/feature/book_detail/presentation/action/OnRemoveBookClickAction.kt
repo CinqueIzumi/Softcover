@@ -16,26 +16,25 @@ internal class OnRemoveBookClickAction(val book: Book) : BookDetailAction {
     ) {
         scope.currentLocalVariables.bookMutationJobs[book.id]?.cancel()
 
-        val job = dependencies.launch {
-            dependencies.removeBookFromLibraryUseCase(book = book)
-                .onFailure { error ->
-                    AppLog.e("$error")
+        dependencies.undoableBookRemover
+            .remove(books = listOf(book))
+            .onFailure { error ->
+                AppLog.e("$error")
 
-                    scope.setState {
-                        it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id)
-                    }
+                scope.setState {
+                    it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id)
                 }
-                .onSuccess {
-                    scope.setState {
-                        it.copy(selectedLens = BookDetailLens.THE_BOOK)
-                    }
-
-                    scope.sendEvent(event = BookDetailEvent.RefreshDetailBookEvent())
+            }
+            .onSuccess {
+                scope.setState { state ->
+                    state.copy(
+                        selectedLens = BookDetailLens.THE_BOOK,
+                        book = state.book?.copy(
+                            userBook = null,
+                            userBookRead = null,
+                        ),
+                    )
                 }
-        }
-
-        scope.setLocalVariables {
-            it.copy(bookMutationJobs = it.bookMutationJobs + (book.id to job))
-        }
+            }
     }
 }

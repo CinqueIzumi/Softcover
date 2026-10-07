@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.core.book.domain.repository
 import kotlinx.coroutines.flow.Flow
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -151,7 +152,15 @@ interface BooksRepository {
         hasSpoilers: Boolean,
     ): Book
 
-    suspend fun removeBookFromLibrary(book: Book)
+    /**
+     * Removes [books] from the local cache only. Until the removal is undone or committed, fetched
+     * copies of these books are dropped instead of cached, so a sync cannot bring them back.
+     */
+    suspend fun stageBookRemoval(books: List<Book>): StagedBookRemoval
+
+    suspend fun undoBookRemoval(staged: StagedBookRemoval)
+
+    suspend fun commitBookRemoval(staged: StagedBookRemoval): List<Book>
 
     suspend fun updateBookProgress(
         book: Book,

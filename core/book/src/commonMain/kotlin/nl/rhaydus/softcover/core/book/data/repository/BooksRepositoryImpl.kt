@@ -18,6 +18,7 @@ import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.domain.model.CreatedBook
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
@@ -53,6 +54,9 @@ internal class BooksRepositoryImpl(
     override val books: Flow<List<Book>> = booksLocalDataSource.allUserBooks
 
     private val inflightMutex = Mutex()
+
+    private val stagedRemovalMutex = Mutex()
+    private val stagedRemovalBookIds = mutableSetOf<Int>()
     private val inflightRefreshes = mutableMapOf<UserBookStatus?, Deferred<Unit>>()
 
     // Owned here rather than injected, for the same reason as inflightRefreshes above: which source
@@ -148,7 +152,7 @@ internal class BooksRepositoryImpl(
             )
         }
 
-        booksLocalDataSource.cacheBooks(books = booksToCache)
+        booksLocalDataSource.cacheBooks(books = booksToCache.withoutStagedRemovals())
 
         val fetchedBookUserBookIds: Set<Int> = booksToCache.mapNotNull { it.userBook?.id }.toSet()
         val locallyStoredUserBookIds: List<Int> = if (statusFilter == null) {
@@ -190,7 +194,7 @@ internal class BooksRepositoryImpl(
             )
 
             if (fetchedBooks.isNotEmpty()) {
-                booksLocalDataSource.cacheBooks(books = fetchedBooks)
+                booksLocalDataSource.cacheBooks(books = fetchedBooks.withoutStagedRemovals())
             }
         }
 
@@ -216,6 +220,8 @@ internal class BooksRepositoryImpl(
     }
 
     override suspend fun cacheBook(book: Book) {
+        if (book.isStagedForRemoval()) return
+
         booksLocalDataSource.cacheBook(book = book)
     }
 
@@ -280,7 +286,9 @@ internal class BooksRepositoryImpl(
         oldId: Int,
         canonical: Book,
     ) {
-        booksLocalDataSource.cacheBook(book = canonical)
+        if (canonical.isStagedForRemoval().not()) {
+            booksLocalDataSource.cacheBook(book = canonical)
+        }
 
         booksLocalDataSource.redirectBookId(
             oldId = oldId,
@@ -489,22 +497,99 @@ internal class BooksRepositoryImpl(
         return optimistic
     }
 
-    override suspend fun removeBookFromLibrary(book: Book) {
-        val snapshot: Book? = booksLocalDataSource.getBookById(id = book.id)
-        val userBookId: Int? = book.userBook?.id
-
-        if (userBookId != null) {
-            booksLocalDataSource.removeUserBooksById(ids = listOf(userBookId))
+    override suspend fun stageBookRemoval(books: List<Book>): StagedBookRemoval {
+        val stageable: List<Book> = stagedRemovalMutex.withLock {
+            books.filter { stagedRemovalBookIds.add(it.id) }
         }
 
-        runCatching {
-            booksRemoteDataSource.removeBookFromLibrary(book = book)
+        val snapshots: List<Book> = runCatching {
+            stageable.map { booksLocalDataSource.getBookById(id = it.id) ?: it }
         }.getOrElse { error ->
-            if (error is CancellationException) throw error
-
-            restoreOptimisticWrite(snapshot = snapshot)
+            unstage(books = stageable)
             throw error
         }
+
+        val staged = StagedBookRemoval(
+            books = stageable,
+            snapshots = snapshots,
+        )
+
+        val userBookIds: List<Int> = stageable.mapNotNull { it.userBook?.id }
+
+        if (userBookIds.isNotEmpty()) {
+            runCatching {
+                booksLocalDataSource.removeUserBooksById(ids = userBookIds)
+            }.onFailure { error ->
+                unstage(books = stageable)
+                throw error
+            }
+        }
+
+        return staged
+    }
+
+    override suspend fun undoBookRemoval(staged: StagedBookRemoval) {
+        try {
+            staged.snapshots.forEach { restoreIfNotReAdded(snapshot = it) }
+        } finally {
+            unstage(books = staged.books)
+        }
+    }
+
+    override suspend fun commitBookRemoval(staged: StagedBookRemoval): List<Book> {
+        val failed = mutableListOf<Book>()
+
+        try {
+            for (book in staged.books) {
+                if (book.isBackInCacheUnderSameUserBook()) continue
+
+                runCatching {
+                    booksRemoteDataSource.removeBookFromLibrary(book = book)
+                }.onSuccess {
+                    book.userBook?.id?.let { booksLocalDataSource.removeUserBooksById(ids = listOf(it)) }
+                }.onFailure { error ->
+                    if (error is CancellationException) throw error
+
+                    AppLog.e(
+                        error,
+                        "Remote removal failed for book ${book.id}",
+                    )
+
+                    staged.snapshots.firstOrNull { it.id == book.id }?.let { restoreIfNotReAdded(snapshot = it) }
+                    failed += book
+                }
+            }
+        } finally {
+            unstage(books = staged.books)
+        }
+
+        return failed
+    }
+
+    private suspend fun Book.isBackInCacheUnderSameUserBook(): Boolean {
+        val stagedUserBookId: Int = userBook?.id ?: return false
+
+        return booksLocalDataSource.getBookById(id = id)?.userBook?.id == stagedUserBookId
+    }
+
+    private suspend fun restoreIfNotReAdded(snapshot: Book) {
+        if (booksLocalDataSource.getBookById(id = snapshot.id)?.userBook != null) return
+
+        booksLocalDataSource.cacheBook(book = snapshot)
+    }
+
+    private suspend fun unstage(books: List<Book>) {
+        stagedRemovalMutex.withLock {
+            stagedRemovalBookIds.removeAll(books.map { it.id }.toSet())
+        }
+    }
+
+    private suspend fun Book.isStagedForRemoval(): Boolean = stagedRemovalMutex.withLock {
+        id in stagedRemovalBookIds
+    }
+
+    private suspend fun List<Book>.withoutStagedRemovals(): List<Book> = stagedRemovalMutex.withLock {
+        filterNot { it.id in stagedRemovalBookIds }
     }
 
     override suspend fun updateBookProgress(

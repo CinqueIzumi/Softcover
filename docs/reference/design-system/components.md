@@ -62,6 +62,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Mark-as-read celebration** — `core:component/celebration` — mark-as-read particle burst.
 - **Search results pagination** (feature-owned) — [detail](components/states-feedback.md#search-results-pagination) — append-on-scroll paging.
 - **Connectivity chrome** — [detail](components/states-feedback.md#connectivity-chrome) — `Banner`, `EmptyState` and `rememberIsOnline()` for offline.
+- **App snackbar host** — `orchestration` `App` — on phones it rides above the compact bottom chrome via `BottomChromeAnchor` (bar plus session peek bar, both styles); with no chrome on screen it sits at the navigation-bar inset.
 - **Callout** — `core:component/callout` — in-flow card for one condition, optionally with a single next step; `CalloutVariant` is `Neutral` or `Highlight`. `Banner` and `Callout` share one dismiss button (`DismissButton`, internal).
 
 ## Sheets

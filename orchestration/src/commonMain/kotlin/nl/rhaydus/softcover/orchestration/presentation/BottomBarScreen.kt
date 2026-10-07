@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -206,7 +207,11 @@ private fun CompactNavShell(body: @Composable () -> Unit) {
 
     BottomBarScaffold(
         placement = themeConfig.bottomBarStyle.toPlacement(),
-        bottomBar = { CompactBottomChrome(style = themeConfig.bottomBarStyle) },
+        bottomBar = {
+            Box(modifier = Modifier.reportBottomChromeTop()) {
+                CompactBottomChrome(style = themeConfig.bottomBarStyle)
+            }
+        },
         content = body,
     )
 }
@@ -308,12 +313,13 @@ private fun TabRootHost() {
         targetState = tabNavigator.current,
         contentKey = { it.key },
         transitionSpec = {
-            (fadeIn(animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS)) +
+            val enter = fadeIn(animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS)) +
                 slideInVertically(
                     animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS),
                     initialOffsetY = { driftPx },
-                ))
-                .togetherWith(fadeOut(animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS)))
+                )
+
+            enter.togetherWith(fadeOut(animationSpec = tween(TAB_ROOT_TRANSITION_DURATION_MS)))
         },
         label = "TabRootCrossfade",
     ) { tab ->

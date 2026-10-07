@@ -30,6 +30,7 @@ import nl.rhaydus.softcover.core.book.data.datasource.BookNotFoundException
 import nl.rhaydus.softcover.core.book.data.datasource.BooksLocalDataSource
 import nl.rhaydus.softcover.core.book.data.datasource.BooksRemoteDataSource
 import nl.rhaydus.softcover.core.book.domain.model.IsbnEditionMatch
+import nl.rhaydus.softcover.core.book.domain.model.StagedBookRemoval
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.domain.exception.OfflineException
 import nl.rhaydus.softcover.core.domain.exception.ServerUnavailableException
@@ -111,6 +112,19 @@ class BooksRepositoryImplTest {
     }
 
     private fun stubBookEdition(): BookEdition = mockk()
+
+    private fun stagedBook(
+        bookId: Int,
+        userBookId: Int?,
+    ): Book = mockk(relaxed = true) {
+        every {
+            this@mockk.id
+        } returns bookId
+
+        every {
+            this@mockk.userBook
+        } returns if (userBookId != null) stubUserBook(userBookId) else null
+    }
 
     @Nested
     inner class RefreshUserBooks {
@@ -2486,27 +2500,327 @@ class BooksRepositoryImplTest {
     }
 
     @Nested
-    inner class RemoveBookFromLibrary {
+    inner class StageBookRemoval {
         @Test
-        fun `happy path — removes user_book locally, calls remote, no rollback occurs`() = runTest {
+        fun `removes the user books locally and returns the cached snapshots`() = runTest {
             // ----- Arrange -----
-            val userBookId = 7
-            val book = stubBook(userBookId = userBookId)
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val cached = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns cached
+
+            // ----- Act -----
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Assert -----
+            staged.books shouldBe listOf(book)
+            staged.snapshots shouldBe listOf(cached)
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(11))
+            }
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.removeBookFromLibrary(book = any())
+            }
+        }
+
+        @Test
+        fun `falls back to the passed-in book when the cache has none`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            // ----- Act -----
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Assert -----
+            staged.snapshots shouldBe listOf(book)
+        }
+
+        @Test
+        fun `drops books that an earlier removal still holds staged`() = runTest {
+            // ----- Arrange -----
+            val first = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val second = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = any())
+            } returns null
+
+            repository.stageBookRemoval(books = listOf(first))
+
+            // ----- Act -----
+            val staged = repository.stageBookRemoval(books = listOf(first, second))
+
+            // ----- Assert -----
+            staged.books shouldBe listOf(second)
+            staged.snapshots shouldBe listOf(second)
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(11))
+            }
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(22))
+            }
+        }
+
+        @Test
+        fun `skips the local delete when no staged book has a user book`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = null,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            // ----- Act -----
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Assert -----
+            staged.books shouldBe listOf(book)
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.removeUserBooksById(ids = any())
+            }
+        }
+
+        @Test
+        fun `a local failure unstages the books and rethrows`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val localError = RuntimeException("disk full")
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            coEvery {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(11))
+            } throws localError
+
+            // ----- Act -----
+            val caught = runCatching {
+                repository.stageBookRemoval(books = listOf(book))
+            }
+            repository.cacheBook(book = book)
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe localError
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+        }
+
+        @Test
+        fun `a failed snapshot read unstages the books and rethrows`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val localError = RuntimeException("read failed")
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } throws localError
+
+            // ----- Act -----
+            val caught = runCatching {
+                repository.stageBookRemoval(books = listOf(book))
+            }
+            repository.cacheBook(book = book)
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe localError
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.removeUserBooksById(ids = any())
+            }
+
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+        }
+    }
+
+    @Nested
+    inner class UndoBookRemoval {
+        @Test
+        fun `restores the snapshot when the cache has no user book for it`() = runTest {
+            // ----- Arrange -----
+            val snapshot = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(snapshot),
+                snapshots = listOf(snapshot),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            // ----- Act -----
+            repository.undoBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+        }
+
+        @Test
+        fun `restores the snapshot when the cached book has lost its user book`() = runTest {
+            // ----- Arrange -----
+            val snapshot = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(snapshot),
+                snapshots = listOf(snapshot),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = null,
+            )
+
+            // ----- Act -----
+            repository.undoBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = snapshot)
+            }
+        }
+
+        @Test
+        fun `does not restore a snapshot the user re-added in the meantime`() = runTest {
+            // ----- Arrange -----
+            val snapshot = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(snapshot),
+                snapshots = listOf(snapshot),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = 99,
+            )
+
+            // ----- Act -----
+            repository.undoBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+        }
+
+        @Test
+        fun `unstages the books even when a restore throws`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val restoreError = RuntimeException("restore failed")
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            coEvery {
+                booksLocalDataSource.cacheBook(book = book)
+            } throws restoreError
+
+            // ----- Act -----
+            val caught = runCatching {
+                repository.undoBookRemoval(staged = staged)
+            }
+
+            // ----- Assert -----
+            caught.exceptionOrNull() shouldBe restoreError
+
+            val restaged = repository.stageBookRemoval(books = listOf(book))
+            restaged.books shouldBe listOf(book)
+        }
+    }
+
+    @Nested
+    inner class CommitBookRemoval {
+        @Test
+        fun `a remote success re-runs the local delete and reports no failures`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
 
             coEvery {
                 booksRemoteDataSource.removeBookFromLibrary(book = book)
             } returns Unit
 
             // ----- Act -----
-            repository.removeBookFromLibrary(book = book)
+            val failed = repository.commitBookRemoval(staged = staged)
 
             // ----- Assert -----
-            coVerify {
-                booksLocalDataSource.removeUserBooksById(ids = listOf(userBookId))
+            failed shouldBe emptyList()
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.removeBookFromLibrary(book = book)
             }
 
-            coVerify {
-                booksRemoteDataSource.removeBookFromLibrary(book = book)
+            coVerify(exactly = 1) {
+                booksLocalDataSource.removeUserBooksById(ids = listOf(11))
             }
 
             coVerify(exactly = 0) {
@@ -2515,58 +2829,128 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `failure path — re-caches snapshot and rethrows`() = runTest {
+        fun `a remote failure restores the snapshot and returns the book as failed`() = runTest {
             // ----- Arrange -----
-            val bookId = 42
-            val userBookId = 7
-            val book = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-                every {
-                    this@mockk.userBook
-                } returns stubUserBook(id = userBookId)
-            }
-            val snapshot = stubBook(userBookId = userBookId)
-            val remoteError = RuntimeException("network error")
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
 
             coEvery {
-                booksLocalDataSource.getBookById(id = bookId)
-            } returns snapshot
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
 
             coEvery {
                 booksRemoteDataSource.removeBookFromLibrary(book = book)
-            } throws remoteError
+            } throws RuntimeException("network error")
 
             // ----- Act -----
-            val caught = runCatching { repository.removeBookFromLibrary(book = book) }
+            val failed = repository.commitBookRemoval(staged = staged)
 
             // ----- Assert -----
-            caught.exceptionOrNull() shouldBe remoteError
+            failed shouldBe listOf(book)
 
-            coVerify {
-                booksLocalDataSource.cacheBook(book = snapshot)
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.removeUserBooksById(ids = any())
             }
         }
 
         @Test
-        fun `cancellation — rethrows CancellationException without re-caching snapshot`() = runTest {
+        fun `a remote failure does not restore a book re-added under a new user book`() = runTest {
             // ----- Arrange -----
-            val bookId = 42
-            val userBookId = 7
-            val book = mockk<Book>(relaxed = true) {
-                every {
-                    this@mockk.id
-                } returns bookId
-                every {
-                    this@mockk.userBook
-                } returns stubUserBook(id = userBookId)
-            }
-            val snapshot = stubBook(userBookId = userBookId)
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
 
             coEvery {
-                booksLocalDataSource.getBookById(id = bookId)
-            } returns snapshot
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = 99,
+            )
+
+            coEvery {
+                booksRemoteDataSource.removeBookFromLibrary(book = book)
+            } throws RuntimeException("network error")
+
+            // ----- Act -----
+            val failed = repository.commitBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            failed shouldBe listOf(book)
+
+            coVerify(exactly = 0) {
+                booksLocalDataSource.cacheBook(book = any())
+            }
+        }
+
+        @Test
+        fun `one failure does not stop the remaining books from being removed`() = runTest {
+            // ----- Arrange -----
+            val failing = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val succeeding = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(failing, succeeding),
+                snapshots = listOf(failing, succeeding),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = any())
+            } returns null
+
+            coEvery {
+                booksRemoteDataSource.removeBookFromLibrary(book = failing)
+            } throws RuntimeException("network error")
+
+            coEvery {
+                booksRemoteDataSource.removeBookFromLibrary(book = succeeding)
+            } returns Unit
+
+            // ----- Act -----
+            val failed = repository.commitBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            failed shouldBe listOf(failing)
+
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.removeBookFromLibrary(book = succeeding)
+            }
+        }
+
+        @Test
+        fun `a cancellation propagates and is not reported as a failed book`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
 
             coEvery {
                 booksRemoteDataSource.removeBookFromLibrary(book = book)
@@ -2574,7 +2958,7 @@ class BooksRepositoryImplTest {
 
             // ----- Act & Assert -----
             shouldThrow<CancellationException> {
-                repository.removeBookFromLibrary(book = book)
+                repository.commitBookRemoval(staged = staged)
             }
 
             coVerify(exactly = 0) {
@@ -2583,24 +2967,243 @@ class BooksRepositoryImplTest {
         }
 
         @Test
-        fun `no-userBook path — skips removeUserBooksById and still calls remote`() = runTest {
+        fun `skips the remote call for a book back in the cache under the same user book`() = runTest {
             // ----- Arrange -----
-            val book = stubBook(userBookId = null)
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            // ----- Act -----
+            val failed = repository.commitBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            failed shouldBe emptyList()
+
+            coVerify(exactly = 0) {
+                booksRemoteDataSource.removeBookFromLibrary(book = any())
+            }
+        }
+
+        @Test
+        fun `still removes a book re-added under a different user book`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val staged = StagedBookRemoval(
+                books = listOf(book),
+                snapshots = listOf(book),
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns stagedBook(
+                bookId = 1,
+                userBookId = 99,
+            )
 
             coEvery {
                 booksRemoteDataSource.removeBookFromLibrary(book = book)
             } returns Unit
 
             // ----- Act -----
-            repository.removeBookFromLibrary(book = book)
+            repository.commitBookRemoval(staged = staged)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksRemoteDataSource.removeBookFromLibrary(book = book)
+            }
+        }
+
+        @Test
+        fun `unstages the books afterwards so they can be cached again`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            coEvery {
+                booksRemoteDataSource.removeBookFromLibrary(book = book)
+            } returns Unit
+
+            val staged = repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Act -----
+            repository.commitBookRemoval(staged = staged)
+            repository.cacheBook(book = book)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+        }
+    }
+
+    @Nested
+    inner class StagedRemovalSyncGuard {
+        @Test
+        fun `cacheBook drops a staged book`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            repository.stageBookRemoval(books = listOf(book))
+
+            // ----- Act -----
+            repository.cacheBook(book = book)
 
             // ----- Assert -----
             coVerify(exactly = 0) {
-                booksLocalDataSource.removeUserBooksById(ids = any())
+                booksLocalDataSource.cacheBook(book = book)
             }
+        }
 
-            coVerify {
-                booksRemoteDataSource.removeBookFromLibrary(book = book)
+        @Test
+        fun `cacheBook caches a book that is not staged`() = runTest {
+            // ----- Arrange -----
+            val staged = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val other = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = any())
+            } returns null
+
+            repository.stageBookRemoval(books = listOf(staged))
+
+            // ----- Act -----
+            repository.cacheBook(book = other)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBook(book = other)
+            }
+        }
+
+        @Test
+        fun `cacheBook caches the book again after an undo`() = runTest {
+            // ----- Arrange -----
+            val book = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            val staged = repository.stageBookRemoval(books = listOf(book))
+            repository.undoBookRemoval(staged = staged)
+
+            // ----- Act -----
+            repository.cacheBook(book = book)
+
+            // ----- Assert -----
+            coVerify(atLeast = 2) {
+                booksLocalDataSource.cacheBook(book = book)
+            }
+        }
+
+        @Test
+        fun `refreshUserBooks leaves a staged book out of the cached batch`() = runTest {
+            // ----- Arrange -----
+            val userId = 20
+            val stagedBook = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val otherBook = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            coEvery {
+                booksLocalDataSource.getAllUserBookIds()
+            } returns emptyList()
+
+            coEvery {
+                offlineSync.drainAndReconcile(any())
+            } returns listOf(stagedBook, otherBook)
+
+            repository.stageBookRemoval(books = listOf(stagedBook))
+
+            // ----- Act -----
+            repository.refreshUserBooks(userId = userId)
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBooks(books = listOf(otherBook))
+            }
+        }
+
+        @Test
+        fun `hydrateReferencedBooks leaves a staged book out of the cached batch`() = runTest {
+            // ----- Arrange -----
+            val stagedBook = stagedBook(
+                bookId = 1,
+                userBookId = 11,
+            )
+            val otherBook = stagedBook(
+                bookId = 2,
+                userBookId = 22,
+            )
+
+            coEvery {
+                booksLocalDataSource.getBookById(id = 1)
+            } returns null
+
+            coEvery {
+                booksRemoteDataSource.fetchBooksByIds(
+                    ids = listOf(1, 2),
+                    forceNetwork = true,
+                )
+            } returns listOf(stagedBook, otherBook)
+
+            repository.stageBookRemoval(books = listOf(stagedBook))
+
+            // ----- Act -----
+            repository.hydrateReferencedBooks(
+                bookIds = listOf(1, 2),
+                editionIds = emptyList(),
+                forceNetwork = true,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) {
+                booksLocalDataSource.cacheBooks(books = listOf(otherBook))
             }
         }
     }

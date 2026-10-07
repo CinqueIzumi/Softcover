@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
-import nl.rhaydus.common.AppLog
-import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
@@ -28,24 +26,7 @@ internal class OnBulkRemoveFromLibraryAction(
             it.copy(bulkActionInProgress = true)
         }
 
-        var failureCount = 0
-
-        for (book in books) {
-            dependencies.removeBookFromLibraryUseCase(book = book).onFailure { throwable ->
-                AppLog.e(
-                    throwable,
-                    "Bulk remove failed for book ${book.id}",
-                )
-
-                failureCount++
-            }
-        }
-
-        if (failureCount > 0) {
-            val noun = if (failureCount == 1) "book" else "books"
-
-            SnackBarManager.showSnackbar(title = "Couldn't remove $failureCount $noun — try again.")
-        }
+        dependencies.undoableBookRemover.remove(books = books)
 
         scope.setState {
             it.copy(

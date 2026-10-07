@@ -9,7 +9,6 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
@@ -26,6 +25,7 @@ import nl.rhaydus.softcover.core.personal.domain.usecase.GetReadingJournalHistor
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
+import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
@@ -45,7 +45,7 @@ internal class BookDetailDependencies(
     val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
     val markBookAsReadUseCase: MarkBookAsReadUseCase,
     val saveBookVerdictUseCase: SaveBookVerdictUseCase,
-    val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    val undoableBookRemover: UndoableBookRemover,
     val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
     val observeCurrentDateUseCase: ObserveCurrentDateUseCase,
     val setEditionAsOwnedUseCase: SetEditionAsOwnedUseCase,

@@ -9,7 +9,6 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookReviewUseCase
@@ -27,6 +26,7 @@ import nl.rhaydus.softcover.core.preferences.domain.usecase.GetDateStyleAsFlowUs
 import nl.rhaydus.softcover.core.preferences.domain.usecase.GetLastUsedProgressUnitAsFlowUseCase
 import nl.rhaydus.softcover.core.preferences.domain.usecase.SetLastUsedProgressUnitUseCase
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
+import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.core.profile.domain.usecase.ObserveUserProfileDataUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetTopBookReviewsUseCase
 import nl.rhaydus.softcover.feature.book_detail.domain.usecase.GetUserTagsUseCase
@@ -55,7 +55,7 @@ internal class BookDetailScreenScreenModel(
     private val getAllUserBooksUseCase: GetAllUserBooksUseCase,
     private val markBookAsWantToReadUseCase: MarkBookAsWantToReadUseCase,
     private val markBookAsReadingUseCase: MarkBookAsReadingUseCase,
-    private val removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase,
+    private val undoableBookRemover: UndoableBookRemover,
     private val markBookAsReadUseCase: MarkBookAsReadUseCase,
     private val saveBookVerdictUseCase: SaveBookVerdictUseCase,
     private val getDateStyleAsFlowUseCase: GetDateStyleAsFlowUseCase,
@@ -101,7 +101,7 @@ internal class BookDetailScreenScreenModel(
         getAllUserBooksUseCase = getAllUserBooksUseCase,
         markBookAsWantToReadUseCase = markBookAsWantToReadUseCase,
         markBookAsReadingUseCase = markBookAsReadingUseCase,
-        removeBookFromLibraryUseCase = removeBookFromLibraryUseCase,
+        undoableBookRemover = undoableBookRemover,
         markBookAsReadUseCase = markBookAsReadUseCase,
         saveBookVerdictUseCase = saveBookVerdictUseCase,
         getDateStyleAsFlowUseCase = getDateStyleAsFlowUseCase,

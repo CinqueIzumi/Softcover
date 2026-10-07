@@ -9,6 +9,7 @@ import nl.rhaydus.softcover.core.book.data.sync.OfflineUserBookSyncImpl
 import nl.rhaydus.softcover.core.book.domain.repository.BooksRepository
 import nl.rhaydus.softcover.core.book.domain.sync.OfflineUserBookSync
 import nl.rhaydus.softcover.core.book.domain.usecase.AddBookByIsbnUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.CommitBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.FetchBookByIdUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetAllUserBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.GetCurrentlyReadingUserBooksUseCase
@@ -24,10 +25,11 @@ import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsReadingUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.MarkBookAsWantToReadUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.PersistEditionImageUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.RecordBookProgressUseCase
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ReorderShelfBooksUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.ResolveBookByIsbnUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.SaveBookVerdictUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.StageBookRemovalUseCase
+import nl.rhaydus.softcover.core.book.domain.usecase.UndoBookRemovalUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookProgressUseCase
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookRatingUseCase
@@ -165,7 +167,15 @@ val bookModule = module {
     }
 
     factory {
-        RemoveBookFromLibraryUseCase(booksRepository = get())
+        StageBookRemovalUseCase(booksRepository = get())
+    }
+
+    factory {
+        UndoBookRemovalUseCase(booksRepository = get())
+    }
+
+    factory {
+        CommitBookRemovalUseCase(booksRepository = get())
     }
 
     factory {

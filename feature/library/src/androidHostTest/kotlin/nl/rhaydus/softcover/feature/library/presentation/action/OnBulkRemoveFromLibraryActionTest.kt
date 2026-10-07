@@ -6,27 +6,22 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
-import io.mockk.verify
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import nl.rhaydus.designsystem.util.SnackBarManager
-import nl.rhaydus.softcover.core.book.domain.usecase.RemoveBookFromLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
+import nl.rhaydus.softcover.core.presentation.removal.UndoableBookRemover
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnBulkRemoveFromLibraryActionTest {
-    private lateinit var removeBookFromLibraryUseCase: RemoveBookFromLibraryUseCase
+    private lateinit var undoableBookRemover: UndoableBookRemover
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
@@ -34,20 +29,13 @@ class OnBulkRemoveFromLibraryActionTest {
 
     @BeforeEach
     fun setUp() {
-        removeBookFromLibraryUseCase = mockk(relaxed = true)
+        undoableBookRemover = mockk()
         stateFlow = MutableStateFlow(LibraryUiState())
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
             eventChannel = Channel(Channel.BUFFERED),
         )
-
-        mockkObject(SnackBarManager)
-    }
-
-    @AfterEach
-    fun tearDown() {
-        unmockkObject(SnackBarManager)
     }
 
     private fun buildBook(id: Int): Book = Book(
@@ -74,8 +62,8 @@ class OnBulkRemoveFromLibraryActionTest {
     private fun stubDependencies(): LibraryDependencies =
         mockk<LibraryDependencies>(relaxed = true).also { mock ->
             every {
-                mock.removeBookFromLibraryUseCase
-            } returns removeBookFromLibraryUseCase
+                mock.undoableBookRemover
+            } returns undoableBookRemover
         }
 
     @Nested
@@ -93,21 +81,19 @@ class OnBulkRemoveFromLibraryActionTest {
             )
 
             coEvery {
-                removeBookFromLibraryUseCase(book = selectedBook)
+                undoableBookRemover.remove(books = listOf(selectedBook))
             } returns Result.success(Unit)
 
             val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
-            val dependencies = stubDependencies()
 
             // ----- Act -----
             action.execute(
-                dependencies = dependencies,
+                dependencies = stubDependencies(),
                 scope = scope,
             )
 
             // ----- Assert -----
-            coVerify(exactly = 1) { removeBookFromLibraryUseCase(book = selectedBook) }
-            coVerify(exactly = 0) { removeBookFromLibraryUseCase(book = unselectedBook) }
+            coVerify(exactly = 1) { undoableBookRemover.remove(books = listOf(selectedBook)) }
 
             stateFlow.value.selectionMode shouldBe false
             stateFlow.value.selectedBookIds shouldBe emptySet()
@@ -127,26 +113,24 @@ class OnBulkRemoveFromLibraryActionTest {
             )
 
             coEvery {
-                removeBookFromLibraryUseCase(book = explicitBook)
+                undoableBookRemover.remove(books = listOf(explicitBook))
             } returns Result.success(Unit)
 
             val action = OnBulkRemoveFromLibraryAction(explicitBookIds = setOf(99))
-            val dependencies = stubDependencies()
 
             // ----- Act -----
             action.execute(
-                dependencies = dependencies,
+                dependencies = stubDependencies(),
                 scope = scope,
             )
 
             // ----- Assert -----
-            coVerify(exactly = 1) { removeBookFromLibraryUseCase(book = explicitBook) }
-            coVerify(exactly = 0) { removeBookFromLibraryUseCase(book = selectedBook1) }
-            coVerify(exactly = 0) { removeBookFromLibraryUseCase(book = selectedBook2) }
+            coVerify(exactly = 1) { undoableBookRemover.remove(books = listOf(explicitBook)) }
+            coVerify(exactly = 1) { undoableBookRemover.remove(books = any()) }
         }
 
         @Test
-        fun `keeps the bulk remove sheet open with progress on while the removal runs`() = runTest {
+        fun `keeps the bulk remove sheet open with progress on while the stage runs`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
@@ -157,7 +141,7 @@ class OnBulkRemoveFromLibraryActionTest {
             var stateDuringRemoval: LibraryUiState? = null
 
             coEvery {
-                removeBookFromLibraryUseCase(book = book)
+                undoableBookRemover.remove(books = listOf(book))
             } coAnswers {
                 stateDuringRemoval = stateFlow.value
 
@@ -180,21 +164,19 @@ class OnBulkRemoveFromLibraryActionTest {
         }
 
         @Test
-        fun `a failed removal shows a snackbar and still requests the sheet to close`() = runTest {
+        fun `a failed stage still resets selection and requests the sheet to close`() = runTest {
             // ----- Arrange -----
             val book = buildBook(id = 1)
             stateFlow.value = LibraryUiState(
+                selectionMode = true,
                 selectedBookIds = setOf(1),
                 booksByTab = mapOf(tabKey to listOf(book)),
                 isBulkRemoveSheetShown = true,
             )
 
             coEvery {
-                removeBookFromLibraryUseCase(book = book)
+                undoableBookRemover.remove(books = listOf(book))
             } returns Result.failure(RuntimeException("boom"))
-            every {
-                SnackBarManager.showSnackbar(title = any())
-            } returns mockk(relaxed = true)
 
             val action = OnBulkRemoveFromLibraryAction(explicitBookIds = null)
 
@@ -205,17 +187,14 @@ class OnBulkRemoveFromLibraryActionTest {
             )
 
             // ----- Assert -----
-            verify(exactly = 1) {
-                SnackBarManager.showSnackbar(title = "Couldn't remove 1 book — try again.")
-            }
-
+            stateFlow.value.selectionMode shouldBe false
+            stateFlow.value.selectedBookIds shouldBe emptySet()
             stateFlow.value.isBulkRemoveCloseRequested shouldBe true
-            stateFlow.value.isBulkRemoveSheetShown shouldBe true
             stateFlow.value.bulkActionInProgress shouldBe false
         }
 
         @Test
-        fun `no books resolved requests the close without starting progress`() = runTest {
+        fun `no books resolved requests the close without calling the remover`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryUiState(
                 selectedBookIds = emptySet(),
@@ -231,6 +210,7 @@ class OnBulkRemoveFromLibraryActionTest {
             )
 
             // ----- Assert -----
+            coVerify(exactly = 0) { undoableBookRemover.remove(books = any()) }
             stateFlow.value.isBulkRemoveCloseRequested shouldBe true
             stateFlow.value.isBulkRemoveSheetShown shouldBe true
             stateFlow.value.bulkActionInProgress shouldBe false

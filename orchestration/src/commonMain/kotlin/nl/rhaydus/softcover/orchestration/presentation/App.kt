@@ -14,12 +14,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -128,7 +132,16 @@ internal fun App() {
                     LocalAppUpdateState provides appUpdateState,
                     LocalStartAppUpdate provides onStartAppUpdate,
                 ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    val bottomChromeAnchor = remember { BottomChromeAnchor() }
+                    var hostBottomInRoot by remember { mutableFloatStateOf(0f) }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onGloballyPositioned { coordinates ->
+                                hostBottomInRoot = coordinates.boundsInRoot().bottom
+                            },
+                    ) {
                         // Gate the first navigation on resolved auth state. Until the splash check
                         // finishes `authenticated` defaults to false, so building the navigator eagerly
                         // would mount OnboardingScreen and only swap to RootScreen once auth resolves.
@@ -138,15 +151,20 @@ internal fun App() {
                             Surface(modifier = Modifier.fillMaxSize()) {}
                         } else {
                             key(state.authenticated) {
-                                Navigator(
-                                    screen = if (state.authenticated) RootScreen else OnboardingScreen,
-                                )
+                                CompositionLocalProvider(LocalBottomChromeAnchor provides bottomChromeAnchor) {
+                                    Navigator(
+                                        screen = if (state.authenticated) RootScreen else OnboardingScreen,
+                                    )
+                                }
                             }
                         }
 
                         // On an expanded (desktop / large) window a bottom-centre toast floats far from
                         // the action; anchor it bottom-end with a constrained width — the desktop
-                        // convention — and keep the phone bottom-centre otherwise.
+                        // convention — and keep the phone bottom-centre otherwise. While the compact
+                        // bottom chrome is on screen the phone host rides above its reported top edge
+                        // (that edge already clears the navigation-bar inset); without it, it only
+                        // clears the navigation bar.
                         val onWideWindow =
                             rememberWindowSizeClass().widthClass == WindowWidthClass.EXPANDED
 
@@ -157,9 +175,21 @@ internal fun App() {
                                 .padding(16.dp)
                                 .widthIn(max = 420.dp)
                         } else {
-                            Modifier
-                                .align(Alignment.BottomCenter)
-                                .navigationBarsPadding()
+                            val chromeTop = bottomChromeAnchor.topInRoot
+
+                            if (chromeTop == null) {
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .navigationBarsPadding()
+                            } else {
+                                val chromeHeightDp = with(LocalDensity.current) {
+                                    (hostBottomInRoot - chromeTop).coerceAtLeast(0f).toDp()
+                                }
+
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = chromeHeightDp + 8.dp)
+                            }
                         }
 
                         SnackbarHost(
