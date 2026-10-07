@@ -7,11 +7,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.IndicatorBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,13 +44,11 @@ internal fun EditorialContent(
             .fillMaxSize(),
         state = pullToRefreshState,
         indicator = {
-            IndicatorBox(
-                modifier = Modifier.align(Alignment.TopCenter),
+            PullToRefreshDefaults.LoadingIndicator(
                 state = pullToRefreshState,
                 isRefreshing = state.isRefreshing,
-            ) {
-                ContainedLoadingIndicator(modifier = Modifier.align(Alignment.TopCenter))
-            }
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
         },
     ) {
         Column(

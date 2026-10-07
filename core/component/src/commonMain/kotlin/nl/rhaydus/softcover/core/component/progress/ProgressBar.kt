@@ -35,5 +35,6 @@ fun ProgressBar(
             .fillMaxWidth()
             .height(height = 12.dp)
             .skeletonMask(visible = isLoading),
+        waveSpeed = 0.dp,
     )
 }

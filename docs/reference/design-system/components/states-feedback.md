@@ -6,7 +6,7 @@
 
 ### Pull-to-refresh indicator
 
-The Material 3 Expressive `ContainedLoadingIndicator` inside a `PullToRefreshDefaults.IndicatorBox` is the canonical pull-to-refresh affordance. This is a deliberate exception to the "wavy progress, always" rule (DS §2.5, §6): the wavy circular indicator visually competes with the pull gesture's own arc and reads as off at this size, while the contained loading indicator's morphing shape carries the same expressive character without the conflict. Reach for the wavy primitive everywhere else progress is shown.
+The Material 3 Expressive `PullToRefreshDefaults.LoadingIndicator` is the canonical pull-to-refresh affordance: it tracks the pull and plays the looping `ContainedLoadingIndicator` only while refreshing, so an idle screen draws no frames. This is a deliberate exception to the "wavy progress, always" rule (DS §2.5, §6): the wavy circular indicator visually competes with the pull gesture's own arc and reads as off at this size, while the contained loading indicator's morphing shape carries the same expressive character without the conflict. Reach for the wavy primitive everywhere else progress is shown.
 
 ### Pull-to-refresh eyebrow
 

@@ -72,7 +72,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Loading sheet** — `core:component/sheet` — full-screen blocking wavy-progress wait.
 - **Date picker dialog** — `core:component/dialog` — single-day calendar dialog; owns the UTC-millis conversion.
 - **Update progress sheet** — `core:component/progress` — pages/percentage/time reading-progress editor.
-- **Progress bar** — `core:component/progress` — determinate wavy bar.
+- **Progress bar** — `core:component/progress` — determinate wavy bar; the wave holds still.
 - **Because-you-read genre picker** (feature-owned) — [detail](components/sheets.md#because-you-read-genre-picker) — genre-override sheet.
 - **Tag editor sheet** (feature-local) — [detail](components/sheets.md#tag-editor-sheet) — manages the user's own tags on a book.
 - **Choose-lists sheet** — `core:component/lists` — add/remove one or many books to the user's custom lists.
