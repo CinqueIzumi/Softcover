@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PF-3 done: the 37 approved contract findings are S11-4–S11-40 (with run-after order) in `steps/s11-contract-retrofit.md` and gone from `premium-feel-audit.md`, which now holds only PF-4's surface rows; the two foundation parts are F35 and F36 in `foundation-upstream-candidates.md`. SL-3b blocked on F34.
-- **Next:** PF-5 (copy audit) per `steps/pf-premium-feel.md`; PF-4 and PF-7 wait for S12-4.
+- **State:** PF-5 done: `copy-audit.md` lists 140 AI-sounding strings with plain replacements, grouped by screen, each with an empty Verdict cell; its `## Notes` holds the clean modules and three non-AI copy nits. SL-3b blocked on F34.
+- **Next:** PF-6 (copy triage) per `steps/pf-premium-feel.md` § PF-6: walk `copy-audit.md` screen by screen with the user and fill each Verdict. PF-4 and PF-7 wait for S12-4.
 - **Open questions:** Share-your-year row: no disabled look when the card is null (failed load) — dim it? TP deleted pure-`setState` action tests — restore some? `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop Profile single-column and search results (SD); onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving); Focus Mode exit from the notification; Explore no-results; Undo snackbars; snackbar above both bar styles; O14 tablet back + desktop Esc.
-- **Verification:** docs only; no build needed.
-- **Uncommitted:** PF-3 docs (S11 step, audit, upstream candidates, PF step, this README).
+- **Verification:** not run — PF-5 was docs only.
+- **Uncommitted:** PF-5 (`copy-audit.md`, PF step tick, this block).
 
 ## Local verification
 
