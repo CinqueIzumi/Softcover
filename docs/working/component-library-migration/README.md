@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PF-2 verdicts in `premium-feel-audit.md`. Fix-now batches 1–4 committed; batch 5 (O14, O15, banner `\'`, idle redraws) done. PC step added. O41 sweep approved. SL-3b blocked on F34.
-- **Next:** commit batch 5 (ask). Then PF-3 per `steps/pf-premium-feel.md`.
+- **State:** PF-3 done: the 37 approved contract findings are S11-4–S11-40 (with run-after order) in `steps/s11-contract-retrofit.md` and gone from `premium-feel-audit.md`, which now holds only PF-4's surface rows; the two foundation parts are F35 and F36 in `foundation-upstream-candidates.md`. SL-3b blocked on F34.
+- **Next:** PF-5 (copy audit) per `steps/pf-premium-feel.md`; PF-4 and PF-7 wait for S12-4.
 - **Open questions:** Share-your-year row: no disabled look when the card is null (failed load) — dim it? TP deleted pure-`setState` action tests — restore some? `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop Profile single-column and search results (SD); onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving); Focus Mode exit from the notification; Explore no-results; Undo snackbars; snackbar above both bar styles; O14 tablet back + desktop Esc.
-- **Verification:** `styleCheck` (JDK 21) passed; reviewed; O15 seen on emulator. No tests (composable-only).
-- **Uncommitted:** batch 5 code, PC step, audit rows, this block.
+- **Verification:** docs only; no build needed.
+- **Uncommitted:** PF-3 docs (S11 step, audit, upstream candidates, PF step, this README).
 
 ## Local verification
 
@@ -74,7 +74,7 @@ every sub-step's Verify.
 | S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
 | SP | [steps/sp-spacing-scale.md](steps/sp-spacing-scale.md) | SP-1–SP-5, SP-C; after S10, before S11 | [ ] |
 | SH | [steps/sh-shape-scale.md](steps/sh-shape-scale.md) | SH-1–SH-4, SH-C; after S10, before S11 | [ ] |
-| S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-3 | [ ] |
+| S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-40, S11-C | [ ] |
 | PC | [steps/pc-performance-checks.md](steps/pc-performance-checks.md) | PC-1–PC-5 | [ ] |
 | S12 | [steps/s12-close-out.md](steps/s12-close-out.md) | S12-1–S12-5 | [ ] |
 
@@ -86,8 +86,6 @@ every sub-step's Verify.
 - Loading follows `component-contract.md` R12; SL retrofits the existing surfaces.
 - Every step builds the simplest shape: no style tables, single-variant fields or one-caller layers.
 - A step spanning several sessions splits into sub-steps, one session each, in the step file's `## Sub-steps`.
-- The premium-feel audit's bug rows (O2, O6–O15, C26, S27, S35) are fixed in this branch now, before S12, not held for PF-4.
-
 ## Baseline
 
 Measured 2026-08-21, `release/3.2.0` @ `ada51050`.

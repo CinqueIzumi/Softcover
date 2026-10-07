@@ -198,6 +198,28 @@ Filed but not yet implemented in the foundation.
   shimmer and a 300ms minimum once shown), release, and switch Softcover's call sites to it. Then delete
   the local copy.
 
+### F35 — `AdaptiveModalSheet`'s panel form has no motion or depth
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.component.AdaptiveModalSheet`)
+- **Status:** **Open.** The panel form (expanded width) is a bare `Dialog`: no enter or exit animation, an
+  instant dismiss, a 1 dp outline and no elevation, while the compact bottom sheet animates both ways.
+- **Impact in the app:** every sheet on tablet and desktop (share, verdict, lists, re-auth, unknown ISBN)
+  appears and vanishes in one frame.
+- **What to build:** scale and fade the panel in, fade the scrim, and play the exit before
+  `onDismissRequest` (Esc included), all gated by `playDecorativeMotion()`; give the panel elevation.
+
+### F36 — Desktop share-card capture reports a cancel as a failure and hides the clipboard copy
+
+- **Type:** bug
+- **Home:** `nl.rhaydus:designsystem-core` (`nl.rhaydus.designsystem.share.JvmShareCardCapture`)
+- **Status:** **Open.** `saveToGallery` returns `SaveOutcome.Failure("Save cancelled")` when the save
+  dialog is cancelled, and `share` copies to the clipboard but returns a plain `ShareOutcome.Shared`.
+- **Impact in the app:** cancelling a desktop save shows an error, and Share gives no hint that the
+  image is now on the clipboard.
+- **What to build:** a `SaveOutcome.Cancelled`, and a share outcome that says the image went to the
+  clipboard, so the caller can confirm "Copied to clipboard".
+
 ### F33 — detekt type resolution cannot read Kotlin 2.3 metadata
 
 - **Type:** bug (gate silently inert)
