@@ -14,6 +14,7 @@ internal data class OnApiKeyValueChangeAction(val newValue: String) : Onboarding
         scope.setState {
             it.copy(
                 apiKeyField = it.apiKeyField.copy(text = newValue),
+                saveApiKeyButtonEnabled = newValue.isNotBlank() && it.loadingSheet.isLoading.not(),
                 submissionError = null,
             )
         }

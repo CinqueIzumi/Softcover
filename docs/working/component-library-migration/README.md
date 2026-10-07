@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PF-2 done: every row of `premium-feel-audit.md` has a verdict. Cut: C22, O5, O29, O32, O35, O36. S30/S33/S40 fire `select`, not `commit`. C6/C27 foundation parts go to `foundation-upstream-candidates.md`. O38 goes to PF-5. Fix-now set widened (see `## Decisions`). SL-3b blocked on F34.
-- **Next:** fix the fix-now rows (O2, O6–O13, C26, S27, S35) via `softcover-implementer`, one batch per session; O14 and O15 after the user's device check. Then PF-3 per `steps/pf-premium-feel.md` § PF-3.
+- **State:** PF-2 verdicts recorded in `premium-feel-audit.md`. Fix-now batch 1 (onboarding: O6, O10, O11) done. SL-3b blocked on F34.
+- **Next:** next fix-now batch via `softcover-implementer`, one per session: settings (O7, O8, O9); then O12, O13, S27, S35; then O2, C26. O14 and O15 after the user's device check. Then PF-3 per `steps/pf-premium-feel.md` § PF-3.
 - **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop single-column Profile layout and desktop search results after the SD fix round.
-- **Verification:** none needed (docs only, verdicts recorded). Last: SD fix round jvm + android compiles and `styleCheck` (JDK 21) passed; reviewer clean.
-- **Uncommitted:** audit verdicts, the PF-2 tick, the fix-now decision line and this `## Now`.
+- **Verification:** onboarding jvm + android compiles, `projectHealth`, `styleCheck` (JDK 21) and `:feature:onboarding:testAndroidHostTest` passed; reviewer's two Save-enabled findings fixed.
+- **Uncommitted:** nothing. Onboarding page 3 keyboard gap (double nav-bar inset) also fixed; unchecked on device.
 
 ## Local verification
 

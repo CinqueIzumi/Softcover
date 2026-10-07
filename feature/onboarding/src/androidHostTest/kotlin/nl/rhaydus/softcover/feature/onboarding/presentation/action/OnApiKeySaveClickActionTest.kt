@@ -47,7 +47,10 @@ class OnApiKeySaveClickActionTest {
     }
 
     private fun stateWithApiKey(text: String): OnboardingUiState = OnboardingUiState().let {
-        it.copy(apiKeyField = it.apiKeyField.copy(text = text))
+        it.copy(
+        apiKeyField = it.apiKeyField.copy(text = text),
+        saveApiKeyButtonEnabled = true,
+    )
     }
 
     private fun stubDependencies(testScope: TestScope): OnboardingDependencies {
@@ -99,6 +102,35 @@ class OnApiKeySaveClickActionTest {
 
     @Nested
     inner class Execute {
+        @Test
+        fun `does nothing when the save button is disabled`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "my-key").copy(saveApiKeyButtonEnabled = false)
+            val stateBefore = stateFlow.value
+            dependencies = stubDependencies(this)
+            stubUseCases()
+
+            val action = OnApiKeySaveClickAction
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value shouldBe stateBefore
+            coVerify(exactly = 0) {
+                resetUserDataUseCase()
+            }
+            coVerify(exactly = 0) {
+                updateApiKeyUseCase(key = any())
+            }
+            coVerify(exactly = 0) {
+                initializeUserIdAndBooksUseCase()
+            }
+        }
+
         @Test
         fun `disables the save button, shows loading and clears the previous error on entry`() = runTest {
             // ----- Arrange -----

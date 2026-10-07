@@ -133,12 +133,12 @@ found during the sweep.
 | O3 | contract | **Exact chart values are hidden.** (`ColumnChart.kt:47`) | A hover tooltip on desktop. On touch, press and scrub with a `tickle` per column. | M | approve |
 | O4 | contract | **The update download has no progress.** (`AppUpdateDataSourceImpl.kt:8-17`, `AppUpdateCalloutMapper.kt:27-31`) | Carry bytes downloaded and show a determinate bar. Android and desktop. | M | approve |
 | O5 | contract | **No blur behind sheets.** | Blur or deepen the dim where the platform supports it, after C6. | L | cut |
-| O6 | surface | **bug: Back on onboarding pages 2–3 closes the app.** (`OnboardingScreenLayout.mobile.kt:70-122`) | Back goes to the previous page. | S | approve; fix now |
+| O6 | surface | **bug: Back on onboarding pages 2–3 closes the app.** (`OnboardingScreenLayout.mobile.kt:70-122`) | Back goes to the previous page. | S | fixed |
 | O7 | surface | **bug: Library tabs discard unsaved changes on back.** (`LibraryVisibilitySettingsScreen.kt:30`) | A Save / Discard sheet, or autosave. | S | approve; fix now |
 | O8 | surface | **bug: A failed tabs save looks saved.** (`OnSaveLibraryVisibilityAction.kt:23-38`) | Show the failure and keep the draft. | S | approve; fix now |
 | O9 | surface | **bug: A failed log-out is silent.** (`OnLogOutClickAction.kt`) | A snackbar, or keep the sheet busy. | S | approve; fix now |
-| O10 | surface | **bug: Enter / Done doesn't submit the API key.** (`OnboardingShelf.kt:136-139`) | Route submit to the save action. | S | approve; fix now |
-| O11 | surface | **bug: Save works on an empty key, and an empty paste clears the field.** (`OnboardingUiState.kt:21`, `OnboardingShelf.kt:118-124`) | Disable Save when the key is blank, and ignore an empty paste. | S | approve; fix now |
+| O10 | surface | **bug: Enter / Done doesn't submit the API key.** (`OnboardingShelf.kt:136-139`) | Route submit to the save action. | S | fixed |
+| O11 | surface | **bug: Save works on an empty key, and an empty paste clears the field.** (`OnboardingUiState.kt:21`, `OnboardingShelf.kt:118-124`) | Disable Save when the key is blank, and ignore an empty paste. | S | fixed |
 | O12 | surface | **bug: "1 days" and "across 1 books".** (`ReadingAtlasMapper.kt:47`, `RatingsHistogramSection.kt:125`) | Pluralise. | S | approve; fix now |
 | O13 | surface | **bug: Focus Mode pops during composition** when the session ends from the notification (`FocusModeScreen.kt:46-52`) | Pop from an effect so the exit animation plays. | S | approve; fix now |
 | O14 | surface | **bug?: System back with a pane book open** likely falls through the root navigator (`BookDetailPaneHost.kt`). Check on a tablet. | Back closes the pane. Esc does the same on desktop. | S | approve; device check, then fix now |

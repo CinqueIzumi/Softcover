@@ -13,10 +13,12 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
         dependencies: OnboardingDependencies,
         scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>,
     ) {
+        if (scope.currentState.saveApiKeyButtonEnabled.not()) return
+
         fun stopLoading(error: Throwable) {
             scope.setState {
                 it.copy(
-                    saveApiKeyButtonEnabled = true,
+                    saveApiKeyButtonEnabled = it.apiKeyField.text.isNotBlank(),
                     loadingSheet = it.loadingSheet.copy(
                         scaffold = it.loadingSheet.scaffold.copy(closeRequested = true),
                         progress = 0f,

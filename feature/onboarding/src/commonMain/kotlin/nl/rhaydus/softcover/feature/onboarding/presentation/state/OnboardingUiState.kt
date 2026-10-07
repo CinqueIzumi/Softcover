@@ -17,8 +17,9 @@ internal data class OnboardingUiState(
         text = "",
         placeholder = "Enter your key",
         variant = TextFieldVariant.Pill(),
+        submittable = true,
     ),
-    val saveApiKeyButtonEnabled: Boolean = true,
+    val saveApiKeyButtonEnabled: Boolean = false,
     val submissionError: String? = null,
     val loadingSheet: LoadingSheetUiModel = LoadingSheetUiModel(
         scaffold = SheetScaffoldUiModel(

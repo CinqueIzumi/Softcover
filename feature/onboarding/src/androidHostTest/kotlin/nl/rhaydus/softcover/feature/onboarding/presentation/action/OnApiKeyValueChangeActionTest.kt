@@ -68,5 +68,56 @@ class OnApiKeyValueChangeActionTest {
             stateFlow.value.apiKeyField.text shouldBe "new-key"
             stateFlow.value.submissionError shouldBe null
         }
+
+        @Test
+        fun `enables the save button when the typed text is not blank`() = runTest {
+            // ----- Arrange -----
+            dependencies = stubDependencies(this)
+            val action = OnApiKeyValueChangeAction(newValue = "new-key")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe true
+        }
+
+        @Test
+        fun `disables the save button when the typed text is blank`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = stateWithApiKey(text = "old-key").copy(saveApiKeyButtonEnabled = true)
+            dependencies = stubDependencies(this)
+            val action = OnApiKeyValueChangeAction(newValue = "   ")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe false
+        }
+
+        @Test
+        fun `keeps the save button disabled for a non-blank value while loading`() = runTest {
+            // ----- Arrange -----
+            val base = stateWithApiKey(text = "old-key")
+            stateFlow.value = base.copy(loadingSheet = base.loadingSheet.copy(isLoading = true))
+            dependencies = stubDependencies(this)
+            val action = OnApiKeyValueChangeAction(newValue = "new-key")
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.saveApiKeyButtonEnabled shouldBe false
+        }
     }
 }

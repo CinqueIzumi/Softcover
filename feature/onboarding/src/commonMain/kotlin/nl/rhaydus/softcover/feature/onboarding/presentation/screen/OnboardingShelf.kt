@@ -49,6 +49,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
+import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyPasteAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyValueChangeAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
@@ -117,9 +118,7 @@ internal fun ApiKeyEntryContent(
     Column(modifier = modifier) {
         PasteFromClipboardRow(
             onClick = {
-                val newValue = getCopiedText()
-
-                runAction(OnApiKeyValueChangeAction(newValue = newValue))
+                runAction(OnApiKeyPasteAction(pastedText = getCopiedText()))
             },
         )
 
@@ -135,7 +134,8 @@ internal fun ApiKeyEntryContent(
                 when (event) {
                     is TextFieldEvent.ValueChanged -> runAction(OnApiKeyValueChangeAction(newValue = event.text))
 
-                    is TextFieldEvent.Submitted,
+                    is TextFieldEvent.Submitted -> runAction(OnApiKeySaveClickAction)
+
                     is TextFieldEvent.TrailingClicked -> Unit
                 }
             },

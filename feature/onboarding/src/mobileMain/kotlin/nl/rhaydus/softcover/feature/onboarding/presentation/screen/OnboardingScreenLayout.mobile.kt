@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -40,6 +41,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.theme.StandardPreview
@@ -71,11 +75,21 @@ internal actual fun OnboardingScreenLayout(
         scope.launch { pagerState.animateScrollToPage(page = index) }
     }
 
+    val previousPageBackState = rememberNavigationEventState(NavigationEventInfo.None)
+
+    NavigationBackHandler(
+        state = previousPageBackState,
+        isBackEnabled = pagerState.currentPage > 0,
+        onBackCancelled = {},
+        onBackCompleted = { navigateToPage(index = pagerState.currentPage - 1) },
+    )
+
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
                 .imePadding(),
         ) {
             // Persistent chrome, rendered once above the pager (not per-page) so it never shifts as
