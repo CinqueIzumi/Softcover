@@ -25,7 +25,7 @@ swap the ones that sound AI-generated for plain, natural text.
 | PF-3 | Write the approved contract-level findings into `s11-contract-retrofit.md` as new S11 sub-steps | PF-2 | [x] |
 | PF-4 | Apply the approved surface-level findings in this branch; delete `premium-feel-audit.md` | PF-3, S12-4 | [ ] |
 | PF-5 | Audit every user-facing string for AI-sounding copy; write `copy-audit.md` in this directory | — | [x] |
-| PF-6 | Walk the copy audit with the user: approve, cut or reword each proposed replacement | PF-5 | [ ] |
+| PF-6 | Walk the copy audit with the user: approve, cut or reword each proposed replacement | PF-5 | [x] |
 | PF-7 | Apply the approved replacements; delete `copy-audit.md` | PF-6, S12-4 | [ ] |
 
 ## PF-1 — Audit
