@@ -15,7 +15,9 @@ import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
+import nl.rhaydus.softcover.feature.settings.presentation.action.OnLibraryVisibilityBackClickAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
+import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilityDiscardGuard
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryVisibilitySaveBar
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 
@@ -24,16 +26,20 @@ import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilit
 internal actual fun LibraryVisibilitySettingsScreenLayout(
     state: LibraryVisibilitySettingsUiState,
     runAction: (LibraryVisibilityAction) -> Unit,
-    onNavigateBack: () -> Unit,
     onCreateListClick: () -> Unit,
 ) {
+    LibraryVisibilityDiscardGuard(
+        state = state,
+        runAction = runAction,
+    )
+
     Scaffold(
         topBar = {
             TopBar(
                 model = state.topBar,
                 onEvent = { event ->
                     when (event) {
-                        TopBarEvent.BackClicked -> onNavigateBack()
+                        TopBarEvent.BackClicked -> runAction(OnLibraryVisibilityBackClickAction())
                     }
                 },
             )

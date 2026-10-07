@@ -134,9 +134,9 @@ found during the sweep.
 | O4 | contract | **The update download has no progress.** (`AppUpdateDataSourceImpl.kt:8-17`, `AppUpdateCalloutMapper.kt:27-31`) | Carry bytes downloaded and show a determinate bar. Android and desktop. | M | approve |
 | O5 | contract | **No blur behind sheets.** | Blur or deepen the dim where the platform supports it, after C6. | L | cut |
 | O6 | surface | **bug: Back on onboarding pages 2–3 closes the app.** (`OnboardingScreenLayout.mobile.kt:70-122`) | Back goes to the previous page. | S | fixed |
-| O7 | surface | **bug: Library tabs discard unsaved changes on back.** (`LibraryVisibilitySettingsScreen.kt:30`) | A Save / Discard sheet, or autosave. | S | approve; fix now |
-| O8 | surface | **bug: A failed tabs save looks saved.** (`OnSaveLibraryVisibilityAction.kt:23-38`) | Show the failure and keep the draft. | S | approve; fix now |
-| O9 | surface | **bug: A failed log-out is silent.** (`OnLogOutClickAction.kt`) | A snackbar, or keep the sheet busy. | S | approve; fix now |
+| O7 | surface | **bug: Library tabs discard unsaved changes on back.** (`LibraryVisibilitySettingsScreen.kt:30`) | A Save / Discard sheet, or autosave. | S | fixed |
+| O8 | surface | **bug: A failed tabs save looks saved.** (`OnSaveLibraryVisibilityAction.kt:23-38`) | Show the failure and keep the draft. | S | fixed |
+| O9 | surface | **bug: A failed log-out is silent.** (`OnLogOutClickAction.kt`) | A snackbar, or keep the sheet busy. | S | fixed |
 | O10 | surface | **bug: Enter / Done doesn't submit the API key.** (`OnboardingShelf.kt:136-139`) | Route submit to the save action. | S | fixed |
 | O11 | surface | **bug: Save works on an empty key, and an empty paste clears the field.** (`OnboardingUiState.kt:21`, `OnboardingShelf.kt:118-124`) | Disable Save when the key is blank, and ignore an empty paste. | S | fixed |
 | O12 | surface | **bug: "1 days" and "across 1 books".** (`ReadingAtlasMapper.kt:47`, `RatingsHistogramSection.kt:125`) | Pluralise. | S | approve; fix now |
@@ -168,3 +168,4 @@ found during the sweep.
 | O38 | surface | **The share row and sheet use different names.** (`ProfileSheetScaffoldBuilder.kt`, `ShareEntryRow.kt:83,91`) | One name. PF-5 may take this. | S | approve; PF-5 takes it |
 | O39 | surface | **First-login progress stalls at 20 %.** (`OnApiKeySaveClickAction.kt:47-63`) | Report real stages. | M | approve |
 | O40 | surface | **The onboarding hero appears all at once.** (`OnboardingScreenLayout.mobile.kt:192-255`) | A one-time stagger. | S | approve |
+| O41 | contract | **bug?: Sheets may vanish in one frame.** A host that navigates away on a sheet click or a `closeRequested` write removes the sheet mid-animation (see `SheetScaffoldEvent.Dismissed`). Sweep every `SheetScaffold` / `AdaptiveModalSheet` host. | Leave on `Dismissed`. | M | approve |

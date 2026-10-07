@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import nl.rhaydus.softcover.core.component.header.SectionHeaderTone
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.core.domain.model.BookList
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
@@ -28,6 +29,9 @@ internal data class LibraryVisibilitySettingsUiState(
     val draftTabOrder: List<String> = emptyList(),
     val initialized: Boolean = false,
     val isSaving: Boolean = false,
+    val showDiscardSheet: Boolean = false,
+    val discardSheetScaffold: SheetScaffoldUiModel = discardSheetScaffold(),
+    val leaveOnSheetDismissed: Boolean = false,
     val availableLists: List<BookList> = emptyList(),
     val statusCounts: Map<Int, Int> = emptyMap(),
     val totalCount: Int = 0,

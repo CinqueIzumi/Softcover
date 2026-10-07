@@ -5,17 +5,21 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -29,6 +33,8 @@ class OnLogOutClickActionTest {
 
     @BeforeEach
     fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+
         resetUserDataUseCase = mockk()
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
@@ -37,6 +43,11 @@ class OnLogOutClickActionTest {
             localVariablesFlow = MutableStateFlow(LocalProfileVariables()),
             eventChannel = eventChannel,
         )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     private fun stubDependencies(testScope: TestScope): ProfileDependencies {

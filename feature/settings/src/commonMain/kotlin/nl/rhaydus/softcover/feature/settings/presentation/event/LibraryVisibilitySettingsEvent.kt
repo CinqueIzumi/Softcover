@@ -2,4 +2,6 @@ package nl.rhaydus.softcover.feature.settings.presentation.event
 
 import nl.rhaydus.toad.UiEvent
 
-internal sealed interface LibraryVisibilitySettingsEvent : UiEvent
+internal sealed interface LibraryVisibilitySettingsEvent : UiEvent {
+    data object NavigateBack : LibraryVisibilitySettingsEvent
+}

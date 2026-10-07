@@ -5,11 +5,14 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import nl.rhaydus.softcover.core.domain.account.RefreshLibraryUseCase
 import nl.rhaydus.softcover.core.domain.model.ApplicationScope
 import nl.rhaydus.softcover.feature.settings.domain.usecase.SetEnabledListIdsUseCase
@@ -20,6 +23,7 @@ import nl.rhaydus.softcover.feature.settings.presentation.screenmodel.LibraryVis
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsLocalVariables
 import nl.rhaydus.softcover.feature.settings.presentation.state.LibraryVisibilitySettingsUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -30,6 +34,7 @@ class OnSaveLibraryVisibilityActionTest {
     private lateinit var setLibraryTabOrderUseCase: SetLibraryTabOrderUseCase
     private lateinit var refreshLibraryUseCase: RefreshLibraryUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryVisibilitySettingsUiState>
+    private lateinit var eventChannel: Channel<LibraryVisibilitySettingsEvent>
     private lateinit var scope: ActionScope<
         LibraryVisibilitySettingsUiState,
         LibraryVisibilitySettingsEvent,
@@ -38,16 +43,24 @@ class OnSaveLibraryVisibilityActionTest {
 
     @BeforeEach
     fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+
         setEnabledStatusCodesUseCase = mockk()
         setEnabledListIdsUseCase = mockk()
         setLibraryTabOrderUseCase = mockk()
         refreshLibraryUseCase = mockk()
         stateFlow = MutableStateFlow(LibraryVisibilitySettingsUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryVisibilitySettingsLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     /**
@@ -240,13 +253,128 @@ class OnSaveLibraryVisibilityActionTest {
         }
 
         @Test
-        fun `still refreshes the library and clears isSaving when every use case fails`() = runTest {
+        fun `still refreshes and clears isSaving when saving status codes fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 persistedEnabledStatusCodes = emptySet(),
-                persistedEnabledListIds = emptySet(),
                 draftEnabledStatusCodes = setOf(1),
-                draftEnabledListIds = emptySet(),
+                initialized = true,
+            )
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                setEnabledStatusCodesUseCase(codes = any())
+            } returns Result.failure(RuntimeException("error"))
+
+            coEvery {
+                setEnabledListIdsUseCase(ids = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setLibraryTabOrderUseCase(order = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnSaveLibraryVisibilityAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { refreshLibraryUseCase() }
+            stateFlow.value.isSaving shouldBe false
+        }
+
+        @Test
+        fun `still refreshes and clears isSaving when saving list ids fails`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
+                initialized = true,
+            )
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                setEnabledStatusCodesUseCase(codes = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setEnabledListIdsUseCase(ids = any())
+            } returns Result.failure(RuntimeException("error"))
+
+            coEvery {
+                setLibraryTabOrderUseCase(order = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnSaveLibraryVisibilityAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { refreshLibraryUseCase() }
+            stateFlow.value.isSaving shouldBe false
+        }
+
+        @Test
+        fun `still refreshes and clears isSaving when saving tab order fails`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
+                initialized = true,
+            )
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                setEnabledStatusCodesUseCase(codes = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setEnabledListIdsUseCase(ids = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setLibraryTabOrderUseCase(order = any())
+            } returns Result.failure(RuntimeException("error"))
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnSaveLibraryVisibilityAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { refreshLibraryUseCase() }
+            stateFlow.value.isSaving shouldBe false
+        }
+
+        @Test
+        fun `skips the refresh and clears isSaving when saving every use case fails`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
                 initialized = true,
             )
             val dependencies = stubDependencies(this)
@@ -265,7 +393,7 @@ class OnSaveLibraryVisibilityActionTest {
 
             coEvery {
                 refreshLibraryUseCase()
-            } returns Result.failure(RuntimeException("error"))
+            } returns Result.success(Unit)
 
             val action = OnSaveLibraryVisibilityAction()
 
@@ -276,11 +404,265 @@ class OnSaveLibraryVisibilityActionTest {
             )
 
             // ----- Assert -----
-            coVerify(exactly = 1) { setEnabledStatusCodesUseCase(codes = any()) }
-            coVerify(exactly = 1) { setEnabledListIdsUseCase(ids = any()) }
-            coVerify(exactly = 1) { setLibraryTabOrderUseCase(order = any()) }
-            coVerify(exactly = 1) { refreshLibraryUseCase() }
+            coVerify(exactly = 0) { refreshLibraryUseCase() }
             stateFlow.value.isSaving shouldBe false
+        }
+
+        @Test
+        fun `requests close and leave on dismiss when leaveAfterSave is true and every save succeeds`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
+                initialized = true,
+                showDiscardSheet = true,
+            )
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                setEnabledStatusCodesUseCase(codes = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setEnabledListIdsUseCase(ids = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setLibraryTabOrderUseCase(order = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull() shouldBe null
+            stateFlow.value.discardSheetScaffold.closeRequested shouldBe true
+            stateFlow.value.leaveOnSheetDismissed shouldBe true
+            coVerify(exactly = 1) { setEnabledStatusCodesUseCase(codes = setOf(1)) }
+        }
+
+        @Test
+        fun `does not touch the discard sheet flag when leaveAfterSave is true`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
+                initialized = true,
+                showDiscardSheet = true,
+            )
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                setEnabledStatusCodesUseCase(codes = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setEnabledListIdsUseCase(ids = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setLibraryTabOrderUseCase(order = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.showDiscardSheet shouldBe true
+        }
+
+        @Test
+        fun `closes the sheet without leaving or sending an event when leaveAfterSave is true and a save fails`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
+                initialized = true,
+                showDiscardSheet = true,
+            )
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                setEnabledStatusCodesUseCase(codes = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setEnabledListIdsUseCase(ids = any())
+            } returns Result.failure(RuntimeException("error"))
+
+            coEvery {
+                setLibraryTabOrderUseCase(order = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull() shouldBe null
+            stateFlow.value.isSaving shouldBe false
+            stateFlow.value.discardSheetScaffold.busy shouldBe false
+            stateFlow.value.discardSheetScaffold.closeRequested shouldBe true
+            stateFlow.value.leaveOnSheetDismissed shouldBe false
+        }
+
+        @Test
+        fun `neither closes nor leaves when the sheet was dismissed during a leaveAfterSave save`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
+                initialized = true,
+                showDiscardSheet = true,
+            )
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                setEnabledStatusCodesUseCase(codes = any())
+            } coAnswers {
+                stateFlow.value = stateFlow.value.copy(showDiscardSheet = false)
+                Result.success(Unit)
+            }
+
+            coEvery {
+                setEnabledListIdsUseCase(ids = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setLibraryTabOrderUseCase(order = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isSaving shouldBe false
+            stateFlow.value.discardSheetScaffold.closeRequested shouldBe false
+            stateFlow.value.leaveOnSheetDismissed shouldBe false
+        }
+
+        @Test
+        fun `requests close and leave on dismiss without saving when leaveAfterSave is true and state is clean`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                initialized = true,
+            )
+            val dependencies = stubDependencies(this)
+            val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull() shouldBe null
+            stateFlow.value.discardSheetScaffold.closeRequested shouldBe true
+            stateFlow.value.leaveOnSheetDismissed shouldBe true
+            coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
+            coVerify(exactly = 0) { setEnabledListIdsUseCase(ids = any()) }
+            coVerify(exactly = 0) { setLibraryTabOrderUseCase(order = any()) }
+        }
+
+        @Test
+        fun `requests close and leave on dismiss without saving when leaveAfterSave is true and isSaving is true`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
+                initialized = true,
+                isSaving = true,
+            )
+            val dependencies = stubDependencies(this)
+            val action = OnSaveLibraryVisibilityAction(leaveAfterSave = true)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull() shouldBe null
+            stateFlow.value.discardSheetScaffold.closeRequested shouldBe true
+            stateFlow.value.leaveOnSheetDismissed shouldBe true
+            coVerify(exactly = 0) { setEnabledStatusCodesUseCase(codes = any()) }
+            coVerify(exactly = 0) { setEnabledListIdsUseCase(ids = any()) }
+            coVerify(exactly = 0) { setLibraryTabOrderUseCase(order = any()) }
+        }
+
+        @Test
+        fun `sends no event by default`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryVisibilitySettingsUiState(
+                persistedEnabledStatusCodes = emptySet(),
+                draftEnabledStatusCodes = setOf(1),
+                initialized = true,
+            )
+            val dependencies = stubDependencies(this)
+
+            coEvery {
+                setEnabledStatusCodesUseCase(codes = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setEnabledListIdsUseCase(ids = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                setLibraryTabOrderUseCase(order = any())
+            } returns Result.success(Unit)
+
+            coEvery {
+                refreshLibraryUseCase()
+            } returns Result.success(Unit)
+
+            val action = OnSaveLibraryVisibilityAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }
 }

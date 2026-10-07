@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PF-2 verdicts recorded in `premium-feel-audit.md`. Fix-now batch 1 (onboarding: O6, O10, O11) done. SL-3b blocked on F34.
-- **Next:** next fix-now batch via `softcover-implementer`, one per session: settings (O7, O8, O9); then O12, O13, S27, S35; then O2, C26. O14 and O15 after the user's device check. Then PF-3 per `steps/pf-premium-feel.md` § PF-3.
-- **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop single-column Profile layout and desktop search results after the SD fix round.
-- **Verification:** onboarding jvm + android compiles, `projectHealth`, `styleCheck` (JDK 21) and `:feature:onboarding:testAndroidHostTest` passed; reviewer's two Save-enabled findings fixed.
-- **Uncommitted:** nothing. Onboarding page 3 keyboard gap (double nav-bar inset) also fixed; unchecked on device.
+- **State:** PF-2 verdicts recorded in `premium-feel-audit.md`. Fix-now batch 1 (onboarding) committed in `a63d9860`. Batch 2 (settings: O7 Save / Discard sheet on back, O8 and O9 failure snackbars) committed; snackbars verified on device. SL-3b blocked on F34.
+- **Next:** fix-now batch 3 — O12, O13, S27, S35 in `premium-feel-audit.md` — via `softcover-implementer`. Later batches, one per session: O2, C26; O14 and O15 after the user's device check; then PF-3 per `steps/pf-premium-feel.md` § PF-3.
+- **Open questions:** Pure-`setState` action tests deleted across TP — user may want some back. `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id (pre-existing) — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop single-column Profile layout and desktop search results after the SD fix round; onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving).
+- **Verification:** settings + profile compiles, `projectHealth`, `styleCheck` (JDK 21) and the touched action tests passed; review findings fixed.
+- **Uncommitted:** nothing.
 
 ## Local verification
 
