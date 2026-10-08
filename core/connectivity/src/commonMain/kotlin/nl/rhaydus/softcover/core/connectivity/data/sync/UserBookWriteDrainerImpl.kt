@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.connectivity.data.sync
 
 import nl.rhaydus.offlinesync.OfflineWriteDrainer
-import nl.rhaydus.softcover.core.domain.connectivity.ListWriteDrainer
 import nl.rhaydus.softcover.core.domain.connectivity.PendingUserBookWriteKind
 import nl.rhaydus.softcover.core.domain.connectivity.UserBookWriteDrainer
 

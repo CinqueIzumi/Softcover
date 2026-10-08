@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.core.personal.data.repository
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -12,11 +11,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import nl.rhaydus.softcover.core.database.model.ReadingLogEntryEntity
 import nl.rhaydus.softcover.core.personal.data.datasource.ReadingLogLocalDataSource
-import nl.rhaydus.softcover.core.personal.domain.model.ReadingLogEntry
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.time.Instant
 
 class ReadingLogRepositoryImplTest {
     private lateinit var localDataSource: ReadingLogLocalDataSource

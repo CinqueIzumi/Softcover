@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.designsystem.presentation.icon
 
-import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.softcover.core.designsystem.generated.resources.Res
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_account
 import nl.rhaydus.softcover.core.designsystem.generated.resources.ic_add

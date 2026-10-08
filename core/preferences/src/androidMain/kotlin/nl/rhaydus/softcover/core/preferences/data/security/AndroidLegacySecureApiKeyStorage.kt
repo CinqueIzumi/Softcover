@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.preferences.data.security
 
 import android.content.Context
-import android.security.keystore.KeyProperties
 import kotlinx.coroutines.withContext
 import nl.rhaydus.common.AppDispatchers
 import nl.rhaydus.common.AppLog

@@ -98,6 +98,16 @@ style:
     # The shared baseline also exempts `Composable`. Softcover deliberately does not: an unused private
     # @Composable is dead UI code and should be caught. Only previews are exempt (they are entry points).
     ignoreAnnotated: ['Preview', 'StandardPreview']
+  UnusedImports:
+    active: true
+    excludes:
+      # kotlinx.coroutines.IO is an extension Dispatchers.IO needs in commonMain on native targets only.
+      - '**/core/domain/di/DispatcherModule.kt'
+      # The SessionValueCache getOrPut/refresh extension imports are not attributed to their call sites.
+      - '**/core/book/data/repository/BooksRepositoryImpl.kt'
+      - '**/feature/explore/data/repository/ExploreRepositoryImpl.kt'
+      # kotlin.concurrent.Volatile is the annotation native targets need; on the JVM @Volatile is kotlin.jvm.
+      - '**/core/preferences/data/datasource/ApiKeyLocalDataSource.kt'
   ForbiddenComment:
     # TODO / FIXME / STOPSHIP are legitimate, tracked markers in this codebase — not a code smell to gate
     # on, so `comments` below replaces the rule's own TODO/FIXME/STOPSHIP defaults rather than adding to

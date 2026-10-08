@@ -26,11 +26,15 @@ class ReadingStandInsTest {
     inner class StandInCards {
         @Test
         fun `every also-reading stand-in's cover is loading and has no source`() {
-            // ----- Act & Assert -----
-            ALSO_READING_STAND_IN_CARDS.shouldNotBeEmpty()
-            ALSO_READING_STAND_IN_CARDS.forEach { card ->
-                val cover = card.standInCover()
+            // ----- Arrange -----
+            val cards = ALSO_READING_STAND_IN_CARDS
 
+            // ----- Act -----
+            val covers = cards.map { it.standInCover() }
+
+            // ----- Assert -----
+            cards.shouldNotBeEmpty()
+            covers.forEach { cover ->
                 cover.isLoading shouldBe true
                 cover.source.shouldBeNull()
             }
@@ -38,11 +42,15 @@ class ReadingStandInsTest {
 
         @Test
         fun `every pick-up-next stand-in's cover is loading and has no source`() {
-            // ----- Act & Assert -----
-            PICK_UP_NEXT_STAND_IN_CARDS.shouldNotBeEmpty()
-            PICK_UP_NEXT_STAND_IN_CARDS.forEach { card ->
-                val cover = card.standInCover()
+            // ----- Arrange -----
+            val cards = PICK_UP_NEXT_STAND_IN_CARDS
 
+            // ----- Act -----
+            val covers = cards.map { it.standInCover() }
+
+            // ----- Assert -----
+            cards.shouldNotBeEmpty()
+            covers.forEach { cover ->
                 cover.isLoading shouldBe true
                 cover.source.shouldBeNull()
             }
@@ -50,9 +58,17 @@ class ReadingStandInsTest {
 
         @Test
         fun `each stand-in list has distinct keys`() {
-            // ----- Act & Assert -----
-            ALSO_READING_STAND_IN_CARDS.map { it.key }.distinct() shouldBe ALSO_READING_STAND_IN_CARDS.map { it.key }
-            PICK_UP_NEXT_STAND_IN_CARDS.map { it.key }.distinct() shouldBe PICK_UP_NEXT_STAND_IN_CARDS.map { it.key }
+            // ----- Arrange -----
+            val alsoReadingKeys = ALSO_READING_STAND_IN_CARDS.map { it.key }
+            val pickUpNextKeys = PICK_UP_NEXT_STAND_IN_CARDS.map { it.key }
+
+            // ----- Act -----
+            val distinctAlsoReading = alsoReadingKeys.distinct()
+            val distinctPickUpNext = pickUpNextKeys.distinct()
+
+            // ----- Assert -----
+            distinctAlsoReading shouldBe alsoReadingKeys
+            distinctPickUpNext shouldBe pickUpNextKeys
         }
     }
 }

@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.component.gallery
 
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf

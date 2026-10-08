@@ -14,11 +14,12 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SL-15b–e done; Reading launch and Library tab switch clean on device. SL-3b blocked on F34; PF-4/7 wait for S12-4.
-- **Next:** PF bold hero: card edges unclear, "Update progress" outshines the book.
-- **Open questions:** Hold the hero reveal for its cover? Share-your-year row: no disabled look when the card is null (failed load) — dim it? TP deleted pure-`setState` action tests — restore some? `ReadingStandInsTest` still lacks Arrange markers (agent read denied). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop Profile single-column and search results (SD); onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving); Focus Mode exit from the notification; Explore no-results; Undo snackbars; snackbar above both bar styles; O14 tablet back + desktop Esc.
-- **Verification:** `styleCheck`, component + reading tests passed (JBR 21); Library re-recorded on the emulator, clean. B5: DataStore 1.2.1 takes the app out of 16 KB page-size compat mode (`pageSizeCompat` 256 → 0 on the 16 KB emulator).
-- **Uncommitted:** none.
+- **State:** SL-15b–e and B5 (16 KB page size) done. SL-3b blocked on F34; PF-4/7 wait for S12-4.
+- **Next:** PF bold hero, Reading's `FeaturedBackdropCard.kt`: card edges unclear, "Update progress" outshines the book. Not in the audit; agree the fix first.
+- **Done this session:** share-your-year row dims when its card is null; `ReadingStandInsTest` in Arrange / Act / Assert; `buildLibraryTabEntries` drops duplicate draft ids (+ test); `/handoff` runs the close-out gate; #275 body updated (PF line, full stage list); detekt `UnusedImports` on, 85 unused imports removed, 4 files excluded for target-only imports; autofixing rule filed upstream as F37.
+- **Open questions:** none. Hero keeps the cover crossfade; pruned `setState` tests stay deleted; device checks live in `visual-checks.md`.
+- **Verification:** JBR 21: `styleCheck` passed; `ReadingStandInsTest` and `LibraryTabEntryBuilderTest` passed; touched modules compile (JVM, iOS simulator, androidHostTest, `:app` debug); close-out greps clean.
+- **Uncommitted:** the six items above, the unused-import sweep (46 files), detekt config, tracker docs.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

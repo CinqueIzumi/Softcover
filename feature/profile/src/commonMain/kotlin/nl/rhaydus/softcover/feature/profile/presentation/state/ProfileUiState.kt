@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.profile.presentation.state
 
-import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.chart.ColumnChartUiModel
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel

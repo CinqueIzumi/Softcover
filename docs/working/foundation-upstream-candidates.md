@@ -220,6 +220,17 @@ Filed but not yet implemented in the foundation.
 - **What to build:** a `SaveOutcome.Cancelled`, and a share outcome that says the image went to the
   clipboard, so the caller can confirm "Copied to clipboard".
 
+### F37 — ktlint-rules has no unused-imports rule
+
+- **Type:** gate (lint rule)
+- **Home:** `nl.rhaydus:ktlint-rules`
+- **Status:** **Open.** The runner (`nl.rhaydus.ktlint.MainKt`) hard-codes its rule providers, so
+  ktlint's standard `no-unused-imports` never runs, even when `.editorconfig` enables it.
+- **Impact in the app:** Softcover gates unused imports with detekt's `UnusedImports`, which reports
+  but cannot fix and does not see imports that only resolve on native targets.
+- **What to build:** an autocorrecting unused-imports rule in the ruleset, so `ktlintFormat` removes
+  them. Once adopted, drop `UnusedImports` from Softcover's detekt config.
+
 ### F33 — detekt type resolution cannot read Kotlin 2.3 metadata
 
 - **Type:** bug (gate silently inert)

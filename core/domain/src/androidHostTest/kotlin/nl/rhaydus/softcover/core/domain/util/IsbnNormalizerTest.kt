@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.domain.util
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

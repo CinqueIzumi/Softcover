@@ -1,7 +1,5 @@
 package nl.rhaydus.softcover.core.component.gallery
 
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp

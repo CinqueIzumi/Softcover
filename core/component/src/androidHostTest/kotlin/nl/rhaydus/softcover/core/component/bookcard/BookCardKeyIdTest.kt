@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.component.bookcard
 
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 

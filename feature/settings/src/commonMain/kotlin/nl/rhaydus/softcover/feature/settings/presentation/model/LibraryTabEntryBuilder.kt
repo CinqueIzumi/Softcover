@@ -58,7 +58,9 @@ internal fun buildLibraryTabEntries(
         reorderableUniverse
     } else {
         val byId = reorderableUniverse.associateBy { it.id }
-        val ordered = draftTabOrder.mapNotNull { byId[it] }
+        val ordered = draftTabOrder
+            .distinct()
+            .mapNotNull { byId[it] }
         val orderedIds = ordered.map { it.id }.toSet()
         val appended = reorderableUniverse.filter { it.id !in orderedIds }
 

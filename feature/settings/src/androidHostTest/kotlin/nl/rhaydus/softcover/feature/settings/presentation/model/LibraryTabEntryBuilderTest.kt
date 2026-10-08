@@ -176,6 +176,38 @@ class LibraryTabEntryBuilderTest {
             )
             entries.size shouldBe 7
         }
+
+        @Test
+        fun `a duplicate id in the order yields that entry once in its first position`() {
+            // ----- Arrange -----
+            val lists = listOf(
+                stubBookList(
+                    id = 1,
+                    name = "Alpha",
+                ),
+                stubBookList(
+                    id = 2,
+                    name = "Beta",
+                ),
+            )
+            val order = listOf(
+                "list-2",
+                "list-1",
+                "list-2",
+            )
+
+            // ----- Act -----
+            val entries = build(
+                availableLists = lists,
+                draftTabOrder = order,
+            )
+
+            // ----- Assert -----
+            entries.count { it.id == "list-2" } shouldBe 1
+            entries[1].id shouldBe "list-2"
+            entries[2].id shouldBe "list-1"
+            entries.size shouldBe 7
+        }
     }
 
     @Nested

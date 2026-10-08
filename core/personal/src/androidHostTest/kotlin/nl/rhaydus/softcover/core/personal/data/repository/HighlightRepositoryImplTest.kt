@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.core.personal.data.repository
 import app.cash.turbine.test
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -11,11 +10,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.database.model.HighlightEntity
 import nl.rhaydus.softcover.core.personal.data.datasource.HighlightLocalDataSource
-import nl.rhaydus.softcover.core.personal.domain.model.Highlight
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.time.Instant
 
 class HighlightRepositoryImplTest {
     private lateinit var localDataSource: HighlightLocalDataSource

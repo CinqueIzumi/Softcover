@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.core.component.gallery
 
-import androidx.compose.foundation.layout.size
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import nl.rhaydus.softcover.core.component.field.TextField
