@@ -13,8 +13,8 @@ and app `foundations.md` § 2.4 (4/8, 12/16, 20/24, 28/32, 40/48).
 
 | Sub | Scope | Status |
 |---|---|---|
-| SP-1 | Inventory and approved shape (below) — stop for approval | [ ] |
-| SP-2 | The token object, its KDoc, the code-style rule, and the gate | [ ] |
+| SP-1 | Inventory and approved shape (below) — stop for approval | [x] |
+| SP-2 | The token object, its KDoc, the code-style rule, and the gate | [x] |
 | SP-3 | Sweep `:core:component` and `:core:designsystem` | [ ] |
 | SP-4 | Sweep the feature modules, one brief per module group | [ ] |
 | SP-5 | Every file-level `private val X = N.dp` (`git grep -l "^private val .*\.dp$" -- '*.kt'`; 30 files, 66 vals at planning) and `BarSpec`-style dp holders becomes a token (spacing) or inline (sizes); done when the grep is empty | [ ] |
@@ -40,4 +40,20 @@ and app `foundations.md` § 2.4 (4/8, 12/16, 20/24, 28/32, 40/48).
 
 ## Approved shape
 
-Not yet approved.
+- Inventory (SP-1): 852 spacing-call dp literals (Spacer 431, padding 320, spacedBy 85, PaddingValues 10,
+  offset 6); 228 off-grid, mostly the 6 / 10 / 14 / 18 midpoints.
+- Scale: the full 4dp grid plus a 2dp hairline, `object Spacing` in `:core:designsystem`
+  `presentation/theme/Spacing.kt`: `xxxs` 2, `xxs` 4, `xs` 8, `sm` 12, `md` 16, `lg` 20, `xl` 24, `xxl` 28,
+  `xxxl` 32, `x4l` 40, `x5l` 48. Entry in `foundation-upstream-candidates.md`.
+- Snapping: nearest step; exact ties round down for inner padding (`padding`, `PaddingValues`,
+  `contentPadding`) and up for gaps (`spacedBy`, `Spacer`, `offset`). 1 and 3 snap to `xxxs`; 36 to `x4l`.
+  `0.dp` and the one-off 64 / 96 stay literal.
+- Spacing means a value passed to `padding`, `PaddingValues`, `contentPadding`, `spacedBy`, `offset`, or a
+  `Spacer`'s `height` / `width` / `size`. Component sizes, strokes and borders stay literal; radii are SH.
+- Gate: new app-local `:detekt-rules` module with one `RawSpacingDp` rule, wired into `detektPlugins` beside
+  the foundation ruleset; fails on a dp literal in those calls outside `Spacing.kt`, allowing 0 / 64 / 96.
+  Also an upstream candidate. SP-4 enables the rule by adding `softcover: RawSpacingDp: active: true` to
+  `config/detekt/detekt.yml`, and must solve config validation for `:detekt-rules` itself, which does not
+  load its own plugin, at that point. Drop the stale `:ktlint-rules` reference in the root `build.gradle.kts`.
+- Code style: "`.dp` values stay inline" becomes "spacing reads a `Spacing` token; sizes stay inline"; the
+  inline-dp memory is updated in SP-2.

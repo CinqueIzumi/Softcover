@@ -38,6 +38,7 @@ if (foundationLocal) {
 
 include(":app")
 include(":desktopApp")
+include(":detekt-rules")
 include(":orchestration")
 include(":core:domain")
 include(":core:database")

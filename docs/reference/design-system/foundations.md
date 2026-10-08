@@ -80,13 +80,16 @@ Never inline an ad-hoc `TextStyle`; pick the closest editorial or Material role 
 
 ### 2.4 Spacing
 
-Spacing is rhythmic, not formulaic. The recurring values are:
+Spacing is rhythmic, not formulaic. The recurring values are `Spacing` tokens:
 
-- **4 / 8** dp — tight inline gaps (icon-to-label, badge offsets).
-- **12 / 16** dp — within-component padding, label-to-control gaps.
-- **20 / 24** dp — page horizontal padding, gap between a card's image and its text block.
-- **28 / 32** dp — gap between distinct content blocks inside a sheet or hero region.
-- **40 / 48** dp — gap between major page sections.
+- **2** dp (`xxxs`) — the hairline gap.
+- **4 / 8** dp (`xxs` / `xs`) — tight inline gaps (icon-to-label, badge offsets).
+- **12 / 16** dp (`sm` / `md`) — within-component padding, label-to-control gaps.
+- **20 / 24** dp (`lg` / `xl`) — page horizontal padding, gap between a card's image and its text block.
+- **28 / 32** dp (`xxl` / `xxxl`) — gap between distinct content blocks inside a sheet or hero region.
+- **40 / 48** dp (`x4l` / `x5l`) — gap between major page sections.
+
+Spacing calls read a token; sizes and strokes stay literal `.dp`.
 
 Sections always breathe. Two adjacent eyebrow/headline pairs without a generous gap between them is a layout bug.
 

@@ -198,6 +198,28 @@ Filed but not yet implemented in the foundation.
   shimmer and a 300ms minimum once shown), release, and switch Softcover's call sites to it. Then delete
   the local copy.
 
+### F33 — detekt type resolution cannot read Kotlin 2.3 metadata
+
+- **Type:** bug (gate silently inert)
+- **Home:** `nl.rhaydus:detekt-rules` + the detekt version in the shared catalog
+- **Status:** **Open.** detekt 1.23.8 embeds the Kotlin 2.0 compiler, which reads library metadata only up
+  to 2.1; Softcover builds on Kotlin 2.3.21. A `--debug` run logs 410 "incompatible version of Kotlin"
+  errors (stdlib, Compose, every repo module), so calls into them stay unresolved and every type-resolved
+  rule skips them silently: a probe's `println` and `material3.Text` went unflagged by `ForbiddenMethodCall`
+  while `!!` on a builtin `String?` was caught. `rhaydus:UnguardedFlowTerminalRead` is very likely inert too.
+- **What to build:** move to detekt 2 (`dev.detekt`, Kotlin 2.x compiler), port `detekt-rules` to its API,
+  then probe each type-resolved rule on a known violation.
+
+### F34 — Import ban with a per-file allowlist (text-leaf gate)
+
+- **Type:** gate
+- **Home:** `nl.rhaydus:ktlint-rules` or `nl.rhaydus:detekt-rules` (must not need type resolution, see F33)
+- **Status:** **Open — blocks Softcover's text-leaf gate.** Softcover routes every text through one leaf
+  (`SoftcoverText`) and needs `androidx.compose.material3.Text` banned everywhere except that leaf's file.
+  detekt's `ForbiddenImport` allows one instance per config and is already scoped to the leaf modules.
+- **What to build:** a configurable rule taking `(import, allowed file globs, reason)` entries, with a
+  fully-qualified-call check alongside the import check; release, then enable it in Softcover.
+
 ### F35 — `AdaptiveModalSheet`'s panel form has no motion or depth
 
 - **Type:** enhancement
@@ -231,27 +253,22 @@ Filed but not yet implemented in the foundation.
 - **What to build:** an autocorrecting unused-imports rule in the ruleset, so `ktlintFormat` removes
   them. Once adopted, drop `UnusedImports` from Softcover's detekt config.
 
-### F33 — detekt type resolution cannot read Kotlin 2.3 metadata
+### F38 — `designsystem-core` describes a spacing scale but ships none
 
-- **Type:** bug (gate silently inert)
-- **Home:** `nl.rhaydus:detekt-rules` + the detekt version in the shared catalog
-- **Status:** **Open.** detekt 1.23.8 embeds the Kotlin 2.0 compiler, which reads library metadata only up
-  to 2.1; Softcover builds on Kotlin 2.3.21. A `--debug` run logs 410 "incompatible version of Kotlin"
-  errors (stdlib, Compose, every repo module), so calls into them stay unresolved and every type-resolved
-  rule skips them silently: a probe's `println` and `material3.Text` went unflagged by `ForbiddenMethodCall`
-  while `!!` on a builtin `String?` was caught. `rhaydus:UnguardedFlowTerminalRead` is very likely inert too.
-- **What to build:** move to detekt 2 (`dev.detekt`, Kotlin 2.x compiler), port `detekt-rules` to its API,
-  then probe each type-resolved rule on a known violation.
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Open.** § 5.1 describes a small recurring spacing set; no token object backs it.
+- **Impact in the app:** Softcover defines `Spacing` itself (2dp hairline plus a 4dp grid up to 48dp).
+- **What to build:** a `Spacing` object in designsystem-core. Once adopted, drop the app-local one.
 
-### F34 — Import ban with a per-file allowlist (text-leaf gate)
+### F39 — No gate keeps raw dp literals out of spacing calls
 
-- **Type:** gate
-- **Home:** `nl.rhaydus:ktlint-rules` or `nl.rhaydus:detekt-rules` (must not need type resolution, see F33)
-- **Status:** **Open — blocks Softcover's text-leaf gate.** Softcover routes every text through one leaf
-  (`SoftcoverText`) and needs `androidx.compose.material3.Text` banned everywhere except that leaf's file.
-  detekt's `ForbiddenImport` allows one instance per config and is already scoped to the leaf modules.
-- **What to build:** a configurable rule taking `(import, allowed file globs, reason)` entries, with a
-  fully-qualified-call check alongside the import check; release, then enable it in Softcover.
+- **Type:** gate (lint rule)
+- **Home:** `nl.rhaydus:detekt-rules`
+- **Status:** **Open.** Softcover's app-local `RawSpacingDp` reports a dp literal passed to `padding`,
+  `PaddingValues`, `contentPadding`, `spacedBy`, `offset` or a `Spacer` size.
+- **Impact in the app:** without it, spacing drifts back to per-screen numbers after the token sweep.
+- **What to build:** the rule in the shared ruleset, with the allowed literals configurable.
 
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 

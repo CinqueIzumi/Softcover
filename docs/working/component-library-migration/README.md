@@ -14,11 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** PF bold hero built and approved on device: theme-driven veil (`surfaceContainerHigh`, +0.15 on a light veil, heavier where `supportsBlur()` is false) over a 6dp-blurred cover, `onSurface` text, tonal Update progress, 120dp `Spotlight` cover; `ReadingHeroBackdropForeground` and `DeadlineSummaryTone` deleted. SL-3b blocked on F34; PF-4/7 wait for S12-4.
-- **S10:** closed. No `*Shelf.kt` file remains; `ChromeIconButton` is public with shared `overMediaIconButtonColors()`; `rememberSessionElapsed` replaces the duplicated ticker. S10-C: nothing to converge (screen roots stay feature-local; the over-media button was the one shared piece).
-- **Next:** SP-1, `steps/sp-spacing-scale.md`.
-- **Open questions:** none. Hero veil values may still get small device tweaks.
-- **Verification:** JBR 21: compile of the 7 touched modules, `checkModuleGraph`, `ktlintCheck`, `styleCheck` passed; `testAndroidHostTest` passed for `:core:component` and the five features; reviewer no blockers, doc findings applied.
+- **State:** SP-2 built: `Spacing` in `:core:designsystem` theme; new `:detekt-rules` module (`softcover` ruleset, `RawSpacingDp`, flags negatives too, Spacer modifier chain only) shipping inactive via its own `config/config.yml`; code-style rule, foundations § 2.4 token map, F38/F39 filed. SL-3b blocked on F34; PF-4/7 wait for S12-4.
+- **Next:** SP-3, sweep `:core:component` and `:core:designsystem` to `Spacing` tokens (snapping per § Approved shape); the rule reported 229 findings in `:core:component`.
+- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` is not flagged, so the sweep greps for it; SP-4 must solve config validation for `:detekt-rules` when it enables the rule.
+- **Verification:** JBR 21: `:detekt-rules:test` (35 pass), `:detekt-rules:jar`, `:detekt-rules:detekt`, `:core:designsystem:compileKotlinJvm`, `checkModuleGraph`, `styleCheck`, `ktlintCheck` passed; reviewer two rounds, no blockers.
 - **Uncommitted:** nothing.
 ## Local verification
 

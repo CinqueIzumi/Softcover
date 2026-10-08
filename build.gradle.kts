@@ -23,10 +23,10 @@ plugins {
 
 // Code coverage. Kover is applied to every shipped module (below) and aggregated into a single XML
 // report at the root — `./gradlew koverXmlReport` → build/reports/kover/report.xml — which CI uploads
-// to Codecov. :ktlint-rules is build tooling, not shipped code, so it is excluded from the report.
+// to Codecov. :detekt-rules is build tooling, not shipped code, so it is excluded from the report.
 dependencies {
     subprojects
-        .filter { it.path != ":ktlint-rules" }
+        .filter { it.path != ":detekt-rules" }
         .forEach { kover(it) }
 }
 
@@ -86,13 +86,18 @@ subprojects {
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
     // Coverage instrumentation for every shipped module; the merged report is wired at the root above.
-    if (path != ":ktlint-rules") {
+    if (path != ":detekt-rules") {
         apply(plugin = "org.jetbrains.kotlinx.kover")
     }
 
     dependencies {
         // The custom `rhaydus` ruleset, discovered via its META-INF/services entry.
         add("detektPlugins", rhaydusDetektRules)
+
+        // Softcover's own rules; the module cannot analyse itself with the jar it produces.
+        if (path != ":detekt-rules") {
+            add("detektPlugins", project(":detekt-rules"))
+        }
     }
 
     configure<DetektExtension> {
