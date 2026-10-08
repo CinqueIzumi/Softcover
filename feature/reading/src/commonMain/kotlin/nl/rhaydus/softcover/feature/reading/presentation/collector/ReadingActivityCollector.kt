@@ -29,6 +29,7 @@ internal class ReadingActivityCollector : ReadingCollector {
                         scope.setState {
                             it.copy(
                                 recentReadingActivity = activity,
+                                hasLoadedReadingActivity = true,
                                 streakSheet = streakSheetScaffoldFor(activity = activity),
                             )
                         }
@@ -37,6 +38,7 @@ internal class ReadingActivityCollector : ReadingCollector {
                 scope.setState {
                     it.copy(
                         recentReadingActivity = emptyList(),
+                        hasLoadedReadingActivity = true,
                         streakSheet = streakSheetScaffoldFor(activity = emptyList()),
                     )
                 }

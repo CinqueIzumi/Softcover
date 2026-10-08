@@ -81,68 +81,69 @@ internal fun FeaturedBackdropCard(
     val foreground = ReadingHeroBackdropForeground
 
     Box(modifier = Modifier.fillMaxWidth()) {
-        if (isInspection) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .skeletonMask(visible = isLoading)
+                .background(cardColor),
+        ) {
+            if (isInspection) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.30f),
+                                ),
+                            ),
+                        ),
+                )
+            } else if (backdropRequest != null) {
+                AsyncImage(
+                    model = backdropRequest,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .blur(
+                            radius = 64.dp,
+                            edgeTreatment = BlurredEdgeTreatment.Unbounded,
+                        ),
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
-                                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.30f),
+                            colorStops = arrayOf(
+                                0f to Color.Black.copy(alpha = 0.45f),
+                                0.35f to Color.Black.copy(alpha = 0.15f),
+                                0.55f to Color.Transparent,
+                                1f to Color.Transparent,
                             ),
                         ),
                     ),
             )
-        } else if (isLoading) {
+
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .skeletonMask(visible = true),
-            )
-        } else if (backdropRequest != null) {
-            AsyncImage(
-                model = backdropRequest,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .matchParentSize()
-                    .blur(
-                        radius = 64.dp,
-                        edgeTreatment = BlurredEdgeTreatment.Unbounded,
+                    .background(
+                        Brush.verticalGradient(
+                            colorStops = arrayOf(
+                                0f to cardColor.copy(alpha = 0f),
+                                0.40f to cardColor.copy(alpha = 0.15f),
+                                0.60f to cardColor.copy(alpha = 0.92f),
+                                1f to cardColor,
+                            ),
+                        ),
                     ),
             )
         }
-
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.verticalGradient(
-                        colorStops = arrayOf(
-                            0f to Color.Black.copy(alpha = 0.45f),
-                            0.35f to Color.Black.copy(alpha = 0.15f),
-                            0.55f to Color.Transparent,
-                            1f to Color.Transparent,
-                        ),
-                    ),
-                ),
-        )
-
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.verticalGradient(
-                        colorStops = arrayOf(
-                            0f to cardColor.copy(alpha = 0f),
-                            0.40f to cardColor.copy(alpha = 0.15f),
-                            0.60f to cardColor.copy(alpha = 0.92f),
-                            1f to cardColor,
-                        ),
-                    ),
-                ),
-        )
 
         Column(
             modifier = Modifier
@@ -213,7 +214,9 @@ internal fun FeaturedBackdropCard(
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = foreground.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .skeletonMask(visible = isLoading),
             )
         }
     }

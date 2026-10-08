@@ -80,7 +80,7 @@ internal actual fun ReadingScreenLayout(
                     .imePadding(),
             ) {
                 PullToRefreshBox(
-                    isRefreshing = state.isLoading,
+                    isRefreshing = state.isRefreshing,
                     onRefresh = { runAction(RefreshAction) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -89,7 +89,7 @@ internal actual fun ReadingScreenLayout(
                     indicator = {
                         PullToRefreshDefaults.LoadingIndicator(
                             state = pullToRefreshState,
-                            isRefreshing = state.isLoading,
+                            isRefreshing = state.isRefreshing,
                             modifier = Modifier.align(Alignment.TopCenter),
                         )
                     },

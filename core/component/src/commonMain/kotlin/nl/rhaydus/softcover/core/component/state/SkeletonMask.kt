@@ -1,8 +1,16 @@
 package nl.rhaydus.softcover.core.component.state
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -10,15 +18,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 
 internal const val SKELETON_GRACE_MILLIS = 250L
 
 internal const val SKELETON_MINIMUM_VISIBLE_MILLIS = 300L
+
+internal const val SKELETON_FADE_MILLIS = 150
+
+private const val SHIMMER_SWEEP_MILLIS = 1600
+
+private const val SHIMMER_BASE_ALPHA = 0.08f
+
+private const val SHIMMER_HIGHLIGHT_ALPHA = 0.16f
 
 private const val NOT_STARTED = -1L
 
@@ -54,7 +77,8 @@ internal fun skeletonRevealPhase(
 
 /**
  * Masks the content while [visible], timed by [skeletonRevealPhase]: nothing is drawn for the first
- * [SKELETON_GRACE_MILLIS], then a shimmer that stays at least [SKELETON_MINIMUM_VISIBLE_MILLIS].
+ * [SKELETON_GRACE_MILLIS], then a shimmer that stays at least [SKELETON_MINIMUM_VISIBLE_MILLIS], then
+ * a crossfade to the content over [SKELETON_FADE_MILLIS] (a plain fade-in when loading ends within the grace).
  * The content still measures and lays out, so a stand-in value sizes the slot the real one will fill.
  *
  * Timed on the frame clock, so leaves composed in the same frame share one start. The minimum hold only
@@ -110,15 +134,125 @@ fun Modifier.skeletonMask(
         else -> phase
     }
 
-    return when (effectivePhase) {
-        SkeletonRevealPhase.Hidden -> this
-            .drawWithContent { }
-            .clearAndSetSemantics { }
+    val playMotion = playDecorativeMotion()
+    val reveal = remember { Animatable(1f) }
+    var fadesFromShimmer by remember { mutableStateOf(false) }
 
-        SkeletonRevealPhase.Shimmer -> this
-            .shimmer(shape = shape)
-            .clearAndSetSemantics { }
+    LaunchedEffect(effectivePhase, playMotion) {
+        if (effectivePhase != SkeletonRevealPhase.Content) {
+            fadesFromShimmer = effectivePhase == SkeletonRevealPhase.Shimmer
+            reveal.snapTo(0f)
 
-        SkeletonRevealPhase.Content -> this
+            return@LaunchedEffect
+        }
+
+        if (playMotion) {
+            reveal.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = SKELETON_FADE_MILLIS),
+            )
+        } else {
+            reveal.snapTo(1f)
+        }
+
+        fadesFromShimmer = false
     }
+
+    val shimmerColor = MaterialTheme.colorScheme.onSurface
+    val showsShimmer = effectivePhase == SkeletonRevealPhase.Shimmer || fadesFromShimmer
+    val sweep = if (showsShimmer && playMotion) rememberShimmerSweep() else null
+
+    return this
+        .drawWithCache {
+            val outline = shape.createOutline(
+                size = size,
+                layoutDirection = layoutDirection,
+                density = this,
+            )
+
+            onDrawWithContent {
+                val shimmerAlpha = when {
+                    effectivePhase == SkeletonRevealPhase.Shimmer -> 1f
+                    effectivePhase == SkeletonRevealPhase.Content && fadesFromShimmer && playMotion -> 1f - reveal.value
+                    else -> 0f
+                }
+
+                if (shimmerAlpha > 0f) {
+                    drawShimmer(
+                        outline = outline,
+                        color = shimmerColor,
+                        progress = sweep?.value,
+                        alpha = shimmerAlpha,
+                    )
+                }
+
+                drawContent()
+            }
+        }
+        .graphicsLayer {
+            alpha = when {
+                effectivePhase != SkeletonRevealPhase.Content -> 0f
+                playMotion -> reveal.value
+                else -> 1f
+            }
+        }
+        .then(
+            if (effectivePhase == SkeletonRevealPhase.Content) {
+                Modifier
+            } else {
+                Modifier.clearAndSetSemantics { }
+            },
+        )
+}
+
+@Composable
+private fun rememberShimmerSweep(): State<Float> = rememberInfiniteTransition(label = "skeletonShimmer")
+    .animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = SHIMMER_SWEEP_MILLIS,
+                easing = FastOutSlowInEasing,
+            ),
+        ),
+        label = "skeletonShimmerSweep",
+    )
+
+private fun DrawScope.drawShimmer(
+    outline: Outline,
+    color: Color,
+    progress: Float?,
+    alpha: Float,
+) {
+    val base = color.copy(alpha = SHIMMER_BASE_ALPHA)
+
+    if (progress == null) {
+        drawOutline(
+            outline = outline,
+            color = base,
+            alpha = alpha,
+        )
+
+        return
+    }
+
+    val bandWidth = size.width / 1.5f
+    val bandStart = -bandWidth + progress * (size.width + bandWidth)
+
+    drawOutline(
+        outline = outline,
+        brush = Brush.linearGradient(
+            colors = listOf(base, color.copy(alpha = SHIMMER_HIGHLIGHT_ALPHA), base),
+            start = Offset(
+                x = bandStart,
+                y = 0f,
+            ),
+            end = Offset(
+                x = bandStart + bandWidth,
+                y = size.height,
+            ),
+        ),
+        alpha = alpha,
+    )
 }

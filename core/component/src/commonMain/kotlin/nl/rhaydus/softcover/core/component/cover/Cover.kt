@@ -10,8 +10,13 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +25,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -27,13 +33,14 @@ import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.LocalPlatformContext
-import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
 import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
-import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
@@ -43,9 +50,10 @@ private const val COVER_ASPECT_RATIO = 2f / 3f
 /**
  * The canonical book cover and the only way the app draws one — never reach for a raw image loader
  * for cover art; a surface that needs the raw request rather than this rendered component uses
- * [rememberCoverImageRequest] instead. Rendered as: a shimmer while [CoverUiModel.isLoading] and
- * nothing has resolved yet, [CoverlessTitleCover] (or a blank box, for purely decorative surfaces)
- * when [CoverUiModel.source] is `null` or fails to decode, or the loaded image otherwise. Treatment —
+ * [rememberCoverImageRequest] instead. Rendered as: a shimmer while [CoverUiModel.isLoading] or the
+ * image load has nothing to show yet, [CoverlessTitleCover] (or a blank box, for purely decorative
+ * surfaces) when [CoverUiModel.source] is `null` or fails to decode, or the loaded image otherwise.
+ * When the source changes, the last loaded image stays up until the new one replaces it. Treatment —
  * elevation, corner radius, shadow tint, decode cap — comes from [CoverUiModel.variant]; no call site
  * hand-tunes a cover, and widths stay in the caller's [modifier] rather than in [CoverVariant].
  *
@@ -113,77 +121,114 @@ fun Cover(
         modifier
     }
 
-    // The loading path uses a bespoke SubcomposeAsyncImage rather than RhaydusShimmerImage because
-    // it needs both a custom success slot (BoxWithConstraints + aspect-ratio from the intrinsic
-    // painter size) and a custom error slot (CoverlessTitleCover fallback). RhaydusPlaceholderImage
-    // only exposes the placeholder slot; routing through it would require dropping these, changing
-    // behavior. The shimmer + SkeletonCrossfade primitives (from designsystem-core) are reused directly.
-    SkeletonCrossfade(
-        isLoading = model.isLoading && request == null,
+    if (request == null) {
+        Box(
+            modifier = containerModifier
+                .aspectRatio(COVER_ASPECT_RATIO)
+                .clip(shape),
+        ) {
+            if (model.isLoading) {
+                CoverShimmer()
+            } else {
+                CoverFallback(coverlessFallback = coverlessFallback)
+            }
+        }
+
+        return
+    }
+
+    Box(
         modifier = containerModifier
             .aspectRatio(COVER_ASPECT_RATIO)
             .clip(shape),
-        label = "Cover",
-    ) { loading ->
-        if (loading) {
-            CoverShimmer()
-        } else if (request == null) {
-            if (coverlessFallback != null) {
-                CoverlessTitleCover(title = coverlessFallback)
-            } else {
-                Box(modifier = Modifier.fillMaxSize())
-            }
-        } else {
-            SubcomposeAsyncImage(
-                model = request,
+    ) {
+        CoverImage(
+            request = request,
+            imageModifier = imageModifier,
+            contentDescription = contentDescription,
+            coverlessFallback = coverlessFallback,
+        )
+    }
+}
+
+@Composable
+private fun CoverImage(
+    request: ImageRequest,
+    imageModifier: Modifier,
+    contentDescription: String?,
+    coverlessFallback: String?,
+) {
+    var settled by remember { mutableStateOf<Painter?>(null) }
+    val previous = remember(request) { settled }
+    val painter = rememberAsyncImagePainter(
+        model = request,
+        placeholder = previous,
+        contentScale = ContentScale.Fit,
+    )
+    val state by painter.state.collectAsState()
+
+    val context = LocalPlatformContext.current
+    val inMemory = remember(request) {
+        val cache = SingletonImageLoader.get(context).memoryCache
+        val key = request.memoryCacheKey?.let { MemoryCache.Key(it) }
+
+        key != null && cache?.get(key) != null
+    }
+
+    LaunchedEffect(state) {
+        (state as? AsyncImagePainter.State.Success)?.let {
+            settled = it.painter
+        }
+    }
+
+    if (state is AsyncImagePainter.State.Error) {
+        CoverFallback(coverlessFallback = coverlessFallback)
+
+        return
+    }
+
+    val loaded = (state as? AsyncImagePainter.State.Success)?.painter ?: previous
+    val intrinsic = loaded?.intrinsicSize
+    val ratio = if (intrinsic != null && intrinsic.isSpecified && intrinsic.height > 0f) {
+        intrinsic.width / intrinsic.height
+    } else {
+        COVER_ASPECT_RATIO
+    }
+    val loadingState = state as? AsyncImagePainter.State.Loading
+    val hasNothingToShow = state is AsyncImagePainter.State.Empty ||
+        (loadingState != null && loadingState.painter == null)
+
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        val width = maxWidth
+
+        Box(
+            modifier = imageModifier
+                .width(width)
+                .requiredHeight(width / ratio)
+                .skeletonMask(
+                    visible = hasNothingToShow && previous == null && inMemory.not(),
+                    shape = RectangleShape,
+                ),
+        ) {
+            Image(
+                painter = painter,
                 contentDescription = contentDescription,
                 modifier = Modifier.fillMaxSize(),
-                loading = { state ->
-                    val placeholder = state.painter
-
-                    if (placeholder != null) {
-                        Image(
-                            painter = placeholder,
-                            contentDescription = contentDescription,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit,
-                        )
-                    } else {
-                        CoverShimmer()
-                    }
-                },
-                error = {
-                    if (coverlessFallback != null) {
-                        CoverlessTitleCover(title = coverlessFallback)
-                    } else {
-                        Box(modifier = Modifier.fillMaxSize())
-                    }
-                },
-                success = { state ->
-                    val intrinsic = state.painter.intrinsicSize
-                    val ratio = if (intrinsic.isSpecified && intrinsic.height > 0f) {
-                        intrinsic.width / intrinsic.height
-                    } else {
-                        COVER_ASPECT_RATIO
-                    }
-                    BoxWithConstraints(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        val width = maxWidth
-                        Image(
-                            painter = state.painter,
-                            contentDescription = contentDescription,
-                            modifier = imageModifier
-                                .width(width)
-                                .requiredHeight(width / ratio),
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                },
                 contentScale = ContentScale.Fit,
             )
         }
+    }
+}
+
+@Composable
+private fun CoverFallback(coverlessFallback: String?) {
+    if (coverlessFallback != null) {
+        CoverlessTitleCover(title = coverlessFallback)
+    } else {
+        Box(modifier = Modifier.fillMaxSize())
     }
 }
 
@@ -220,12 +265,14 @@ fun rememberCoverImageRequest(model: CoverUiModel): ImageRequest? {
     val persister = LocalCoverImagePersister.current
     val coroutineScope = rememberCoroutineScope()
     val maxDecodePx = if (model.variant == CoverVariant.Shelf) 600 else null
+    val playMotion = playDecorativeMotion()
 
     val source = model.source ?: return null
 
     return remember(
         source,
         maxDecodePx,
+        playMotion,
     ) {
         val builder = when (source) {
             is CoverSource.Local -> ImageRequest.Builder(context).data(source.path)
@@ -261,6 +308,8 @@ fun rememberCoverImageRequest(model: CoverUiModel): ImageRequest? {
                 )
             }
         }
+
+        builder.crossfade(playMotion)
 
         if (maxDecodePx != null) {
             builder.size(maxDecodePx)

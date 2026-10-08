@@ -19,11 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
-import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
+import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
@@ -33,6 +35,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
+import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.AlsoReadingHeader
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.EmptyCurrentlyReadingScreen
 import nl.rhaydus.softcover.feature.reading.presentation.screen.section.ReadingFeaturedSection
@@ -136,12 +139,17 @@ private fun DesktopReadingContent(
     modifier: Modifier = Modifier,
 ) {
     val onCardEvent = rememberReadingCardEventHandler(
-        alsoReading = state.alsoReading,
+        alsoReading = state.visibleAlsoReading,
         runAction = runAction,
         onBookClick = onBookClick,
     )
 
-    val entry = rememberStaggeredEntryCoordinator(key = "reading:rest")
+    val isShowingStandIns = state.visibleAlsoReading.cards.any(BookCardUiModel::isLoading)
+
+    val entry = rememberBookCardEntryCoordinator(
+        cards = state.visibleAlsoReading.cards,
+        key = "reading:rest",
+    )
 
     Box(modifier = modifier) {
         Column(
@@ -157,23 +165,29 @@ private fun DesktopReadingContent(
                 controller = controller,
             )
 
-            if (state.alsoReading.isEmpty.not()) {
-                AlsoReadingHeader(model = state.alsoReadingHeader)
+            if (state.visibleAlsoReading.isEmpty.not()) {
+                AlsoReadingHeader(model = state.visibleAlsoReadingHeader)
 
-                state.alsoReading.cards.forEachIndexed { index, card ->
-                    val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@forEachIndexed
+                SkeletonCrossfade(isLoading = isShowingStandIns) { showStandIns ->
+                    Column {
+                        val cards = if (showStandIns) ALSO_READING_STAND_IN_CARDS else state.visibleAlsoReading.cards
 
-                    BookCard(
-                        model = card,
-                        onEvent = onCardEvent,
-                        modifier = Modifier
-                            .bookCardStaggeredEntry(
-                                card = card,
-                                coordinator = entry,
-                                index = index,
+                        cards.forEachIndexed { index, card ->
+                            val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@forEachIndexed
+
+                            BookCard(
+                                model = card,
+                                onEvent = onCardEvent,
+                                modifier = Modifier
+                                    .bookCardStaggeredEntry(
+                                        card = card,
+                                        coordinator = entry,
+                                        index = index,
+                                    )
+                                    .then(controller.slideModifier(bookId)),
                             )
-                            .then(controller.slideModifier(bookId)),
-                    )
+                        }
+                    }
                 }
             }
         }
@@ -199,7 +213,7 @@ private fun DesktopReadingHeader(
             .fillMaxWidth()
             .padding(start = 24.dp, end = 12.dp, top = 16.dp),
     ) {
-        PageMasthead(model = state.masthead) {
+        PageMasthead(model = state.visibleMasthead) {
             MastheadRefreshAction(
                 model = state.mastheadRefresh,
                 onEvent = {
@@ -210,12 +224,13 @@ private fun DesktopReadingHeader(
             )
         }
 
-        if (state.streakEnabled && state.recentReadingActivity.isNotEmpty()) {
+        if (state.streakEnabled && (state.isLoading || state.recentReadingActivity.isNotEmpty())) {
             Spacer(modifier = Modifier.height(14.dp))
 
             StreakStrip(
                 activity = state.recentReadingActivity,
                 onClick = onExpandStreak,
+                isLoading = state.isLoading,
             )
         }
 

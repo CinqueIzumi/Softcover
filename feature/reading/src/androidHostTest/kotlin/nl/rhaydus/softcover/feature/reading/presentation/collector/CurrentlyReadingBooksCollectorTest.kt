@@ -56,7 +56,7 @@ class CurrentlyReadingBooksCollectorTest {
     @Nested
     inner class OnLaunch {
         @Test
-        fun `stores the emitted books, ends loading and leaves other state alone`() = runTest(UnconfinedTestDispatcher()) {
+        fun `stores the emitted books, marks them loaded and leaves other state alone`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
                 isLoading = true,
@@ -76,8 +76,65 @@ class CurrentlyReadingBooksCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.books shouldBe books
-            stateFlow.value.isLoading shouldBe false
+            stateFlow.value.hasLoadedBooks shouldBe true
             stateFlow.value.showProgressSheet shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `marks an empty emission as loaded`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = CurrentlyReadingBooksCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            booksFlow.emit(emptyList())
+
+            // ----- Assert -----
+            stateFlow.value.hasLoadedBooks shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `has not loaded before the first emission`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val collector = CurrentlyReadingBooksCollector()
+
+            // ----- Act -----
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Assert -----
+            stateFlow.value.hasLoadedBooks shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `never writes isLoading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(isLoading = true)
+            val collector = CurrentlyReadingBooksCollector()
+            val job = launch {
+                collector.onLaunch(
+                    scope = scope,
+                    dependencies = dependencies,
+                )
+            }
+
+            // ----- Act -----
+            booksFlow.emit(listOf(stubBook()))
+
+            // ----- Assert -----
+            stateFlow.value.isLoading shouldBe true
             job.cancel()
         }
 

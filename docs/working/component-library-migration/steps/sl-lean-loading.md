@@ -31,10 +31,10 @@ deleted.
 | SL-14 | Delayed reveal: `skeletonMask` and `Cover`'s loading shimmer wait out a grace period and hold a minimum once shown | SL-11 | [x] |
 | SL-15 | Investigate Reading's launch flash and the cover grey flash (traced on the emulator, 2026-10-07; fixes below) | SL-14 | [x] |
 | SL-15a | Reduced motion: gate the cover morph (`fun Cover(`), `Banner`, `ProgressBar`, `WhenReadRow`, `TopBar`'s colour and `SessionPeekBar`'s enter and exit behind `playDecorativeMotion()`. Lands before any new motion | SL-15 | [x] |
-| SL-15b | Reading's first content lands in one update, and everything that waits on data masks | SL-15 | [ ] |
-| SL-15c | Skeleton hand-over: every `skeletonMask` site crossfades to content, keeping the grace and minimum-hold timing | SL-15a | [ ] |
-| SL-15d | Stand-in hand-over, Library (`BookList`, `EditionList`, `LibraryStandIns`) and Reading's also-reading rows | SL-15c | [ ] |
-| SL-15e | `Cover`: one placeholder layer over the image, a fade for disk / network loads, the last image kept through a source swap (book detail's hero on an edition change) | SL-15a | [ ] |
+| SL-15b | Reading's first content lands in one update, and everything that waits on data masks | SL-15 | [x] |
+| SL-15c | Skeleton hand-over: every `skeletonMask` site crossfades to content, keeping the grace and minimum-hold timing | SL-15a | [x] |
+| SL-15d | Stand-in hand-over, Library (`BookList`, `EditionList`, `LibraryStandIns`) and Reading's also-reading rows | SL-15c | [x] |
+| SL-15e | `Cover`: one placeholder layer over the image, a fade for disk / network loads, the last image kept through a source swap (book detail's hero on an edition change) | SL-15a | [x] |
 
 SL-1 to SL-7 run before S7-2. A sub-step whose "Runs after" is open waits; the tracker's `## Now` picks the
 next one whose prerequisites are done.
@@ -94,6 +94,8 @@ next one whose prerequisites are done.
   reserved) mask while loading; the spinner and eyebrow copy react to a real refresh only, not the first load.
 - SL-15c: content fades in (~150 ms) inside `skeletonMask` from the shimmer and from the hidden grace phase
   alike; the fade honours reduced motion.
+- SL-15c: `skeletonMask` draws its own theme-coloured shimmer (foundation `.shimmer` unused), so shimmer
+  and content crossfade. No upstream entry.
 - SL-15d: stand-ins never become the mutation animator's baseline; the stand-in list hands over to the real
   list in one quiet crossfade and the entry stagger plays on the real items only. No position keys.
 - SL-15e: `Cover` keeps one placeholder layer over the image so the hold survives success; disk / network

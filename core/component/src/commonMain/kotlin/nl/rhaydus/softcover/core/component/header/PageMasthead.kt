@@ -46,6 +46,7 @@ fun PageMasthead(
 
             SoftcoverText(
                 text = model.title,
+                standIn = "Page title",
                 style = when (model.size) {
                     PageMastheadSize.Regular -> MaterialTheme.editorialTypography.pageTitle
                     PageMastheadSize.Compact -> MaterialTheme.editorialTypography.headlineMedium

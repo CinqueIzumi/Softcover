@@ -36,11 +36,14 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.state.streakSheetScaffoldFor
+
+private const val PLACEHOLDER_DAY_COUNT = 21
 
 private val sheetDateFormatter = LocalDate.Format {
     dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
@@ -55,6 +58,7 @@ internal fun StreakStrip(
     activity: List<ReadingDayActivity>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     val haptics = rememberHaptics()
 
@@ -65,7 +69,11 @@ internal fun StreakStrip(
     // Most-recent-first: today sits at the left edge, older days run off to the right.
     val displayDays = activity.asReversed()
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .skeletonMask(visible = isLoading),
+    ) {
         // A scrolling row keeps every dot comfortably sized on narrow screens instead of
         // squeezing 21 of them into the viewport width. The tap target lives on this row so
         // the press-scale never fires on a horizontal scroll — the inner scroll wins the drag.
@@ -82,6 +90,19 @@ internal fun StreakStrip(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (isLoading && displayDays.isEmpty()) {
+                repeat(PLACEHOLDER_DAY_COUNT) {
+                    Box(
+                        modifier = Modifier
+                            .size(9.dp)
+                            .background(
+                                color = trackColor,
+                                shape = CircleShape,
+                            ),
+                    )
+                }
+            }
+
             displayDays.forEach { day ->
                 val isToday = day.date == todayDate
 

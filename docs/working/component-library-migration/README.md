@@ -14,13 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SL-15 traced on the emulator and split into SL-15a–e (S11-4/7/8/10 folded in; shape approved). SL-3b blocked on F34; PF-4/PF-7 wait for S12-4.
-- **Next:** SL-15a per `steps/sl-lean-loading.md` § Sub-steps (reduced-motion gating), Phase 1 then build.
-- **Due when:** B5 (16 KB page-size fix, urgent, no issue) in `docs/working/architecture-review.md` — SL-15e is ticked in `steps/sl-lean-loading.md`.
-- **Open questions:** Share-your-year row: no disabled look when the card is null (failed load) — dim it? TP deleted pure-`setState` action tests — restore some? `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop Profile single-column and search results (SD); onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving); Focus Mode exit from the notification; Explore no-results; Undo snackbars; snackbar above both bar styles; O14 tablet back + desktop Esc.
-- **Verification:** docs only this session, no gates run. Emulator: `adb screenrecord` + frames via AVFoundation (no ffmpeg).
-- **Uncommitted:** this block.
-
+- **State:** SL-15b–e done; Reading launch and Library tab switch clean on device. SL-3b blocked on F34; PF-4/7 wait for S12-4.
+- **Next:** B5 (16 KB page-size fix, urgent, no issue) in `docs/working/architecture-review.md`. Then PF bold hero: card edges unclear, "Update progress" outshines the book.
+- **Open questions:** Hold the hero reveal for its cover? Share-your-year row: no disabled look when the card is null (failed load) — dim it? TP deleted pure-`setState` action tests — restore some? `ReadingStandInsTest` still lacks Arrange markers (agent read denied). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop Profile single-column and search results (SD); onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving); Focus Mode exit from the notification; Explore no-results; Undo snackbars; snackbar above both bar styles; O14 tablet back + desktop Esc.
+- **Verification:** `styleCheck`, component + reading tests passed (JBR 21).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

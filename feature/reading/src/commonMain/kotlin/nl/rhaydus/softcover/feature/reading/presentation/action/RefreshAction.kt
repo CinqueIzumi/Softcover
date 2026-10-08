@@ -15,7 +15,7 @@ internal data object RefreshAction : ReadingAction {
         scope: ActionScope<ReadingScreenUiState, ReadingScreenEvent, ReadingLocalVariables>,
     ) {
         scope.setState {
-            it.copy(isLoading = true)
+            it.copy(isRefreshing = true)
         }
 
         dependencies
@@ -25,7 +25,7 @@ internal data object RefreshAction : ReadingAction {
             .onApiFailure()
 
         scope.setState {
-            it.copy(isLoading = false)
+            it.copy(isRefreshing = false)
         }
     }
 }

@@ -8,9 +8,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
@@ -76,7 +78,9 @@ internal fun FeaturedBookCard(
                     runAction(OnClearMutationFailureAction(bookId = book.id))
                 },
             ),
-        color = cardColor,
+        // FeaturedBackdropCard paints cardColor inside its loading mask, so the shell hides with the content.
+        color = Color.Transparent,
+        contentColor = contentColorFor(cardColor),
         shape = shape,
         onClick = { onBookClick(book) },
         enabled = isLoading.not(),

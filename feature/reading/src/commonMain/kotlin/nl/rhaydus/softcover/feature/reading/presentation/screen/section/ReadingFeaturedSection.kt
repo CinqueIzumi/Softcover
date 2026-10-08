@@ -22,12 +22,12 @@ internal fun ReadingFeaturedSection(
         book = featured,
         backdropCover = state.featuredBackdropCover,
         heroCover = state.featuredCover,
-        progress = state.featuredProgress,
+        progress = state.visibleFeaturedProgress,
         deadlineCoverOverlay = state.deadlineCoverOverlays[featured.id],
-        deadlineSummary = state.featuredDeadlineSummary,
+        deadlineSummary = state.visibleFeaturedDeadlineSummary,
         mutationFailed = featured.id in state.failedMutationBookIds,
         paceForecast = state.featuredBookPace,
-        paceNudge = state.featuredPaceNudge,
+        paceNudge = state.visibleFeaturedPaceNudge,
         onDismissPlanToday = {
             runAction(OnDismissPlanTodayAction(bookId = featured.id))
         },

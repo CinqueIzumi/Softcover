@@ -32,7 +32,11 @@ import nl.rhaydus.toad.UiState
 
 internal data class ReadingScreenUiState(
     val books: List<Book> = emptyList(),
+
+    /** True until the first load has built every slice the screen shows; a pull-to-refresh is [isRefreshing]. */
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val hasLoadedBooks: Boolean = false,
 
     val alsoReadingHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "0 more in motion",
@@ -74,6 +78,7 @@ internal data class ReadingScreenUiState(
     ),
 
     val recentReadingActivity: List<ReadingDayActivity> = emptyList(),
+    val hasLoadedReadingActivity: Boolean = false,
     val streakEnabled: Boolean = true,
 
     val streakSheet: SheetScaffoldUiModel = streakSheetScaffoldFor(activity = emptyList()),
@@ -120,26 +125,68 @@ internal data class ReadingScreenUiState(
      */
     val featuredPaceNudge: BannerUiModel? = null,
 
-    val masthead: PageMastheadUiModel = PageMastheadUiModel(
-        eyebrow = mastheadEyebrowFor(isLoading = true),
-        title = "Good morning.",
-        subtitle = "0 titles in motion",
-    ),
+    /** `null` until the books first load. */
+    val masthead: PageMastheadUiModel? = null,
 
     /** The same greeting and subtitle at [PageMastheadSize.Compact], for the mobile header. */
-    val compactMasthead: PageMastheadUiModel = PageMastheadUiModel(
-        title = "Good morning.",
-        subtitle = "0 titles in motion",
-        size = PageMastheadSize.Compact,
-    ),
+    val compactMasthead: PageMastheadUiModel? = null,
 
-    /** [masthead]'s trailing refresh action label and enabled state, tracking [isLoading]. */
-    val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = true),
+    /** [masthead]'s trailing refresh action label and enabled state, tracking [isRefreshing]. */
+    val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = false),
 ) : UiState {
-    /** The first of [books], or the loading stand-in while there are none. */
+    /** The first of [books], or the loading stand-in while [isLoading] or there are none. */
     val featuredBook: Book
-        get() = books.firstOrNull() ?: FEATURED_STAND_IN_BOOK
+        get() = if (isLoading) FEATURED_STAND_IN_BOOK else books.firstOrNull() ?: FEATURED_STAND_IN_BOOK
 
     val isLoadingFeatured: Boolean
-        get() = books.isEmpty()
+        get() = isLoading || books.isEmpty()
+
+    /** [alsoReading], or its stand-in rows while [isLoading]. */
+    val visibleAlsoReading: BookCardSet<Book>
+        get() = if (isLoading) ALSO_READING_STAND_IN_SET else alsoReading
+
+    /** [masthead], or a masked stand-in while [isLoading] or before it is built. */
+    val visibleMasthead: PageMastheadUiModel
+        get() = if (isLoading) MASTHEAD_STAND_IN else masthead ?: MASTHEAD_STAND_IN
+
+    /** [compactMasthead], or a masked stand-in while [isLoading] or before it is built. */
+    val visibleCompactMasthead: PageMastheadUiModel
+        get() = if (isLoading) COMPACT_MASTHEAD_STAND_IN else compactMasthead ?: COMPACT_MASTHEAD_STAND_IN
+
+    /** [alsoReadingHeader], masked while [isLoading]. */
+    val visibleAlsoReadingHeader: SectionHeaderUiModel
+        get() = if (isLoading) ALSO_READING_HEADER_STAND_IN else alsoReadingHeader
+
+    val visibleFeaturedProgress: FeaturedProgressUiModel
+        get() = if (isLoading) FeaturedProgressUiModel.Loading else featuredProgress
+
+    val visibleFeaturedDeadlineSummary: DeadlineSummaryUiModel?
+        get() = if (isLoading) null else featuredDeadlineSummary
+
+    val visibleFeaturedPaceNudge: BannerUiModel?
+        get() = if (isLoading) null else featuredPaceNudge
+
+    private companion object {
+        val MASTHEAD_STAND_IN = PageMastheadUiModel(
+            eyebrow = mastheadEyebrowFor(isRefreshing = false),
+            title = null,
+            subtitle = "0 titles in motion",
+            isLoading = true,
+        )
+
+        val COMPACT_MASTHEAD_STAND_IN = PageMastheadUiModel(
+            title = null,
+            subtitle = "0 titles in motion",
+            size = PageMastheadSize.Compact,
+            isLoading = true,
+        )
+
+        val ALSO_READING_HEADER_STAND_IN = SectionHeaderUiModel.Section(
+            eyebrow = "0 more in motion",
+            headline = "Also between your fingers",
+            isLoading = true,
+        )
+
+        val ALSO_READING_STAND_IN_SET: BookCardSet<Book> = BookCardSet.standIns(ALSO_READING_STAND_IN_CARDS)
+    }
 }

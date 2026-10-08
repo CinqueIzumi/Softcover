@@ -44,9 +44,52 @@ class RefreshActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `sets isLoading to true then false around the use case call`() = runTest {
+        fun `sets isRefreshing to true then false around the use case call`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(isLoading = false)
+            stateFlow.value = ReadingScreenUiState(isRefreshing = false)
+            val refreshingStates = mutableListOf<Boolean>()
+
+            coEvery {
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
+            } answers {
+                refreshingStates.add(stateFlow.value.isRefreshing)
+                Result.success(Unit)
+            }
+
+            // ----- Act -----
+            RefreshAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            refreshingStates.first() shouldBe true
+            stateFlow.value.isRefreshing shouldBe false
+        }
+
+        @Test
+        fun `clears isRefreshing even when use case fails`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(isRefreshing = false)
+
+            coEvery {
+                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
+            } returns Result.failure(RuntimeException("network error"))
+
+            // ----- Act -----
+            RefreshAction.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isRefreshing shouldBe false
+        }
+
+        @Test
+        fun `never touches isLoading`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(isLoading = true)
             val loadingStates = mutableListOf<Boolean>()
 
             coEvery {
@@ -64,26 +107,7 @@ class RefreshActionTest {
 
             // ----- Assert -----
             loadingStates.first() shouldBe true
-            stateFlow.value.isLoading shouldBe false
-        }
-
-        @Test
-        fun `clears isLoading flag even when use case fails`() = runTest {
-            // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(isLoading = false)
-
-            coEvery {
-                refreshLibraryUseCase(scope = RefreshScope.ByStatus(status = UserBookStatus.CURRENTLY_READING))
-            } returns Result.failure(RuntimeException("network error"))
-
-            // ----- Act -----
-            RefreshAction.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            stateFlow.value.isLoading shouldBe false
+            stateFlow.value.isLoading shouldBe true
         }
     }
 }

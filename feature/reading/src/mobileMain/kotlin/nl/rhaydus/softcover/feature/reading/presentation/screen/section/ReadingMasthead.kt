@@ -34,21 +34,22 @@ internal fun ReadingMasthead(
     ) {
         PullToRefreshEyebrow(
             pullToRefreshState = pullToRefreshState,
-            isRefreshing = state.isLoading,
+            isRefreshing = state.isRefreshing,
             baseText = "Now reading",
             refreshingText = "Catching up on your reading…",
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        PageMasthead(model = state.compactMasthead)
+        PageMasthead(model = state.visibleCompactMasthead)
 
-        if (state.streakEnabled && state.recentReadingActivity.isNotEmpty()) {
+        if (state.streakEnabled && (state.isLoading || state.recentReadingActivity.isNotEmpty())) {
             Spacer(modifier = Modifier.height(14.dp))
 
             StreakStrip(
                 activity = state.recentReadingActivity,
                 onClick = onExpandStreak,
+                isLoading = state.isLoading,
             )
         }
 

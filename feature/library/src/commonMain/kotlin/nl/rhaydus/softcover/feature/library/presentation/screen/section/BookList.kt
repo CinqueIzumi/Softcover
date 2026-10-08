@@ -19,16 +19,15 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import nl.rhaydus.designsystem.component.DesktopContextMenu
 import nl.rhaydus.designsystem.component.DesktopContextMenuItem
-import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.modifier.platformModifierClick
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
@@ -113,9 +112,14 @@ internal fun BookList(
 
     val isRearranging = reorderStatus != null && isShowingStandIns.not()
 
-    val animator = rememberLazyItemMutationAnimator(keys = visibleKeys)
+    val realKeys = remember(cards) { cards.filterNot { it.isLoading }.map { it.key.lazyKey } }
 
-    val entry = rememberStaggeredEntryCoordinator(key = "library:books:${tab.id}")
+    val animator = rememberLazyItemMutationAnimator(keys = realKeys)
+
+    val entry = rememberBookCardEntryCoordinator(
+        cards = cards,
+        key = "library:books:${tab.id}",
+    )
 
     ScrollToTopOnVisibleSetChange(
         tabId = tab.id,
@@ -328,15 +332,13 @@ internal fun BookList(
                     )
                 }
 
-                val baseModifier = Modifier.mutationAnimated(
+                val baseModifier = Modifier.bookCardHandOver(
                     scope = gridItemScope,
+                    card = card,
                     animator = animator,
-                    itemKey = card.key.lazyKey,
+                    coordinator = entry,
+                    index = index,
                 )
-                    .staggeredEntry(
-                        coordinator = entry,
-                        index = index,
-                    )
 
                 val entryModifier = if (isRearranging || isShowingStandIns) {
                     baseModifier

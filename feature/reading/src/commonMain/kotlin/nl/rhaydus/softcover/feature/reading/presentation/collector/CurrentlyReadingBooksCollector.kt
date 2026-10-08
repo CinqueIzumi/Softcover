@@ -20,7 +20,7 @@ internal class CurrentlyReadingBooksCollector : ReadingCollector {
             scope.setState {
                 it.copy(
                     books = books,
-                    isLoading = false,
+                    hasLoadedBooks = true,
                     alsoReadingHeader = SectionHeaderUiModel.Section(
                         eyebrow = if (restCount == 1) "One more in motion" else "$restCount more in motion",
                         headline = "Also between your fingers",

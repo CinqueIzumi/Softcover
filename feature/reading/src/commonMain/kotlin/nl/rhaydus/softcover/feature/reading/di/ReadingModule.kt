@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.feature.reading.presentation.collector.ProgressSheet
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingActivityCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingPaceForecastCollector
+import nl.rhaydus.softcover.feature.reading.presentation.collector.ReadingReadinessCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.TrendingBooksLoader
 import nl.rhaydus.softcover.feature.reading.presentation.collector.VerdictSheetCollector
 import nl.rhaydus.softcover.feature.reading.presentation.collector.WantToReadCollector
@@ -85,4 +86,5 @@ val readingModule = module {
     factory { LastUsedProgressUnitCollector() } bind ReadingCollector::class
     factory { ReadingPaceForecastCollector() } bind ReadingCollector::class
     factory { MastheadCollector() } bind ReadingCollector::class
+    factory { ReadingReadinessCollector() } bind ReadingCollector::class
 }

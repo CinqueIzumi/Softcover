@@ -9,14 +9,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
-import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
+import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.screen.MarkAsReadController
@@ -35,15 +34,18 @@ internal fun ReadingBooksColumn(
     header: @Composable () -> Unit,
 ) {
     val animator = rememberLazyItemMutationAnimator(
-        keys = remember(state.alsoReading) {
-            state.alsoReading.cards.filterNot(BookCardUiModel::isLoading).map { it.key.lazyKey }
+        keys = remember(state.visibleAlsoReading) {
+            state.visibleAlsoReading.cards.filterNot(BookCardUiModel::isLoading).map { it.key.lazyKey }
         },
     )
 
-    val entry = rememberStaggeredEntryCoordinator(key = "reading:rest")
+    val entry = rememberBookCardEntryCoordinator(
+        cards = state.visibleAlsoReading.cards,
+        key = "reading:rest",
+    )
 
     val onCardEvent = rememberReadingCardEventHandler(
-        alsoReading = state.alsoReading,
+        alsoReading = state.visibleAlsoReading,
         runAction = runAction,
         onBookClick = onBookClick,
     )
@@ -57,7 +59,7 @@ internal fun ReadingBooksColumn(
             header()
         }
 
-        item(key = "featured-${state.featuredBook.id}") {
+        item(key = "featured") {
             ReadingFeaturedSection(
                 state = state,
                 runAction = runAction,
@@ -66,13 +68,13 @@ internal fun ReadingBooksColumn(
             )
         }
 
-        if (state.alsoReading.isEmpty.not()) {
+        if (state.visibleAlsoReading.isEmpty.not()) {
             item(key = "also-reading-label") {
-                AlsoReadingHeader(model = state.alsoReadingHeader)
+                AlsoReadingHeader(model = state.visibleAlsoReadingHeader)
             }
 
             itemsIndexed(
-                state.alsoReading.cards,
+                state.visibleAlsoReading.cards,
                 key = { _, card -> card.key.lazyKey },
             ) { index, card ->
                 val bookId = (card.key as? BookCardKey.Book)?.bookId ?: return@itemsIndexed
@@ -80,16 +82,13 @@ internal fun ReadingBooksColumn(
                 BookCard(
                     model = card,
                     onEvent = onCardEvent,
-                    modifier = Modifier.mutationAnimated(
+                    modifier = Modifier.bookCardHandOver(
                         scope = this,
+                        card = card,
                         animator = animator,
-                        itemKey = card.key.lazyKey,
+                        coordinator = entry,
+                        index = index,
                     )
-                        .bookCardStaggeredEntry(
-                            card = card,
-                            coordinator = entry,
-                            index = index,
-                        )
                         .then(controller.slideModifier(bookId)),
                 )
             }

@@ -142,6 +142,7 @@ class ReadingActivityCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.recentReadingActivity shouldBe activity
+            stateFlow.value.hasLoadedReadingActivity shouldBe true
             job.cancel()
         }
 
@@ -192,6 +193,7 @@ class ReadingActivityCollectorTest {
             // ----- Assert -----
             stateFlow.value.streakEnabled shouldBe false
             stateFlow.value.recentReadingActivity shouldBe emptyList()
+            stateFlow.value.hasLoadedReadingActivity shouldBe true
             job.cancel()
         }
 

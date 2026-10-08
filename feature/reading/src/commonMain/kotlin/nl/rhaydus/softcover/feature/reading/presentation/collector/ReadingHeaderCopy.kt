@@ -11,8 +11,8 @@ internal fun List<Book>.averageProgress(): Float? {
     return values.average().toFloat()
 }
 
-internal fun mastheadEyebrowFor(isLoading: Boolean): String =
-    if (isLoading) "Catching up on your reading…" else "Now reading"
+internal fun mastheadEyebrowFor(isRefreshing: Boolean): String =
+    if (isRefreshing) "Catching up on your reading…" else "Now reading"
 
 internal fun greetingForNow(): String {
     val hour = currentLocalDateTime().hour

@@ -13,10 +13,9 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiSt
 import nl.rhaydus.toad.ActionScope
 
 /**
- * Builds both Reading mastheads off the composition (R9/R10) — the desktop
- * [PageMastheadSize.Regular] one and the mobile [PageMastheadSize.Compact] one sharing space with
- * pull-to-refresh — and the desktop refresh action's label and enabled state, from
- * [ReadingScreenUiState.books] and [ReadingScreenUiState.isLoading].
+ * Builds both Reading mastheads — the desktop [PageMastheadSize.Regular] one and the mobile
+ * [PageMastheadSize.Compact] one sharing space with pull-to-refresh — and the desktop refresh action's
+ * label and enabled state, from [ReadingScreenUiState.books] and [ReadingScreenUiState.isRefreshing].
  */
 internal class MastheadCollector : ReadingCollector {
     override suspend fun onLaunch(
@@ -28,7 +27,8 @@ internal class MastheadCollector : ReadingCollector {
                 MastheadSnapshot(
                     bookCount = it.books.size,
                     averageProgress = it.books.averageProgress(),
-                    isLoading = it.isLoading,
+                    isRefreshing = it.isRefreshing,
+                    hasLoadedBooks = it.hasLoadedBooks,
                 )
             }
             .distinctUntilChanged()
@@ -39,19 +39,23 @@ internal class MastheadCollector : ReadingCollector {
                     averageProgress = snapshot.averageProgress,
                 )
 
+                val masthead = PageMastheadUiModel(
+                    eyebrow = mastheadEyebrowFor(isRefreshing = snapshot.isRefreshing),
+                    title = title,
+                    subtitle = subtitle,
+                )
+
+                val compactMasthead = PageMastheadUiModel(
+                    title = title,
+                    subtitle = subtitle,
+                    size = PageMastheadSize.Compact,
+                )
+
                 scope.setState {
                     it.copy(
-                        masthead = PageMastheadUiModel(
-                            eyebrow = mastheadEyebrowFor(isLoading = snapshot.isLoading),
-                            title = title,
-                            subtitle = subtitle,
-                        ),
-                        compactMasthead = PageMastheadUiModel(
-                            title = title,
-                            subtitle = subtitle,
-                            size = PageMastheadSize.Compact,
-                        ),
-                        mastheadRefresh = mastheadRefreshFor(isLoading = snapshot.isLoading),
+                        masthead = masthead.takeIf { snapshot.hasLoadedBooks },
+                        compactMasthead = compactMasthead.takeIf { snapshot.hasLoadedBooks },
+                        mastheadRefresh = mastheadRefreshFor(isLoading = snapshot.isRefreshing),
                     )
                 }
             }

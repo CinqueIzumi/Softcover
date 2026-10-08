@@ -1,7 +1,8 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Job
@@ -62,39 +63,48 @@ class MastheadCollectorTest {
         @Test
         fun `subtitle counts zero books`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = emptyList())
+            stateFlow.value = ReadingScreenUiState(
+                books = emptyList(),
+                hasLoadedBooks = true,
+            )
 
             // ----- Act -----
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.subtitle shouldBe "0 titles in motion"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "0 titles in motion"
             job.cancel()
         }
 
         @Test
         fun `subtitle uses the singular for exactly one book without a read`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = listOf(stubBook(userBookRead = null)))
+            stateFlow.value = ReadingScreenUiState(
+                books = listOf(stubBook(userBookRead = null)),
+                hasLoadedBooks = true,
+            )
 
             // ----- Act -----
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.subtitle shouldBe "One title in motion"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "One title in motion"
             job.cancel()
         }
 
         @Test
         fun `subtitle counts several books`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(books = listOf(stubBook(), stubBook(), stubBook()))
+            stateFlow.value = ReadingScreenUiState(
+                books = listOf(stubBook(), stubBook(), stubBook()),
+                hasLoadedBooks = true,
+            )
 
             // ----- Act -----
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.subtitle shouldBe "3 titles in motion"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "3 titles in motion"
             job.cancel()
         }
 
@@ -105,13 +115,16 @@ class MastheadCollectorTest {
                 stubBook(userBookRead = stubUserBookRead(progress = 40f)),
                 stubBook(userBookRead = stubUserBookRead(progress = 80f)),
             )
-            stateFlow.value = ReadingScreenUiState(books = books)
+            stateFlow.value = ReadingScreenUiState(
+                books = books,
+                hasLoadedBooks = true,
+            )
 
             // ----- Act -----
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.subtitle shouldBe "2 titles in motion · 60% along, on average"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "2 titles in motion · 60% along, on average"
             job.cancel()
         }
 
@@ -122,35 +135,85 @@ class MastheadCollectorTest {
                 stubBook(userBookRead = null),
                 stubBook(userBookRead = stubUserBookRead(progress = 45f)),
             )
-            stateFlow.value = ReadingScreenUiState(books = books)
+            stateFlow.value = ReadingScreenUiState(
+                books = books,
+                hasLoadedBooks = true,
+            )
 
             // ----- Act -----
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.subtitle shouldBe "2 titles in motion · 45% along, on average"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "2 titles in motion · 45% along, on average"
             job.cancel()
         }
 
         @Test
-        fun `recomputes off the latest state when books and loading change`() = runTest(UnconfinedTestDispatcher()) {
+        fun `recomputes the subtitle when the books change`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
                 books = emptyList(),
-                isLoading = true,
+                hasLoadedBooks = true,
             )
             val job = launchCollector(this)
-            val loadingEyebrow = stateFlow.value.masthead.eyebrow
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(
-                books = listOf(stubBook()),
-                isLoading = false,
-            )
+            stateFlow.value = stateFlow.value.copy(books = listOf(stubBook()))
 
             // ----- Assert -----
-            stateFlow.value.masthead.eyebrow shouldNotBe loadingEyebrow
-            stateFlow.value.masthead.subtitle shouldBe "One title in motion"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "One title in motion"
+            job.cancel()
+        }
+
+        @Test
+        fun `is null before the books have loaded`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(
+                books = listOf(stubBook()),
+                hasLoadedBooks = false,
+            )
+
+            // ----- Act -----
+            val job = launchCollector(this)
+
+            // ----- Assert -----
+            stateFlow.value.masthead.shouldBeNull()
+            job.cancel()
+        }
+
+        @Test
+        fun `is built once the books have loaded`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(hasLoadedBooks = false)
+            val job = launchCollector(this)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(hasLoadedBooks = true)
+
+            // ----- Assert -----
+            stateFlow.value.masthead.shouldNotBeNull()
+            job.cancel()
+        }
+
+        @Test
+        fun `eyebrow follows isRefreshing`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(
+                hasLoadedBooks = true,
+                isRefreshing = false,
+            )
+            val job = launchCollector(this)
+            val idleEyebrow = stateFlow.value.masthead.shouldNotBeNull().eyebrow
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isRefreshing = true)
+            val refreshingEyebrow = stateFlow.value.masthead.shouldNotBeNull().eyebrow
+            stateFlow.value = stateFlow.value.copy(isRefreshing = false)
+
+            // ----- Assert -----
+            idleEyebrow shouldBe mastheadEyebrowFor(isRefreshing = false)
+            refreshingEyebrow shouldBe mastheadEyebrowFor(isRefreshing = true)
+            stateFlow.value.masthead.shouldNotBeNull().eyebrow shouldBe idleEyebrow
             job.cancel()
         }
     }
@@ -162,15 +225,30 @@ class MastheadCollectorTest {
             // ----- Arrange -----
             stateFlow.value = ReadingScreenUiState(
                 books = listOf(stubBook(), stubBook()),
-                isLoading = false,
+                hasLoadedBooks = true,
             )
 
             // ----- Act -----
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.compactMasthead.title shouldBe stateFlow.value.masthead.title
-            stateFlow.value.compactMasthead.subtitle shouldBe stateFlow.value.masthead.subtitle
+            val compact = stateFlow.value.compactMasthead.shouldNotBeNull()
+            val regular = stateFlow.value.masthead.shouldNotBeNull()
+            compact.title shouldBe regular.title
+            compact.subtitle shouldBe regular.subtitle
+            job.cancel()
+        }
+
+        @Test
+        fun `is null before the books have loaded`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(hasLoadedBooks = false)
+
+            // ----- Act -----
+            val job = launchCollector(this)
+
+            // ----- Assert -----
+            stateFlow.value.compactMasthead.shouldBeNull()
             job.cancel()
         }
     }
@@ -178,17 +256,33 @@ class MastheadCollectorTest {
     @Nested
     inner class MastheadRefresh {
         @Test
-        fun `is disabled while loading and enabled once loading ends`() = runTest(UnconfinedTestDispatcher()) {
+        fun `is disabled while refreshing and enabled once refreshing ends`() = runTest(UnconfinedTestDispatcher()) {
             // ----- Arrange -----
-            stateFlow.value = ReadingScreenUiState(isLoading = true)
+            stateFlow.value = ReadingScreenUiState(isRefreshing = true)
             val job = launchCollector(this)
-            val whileLoading = stateFlow.value.mastheadRefresh
+            val whileRefreshing = stateFlow.value.mastheadRefresh
 
             // ----- Act -----
-            stateFlow.value = stateFlow.value.copy(isLoading = false)
+            stateFlow.value = stateFlow.value.copy(isRefreshing = false)
 
             // ----- Assert -----
-            whileLoading.enabled shouldBe false
+            whileRefreshing.enabled shouldBe false
+            stateFlow.value.mastheadRefresh.enabled shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `ignores first-load isLoading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = ReadingScreenUiState(
+                isLoading = true,
+                isRefreshing = false,
+            )
+
+            // ----- Act -----
+            val job = launchCollector(this)
+
+            // ----- Assert -----
             stateFlow.value.mastheadRefresh.enabled shouldBe true
             job.cancel()
         }

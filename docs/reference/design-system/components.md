@@ -42,7 +42,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 - **Cover** — `core:component/cover` — the app's only book-cover renderer; variant-driven, never blank.
 - **Coverless title cover** — `core:component/cover` — the monogram/title jacket `Cover` falls back to.
-- **Book card** — `core:component/bookcard` — the one book/series card (cover-only, column or row) for every list, rail and grid surface; `bookCardStaggeredEntry` skips the entry animation for stand-ins.
+- **Book card** — `core:component/bookcard` — the one book/series card (cover-only, column or row) for every list, rail and grid surface; `bookCardStaggeredEntry` skips the entry animation for stand-ins; `bookCardHandOver` fades lazy stand-ins out as the real list staggers in.
 - **Rhaydus shimmer image** — [detail](components/covers.md#rhaydus-shimmer-image) — the loader for every non-cover image.
 
 ## States & feedback
@@ -50,7 +50,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error.
 - **Banner** — `core:component/callout` — full-width slide-in strip for a screen-level condition or a card-fused nudge; `BannerVariant` (`Status`, `Editorial`) sets colour, voice, icon and dismiss.
 - **Empty state** — `core:component/state` — placeholder for content a surface has nothing to draw; `EmptyStateVariant.Centered(button?)` (quote glyph, headline, optional button) or `Inline` (start-aligned title and body); the caller pads it full pane or in flow.
-- **SkeletonMask** — `core:component/state` — `Modifier.skeletonMask(visible, shape)`: shimmers a leaf over its bounds while loading, keeping its real layout.
+- **SkeletonMask** — `core:component/state` — `Modifier.skeletonMask(visible, shape)`: shimmers a leaf over its bounds while loading, keeping its real layout, then fades the content in.
 - **Divider** — `core:component/divider` — hairline rule, bare, centred, or vertical.
 - **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — exception to the wavy-progress rule.
 - **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.

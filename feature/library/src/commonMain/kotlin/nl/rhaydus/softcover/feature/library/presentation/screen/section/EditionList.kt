@@ -14,15 +14,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
-import nl.rhaydus.designsystem.component.mutationAnimated
 import nl.rhaydus.designsystem.component.rememberLazyItemMutationAnimator
-import nl.rhaydus.designsystem.component.rememberStaggeredEntryCoordinator
-import nl.rhaydus.designsystem.component.staggeredEntry
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardKey
+import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -90,9 +89,14 @@ internal fun EditionList(
         isRearranging = state.isRearranging,
     ) && cards.none { it.isLoading }
 
-    val animator = rememberLazyItemMutationAnimator(keys = visibleKeys)
+    val realKeys = remember(cards) { cards.filterNot { it.isLoading }.map { it.key.lazyKey } }
 
-    val entry = rememberStaggeredEntryCoordinator(key = "library:editions:${tab.id}")
+    val animator = rememberLazyItemMutationAnimator(keys = realKeys)
+
+    val entry = rememberBookCardEntryCoordinator(
+        cards = cards,
+        key = "library:editions:${tab.id}",
+    )
 
     ScrollToTopOnVisibleSetChange(
         tabId = tab.id,
@@ -254,15 +258,13 @@ internal fun EditionList(
                     },
                 )
 
-                val entryModifier = Modifier.mutationAnimated(
+                val entryModifier = Modifier.bookCardHandOver(
                     scope = gridItemScope,
+                    card = card,
                     animator = animator,
-                    itemKey = card.key.lazyKey,
+                    coordinator = entry,
+                    index = index,
                 )
-                    .staggeredEntry(
-                        coordinator = entry,
-                        index = index,
-                    )
 
                 BookCard(
                     model = card,

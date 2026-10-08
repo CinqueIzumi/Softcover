@@ -165,7 +165,7 @@ internal actual fun LibraryScreenLayout(
                 val masthead = state.mastheadFor(currentTab?.id)
 
                 MastheadHeader(
-                    title = masthead.title,
+                    title = masthead.title.orEmpty(),
                     subtitle = masthead.subtitle.orEmpty(),
                     isSubtitleLoading = masthead.isLoading,
                     pullToRefreshState = pullToRefreshState,

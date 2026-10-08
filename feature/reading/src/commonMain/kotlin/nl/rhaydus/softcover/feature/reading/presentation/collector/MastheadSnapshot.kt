@@ -4,5 +4,6 @@ package nl.rhaydus.softcover.feature.reading.presentation.collector
 internal data class MastheadSnapshot(
     val bookCount: Int,
     val averageProgress: Float?,
-    val isLoading: Boolean,
+    val isRefreshing: Boolean,
+    val hasLoadedBooks: Boolean,
 )
