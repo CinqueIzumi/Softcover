@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.component.chart.ProportionChart
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
@@ -97,7 +96,8 @@ internal fun AuthorRepresentationSection(
                     ),
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.shimmer(isLoading = isLoading),
+                    isLoading = isLoading,
+                    standIn = "Across 120 authors with a known gender.",
                 )
             }
 
@@ -110,7 +110,8 @@ internal fun AuthorRepresentationSection(
                     text = demographicScopeCaption(hideUntaggedAuthors = hideUntaggedAuthors),
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.shimmer(isLoading = isLoading),
+                    isLoading = isLoading,
+                    standIn = "Shares of the authors each one is tagged for, untagged authors left out.",
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -202,7 +203,8 @@ private fun DemographicBreakdownBlock(
             ),
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.shimmer(isLoading = isLoading),
+            isLoading = isLoading,
+            standIn = "Yes 24 · No 96 · Unknown 12 · of 132 authors",
         )
     }
 }

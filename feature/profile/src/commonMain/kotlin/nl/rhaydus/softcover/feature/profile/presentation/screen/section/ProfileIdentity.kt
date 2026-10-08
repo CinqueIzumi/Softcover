@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -56,9 +55,9 @@ internal fun ProfileIdentity(
             style = MaterialTheme.editorialTypography.display,
             color = MaterialTheme.colorScheme.primary,
             textAlign = textAlign,
-            modifier = Modifier
-                .fillMaxWidth()
-                .shimmer(isLoading = state.isLoading),
+            isLoading = state.isLoading,
+            standIn = "Reader Name",
+            modifier = Modifier.fillMaxWidth(),
         )
 
         val bio = data?.bio.orEmpty()
@@ -100,9 +99,7 @@ internal fun ProfileIdentity(
                 style = MaterialTheme.editorialTypography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = textAlign,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shimmer(isLoading = state.isLoading),
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }

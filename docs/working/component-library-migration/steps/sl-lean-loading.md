@@ -26,7 +26,7 @@ deleted.
 | SL-10a | Explore feed (featured, trending, up next, because-you-read, mood), mobile and desktop, render their real layout while loading; their `*Skeleton` state fields go | SL-9 | [x] |
 | SL-10b | Explore search and hidden suggestions, the same; the remaining `*Skeleton` state fields go | SL-10a, S7-5 | [x] |
 | SL-11 | Library and Reading: audit how they show loading; convert any loading branch to the shape below | S7-6 | [x] |
-| SL-12 | Profile: sections and both layouts move from `.shimmer` blocks to masked real leaves | S9-3 | [ ] |
+| SL-12 | Profile: sections and both layouts move from `.shimmer` blocks to masked real leaves | S9-3 | [x] |
 | SL-13 | Delete `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry, `SkeletonUiModelTest` and doc lines | SL-8, SL-10 | [x] |
 | SL-14 | Delayed reveal: `skeletonMask` and `Cover`'s loading shimmer wait out a grace period and hold a minimum once shown | SL-11 | [x] |
 | SL-15 | Investigate (user report, 2026-10-06): Reading's launch load still flashes, and covers flash grey/colour although SL-14's grace period should hide fast loads. Trace the launch state sequence (loading → empty → content?). Covers: the image-fetch `CoverShimmer` gets the grace but loses the minimum hold (the loading slot leaves composition on success), so a 250–550 ms load flashes grey for a few frames, then the image pops in without a fade. Candidate fixes: keep loading until the first real emission (no empty frame); memory-cache hits render instantly, disk / network loads fade in ~120–150 ms; a static low-contrast paper-toned fill before the image, shimmer only past the grace | SL-14 | [ ] |

@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.designsystem.modifier.shimmer
+import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -47,9 +47,9 @@ internal fun ShareEntryRow(
             .fillMaxWidth()
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .shimmer(
+            .skeletonMask(
+                visible = isLoading,
                 shape = shape,
-                isLoading = isLoading,
             )
             .conditional(
                 condition = enabled,

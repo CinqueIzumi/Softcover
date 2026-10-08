@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatGroupedNumber
-import nl.rhaydus.designsystem.modifier.shimmer
 import nl.rhaydus.softcover.core.component.chart.RankedBars
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
@@ -61,7 +60,10 @@ internal fun GenreRankingSection(
                 text = genreScopeCaption(taggedBookCount = genres.taggedBookCount),
                 style = MaterialTheme.editorialTypography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.shimmer(isLoading = isLoading),
+                isLoading = isLoading,
+                standIn = "Your five most-read genres, each as a share of your books, counted over your " +
+                    "finished books that carry genre tags. A book tagged with several counts " +
+                    "toward each, so these overlap.",
             )
         }
     }
