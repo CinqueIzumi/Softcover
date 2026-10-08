@@ -35,6 +35,17 @@ sync and caching (D3/D5/DC2), test breadth (T3/T5/T6), and a long tail of low-se
   (+ related flags) to work around KSP not yet supporting AGP 9's built-in Kotlin. Track it; flip back
   and drop the explicit Kotlin-android plugin once KSP catches up. Verify the Room KSP path still works
   after the switch. Cost: trivial (later). *(Also carried as a fast-track fix in `now.md`.)*
+- **B5 [MEDIUM] Native libraries are not 16 KB page-size compatible.** On a 16 KB-page emulator
+  (`sdk_gphone16k_arm64`, seen 2026-10-07) every launch of the debug build shows the system
+  "Android app compatibility" dialog: the app runs in page-size compatibility mode because these
+  `lib/arm64-v8a/` libraries fail the 16 KB RELRO alignment check — `libdatastore_shared_counter.so`
+  (DataStore), `libsurface_util_jni.so` and `libimage_processing_util_jni.so` (CameraX),
+  `libsqliteJni.so` (`androidx.sqlite` bundled), `libbarhopper_v3.so` (ML Kit barcode scanning),
+  `libandroidx.graphics.path.so` (`androidx.graphics:graphics-path`, via Compose). Google Play requires
+  16 KB support for apps targeting Android 15+. Fix: move each owning dependency to a release built
+  with 16 KB alignment, then confirm with APK Analyzer's alignment column and a launch on the 16 KB
+  emulator with no dialog. Cost: small to medium (version bumps; ML Kit may need the unbundled model
+  or a newer artifact).
 
 ---
 

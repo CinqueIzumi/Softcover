@@ -29,7 +29,12 @@ deleted.
 | SL-12 | Profile: sections and both layouts move from `.shimmer` blocks to masked real leaves | S9-3 | [x] |
 | SL-13 | Delete `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry, `SkeletonUiModelTest` and doc lines | SL-8, SL-10 | [x] |
 | SL-14 | Delayed reveal: `skeletonMask` and `Cover`'s loading shimmer wait out a grace period and hold a minimum once shown | SL-11 | [x] |
-| SL-15 | Investigate (user report, 2026-10-06): Reading's launch load still flashes, and covers flash grey/colour although SL-14's grace period should hide fast loads. Trace the launch state sequence (loading → empty → content?). Covers: the image-fetch `CoverShimmer` gets the grace but loses the minimum hold (the loading slot leaves composition on success), so a 250–550 ms load flashes grey for a few frames, then the image pops in without a fade. Candidate fixes: keep loading until the first real emission (no empty frame); memory-cache hits render instantly, disk / network loads fade in ~120–150 ms; a static low-contrast paper-toned fill before the image, shimmer only past the grace | SL-14 | [ ] |
+| SL-15 | Investigate Reading's launch flash and the cover grey flash (traced on the emulator, 2026-10-07; fixes below) | SL-14 | [x] |
+| SL-15a | Reduced motion: gate the cover morph (`fun Cover(`), `Banner`, `ProgressBar`, `WhenReadRow`, `TopBar`'s colour and `SessionPeekBar`'s enter and exit behind `playDecorativeMotion()`. Lands before any new motion | SL-15 | [ ] |
+| SL-15b | Reading's first content lands in one update, and everything that waits on data masks | SL-15 | [ ] |
+| SL-15c | Skeleton hand-over: every `skeletonMask` site crossfades to content, keeping the grace and minimum-hold timing | SL-15a | [ ] |
+| SL-15d | Stand-in hand-over, Library (`BookList`, `EditionList`, `LibraryStandIns`) and Reading's also-reading rows | SL-15c | [ ] |
+| SL-15e | `Cover`: one placeholder layer over the image, a fade for disk / network loads, the last image kept through a source swap (book detail's hero on an edition change) | SL-15a | [ ] |
 
 SL-1 to SL-7 run before S7-2. A sub-step whose "Runs after" is open waits; the tracker's `## Now` picks the
 next one whose prerequisites are done.
@@ -78,6 +83,18 @@ next one whose prerequisites are done.
 - SL-14: `Cover`'s own `isLoading` shimmer follows the same timing.
 - SL-14: app-wide, explore and book detail included (accepted: network surfaces show their shimmer 250ms
   later). F32 carries the timing upstream.
+- SL-15b: Reading's `isLoading` stays true until books, masthead, cards, progress and cover models are all
+  built; loading → content is one state change.
+- SL-15b: masthead title and subtitle, the featured caption and backdrop, and the streak strip (space
+  reserved) mask while loading; the spinner and eyebrow copy react to a real refresh only, not the first load.
+- SL-15c: content fades in (~150 ms) inside `skeletonMask` from the shimmer and from the hidden grace phase
+  alike; the fade honours reduced motion.
+- SL-15d: stand-ins never become the mutation animator's baseline; the stand-in list hands over to the real
+  list in one quiet crossfade and the entry stagger plays on the real items only. No position keys.
+- SL-15e: `Cover` keeps one placeholder layer over the image so the hold survives success; disk / network
+  loads fade in, memory-cache hits render instantly; loading and loaded share one size and treatment; the
+  last image stays through a source swap and crossfades to the new one; the featured backdrop fades too.
+- SL-15b–e: verified on the emulator by frame-by-frame launch and Library recordings, before and after.
 
 ## Inventory (current paths)
 

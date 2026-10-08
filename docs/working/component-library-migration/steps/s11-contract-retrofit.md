@@ -14,39 +14,35 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-1 | R10 sweep: every UI model built outside a collector, behind a build gate | — | [ ] |
 | S11-2 | R11 holdouts | — | [ ] |
 | S11-3 | `TopBarSurface`, the `ShareCardPalette` fold, the final § 7.4a check | S11-1, S11-2 | [ ] |
-| S11-4 | Shared pieces honour reduced motion; Profile's raw shimmer moves onto `skeletonMask` | — | [ ] |
 | S11-5 | Provide `LocalHaptics` at the theme root; one way of reading haptics | — | [ ] |
 | S11-6 | Haptic vocabulary: `commit` for milestones only, fired after the outcome, `reject` on failure | S11-5 | [ ] |
-| S11-7 | `skeletonMask` crossfades from shimmer to content | S11-4 | [ ] |
-| S11-8 | Library cold start: placeholders never become the mutation baseline | S11-7 | [ ] |
-| S11-9 | Explore search keeps its results while a refresh runs | S11-7 | [ ] |
-| S11-10 | `Cover` keeps its image through a source swap; one loading and loaded size | S11-4 | [ ] |
+| S11-9 | Explore search keeps its results while a refresh runs | SL-15c | [ ] |
 | S11-11 | Numbers that change render through `StatNumber` | S11-2 | [ ] |
-| S11-12 | The `StatNumber` count-up starts when the mask clears | S11-7, S11-11 | [ ] |
-| S11-13 | Charts grow, morph and slide | S11-4 | [ ] |
-| S11-14 | Cover selection animates | S11-4 | [ ] |
+| S11-12 | The `StatNumber` count-up starts when the mask clears | SL-15c, S11-11 | [ ] |
+| S11-13 | Charts grow, morph and slide | SL-15a | [ ] |
+| S11-14 | Cover selection animates | SL-15a | [ ] |
 | S11-15 | One reorder lift treatment | S11-6 | [ ] |
 | S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [ ] |
-| S11-17 | Selection states animate with motion-scheme specs | S11-4 | [ ] |
+| S11-17 | Selection states animate with motion-scheme specs | SL-15a | [ ] |
 | S11-18 | `SheetScaffold` footer: `commit` on a data commit, spinner on the running button | S11-6 | [ ] |
 | S11-19 | The progress sheet plays its dismiss on submit | — | [ ] |
 | S11-20 | Every sheet host leaves on `Dismissed` | S11-19 | [ ] |
-| S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | S11-4 | [ ] |
+| S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | SL-15a | [ ] |
 | S11-22 | `TextFieldUiModel` error state: outline, shake and `reject` | S11-6 | [ ] |
 | S11-23 | `StepperCircle`: press scale, a tick per step, accelerating auto-repeat | S11-6 | [ ] |
-| S11-24 | Progress-sheet tab body crossfades with a size transform | S11-4 | [ ] |
+| S11-24 | Progress-sheet tab body crossfades with a size transform | SL-15a | [ ] |
 | S11-25 | Add-to-list: bookmark, chip and spinner animate; `select` fires | S11-6 | [ ] |
-| S11-26 | Search chrome: press, border, slot crossfade, scroll lift, Refresh text | S11-4 | [ ] |
+| S11-26 | Search chrome: press, border, slot crossfade, scroll lift, Refresh text | SL-15a | [ ] |
 | S11-27 | Desktop hover on every clickable primitive; sidebar press scale | — | [ ] |
 | S11-28 | Desktop share and save say what happened | — | [ ] |
 | S11-29 | Share-card success and failure feedback | S11-6, S11-28 | [ ] |
 | S11-30 | The update callout crossfades its call to action | S11-6 | [ ] |
 | S11-31 | The update download shows determinate progress | S11-30 | [ ] |
-| S11-32 | Tab switches take their specs from the motion scheme | S11-4 | [ ] |
+| S11-32 | Tab switches take their specs from the motion scheme | SL-15a | [ ] |
 | S11-33 | Explore pull-to-refresh moves onto `PullToRefreshEyebrow` | S11-5 | [ ] |
 | S11-34 | Re-tapping the current tab scrolls to the top or pulses | — | [ ] |
 | S11-35 | Exact chart values on hover and press-and-scrub | S11-13 | [ ] |
-| S11-36 | One root push/pop transition | S11-4 | [ ] |
+| S11-36 | One root push/pop transition | SL-15a | [ ] |
 | S11-37 | The Focus Mode cover travels | S11-36 | [ ] |
 | S11-38 | The full-screen cover grows out of the hero | S11-36 | [ ] |
 | S11-39 | Shared title and rating keys into book detail | S11-36 | [ ] |
@@ -90,7 +86,7 @@ Components still taking a loose render parameter instead of the model deciding i
 - Fold `ShareCardPalette`'s two parallel colour `when`s into a per-variant lookup.
 - Run the final `component-contract.md` § 7.4a check: no remaining exception rows.
 
-## S11-4 to S11-40 — Premium feel
+## S11-5 to S11-40 — Premium feel
 
 Approved in the premium-feel triage. The app keeps today's UI until these land, so each one is a
 deliberate change the S12 walkthrough expects. Rules for every sub-step:
@@ -102,13 +98,6 @@ deliberate change the S12 walkthrough expects. Rules for every sub-step:
   `mutationAnimated`, `SkeletonCrossfade`, `bookCoverTransitionKey`, `MarkAsReadBurst`, the animated
   sheet closes. Never add a second system beside one.
 - Each scope names the moment and the touch; Phase 1 designs the API.
-
-### S11-4 — Reduced motion everywhere
-
-Gate the cover morph (`fun Cover(`), `Banner`, `ProgressBar`, `WhenReadRow`, `TopBar`'s colour and
-`SessionPeekBar`'s enter and exit behind `playDecorativeMotion()`. Profile's raw `Modifier.shimmer`
-(`ProfileIdentity`, `GenreRankingSection`, `AuthorRepresentationSection`) moves onto `skeletonMask`, so
-it gets the grace period. Lands before any new motion.
 
 ### S11-5 — Haptics actually fire
 
@@ -124,31 +113,12 @@ outcome is known; `threshold` fires on session start and stop. Keep `commit` for
 creating a list and a session recap. Use `select` for routine changes and nothing on Remove. Fire after
 the outcome, and `reject` on failure.
 
-### S11-7 — Skeleton hand-over
-
-All `skeletonMask` sites swap shimmer for content in one frame. Crossfade inside the modifier, keeping
-the grace and minimum-hold timing.
-
-### S11-8 — Library cold start
-
-Placeholders keyed `Book(-1..-N)` (`BookList`, `EditionList`, `LibraryStandIns`) become the mutation
-animator's baseline: every real card pulses as inserted, the welcome stagger plays on placeholders, and
-the crossfade never runs. Placeholders never become the baseline; the hand-over is one quiet crossfade
-and the stagger plays on the real books.
-
 ### S11-9 — Search keeps its results
 
 Each keystroke and sort change (`OnQueryChangeAction`, `OnSortModeChangeAction`,
 `BookCardModelsCollector`) replaces the results with stand-ins until the debounce lands. While a refresh
 runs, keep the old results (dimmed, or with only the field spinner) and crossfade to the new ones.
 Stand-ins show for the first query only.
-
-### S11-10 — Hero cover through a swap
-
-Book detail's cover drops its image and flashes a shimmer on load and on an edition change, and the
-loading slot (`fillMaxSize` / `Fit`) differs from the loaded one (cover ratio with a shadow). `Cover`
-keeps the last image through a source swap and crossfades to the new one; loading and loaded share one
-size and treatment.
 
 ### S11-11 — Numbers that change
 

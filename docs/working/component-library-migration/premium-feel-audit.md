@@ -1,8 +1,9 @@
 # Premium-feel audit
 
 PF-1 output for [`steps/pf-premium-feel.md`](steps/pf-premium-feel.md), with the PF-2 verdict on each row.
-The approved contract rows are S11-4 to S11-40 in
-[`steps/s11-contract-retrofit.md`](steps/s11-contract-retrofit.md); a surface row citing one names that
+The approved contract rows are S11-5 to S11-40 in
+[`steps/s11-contract-retrofit.md`](steps/s11-contract-retrofit.md) and SL-15a–e in
+[`steps/sl-lean-loading.md`](steps/sl-lean-loading.md); a surface row citing one names that
 sub-step. PF-4 applies the approved surface rows after S12-4, then deletes this file.
 
 **Columns.** *Today* has been checked against the code. *Touch* names the change, not its API. Each row

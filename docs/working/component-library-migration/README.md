@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SL-12 done: Profile has no `.shimmer` left; name and captions mask via `SoftcoverText(isLoading, standIn)`, the share row via `skeletonMask`. The name keeps `orEmpty()` so a failed load shows no endless mask. SL-3b blocked on F34.
-- **Next:** SL-15 per `steps/sl-lean-loading.md` (launch flash and cover flash investigation), unless S10-1 goes first. PF-4 and PF-7 wait for S12-4.
-- **Open questions:** SL-15 or S10-1 next? Share-your-year row: no disabled look when the card is null (failed load) — dim it? TP deleted pure-`setState` action tests — restore some? `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop Profile single-column and search results (SD); onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving); Focus Mode exit from the notification; Explore no-results; Undo snackbars; snackbar above both bar styles; O14 tablet back + desktop Esc.
-- **Verification:** profile compile + `styleCheck` passed; reviewed. Not seen on device.
-- **Uncommitted:** SL-12 (4 profile section files, tick, this block).
+- **State:** SL-15 traced on the emulator: Reading assembles in ~6 separate `setState`s over unmasked chrome; covers cut in with no fade and lose the hold. SL-3b blocked on F34.
+- **Next:** SL-15a (S11-4/7/8/10 now SL-15a–e). Then, urgent and ahead of every other step: 16 KB page-size fix, B5 in [`architecture-review.md`](../architecture-review.md) (no issue). PF-4/PF-7 wait for S12-4.
+- **Open questions:** Share-your-year row: no disabled look when the card is null (failed load) — dim it? TP deleted pure-`setState` action tests — restore some? `ReadingStandInsTest` still lacks Arrange markers (agent read denied). `shimmer` fixed colours (upstream?). ktlint `no-unused-imports` never runs — add one? #275 PF line vs PF-4 (no follow-up issue) and PF-7 copy — reword? `buildLibraryTabEntries` (settings) duplicate tab id — de-duplicate? Add SP and SS checkboxes to #275? Tick S9 on #275 (gh write denied). Close-out gate in `/handoff` or a Stop hook? On device, unchecked: lens toggle TalkBack ("selected, tab"); Numeral select-all vs tap cursor; fast typing in time fields; scan manual-entry focus (desktop); share card rating; `StatTile`, charts, `ProgressBar`, 12 dp card bars in gallery; desktop Profile single-column and search results (SD); onboarding page-3 keyboard gap; Library tabs discard sheet (system back, exit animation, swipe while saving); Focus Mode exit from the notification; Explore no-results; Undo snackbars; snackbar above both bar styles; O14 tablet back + desktop Esc.
+- **Verification:** profile compile + `styleCheck` passed; reviewed. SL-12 masks not seen on device.
+- **Uncommitted:** this block, B5, the SL-15 split (3 step/audit files).
 
 ## Local verification
 
@@ -63,7 +63,7 @@ every sub-step's Verify.
 | S6 | — (rows) | S6-1, S6-2 (audit only), S6-C-rows | [x] |
 | S6 | — (sheet chrome) | S6-3–S6-7, S6-C-sheets | [x] |
 | S7 | — (book cards) | S7-1–S7-7, S7-C1–C5 | [x] |
-| SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-13, app-wide; SL-1–SL-7 before S7-2 | [ ] |
+| SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-15e, app-wide; SL-1–SL-7 before S7-2 | [ ] |
 | S8 | — (screen states) | S8-1–S8-3, S8-C-a–C-c | [x] |
 | S8 | — (controls) | S8-4–S8-6, S8-C-controls | [x] |
 | S9 | — (statistics & progress) | S9-1–S9-4, S9-C | [x] |
