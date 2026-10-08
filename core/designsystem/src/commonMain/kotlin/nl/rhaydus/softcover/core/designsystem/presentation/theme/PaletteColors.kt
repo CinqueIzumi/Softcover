@@ -7,8 +7,7 @@ package nl.rhaydus.softcover.core.designsystem.presentation.theme
  * shared set of surface hexes.
  *
  * The only colours a palette does **not** own are the ones that must not move: the error family, the
- * black scrim, and the fixed printed inks (`RatingGold`, the mood inks, `MonogramCoverInk`,
- * `ReadingHeroBackdropForeground`).
+ * black scrim, and the fixed printed inks (`RatingGold`, the mood inks, `MonogramCoverInk`).
  */
 internal data class PaletteColors(
     val primary: AccentFamily,

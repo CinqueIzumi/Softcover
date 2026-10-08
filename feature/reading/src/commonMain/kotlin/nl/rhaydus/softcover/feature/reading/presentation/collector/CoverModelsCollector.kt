@@ -40,7 +40,7 @@ internal class CoverModelsCollector : ReadingCollector {
                         ),
                         featuredCover = snapshot.featuredBook?.let { book ->
                             book.toCoverUiModel(
-                                variant = CoverVariant.Floating,
+                                variant = CoverVariant.Spotlight,
                                 shareTransition = true,
                             )
                         },

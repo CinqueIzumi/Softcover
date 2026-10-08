@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextAlign
@@ -40,7 +38,7 @@ import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
+import nl.rhaydus.softcover.core.designsystem.presentation.modifier.supportsBlur
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
@@ -49,12 +47,10 @@ import nl.rhaydus.softcover.feature.reading.presentation.collector.greetingForNo
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 
 /**
- * The single full-card blurred-cover backdrop, restored to the pre-redesign treatment: ONE
- * continuous image (full-opacity blur, a black top scrim for the series-eyebrow's legibility near
- * the top edge, and a fade at the foot into [cardColor]) behind ALL of the card's content — cover,
- * meta, the page-count/percentage stat, the wavy bar, the deadline row, both pills, and the caption
- * — rather than a backdrop band handed off to a separate flat body surface below it. The content
- * column is the last (topmost) child, so it paints over every background layer including the fade.
+ * The featured hero's single backdrop: one blurred cover image on a `surfaceContainerHigh` base, under
+ * a veil of the same colour that spans the full card height and thickens toward the foot. The
+ * `onSurface` text of every content row stays legible over any cover, and a missing cover still
+ * leaves a themed slab. The content column is the topmost child, so it paints over every background layer.
  */
 @Composable
 internal fun FeaturedBackdropCard(
@@ -66,7 +62,6 @@ internal fun FeaturedBackdropCard(
     deadlineSummary: DeadlineSummaryUiModel?,
     mutationFailed: Boolean,
     paceForecast: String?,
-    cardColor: Color,
     runAction: (ReadingAction) -> Unit,
     isLoading: Boolean = false,
 ) {
@@ -78,14 +73,17 @@ internal fun FeaturedBackdropCard(
     } else {
         null
     }
-    val foreground = ReadingHeroBackdropForeground
+    val foreground = MaterialTheme.colorScheme.onSurface
+    val veil = MaterialTheme.colorScheme.surfaceContainerHigh
+    val lightVeilLift = if (veil.luminance() > 0.5f) 0.15f else 0f
+    val blurSupported = supportsBlur()
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
                 .matchParentSize()
                 .skeletonMask(visible = isLoading)
-                .background(cardColor),
+                .background(veil),
         ) {
             if (isInspection) {
                 Box(
@@ -108,7 +106,7 @@ internal fun FeaturedBackdropCard(
                     modifier = Modifier
                         .matchParentSize()
                         .blur(
-                            radius = 64.dp,
+                            radius = 6.dp,
                             edgeTreatment = BlurredEdgeTreatment.Unbounded,
                         ),
                 )
@@ -119,27 +117,21 @@ internal fun FeaturedBackdropCard(
                     .matchParentSize()
                     .background(
                         Brush.verticalGradient(
-                            colorStops = arrayOf(
-                                0f to Color.Black.copy(alpha = 0.45f),
-                                0.35f to Color.Black.copy(alpha = 0.15f),
-                                0.55f to Color.Transparent,
-                                1f to Color.Transparent,
-                            ),
-                        ),
-                    ),
-            )
-
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colorStops = arrayOf(
-                                0f to cardColor.copy(alpha = 0f),
-                                0.40f to cardColor.copy(alpha = 0.15f),
-                                0.60f to cardColor.copy(alpha = 0.92f),
-                                1f to cardColor,
-                            ),
+                            colorStops = if (blurSupported) {
+                                arrayOf(
+                                    0f to veil.copy(alpha = 0.50f + lightVeilLift),
+                                    0.4f to veil.copy(alpha = 0.58f + lightVeilLift),
+                                    0.55f to veil.copy(alpha = 0.82f),
+                                    1f to veil.copy(alpha = 0.92f),
+                                )
+                            } else {
+                                arrayOf(
+                                    0f to veil.copy(alpha = 0.70f + lightVeilLift),
+                                    0.4f to veil.copy(alpha = 0.75f + lightVeilLift),
+                                    0.55f to veil.copy(alpha = 0.90f),
+                                    1f to veil.copy(alpha = 0.95f),
+                                )
+                            },
                         ),
                     ),
             )
@@ -171,10 +163,7 @@ internal fun FeaturedBackdropCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            FeaturedProgressStat(
-                model = progress,
-                foreground = foreground,
-            )
+            FeaturedProgressStat(model = progress)
 
             RevealedWhenPresent(value = deadlineSummary) { summary ->
                 Column {
@@ -188,7 +177,7 @@ internal fun FeaturedBackdropCard(
 
             RhaydusButton(
                 label = "Update progress",
-                style = ButtonStyle.FILLED,
+                style = ButtonStyle.TONAL,
                 size = ButtonSize.M,
                 icon = drawableIconResource(
                     icon = SoftcoverIcon.Edit,
@@ -203,7 +192,6 @@ internal fun FeaturedBackdropCard(
 
             FeaturedSessionButton(
                 book = book,
-                foreground = foreground,
                 isLoading = isLoading,
             )
 
@@ -222,7 +210,7 @@ internal fun FeaturedBackdropCard(
     }
 }
 
-/** The featured cover, 2:3 at 108dp wide, with the deadline badge overlay. */
+/** The featured cover, 2:3 at 120dp wide, with the deadline badge overlay. */
 @Composable
 private fun FeaturedCover(
     cover: CoverUiModel?,
@@ -233,7 +221,7 @@ private fun FeaturedCover(
         Cover(
             model = cover,
             modifier = Modifier
-                .width(108.dp)
+                .width(120.dp)
                 .skeletonMask(visible = isLoading),
         )
     }

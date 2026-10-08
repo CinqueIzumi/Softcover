@@ -3,7 +3,6 @@ package nl.rhaydus.softcover.feature.reading.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.uibinding.deadline.toCoverOverlayUiModel
 import nl.rhaydus.softcover.core.uibinding.deadline.toDeadlineSummaryUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -54,7 +53,6 @@ internal class DeadlineModelsCollector : ReadingCollector {
                         },
                         featuredDeadlineSummary = progressByBook[featuredId]?.toDeadlineSummaryUiModel(
                             dateStyle = snapshot.dateStyle,
-                            tone = DeadlineSummaryTone.OnHeroBackdrop,
                         ),
                         featuredPaceNudge = planTodayNudgeFor(
                             progress = progressByBook[featuredId],

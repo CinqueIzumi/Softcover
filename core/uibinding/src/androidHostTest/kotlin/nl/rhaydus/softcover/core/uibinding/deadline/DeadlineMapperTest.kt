@@ -7,7 +7,6 @@ import nl.rhaydus.softcover.core.component.badge.BadgeTone
 import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
-import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
 import nl.rhaydus.softcover.core.domain.model.DeadlineUnit
@@ -158,11 +157,9 @@ class DeadlineMapperTest {
             // ----- Act -----
             val dayMonthYear = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
             )
             val monthDayYear = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.MONTH_DAY_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
             )
 
             // ----- Assert -----
@@ -181,7 +178,6 @@ class DeadlineMapperTest {
             // ----- Act -----
             val result = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
             )
 
             // ----- Assert -----
@@ -199,7 +195,6 @@ class DeadlineMapperTest {
             // ----- Act -----
             val result = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
             )
 
             // ----- Assert -----
@@ -217,7 +212,6 @@ class DeadlineMapperTest {
             // ----- Act -----
             val result = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
             )
 
             // ----- Assert -----
@@ -235,7 +229,6 @@ class DeadlineMapperTest {
             // ----- Act -----
             val result = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
             )
 
             // ----- Assert -----
@@ -253,7 +246,6 @@ class DeadlineMapperTest {
             // ----- Act -----
             val result = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
             )
 
             // ----- Assert -----
@@ -273,7 +265,6 @@ class DeadlineMapperTest {
             // ----- Act -----
             val result = subject.toDeadlineSummaryUiModel(
                 dateStyle = DateStyle.DAY_MONTH_YEAR,
-                tone = DeadlineSummaryTone.OnSurface,
             )
 
             // ----- Assert -----

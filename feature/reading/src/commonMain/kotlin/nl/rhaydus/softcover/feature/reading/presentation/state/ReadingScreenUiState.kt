@@ -112,10 +112,7 @@ internal data class ReadingScreenUiState(
     val featuredProgress: FeaturedProgressUiModel = FeaturedProgressUiModel.Loading,
 
     /**
-     * The featured book's ([books] `.firstOrNull()`) deadline summary line, in the
-     * [nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone.OnHeroBackdrop] ink for the
-     * blurred-cover hero backdrop, where the book cards' summaries take
-     * [nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone.OnSurface].
+     * The featured book's ([books] `.firstOrNull()`) deadline summary line.
      */
     val featuredDeadlineSummary: DeadlineSummaryUiModel? = null,
 

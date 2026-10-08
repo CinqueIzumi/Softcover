@@ -14,12 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SL-15b–e and B5 (16 KB page size) done. SL-3b blocked on F34; PF-4/7 wait for S12-4.
-- **Next:** PF bold hero, Reading's `FeaturedBackdropCard.kt`: card edges unclear, "Update progress" outshines the book. Not in the audit; agree the fix first.
-- **Done this session:** share-your-year row dims when its card is null; `ReadingStandInsTest` in Arrange / Act / Assert; `buildLibraryTabEntries` drops duplicate draft ids (+ test); `/handoff` runs the close-out gate; #275 body updated (PF line, full stage list); detekt `UnusedImports` on, 85 unused imports removed, 4 files excluded for target-only imports; autofixing rule filed upstream as F37.
-- **Open questions:** none. Hero keeps the cover crossfade; pruned `setState` tests stay deleted; device checks live in `visual-checks.md`.
-- **Verification:** JBR 21: `styleCheck` passed; `ReadingStandInsTest` and `LibraryTabEntryBuilderTest` passed; touched modules compile (JVM, iOS simulator, androidHostTest, `:app` debug); close-out greps clean.
-- **Uncommitted:** the six items above, the unused-import sweep (46 files), detekt config, tracker docs.
+- **State:** PF bold hero built and approved on device: theme-driven veil (`surfaceContainerHigh`, +0.15 on a light veil, heavier where `supportsBlur()` is false) over a 6dp-blurred cover, `onSurface` text, tonal Update progress, 120dp `Spotlight` cover; `ReadingHeroBackdropForeground` and `DeadlineSummaryTone` deleted. SL-3b blocked on F34; PF-4/7 wait for S12-4.
+- **Next:** commit the PF bold hero (on the user's go-ahead), then pick the next unblocked step.
+- **Open questions:** none. Veil values may still get small device tweaks.
+- **Verification:** JBR 21: `styleCheck` passed after the last Kotlin edit; `:core:designsystem` iOS-simulator compile passed; `testAndroidHostTest` passed for `:core:component`, `:core:uibinding`, `:feature:reading`; final reviewer round found no bugs, and its findings were applied (unused imports, a monotonic no-blur veil stop at 0.90, `supportsBlur()` named in `patterns/reading.md`).
+- **Uncommitted:** hero rework across `:feature:reading` section/collector/state, `:core:component` deadline + bookcard, `:core:uibinding` DeadlineMapper (+test), `:core:designsystem` Color/PaletteColors + new `SupportsBlur*`; reference docs (`patterns/reading.md`, `foundations.md`, `component-contract.md`); this tracker. Almost everything is staged; `patterns/reading.md` also has unstaged edits.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

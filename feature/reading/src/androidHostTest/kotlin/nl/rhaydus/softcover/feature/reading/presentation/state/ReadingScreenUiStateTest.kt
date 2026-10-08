@@ -9,7 +9,6 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.callout.BannerVariant
-import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
@@ -41,7 +40,6 @@ class ReadingScreenUiStateTest {
 
     private fun loadedDeadlineSummary(): DeadlineSummaryUiModel = DeadlineSummaryUiModel(
         text = "28 Aug • 18 pages/day",
-        tone = DeadlineSummaryTone.OnHeroBackdrop,
     )
 
     private fun loadedNudge(): BannerUiModel = BannerUiModel(

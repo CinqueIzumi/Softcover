@@ -12,7 +12,6 @@ import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverSource
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
-import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.gallery.UiModelPreviews
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -209,7 +208,6 @@ data class BookCardUiModel(
                     trailing = BookCardTrailing.SetProgress.labelled(),
                     deadline = DeadlineSummaryUiModel(
                         text = "28 Aug • 18 pages/day",
-                        tone = DeadlineSummaryTone.OnSurface,
                     ),
                 ),
                 decorations = BookCardDecorations(

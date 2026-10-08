@@ -5,7 +5,6 @@ import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayCorner
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRowUiModel
-import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryTone
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
@@ -36,13 +35,11 @@ fun DeadlineProgress.toCoverOverlayUiModel(): CoverOverlayUiModel =
     )
 
 /**
- * A deadline's progress as the summary line's text, in [dateStyle]'s date format and rendered for
- * [tone]. The pace is the status label once the deadline is expired, otherwise the required pace
- * rounded up to a whole unit.
+ * A deadline's progress as the summary line's text, in [dateStyle]'s date format. The pace is the
+ * status label once the deadline is expired, otherwise the required pace rounded up to a whole unit.
  */
 fun DeadlineProgress.toDeadlineSummaryUiModel(
     dateStyle: DateStyle,
-    tone: DeadlineSummaryTone = DeadlineSummaryTone.OnSurface,
 ): DeadlineSummaryUiModel {
     val dateText = dateStyle.formatter.format(deadline)
 
@@ -55,10 +52,7 @@ fun DeadlineProgress.toDeadlineSummaryUiModel(
         )
     }
 
-    return DeadlineSummaryUiModel(
-        text = "$dateText • $paceText",
-        tone = tone,
-    )
+    return DeadlineSummaryUiModel(text = "$dateText • $paceText")
 }
 
 /**

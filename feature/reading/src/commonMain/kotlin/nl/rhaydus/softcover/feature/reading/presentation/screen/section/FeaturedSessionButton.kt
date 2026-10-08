@@ -3,12 +3,10 @@ package nl.rhaydus.softcover.feature.reading.presentation.screen.section
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -30,7 +28,6 @@ import org.koin.compose.koinInject
 @Composable
 internal fun FeaturedSessionButton(
     book: Book,
-    foreground: Color,
     isLoading: Boolean = false,
 ) {
     val controller = koinInject<ActiveSessionController>()
@@ -76,38 +73,26 @@ internal fun FeaturedSessionButton(
         isLoading || active == null -> {
             Spacer(modifier = Modifier.height(10.dp))
 
-            // The catalog's OUTLINED style hardcodes its border and label colour to the theme's
-            // `outline` / `onSurface` roles, tuned for a plain surface — not reliably visible now
-            // that the button sits on the featured card's blurred-cover backdrop. A scoped
-            // ColorScheme override (shapes/typography still inherited) keeps the border and label
-            // legible against the image regardless of theme, without a bespoke button component.
-            MaterialTheme(
-                colorScheme = MaterialTheme.colorScheme.copy(
-                    outline = foreground,
-                    onSurface = foreground,
+            RhaydusButton(
+                label = "Start reading session",
+                style = ButtonStyle.OUTLINED,
+                size = ButtonSize.M,
+                icon = drawableIconResource(
+                    icon = SoftcoverIcon.Play,
+                    contentDescription = "Start reading session icon",
                 ),
-            ) {
-                RhaydusButton(
-                    label = "Start reading session",
-                    style = ButtonStyle.OUTLINED,
-                    size = ButtonSize.M,
-                    icon = drawableIconResource(
-                        icon = SoftcoverIcon.Play,
-                        contentDescription = "Start reading session icon",
-                    ),
-                    onClick = {
-                        if (isLoading.not()) {
-                            haptics.threshold()
+                onClick = {
+                    if (isLoading.not()) {
+                        haptics.threshold()
 
-                            sessionPermissionRequester.request()
-                        }
-                    },
-                    enabled = isLoading.not(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .skeletonMask(visible = isLoading),
-                )
-            }
+                        sessionPermissionRequester.request()
+                    }
+                },
+                enabled = isLoading.not(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .skeletonMask(visible = isLoading),
+            )
         }
     }
 }

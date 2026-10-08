@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
 
 /**
  * The deadline date paired with the pace needed to still make it — "28 Aug • 18 pages/day", or with
@@ -40,10 +39,7 @@ fun DeadlineSummaryLine(
     model: DeadlineSummaryUiModel,
     modifier: Modifier = Modifier,
 ) {
-    val contentColor = when (model.tone) {
-        DeadlineSummaryTone.OnSurface -> MaterialTheme.colorScheme.onSurfaceVariant
-        DeadlineSummaryTone.OnHeroBackdrop -> ReadingHeroBackdropForeground
-    }
+    val contentColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     Row(
         modifier = modifier,

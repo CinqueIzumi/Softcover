@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -31,10 +30,8 @@ import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressU
 
 /**
  * The Reading screen's emotional centre (design-system.md §5 "Reading featured-hero card"): a
- * `surfaceContainerLow` card whose top band fuses the pace-nudge ribbon (when one applies) directly
- * onto the card rather than floating in-flow above it, a dark fixed-ink backdrop carrying the cover
- * + title/byline/pace meta, and a body section (page count, wavy progress, deadline readout, hero
- * actions) on the card's own surface colour.
+ * transparent card shell whose top band fuses the pace-nudge ribbon (when one applies) onto the
+ * card, over the themed backdrop that [FeaturedBackdropCard] paints.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -55,7 +52,6 @@ internal fun FeaturedBookCard(
     isLoading: Boolean = false,
 ) {
     val shape = RoundedCornerShape(22.dp)
-    val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
     val interactionSource = remember { MutableInteractionSource() }
 
     Surface(
@@ -78,9 +74,9 @@ internal fun FeaturedBookCard(
                     runAction(OnClearMutationFailureAction(bookId = book.id))
                 },
             ),
-        // FeaturedBackdropCard paints cardColor inside its loading mask, so the shell hides with the content.
+        // FeaturedBackdropCard paints its own backdrop inside its loading mask, so the shell hides with the content.
         color = Color.Transparent,
-        contentColor = contentColorFor(cardColor),
+        contentColor = MaterialTheme.colorScheme.onSurface,
         shape = shape,
         onClick = { onBookClick(book) },
         enabled = isLoading.not(),
@@ -107,7 +103,6 @@ internal fun FeaturedBookCard(
                 deadlineSummary = deadlineSummary,
                 mutationFailed = mutationFailed,
                 paceForecast = paceForecast,
-                cardColor = cardColor,
                 runAction = runAction,
                 isLoading = isLoading,
             )

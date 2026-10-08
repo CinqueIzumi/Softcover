@@ -159,7 +159,7 @@ TopBar(model = state.topBar)
 
 - **A composition-scoped value is a variant, not a nullable field.** When a loose parameter resolves from
   something only composition has (a theme lookup, a platform read), name the possibilities as a variant the
-  component resolves internally (`DeadlineSummaryTone`'s `OnSurface` / `OnHeroBackdrop`, not a nullable
+  component resolves internally (`BookCardEyebrow.Tone`'s `Accent` / `Error`, not a nullable
   `Color`).
 - **One model per identity unless it varies by surface.** A collector building per-item models keeps one map
   keyed by identity; a cover carries a per-rail shared-element key and needs one map per rail, a badge with

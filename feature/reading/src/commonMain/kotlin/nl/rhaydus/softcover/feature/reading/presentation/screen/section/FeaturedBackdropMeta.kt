@@ -14,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,11 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.ReadingHeroBackdropForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 
-/** The series eyebrow, hero title, byline, and "Your pace" row sitting over the dark backdrop. */
+/** The series eyebrow, hero title, byline, and "Your pace" row over the hero backdrop. */
 @Composable
 internal fun FeaturedBackdropMeta(
     book: Book,
@@ -36,14 +34,14 @@ internal fun FeaturedBackdropMeta(
     isLoading: Boolean = false,
 ) {
     val overlayShadow = Shadow(
-        color = Color.Black.copy(alpha = 0.85f),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
         offset = Offset(
             x = 0f,
             y = 1f,
         ),
         blurRadius = 14f,
     )
-    val foreground = ReadingHeroBackdropForeground
+    val foreground = MaterialTheme.colorScheme.onSurface
 
     Column(modifier = modifier) {
         val topLineText = if (mutationFailed) {
@@ -94,7 +92,7 @@ internal fun FeaturedBackdropMeta(
                     letterSpacing = 1.2.sp,
                     shadow = overlayShadow,
                 ),
-                color = foreground.copy(alpha = 0.74f),
+                color = foreground.copy(alpha = 0.8f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -111,7 +109,7 @@ internal fun FeaturedBackdropMeta(
                             letterSpacing = 1.4.sp,
                             shadow = overlayShadow,
                         ),
-                        color = foreground.copy(alpha = 0.7f),
+                        color = foreground.copy(alpha = 0.8f),
                         maxLines = 1,
                     )
 

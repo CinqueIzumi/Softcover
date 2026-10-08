@@ -21,16 +21,13 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 
-/**
- * The page position beside the "NN%" stat, then a wavy bar — set in [foreground] (rather than a
- * `onSurface`/`onSurfaceVariant` theme pair) since this sits over the featured card's single
- * full-card blurred-cover backdrop, not a flat surface below it.
- */
+/** The page position beside the "NN%" stat, then a wavy bar. */
 @Composable
 internal fun FeaturedProgressStat(
     model: FeaturedProgressUiModel,
-    foreground: Color,
 ) {
+    val foreground = MaterialTheme.colorScheme.onSurface
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
