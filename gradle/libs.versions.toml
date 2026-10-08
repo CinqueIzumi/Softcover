@@ -13,7 +13,7 @@ apollo = "5.0.0"
 # Apollo's normalized cache moved to a separately-versioned library in Apollo Kotlin 5.0; the built-in
 # `com.apollographql.apollo.cache.normalized.*` is deprecated. This is the new in-memory cache artifact.
 apolloCache = "1.0.5"
-dataStore = "1.2.0"
+dataStore = "1.2.1"
 kotlinxSerialization = "1.9.0"
 ksp = "2.3.9"
 voyager = "1.1.0-beta02"
