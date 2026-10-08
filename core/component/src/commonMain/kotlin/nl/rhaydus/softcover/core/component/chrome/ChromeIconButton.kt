@@ -7,6 +7,7 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
@@ -21,18 +22,19 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
  * the container it sits in must leave it 48 dp; [iconSize] only sizes the glyph.
  */
 @Composable
-internal fun ChromeIconButton(
+fun ChromeIconButton(
     icon: SoftcoverIcon,
     contentDescription: String,
     tooltip: String,
     onClick: () -> Unit,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     iconSize: Dp = 24.dp,
+    modifier: Modifier = Modifier,
 ) {
     DesktopTooltip(text = tooltip) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier.pointerHandCursor(),
+            modifier = modifier.pointerHandCursor(),
             colors = colors,
         ) {
             val iconResource = drawableIconResource(
@@ -48,3 +50,9 @@ internal fun ChromeIconButton(
         }
     }
 }
+
+@Composable
+fun overMediaIconButtonColors(): IconButtonColors = IconButtonDefaults.iconButtonColors(
+    containerColor = Color.Black.copy(alpha = 0.35f),
+    contentColor = Color.White,
+)

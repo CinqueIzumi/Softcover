@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
+import nl.rhaydus.softcover.feature.session.presentation.screen.section.FocusReadingPanel
 import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
 
 @Composable

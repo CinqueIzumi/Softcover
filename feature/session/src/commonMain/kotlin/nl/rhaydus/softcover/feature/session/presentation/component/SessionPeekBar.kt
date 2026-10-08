@@ -18,7 +18,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,8 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.delay
-import nl.rhaydus.common.currentInstant
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
@@ -109,17 +106,7 @@ private fun SessionPeekBarContent(
 ) {
     val haptics = rememberHaptics()
 
-    var now by remember { mutableStateOf(currentInstant()) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            now = currentInstant()
-
-            delay(timeMillis = 1_000)
-        }
-    }
-
-    val elapsed = active.session.readingDuration(now = now)
+    val elapsed = rememberSessionElapsed(active = active)
 
     Column(modifier = Modifier.fillMaxWidth()) {
         // The flush desktop strip is led by a top hairline so it reads as docked chrome rather than

@@ -29,6 +29,8 @@ internal data class HiddenSuggestionsUiState(
         body = "Books and series you mute from “Up next in your series” land here, " +
             "so you can bring any of them back whenever you like.",
     ),
+    val intro: String = "Books and series you’ve muted stay out of your " +
+        "“Up next in your series” suggestions. Restore any of them here.",
     // Loading stand-ins until the surface has loaded; each card's payload is the action that restores it.
     val hiddenBooks: BookCardSet<HiddenSuggestionsAction> = BookCardSet.standIns(HIDDEN_BOOK_STAND_IN_CARDS),
     val hiddenSeries: BookCardSet<HiddenSuggestionsAction> = BookCardSet.standIns(HIDDEN_SERIES_STAND_IN_CARDS),

@@ -15,10 +15,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 ## Now
 
 - **State:** PF bold hero built and approved on device: theme-driven veil (`surfaceContainerHigh`, +0.15 on a light veil, heavier where `supportsBlur()` is false) over a 6dp-blurred cover, `onSurface` text, tonal Update progress, 120dp `Spotlight` cover; `ReadingHeroBackdropForeground` and `DeadlineSummaryTone` deleted. SL-3b blocked on F34; PF-4/7 wait for S12-4.
-- **Next:** commit the PF bold hero (on the user's go-ahead), then pick the next unblocked step.
-- **Open questions:** none. Veil values may still get small device tweaks.
-- **Verification:** JBR 21: `styleCheck` passed after the last Kotlin edit; `:core:designsystem` iOS-simulator compile passed; `testAndroidHostTest` passed for `:core:component`, `:core:uibinding`, `:feature:reading`; final reviewer round found no bugs, and its findings were applied (unused imports, a monotonic no-blur veil stop at 0.90, `supportsBlur()` named in `patterns/reading.md`).
-- **Uncommitted:** hero rework across `:feature:reading` section/collector/state, `:core:component` deadline + bookcard, `:core:uibinding` DeadlineMapper (+test), `:core:designsystem` Color/PaletteColors + new `SupportsBlur*`; reference docs (`patterns/reading.md`, `foundations.md`, `component-contract.md`); this tracker. Almost everything is staged; `patterns/reading.md` also has unstaged edits.
+- **S10:** closed. No `*Shelf.kt` file remains; `ChromeIconButton` is public with shared `overMediaIconButtonColors()`; `rememberSessionElapsed` replaces the duplicated ticker. S10-C: nothing to converge (screen roots stay feature-local; the over-media button was the one shared piece).
+- **Next:** SP-1, `steps/sp-spacing-scale.md`.
+- **Open questions:** none. Hero veil values may still get small device tweaks.
+- **Verification:** JBR 21: compile of the 7 touched modules, `checkModuleGraph`, `ktlintCheck`, `styleCheck` passed; `testAndroidHostTest` passed for `:core:component` and the five features; reviewer no blockers, doc findings applied.
+- **Uncommitted:** nothing.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
@@ -70,7 +71,7 @@ every sub-step's Verify.
 | TP | — (test prune) | TP-0 timings, TP-1–TP-8 per module group | [x] |
 | SD | — (screen de-duplication) | SD-0 inventory, SD-P shell, SD-1–SD-6 per screen group | [x] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
-| S10 | [steps/s10-shelf-teardown.md](steps/s10-shelf-teardown.md) | one per `*Shelf.kt` | [ ] |
+| S10 | — (shelf teardown) | S10-1–S10-5, S10-C | [x] |
 | SP | [steps/sp-spacing-scale.md](steps/sp-spacing-scale.md) | SP-1–SP-5, SP-C; after S10, before S11 | [ ] |
 | SH | [steps/sh-shape-scale.md](steps/sh-shape-scale.md) | SH-1–SH-4, SH-C; after S10, before S11 | [ ] |
 | S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-40, S11-C | [ ] |

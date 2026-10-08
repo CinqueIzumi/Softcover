@@ -54,6 +54,9 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
+import nl.rhaydus.softcover.feature.onboarding.presentation.screen.section.ApiKeyEntryContent
+import nl.rhaydus.softcover.feature.onboarding.presentation.screen.section.ApiKeyEntryFooter
+import nl.rhaydus.softcover.feature.onboarding.presentation.screen.section.PrimaryActionFooterRow
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 
 private val PAGE_NUMBERS = listOf(1, 2, 3)

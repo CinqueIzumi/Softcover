@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
+import nl.rhaydus.softcover.core.component.chrome.overMediaIconButtonColors
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 
@@ -63,10 +64,7 @@ fun TopBar(
             contentColor = scheme.onSurface,
         )
 
-        TopBarSurface.OverMedia -> IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Black.copy(alpha = 0.35f),
-            contentColor = Color.White,
-        )
+        TopBarSurface.OverMedia -> overMediaIconButtonColors()
     }
 
     TopAppBar(

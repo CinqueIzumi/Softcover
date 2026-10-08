@@ -110,7 +110,7 @@ component/
 +              Callout  CalloutUiModel  CalloutVariant  CalloutActionUiModel  CalloutEvent
 + celebration/ MarkAsReadBurst  MarkAsReadBurstScale
 + chip/        Chip  ChipUiModel  ChipEvent
-+ chrome/      ChromeIconButton (internal)
++ chrome/      ChromeIconButton  overMediaIconButtonColors
 + control/     ThemePreviewTile  ColorPalettePreviewTile  PreviewTile
 +              ThemeTilePainting
 +              Toggle  ToggleUiModel/Variant/Event  ToggleRowVariant

@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEventHandler
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -48,8 +49,7 @@ internal fun HiddenSuggestionsContent(
             )
         } else {
             SoftcoverText(
-                text = "Books and series you’ve muted stay out of your " +
-                    "“Up next in your series” suggestions. Restore any of them here.",
+                text = state.intro,
                 style = MaterialTheme.editorialTypography.body,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

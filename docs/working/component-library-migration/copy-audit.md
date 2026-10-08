@@ -31,8 +31,8 @@ Paths are relative to `feature/<module>/src/<sourceSet>/kotlin/nl/rhaydus/softco
 | Where | Current | Why | Replacement | Verdict |
 |---|---|---|---|---|
 | API key body — `onboarding/mobileMain/screen/OnboardingScreenLayout.mobile.kt:455` | "One key, once. It only syncs your reading progress — never your password." | punchy fragment, em-dash contrast | "You only need to add it once. It syncs your reading progress and never touches your password." | approve |
-| Paste row subtitle — `onboarding/commonMain/screen/OnboardingShelf.kt:227` | "The quick way in" | cute rather than clear | "Paste it from your clipboard" | approve |
-| "Where to find it" step 2 subtitle — `onboarding/commonMain/screen/OnboardingShelf.kt:332` | "Your access token lives here." | personification; calls the key a "token" | "Your API key is on this page." | approve |
+| Paste row subtitle — `onboarding/commonMain/screen/section/ApiKeyEntrySection.kt` `PasteFromClipboardRow` | "The quick way in" | cute rather than clear | "Paste it from your clipboard" | approve |
+| "Where to find it" step 2 subtitle — `onboarding/commonMain/screen/section/ApiKeyEntrySection.kt` `WhereToFindItExplainer` | "Your access token lives here." | personification; calls the key a "token" | "Your API key is on this page." | approve |
 
 ### Onboarding: loading sheet
 

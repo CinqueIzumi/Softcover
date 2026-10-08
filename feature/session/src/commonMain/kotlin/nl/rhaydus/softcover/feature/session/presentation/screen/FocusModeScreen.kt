@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.ActiveSessionController
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
 import nl.rhaydus.softcover.feature.session.presentation.event.FocusModeEvent
+import nl.rhaydus.softcover.feature.session.presentation.screen.section.FocusReadingPanel
 import nl.rhaydus.softcover.feature.session.presentation.screenmodel.FocusModeScreenModel
 import nl.rhaydus.softcover.feature.session.presentation.state.FocusModeUiState
 import org.koin.compose.koinInject
