@@ -32,12 +32,12 @@ import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
 
-// Book covers are 2:3 everywhere, in both the loaded and the not-yet-mapped branch.
 private const val COVER_ASPECT_RATIO = 2f / 3f
 
 /**
@@ -68,8 +68,6 @@ fun Cover(
     modifier: Modifier = Modifier,
 ) {
     if (model == null) {
-        // The same 2:3 the loaded branch applies below — without it the placeholder would take the
-        // caller's width and no height, collapsing the very layout this branch exists to hold open.
         Box(modifier = modifier.aspectRatio(COVER_ASPECT_RATIO))
 
         return
@@ -95,10 +93,12 @@ fun Cover(
         Modifier.clip(shape)
     }
 
+    val playMotion = playDecorativeMotion()
     val sharedScope = LocalSharedTransitionScope.current
     val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
 
     val containerModifier = if (
+        playMotion &&
         model.sharedTransitionKey != null &&
         sharedScope != null &&
         animatedVisibilityScope != null
@@ -203,8 +203,7 @@ fun interface CoverImagePersister {
 
 /**
  * The [CoverImagePersister] in scope, or `null` when nothing should persist — the Component Gallery
- * and every other preview leave this at its default `null` and simply skip persisting, replacing the
- * old `LocalInspectionMode` guard `EditionImage` used for the same purpose.
+ * and every other preview leave this at its default `null` and simply skip persisting.
  */
 val LocalCoverImagePersister = staticCompositionLocalOf<CoverImagePersister?> { null }
 

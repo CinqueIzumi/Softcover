@@ -30,7 +30,7 @@ deleted.
 | SL-13 | Delete `Skeleton`, `SkeletonUiModel`, `SkeletonVariant`, their gallery entry, `SkeletonUiModelTest` and doc lines | SL-8, SL-10 | [x] |
 | SL-14 | Delayed reveal: `skeletonMask` and `Cover`'s loading shimmer wait out a grace period and hold a minimum once shown | SL-11 | [x] |
 | SL-15 | Investigate Reading's launch flash and the cover grey flash (traced on the emulator, 2026-10-07; fixes below) | SL-14 | [x] |
-| SL-15a | Reduced motion: gate the cover morph (`fun Cover(`), `Banner`, `ProgressBar`, `WhenReadRow`, `TopBar`'s colour and `SessionPeekBar`'s enter and exit behind `playDecorativeMotion()`. Lands before any new motion | SL-15 | [ ] |
+| SL-15a | Reduced motion: gate the cover morph (`fun Cover(`), `Banner`, `ProgressBar`, `WhenReadRow`, `TopBar`'s colour and `SessionPeekBar`'s enter and exit behind `playDecorativeMotion()`. Lands before any new motion | SL-15 | [x] |
 | SL-15b | Reading's first content lands in one update, and everything that waits on data masks | SL-15 | [ ] |
 | SL-15c | Skeleton hand-over: every `skeletonMask` site crossfades to content, keeping the grace and minimum-hold timing | SL-15a | [ ] |
 | SL-15d | Stand-in hand-over, Library (`BookList`, `EditionList`, `LibraryStandIns`) and Reading's also-reading rows | SL-15c | [ ] |
@@ -83,6 +83,11 @@ next one whose prerequisites are done.
 - SL-14: `Cover`'s own `isLoading` shimmer follows the same timing.
 - SL-14: app-wide, explore and book detail included (accepted: network surfaces show their shimmer 250ms
   later). F32 carries the timing upstream.
+- SL-15a: each site gates with the existing idiom and gains no parameter or type. `Cover` adds
+  `playDecorativeMotion()` to its `sharedBounds` condition (no morph; the cover rides the screen transition);
+  `Banner`, `WhenReadRow` and `SessionPeekBar` use `EnterTransition.None` / `ExitTransition.None`;
+  `ProgressBar`'s fill uses `if (playMotion) spring() else snap()` (`waveSpeed` is already 0); `TopBar`'s
+  container colour snaps. Motion-on timing is unchanged. No tests (no logic).
 - SL-15b: Reading's `isLoading` stays true until books, masthead, cards, progress and cover models are all
   built; loading → content is one state change.
 - SL-15b: masthead title and subtitle, the featured caption and backdrop, and the streak strip (space

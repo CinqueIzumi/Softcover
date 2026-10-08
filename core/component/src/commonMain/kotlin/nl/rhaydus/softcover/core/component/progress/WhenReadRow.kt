@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.component.progress
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 
@@ -28,6 +31,7 @@ internal fun WhenReadRow(
     model: WhenReadUiModel,
     onEvent: (ProgressSheetEvent) -> Unit,
 ) {
+    val playMotion = playDecorativeMotion()
     var expanded by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -55,8 +59,8 @@ internal fun WhenReadRow(
 
         AnimatedVisibility(
             visible = expanded && model.chip.selected,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut(),
+            enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
+            exit = if (playMotion) shrinkVertically() + fadeOut() else ExitTransition.None,
         ) {
             WhenReadEditor(
                 model = model,
