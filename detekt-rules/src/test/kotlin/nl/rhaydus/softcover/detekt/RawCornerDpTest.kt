@@ -413,6 +413,21 @@ class RawCornerDpTest {
         }
 
         @Test
+        fun `does not flag raw corners in a Corners kt reached through a full path`() {
+            // ----- Arrange -----
+            val file = compileContentForTest(
+                content = "val md = RoundedCornerShape(8.dp)",
+                filename = "/project/core/component/src/commonMain/Corners.kt",
+            )
+
+            // ----- Act -----
+            val findings = rule.lint(file)
+
+            // ----- Assert -----
+            findings.shouldBeEmpty()
+        }
+
+        @Test
         fun `flags the same code in any other file`() {
             // ----- Arrange -----
             val file = compileContentForTest(

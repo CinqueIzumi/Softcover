@@ -4,3 +4,5 @@ softcover:
     active: false
   RawCornerDp:
     active: false
+  UiModelBuiltInRender:
+    active: false

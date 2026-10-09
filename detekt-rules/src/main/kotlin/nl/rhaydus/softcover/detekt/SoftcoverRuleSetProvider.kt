@@ -14,6 +14,7 @@ class SoftcoverRuleSetProvider : RuleSetProvider {
             listOf(
                 RawSpacingDp(config),
                 RawCornerDp(config),
+                UiModelBuiltInRender(config),
             ),
         )
     }

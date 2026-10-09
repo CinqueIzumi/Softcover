@@ -170,10 +170,10 @@ TopBar(model = state.topBar)
   implementation, bound once in `presentationModule` (`:core:component` itself uses no DI). A collector
   reads it from its `Dependencies` and puts the result on the `UiState`, so the render never builds the
   model and a collector test can substitute the copy.
-- **Not yet satisfied by the whole library.** Write new components to R10 and do not take an existing call
-  site as precedent. Two edges are unsettled: preview fixtures and the gallery, which construct models by
-  definition; and a model that depends on a value only composition has (scroll position, window size class,
-  a `CompositionLocal`).
+- **Gated by `softcover:UiModelBuiltInRender` once the sweep enables it.** Preview fixtures, the gallery and
+  debug screens are excluded by path. A recorded § 7.4a exception carries `@ModelBuiltInComposition(reason)`,
+  never `@Suppress`. Until the gate is on, do not take an existing call site as precedent. A model that depends
+  on a value only composition has (scroll position, window size class, a `CompositionLocal`) is unsettled.
 
 **R11 — The signature is the model, the event lambda and the modifier. Nothing else.** Anything a call site
 would otherwise pass — a `TextStyle`, a `Color`, `maxLines`, an autosize spec, a particle count, a
