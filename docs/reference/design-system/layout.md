@@ -13,8 +13,8 @@ That padding comes from the foundation contract: every nav shell hosts its botto
 **Desktop scroll page — `DesktopScrollPage`.** The `jvmMain` shell for a scrolling desktop page (`core:component`, `layout/`). It takes slots, not models: `topBar`, `masthead`, `bottomBar` and the column `content`.
 - The `topBar` slot sits above the scroll area; the `bottomBar` slot is docked below it.
 - The scroll column pads 24dp top and bottom.
-- Inside it, a column capped to the reading measure (`cappedContentWidth`) carries 32dp horizontal gutters.
-- The optional `masthead` leads the capped column, followed by a 28dp gap, then `content`.
+- Inside it, a column capped to the reading measure (`cappedContentWidth`) carries 24dp gutters (`Spacing.gutter`).
+- The optional `masthead` leads the capped column, followed by a 32dp gap, then `content`.
 - The scrollbar sits at the window edge, outside the capped column.
 
 Screens **pushed onto the root navigator** (profile, settings sub-pages, hidden suggestions, focus mode, the scanner, onboarding, and book detail on compact) render *outside* the shell. `rememberBottomBarPadding()` resolves to `0.dp` there, so reading it is harmless but pointless — they clear the system navigation bar instead, via their `Scaffold` insets or `BottomNavigationSpacer()` (the foundation spacer, which is the navigation-bar inset **only** — not the bar footprint).

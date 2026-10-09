@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SP-5 done: SP-3/4 had already cleared every file-level dp val but `MonogramCoverMetrics.kt`'s; its border-inset clamps now read `Spacing.xxxs` / `Spacing.xs` (floor 3 → 2 dp, in `visual-checks.md`) and the 64 dp full-title threshold is inline. The `^private val .*\.dp$` grep is empty and no `BarSpec`-style holders remain. SL-3b blocked on F34; PF-4/7 wait for S12-4.
-- **Next:** SP-C (`steps/sp-spacing-scale.md` § Sub-steps, SP-C row): convergence pass per `family-procedure.md` § Phase 3 over spacing as it now stands (the gutters and gaps that should be one value); propose, then stop for approval.
+- **State:** SP done; the step file is deleted. SP-C added `Spacing.gutter` (24, horizontal page edge only) and `Spacing.section` (40). Every page now has one 24 gutter, desktop scroll pages included. Gaps: masthead to first section 32, header to body 16, sheet blocks 24. Cards pad 16, hero cards 20. Stacked trailing gaps are gone, and `foundations.md` § 2.4 and `layout.md` match. Shifts are in `visual-checks.md`. SL-3b blocked on F34; PF-4/7 wait for S12-4.
+- **Next:** SH-1 (`steps/sh-shape-scale.md` § Sub-steps, SH-1 row): corner-radius inventory and approved shape; stop for approval.
 - **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21: `:core:component:compileKotlinJvm`, `:core:component:testAndroidHostTest`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` passed. One-file main-conversation change, no reviewer round.
-- **Uncommitted:** SP-5 (`MonogramCoverMetrics.kt`, this README, the SP step file, `visual-checks.md`).
+- **Verification:** JBR 21: `compileKotlinJvm`, `:desktopApp:compileKotlin`, `styleCheck`, `checkModuleGraph`, `testAndroidHostTest` passed after the last Kotlin edit; glom grep clean over all changed files; reviewer round's findings fixed (trailing gap in hidden suggestions, stacked hero gutter, `gutter` on vertical sides, dead `when`, stale KDoc).
+- **Uncommitted:** SP-C (~100 `.kt` files, `Spacing.kt`, `foundations.md`, `layout.md`, this README, `visual-checks.md`, deleted SP step file).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
@@ -71,7 +71,7 @@ every sub-step's Verify.
 | SD | — (screen de-duplication) | SD-0 inventory, SD-P shell, SD-1–SD-6 per screen group | [x] |
 | PF | [steps/pf-premium-feel.md](steps/pf-premium-feel.md) | PF-1–PF-7, any session before S11 | [ ] |
 | S10 | — (shelf teardown) | S10-1–S10-5, S10-C | [x] |
-| SP | [steps/sp-spacing-scale.md](steps/sp-spacing-scale.md) | SP-1–SP-5, SP-C; after S10, before S11 | [ ] |
+| SP | — (spacing scale) | SP-1–SP-5, SP-C; after S10, before S11 | [x] |
 | SH | [steps/sh-shape-scale.md](steps/sh-shape-scale.md) | SH-1–SH-4, SH-C; after S10, before S11 | [ ] |
 | S11 | [steps/s11-contract-retrofit.md](steps/s11-contract-retrofit.md) | S11-1–S11-40, S11-C | [ ] |
 | PC | [steps/pc-performance-checks.md](steps/pc-performance-checks.md) | PC-1–PC-5 | [ ] |

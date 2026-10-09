@@ -177,7 +177,10 @@ internal object BottomBarScreen : Screen {
                                                     model = state.emptyDetailPane,
                                                     modifier = Modifier
                                                         .fillMaxSize()
-                                                        .padding(Spacing.xl),
+                                                        .padding(
+                                                            horizontal = Spacing.gutter,
+                                                            vertical = Spacing.xl,
+                                                        ),
                                                 )
                                             }
                                         }

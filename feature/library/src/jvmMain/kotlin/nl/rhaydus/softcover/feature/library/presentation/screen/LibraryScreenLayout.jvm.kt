@@ -118,7 +118,7 @@ internal actual fun LibraryScreenLayout(
                 PageMasthead(
                     model = state.mastheadFor(currentTab?.id),
                     modifier = Modifier.padding(
-                        start = Spacing.xl,
+                        start = Spacing.gutter,
                         end = Spacing.sm,
                         top = Spacing.md,
                     ),

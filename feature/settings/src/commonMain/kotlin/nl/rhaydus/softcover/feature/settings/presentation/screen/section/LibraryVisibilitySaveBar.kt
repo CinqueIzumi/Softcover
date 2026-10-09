@@ -34,8 +34,8 @@ internal fun LibraryVisibilitySaveBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        start = Spacing.xl,
-                        end = Spacing.xl,
+                        start = Spacing.gutter,
+                        end = Spacing.gutter,
                         top = Spacing.md,
                         bottom = Spacing.md + rememberBottomBarPadding(),
                     ),

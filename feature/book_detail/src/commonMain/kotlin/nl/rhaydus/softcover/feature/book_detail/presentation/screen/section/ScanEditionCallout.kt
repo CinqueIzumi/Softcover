@@ -20,6 +20,6 @@ internal fun ScanEditionCallout(
         onEvent = { event -> runAction(bookDetailActionFor(event)) },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.xl),
+            .padding(horizontal = Spacing.gutter),
     )
 }

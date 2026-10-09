@@ -124,7 +124,7 @@ private fun FacetSections(
             }
         }
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
     if (chips.releaseYearChips.isEmpty.not()) {
@@ -137,7 +137,7 @@ private fun FacetSections(
             }
         }
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
     if (chips.readYearChips.isEmpty.not()) {
@@ -150,7 +150,7 @@ private fun FacetSections(
             }
         }
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
     if (chips.tagChips.isEmpty.not()) {
@@ -163,7 +163,7 @@ private fun FacetSections(
             onTagSearchEvent = onTagSearchEvent,
         )
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.xl))
     }
 
     if (chips.ratingChips.isEmpty.not()) {

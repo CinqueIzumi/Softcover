@@ -61,7 +61,7 @@ internal fun BookList(
             EmptyState(
                 model = emptyState,
                 modifier = Modifier
-                    .padding(horizontal = Spacing.xxxl)
+                    .padding(horizontal = Spacing.gutter)
                     .fillMaxWidth()
                     .padding(top = Spacing.x4l),
             )

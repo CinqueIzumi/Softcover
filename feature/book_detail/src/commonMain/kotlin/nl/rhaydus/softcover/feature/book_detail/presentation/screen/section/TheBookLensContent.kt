@@ -9,15 +9,15 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 
 /**
  * The "The Book" lens content (design-system.md's lens-toggle pattern): the book's own facts, in
- * order — About, Tags (community tags + edition colophon), Find it, Voices. 36dp gaps between
- * sections, per the design system's "gap between distinct content blocks" rhythm.
+ * order — About, Tags (community tags + edition colophon), Find it, Voices. Sections sit
+ * a `Spacing.section` apart.
  */
 @Composable
 internal fun TheBookLensContent(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
 ) {
-    // Each section below (Tags, Find it, Voices) supplies its own leading 36dp gap, guarded on the
+    // Each section below (Tags, Find it, Voices) supplies its own leading section gap, guarded on the
     // same early-return that decides whether it renders anything — so a book missing one of them
     // (e.g. no ISBN, no community tags or colophon) never leaves a dead gap between its neighbors.
     Column(modifier = Modifier.fillMaxWidth()) {

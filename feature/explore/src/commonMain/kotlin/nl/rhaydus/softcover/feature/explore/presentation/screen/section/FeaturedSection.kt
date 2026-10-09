@@ -40,6 +40,6 @@ internal fun FeaturedSection(
                 }
             }
         },
-        modifier = Modifier.padding(horizontal = Spacing.xl),
+        modifier = Modifier.padding(horizontal = Spacing.gutter),
     )
 }

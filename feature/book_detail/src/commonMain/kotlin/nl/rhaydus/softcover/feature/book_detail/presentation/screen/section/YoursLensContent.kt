@@ -30,6 +30,8 @@ internal fun YoursLensContent(
     val book = state.book ?: return
 
     Column(modifier = Modifier.fillMaxWidth()) {
+        var hasLeadingBlock = book.status == BookStatus.Reading || state.statusCallout != null
+
         when (book.status) {
             BookStatus.Reading -> InProgressSection(
                 state = state,
@@ -41,15 +43,19 @@ internal fun YoursLensContent(
                     model = callout,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = Spacing.md),
+                        .padding(horizontal = Spacing.gutter),
                 )
             }
         }
 
         if (book.status == BookStatus.Read) {
-            Spacer(modifier = Modifier.height(Spacing.xxl))
-
             state.verdictBlock?.let { verdictBlock ->
+                if (hasLeadingBlock) {
+                    Spacer(modifier = Modifier.height(Spacing.section))
+                }
+
+                hasLeadingBlock = true
+
                 VerdictBlock(
                     model = verdictBlock,
                     onEvent = { event ->
@@ -59,13 +65,15 @@ internal fun YoursLensContent(
                             )
                         }
                     },
-                    modifier = Modifier.padding(horizontal = Spacing.md),
+                    modifier = Modifier.padding(horizontal = Spacing.gutter),
                 )
             }
         }
 
         if (book.userBook != null) {
-            Spacer(modifier = Modifier.height(Spacing.xxl))
+            if (hasLeadingBlock) {
+                Spacer(modifier = Modifier.height(Spacing.section))
+            }
 
             UserTagsSection(
                 state = state,

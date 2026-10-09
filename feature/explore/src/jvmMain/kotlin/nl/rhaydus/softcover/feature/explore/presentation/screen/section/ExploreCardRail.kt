@@ -36,7 +36,7 @@ internal fun ExploreCardRail(
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.xl),
+            .padding(horizontal = Spacing.gutter),
         horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.xl),
     ) {

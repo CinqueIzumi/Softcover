@@ -44,7 +44,7 @@ internal fun LazyListScope.bookDetailItems(
         )
     }
 
-    item { Spacer(modifier = Modifier.height(Spacing.lg)) }
+    item { Spacer(modifier = Modifier.height(Spacing.xxl)) }
 
     item {
         ShelveControlCard(
@@ -56,7 +56,7 @@ internal fun LazyListScope.bookDetailItems(
     }
 
     state.scanEditionCallout?.let { scanEditionCallout ->
-        item { Spacer(modifier = Modifier.height(Spacing.lg)) }
+        item { Spacer(modifier = Modifier.height(Spacing.xxl)) }
 
         item {
             ScanEditionCallout(
@@ -66,7 +66,7 @@ internal fun LazyListScope.bookDetailItems(
         }
     }
 
-    item { Spacer(modifier = Modifier.height(Spacing.lg)) }
+    item { Spacer(modifier = Modifier.height(Spacing.xxl)) }
 
     lensItems(
         state = state,

@@ -43,7 +43,7 @@ internal fun GenreRankingSection(
     Column(modifier = modifier) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         if (genres.slices.isEmpty() && isLoading.not()) {
             SoftcoverText(

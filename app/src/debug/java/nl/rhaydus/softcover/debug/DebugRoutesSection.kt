@@ -65,7 +65,7 @@ fun DebugRoutesSection(host: Screen) {
             }
         }
 
-        Spacer(modifier = Modifier.height(Spacing.x4l))
+        Spacer(modifier = Modifier.height(Spacing.section))
     }
 }
 

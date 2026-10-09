@@ -49,7 +49,7 @@ internal fun ProfileIdentity(
 
         SectionHeader(model = state.theReaderHeader)
 
-        Spacer(modifier = Modifier.height(Spacing.sm))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
             text = data?.name.orEmpty(),

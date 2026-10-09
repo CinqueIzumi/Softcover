@@ -47,7 +47,7 @@ internal fun NewListFootAction(onClick: () -> Unit) {
                 vertical = Spacing.sm,
             ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         Box(
             modifier = Modifier

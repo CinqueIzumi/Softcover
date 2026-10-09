@@ -15,6 +15,9 @@ fun OfflineEmptyStatePlaceholder(
         model = model,
         modifier = modifier
             .fillMaxSize()
-            .padding(Spacing.xl),
+            .padding(
+                horizontal = Spacing.gutter,
+                vertical = Spacing.xl,
+            ),
     )
 }

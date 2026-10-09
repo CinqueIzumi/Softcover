@@ -50,15 +50,14 @@ internal fun TrendingTileSection(
                 .pointerHandCursor(),
         ) {
             Row(
-                modifier = Modifier.padding(Spacing.sm),
+                modifier = Modifier.padding(Spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Cover(
                     model = cover,
                     modifier = Modifier.width(80.dp),
                 )
-
-                Spacer(modifier = Modifier.width(Spacing.md))
 
                 Column(
                     modifier = Modifier.weight(1f),

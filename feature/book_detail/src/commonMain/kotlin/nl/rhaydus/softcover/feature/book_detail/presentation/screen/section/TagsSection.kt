@@ -61,8 +61,8 @@ internal fun TagsSection(
         enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
         exit = ExitTransition.None,
     ) {
-        Column(modifier = Modifier.padding(horizontal = Spacing.xl)) {
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+        Column(modifier = Modifier.padding(horizontal = Spacing.gutter)) {
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             if (groups.isNotEmpty()) {
                 SectionHeader(model = state.tagsLabel)
@@ -101,7 +101,9 @@ internal fun TagsSection(
             }
 
             if (colophon != null) {
-                Spacer(modifier = Modifier.height(Spacing.lg))
+                if (groups.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(Spacing.lg))
+                }
 
                 SoftcoverText(
                     text = colophon,

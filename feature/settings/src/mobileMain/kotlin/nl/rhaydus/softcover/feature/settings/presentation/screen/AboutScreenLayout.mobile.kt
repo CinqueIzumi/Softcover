@@ -57,7 +57,7 @@ internal actual fun AboutScreenLayout(
                 .verticalScroll(rememberScrollState())
                 .cappedContentWidth()
                 .padding(
-                    horizontal = Spacing.xl,
+                    horizontal = Spacing.gutter,
                     vertical = Spacing.md,
                 ),
         )

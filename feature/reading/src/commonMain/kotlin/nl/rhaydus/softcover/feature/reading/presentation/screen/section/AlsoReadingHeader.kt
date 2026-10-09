@@ -12,11 +12,11 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 internal fun AlsoReadingHeader(model: SectionHeaderUiModel) {
-    Spacer(modifier = Modifier.height(Spacing.xxxl))
+    Spacer(modifier = Modifier.height(Spacing.section))
 
-    Box(modifier = Modifier.padding(horizontal = Spacing.xl)) {
+    Box(modifier = Modifier.padding(horizontal = Spacing.gutter)) {
         SectionHeader(model = model)
     }
 
-    Spacer(modifier = Modifier.height(Spacing.xs))
+    Spacer(modifier = Modifier.height(Spacing.md))
 }

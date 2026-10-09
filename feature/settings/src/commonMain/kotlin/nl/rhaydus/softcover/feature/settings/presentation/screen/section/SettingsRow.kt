@@ -75,10 +75,7 @@ internal fun SettingsRow(
         modifier = modifier
             .fillMaxWidth()
             .then(interactionModifier)
-            .padding(
-                horizontal = Spacing.xxs,
-                vertical = Spacing.md,
-            ),
+            .padding(vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leading != null) {

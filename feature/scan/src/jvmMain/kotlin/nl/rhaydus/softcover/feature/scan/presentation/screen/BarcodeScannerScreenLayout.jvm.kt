@@ -54,7 +54,7 @@ internal actual fun BarcodeScannerScreenLayout(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = Spacing.xl, vertical = Spacing.xl),
+                    .padding(horizontal = Spacing.gutter, vertical = Spacing.xl),
                 contentAlignment = Alignment.Center,
             ) {
                 Surface(

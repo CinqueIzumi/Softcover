@@ -64,8 +64,8 @@ internal fun CreateListSheetContent(
             .imePadding()
             .padding(
                 top = Spacing.xs,
-                start = Spacing.xxl,
-                end = Spacing.xxl,
+                start = Spacing.gutter,
+                end = Spacing.gutter,
                 bottom = Spacing.xxl,
             ),
     ) {
@@ -81,7 +81,7 @@ internal fun CreateListSheetContent(
 
         Divider(center = DividerCenter.QuoteMark)
 
-        Spacer(modifier = Modifier.height(Spacing.xxxl))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         TextField(
             model = state.nameField,

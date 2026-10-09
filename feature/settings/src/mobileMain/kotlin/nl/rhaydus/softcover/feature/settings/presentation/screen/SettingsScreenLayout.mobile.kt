@@ -90,7 +90,7 @@ internal actual fun SettingsScreenLayout(
                 .verticalScroll(rememberScrollState())
                 .imePadding()
                 .cappedContentWidth()
-                .padding(horizontal = Spacing.xl),
+                .padding(horizontal = Spacing.gutter),
         ) {
             Spacer(modifier = Modifier.height(Spacing.xs))
 
@@ -110,7 +110,7 @@ internal actual fun SettingsScreenLayout(
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                Spacer(modifier = Modifier.height(Spacing.x4l))
+                Spacer(modifier = Modifier.height(Spacing.section))
             }
 
             SectionHeader(model = state.settingsMenuAccountHeader)
@@ -128,7 +128,7 @@ internal actual fun SettingsScreenLayout(
                 }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             SectionHeader(model = state.settingsMenuPersonalisationHeader)
 
@@ -161,7 +161,7 @@ internal actual fun SettingsScreenLayout(
                 }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             SectionHeader(model = state.settingsMenuAboutHeader)
 
@@ -186,11 +186,9 @@ internal actual fun SettingsScreenLayout(
                 }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.x4l))
-
             debugSection()
 
-            Spacer(modifier = Modifier.height(Spacing.xl + bottomBarPadding))
+            Spacer(modifier = Modifier.height(Spacing.section + bottomBarPadding))
         }
     }
 }

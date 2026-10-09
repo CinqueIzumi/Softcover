@@ -36,7 +36,7 @@ internal fun InProgressSection(
 ) {
     val inProgress = state.inProgress ?: return
 
-    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.gutter)) {
         SectionHeader(model = state.inProgressSectionHeader) {
             PillButton(
                 model = state.updateProgressPill,
@@ -44,7 +44,7 @@ internal fun InProgressSection(
             )
         }
 
-        Spacer(modifier = Modifier.height(Spacing.xs))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
             text = inProgress.percent,

@@ -35,7 +35,7 @@ internal fun ExploreCardRail(
 
     LazyRow(
         state = railListStates.getValue(rail),
-        contentPadding = PaddingValues(horizontal = Spacing.xl),
+        contentPadding = PaddingValues(horizontal = Spacing.gutter),
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         itemsIndexed(set.cards, key = { _, card -> card.key.lazyKey }) { index, card ->

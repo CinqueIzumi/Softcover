@@ -142,8 +142,6 @@ fun ShareCardSheetContent(
             ) {
                 ShareCard(model = card)
             }
-
-            Spacer(modifier = Modifier.height(Spacing.xl))
         }
     }
 }

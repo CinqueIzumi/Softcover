@@ -35,7 +35,7 @@ internal fun ColumnScope.ProfileReadingLife(
         onClick = onShareClick,
     )
 
-    Spacer(modifier = Modifier.height(Spacing.x4l))
+    Spacer(modifier = Modifier.height(Spacing.section))
 
     YearColumnHistorySection(
         chart = state.yearHistoryChart,
@@ -47,7 +47,7 @@ internal fun ColumnScope.ProfileReadingLife(
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(Spacing.x4l))
+    Spacer(modifier = Modifier.height(Spacing.section))
 
     GenreRankingSection(
         genres = state.readingLife?.genres ?: GenreBreakdown(),
@@ -57,7 +57,7 @@ internal fun ColumnScope.ProfileReadingLife(
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(Spacing.x4l))
+    Spacer(modifier = Modifier.height(Spacing.section))
 
     AuthorRepresentationSection(
         authorDemographics = state.authorDemographics,
@@ -73,7 +73,7 @@ internal fun ColumnScope.ProfileReadingLife(
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(Spacing.x4l))
+    Spacer(modifier = Modifier.height(Spacing.section))
 
     RatingsHistogramSection(
         chart = state.ratingsChart,
@@ -86,7 +86,7 @@ internal fun ColumnScope.ProfileReadingLife(
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(Spacing.x4l))
+    Spacer(modifier = Modifier.height(Spacing.section))
 
     RecentlyLovedSection(
         cards = state.recentlyLoved.cards,

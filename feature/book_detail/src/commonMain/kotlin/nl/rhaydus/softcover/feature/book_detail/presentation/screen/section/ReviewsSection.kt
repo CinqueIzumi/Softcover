@@ -46,8 +46,9 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiS
 private const val REVIEW_COLLAPSED_LINES = 8
 
 /**
- * "Voices" (The Book lens): section-opener bar + eyebrow, the "What readers think" italic headline,
- * the community review cards, and a footer summary line (`★ avg across N ratings`).
+ * "Voices" (The Book lens): section-opener bar + eyebrow, the headline from
+ * [BookDetailUiState.reviewsSectionHeader], the community review cards, and a footer summary line
+ * (`★ avg across N ratings`).
  */
 @Composable
 internal fun ReviewsSection(
@@ -56,19 +57,10 @@ internal fun ReviewsSection(
 ) {
     if (state.reviews.isEmpty()) return
 
-    Spacer(modifier = Modifier.height(Spacing.x4l))
+    Spacer(modifier = Modifier.height(Spacing.section))
 
-    Column(modifier = Modifier.padding(horizontal = Spacing.md)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.gutter)) {
         SectionHeader(model = state.reviewsSectionHeader)
-
-        Spacer(modifier = Modifier.height(Spacing.xxs))
-
-        SoftcoverText(
-            text = "What readers think",
-            style = MaterialTheme.editorialTypography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = Spacing.xs),
-        )
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
@@ -90,7 +82,6 @@ internal fun ReviewsSection(
                 Spacer(modifier = Modifier.height(Spacing.md))
 
                 Row(
-                    modifier = Modifier.padding(horizontal = Spacing.xs),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val footerStarIcon = drawableIconResource(
@@ -145,7 +136,7 @@ private fun ReviewCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(Spacing.lg),
+                    .padding(Spacing.md),
             ) {
                 Spacer(modifier = Modifier.height(Spacing.xxl))
 

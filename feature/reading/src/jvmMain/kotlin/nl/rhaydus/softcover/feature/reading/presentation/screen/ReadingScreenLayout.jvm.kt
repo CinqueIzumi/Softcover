@@ -211,7 +211,7 @@ private fun DesktopReadingHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Spacing.xl, end = Spacing.sm, top = Spacing.md),
+            .padding(start = Spacing.gutter, end = Spacing.sm, top = Spacing.md),
     ) {
         PageMasthead(model = state.visibleMasthead) {
             MastheadRefreshAction(

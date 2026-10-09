@@ -167,7 +167,7 @@ private fun FilledVerdict(
 
 @Composable
 private fun EmptyVerdict() {
-    Column(modifier = Modifier.padding(Spacing.lg)) {
+    Column(modifier = Modifier.padding(Spacing.md)) {
         StarRatingInput(
             rating = null,
             onRatingChange = {},

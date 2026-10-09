@@ -85,9 +85,9 @@ Spacing is rhythmic, not formulaic. The recurring values are `Spacing` tokens:
 - **2** dp (`xxxs`) — the hairline gap.
 - **4 / 8** dp (`xxs` / `xs`) — tight inline gaps (icon-to-label, badge offsets).
 - **12 / 16** dp (`sm` / `md`) — within-component padding, label-to-control gaps.
-- **20 / 24** dp (`lg` / `xl`) — page horizontal padding, gap between a card's image and its text block.
-- **28 / 32** dp (`xxl` / `xxxl`) — gap between distinct content blocks inside a sheet or hero region.
-- **40 / 48** dp (`x4l` / `x5l`) — gap between major page sections.
+- **24** dp (`xl`, `Spacing.gutter`) — the page horizontal gutter on every page. **20** dp (`lg`) — the gap between a hero card's image and its text block.
+- **28 / 32** dp (`xxl` / `xxxl`) — the gap between blocks inside a hero region, and masthead to first section (32). Sheet blocks are separated by 24; a section header to its body is 16.
+- **40 / 48** dp (`x4l` / `x5l`) — gap between major page sections; the 40 step is `Spacing.section`.
 
 Spacing calls read a token; sizes and strokes stay literal `.dp`.
 

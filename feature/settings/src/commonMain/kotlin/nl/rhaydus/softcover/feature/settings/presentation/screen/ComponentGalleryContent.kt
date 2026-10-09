@@ -62,7 +62,7 @@ internal fun ComponentGalleryContent(
 
         SectionHeader(model = state.previewControlsHeader)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         GalleryOverrideControls(
             state = state,
@@ -76,7 +76,7 @@ internal fun ComponentGalleryContent(
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(Spacing.x4l))
+        Spacer(modifier = Modifier.height(Spacing.section))
 
         GalleryThemedRegion(state = state)
     }
@@ -197,7 +197,7 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
                 }
 
                 visibleFamilies.forEachIndexed { index, family ->
-                    if (index > 0) Spacer(modifier = Modifier.height(Spacing.x4l))
+                    if (index > 0) Spacer(modifier = Modifier.height(Spacing.section))
 
                     GalleryFamilySection(
                         family = family,
@@ -217,7 +217,7 @@ private fun GalleryFamilySection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         val entries = GalleryRegistry.entries.filter { it.family == family }
 

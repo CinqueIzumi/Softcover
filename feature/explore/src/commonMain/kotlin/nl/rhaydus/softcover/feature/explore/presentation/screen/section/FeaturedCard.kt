@@ -60,7 +60,7 @@ internal fun FeaturedCard(
                         .pressScaleClickable(onClick = { onEvent(FeaturedCardEvent.Clicked) })
                 },
             )
-            .padding(Spacing.md),
+            .padding(Spacing.lg),
     ) {
         SectionHeader(model = model.header)
 

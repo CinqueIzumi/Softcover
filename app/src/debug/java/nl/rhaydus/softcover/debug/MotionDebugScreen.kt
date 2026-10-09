@@ -96,7 +96,7 @@ object MotionDebugScreen : Screen {
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
                     .padding(
-                        horizontal = Spacing.xl,
+                        horizontal = Spacing.gutter,
                         vertical = Spacing.md,
                     ),
             ) {
@@ -106,19 +106,19 @@ object MotionDebugScreen : Screen {
 
                 HapticsSection(header = state.hapticsHeader)
 
-                Spacer(modifier = Modifier.height(Spacing.x4l))
+                Spacer(modifier = Modifier.height(Spacing.section))
 
                 MarkAsReadBurstSection(header = state.markAsReadBurstHeader)
 
-                Spacer(modifier = Modifier.height(Spacing.x4l))
+                Spacer(modifier = Modifier.height(Spacing.section))
 
                 ShakeOnErrorSection(header = state.shakeOnErrorHeader)
 
-                Spacer(modifier = Modifier.height(Spacing.x4l))
+                Spacer(modifier = Modifier.height(Spacing.section))
 
                 StatNumberSection(header = state.statNumberHeader)
 
-                Spacer(modifier = Modifier.height(Spacing.x4l))
+                Spacer(modifier = Modifier.height(Spacing.section))
 
                 WavyProgressSection(header = state.wavyProgressHeader)
 
@@ -133,7 +133,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.sm))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Column(modifier = Modifier.fillMaxWidth()) {
             HapticRow(label = "commit", description = "Successful save / mark-as-read") { haptics.commit() }
@@ -209,7 +209,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.sm))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Box(
             modifier = Modifier
@@ -245,7 +245,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.sm))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
             modifier = Modifier
@@ -287,7 +287,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.sm))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -334,7 +334,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.sm))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
             modifier = Modifier.fillMaxWidth(),

@@ -46,7 +46,7 @@ internal fun RatingsHistogramSection(
     Column(modifier = modifier) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         if (totalRatings == 0 && isLoading.not()) {
             SoftcoverText(

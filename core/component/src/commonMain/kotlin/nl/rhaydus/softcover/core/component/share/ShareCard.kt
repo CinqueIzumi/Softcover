@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -87,11 +88,11 @@ fun ShareCard(
 
     val contentPadding = when (model) {
         is BookShareCardUiModel,
-        is ReadingUpdateShareCardUiModel -> 32.dp
-        is ReadingLifeShareCardUiModel -> 24.dp
+        is ReadingUpdateShareCardUiModel -> Spacing.xxxl
+        is ReadingLifeShareCardUiModel -> Spacing.xl
         is StatShareCardUiModel,
         is QuoteShareCardUiModel,
-        is YearRecapShareCardUiModel -> 28.dp
+        is YearRecapShareCardUiModel -> Spacing.xxl
     }
 
     Surface(

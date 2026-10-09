@@ -51,7 +51,6 @@ internal fun TagEditorCollection(
             EmptyState(
                 model = emptyState,
                 modifier = Modifier
-                    .padding(horizontal = Spacing.xs)
                     .fillMaxWidth()
                     .padding(top = Spacing.x4l),
             )

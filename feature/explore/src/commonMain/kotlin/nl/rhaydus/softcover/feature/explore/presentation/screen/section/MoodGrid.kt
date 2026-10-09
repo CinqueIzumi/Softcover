@@ -41,11 +41,11 @@ internal fun MoodGrid(
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
         SectionHeader(
             model = header,
-            modifier = Modifier.padding(horizontal = Spacing.xl),
+            modifier = Modifier.padding(horizontal = Spacing.gutter),
         )
 
         Column(
-            modifier = Modifier.padding(horizontal = Spacing.xl),
+            modifier = Modifier.padding(horizontal = Spacing.gutter),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             tiles.chunked(2).forEach { row ->

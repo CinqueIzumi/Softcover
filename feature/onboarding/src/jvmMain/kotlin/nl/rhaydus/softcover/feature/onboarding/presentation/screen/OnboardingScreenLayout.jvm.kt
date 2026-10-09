@@ -55,7 +55,7 @@ internal actual fun OnboardingScreenLayout(
                     .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(
-                        horizontal = Spacing.xl,
+                        horizontal = Spacing.gutter,
                         vertical = Spacing.x5l,
                     ),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -73,7 +73,7 @@ internal actual fun OnboardingScreenLayout(
                         textAlign = TextAlign.Center,
                     )
 
-                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
                     SoftcoverText(
                         text = "Book smart.",

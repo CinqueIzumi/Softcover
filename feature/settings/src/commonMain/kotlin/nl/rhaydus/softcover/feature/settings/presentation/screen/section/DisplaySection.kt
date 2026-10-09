@@ -27,7 +27,7 @@ internal fun DisplaySection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = state.displaySectionHeader)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SettingsRowGroup {
             state.displayToggleRows.forEach { toggleRow ->

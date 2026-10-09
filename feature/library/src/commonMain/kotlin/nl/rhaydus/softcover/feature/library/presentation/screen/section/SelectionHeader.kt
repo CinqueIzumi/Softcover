@@ -42,7 +42,7 @@ internal fun SelectionHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.xl, vertical = Spacing.sm),
+            .padding(horizontal = Spacing.gutter, vertical = Spacing.sm),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             PillButton(

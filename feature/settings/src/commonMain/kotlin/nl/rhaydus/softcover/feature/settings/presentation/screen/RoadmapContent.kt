@@ -153,7 +153,7 @@ private fun RoadmapLastUpdatedFooter(text: String) {
 // region Block grouping
 private fun RoadmapRenderUnit.leadingSpacing() = when (this) {
     is RoadmapRenderUnit.ListGroup -> Spacing.sm
-    is RoadmapRenderUnit.Heading, is RoadmapRenderUnit.PlainHeading -> Spacing.xxxl
+    is RoadmapRenderUnit.Heading, is RoadmapRenderUnit.PlainHeading -> Spacing.section
     is RoadmapRenderUnit.ThematicBreak -> Spacing.xxl
     is RoadmapRenderUnit.BlockQuote -> Spacing.lg
     is RoadmapRenderUnit.Paragraph -> Spacing.md

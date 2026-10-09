@@ -51,7 +51,7 @@ internal fun SearchFocusContent(
     runAction: (ExploreAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.padding(horizontal = Spacing.lg)) {
+    Column(modifier = modifier.padding(horizontal = Spacing.gutter)) {
         if (queries.isNotEmpty()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -129,7 +129,7 @@ private fun SearchFocusRecentRow(
                     .clickable(onClick = onClick)
                     .padding(vertical = Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
                 val clockIcon = drawableIconResource(
                     icon = SoftcoverIcon.History,

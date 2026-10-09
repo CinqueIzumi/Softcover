@@ -184,6 +184,8 @@ internal fun AppUpdateSimulatorSection(
 
     val scope = rememberCoroutineScope()
 
+    Spacer(modifier = Modifier.height(Spacing.section))
+
     SectionHeader(model = header)
 
     Spacer(modifier = Modifier.height(Spacing.md))
@@ -237,6 +239,4 @@ internal fun AppUpdateSimulatorSection(
             modifier = Modifier.fillMaxWidth(),
         )
     }
-
-    Spacer(modifier = Modifier.height(Spacing.x4l))
 }

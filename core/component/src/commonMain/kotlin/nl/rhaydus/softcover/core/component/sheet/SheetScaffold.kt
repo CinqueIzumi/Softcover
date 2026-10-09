@@ -92,7 +92,7 @@ internal fun SheetScaffoldContent(
             .fillMaxWidth()
             .imePadding()
             .then(if (model.layout == SheetLayout.Scrolling) Modifier.verticalScroll(state = scrollState) else Modifier)
-            .padding(horizontal = Spacing.xl)
+            .padding(horizontal = Spacing.gutter)
             .padding(
                 top = Spacing.xs,
                 bottom = Spacing.md,

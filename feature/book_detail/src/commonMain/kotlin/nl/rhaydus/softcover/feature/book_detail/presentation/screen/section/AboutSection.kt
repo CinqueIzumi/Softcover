@@ -37,10 +37,10 @@ internal fun AboutSection(state: BookDetailUiState) {
     val isLoading = state.loadingBookDetails && headline.isBlank() && description.isBlank()
     val descriptionStandIn = remember { AnnotatedString(ABOUT_DESCRIPTION_STAND_IN) }
 
-    Column(modifier = Modifier.padding(horizontal = Spacing.xl)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.gutter)) {
         SectionHeader(model = state.aboutSectionHeader)
 
-        Spacer(modifier = Modifier.height(Spacing.sm))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Column {
             if (isLoading || headline.isNotBlank()) {

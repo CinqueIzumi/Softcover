@@ -281,7 +281,7 @@ fun VerdictSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
+            Spacer(modifier = Modifier.height(Spacing.xl))
 
             ToggleRow(
                 model = spoilersRow,
@@ -291,8 +291,6 @@ fun VerdictSheet(
                     }
                 },
             )
-
-            Spacer(modifier = Modifier.height(Spacing.lg))
         }
     }
 }

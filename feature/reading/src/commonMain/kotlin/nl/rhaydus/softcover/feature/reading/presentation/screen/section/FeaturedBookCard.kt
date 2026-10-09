@@ -58,7 +58,7 @@ internal fun FeaturedBookCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.md)
+            .padding(horizontal = Spacing.gutter)
             .then(if (isLoading) Modifier else Modifier.prefetchBookDetailOnPress(book.id))
             .then(
                 if (isLoading) {

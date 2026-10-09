@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -54,7 +53,7 @@ internal fun SpineColourSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = state.spineColourSectionHeader)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         // Every tile is measured to the same width — a third of the row, capped — rather than
         // weighted: with weights the wrapped second row's two tiles would each claim half the width
@@ -96,7 +95,6 @@ internal fun SpineColourSection(
             },
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = Spacing.xxs),
         )
 
         if (supportsDynamicColor()) {

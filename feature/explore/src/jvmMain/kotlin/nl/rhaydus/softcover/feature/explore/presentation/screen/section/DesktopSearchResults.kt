@@ -43,7 +43,7 @@ internal fun DesktopSearchResults(
             runAction = runAction,
             onBookClick = onBookClick,
         ) { onSearchResultEvent ->
-            Row(modifier = Modifier.padding(horizontal = Spacing.xl, vertical = Spacing.xs)) {
+            Row(modifier = Modifier.padding(horizontal = Spacing.gutter, vertical = Spacing.xs)) {
                 SortChip(
                     state = state,
                     runAction = runAction,
@@ -62,7 +62,7 @@ internal fun DesktopSearchResults(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = Spacing.xl),
+                    .padding(horizontal = Spacing.gutter),
             ) {
                 LazyVerticalGrid(
                     state = searchResultsGridState,

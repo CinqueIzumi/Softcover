@@ -78,12 +78,12 @@ internal fun ShelveControlCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.md),
+            .padding(horizontal = Spacing.gutter),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             SectionHeader(model = state.shelveControlHeader)
 
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),

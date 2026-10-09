@@ -31,7 +31,7 @@ internal fun UserTagsSection(
         if (event is ChipEvent.Clicked) runAction(OnOpenTagEditorAction())
     }
 
-    Column(modifier = Modifier.padding(horizontal = Spacing.xl)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.gutter)) {
         SectionHeader(model = state.yourTagsLabel)
 
         Spacer(modifier = Modifier.height(Spacing.md))

@@ -60,7 +60,7 @@ internal actual fun BarcodeScannerScreenLayout(
                     modifier = Modifier
                         .fillMaxSize()
                         .imePadding()
-                        .padding(horizontal = Spacing.xl),
+                        .padding(horizontal = Spacing.gutter),
                 )
 
                 cameraGranted -> ScannerContent(

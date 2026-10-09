@@ -57,7 +57,7 @@ internal fun ManualEntryContent(
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.xl))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         TextField(
             model = field,

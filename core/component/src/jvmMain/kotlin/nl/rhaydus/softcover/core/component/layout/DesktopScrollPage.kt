@@ -56,12 +56,12 @@ fun DesktopScrollPage(
                 Column(
                     modifier = Modifier
                         .cappedContentWidth()
-                        .padding(horizontal = Spacing.xxxl),
+                        .padding(horizontal = Spacing.gutter),
                 ) {
                     if (masthead != null) {
                         masthead()
 
-                        Spacer(modifier = Modifier.height(Spacing.xxl))
+                        Spacer(modifier = Modifier.height(Spacing.xxxl))
                     }
 
                     content()

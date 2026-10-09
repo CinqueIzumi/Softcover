@@ -149,7 +149,7 @@ object ShareCardDebugScreen : Screen {
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
                     .padding(
-                        horizontal = Spacing.xl,
+                        horizontal = Spacing.gutter,
                         vertical = Spacing.md,
                     ),
             ) {
@@ -169,7 +169,7 @@ object ShareCardDebugScreen : Screen {
                     },
                 )
 
-                Spacer(modifier = Modifier.height(Spacing.x4l))
+                Spacer(modifier = Modifier.height(Spacing.section))
 
                 VariantBlock(
                     label = "Stat",
@@ -183,7 +183,7 @@ object ShareCardDebugScreen : Screen {
                     },
                 )
 
-                Spacer(modifier = Modifier.height(Spacing.x4l))
+                Spacer(modifier = Modifier.height(Spacing.section))
 
                 VariantBlock(
                     label = "Quote",
@@ -197,7 +197,7 @@ object ShareCardDebugScreen : Screen {
                     },
                 )
 
-                Spacer(modifier = Modifier.height(Spacing.x4l))
+                Spacer(modifier = Modifier.height(Spacing.section))
 
                 VariantBlock(
                     label = "Year recap",

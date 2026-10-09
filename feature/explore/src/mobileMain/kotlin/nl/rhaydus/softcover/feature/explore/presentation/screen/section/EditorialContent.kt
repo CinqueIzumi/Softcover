@@ -59,7 +59,7 @@ internal fun EditorialContent(
                     top = Spacing.xs,
                     bottom = rememberBottomBarPadding(),
                 ),
-            verticalArrangement = Arrangement.spacedBy(Spacing.x4l),
+            verticalArrangement = Arrangement.spacedBy(Spacing.section),
         ) {
             DiscoverySections(
                 state = state,

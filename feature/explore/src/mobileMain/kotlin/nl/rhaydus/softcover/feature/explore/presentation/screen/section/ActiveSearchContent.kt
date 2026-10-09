@@ -37,7 +37,7 @@ internal fun ActiveSearchContent(
             onBookClick = onBookClick,
         ) { onSearchResultEvent ->
             Row(
-                modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                modifier = Modifier.padding(horizontal = Spacing.gutter, vertical = Spacing.sm),
             ) {
                 SortChip(
                     state = state,
@@ -58,7 +58,7 @@ internal fun ActiveSearchContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(horizontal = Spacing.lg),
+                    .padding(horizontal = Spacing.gutter),
                 contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
             ) {
                 items(state.searchResults.cards, key = { it.key.lazyKey }) { card ->

@@ -64,7 +64,7 @@ internal fun Book.toAlsoReadingCard(
             deadline = deadlineProgress?.toDeadlineSummaryUiModel(
                 dateStyle = dateStyle,
             ),
-            contentHorizontalInset = Spacing.xl,
+            contentHorizontalInset = Spacing.gutter,
             contentVerticalInset = Spacing.md,
         ),
         decorations = BookCardDecorations(

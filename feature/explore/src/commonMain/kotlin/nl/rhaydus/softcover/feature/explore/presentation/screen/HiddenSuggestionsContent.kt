@@ -56,18 +56,22 @@ internal fun HiddenSuggestionsContent(
 
             Spacer(modifier = Modifier.height(Spacing.xxxl))
 
-            if (state.isLoadingBooks || state.hiddenBooks.isEmpty.not()) {
+            val hasBooksGroup = state.isLoadingBooks || state.hiddenBooks.isEmpty.not()
+
+            if (hasBooksGroup) {
                 HiddenGroupSection(
                     header = state.hiddenBooksGroupHeader,
                     set = state.hiddenBooks,
                     isLoading = state.isLoadingBooks,
                     runAction = runAction,
                 )
-
-                Spacer(modifier = Modifier.height(Spacing.x4l))
             }
 
             if (state.isLoadingSeries || state.hiddenSeries.isEmpty.not()) {
+                if (hasBooksGroup) {
+                    Spacer(modifier = Modifier.height(Spacing.section))
+                }
+
                 HiddenGroupSection(
                     header = state.hiddenSeriesGroupHeader,
                     set = state.hiddenSeries,
@@ -76,8 +80,6 @@ internal fun HiddenSuggestionsContent(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(Spacing.xl))
     }
 }
 

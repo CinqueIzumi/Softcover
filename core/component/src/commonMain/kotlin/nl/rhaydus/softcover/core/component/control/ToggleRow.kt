@@ -67,10 +67,7 @@ fun <K> ToggleRow(
             .background(wash)
             .then(
                 if (model.variant == ToggleRowVariant.Inset) {
-                    Modifier.padding(
-                        horizontal = Spacing.xxs,
-                        vertical = Spacing.md,
-                    )
+                    Modifier.padding(vertical = Spacing.md)
                 } else {
                     Modifier
                 },

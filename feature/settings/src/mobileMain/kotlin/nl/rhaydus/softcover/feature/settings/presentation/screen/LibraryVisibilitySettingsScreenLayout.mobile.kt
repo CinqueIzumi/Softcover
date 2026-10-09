@@ -62,7 +62,7 @@ internal actual fun LibraryVisibilitySettingsScreenLayout(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .cappedContentWidth()
-                .padding(horizontal = Spacing.xl),
+                .padding(horizontal = Spacing.gutter),
         )
     }
 }

@@ -35,7 +35,7 @@ internal fun LibraryVisibilityContent(
 
         SectionHeader(model = state.libraryTabsPageHeader)
 
-        Spacer(modifier = Modifier.height(Spacing.xxl))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         LibraryTabsGroupHeader(header = state.libraryTabsHeader)
 

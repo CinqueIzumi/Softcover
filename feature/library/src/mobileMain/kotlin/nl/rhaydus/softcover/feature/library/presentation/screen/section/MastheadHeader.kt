@@ -57,7 +57,7 @@ internal fun MastheadHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Spacing.xl, end = Spacing.xs, top = Spacing.xs),
+            .padding(start = Spacing.gutter, end = Spacing.xs, top = Spacing.xs),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

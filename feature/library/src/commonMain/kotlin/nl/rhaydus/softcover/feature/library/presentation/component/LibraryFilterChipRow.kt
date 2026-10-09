@@ -62,7 +62,7 @@ internal fun LibraryFilterChipRow(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacing.md),
+                .padding(horizontal = Spacing.gutter),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
@@ -72,7 +72,7 @@ internal fun LibraryFilterChipRow(
         Row(
             modifier = Modifier
                 .horizontalScroll(state = rememberScrollState())
-                .padding(horizontal = Spacing.md),
+                .padding(horizontal = Spacing.gutter),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
         ) {

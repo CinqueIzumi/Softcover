@@ -151,7 +151,7 @@ private fun TwoColumnContent(
                 onCoverClick = onCoverClick,
             )
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             ShelveControlCard(
                 state = state,
@@ -161,7 +161,7 @@ private fun TwoColumnContent(
             )
 
             state.scanEditionCallout?.let { scanEditionCallout ->
-                Spacer(modifier = Modifier.height(Spacing.lg))
+                Spacer(modifier = Modifier.height(Spacing.xxl))
 
                 ScanEditionCallout(
                     model = scanEditionCallout,

@@ -72,7 +72,7 @@ internal actual fun ProfileScreenLayout(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .cappedContentWidth()
-                .padding(horizontal = Spacing.xl),
+                .padding(horizontal = Spacing.gutter),
         ) {
             ProfileIdentity(
                 state = state,
@@ -80,7 +80,7 @@ internal actual fun ProfileScreenLayout(
                 horizontalAlignment = Alignment.CenterHorizontally,
             )
 
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             ProfileReadingLife(
                 state = state,
@@ -89,12 +89,12 @@ internal actual fun ProfileScreenLayout(
                 onBookCardEvent = onBookCardEvent,
             )
 
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             AccountFootSection(
                 onLogOutClick = { showLogOutConfirm = true },
                 enabled = state.isLoading.not(),
-                modifier = Modifier.padding(vertical = Spacing.xl),
+                modifier = Modifier.padding(bottom = Spacing.xl),
             )
         }
     }

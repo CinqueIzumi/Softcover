@@ -52,7 +52,7 @@ internal fun EmptyCurrentlyReadingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = Spacing.xxxl)
+            .padding(horizontal = Spacing.gutter)
             .verticalScroll(rememberScrollState())
             .padding(bottom = rememberBottomBarPadding()),
         verticalArrangement = if (showAdaptive) Arrangement.Top else Arrangement.Center,
@@ -63,11 +63,11 @@ internal fun EmptyCurrentlyReadingScreen(
             modifier = if (showAdaptive) {
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = Spacing.x4l)
+                    .padding(top = Spacing.section)
             } else {
                 Modifier
                     .fillMaxSize()
-                    .padding(Spacing.xl)
+                    .padding(vertical = Spacing.xl)
             },
             onEvent = { event ->
                 when (event) {
@@ -80,7 +80,7 @@ internal fun EmptyCurrentlyReadingScreen(
         // read (all-unlit), inviting a brand-new reader to start a streak; isNotEmpty()
         // only suppresses the brief pre-load window before activity data arrives.
         if (streakEnabled && recentReadingActivity.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(Spacing.xxxl))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             StreakStrip(
                 activity = recentReadingActivity,
@@ -89,7 +89,7 @@ internal fun EmptyCurrentlyReadingScreen(
         }
 
         if (pickUpNext.isEmpty.not()) {
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             PickUpNextSection(
                 cards = pickUpNext.cards,
@@ -97,7 +97,7 @@ internal fun EmptyCurrentlyReadingScreen(
                 onEvent = onPickUpNextEvent,
             )
         } else if (trendingTile != null) {
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             TrendingTileSection(
                 book = trendingTile,

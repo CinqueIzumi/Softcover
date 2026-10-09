@@ -150,7 +150,7 @@ private fun TwoColumnProfile(
                 .width(320.dp)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
-                .padding(start = Spacing.xl, end = Spacing.xl, top = Spacing.xs, bottom = Spacing.xl),
+                .padding(start = Spacing.gutter, end = Spacing.gutter, top = Spacing.xs, bottom = Spacing.xl),
         ) {
             ProfileIdentity(
                 state = state,
@@ -158,7 +158,7 @@ private fun TwoColumnProfile(
                 horizontalAlignment = Alignment.Start,
             )
 
-            Spacer(modifier = Modifier.height(Spacing.xxl))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             AccountFootSection(
                 onLogOutClick = onLogOutClick,
@@ -180,7 +180,7 @@ private fun TwoColumnProfile(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(start = Spacing.xxxl, end = Spacing.xl, top = Spacing.xs, bottom = Spacing.xl),
+                    .padding(start = Spacing.gutter, end = Spacing.gutter, top = Spacing.xs, bottom = Spacing.xl),
             ) {
                 Column(modifier = Modifier.widthIn(max = 640.dp)) {
                     ProfileReadingLife(
@@ -218,7 +218,7 @@ private fun SingleColumnProfile(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = Spacing.xl, vertical = Spacing.xs),
+                .padding(horizontal = Spacing.gutter, vertical = Spacing.xs),
         ) {
             ProfileIdentity(
                 state = state,
@@ -226,7 +226,7 @@ private fun SingleColumnProfile(
                 horizontalAlignment = Alignment.CenterHorizontally,
             )
 
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             ProfileReadingLife(
                 state = state,
@@ -235,14 +235,14 @@ private fun SingleColumnProfile(
                 onBookCardEvent = onBookCardEvent,
             )
 
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+            Spacer(modifier = Modifier.height(Spacing.section))
 
             AccountFootSection(
                 onLogOutClick = onLogOutClick,
                 enabled = state.isLoading.not(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = Spacing.xl),
+                    .padding(bottom = Spacing.xl),
             )
         }
 

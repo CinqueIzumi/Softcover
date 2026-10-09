@@ -50,7 +50,7 @@ internal fun ColumnScope.SearchResultsSection(
             onRetry = { runAction(OnRetrySearchAction) },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = Spacing.xl),
+                .padding(horizontal = Spacing.gutter),
             textStyle = MaterialTheme.editorialTypography.bodySmall,
         )
 
@@ -63,7 +63,10 @@ internal fun ColumnScope.SearchResultsSection(
             onEvent = { runAction(OnClearSearchAction) },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(Spacing.xl),
+                .padding(
+                    horizontal = Spacing.gutter,
+                    vertical = Spacing.xl,
+                ),
         )
 
         return

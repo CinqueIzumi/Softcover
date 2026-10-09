@@ -39,7 +39,7 @@ internal fun LensToggle(
                 }
             },
             modifier = Modifier.padding(
-                horizontal = Spacing.md,
+                horizontal = Spacing.gutter,
                 vertical = Spacing.xs,
             ),
         )

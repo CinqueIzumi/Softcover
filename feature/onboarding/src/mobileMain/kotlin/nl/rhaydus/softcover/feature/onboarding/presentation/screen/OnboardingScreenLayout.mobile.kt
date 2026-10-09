@@ -102,7 +102,7 @@ internal actual fun OnboardingScreenLayout(
                 header = state.pageHeaders.getValue(pages[pagerState.currentPage]),
                 activePage = pagerState.currentPage + 1,
                 modifier = Modifier
-                    .padding(horizontal = Spacing.xxl)
+                    .padding(horizontal = Spacing.gutter)
                     .padding(top = Spacing.xl),
             )
 
@@ -228,7 +228,7 @@ private fun FirstIntroScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = Spacing.xxl),
+                .padding(horizontal = Spacing.gutter),
         ) {
             Column(
                 modifier = Modifier
@@ -246,7 +246,7 @@ private fun FirstIntroScreen(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                Spacer(modifier = Modifier.height(Spacing.xxl))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 SoftcoverText(
                     text = "Track every book you read, share the ones worth sharing — or " +
@@ -280,7 +280,7 @@ private fun SecondIntroScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = Spacing.xxl),
+            .padding(horizontal = Spacing.gutter),
     ) {
         Column(
             modifier = Modifier
@@ -298,11 +298,11 @@ private fun SecondIntroScreen(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.height(Spacing.xxxl))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             WavyConnector()
 
-            Spacer(modifier = Modifier.height(Spacing.xxxl))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             SoftcoverText(
                 text = "To sync your reading, Softcover connects to your Hardcover account — " +
@@ -431,7 +431,7 @@ private fun ThirdIntroScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = Spacing.xxl),
+            .padding(horizontal = Spacing.gutter),
     ) {
         // Scrollable content only — the commit footer is a pinned sibling below, outside this scroll
         // region, so "Save API key" is always visible rather than scrolling off-screen with the

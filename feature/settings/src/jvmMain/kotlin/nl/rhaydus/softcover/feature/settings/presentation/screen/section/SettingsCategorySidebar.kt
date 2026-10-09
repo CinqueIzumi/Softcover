@@ -51,7 +51,7 @@ internal fun SettingsCategorySidebar(
         ) {
             PageMasthead(
                 model = state.settingsSidebarMasthead,
-                modifier = Modifier.padding(start = Spacing.xl, end = Spacing.md),
+                modifier = Modifier.padding(start = Spacing.gutter, end = Spacing.md),
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))

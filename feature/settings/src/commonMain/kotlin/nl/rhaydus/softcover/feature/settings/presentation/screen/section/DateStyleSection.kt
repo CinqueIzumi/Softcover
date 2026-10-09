@@ -20,7 +20,7 @@ internal fun DateStyleSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = state.dateStyleSectionHeader)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SettingsRowGroup(selectableGroup = true) {
             state.dateStyleRows.forEach { dateStyleRow ->

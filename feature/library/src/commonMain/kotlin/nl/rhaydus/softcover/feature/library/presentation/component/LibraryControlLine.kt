@@ -52,7 +52,7 @@ internal fun LibraryControlLine(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.xl),
+            .padding(horizontal = Spacing.gutter),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SortLabelControl(

@@ -109,8 +109,8 @@ internal fun GeneralBookInfoSection(
                 .statusBarsPadding()
                 .heightIn(min = imageHeight)
                 .padding(
-                    start = Spacing.md,
-                    end = Spacing.md,
+                    start = Spacing.gutter,
+                    end = Spacing.gutter,
                     top = 64.dp,
                     bottom = Spacing.x4l,
                 ),

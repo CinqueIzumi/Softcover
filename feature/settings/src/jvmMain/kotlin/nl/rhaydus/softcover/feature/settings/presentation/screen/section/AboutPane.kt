@@ -20,9 +20,9 @@ internal fun AboutPane(
     onStartAppUpdate: () -> Unit,
     debugSection: @Composable () -> Unit,
 ) {
-    Spacer(modifier = Modifier.height(Spacing.x4l))
-
     if (appUpdateCallout != null) {
+        Spacer(modifier = Modifier.height(Spacing.section))
+
         Callout(
             model = appUpdateCallout,
             onEvent = { event ->
@@ -33,8 +33,6 @@ internal fun AboutPane(
             },
             modifier = Modifier.fillMaxWidth(),
         )
-
-        Spacer(modifier = Modifier.height(Spacing.x4l))
     }
 
     debugSection()

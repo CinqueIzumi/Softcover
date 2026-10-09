@@ -136,16 +136,11 @@ internal fun LayoutGrid(
         LibraryGridLayout.LIST_COMPACT -> 0.dp
     }
 
-    val horizontalPadding = when (layout) {
-        LibraryGridLayout.LIST_COMPACT -> Spacing.xl
-        else -> Spacing.md
-    }
-
     LazyVerticalGrid(
         columns = columns,
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = horizontalPadding),
+            .padding(horizontal = Spacing.gutter),
         contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
         verticalArrangement = Arrangement.spacedBy(itemSpacing),
         horizontalArrangement = Arrangement.spacedBy(itemSpacing),

@@ -52,14 +52,14 @@ internal fun AppearanceSettingsContent(
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(Spacing.x4l))
+        Spacer(modifier = Modifier.height(Spacing.section))
 
         SpineColourSection(
             state = state,
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(Spacing.x4l))
+        Spacer(modifier = Modifier.height(Spacing.section))
 
         if (showUiScaleControl) {
             UiScaleSection(
@@ -67,7 +67,7 @@ internal fun AppearanceSettingsContent(
                 runAction = runAction,
             )
 
-            Spacer(modifier = Modifier.height(Spacing.x4l))
+            Spacer(modifier = Modifier.height(Spacing.section))
         }
 
         DisplaySection(
@@ -75,13 +75,11 @@ internal fun AppearanceSettingsContent(
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(Spacing.x4l))
+        Spacer(modifier = Modifier.height(Spacing.section))
 
         DateStyleSection(
             state = state,
             runAction = runAction,
         )
-
-        Spacer(modifier = Modifier.height(Spacing.x5l))
     }
 }

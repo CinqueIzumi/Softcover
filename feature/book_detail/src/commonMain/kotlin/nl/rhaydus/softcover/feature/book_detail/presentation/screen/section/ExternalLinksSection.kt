@@ -46,12 +46,12 @@ internal fun ExternalLinksSection(
         exit = ExitTransition.None,
     ) {
         links?.let { knownLinks ->
-            Column(modifier = Modifier.padding(horizontal = Spacing.xl)) {
-                Spacer(modifier = Modifier.height(Spacing.x4l))
+            Column(modifier = Modifier.padding(horizontal = Spacing.gutter)) {
+                Spacer(modifier = Modifier.height(Spacing.section))
 
                 SectionHeader(model = state.findItLabel)
 
-                Spacer(modifier = Modifier.height(Spacing.sm))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),

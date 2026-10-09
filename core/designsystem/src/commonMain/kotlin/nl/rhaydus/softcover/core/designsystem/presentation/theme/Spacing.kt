@@ -22,4 +22,10 @@ object Spacing {
     val xxxl: Dp = 32.dp
     val x4l: Dp = 40.dp
     val x5l: Dp = 48.dp
+
+    /** The page horizontal gutter, shared by every page on every platform. */
+    val gutter: Dp = xl
+
+    /** The gap between major page sections. */
+    val section: Dp = x4l
 }

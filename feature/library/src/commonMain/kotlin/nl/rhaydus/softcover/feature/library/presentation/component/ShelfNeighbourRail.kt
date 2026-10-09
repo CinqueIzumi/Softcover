@@ -53,7 +53,7 @@ internal fun ShelfNeighbourRail(
                 .fillMaxWidth()
                 // Not the ~36dp the labels need: each half of the row is a navigation tap target.
                 .height(48.dp)
-                .padding(horizontal = Spacing.md),
+                .padding(horizontal = Spacing.gutter),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             NeighbourEnd(

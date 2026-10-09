@@ -59,7 +59,7 @@ internal actual fun FocusModeScreenLayout(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .cappedContentWidth()
-                    .padding(horizontal = Spacing.xl, vertical = Spacing.md),
+                    .padding(horizontal = Spacing.gutter, vertical = Spacing.md),
             )
 
             val closeIcon = drawableIconResource(

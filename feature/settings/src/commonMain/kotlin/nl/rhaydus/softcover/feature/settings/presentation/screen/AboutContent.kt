@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -58,7 +57,7 @@ internal fun AboutContent(
             openUrl = openUrl,
         )
 
-        Spacer(modifier = Modifier.height(Spacing.x4l))
+        Spacer(modifier = Modifier.height(Spacing.section))
 
         SourceSection(
             header = sourceHeader,
@@ -66,14 +65,14 @@ internal fun AboutContent(
             onRoadmapClick = onRoadmapClick,
         )
 
-        Spacer(modifier = Modifier.height(Spacing.x4l))
+        Spacer(modifier = Modifier.height(Spacing.section))
 
         ContactSection(
             header = contactHeader,
             openUrl = openUrl,
         )
 
-        Spacer(modifier = Modifier.height(Spacing.x4l))
+        Spacer(modifier = Modifier.height(Spacing.section))
 
         VersionFooter(
             versionLabel = versionLabel,
@@ -94,7 +93,7 @@ private fun CreditsSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SettingsRowGroup {
             row {
@@ -114,7 +113,6 @@ private fun CreditsSection(
                 "with, endorsed by, or sponsored by Hardcover.app.",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = Spacing.xxs),
         )
     }
 }
@@ -128,7 +126,7 @@ private fun SourceSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SettingsRowGroup {
             row {
@@ -163,7 +161,7 @@ private fun ContactSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SettingsRowGroup {
             row {

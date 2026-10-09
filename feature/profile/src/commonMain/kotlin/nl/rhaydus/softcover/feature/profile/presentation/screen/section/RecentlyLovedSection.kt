@@ -36,7 +36,7 @@ internal fun RecentlyLovedSection(
     Column(modifier = modifier) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         if (hasRecentlyLoved.not() && isLoading.not()) {
             SoftcoverText(

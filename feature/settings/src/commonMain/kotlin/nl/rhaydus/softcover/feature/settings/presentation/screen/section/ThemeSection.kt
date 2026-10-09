@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -37,7 +36,7 @@ internal fun ThemeSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = state.themeSectionHeader)
 
-        Spacer(modifier = Modifier.height(Spacing.lg))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -68,7 +67,6 @@ internal fun ThemeSection(
             text = "System follows your device's own light and dark setting.",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = Spacing.xxs),
         )
     }
 }

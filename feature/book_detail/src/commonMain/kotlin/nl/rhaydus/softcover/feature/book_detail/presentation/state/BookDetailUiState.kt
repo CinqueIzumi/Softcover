@@ -92,7 +92,10 @@ internal data class BookDetailUiState(
 
     val aboutSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "About"),
     val inProgressSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "In progress"),
-    val reviewsSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Voices"),
+    val reviewsSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
+        eyebrow = "Voices",
+        headline = "What readers think",
+    ),
     val findItLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Find it"),
     val tagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Tags"),
     val yourTagsLabel: SectionHeaderUiModel = SectionHeaderUiModel.Label(eyebrow = "Your tags"),
