@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SP done; the step file is deleted. SP-C added `Spacing.gutter` (24, horizontal page edge only) and `Spacing.section` (40). Every page now has one 24 gutter, desktop scroll pages included. Gaps: masthead to first section 32, header to body 16, sheet blocks 24. Cards pad 16, hero cards 20. Stacked trailing gaps are gone, and `foundations.md` § 2.4 and `layout.md` match. Shifts are in `visual-checks.md`. SL-3b blocked on F34; PF-4/7 wait for S12-4.
-- **Next:** SH-1 (`steps/sh-shape-scale.md` § Sub-steps, SH-1 row): corner-radius inventory and approved shape; stop for approval.
-- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21: `compileKotlinJvm`, `:desktopApp:compileKotlin`, `styleCheck`, `checkModuleGraph`, `testAndroidHostTest` passed after the last Kotlin edit; glom grep clean over all changed files; reviewer round's findings fixed (trailing gap in hidden suggestions, stacked hero gutter, `gutter` on vertical sides, dead `when`, stale KDoc).
-- **Uncommitted:** SP-C (~100 `.kt` files, `Spacing.kt`, `foundations.md`, `layout.md`, this README, `visual-checks.md`, deleted SP step file).
+- **State:** SH-2 done: `Corners` in `:core:designsystem`, the inactive `RawCornerDp` rule with tests, the code-style and `foundations.md` § 2.3 rules, F40/F41. SL closed: its step file is deleted and SL-3b (the `material3.Text` import ban) lives on as F34. PF-4/7 wait for S12-4.
+- **Next:** SH-3 (`steps/sh-shape-scale.md` § Sub-steps, SH-3 row, per § Approved shape): sweep `:core:component` and `:core:designsystem` onto `Corners`, including `CoverVariant.cornerRadius()` → `shape()`; snaps go to `visual-checks.md`; delegate to `softcover-implementer`.
+- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `iosMain` is not gated (dead imports slip through).
+- **Verification:** JBR 21: `styleCheck`, `checkDocBudgets` and `RawCornerDpTest` passed; reviewer round's findings fixed (`percent = 0`, `CornerSize` / `Absolute*` coverage, stale tracker text).
+- **Uncommitted:** SH-2 (`Corners.kt`, `RawCornerDp.kt` + test, rule set and config, `code-style.md`, `foundations.md`, F40/F41) and the SL close-out (deleted step file, F34, this README, `premium-feel-audit.md`, `component-contract.md` R12).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
@@ -62,7 +62,7 @@ every sub-step's Verify.
 | S6 | — (rows) | S6-1, S6-2 (audit only), S6-C-rows | [x] |
 | S6 | — (sheet chrome) | S6-3–S6-7, S6-C-sheets | [x] |
 | S7 | — (book cards) | S7-1–S7-7, S7-C1–C5 | [x] |
-| SL | [steps/sl-lean-loading.md](steps/sl-lean-loading.md) | SL-1–SL-15e, app-wide; SL-1–SL-7 before S7-2 | [ ] |
+| SL | — (lean loading) | SL-1–SL-15e; SL-3b moved to foundation F34 | [x] |
 | S8 | — (screen states) | S8-1–S8-3, S8-C-a–C-c | [x] |
 | S8 | — (controls) | S8-4–S8-6, S8-C-controls | [x] |
 | S9 | — (statistics & progress) | S9-1–S9-4, S9-C | [x] |

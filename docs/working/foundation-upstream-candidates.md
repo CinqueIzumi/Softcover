@@ -218,7 +218,9 @@ Filed but not yet implemented in the foundation.
   (`SoftcoverText`) and needs `androidx.compose.material3.Text` banned everywhere except that leaf's file.
   detekt's `ForbiddenImport` allows one instance per config and is already scoped to the leaf modules.
 - **What to build:** a configurable rule taking `(import, allowed file globs, reason)` entries, with a
-  fully-qualified-call check alongside the import check; release, then enable it in Softcover.
+  fully-qualified-call check alongside the import check; release, then enable it in Softcover with one
+  entry: `androidx.compose.material3.Text`, allowed only in `SoftcoverText.kt`. The swap itself is done,
+  so the gate passes on enable.
 
 ### F35 — `AdaptiveModalSheet`'s panel form has no motion or depth
 
@@ -270,8 +272,6 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** without it, spacing drifts back to per-screen numbers after the token sweep.
 - **What to build:** the rule in the shared ruleset, with the allowed literals configurable.
 
-### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
-
 ### F40 — `designsystem-core` ships no corner scale and `RhaydusTheme` has no `shapes` parameter
 
 - **Type:** enhancement
@@ -288,6 +288,8 @@ Filed but not yet implemented in the foundation.
   `RoundedCornerShape` or `CutCornerShape`.
 - **Impact in the app:** without it, corner radii drift back to per-screen numbers after the token sweep.
 - **What to build:** the rule in the shared ruleset.
+
+### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)
 - **Home:** `build-logic` convention plugins (alongside `rhaydus.module-graph`, F18)

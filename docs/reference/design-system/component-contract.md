@@ -6,7 +6,7 @@ Every component in `:core:component` is driven by a **UI model**. This contract 
 signature looks like, what its model may hold, and where the domain → UI mapping lives.
 
 It is normative. A component that does not satisfy R1–R12 does not belong in `:core:component`; two of the
-rules are build gates (§ 7.4), and the standing exceptions are in § 7.4a. R10, R11 and R12 are not yet
+rules are build gates (§ 7.4), and the standing exceptions are in § 7.4a. R10 and R11 are not yet
 satisfied by the whole app; each says what that means for new code. Why the rules exist is in § 7.7, which
 is optional reading.
 
@@ -211,10 +211,6 @@ models, built by the feature's mapper / collector, and the render iterates it li
 No per-surface skeleton composable, no skeleton variant, no `SkeletonCrossfade` from a skeleton layout to
 the real one (`Cover`'s crossfade from its own masked slot to the image is the real layout). A model's
 `previews` include a loading fixture; a data-free primitive's gallery fixtures do.
-
-- **Not yet satisfied by the whole app.** The only holdout is profile: its sections and both layouts
-  still use hand-sized `.shimmer` blocks. Write new components to R12; an existing skeleton swap is not
-  licence.
 
 ### 7.3 Reference implementation — `ShareCard`
 
