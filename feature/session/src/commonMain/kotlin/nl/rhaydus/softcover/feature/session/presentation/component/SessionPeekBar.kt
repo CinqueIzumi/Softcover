@@ -38,6 +38,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
@@ -119,7 +120,7 @@ private fun SessionPeekBarContent(
         Surface(
             onClick = onOpen,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shape = if (flush) RectangleShape else MaterialTheme.shapes.large,
+            shape = if (flush) RectangleShape else Corners.lg,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = if (flush) 0.dp else Spacing.sm),

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -29,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.badge.CoverOverlay
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
-import nl.rhaydus.softcover.core.component.cover.cornerRadius
+import nl.rhaydus.softcover.core.component.cover.shape
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.state.skeletonMask
@@ -51,7 +50,7 @@ internal fun BookCardCoverLayout(
     val shape = if (coverModel == null) {
         RectangleShape
     } else {
-        RoundedCornerShape(coverModel.variant.cornerRadius())
+        coverModel.variant.shape()
     }
 
     Box(modifier = modifier) {
@@ -102,7 +101,7 @@ internal fun BookCardSeriesStack(
     isLoading: Boolean,
 ) {
     val frontWidth = width - 12.dp
-    val plateShape = RoundedCornerShape(front.variant.cornerRadius())
+    val plateShape = front.variant.shape()
 
     Box(modifier = Modifier.width(width)) {
         SeriesStackPlate(

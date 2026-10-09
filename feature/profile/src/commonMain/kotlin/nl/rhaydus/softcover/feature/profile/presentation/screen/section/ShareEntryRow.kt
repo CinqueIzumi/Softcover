@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -26,6 +25,7 @@ import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -41,17 +41,15 @@ internal fun ShareEntryRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val shape = RoundedCornerShape(16.dp)
-
     Row(
         modifier = modifier
             .fillMaxWidth()
             .alpha(if (enabled || isLoading) 1f else 0.4f)
-            .clip(shape)
+            .clip(Corners.lg)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .skeletonMask(
                 visible = isLoading,
-                shape = shape,
+                shape = Corners.lg,
             )
             .conditional(
                 condition = enabled,
@@ -71,7 +69,7 @@ internal fun ShareEntryRow(
         Box(
             modifier = Modifier
                 .size(42.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(Corners.md)
                 .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center,
         ) {

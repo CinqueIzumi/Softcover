@@ -17,7 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -51,6 +51,7 @@ import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -273,9 +274,9 @@ private fun PartialBookmarkMark() {
             .border(
                 width = 2.4.dp,
                 color = primary,
-                shape = RoundedCornerShape(
-                    topStart = 3.dp,
-                    topEnd = 3.dp,
+                shape = Corners.xs.copy(
+                    bottomStart = ZeroCornerSize,
+                    bottomEnd = ZeroCornerSize,
                 ),
             ),
         contentAlignment = Alignment.Center,

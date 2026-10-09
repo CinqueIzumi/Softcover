@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -22,6 +21,7 @@ import nl.rhaydus.softcover.core.component.gallery.GalleryRegistry
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -32,9 +32,6 @@ import nl.rhaydus.softcover.feature.settings.presentation.action.OnGalleryFamily
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnGalleryPaletteSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnGalleryThemeModeSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.state.ComponentGalleryUiState
-
-private val THEMED_REGION_SHAPE = RoundedCornerShape(20.dp)
-private val FIXTURE_FRAME_SHAPE = RoundedCornerShape(12.dp)
 // region Gallery content
 /**
  * The Component Gallery screen body, shared by the mobile [ComponentGalleryScreen] page and the
@@ -183,7 +180,7 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = THEMED_REGION_SHAPE,
+            shape = Corners.xl,
             color = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onBackground,
             border = BorderStroke(
@@ -275,7 +272,7 @@ private fun GalleryFixtureFrame(fixture: GalleryFixture) {
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = FIXTURE_FRAME_SHAPE,
+            shape = Corners.md,
             color = MaterialTheme.colorScheme.surfaceContainerLow,
         ) {
             fixture.render(

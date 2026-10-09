@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -42,6 +41,7 @@ import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -82,7 +82,7 @@ private fun <K> TrackSegments(
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = CircleShape,
+        shape = Corners.pill,
     ) {
         Row(modifier = Modifier.selectableGroup().padding(Spacing.xxs)) {
             model.options.forEach { option ->
@@ -141,7 +141,7 @@ private fun <K> RowScope.TrackSegment(
             },
         color = containerColor,
         contentColor = contentColor,
-        shape = CircleShape,
+        shape = Corners.pill,
         onClick = { if (isSelected.not()) onSelect() },
         enabled = option.enabled,
     ) {

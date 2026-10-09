@@ -8,8 +8,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -29,6 +27,7 @@ import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
 /** A two-state glyph control reporting through one [ToggleEvent] lambda; the caller's [modifier] places it. */
 @Composable
@@ -41,7 +40,7 @@ fun Toggle(
     val filled = model.variant == ToggleVariant.Filled
     val size = if (filled) 44.dp else 38.dp
     val iconSize = if (filled) 24.dp else 20.dp
-    val shape = if (filled) RoundedCornerShape(12.dp) else CircleShape
+    val shape = if (filled) Corners.md else Corners.pill
     val targetContainer = when {
         filled.not() -> Color.Transparent
         model.checked -> scheme.primary

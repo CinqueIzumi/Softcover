@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -41,6 +40,7 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import java.util.concurrent.Executors
@@ -183,11 +183,11 @@ actual fun BarcodeScanner(
                 .align(Alignment.Center)
                 .fillMaxWidth(0.72f)
                 .aspectRatio(1.9f)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(Corners.lg)
                 .border(
                     width = 2.dp,
                     color = Color.White.copy(alpha = 0.85f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = Corners.lg,
                 ),
         )
     }

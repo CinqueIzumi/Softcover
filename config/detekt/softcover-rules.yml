@@ -3,3 +3,5 @@
 softcover:
   RawSpacingDp:
     active: true
+  RawCornerDp:
+    active: true

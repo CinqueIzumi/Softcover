@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
@@ -77,7 +77,7 @@ internal fun PageMiniature(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(if (accentLed) 34.dp else 30.dp)
-                .clip(RoundedCornerShape(7.dp))
+                .clip(Corners.sm)
                 .background(if (accentLed) scheme.primary else scheme.surfaceContainerHigh)
                 .padding(Spacing.xs),
             contentAlignment = Alignment.BottomStart,
@@ -96,7 +96,7 @@ internal fun PageMiniature(
                 modifier = Modifier
                     .fillMaxWidth(0.44f)
                     .height(14.dp)
-                    .clip(RoundedCornerShape(7.dp))
+                    .clip(Corners.sm)
                     .background(scheme.tertiaryContainer),
                 contentAlignment = Alignment.Center,
             ) {

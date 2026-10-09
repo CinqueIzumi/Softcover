@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -17,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
@@ -59,7 +59,7 @@ internal actual fun BarcodeScannerScreenLayout(
             ) {
                 Surface(
                     modifier = Modifier.widthIn(max = 460.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = Corners.lg,
                     color = MaterialTheme.colorScheme.surface,
                     border = BorderStroke(
                         width = 1.dp,

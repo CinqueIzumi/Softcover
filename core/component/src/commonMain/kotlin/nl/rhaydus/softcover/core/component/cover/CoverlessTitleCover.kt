@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -17,6 +16,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverInk
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -76,7 +76,7 @@ internal fun CoverlessTitleCover(
                 .border(
                     width = 1.dp,
                     color = MonogramCoverForeground.copy(alpha = 0.24f),
-                    shape = RoundedCornerShape(2.dp),
+                    shape = Corners.xxs,
                 ),
         )
 

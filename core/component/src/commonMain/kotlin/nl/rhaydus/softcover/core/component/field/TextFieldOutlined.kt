@@ -1,7 +1,6 @@
 package nl.rhaydus.softcover.core.component.field
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -11,8 +10,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
 @Composable
 internal fun OutlinedTextFieldBody(
@@ -36,7 +35,7 @@ internal fun OutlinedTextFieldBody(
         },
         enabled = model.enabled,
         singleLine = true,
-        shape = RoundedCornerShape(8.dp),
+        shape = Corners.sm,
         keyboardOptions = model.keyboardOptions(),
         keyboardActions = model.keyboardActions(onEvent),
         colors = OutlinedTextFieldDefaults.colors().copy(

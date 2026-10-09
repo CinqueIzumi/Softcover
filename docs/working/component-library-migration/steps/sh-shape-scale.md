@@ -18,8 +18,8 @@ buttons, fully rounded for pills and active toggles) and app `foundations.md` §
 |---|---|---|
 | SH-1 | Inventory and approved shape (below) — stop for approval | [x] |
 | SH-2 | The token object, its KDoc, the code-style rule, and the gate | [x] |
-| SH-3 | Sweep `:core:component` and `:core:designsystem` | [ ] |
-| SH-4 | Sweep the feature modules, one brief per module group | [ ] |
+| SH-3 | Sweep `:core:component` and `:core:designsystem` | [x] |
+| SH-4 | Sweep the feature modules, one brief per module group | [x] |
 | SH-C | Convergence pass (family-procedure.md § Phase 3): the surfaces whose corners should now be one step | [ ] |
 
 ## SH-1 — inventory and decisions

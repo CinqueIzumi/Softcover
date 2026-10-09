@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SH-2 done: `Corners` in `:core:designsystem`, the inactive `RawCornerDp` rule with tests, the code-style and `foundations.md` § 2.3 rules, F40/F41. SL closed: its step file is deleted and SL-3b (the `material3.Text` import ban) lives on as F34. PF-4/7 wait for S12-4.
-- **Next:** SH-3 (`steps/sh-shape-scale.md` § Sub-steps, SH-3 row, per § Approved shape): sweep `:core:component` and `:core:designsystem` onto `Corners`, including `CoverVariant.cornerRadius()` → `shape()`; snaps go to `visual-checks.md`; delegate to `softcover-implementer`.
+- **State:** SH-3 and SH-4 done: every corner in main and debug source sets reads `Corners` (`CoverVariant.shape()`, top-only sheets via `.copy(… ZeroCornerSize)`, stadiums on `Corners.pill`, true circles keep `CircleShape`); `RawCornerDp` is active; snaps logged in `visual-checks.md` (SH-3, SH-4a, SH-4b). PF-4/7 wait for S12-4.
+- **Next:** SH-C (`steps/sh-shape-scale.md` § Sub-steps, SH-C row): convergence pass per `family-procedure.md` § Phase 3, covering the surfaces whose corners should now be one step.
 - **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21: `styleCheck`, `checkDocBudgets` and `RawCornerDpTest` passed; reviewer round's findings fixed (`percent = 0`, `CornerSize` / `Absolute*` coverage, stale tracker text).
-- **Uncommitted:** SH-2 (`Corners.kt`, `RawCornerDp.kt` + test, rule set and config, `code-style.md`, `foundations.md`, F40/F41) and the SL close-out (deleted step file, F34, this README, `premium-feel-audit.md`, `component-contract.md` R12).
+- **Verification:** JBR 21: every touched module's `compileKotlinJvm`, `:feature:scan:compileAndroidMain`, `:app:compileDebugKotlin`, `ktlintCheck` and `styleCheck` (with `RawCornerDp` on) passed; glom grep clean; reviewer found no code issues, its doc-drift findings are fixed.
+- **Uncommitted:** SH-3 + SH-4 (55 files, `softcover-rules.yml`, `visual-checks.md`, step-file ticks, radius fixes in `code-style.md`, `layout.md`, `patterns/book-detail.md`, `patterns/reading.md`), this `## Now` block, and the reviewer agent's memory (pruned the SL-only skeleton-dimension entry).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

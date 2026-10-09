@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -17,6 +16,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
 /**
  * A borderless [SettingsRow] shared by the mobile Settings menu and the About screen: a 42dp
@@ -39,7 +39,7 @@ internal fun SettingsMenuRow(
         Box(
             modifier = Modifier
                 .size(42.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(Corners.md)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center,
         ) {

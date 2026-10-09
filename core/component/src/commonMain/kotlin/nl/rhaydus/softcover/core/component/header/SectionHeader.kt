@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -107,7 +107,7 @@ private fun SectionHeaderRegion(
             eyebrow = model.eyebrow,
             barWidth = 32.dp,
             barHeight = 4.dp,
-            barShape = RoundedCornerShape(2.dp),
+            barShape = Corners.xxs,
             gap = 12.dp,
             textStyle = MaterialTheme.editorialTypography.eyebrow,
             color = MaterialTheme.colorScheme.primary,

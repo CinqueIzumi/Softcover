@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -28,6 +27,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderEyebrowText
 import nl.rhaydus.softcover.core.component.header.SectionHeaderInlineEyebrow
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -44,7 +44,7 @@ fun Callout(
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         },
-        shape = RoundedCornerShape(16.dp),
+        shape = Corners.lg,
     ) {
         Row(
             modifier = Modifier.padding(

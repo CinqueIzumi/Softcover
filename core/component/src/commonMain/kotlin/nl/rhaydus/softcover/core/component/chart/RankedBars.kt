@@ -8,13 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
@@ -22,7 +22,7 @@ fun RankedBars(
     model: RankedBarsUiModel,
     modifier: Modifier = Modifier,
 ) {
-    val shape = RoundedCornerShape(3.dp)
+    val shape = Corners.xxs
 
     Column(
         modifier = modifier,

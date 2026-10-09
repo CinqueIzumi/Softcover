@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -49,6 +48,7 @@ import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
@@ -136,7 +136,7 @@ private fun SearchChromeField(
 
     Surface(
         modifier = modifier.height(48.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = Corners.lg,
         color = MaterialTheme.colorScheme.surfaceContainer,
         border = if (model.active) BorderStroke(
             1.5.dp,
@@ -288,7 +288,7 @@ private fun SearchChromeBarcodeButton(onClick: () -> Unit) {
         modifier = Modifier
             .size(48.dp)
             .pointerHandCursor(),
-        shape = RoundedCornerShape(16.dp),
+        shape = Corners.lg,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Box(

@@ -4,7 +4,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -12,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.modifier.shakeOnError
@@ -22,6 +20,7 @@ import nl.rhaydus.softcover.core.component.callout.BannerEvent
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
@@ -52,7 +51,7 @@ internal fun FeaturedBookCard(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
-    val shape = RoundedCornerShape(22.dp)
+    val shape = Corners.xl
     val interactionSource = remember { MutableInteractionSource() }
 
     Surface(

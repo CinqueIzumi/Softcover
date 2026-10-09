@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -18,11 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -63,7 +62,7 @@ private fun HeroTile(
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         color = MaterialTheme.colorScheme.primary,
-        shape = RoundedCornerShape(28.dp),
+        shape = Corners.xxl,
     ) {
         val demoted = LocalContentColor.current.copy(alpha = 0.75f)
 
@@ -113,7 +112,7 @@ private fun StandardTile(
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         color = colors.surfaceContainerHigh,
-        shape = RoundedCornerShape(24.dp),
+        shape = Corners.xxl,
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(Spacing.md),
@@ -153,7 +152,7 @@ private fun CompactTile(
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         color = colors.surfaceContainer,
-        shape = RoundedCornerShape(20.dp),
+        shape = Corners.xl,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(

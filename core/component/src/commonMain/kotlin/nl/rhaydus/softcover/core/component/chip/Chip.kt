@@ -5,14 +5,12 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +43,7 @@ import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 
@@ -98,7 +97,7 @@ private fun ChipScaffold(
     val selectable = model.tone == ChipTone.Tonal || model.tone == ChipTone.Choice
 
     val rowModifier = modifier
-        .clip(CircleShape)
+        .clip(Corners.pill)
         .background(animatedStyle.container)
         .thenChipBorder(
             tone = model.tone,
@@ -161,7 +160,7 @@ private fun Modifier.thenChipBorder(
     ChipTone.Outlined -> this.border(
         width = 1.dp,
         color = scheme.outlineVariant,
-        shape = CircleShape,
+        shape = Corners.pill,
     )
     ChipTone.Dashed -> this.drawBehind {
         drawRoundRect(
@@ -238,7 +237,7 @@ private fun ChipLabel(
         overflow = TextOverflow.Ellipsis,
         modifier = if (spoilerWash) {
             Modifier
-                .clip(RoundedCornerShape(2.dp))
+                .clip(Corners.xxs)
                 .background(MaterialTheme.colorScheme.spoilerEditorHighlight)
                 .padding(
                     horizontal = Spacing.xxxs,

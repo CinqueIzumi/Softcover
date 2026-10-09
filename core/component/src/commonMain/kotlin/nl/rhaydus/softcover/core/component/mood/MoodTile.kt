@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -27,6 +26,7 @@ import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkCosyBackground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkCosyForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkDreadBackground
@@ -88,7 +88,7 @@ fun MoodTile(
     Column(
         modifier = modifier
             .heightIn(min = 104.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(Corners.lg)
             .background(background)
             .then(
                 if (isLoading) {

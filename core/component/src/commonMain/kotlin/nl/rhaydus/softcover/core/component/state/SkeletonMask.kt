@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,8 +27,8 @@ import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 
 internal const val SKELETON_GRACE_MILLIS = 250L
 
@@ -87,7 +86,7 @@ internal fun skeletonRevealPhase(
 @Composable
 fun Modifier.skeletonMask(
     visible: Boolean,
-    shape: Shape = RoundedCornerShape(4.dp),
+    shape: Shape = Corners.xs,
 ): Modifier {
     var phase by remember { mutableStateOf(SkeletonRevealPhase.Content) }
     var startMillis by remember { mutableLongStateOf(NOT_STARTED) }

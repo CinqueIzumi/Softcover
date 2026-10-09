@@ -1,7 +1,6 @@
 - [onStart + StateFlow double-emit](feedback_onstart_stateflow_double_emit.md) — an `.onStart{ check-and-fire }` guard on a StateFlow collector double-fires on startup; confirm with an instrumented test run
 - [Full-height sheet pinning is safe](architecture_full_height_sheet_pinning.md) — pinned rows + `weight(1f)+verticalScroll` body in AdaptiveModalSheet fills height on both forms; don't re-litigate
 - [Foundation press/click modifiers](architecture_foundation_press_modifiers.md) — pressScaleClickable hides its InteractionSource; hand-rolling pressScale+clickable is correct when the source is shared
-- [Skeleton dimension math](project_skeleton_dimension_math.md) — check a skeleton bar against the real lineHeight; a Row next to a tall cover masks a gap, a Column sums it
 - [Design-system doc drift](project_design_system_doc_drift_pattern.md) — one UI fact/component is stated in several sections incl. patterns/*.md; grep the old value/name everywhere
 - [Staged vs unstaged review scope](feedback_staged_vs_unstaged_review_scope.md) — "unstaged changes" may mean everything uncommitted; reconcile `git diff HEAD` against the brief's prose
 - [Hook script not registered](project_hook_script_not_registered.md) — a new `.claude/hooks/*.sh` does nothing until `.claude/settings.json` wires its matcher; always check both

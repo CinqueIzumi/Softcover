@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -34,6 +33,7 @@ import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
@@ -117,7 +117,7 @@ private fun ReviewCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(20.dp),
+        shape = Corners.xl,
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             val quoteAlpha = if (isSystemInDarkTheme()) 0.22f else 0.32f
@@ -182,10 +182,10 @@ private fun ReviewCard(
                         contentDescription = "Reviewer avatar",
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(RoundedCornerShape(18.dp))
+                            .clip(Corners.lg)
                             .skeletonMask(
                                 visible = review.isLoading,
-                                shape = RoundedCornerShape(18.dp),
+                                shape = Corners.lg,
                             ),
                         contentScale = ContentScale.Crop,
                     )
@@ -215,10 +215,10 @@ private fun ReviewCard(
                     review.rating?.let { rating ->
                         Surface(
                             color = MaterialTheme.colorScheme.tertiaryContainer,
-                            shape = RoundedCornerShape(10.dp),
+                            shape = Corners.md,
                             modifier = Modifier.skeletonMask(
                                 visible = review.isLoading,
-                                shape = RoundedCornerShape(10.dp),
+                                shape = Corners.md,
                             ),
                         ) {
                             Row(

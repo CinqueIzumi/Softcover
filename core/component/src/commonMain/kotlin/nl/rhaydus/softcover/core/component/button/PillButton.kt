@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
@@ -75,14 +76,14 @@ fun PillButton(
         }
         .height(height)
         .let { base -> if (isIconOnly) base.width(height) else base }
-        .clip(CircleShape)
+        .clip(Corners.pill)
         .background(container)
         .let { base ->
             if (model.tone == PillButtonTone.Outlined) {
                 base.border(
                     width = 1.dp,
                     color = scheme.outlineVariant,
-                    shape = CircleShape,
+                    shape = Corners.pill,
                 )
             } else {
                 base

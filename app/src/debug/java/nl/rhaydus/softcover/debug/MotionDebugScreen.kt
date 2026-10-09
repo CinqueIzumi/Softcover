@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -50,6 +49,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -165,7 +165,7 @@ object MotionDebugScreen : Screen {
                 .fillMaxWidth()
                 .padding(vertical = Spacing.xxs),
             color = MaterialTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(16.dp),
+            shape = Corners.lg,
         ) {
             Row(
                 modifier = Modifier
@@ -215,7 +215,7 @@ object MotionDebugScreen : Screen {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(160.dp)
-                .clip(RoundedCornerShape(16.dp)),
+                .clip(Corners.lg),
             contentAlignment = Alignment.Center,
         ) {
             Surface(
@@ -256,7 +256,7 @@ object MotionDebugScreen : Screen {
                     onShakeEnd = { trigger = false },
                 ),
             color = MaterialTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(16.dp),
+            shape = Corners.lg,
         ) {
             Row(
                 modifier = Modifier
@@ -292,7 +292,7 @@ object MotionDebugScreen : Screen {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(16.dp),
+            shape = Corners.lg,
         ) {
             Row(
                 modifier = Modifier
@@ -339,7 +339,7 @@ object MotionDebugScreen : Screen {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(16.dp),
+            shape = Corners.lg,
         ) {
             Column(
                 modifier = Modifier

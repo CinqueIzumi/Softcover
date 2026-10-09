@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -19,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -27,10 +25,10 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-private val TILE_SHAPE: Shape = RoundedCornerShape(14.dp)
 private const val TILE_ASPECT_RATIO = 0.78f
 
 /**
@@ -79,11 +77,11 @@ internal fun PreviewTileFrame(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(TILE_ASPECT_RATIO)
-                .clip(TILE_SHAPE)
+                .clip(Corners.lg)
                 .border(
                     width = if (selected) 2.dp else 1.dp,
                     color = accentColor,
-                    shape = TILE_SHAPE,
+                    shape = Corners.lg,
                 ),
             content = content,
         )
@@ -114,7 +112,7 @@ internal fun MiniBar(
         modifier = Modifier
             .fillMaxWidth(widthFraction)
             .height(height)
-            .clip(RoundedCornerShape(2.dp))
+            .clip(Corners.xxs)
             .background(color),
     )
 }

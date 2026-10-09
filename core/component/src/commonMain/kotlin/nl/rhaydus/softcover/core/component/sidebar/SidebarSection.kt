@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -35,6 +34,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /** Renders every section in [model] under one shared `selectableGroup()`, with a gap between sections. */
@@ -123,7 +123,7 @@ private fun <K> SidebarRow(
             .pointerHandCursor()
             .hoverHighlight(
                 interactionSource = interactionSource,
-                shape = RoundedCornerShape(10.dp),
+                shape = Corners.md,
             )
             .semantics {
                 role = rowRole
@@ -139,7 +139,7 @@ private fun <K> SidebarRow(
             ),
         color = container,
         contentColor = content,
-        shape = RoundedCornerShape(10.dp),
+        shape = Corners.md,
     ) {
         Row(
             modifier = Modifier.padding(

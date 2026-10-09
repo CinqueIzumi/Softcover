@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -31,10 +30,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
-private val SIDEBAR_ITEM_SHAPE = RoundedCornerShape(16.dp)
 
 /**
  * The expanded-width navigation chrome (`>= 840dp`): a permanent editorial sidebar that replaces
@@ -112,7 +111,7 @@ private fun SidebarItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(SIDEBAR_ITEM_SHAPE)
+            .clip(Corners.lg)
             .background(containerColor)
             .selectable(
                 selected = item.selected,

@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
-import coil3.compose.LocalPlatformContext
 import coil3.compose.AsyncImagePainter
+import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
 import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
@@ -42,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalSharedTransitionScope
 
@@ -86,7 +87,7 @@ fun Cover(
     val coverlessFallback = model.coverlessTitle?.takeIf { it.isNotBlank() }
     val contentDescription = coverlessFallback?.let { "Cover of $it" }
 
-    val shape = RoundedCornerShape(model.variant.cornerRadius())
+    val shape = model.variant.shape()
     val imageModifier = if (model.variant.elevation() > 0.dp) {
         Modifier
             .shadow(
@@ -319,19 +320,19 @@ fun rememberCoverImageRequest(model: CoverUiModel): ImageRequest? {
     }
 }
 
-internal fun CoverVariant.cornerRadius(): Dp = when (this) {
-    CoverVariant.Shelf -> 10.dp
-    CoverVariant.Rounded -> 16.dp
+internal fun CoverVariant.shape(): RoundedCornerShape = when (this) {
+    CoverVariant.Shelf -> Corners.md
+    CoverVariant.Rounded -> Corners.lg
     CoverVariant.Tile,
     CoverVariant.Spotlight,
-    -> 8.dp
+    -> Corners.sm
 
     CoverVariant.Raised,
     CoverVariant.Floating,
     CoverVariant.Jacket,
     CoverVariant.StackedJacket,
     CoverVariant.Flat,
-    -> 4.dp
+    -> Corners.xs
 }
 
 private fun CoverVariant.elevation(): Dp = when (this) {
