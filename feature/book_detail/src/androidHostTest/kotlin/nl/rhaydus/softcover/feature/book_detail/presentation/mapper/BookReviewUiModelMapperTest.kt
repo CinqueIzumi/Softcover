@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.mapper
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.softcover.core.domain.model.ReviewDocument
 import nl.rhaydus.softcover.feature.book_detail.domain.model.BookReview
@@ -39,7 +40,19 @@ class BookReviewUiModelMapperTest {
             val model = review.toBookReviewUiModel()
 
             // ----- Assert -----
-            model.rating shouldBe "4.0"
+            model.rating.shouldNotBeNull().label shouldBe "4.0"
+        }
+
+        @Test
+        fun `describes the rating badge with the formatted rating for accessibility`() {
+            // ----- Arrange -----
+            val review = review(rating = 4.0)
+
+            // ----- Act -----
+            val model = review.toBookReviewUiModel()
+
+            // ----- Assert -----
+            model.rating.shouldNotBeNull().contentDescription shouldBe "Rated 4.0"
         }
 
         @Test

@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
  * @property tone The colour register — see [BadgeTone].
  * @property size The pad tier — see [BadgeSize]. Defaults to [BadgeSize.Compact].
  * @property icon An optional leading icon, decorative — the label already announces what it marks.
+ * @property contentDescription What a screen reader speaks instead of the bare label; null = the label is read as-is.
  */
 @Immutable
 data class BadgeUiModel(
@@ -23,6 +24,7 @@ data class BadgeUiModel(
     val tone: BadgeTone,
     val size: BadgeSize = BadgeSize.Compact,
     val icon: SoftcoverIcon? = null,
+    val contentDescription: String? = null,
 ) {
     companion object : UiModelPreviews<BadgeUiModel> {
         /** Per R5, one fixture per tone, one Regular, and one with a leading icon. */
@@ -34,6 +36,13 @@ data class BadgeUiModel(
             "Behind" to BadgeUiModel(
                 label = "Behind",
                 tone = BadgeTone.ErrorContainer,
+            ),
+            "Rating" to BadgeUiModel(
+                label = "4.0",
+                tone = BadgeTone.TertiaryContainer,
+                size = BadgeSize.Regular,
+                icon = SoftcoverIcon.StarFilled,
+                contentDescription = "Rated 4.0",
             ),
             "Expired" to BadgeUiModel(
                 label = "Expired",

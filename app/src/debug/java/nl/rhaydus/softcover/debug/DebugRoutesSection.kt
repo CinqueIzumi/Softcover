@@ -48,7 +48,7 @@ fun DebugRoutesSection(host: Screen) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.surfaceContainer,
-            shape = Corners.xl,
+            shape = Corners.lg,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 DebugNavigationRow(

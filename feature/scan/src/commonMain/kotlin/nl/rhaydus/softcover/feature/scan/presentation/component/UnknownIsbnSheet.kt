@@ -42,7 +42,7 @@ internal fun UnknownIsbnSheet(
         content = {
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = Corners.sm,
+                shape = Corners.lg,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Box(

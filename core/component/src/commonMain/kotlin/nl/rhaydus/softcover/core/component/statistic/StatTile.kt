@@ -62,7 +62,7 @@ private fun HeroTile(
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         color = MaterialTheme.colorScheme.primary,
-        shape = Corners.xxl,
+        shape = Corners.xl,
     ) {
         val demoted = LocalContentColor.current.copy(alpha = 0.75f)
 
@@ -112,7 +112,7 @@ private fun StandardTile(
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) {},
         color = colors.surfaceContainerHigh,
-        shape = Corners.xxl,
+        shape = Corners.xl,
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(Spacing.md),

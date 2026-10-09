@@ -13,10 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.divider.Divider
-import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
@@ -32,8 +31,7 @@ fun ProportionChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(18.dp)
-                .clip(barShape)
-                .skeletonMask(
+                .clippedSkeletonMask(
                     visible = model.isLoading,
                     shape = barShape,
                 ),

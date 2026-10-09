@@ -22,13 +22,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
+import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.RichText
+import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
@@ -36,7 +37,6 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRevealReviewSpoilerAction
@@ -117,7 +117,7 @@ private fun ReviewCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = Corners.xl,
+        shape = Corners.lg,
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             val quoteAlpha = if (isSystemInDarkTheme()) 0.22f else 0.32f
@@ -182,8 +182,7 @@ private fun ReviewCard(
                         contentDescription = "Reviewer avatar",
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(Corners.lg)
-                            .skeletonMask(
+                            .clippedSkeletonMask(
                                 visible = review.isLoading,
                                 shape = Corners.lg,
                             ),
@@ -213,44 +212,13 @@ private fun ReviewCard(
                     }
 
                     review.rating?.let { rating ->
-                        Surface(
-                            color = MaterialTheme.colorScheme.tertiaryContainer,
-                            shape = Corners.md,
+                        Badge(
+                            model = rating,
                             modifier = Modifier.skeletonMask(
                                 visible = review.isLoading,
-                                shape = Corners.md,
+                                shape = Corners.sm,
                             ),
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(
-                                    horizontal = Spacing.xs,
-                                    vertical = Spacing.xxs,
-                                ),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                val ratingBadgeIcon = drawableIconResource(
-                                    icon = SoftcoverIcon.StarFilled,
-                                    contentDescription = "Rating",
-                                )
-
-                                Icon(
-                                    painter = ratingBadgeIcon.getIconPainter(),
-                                    contentDescription = ratingBadgeIcon.contentDescription,
-                                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    modifier = Modifier.size(14.dp),
-                                )
-
-                                Spacer(modifier = Modifier.width(Spacing.xxs))
-
-                                SoftcoverText(
-                                    text = rating,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontFamily = displayFontFamily(),
-                                    ),
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                )
-                            }
-                        }
+                        )
                     }
                 }
             }

@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.model
 
+import nl.rhaydus.softcover.core.component.badge.BadgeUiModel
 import nl.rhaydus.softcover.core.component.richtext.RichTextUiModel
 
 /**
@@ -12,7 +13,7 @@ internal data class BookReviewUiModel(
     val id: Int,
     val body: RichTextUiModel,
     val isSpoilerGated: Boolean,
-    val rating: String?,
+    val rating: BadgeUiModel?,
     val reviewedMonthYear: String?,
     val reviewerName: String,
     val reviewerAvatarUrl: String?,

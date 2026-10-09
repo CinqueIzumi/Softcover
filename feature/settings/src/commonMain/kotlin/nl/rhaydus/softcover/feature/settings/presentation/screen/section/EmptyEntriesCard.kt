@@ -16,7 +16,7 @@ internal fun EmptyEntriesCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = Corners.xl,
+        shape = Corners.lg,
     ) {
         SoftcoverText(
             text = "No shelves to configure yet.",

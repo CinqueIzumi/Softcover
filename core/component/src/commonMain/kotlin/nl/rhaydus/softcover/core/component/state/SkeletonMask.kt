@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -203,6 +204,17 @@ fun Modifier.skeletonMask(
             },
         )
 }
+
+@Composable
+fun Modifier.clippedSkeletonMask(
+    visible: Boolean,
+    shape: Shape,
+): Modifier = this
+    .clip(shape)
+    .skeletonMask(
+        visible = visible,
+        shape = shape,
+    )
 
 @Composable
 private fun rememberShimmerSweep(): State<Float> = rememberInfiniteTransition(label = "skeletonShimmer")

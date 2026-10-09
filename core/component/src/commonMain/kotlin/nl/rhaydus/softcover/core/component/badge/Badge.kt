@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -35,6 +37,7 @@ fun Badge(
         BadgeTone.Primary -> scheme.primary to scheme.onPrimary
         BadgeTone.PrimaryContainer -> scheme.primaryContainer to scheme.onPrimaryContainer
         BadgeTone.ErrorContainer -> scheme.errorContainer to scheme.onErrorContainer
+        BadgeTone.TertiaryContainer -> scheme.tertiaryContainer to scheme.onTertiaryContainer
         BadgeTone.Neutral -> scheme.surfaceContainerHigh to scheme.onSurfaceVariant
         BadgeTone.Scrim -> Color.Black.copy(alpha = 0.55f) to Color.White
     }
@@ -52,7 +55,9 @@ fun Badge(
     val style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {
+            model.contentDescription?.let { contentDescription = it }
+        },
         color = container,
         contentColor = content,
         shape = Corners.sm,

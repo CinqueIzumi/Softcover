@@ -10,9 +10,11 @@ internal fun BookReview.toBookReviewUiModel(): BookReviewUiModel = BookReviewUiM
     body = reviewDocument.toRichTextUiModel(),
     isSpoilerGated = hasSpoilers,
     rating = rating?.let {
-        formatDecimalNumber(
-            value = it,
-            fractionDigits = 1,
+        ratingBadge(
+            label = formatDecimalNumber(
+                value = it,
+                fractionDigits = 1,
+            ),
         )
     },
     reviewedMonthYear = getReviewedMonthYear(),

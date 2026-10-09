@@ -19,7 +19,7 @@ private val STAND_IN_REVIEW = BookReviewUiModel(
         ),
     ),
     isSpoilerGated = false,
-    rating = "4.0",
+    rating = ratingBadge(label = "4.0"),
     reviewedMonthYear = "January 2025",
     reviewerName = "REVIEWER NAME",
     reviewerAvatarUrl = null,

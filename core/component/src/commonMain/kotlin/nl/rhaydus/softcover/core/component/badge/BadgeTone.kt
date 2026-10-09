@@ -9,6 +9,7 @@ enum class BadgeTone {
     Primary,
     PrimaryContainer,
     ErrorContainer,
+    TertiaryContainer,
     Neutral,
     Scrim,
 }

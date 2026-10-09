@@ -76,7 +76,7 @@ fun VerdictBlock(
             modifier = Modifier
                 .fillMaxWidth()
                 .pointerHandCursor(),
-            shape = Corners.xl,
+            shape = Corners.lg,
             color = MaterialTheme.colorScheme.surfaceContainer,
             onClick = onEditClick,
         ) {

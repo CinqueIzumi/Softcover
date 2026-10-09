@@ -45,11 +45,11 @@ internal fun ShareEntryRow(
         modifier = modifier
             .fillMaxWidth()
             .alpha(if (enabled || isLoading) 1f else 0.4f)
-            .clip(Corners.lg)
+            .clip(Corners.md)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .skeletonMask(
                 visible = isLoading,
-                shape = Corners.lg,
+                shape = Corners.md,
             )
             .conditional(
                 condition = enabled,
