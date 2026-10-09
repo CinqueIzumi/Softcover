@@ -17,7 +17,7 @@ and app `foundations.md` § 2.4 (4/8, 12/16, 20/24, 28/32, 40/48).
 | SP-2 | The token object, its KDoc, the code-style rule, and the gate | [x] |
 | SP-3 | Sweep `:core:component` and `:core:designsystem` | [x] |
 | SP-4 | Sweep the feature modules, one brief per module group | [x] |
-| SP-5 | Every file-level `private val X = N.dp` (`git grep -l "^private val .*\.dp$" -- '*.kt'`; 30 files, 66 vals at planning) and `BarSpec`-style dp holders becomes a token (spacing) or inline (sizes); done when the grep is empty | [ ] |
+| SP-5 | Every file-level `private val X = N.dp` (`git grep -l "^private val .*\.dp$" -- '*.kt'`; 30 files, 66 vals at planning) and `BarSpec`-style dp holders becomes a token (spacing) or inline (sizes); done when the grep is empty | [x] |
 | SP-C | Convergence pass (family-procedure.md § Phase 3): the gutters and gaps that should now be one value | [ ] |
 
 ## SP-1 — inventory and decisions

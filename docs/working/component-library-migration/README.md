@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SP-3 + SP-4 built together: every spacing call in core, features, `:orchestration` and `:app` reads a `Spacing` token (incl. `when`-branch / model-field spacing such as Library `itemSpacing` and BookCard `contentVerticalInset`); `RawSpacingDp` active app-wide via `config/detekt/softcover-rules.yml`, appended for every module but `:detekt-rules`; shifts in `visual-checks.md`. SL-3b blocked on F34; PF-4/7 wait for S12-4.
-- **Next:** SP-5, the file-level `private val X = N.dp` and `BarSpec`-style dp holders (spacing → token, sizes → inline).
+- **State:** SP-5 done: SP-3/4 had already cleared every file-level dp val but `MonogramCoverMetrics.kt`'s; its border-inset clamps now read `Spacing.xxxs` / `Spacing.xs` (floor 3 → 2 dp, in `visual-checks.md`) and the 64 dp full-title threshold is inline. The `^private val .*\.dp$` grep is empty and no `BarSpec`-style holders remain. SL-3b blocked on F34; PF-4/7 wait for S12-4.
+- **Next:** SP-C (`steps/sp-spacing-scale.md` § Sub-steps, SP-C row): convergence pass per `family-procedure.md` § Phase 3 over spacing as it now stands (the gutters and gaps that should be one value); propose, then stop for approval.
 - **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21: `styleCheck`, `checkModuleGraph`, `assembleDebug`, `:desktopApp:compileKotlin`, `testAndroidHostTest` passed; glom grep clean; reviewer one round, 4 minor fixes applied.
-- **Uncommitted:** nothing.
+- **Verification:** JBR 21: `:core:component:compileKotlinJvm`, `:core:component:testAndroidHostTest`, `checkModuleGraph`, `:core:component:projectHealth`, `ktlintCheck`, `styleCheck` passed. One-file main-conversation change, no reviewer round.
+- **Uncommitted:** SP-5 (`MonogramCoverMetrics.kt`, this README, the SP step file, `visual-checks.md`).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

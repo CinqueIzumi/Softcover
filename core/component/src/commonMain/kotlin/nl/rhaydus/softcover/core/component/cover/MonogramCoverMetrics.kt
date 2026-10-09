@@ -4,29 +4,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import kotlin.math.roundToInt
 
 /**
- * The smallest font size either the single-initial fallback or the full-title rendering ever
- * settles at — below this a glyph stops reading as a letterform. Shared so [CoverlessTitleCover]'s
- * `TextAutoSize` floor for the full title matches the same legibility line this file already draws
- * for the initial.
+ * The smallest font size the monogram ever renders at; below it a glyph stops reading as a
+ * letterform.
  */
 internal val MONOGRAM_MIN_LEGIBLE_FONT_SIZE = 10.sp
 
 private const val BORDER_INSET_FRACTION = 0.06f
-private val BORDER_INSET_FLOOR = 3.dp
-private val BORDER_INSET_CEIL = 8.dp
 
 private const val INITIAL_FONT_SIZE_FRACTION = 0.36f
 private val INITIAL_FONT_SIZE_CEIL = 96.sp
-
-/**
- * Below this width, a full multi-word title can't wrap into anything legible — [CoverlessTitleCover]
- * degrades to the single-initial rendering instead. Set just above the 48dp shelf-thumbnail floor
- * documented on [CoverlessTitleCover], the narrowest real call site, which needs the initial.
- */
-private val FULL_TITLE_MIN_WIDTH = 64.dp
 
 private const val TITLE_FONT_SIZE_FRACTION = 0.15f
 private val TITLE_FONT_SIZE_CEIL = 28.sp
@@ -44,20 +34,14 @@ internal data class MonogramCoverMetrics(
 )
 
 /**
- * Derives [CoverlessTitleCover]'s size-adaptive fit purely from the measured tile [width]: the
- * hairline border inset, the single-initial fallback's font size, and the full-title rendering's
- * starting font size / line cap all scale with the tile, floored so they never vanish on a
- * thumbnail-sized tile and capped so they never balloon on a very wide desktop tile. [showFullTitle]
- * is the degrade gate — below [FULL_TITLE_MIN_WIDTH] a wrapped title has no room to read, so
- * [CoverlessTitleCover] falls back to [initialFontSize] alone. Pure (non-composable) so the fit math
- * is independently testable; [titleFontSize] is a *starting* size only — the caller still shrinks it
- * further per-title via `TextAutoSize`, since the actual fit also depends on the title's own length,
- * which this width-only function can't see.
+ * [CoverlessTitleCover]'s fit for a tile of [width]. [MonogramCoverMetrics.titleFontSize] is only a
+ * starting size: the caller still shrinks it per title via `TextAutoSize`, because the fit also
+ * depends on the title's length.
  */
 internal fun monogramCoverMetrics(width: Dp): MonogramCoverMetrics {
     val borderInset = (width * BORDER_INSET_FRACTION).coerceIn(
-        BORDER_INSET_FLOOR,
-        BORDER_INSET_CEIL,
+        Spacing.xxxs,
+        Spacing.xs,
     )
 
     val initialFontSizeSp = (width.value * INITIAL_FONT_SIZE_FRACTION)
@@ -82,7 +66,7 @@ internal fun monogramCoverMetrics(width: Dp): MonogramCoverMetrics {
     return MonogramCoverMetrics(
         borderInset = borderInset,
         initialFontSize = initialFontSizeSp.sp,
-        showFullTitle = width >= FULL_TITLE_MIN_WIDTH,
+        showFullTitle = width >= 64.dp,
         titleFontSize = titleFontSizeSp.sp,
         titleMaxLines = titleMaxLines,
     )
