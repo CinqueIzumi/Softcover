@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -18,6 +17,7 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.notification.rememberNotificationPermissionRequester
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
@@ -47,7 +47,7 @@ internal fun FeaturedSessionButton(
 
     when {
         isLoading.not() && active?.book?.id == book.id -> {
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             // Kept tonal (rather than the idle state's outlined pill) so the active-session state
             // still reads with a touch more weight than a plain "start" affordance.
@@ -71,7 +71,7 @@ internal fun FeaturedSessionButton(
         isLoading.not() && book.currentEdition?.isAudiobook == true -> Unit
 
         isLoading || active == null -> {
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             RhaydusButton(
                 label = "Start reading session",

@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkDreadEye
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkDreadForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkHeartWrenchBackground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MoodInkHeartWrenchForeground
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -98,7 +99,7 @@ fun MoodTile(
                         .pressScaleClickable(onClick = { onEvent(MoodTileEvent.Clicked(key = model.key)) })
                 },
             )
-            .padding(16.dp),
+            .padding(Spacing.md),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Row(

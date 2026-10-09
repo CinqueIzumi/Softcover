@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.badge.CoverOverlayUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardCover
@@ -13,6 +12,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardTrailing
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.DateStyle
 import nl.rhaydus.softcover.core.domain.model.DeadlineProgress
@@ -64,8 +64,8 @@ internal fun Book.toAlsoReadingCard(
             deadline = deadlineProgress?.toDeadlineSummaryUiModel(
                 dateStyle = dateStyle,
             ),
-            contentHorizontalInset = 24.dp,
-            contentVerticalInset = 18.dp,
+            contentHorizontalInset = Spacing.xl,
+            contentVerticalInset = Spacing.md,
         ),
         decorations = BookCardDecorations(
             progress = BookCardProgress.Value(

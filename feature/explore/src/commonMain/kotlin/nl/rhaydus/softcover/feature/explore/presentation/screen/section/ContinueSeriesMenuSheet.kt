@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuOptionUiModel
@@ -77,9 +78,9 @@ private fun DismissSheetOption(
                 role = Role.Button,
                 onClick = onClick,
             )
-            .padding(vertical = 12.dp),
+            .padding(vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         val iconResource = drawableIconResource(
             icon = model.icon,
@@ -93,7 +94,7 @@ private fun DismissSheetOption(
             modifier = Modifier.size(22.dp),
         )
 
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxxs)) {
             SoftcoverText(
                 text = model.label,
                 style = MaterialTheme.typography.titleMedium,

@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The page in miniature, painted from [scheme] rather than from the surrounding theme: the section
@@ -34,8 +35,8 @@ internal fun PageMiniature(
         modifier = modifier
             .background(scheme.background)
             .padding(
-                horizontal = 10.dp,
-                vertical = 12.dp,
+                horizontal = Spacing.xs,
+                vertical = Spacing.sm,
             ),
     ) {
         MiniBar(
@@ -44,7 +45,7 @@ internal fun PageMiniature(
             color = scheme.primary,
         )
 
-        Spacer(modifier = Modifier.height(9.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         MiniBar(
             widthFraction = 0.82f,
@@ -52,7 +53,7 @@ internal fun PageMiniature(
             color = scheme.onSurface,
         )
 
-        Spacer(modifier = Modifier.height(7.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         MiniBar(
             widthFraction = 1f,
@@ -61,7 +62,7 @@ internal fun PageMiniature(
         )
 
         if (accentLed.not()) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxs))
 
             MiniBar(
                 widthFraction = 0.62f,
@@ -70,7 +71,7 @@ internal fun PageMiniature(
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Box(
             modifier = Modifier
@@ -78,7 +79,7 @@ internal fun PageMiniature(
                 .height(if (accentLed) 34.dp else 30.dp)
                 .clip(RoundedCornerShape(7.dp))
                 .background(if (accentLed) scheme.primary else scheme.surfaceContainerHigh)
-                .padding(7.dp),
+                .padding(Spacing.xs),
             contentAlignment = Alignment.BottomStart,
         ) {
             MiniBar(
@@ -89,7 +90,7 @@ internal fun PageMiniature(
         }
 
         if (accentLed) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             Box(
                 modifier = Modifier

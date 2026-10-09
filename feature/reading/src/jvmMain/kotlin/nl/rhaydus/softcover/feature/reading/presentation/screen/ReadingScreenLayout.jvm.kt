@@ -17,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.util.SkeletonCrossfade
@@ -31,6 +30,7 @@ import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurstScale
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshEvent
 import nl.rhaydus.softcover.core.component.header.PageMasthead
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.action.ReadingAction
 import nl.rhaydus.softcover.feature.reading.presentation.action.RefreshAction
@@ -156,7 +156,7 @@ private fun DesktopReadingContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(readingScrollState)
-                .padding(top = 8.dp, bottom = 24.dp + rememberBottomBarPadding()),
+                .padding(top = Spacing.xs, bottom = Spacing.xl + rememberBottomBarPadding()),
         ) {
             ReadingFeaturedSection(
                 state = state,
@@ -197,7 +197,7 @@ private fun DesktopReadingContent(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(vertical = 4.dp),
+                .padding(vertical = Spacing.xxs),
         )
     }
 }
@@ -211,7 +211,7 @@ private fun DesktopReadingHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 24.dp, end = 12.dp, top = 16.dp),
+            .padding(start = Spacing.xl, end = Spacing.sm, top = Spacing.md),
     ) {
         PageMasthead(model = state.visibleMasthead) {
             MastheadRefreshAction(
@@ -225,7 +225,7 @@ private fun DesktopReadingHeader(
         }
 
         if (state.streakEnabled && (state.isLoading || state.recentReadingActivity.isNotEmpty())) {
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             StreakStrip(
                 activity = state.recentReadingActivity,
@@ -234,6 +234,6 @@ private fun DesktopReadingHeader(
             )
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxs))
     }
 }

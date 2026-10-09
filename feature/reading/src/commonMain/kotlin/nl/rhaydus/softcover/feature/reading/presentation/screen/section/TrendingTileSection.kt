@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -38,7 +39,7 @@ internal fun TrendingTileSection(
     ) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
             onClick = { onBookClick(book) },
@@ -49,7 +50,7 @@ internal fun TrendingTileSection(
                 .pointerHandCursor(),
         ) {
             Row(
-                modifier = Modifier.padding(14.dp),
+                modifier = Modifier.padding(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Cover(
@@ -57,11 +58,11 @@ internal fun TrendingTileSection(
                     modifier = Modifier.width(80.dp),
                 )
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(Spacing.md))
 
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
                 ) {
                     SoftcoverText(
                         text = "Trending".uppercase(),

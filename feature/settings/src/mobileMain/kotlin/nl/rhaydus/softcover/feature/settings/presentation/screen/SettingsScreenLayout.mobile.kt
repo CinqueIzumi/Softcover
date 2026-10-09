@@ -15,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.theme.StandardPreview
@@ -24,6 +23,7 @@ import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.RoadmapAction
@@ -90,13 +90,13 @@ internal actual fun SettingsScreenLayout(
                 .verticalScroll(rememberScrollState())
                 .imePadding()
                 .cappedContentWidth()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = Spacing.xl),
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             PageMasthead(model = state.settingsPageMasthead)
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             state.appUpdateCallout?.let { appUpdateCallout ->
                 Callout(
@@ -110,12 +110,12 @@ internal actual fun SettingsScreenLayout(
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(Spacing.x4l))
             }
 
             SectionHeader(model = state.settingsMenuAccountHeader)
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             SettingsRowGroup {
                 row {
@@ -128,11 +128,11 @@ internal actual fun SettingsScreenLayout(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             SectionHeader(model = state.settingsMenuPersonalisationHeader)
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             SettingsRowGroup {
                 row {
@@ -161,11 +161,11 @@ internal actual fun SettingsScreenLayout(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             SectionHeader(model = state.settingsMenuAboutHeader)
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             SettingsRowGroup {
                 row {
@@ -186,11 +186,11 @@ internal actual fun SettingsScreenLayout(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             debugSection()
 
-            Spacer(modifier = Modifier.height(24.dp + bottomBarPadding))
+            Spacer(modifier = Modifier.height(Spacing.xl + bottomBarPadding))
         }
     }
 }

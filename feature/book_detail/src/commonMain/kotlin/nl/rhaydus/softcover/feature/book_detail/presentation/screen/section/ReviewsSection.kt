@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -55,26 +56,26 @@ internal fun ReviewsSection(
 ) {
     if (state.reviews.isEmpty()) return
 
-    Spacer(modifier = Modifier.height(36.dp))
+    Spacer(modifier = Modifier.height(Spacing.x4l))
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.md)) {
         SectionHeader(model = state.reviewsSectionHeader)
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxs))
 
         SoftcoverText(
             text = "What readers think",
             style = MaterialTheme.editorialTypography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = Spacing.xs),
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Column {
             state.reviews.forEachIndexed { index, review ->
                 if (index > 0) {
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
                 }
 
                 ReviewCard(
@@ -86,10 +87,10 @@ internal fun ReviewsSection(
             }
 
             state.reviewsSummary?.let { summary ->
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 Row(
-                    modifier = Modifier.padding(horizontal = 8.dp),
+                    modifier = Modifier.padding(horizontal = Spacing.xs),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val footerStarIcon = drawableIconResource(
@@ -104,7 +105,7 @@ internal fun ReviewsSection(
                         modifier = Modifier.size(14.dp),
                     )
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(Spacing.xxs))
 
                     SoftcoverText(
                         text = summary,
@@ -138,15 +139,15 @@ private fun ReviewCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = quoteAlpha),
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = 16.dp, top = 4.dp),
+                    .padding(start = Spacing.md, top = Spacing.xxs),
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(22.dp),
+                    .padding(Spacing.lg),
             ) {
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxl))
 
                 // Whole-review spoiler gate (HEAD behavior): a review flagged as containing
                 // spoilers withholds its body entirely behind a quiet "Show spoiler" text button —
@@ -182,7 +183,7 @@ private fun ReviewCard(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RhaydusShimmerImage(
@@ -198,7 +199,7 @@ private fun ReviewCard(
                         contentScale = ContentScale.Crop,
                     )
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(Spacing.sm))
 
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -209,7 +210,7 @@ private fun ReviewCard(
                             )
 
                             review.reviewedMonthYear?.let { monthYear ->
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(Spacing.xs))
 
                                 SoftcoverText(
                                     text = monthYear,
@@ -231,8 +232,8 @@ private fun ReviewCard(
                         ) {
                             Row(
                                 modifier = Modifier.padding(
-                                    horizontal = 8.dp,
-                                    vertical = 4.dp,
+                                    horizontal = Spacing.xs,
+                                    vertical = Spacing.xxs,
                                 ),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
@@ -248,7 +249,7 @@ private fun ReviewCard(
                                     modifier = Modifier.size(14.dp),
                                 )
 
-                                Spacer(modifier = Modifier.width(4.dp))
+                                Spacer(modifier = Modifier.width(Spacing.xxs))
 
                                 SoftcoverText(
                                     text = rating,

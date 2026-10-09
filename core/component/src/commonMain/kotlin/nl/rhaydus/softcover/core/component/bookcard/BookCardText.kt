@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -43,7 +44,7 @@ internal fun BookCardTextBlock(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xxxs),
     ) {
         if (eyebrow != null) {
             val eyebrowColor = when (eyebrow.tone) {
@@ -95,7 +96,7 @@ internal fun BookCardTextBlock(
                 isLoading = isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp),
+                    .padding(top = Spacing.xxs),
             )
         }
     }
@@ -141,7 +142,7 @@ private fun TitleRow(
     )
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         verticalAlignment = Alignment.Top,
     ) {
         Icon(
@@ -220,7 +221,7 @@ private fun RatingLabel(
     )
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clearAndSetSemantics { this.contentDescription = contentDescription },
     ) {

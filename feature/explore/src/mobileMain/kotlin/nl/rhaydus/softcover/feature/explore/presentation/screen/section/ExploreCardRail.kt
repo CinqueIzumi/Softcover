@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 
 private val railListStates = ExploreRail.entries.associateWith { LazyListState() }
@@ -34,8 +35,8 @@ internal fun ExploreCardRail(
 
     LazyRow(
         state = railListStates.getValue(rail),
-        contentPadding = PaddingValues(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = Spacing.xl),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         itemsIndexed(set.cards, key = { _, card -> card.key.lazyKey }) { index, card ->
             BookCard(

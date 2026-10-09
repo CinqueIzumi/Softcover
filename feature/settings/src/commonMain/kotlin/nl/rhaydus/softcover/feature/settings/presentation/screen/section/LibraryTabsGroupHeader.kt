@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val LIST_DOT_INLINE_CONTENT_ID = "library-tabs-list-dot"
@@ -39,7 +40,7 @@ internal fun LibraryTabsGroupHeader(header: SectionHeaderUiModel) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         LibraryTabsGroupSubhead()
     }

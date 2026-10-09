@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.EditorialSearchField
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnSearchQueryChangeAction
@@ -22,7 +22,7 @@ internal fun LibrarySearchAndControls(
     runAction: (LibraryAction) -> Unit,
 ) {
     Column {
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxs))
 
         EditorialSearchField(
             query = state.searchQuery,
@@ -43,7 +43,7 @@ internal fun LibrarySearchAndControls(
             placeholder = "Search your collection",
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         LibraryControlLine(
             state = state,

@@ -50,6 +50,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /** Fixed for this screen, so the model is a constant rather than rebuilt per frame. */
@@ -95,33 +96,33 @@ object MotionDebugScreen : Screen {
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
                     .padding(
-                        horizontal = 24.dp,
-                        vertical = 16.dp,
+                        horizontal = Spacing.xl,
+                        vertical = Spacing.md,
                     ),
             ) {
                 SectionHeader(model = state.pageHeader)
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                 HapticsSection(header = state.hapticsHeader)
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(Spacing.x4l))
 
                 MarkAsReadBurstSection(header = state.markAsReadBurstHeader)
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(Spacing.x4l))
 
                 ShakeOnErrorSection(header = state.shakeOnErrorHeader)
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(Spacing.x4l))
 
                 StatNumberSection(header = state.statNumberHeader)
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(Spacing.x4l))
 
                 WavyProgressSection(header = state.wavyProgressHeader)
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(Spacing.x5l))
             }
         }
     }
@@ -132,7 +133,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Column(modifier = Modifier.fillMaxWidth()) {
             HapticRow(label = "commit", description = "Successful save / mark-as-read") { haptics.commit() }
@@ -162,7 +163,7 @@ object MotionDebugScreen : Screen {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp),
+                .padding(vertical = Spacing.xxs),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(16.dp),
         ) {
@@ -170,20 +171,20 @@ object MotionDebugScreen : Screen {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = 16.dp,
-                        vertical = 12.dp,
+                        horizontal = Spacing.md,
+                        vertical = Spacing.sm,
                     ),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(modifier = Modifier.padding(end = 12.dp)) {
+                Column(modifier = Modifier.padding(end = Spacing.sm)) {
                     SoftcoverText(
                         text = label.uppercase(),
                         style = MaterialTheme.editorialTypography.eyebrowSmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xxxs))
 
                     SoftcoverText(
                         text = description,
@@ -208,7 +209,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Box(
             modifier = Modifier
@@ -244,7 +245,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Surface(
             modifier = Modifier
@@ -260,7 +261,7 @@ object MotionDebugScreen : Screen {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = Spacing.md),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -286,7 +287,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -297,8 +298,8 @@ object MotionDebugScreen : Screen {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = 20.dp,
-                        vertical = 20.dp,
+                        horizontal = Spacing.lg,
+                        vertical = Spacing.lg,
                     ),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -333,7 +334,7 @@ object MotionDebugScreen : Screen {
 
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -344,8 +345,8 @@ object MotionDebugScreen : Screen {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = 20.dp,
-                        vertical = 20.dp,
+                        horizontal = Spacing.lg,
+                        vertical = Spacing.lg,
                     ),
             ) {
                 SoftcoverText(
@@ -354,7 +355,7 @@ object MotionDebugScreen : Screen {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
 
                 LinearWavyProgressIndicator(
                     progress = { progress },

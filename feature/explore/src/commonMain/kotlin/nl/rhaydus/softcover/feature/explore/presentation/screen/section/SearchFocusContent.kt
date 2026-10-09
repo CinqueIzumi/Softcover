@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.domain.model.MoodTag
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
@@ -50,7 +51,7 @@ internal fun SearchFocusContent(
     runAction: (ExploreAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = modifier.padding(horizontal = Spacing.lg)) {
         if (queries.isNotEmpty()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -70,7 +71,7 @@ internal fun SearchFocusContent(
                 )
             }
 
-            Column(modifier = Modifier.padding(top = 8.dp)) {
+            Column(modifier = Modifier.padding(top = Spacing.xs)) {
                 queries.forEach { query ->
                     SearchFocusRecentRow(
                         query = query,
@@ -87,7 +88,7 @@ internal fun SearchFocusContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
         }
 
         if (moodChips.isEmpty.not()) {
@@ -104,7 +105,7 @@ internal fun SearchFocusContent(
                         runAction(OnMoodChipClickedAction(key = event.key))
                     }
                 },
-                modifier = Modifier.padding(top = 12.dp),
+                modifier = Modifier.padding(top = Spacing.sm),
             )
         }
     }
@@ -126,9 +127,9 @@ private fun SearchFocusRecentRow(
                     .weight(1f)
                     .pointerHandCursor()
                     .clickable(onClick = onClick)
-                    .padding(vertical = 12.dp),
+                    .padding(vertical = Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(13.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 val clockIcon = drawableIconResource(
                     icon = SoftcoverIcon.History,

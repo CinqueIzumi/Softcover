@@ -17,12 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
@@ -61,15 +61,15 @@ internal fun TagsSection(
         enter = if (playMotion) expandVertically() + fadeIn() else EnterTransition.None,
         exit = ExitTransition.None,
     ) {
-        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(modifier = Modifier.height(36.dp))
+        Column(modifier = Modifier.padding(horizontal = Spacing.xl)) {
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             if (groups.isNotEmpty()) {
                 SectionHeader(model = state.tagsLabel)
             }
 
             groups.forEach { group ->
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 SoftcoverText(
                     text = group.category.label,
@@ -79,11 +79,11 @@ internal fun TagsSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
 
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
                 ) {
                     group.chips.forEach { chip ->
                         key(chip.key) {
@@ -101,7 +101,7 @@ internal fun TagsSection(
             }
 
             if (colophon != null) {
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(Spacing.lg))
 
                 SoftcoverText(
                     text = colophon,

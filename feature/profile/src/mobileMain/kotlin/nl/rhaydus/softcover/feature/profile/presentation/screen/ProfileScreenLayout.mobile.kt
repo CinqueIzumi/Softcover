@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
@@ -71,7 +72,7 @@ internal actual fun ProfileScreenLayout(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .cappedContentWidth()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = Spacing.xl),
         ) {
             ProfileIdentity(
                 state = state,
@@ -79,7 +80,7 @@ internal actual fun ProfileScreenLayout(
                 horizontalAlignment = Alignment.CenterHorizontally,
             )
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             ProfileReadingLife(
                 state = state,
@@ -88,12 +89,12 @@ internal actual fun ProfileScreenLayout(
                 onBookCardEvent = onBookCardEvent,
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             AccountFootSection(
                 onLogOutClick = { showLogOutConfirm = true },
                 enabled = state.isLoading.not(),
-                modifier = Modifier.padding(vertical = 24.dp),
+                modifier = Modifier.padding(vertical = Spacing.xl),
             )
         }
     }

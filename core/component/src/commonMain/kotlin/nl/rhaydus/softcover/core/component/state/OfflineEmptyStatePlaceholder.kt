@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 fun OfflineEmptyStatePlaceholder(
@@ -15,6 +15,6 @@ fun OfflineEmptyStatePlaceholder(
         model = model,
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(Spacing.xl),
     )
 }

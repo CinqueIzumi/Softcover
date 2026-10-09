@@ -11,11 +11,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -34,10 +34,10 @@ internal fun LibraryVisibilitySaveBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        start = 24.dp,
-                        end = 24.dp,
-                        top = 16.dp,
-                        bottom = 16.dp + rememberBottomBarPadding(),
+                        start = Spacing.xl,
+                        end = Spacing.xl,
+                        top = Spacing.md,
+                        bottom = Spacing.md + rememberBottomBarPadding(),
                     ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

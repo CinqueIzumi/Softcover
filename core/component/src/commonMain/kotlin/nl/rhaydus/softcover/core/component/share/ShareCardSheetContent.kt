@@ -27,6 +27,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The share sheet every share card goes through: a [SheetScaffold] around a scaled preview of [card]
@@ -132,7 +133,7 @@ fun ShareCardSheetContent(
         ) {
             aboveCard()
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             ScaledShareCardPreview(
                 capture = capture,
@@ -142,7 +143,7 @@ fun ShareCardSheetContent(
                 ShareCard(model = card)
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
         }
     }
 }

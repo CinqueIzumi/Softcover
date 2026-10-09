@@ -14,10 +14,10 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** SP-2 built: `Spacing` in `:core:designsystem` theme; new `:detekt-rules` module (`softcover` ruleset, `RawSpacingDp`, flags negatives too, Spacer modifier chain only) shipping inactive via its own `config/config.yml`; code-style rule, foundations § 2.4 token map, F38/F39 filed. SL-3b blocked on F34; PF-4/7 wait for S12-4.
-- **Next:** SP-3, sweep `:core:component` and `:core:designsystem` to `Spacing` tokens (snapping per § Approved shape); the rule reported 229 findings in `:core:component`.
-- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` is not flagged, so the sweep greps for it; SP-4 must solve config validation for `:detekt-rules` when it enables the rule.
-- **Verification:** JBR 21: `:detekt-rules:test` (35 pass), `:detekt-rules:jar`, `:detekt-rules:detekt`, `:core:designsystem:compileKotlinJvm`, `checkModuleGraph`, `styleCheck`, `ktlintCheck` passed; reviewer two rounds, no blockers.
+- **State:** SP-3 + SP-4 built together: every spacing call in core, features, `:orchestration` and `:app` reads a `Spacing` token (incl. `when`-branch / model-field spacing such as Library `itemSpacing` and BookCard `contentVerticalInset`); `RawSpacingDp` active app-wide via `config/detekt/softcover-rules.yml`, appended for every module but `:detekt-rules`; shifts in `visual-checks.md`. SL-3b blocked on F34; PF-4/7 wait for S12-4.
+- **Next:** SP-5, the file-level `private val X = N.dp` and `BarSpec`-style dp holders (spacing → token, sizes → inline).
+- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; `iosMain` is not gated (dead imports slip through).
+- **Verification:** JBR 21: `styleCheck`, `checkModuleGraph`, `assembleDebug`, `:desktopApp:compileKotlin`, `testAndroidHostTest` passed; glom grep clean; reviewer one round, 4 minor fixes applied.
 - **Uncommitted:** nothing.
 ## Local verification
 

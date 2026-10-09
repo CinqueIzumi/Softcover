@@ -6,13 +6,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.softcover.core.component.chart.RankedBars
 import nl.rhaydus.softcover.core.component.chart.RankedBarsUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 
@@ -43,7 +43,7 @@ internal fun GenreRankingSection(
     Column(modifier = modifier) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         if (genres.slices.isEmpty() && isLoading.not()) {
             SoftcoverText(
@@ -54,7 +54,7 @@ internal fun GenreRankingSection(
         } else {
             RankedBars(model = genreRanking)
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             SoftcoverText(
                 text = genreScopeCaption(taggedBookCount = genres.taggedBookCount),

@@ -33,6 +33,7 @@ import nl.rhaydus.softcover.core.component.control.ToggleEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.model.LibraryTabEntry
 
@@ -71,13 +72,13 @@ internal fun ReorderableRow(
             .background(rowBackground)
             .alpha(if (hidden) HIDDEN_ROW_ALPHA else 1f)
             .padding(
-                start = 14.dp,
-                top = 13.dp,
-                end = 18.dp,
-                bottom = 13.dp,
+                start = Spacing.sm,
+                top = Spacing.sm,
+                end = Spacing.md,
+                bottom = Spacing.sm,
             ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         GripOrPinGlyph(
             entry = entry,
@@ -91,7 +92,7 @@ internal fun ReorderableRow(
                 hidden = hidden,
             )
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxs))
 
             RowCountLine(
                 entry = entry,
@@ -179,7 +180,7 @@ private fun RowLabel(
                     .background(MaterialTheme.colorScheme.primary),
             )
 
-            Spacer(modifier = Modifier.width(7.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
         }
 
         SoftcoverText(

@@ -21,6 +21,7 @@ import nl.rhaydus.designsystem.component.RhaydusIconToggleButton
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.model.IconToggleButtonStyle
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -70,7 +71,7 @@ internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
                     ),
                     style = IconToggleButtonStyle.FILLED,
                     modifier = Modifier
-                        .padding(horizontal = 4.dp)
+                        .padding(horizontal = Spacing.xxs)
                         .graphicsLayer {
                             scaleX = item.iconScale
                             scaleY = item.iconScale
@@ -82,7 +83,7 @@ internal fun BottomFloatingBar(modifier: Modifier = Modifier) {
                         containerColor = MaterialTheme.colorScheme.inversePrimary,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .offset(x = (-6).dp, y = 2.dp)
+                            .offset(x = -Spacing.xs, y = Spacing.xxxs)
                             .size(10.dp),
                     )
                 }

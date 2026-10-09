@@ -13,8 +13,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnSearchDismissedAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -43,7 +43,7 @@ internal fun SearchFocusScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(focusScrollState)
-                .padding(top = 18.dp),
+                .padding(top = Spacing.md),
         ) {
             SearchFocusContent(
                 queries = state.previousSearchQueries,

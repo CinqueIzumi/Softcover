@@ -28,6 +28,7 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +57,7 @@ internal fun MastheadHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 24.dp, end = 8.dp, top = 8.dp),
+            .padding(start = Spacing.xl, end = Spacing.xs, top = Spacing.xs),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -90,7 +91,7 @@ internal fun MastheadHeader(
                 },
         ) {
             Column {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxs))
 
                 // The masthead title IS the shelf switcher (redesign brief): tapping it opens the
                 // Shelves sheet, replacing the retired pill tab row.
@@ -98,7 +99,7 @@ internal fun MastheadHeader(
                     modifier = Modifier
                         .pointerHandCursor()
                         .pressScaleClickable(onClick = onTitleClick)
-                        .padding(end = 16.dp),
+                        .padding(end = Spacing.md),
                     verticalAlignment = Alignment.Top,
                 ) {
                     SoftcoverText(
@@ -113,7 +114,7 @@ internal fun MastheadHeader(
                         modifier = Modifier.weight(1f),
                     )
 
-                    Spacer(modifier = Modifier.width(9.dp))
+                    Spacer(modifier = Modifier.width(Spacing.xs))
 
                     val chevronIcon = drawableIconResource(
                         icon = SoftcoverIcon.ArrowDropDown,
@@ -125,12 +126,12 @@ internal fun MastheadHeader(
                         contentDescription = chevronIcon.contentDescription,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
-                            .padding(top = 7.dp)
+                            .padding(top = Spacing.xs)
                             .size(24.dp),
                     )
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
 
                 SoftcoverText(
                     text = subtitle,
@@ -138,10 +139,10 @@ internal fun MastheadHeader(
                     standIn = subtitle,
                     style = MaterialTheme.editorialTypography.body,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(end = 16.dp),
+                    modifier = Modifier.padding(end = Spacing.md),
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
             }
         }
     }

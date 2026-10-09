@@ -14,13 +14,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.image.RhaydusShimmerImage
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.chrome.overMediaIconButtonColors
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.rememberCoverImageRequest
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The full-screen cover viewer chrome shared by both platforms: a black surface, the cover scaled and
@@ -69,7 +69,7 @@ internal fun FullScreenCoverViewer(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .statusBarsPadding()
-                .padding(8.dp),
+                .padding(Spacing.xs),
         )
     }
 }

@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRow
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.SettingsMenuRowTarget
@@ -51,14 +51,14 @@ internal fun AboutContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxl))
 
         CreditsSection(
             header = creditsHeader,
             openUrl = openUrl,
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.x4l))
 
         SourceSection(
             header = sourceHeader,
@@ -66,14 +66,14 @@ internal fun AboutContent(
             onRoadmapClick = onRoadmapClick,
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.x4l))
 
         ContactSection(
             header = contactHeader,
             openUrl = openUrl,
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.x4l))
 
         VersionFooter(
             versionLabel = versionLabel,
@@ -94,7 +94,7 @@ private fun CreditsSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         SettingsRowGroup {
             row {
@@ -107,14 +107,14 @@ private fun CreditsSection(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
             text = "This project is an independent, open-source application and is not affiliated " +
                 "with, endorsed by, or sponsored by Hardcover.app.",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp),
+            modifier = Modifier.padding(horizontal = Spacing.xxs),
         )
     }
 }
@@ -128,7 +128,7 @@ private fun SourceSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         SettingsRowGroup {
             row {
@@ -163,7 +163,7 @@ private fun ContactSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         SettingsRowGroup {
             row {

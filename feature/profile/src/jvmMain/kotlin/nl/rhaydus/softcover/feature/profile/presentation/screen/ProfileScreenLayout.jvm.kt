@@ -33,6 +33,7 @@ import nl.rhaydus.softcover.core.component.divider.VerticalDivider
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.profile.domain.model.UserProfileData
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.mapper.demographicChartUiModel
@@ -149,7 +150,7 @@ private fun TwoColumnProfile(
                 .width(320.dp)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
-                .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 24.dp),
+                .padding(start = Spacing.xl, end = Spacing.xl, top = Spacing.xs, bottom = Spacing.xl),
         ) {
             ProfileIdentity(
                 state = state,
@@ -157,7 +158,7 @@ private fun TwoColumnProfile(
                 horizontalAlignment = Alignment.Start,
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             AccountFootSection(
                 onLogOutClick = onLogOutClick,
@@ -179,7 +180,7 @@ private fun TwoColumnProfile(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(start = 32.dp, end = 24.dp, top = 8.dp, bottom = 24.dp),
+                    .padding(start = Spacing.xxxl, end = Spacing.xl, top = Spacing.xs, bottom = Spacing.xl),
             ) {
                 Column(modifier = Modifier.widthIn(max = 640.dp)) {
                     ProfileReadingLife(
@@ -196,7 +197,7 @@ private fun TwoColumnProfile(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = Spacing.xxs),
             )
         }
     }
@@ -217,7 +218,7 @@ private fun SingleColumnProfile(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = 24.dp, vertical = 8.dp),
+                .padding(horizontal = Spacing.xl, vertical = Spacing.xs),
         ) {
             ProfileIdentity(
                 state = state,
@@ -225,7 +226,7 @@ private fun SingleColumnProfile(
                 horizontalAlignment = Alignment.CenterHorizontally,
             )
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             ProfileReadingLife(
                 state = state,
@@ -234,14 +235,14 @@ private fun SingleColumnProfile(
                 onBookCardEvent = onBookCardEvent,
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             AccountFootSection(
                 onLogOutClick = onLogOutClick,
                 enabled = state.isLoading.not(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 24.dp),
+                    .padding(vertical = Spacing.xl),
             )
         }
 
@@ -250,7 +251,7 @@ private fun SingleColumnProfile(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(vertical = 4.dp),
+                .padding(vertical = Spacing.xxs),
         )
     }
 }

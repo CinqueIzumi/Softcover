@@ -19,11 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -76,14 +76,14 @@ internal fun SettingsRow(
             .fillMaxWidth()
             .then(interactionModifier)
             .padding(
-                horizontal = 4.dp,
-                vertical = 16.dp,
+                horizontal = Spacing.xxs,
+                vertical = Spacing.md,
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leading != null) {
             leading()
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
         }
 
         Column(modifier = Modifier.weight(1f)) {
@@ -104,7 +104,7 @@ internal fun SettingsRow(
             }
 
             if (secondary != null) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxs))
 
                 SoftcoverText(
                     text = secondary,
@@ -115,7 +115,7 @@ internal fun SettingsRow(
         }
 
         if (trailing != null) {
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
             trailing()
         }
     }

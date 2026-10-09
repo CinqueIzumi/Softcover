@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.layout.FlowRowExpansion
 import nl.rhaydus.softcover.core.component.chip.Chip
@@ -18,6 +17,7 @@ import nl.rhaydus.softcover.core.component.chip.ChipUiModel
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.field.TextFieldUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.TagCategory
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -34,8 +34,8 @@ internal fun TagEditorAddBlock(
 ) {
     Column(modifier = modifier) {
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             categoryChips.forEach { chip ->
                 Chip(
@@ -45,7 +45,7 @@ internal fun TagEditorAddBlock(
             }
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         TextField(
             model = namingField,
@@ -53,7 +53,7 @@ internal fun TagEditorAddBlock(
         )
 
         if (suggestionChips.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             // Keyed on the category so the cloud's expansion does not survive a category switch:
             // `ExpandableFlowRow` holds its revealed-line count internally, so without a fresh key per

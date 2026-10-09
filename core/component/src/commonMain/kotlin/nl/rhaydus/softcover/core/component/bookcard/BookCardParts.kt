@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.selection.SelectionMark
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 internal fun BookCardCoverLayout(
@@ -88,7 +89,7 @@ internal fun BookCardCoverLayout(
                 selected = markSelected,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp),
+                    .padding(Spacing.xs),
             )
         }
     }
@@ -107,7 +108,7 @@ internal fun BookCardSeriesStack(
         SeriesStackPlate(
             width = frontWidth,
             shape = plateShape,
-            offset = 12.dp,
+            offset = Spacing.sm,
             alpha = 0.4f,
             isLoading = isLoading,
         )
@@ -115,7 +116,7 @@ internal fun BookCardSeriesStack(
         SeriesStackPlate(
             width = frontWidth,
             shape = plateShape,
-            offset = 6.dp,
+            offset = Spacing.xs,
             alpha = 0.7f,
             isLoading = isLoading,
         )
@@ -164,7 +165,7 @@ internal fun BookCardProgressBar(
 
             Row(
                 modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ProgressBar(

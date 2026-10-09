@@ -14,7 +14,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.LocalModalSheetForm
 import nl.rhaydus.designsystem.layout.ExpandableFlowRow
 import nl.rhaydus.designsystem.model.ModalSheetForm
@@ -29,6 +28,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyFiltersAction
@@ -124,7 +124,7 @@ private fun FacetSections(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
     }
 
     if (chips.releaseYearChips.isEmpty.not()) {
@@ -137,7 +137,7 @@ private fun FacetSections(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
     }
 
     if (chips.readYearChips.isEmpty.not()) {
@@ -150,7 +150,7 @@ private fun FacetSections(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
     }
 
     if (chips.tagChips.isEmpty.not()) {
@@ -163,7 +163,7 @@ private fun FacetSections(
             onTagSearchEvent = onTagSearchEvent,
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
     }
 
     if (chips.ratingChips.isEmpty.not()) {
@@ -206,14 +206,14 @@ private fun TagsFacetSection(
             },
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         TextField(
             model = tagSearchField,
             onEvent = onTagSearchEvent,
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         if (LocalModalSheetForm.current == ModalSheetForm.PANEL) {
             ExpandableFlowRow {
@@ -227,7 +227,7 @@ private fun TagsFacetSection(
         } else {
             Row(
                 modifier = Modifier.horizontalScroll(state = rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 visibleChips.forEach { chip ->
@@ -249,7 +249,7 @@ private fun FacetSection(
     Column {
         SectionHeader(model = label)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         // The fixed-width desktop panel can't scroll a chip row sideways with a pointer, so its facets
         // wrap and collapse behind a "show more" (a long tag set never buries the facets below it); the
@@ -261,7 +261,7 @@ private fun FacetSection(
         } else {
             Row(
                 modifier = Modifier.horizontalScroll(state = rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 chips()
@@ -281,8 +281,8 @@ private fun EmptyFacetMessage() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = 20.dp,
-                    vertical = 18.dp,
+                    horizontal = Spacing.lg,
+                    vertical = Spacing.md,
                 ),
         ) {
             SoftcoverText(
@@ -291,7 +291,7 @@ private fun EmptyFacetMessage() {
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxs))
 
             SoftcoverText(
                 text = "This shelf is too sparse for filters to matter — add a few books first.",

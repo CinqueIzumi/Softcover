@@ -11,9 +11,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -31,8 +31,8 @@ internal fun DesktopDiscovery(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(discoveryScrollState)
-                .padding(bottom = 24.dp + rememberBottomBarPadding()),
-            verticalArrangement = Arrangement.spacedBy(40.dp),
+                .padding(bottom = Spacing.xl + rememberBottomBarPadding()),
+            verticalArrangement = Arrangement.spacedBy(Spacing.x4l),
         ) {
             DiscoverySections(
                 state = state,
@@ -52,7 +52,7 @@ internal fun DesktopDiscovery(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(vertical = 4.dp),
+                .padding(vertical = Spacing.xxs),
         )
     }
 }

@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import sh.calvin.reorderable.ReorderableItem
@@ -29,6 +28,7 @@ import nl.rhaydus.softcover.core.component.bookcard.bookCardHandOver
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
 import nl.rhaydus.softcover.core.component.bookcard.rememberBookCardEntryCoordinator
 import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
@@ -61,9 +61,9 @@ internal fun BookList(
             EmptyState(
                 model = emptyState,
                 modifier = Modifier
-                    .padding(horizontal = 32.dp)
+                    .padding(horizontal = Spacing.xxxl)
                     .fillMaxWidth()
-                    .padding(top = 40.dp),
+                    .padding(top = Spacing.x4l),
             )
         }
 

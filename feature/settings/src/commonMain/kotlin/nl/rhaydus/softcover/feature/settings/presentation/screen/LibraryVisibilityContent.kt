@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.LibraryTabsGroupHeader
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.NewListFootAction
@@ -31,25 +31,25 @@ internal fun LibraryVisibilityContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         SectionHeader(model = state.libraryTabsPageHeader)
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         LibraryTabsGroupHeader(header = state.libraryTabsHeader)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         ReorderableTabsGroup(
             state = state,
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         NewListFootAction(onClick = onCreateListClick)
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
     }
 }

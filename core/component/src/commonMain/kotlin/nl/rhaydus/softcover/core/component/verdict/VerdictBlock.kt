@@ -26,6 +26,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val VERDICT_BLOCK_REVIEW_COLLAPSED_LINES = 8
@@ -69,7 +70,7 @@ fun VerdictBlock(
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Surface(
             modifier = Modifier
@@ -99,7 +100,7 @@ private fun FilledVerdict(
     val rating = model.rating
     val review = model.review
 
-    Column(modifier = Modifier.padding(18.dp)) {
+    Column(modifier = Modifier.padding(Spacing.md)) {
         if (rating != null) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 StarRatingInput(
@@ -115,17 +116,17 @@ private fun FilledVerdict(
                     starSize = 22.dp,
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Spacing.sm))
 
                 VerdictScoreLine(score = verdictScoreOf(rating = rating))
             }
 
             if (review != null) {
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 Divider()
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
             }
         }
 
@@ -141,7 +142,7 @@ private fun FilledVerdict(
             )
 
             if (model.hasSpoilers) {
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
 
                 SoftcoverText(
                     text = "Marked as containing spoilers",
@@ -151,7 +152,7 @@ private fun FilledVerdict(
             }
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
             text = "Tap to edit".uppercase(),
@@ -166,7 +167,7 @@ private fun FilledVerdict(
 
 @Composable
 private fun EmptyVerdict() {
-    Column(modifier = Modifier.padding(20.dp)) {
+    Column(modifier = Modifier.padding(Spacing.lg)) {
         StarRatingInput(
             rating = null,
             onRatingChange = {},
@@ -180,7 +181,7 @@ private fun EmptyVerdict() {
             starSize = 30.dp,
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         SoftcoverText(
             text = "Rate it and say a few words…",
@@ -188,7 +189,7 @@ private fun EmptyVerdict() {
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxs))
 
         SoftcoverText(
             text = "Out of ten, your ten — spoilers optional.",

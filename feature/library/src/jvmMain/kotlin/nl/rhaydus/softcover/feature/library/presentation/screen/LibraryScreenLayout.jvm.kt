@@ -31,6 +31,7 @@ import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.sidebar.Sidebar
 import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
@@ -117,9 +118,9 @@ internal actual fun LibraryScreenLayout(
                 PageMasthead(
                     model = state.mastheadFor(currentTab?.id),
                     modifier = Modifier.padding(
-                        start = 24.dp,
-                        end = 12.dp,
-                        top = 16.dp,
+                        start = Spacing.xl,
+                        end = Spacing.sm,
+                        top = Spacing.md,
                     ),
                 ) {
                     MastheadRefreshAction(
@@ -145,7 +146,7 @@ internal actual fun LibraryScreenLayout(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             Box(
                 modifier = Modifier
@@ -183,7 +184,7 @@ internal actual fun LibraryScreenLayout(
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .fillMaxHeight()
-                            .padding(vertical = 4.dp),
+                            .padding(vertical = Spacing.xxs),
                     )
                 }
             }
@@ -225,8 +226,8 @@ private fun ShelfSidebar(
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .padding(
-                top = 16.dp,
-                bottom = 16.dp + rememberBottomBarPadding(),
+                top = Spacing.md,
+                bottom = Spacing.md + rememberBottomBarPadding(),
             ),
     )
 }

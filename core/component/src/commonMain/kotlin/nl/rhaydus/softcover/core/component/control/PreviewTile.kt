@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private val TILE_SHAPE: Shape = RoundedCornerShape(14.dp)
@@ -87,7 +88,7 @@ internal fun PreviewTileFrame(
             content = content,
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         SoftcoverText(
             text = label,

@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -21,6 +20,7 @@ import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.appupdate.AppUpdateSimulator
 import nl.rhaydus.softcover.core.presentation.debug.DebugRoutesContent
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
@@ -186,7 +186,7 @@ internal fun AppUpdateSimulatorSection(
 
     SectionHeader(model = header)
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(Spacing.md))
 
     Column(modifier = Modifier.fillMaxWidth()) {
         RhaydusButton(
@@ -197,7 +197,7 @@ internal fun AppUpdateSimulatorSection(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         RhaydusButton(
             label = "Simulate downloading",
@@ -207,7 +207,7 @@ internal fun AppUpdateSimulatorSection(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         RhaydusButton(
             label = "Simulate downloaded",
@@ -217,7 +217,7 @@ internal fun AppUpdateSimulatorSection(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         RhaydusButton(
             label = "Simulate failure",
@@ -227,7 +227,7 @@ internal fun AppUpdateSimulatorSection(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         RhaydusButton(
             label = "Reset",
@@ -238,5 +238,5 @@ internal fun AppUpdateSimulatorSection(
         )
     }
 
-    Spacer(modifier = Modifier.height(40.dp))
+    Spacer(modifier = Modifier.height(Spacing.x4l))
 }

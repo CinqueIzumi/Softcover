@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
@@ -44,11 +45,11 @@ internal fun ProfileIdentity(
             modifier = Modifier.size(avatarSize),
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         SectionHeader(model = state.theReaderHeader)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         SoftcoverText(
             text = data?.name.orEmpty(),
@@ -63,7 +64,7 @@ internal fun ProfileIdentity(
         val bio = data?.bio.orEmpty()
 
         if (bio.isNotBlank()) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -81,7 +82,7 @@ internal fun ProfileIdentity(
                     text = "•",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.padding(horizontal = 10.dp),
+                    modifier = Modifier.padding(horizontal = Spacing.xs),
                 )
 
                 Box(
@@ -92,7 +93,7 @@ internal fun ProfileIdentity(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             SoftcoverText(
                 text = "“$bio”",

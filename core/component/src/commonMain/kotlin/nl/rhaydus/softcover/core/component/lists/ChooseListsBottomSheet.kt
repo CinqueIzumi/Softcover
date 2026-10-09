@@ -51,6 +51,7 @@ import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -91,7 +92,7 @@ fun ChooseListsBottomSheet(
                 model = model.emptyState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 40.dp),
+                    .padding(top = Spacing.x4l),
             )
         } else {
             LazyColumn(
@@ -120,7 +121,7 @@ fun ChooseListsBottomSheet(
 
         NewListRow(
             onClick = { onEvent(ChooseListsEvent.NewListRequested) },
-            modifier = Modifier.padding(top = 20.dp),
+            modifier = Modifier.padding(top = Spacing.lg),
         )
     }
 }
@@ -154,9 +155,9 @@ private fun ChooseListsRow(
                             )
                     },
                 )
-                .padding(vertical = 17.dp),
+                .padding(vertical = Spacing.md),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             BookmarkGlyph(membership = row.membership)
 
@@ -169,7 +170,7 @@ private fun ChooseListsRow(
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                Spacer(modifier = Modifier.height(3.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxxs))
 
                 SoftcoverText(
                     text = row.caption,
@@ -298,7 +299,7 @@ private fun NewListRow(
             .pointerHandCursor()
             .pressScaleClickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(9.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         Box(
             modifier = Modifier

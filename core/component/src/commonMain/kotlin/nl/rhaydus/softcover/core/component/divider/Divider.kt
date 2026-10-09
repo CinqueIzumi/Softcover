@@ -12,9 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /** A hairline rule, bare or broken by a centred glyph or label. */
@@ -39,7 +39,7 @@ fun Divider(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         modifier = modifier.fillMaxWidth(),
     ) {
         HorizontalDivider(
@@ -95,7 +95,7 @@ private fun QuoteMarkGlyph() {
         ),
         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
         modifier = Modifier
-            .offset(y = 6.dp)
+            .offset(y = Spacing.xs)
             .clearAndSetSemantics {},
     )
 }

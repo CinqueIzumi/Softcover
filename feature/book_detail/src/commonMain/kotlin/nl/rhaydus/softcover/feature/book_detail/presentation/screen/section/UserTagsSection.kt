@@ -11,10 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenTagEditorAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -31,10 +31,10 @@ internal fun UserTagsSection(
         if (event is ChipEvent.Clicked) runAction(OnOpenTagEditorAction())
     }
 
-    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.xl)) {
         SectionHeader(model = state.yourTagsLabel)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         if (chips.isEmpty()) {
             opener?.let {
@@ -45,8 +45,8 @@ internal fun UserTagsSection(
             }
         } else {
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 chips.forEach { chip ->

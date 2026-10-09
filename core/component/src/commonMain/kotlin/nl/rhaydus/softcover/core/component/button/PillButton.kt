@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * A fixed-height, fully-rounded action button. A menu it opens belongs to the caller: the pill is only
@@ -90,7 +91,7 @@ fun PillButton(
 
     when (val content = model.content) {
         is PillButtonContent.Label -> Row(
-            modifier = pillModifier.padding(horizontal = 14.dp),
+            modifier = pillModifier.padding(horizontal = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
@@ -147,7 +148,7 @@ private fun RowScope.PillButtonLabel(
             tint = iconTint,
         )
 
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(Spacing.xs))
     }
 
     SoftcoverText(
@@ -163,7 +164,7 @@ private fun RowScope.PillButtonLabel(
     )
 
     if (content.indicator) {
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(Spacing.xs))
 
         Box(
             modifier = Modifier

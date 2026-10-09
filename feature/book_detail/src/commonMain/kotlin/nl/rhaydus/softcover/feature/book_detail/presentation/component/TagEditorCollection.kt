@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.UserTagEditorChipGroup
 
@@ -50,9 +51,9 @@ internal fun TagEditorCollection(
             EmptyState(
                 model = emptyState,
                 modifier = Modifier
-                    .padding(horizontal = 10.dp)
+                    .padding(horizontal = Spacing.xs)
                     .fillMaxWidth()
-                    .padding(top = 40.dp),
+                    .padding(top = Spacing.x4l),
             )
         } else {
             groups.forEachIndexed { index, group ->
@@ -62,7 +63,7 @@ internal fun TagEditorCollection(
                     onEvent = onEvent,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = if (index == 0) 6.dp else 26.dp),
+                        .padding(top = if (index == 0) Spacing.xxs else Spacing.xl),
                 )
             }
         }
@@ -88,13 +89,13 @@ private fun TagGroupSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
 
             Divider(
                 modifier = Modifier.weight(1f),
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
 
             SoftcoverText(
                 text = group.chips.size.toString(),
@@ -103,11 +104,11 @@ private fun TagGroupSection(
             )
         }
 
-        Spacer(modifier = Modifier.height(11.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             group.chips.forEach { chip ->
                 key(chip.key) {

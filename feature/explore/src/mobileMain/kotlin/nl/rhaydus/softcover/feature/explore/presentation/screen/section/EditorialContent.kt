@@ -15,8 +15,8 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
@@ -56,10 +56,10 @@ internal fun EditorialContent(
                 .fillMaxSize()
                 .verticalScroll(editorialScrollState)
                 .padding(
-                    top = 8.dp,
+                    top = Spacing.xs,
                     bottom = rememberBottomBarPadding(),
                 ),
-            verticalArrangement = Arrangement.spacedBy(36.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacing.x4l),
         ) {
             DiscoverySections(
                 state = state,

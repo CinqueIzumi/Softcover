@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.session.presentation.action.FocusModeAction
 import nl.rhaydus.softcover.feature.session.presentation.action.OnPageDraftChangedAction
 import nl.rhaydus.softcover.feature.session.presentation.action.OnPageFocusGainedAction
@@ -34,7 +34,7 @@ internal fun FocusPageEditor(
     if (pageEditor.isEditable.not()) {
         EditorialSuffix(text = pageEditor.caption)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         ProgressBar(fraction = pageEditor.fraction)
 
@@ -54,11 +54,11 @@ internal fun FocusPageEditor(
         )
     }
 
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(Spacing.xs))
 
     EditorialSuffix(text = pageEditor.caption)
 
-    Spacer(modifier = Modifier.height(20.dp))
+    Spacer(modifier = Modifier.height(Spacing.lg))
 
     ProgressBar(fraction = pageEditor.fraction)
 }

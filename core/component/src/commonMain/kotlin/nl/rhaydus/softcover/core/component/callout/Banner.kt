@@ -25,6 +25,7 @@ import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -61,8 +62,8 @@ fun Banner(
                 .background(container)
                 .windowInsetsPadding(windowInsets)
                 .padding(
-                    horizontal = 16.dp,
-                    vertical = 10.dp,
+                    horizontal = Spacing.md,
+                    vertical = Spacing.xs,
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -79,7 +80,7 @@ fun Banner(
                     modifier = Modifier.size(18.dp),
                 )
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(Spacing.sm))
             }
 
             SoftcoverText(

@@ -5,7 +5,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopTooltip
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshAction
@@ -15,6 +14,7 @@ import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnRefreshAction
 
@@ -27,7 +27,7 @@ internal fun DesktopExploreHeader(
 ) {
     PageMasthead(
         model = masthead,
-        modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp),
+        modifier = Modifier.padding(start = Spacing.xl, end = Spacing.sm, top = Spacing.md),
     ) {
         MastheadRefreshAction(
             model = refresh,

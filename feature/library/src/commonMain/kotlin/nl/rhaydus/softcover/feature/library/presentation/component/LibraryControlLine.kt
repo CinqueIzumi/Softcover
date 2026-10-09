@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.component.chip.ChipEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -51,7 +52,7 @@ internal fun LibraryControlLine(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = Spacing.xl),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SortLabelControl(
@@ -61,7 +62,7 @@ internal fun LibraryControlLine(
         )
 
         state.rearrangeChipFor(tabId = currentTab.id)?.let { chip ->
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
 
             Chip(
                 model = chip,
@@ -92,7 +93,7 @@ internal fun LibraryControlLine(
         )
 
         if (canSelectTab) {
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
 
             PillButton(
                 model = state.selectPill,
@@ -118,7 +119,7 @@ private fun SortLabelControl(
             .pressScaleClickable(
                 onClick = { runAction(OnArrangeSheetExpandedChangeAction(expanded = true)) },
             )
-            .padding(vertical = 8.dp),
+            .padding(vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SoftcoverText(
@@ -128,7 +129,7 @@ private fun SortLabelControl(
         )
 
         if (isPositional.not()) {
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(Spacing.xxs))
 
             val arrowIcon = drawableIconResource(
                 icon = if (direction == SortDirection.ASCENDING) {

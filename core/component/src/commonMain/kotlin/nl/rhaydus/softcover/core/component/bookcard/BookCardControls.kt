@@ -26,6 +26,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverInk
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 internal fun BookCardTrailingControl(
@@ -73,7 +74,7 @@ internal fun BookCardMenuButton(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(6.dp),
+                .padding(Spacing.xxs),
             contentAlignment = Alignment.TopEnd,
         ) {
             Box(
@@ -104,7 +105,7 @@ private fun RestoreLabel(label: String) {
     )
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(

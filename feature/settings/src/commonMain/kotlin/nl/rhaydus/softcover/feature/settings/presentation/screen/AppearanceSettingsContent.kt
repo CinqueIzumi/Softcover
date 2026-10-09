@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.screen.section.DateStyleSection
@@ -45,21 +45,21 @@ internal fun AppearanceSettingsContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxl))
 
         ThemeSection(
             state = state,
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.x4l))
 
         SpineColourSection(
             state = state,
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.x4l))
 
         if (showUiScaleControl) {
             UiScaleSection(
@@ -67,7 +67,7 @@ internal fun AppearanceSettingsContent(
                 runAction = runAction,
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
         }
 
         DisplaySection(
@@ -75,13 +75,13 @@ internal fun AppearanceSettingsContent(
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.x4l))
 
         DateStyleSection(
             state = state,
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(Spacing.x5l))
     }
 }

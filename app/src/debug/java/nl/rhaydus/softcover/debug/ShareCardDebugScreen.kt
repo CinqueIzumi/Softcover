@@ -21,7 +21,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -51,6 +50,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /** Fixed for this screen, so the model is a constant rather than rebuilt per frame. */
@@ -149,13 +149,13 @@ object ShareCardDebugScreen : Screen {
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
                     .padding(
-                        horizontal = 24.dp,
-                        vertical = 16.dp,
+                        horizontal = Spacing.xl,
+                        vertical = Spacing.md,
                     ),
             ) {
                 SectionHeader(model = state.pageHeader)
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                 VariantBlock(
                     label = "Book",
@@ -169,7 +169,7 @@ object ShareCardDebugScreen : Screen {
                     },
                 )
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(Spacing.x4l))
 
                 VariantBlock(
                     label = "Stat",
@@ -183,7 +183,7 @@ object ShareCardDebugScreen : Screen {
                     },
                 )
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(Spacing.x4l))
 
                 VariantBlock(
                     label = "Quote",
@@ -197,7 +197,7 @@ object ShareCardDebugScreen : Screen {
                     },
                 )
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(Spacing.x4l))
 
                 VariantBlock(
                     label = "Year recap",
@@ -211,7 +211,7 @@ object ShareCardDebugScreen : Screen {
                     },
                 )
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(Spacing.x5l))
             }
         }
     }
@@ -234,7 +234,7 @@ object ShareCardDebugScreen : Screen {
                 modifier = Modifier.align(Alignment.Start),
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             Box(
                 modifier = Modifier.fillMaxWidth(),
@@ -245,7 +245,7 @@ object ShareCardDebugScreen : Screen {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             RhaydusButton(
                 label = "Save to gallery",

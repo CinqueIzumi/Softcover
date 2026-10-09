@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -44,9 +45,9 @@ internal fun <K> SheetRow(
                     role = Role.RadioButton,
                     onClick = { onEvent(SheetRowEvent.Selected(key = model.key)) },
                 )
-                .padding(vertical = 13.dp),
+                .padding(vertical = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             val ink = if (model.selected) {
                 MaterialTheme.colorScheme.primary

@@ -50,6 +50,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.transition.LocalNavAnimatedVisibilityScope
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -108,10 +109,10 @@ internal fun GeneralBookInfoSection(
                 .statusBarsPadding()
                 .heightIn(min = imageHeight)
                 .padding(
-                    start = 16.dp,
-                    end = 16.dp,
+                    start = Spacing.md,
+                    end = Spacing.md,
                     top = 64.dp,
-                    bottom = 36.dp,
+                    bottom = Spacing.x4l,
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -142,7 +143,7 @@ internal fun GeneralBookInfoSection(
                         model = ownedCoverBadge,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .padding(8.dp)
+                            .padding(Spacing.xs)
                             .alpha(badgeAlpha),
                     )
                 }
@@ -170,7 +171,7 @@ internal fun GeneralBookInfoSection(
                 shadow = secondaryShadow,
             )
 
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Column(modifier = Modifier.padding(horizontal = Spacing.md)) {
                 val seriesUnknown = isLoading && seriesText == null
 
                 if (seriesUnknown || seriesText.isNullOrBlank().not()) {
@@ -185,7 +186,7 @@ internal fun GeneralBookInfoSection(
                         ),
                     )
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xxxs))
                 }
 
                 val titleUnknown = isLoading && title == null
@@ -207,7 +208,7 @@ internal fun GeneralBookInfoSection(
                     ),
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxs))
 
                 val editionUnknown = isLoading && edition == null
                 val authorName = edition?.authorString.orEmpty()
@@ -236,7 +237,7 @@ internal fun GeneralBookInfoSection(
                 )
 
                 if (unreleasedBadge != null) {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xs))
 
                     Badge(model = unreleasedBadge)
                 }
@@ -252,15 +253,15 @@ internal fun GeneralBookInfoSection(
                 }
 
                 if (showRating || showLength) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xs))
 
                     Divider(ink = DividerInk.OnImage)
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xs))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
                     ) {
                         if (showRating) {
                             Column(
@@ -284,7 +285,7 @@ internal fun GeneralBookInfoSection(
                                         style = bodySmall,
                                     )
 
-                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Spacer(modifier = Modifier.width(Spacing.xxs))
 
                                     val ratingStarIcon = drawableIconResource(
                                         icon = SoftcoverIcon.StarFilled,
@@ -328,7 +329,7 @@ internal fun GeneralBookInfoSection(
                                     )
 
                                     if (editionUnknown.not() && isAudiobook.not()) {
-                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Spacer(modifier = Modifier.width(Spacing.xxs))
 
                                         SoftcoverText(
                                             text = "pgs",

@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnActiveFilterChipClickedAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryFilterChipRow
@@ -38,7 +38,7 @@ internal fun LibraryActiveFilterChipsSection(
             val (targetTabId, targetChips) = target
 
             Column {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
 
                 LibraryFilterChipRow(
                     activeFilters = targetChips,

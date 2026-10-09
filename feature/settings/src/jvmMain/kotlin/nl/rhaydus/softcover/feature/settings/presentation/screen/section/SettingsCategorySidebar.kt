@@ -9,10 +9,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.header.PageMasthead
 import nl.rhaydus.softcover.core.component.sidebar.Sidebar
 import nl.rhaydus.softcover.core.component.sidebar.SidebarEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSettingsCategorySelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
 import nl.rhaydus.softcover.feature.settings.presentation.model.SettingsSidebarKey
@@ -47,14 +47,14 @@ internal fun SettingsCategorySidebar(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 16.dp),
+                .padding(vertical = Spacing.md),
         ) {
             PageMasthead(
                 model = state.settingsSidebarMasthead,
-                modifier = Modifier.padding(start = 26.dp, end = 16.dp),
+                modifier = Modifier.padding(start = Spacing.xl, end = Spacing.md),
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             Sidebar(
                 model = state.settingsSidebar,

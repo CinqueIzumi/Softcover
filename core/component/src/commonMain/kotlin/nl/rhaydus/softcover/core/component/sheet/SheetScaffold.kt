@@ -37,6 +37,7 @@ import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 fun SheetScaffold(
@@ -91,10 +92,10 @@ internal fun SheetScaffoldContent(
             .fillMaxWidth()
             .imePadding()
             .then(if (model.layout == SheetLayout.Scrolling) Modifier.verticalScroll(state = scrollState) else Modifier)
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = Spacing.xl)
             .padding(
-                top = 8.dp,
-                bottom = 16.dp,
+                top = Spacing.xs,
+                bottom = Spacing.md,
             )
             .semantics { this.paneTitle = paneTitle },
     ) {
@@ -120,13 +121,13 @@ internal fun SheetScaffoldContent(
 
         if (model.footer != null) {
             if (model.layout != SheetLayout.Scrolling) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 Divider()
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
             } else {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(Spacing.xl))
             }
 
             SheetFooter(
@@ -164,7 +165,7 @@ private fun SheetTop(
         onEvent = onEvent,
     )
 
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(Spacing.xl))
 }
 
 @Composable
@@ -181,7 +182,7 @@ private fun SheetHeader(
             null
         } else {
             {
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
 
                 SheetHeaderTrailingContent(
                     trailing = trailing,
@@ -231,7 +232,7 @@ private fun JacketStack(trailing: SheetHeaderTrailing.JacketStack) {
             Cover(
                 model = trailing.covers[index],
                 modifier = Modifier
-                    .offset(x = 26.dp * side)
+                    .offset(x = Spacing.xxl * side)
                     .width(52.dp)
                     .rotate(10f * side),
             )
@@ -251,7 +252,7 @@ private fun SheetFooter(
     when (model) {
         is SheetFooterUiModel.Stacked -> Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
         ) {
             if (model.primary != null) {
                 FooterButton(
@@ -277,7 +278,7 @@ private fun SheetFooter(
         is SheetFooterUiModel.Inline -> Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             FooterButton(
                 button = model.secondary,
@@ -336,7 +337,7 @@ private fun FooterButton(
         if (loading) {
             CircularWavyProgressIndicator(
                 modifier = Modifier
-                    .padding(end = 16.dp)
+                    .padding(end = Spacing.md)
                     .size(20.dp),
             )
         }

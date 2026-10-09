@@ -13,10 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -36,10 +36,10 @@ fun EditorialTopBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                start = 8.dp,
-                end = 8.dp,
-                top = 12.dp,
-                bottom = 4.dp,
+                start = Spacing.xs,
+                end = Spacing.xs,
+                top = Spacing.sm,
+                bottom = Spacing.xxs,
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -51,7 +51,7 @@ fun EditorialTopBar(
         )
 
         model.title?.let { title ->
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(Spacing.xxs))
 
             SoftcoverText(
                 text = title,

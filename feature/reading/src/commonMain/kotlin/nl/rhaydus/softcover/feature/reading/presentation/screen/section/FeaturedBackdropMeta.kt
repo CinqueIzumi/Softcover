@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -65,7 +66,7 @@ internal fun FeaturedBackdropMeta(
                 overflow = TextOverflow.Ellipsis,
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
         }
 
         SoftcoverText(
@@ -82,7 +83,7 @@ internal fun FeaturedBackdropMeta(
         )
 
         book.currentEdition?.authorString?.takeIf { it.isNotBlank() }?.let { authors ->
-            Spacer(modifier = Modifier.height(9.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             SoftcoverText(
                 text = "By $authors".uppercase(),
@@ -100,7 +101,7 @@ internal fun FeaturedBackdropMeta(
 
         RevealedWhenPresent(value = paceForecast) { paceLine ->
             Column {
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SoftcoverText(
@@ -113,7 +114,7 @@ internal fun FeaturedBackdropMeta(
                         maxLines = 1,
                     )
 
-                    Spacer(modifier = Modifier.width(9.dp))
+                    Spacer(modifier = Modifier.width(Spacing.xs))
 
                     Box(
                         modifier = Modifier
@@ -123,7 +124,7 @@ internal fun FeaturedBackdropMeta(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
 
                 SoftcoverText(
                     text = paceLine,

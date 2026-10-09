@@ -39,6 +39,7 @@ import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -53,7 +54,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
             color = LocalContentColor.current,
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxs))
 
         SoftcoverText(
             text = "A reading life",
@@ -61,7 +62,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
             color = LocalContentColor.current.copy(alpha = 0.7f),
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         MiniScallopPortrait(
             avatarUrl = content.avatarUrl,
@@ -69,7 +70,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
             readerInitials = content.readerInitials,
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         SoftcoverText(
             text = "THE READER",
@@ -77,7 +78,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
             color = LocalContentColor.current.copy(alpha = 0.75f),
         )
 
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxs))
 
         SoftcoverText(
             text = content.readerName,
@@ -89,7 +90,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         SoftcoverText(
             text = "TOTAL PAGES READ",
@@ -98,7 +99,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         SoftcoverText(
             text = content.totalPagesRead,
@@ -110,7 +111,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         SoftcoverText(
             text = content.totalBooksLine,
@@ -123,16 +124,16 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
         // The genre ranking sits directly under the pages hero — it is the card's second headline,
         // not a footnote, so it precedes the reading-year chart rather than trailing it.
         if (content.topGenres.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
 
             Divider(ink = DividerInk.ContentTint)
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             ReadingLifeGenreRanking(genres = content.topGenres)
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         SoftcoverText(
             text = "THE READING YEAR",
@@ -141,7 +142,7 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxs))
 
         SoftcoverText(
             text = "pages, month by month",
@@ -150,15 +151,15 @@ internal fun ReadingLifeShareCardBody(content: ReadingLifeShareCardUiModel) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         ReadingLifeRidgeline(monthlyPages = content.pagesByMonth)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Divider(ink = DividerInk.ContentTint)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -322,7 +323,7 @@ private fun ReadingLifeRidgeline(monthlyPages: List<Int>) {
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         // Only the endpoints are labelled — twelve three-letter month labels crowded under a 12-point
         // sparkline read as noise, so this keeps just "JAN" at the left and "DEC" at the right.
@@ -355,11 +356,11 @@ private fun ReadingLifeGenreRanking(genres: List<ReadingLifeGenre>) {
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         genres.forEachIndexed { index, genre ->
             if (index > 0) {
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
             }
 
             ReadingLifeGenreRow(
@@ -398,7 +399,7 @@ private fun ReadingLifeGenreRow(
             modifier = Modifier.weight(1f),
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(Spacing.sm))
 
         SoftcoverText(
             text = genre.percentLabel,
@@ -430,12 +431,12 @@ private fun ReadingLifeFooterStat(
         )
 
         if (accessory != null) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxs))
 
             accessory()
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxs))
 
         SoftcoverText(
             text = label.uppercase(),

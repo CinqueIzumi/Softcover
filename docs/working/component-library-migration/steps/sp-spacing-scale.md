@@ -15,8 +15,8 @@ and app `foundations.md` § 2.4 (4/8, 12/16, 20/24, 28/32, 40/48).
 |---|---|---|
 | SP-1 | Inventory and approved shape (below) — stop for approval | [x] |
 | SP-2 | The token object, its KDoc, the code-style rule, and the gate | [x] |
-| SP-3 | Sweep `:core:component` and `:core:designsystem` | [ ] |
-| SP-4 | Sweep the feature modules, one brief per module group | [ ] |
+| SP-3 | Sweep `:core:component` and `:core:designsystem` | [x] |
+| SP-4 | Sweep the feature modules, one brief per module group | [x] |
 | SP-5 | Every file-level `private val X = N.dp` (`git grep -l "^private val .*\.dp$" -- '*.kt'`; 30 files, 66 vals at planning) and `BarSpec`-style dp holders becomes a token (spacing) or inline (sizes); done when the grep is empty | [ ] |
 | SP-C | Convergence pass (family-procedure.md § Phase 3): the gutters and gaps that should now be one value | [ ] |
 
@@ -52,8 +52,7 @@ and app `foundations.md` § 2.4 (4/8, 12/16, 20/24, 28/32, 40/48).
   `Spacer`'s `height` / `width` / `size`. Component sizes, strokes and borders stay literal; radii are SH.
 - Gate: new app-local `:detekt-rules` module with one `RawSpacingDp` rule, wired into `detektPlugins` beside
   the foundation ruleset; fails on a dp literal in those calls outside `Spacing.kt`, allowing 0 / 64 / 96.
-  Also an upstream candidate. SP-4 enables the rule by adding `softcover: RawSpacingDp: active: true` to
-  `config/detekt/detekt.yml`, and must solve config validation for `:detekt-rules` itself, which does not
-  load its own plugin, at that point. Drop the stale `:ktlint-rules` reference in the root `build.gradle.kts`.
+  Also an upstream candidate. Active via `config/detekt/softcover-rules.yml`, a config layer the root build
+  appends for every module but `:detekt-rules` (which cannot load its own plugin). Drop the stale `:ktlint-rules` reference in the root `build.gradle.kts`.
 - Code style: "`.dp` values stay inline" becomes "spacing reads a `Spacing` token; sizes stay inline"; the
   inline-dp memory is updated in SP-2.

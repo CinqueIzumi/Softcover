@@ -39,6 +39,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.state.streakSheetScaffoldFor
@@ -87,7 +88,7 @@ internal fun StreakStrip(
                 }
                 .horizontalScroll(rememberScrollState())
                 .height(18.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (isLoading && displayDays.isEmpty()) {
@@ -128,7 +129,7 @@ internal fun StreakStrip(
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -226,7 +227,7 @@ private fun StreakStripSheetRow(
                 ),
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
         SoftcoverText(
             text = sheetDayLabel(
@@ -286,7 +287,7 @@ private fun previewActivity(litOffsets: Set<Int>): List<ReadingDayActivity> {
 @Composable
 private fun StreakStripPreview() {
     SoftcoverTheme {
-        Column(modifier = Modifier.padding(24.dp)) {
+        Column(modifier = Modifier.padding(Spacing.xl)) {
             StreakStrip(
                 activity = previewActivity(
                     litOffsets = setOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20),

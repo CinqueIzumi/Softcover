@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
@@ -26,6 +25,7 @@ import nl.rhaydus.softcover.core.component.divider.DividerCenter
 import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.lists.presentation.action.CreateListAction
 import nl.rhaydus.softcover.feature.lists.presentation.action.OnNameChangedAction
@@ -63,13 +63,13 @@ internal fun CreateListSheetContent(
             .verticalScroll(state = rememberScrollState())
             .imePadding()
             .padding(
-                top = 8.dp,
-                start = 28.dp,
-                end = 28.dp,
-                bottom = 28.dp,
+                top = Spacing.xs,
+                start = Spacing.xxl,
+                end = Spacing.xxl,
+                bottom = Spacing.xxl,
             ),
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         SoftcoverText(
             text = "A NEW LIST",
@@ -77,11 +77,11 @@ internal fun CreateListSheetContent(
             color = MaterialTheme.colorScheme.primary,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Divider(center = DividerCenter.QuoteMark)
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxl))
 
         TextField(
             model = state.nameField,
@@ -96,11 +96,11 @@ internal fun CreateListSheetContent(
             },
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxl))
 
-        Divider(modifier = Modifier.padding(horizontal = 40.dp))
+        Divider(modifier = Modifier.padding(horizontal = Spacing.x4l))
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxl))
 
         SegmentedControl(
             model = state.privacyToggle,
@@ -111,7 +111,7 @@ internal fun CreateListSheetContent(
             },
         )
 
-        Spacer(modifier = Modifier.height(34.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxl))
 
         RhaydusButton(
             label = "Create list",

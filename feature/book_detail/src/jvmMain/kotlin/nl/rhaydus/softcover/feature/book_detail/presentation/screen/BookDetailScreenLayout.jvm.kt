@@ -30,6 +30,7 @@ import nl.rhaydus.softcover.core.component.state.OfflineEmptyStatePlaceholder
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.layout.bottomChromePadding
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookDetailOverlays
 import nl.rhaydus.softcover.feature.book_detail.presentation.screen.section.BookHero
@@ -150,7 +151,7 @@ private fun TwoColumnContent(
                 onCoverClick = onCoverClick,
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             ShelveControlCard(
                 state = state,
@@ -160,7 +161,7 @@ private fun TwoColumnContent(
             )
 
             state.scanEditionCallout?.let { scanEditionCallout ->
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(Spacing.lg))
 
                 ScanEditionCallout(
                     model = scanEditionCallout,
@@ -168,7 +169,7 @@ private fun TwoColumnContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp + bottomChromePadding()))
+            Spacer(modifier = Modifier.height(Spacing.xl + bottomChromePadding()))
         }
 
         VerticalDivider()
@@ -213,7 +214,7 @@ private fun NarrativeColumn(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(vertical = 4.dp),
+                .padding(vertical = Spacing.xxs),
         )
     }
 }
@@ -246,7 +247,7 @@ private fun SingleColumnContent(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(vertical = 4.dp),
+                .padding(vertical = Spacing.xxs),
         )
     }
 }

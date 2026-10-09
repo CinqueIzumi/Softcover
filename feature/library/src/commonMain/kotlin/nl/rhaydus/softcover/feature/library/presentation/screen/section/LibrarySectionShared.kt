@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.LibraryGridLayout
 import nl.rhaydus.softcover.core.domain.model.LibrarySortMode
 import nl.rhaydus.softcover.core.domain.model.SortDirection
@@ -52,7 +53,7 @@ internal fun DragHandle(modifier: Modifier = Modifier) {
             contentDescription = dragHandleIcon.contentDescription,
             modifier = Modifier
                 .size(28.dp)
-                .padding(4.dp),
+                .padding(Spacing.xxs),
         )
     }
 }
@@ -127,17 +128,17 @@ internal fun LayoutGrid(
     )
 
     val itemSpacing = when (layout) {
-        LibraryGridLayout.GRID_TWO_COLUMNS -> 20.dp
-        LibraryGridLayout.GRID_THREE_COLUMNS -> 16.dp
-        LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY -> 14.dp
-        LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY -> 10.dp
-        LibraryGridLayout.LIST_LARGE -> 12.dp
+        LibraryGridLayout.GRID_TWO_COLUMNS -> Spacing.lg
+        LibraryGridLayout.GRID_THREE_COLUMNS -> Spacing.md
+        LibraryGridLayout.GRID_TWO_COLUMNS_COVER_ONLY -> Spacing.md
+        LibraryGridLayout.GRID_THREE_COLUMNS_COVER_ONLY -> Spacing.sm
+        LibraryGridLayout.LIST_LARGE -> Spacing.sm
         LibraryGridLayout.LIST_COMPACT -> 0.dp
     }
 
     val horizontalPadding = when (layout) {
-        LibraryGridLayout.LIST_COMPACT -> 24.dp
-        else -> 16.dp
+        LibraryGridLayout.LIST_COMPACT -> Spacing.xl
+        else -> Spacing.md
     }
 
     LazyVerticalGrid(

@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.core.component.callout.BannerEvent
 import nl.rhaydus.softcover.core.component.callout.BannerUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.prefetchBookDetailOnPress
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnClearMutationFailureAction
@@ -57,7 +58,7 @@ internal fun FeaturedBookCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = Spacing.md)
             .then(if (isLoading) Modifier else Modifier.prefetchBookDetailOnPress(book.id))
             .then(
                 if (isLoading) {

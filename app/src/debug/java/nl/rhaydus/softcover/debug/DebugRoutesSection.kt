@@ -29,6 +29,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -42,7 +43,7 @@ fun DebugRoutesSection(host: Screen) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = state.pageHeader)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -55,7 +56,7 @@ fun DebugRoutesSection(host: Screen) {
                     onClick = { navigator.parent?.push(ShareCardDebugScreen) },
                 )
 
-                Divider(modifier = Modifier.padding(horizontal = 20.dp))
+                Divider(modifier = Modifier.padding(horizontal = Spacing.lg))
 
                 DebugNavigationRow(
                     title = "Motion & haptics",
@@ -64,7 +65,7 @@ fun DebugRoutesSection(host: Screen) {
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.x4l))
     }
 }
 
@@ -78,8 +79,8 @@ private fun DebugNavigationRow(
             .fillMaxWidth()
             .noRippleClickable(onClick)
             .padding(
-                horizontal = 20.dp,
-                vertical = 18.dp,
+                horizontal = Spacing.lg,
+                vertical = Spacing.md,
             ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -90,7 +91,7 @@ private fun DebugNavigationRow(
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(Spacing.sm))
 
         val icon = drawableIconResource(
             icon = SoftcoverIcon.KeyboardArrowRight,

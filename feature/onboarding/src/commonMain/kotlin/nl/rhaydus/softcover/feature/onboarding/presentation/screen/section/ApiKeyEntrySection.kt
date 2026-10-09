@@ -39,6 +39,7 @@ import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeyPasteAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnApiKeySaveClickAction
@@ -83,7 +84,7 @@ internal fun ApiKeyEntrySection(
             getCopiedText = getCopiedText,
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxl))
 
         ApiKeyEntryFooter(
             state = state,
@@ -113,11 +114,11 @@ internal fun ApiKeyEntryContent(
             },
         )
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Divider(center = DividerCenter.Label(text = "Or type it"))
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         TextField(
             model = state.apiKeyField,
@@ -132,11 +133,11 @@ internal fun ApiKeyEntryContent(
             },
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         HelperLine(openUrl = openUrl)
 
-        Spacer(modifier = Modifier.height(26.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         WhereToFindItExplainer()
     }
@@ -165,7 +166,7 @@ internal fun ApiKeyEntryFooter(
         )
 
         state.submissionError?.let { error ->
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             InlineErrorState(
                 message = error,
@@ -186,10 +187,10 @@ private fun PasteFromClipboardRow(onClick: () -> Unit) {
             .pointerHandCursor()
             .clickable(onClick = onClick)
             .padding(
-                horizontal = 18.dp,
-                vertical = 16.dp,
+                horizontal = Spacing.md,
+                vertical = Spacing.md,
             ),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val pasteIcon = drawableIconResource(
@@ -296,7 +297,7 @@ private fun WhereToFindItExplainer() {
     Column(modifier = Modifier.fillMaxWidth()) {
         Divider()
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
             text = "Where to find it".uppercase(),
@@ -308,9 +309,9 @@ private fun WhereToFindItExplainer() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
             ExplainerStepRow(
                 number = "01",
                 label = "Sign in at hardcover.app",
@@ -338,7 +339,7 @@ private fun ExplainerStepRow(
     label: String,
     sub: String,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
         SoftcoverText(
             text = number,
             style = MaterialTheme.editorialTypography.headlineSmall.copy(
@@ -362,7 +363,7 @@ private fun ExplainerStepRow(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.height(1.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxs))
 
             SoftcoverText(
                 text = sub,

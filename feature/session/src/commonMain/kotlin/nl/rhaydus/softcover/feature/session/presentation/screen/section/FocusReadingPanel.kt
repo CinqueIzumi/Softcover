@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.haptics.rememberHaptics
 import nl.rhaydus.designsystem.model.ButtonSize
@@ -25,6 +24,7 @@ import nl.rhaydus.softcover.core.component.cover.Cover
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.session.ActiveSession
 import nl.rhaydus.softcover.core.presentation.session.formatSessionElapsed
@@ -63,7 +63,7 @@ internal fun FocusReadingPanel(
             color = MaterialTheme.colorScheme.primary,
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Cover(
             model = active.focusCover,
@@ -72,7 +72,7 @@ internal fun FocusReadingPanel(
                 .aspectRatio(2f / 3f),
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
             text = active.book.title,
@@ -84,7 +84,7 @@ internal fun FocusReadingPanel(
         )
 
         active.book.authors.firstOrNull()?.let { author ->
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxs))
 
             SoftcoverText(
                 text = "By ${author.name}",
@@ -94,7 +94,7 @@ internal fun FocusReadingPanel(
             )
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         SoftcoverText(
             text = if (isPaused) "PAUSED" else "READING TIME",
@@ -106,7 +106,7 @@ internal fun FocusReadingPanel(
             },
         )
 
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxs))
 
         SoftcoverText(
             text = formatSessionElapsed(elapsed = elapsed),
@@ -118,7 +118,7 @@ internal fun FocusReadingPanel(
             },
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         state.pageEditor?.let { pageEditor ->
             FocusPageEditor(
@@ -128,11 +128,11 @@ internal fun FocusReadingPanel(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             RhaydusButton(
                 label = if (isPaused) "Resume" else "Pause",

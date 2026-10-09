@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -23,8 +24,8 @@ internal fun EmptyEntriesCard() {
             style = MaterialTheme.editorialTypography.body,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(
-                horizontal = 20.dp,
-                vertical = 18.dp,
+                horizontal = Spacing.lg,
+                vertical = Spacing.md,
             ),
         )
     }

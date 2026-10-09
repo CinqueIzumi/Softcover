@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
@@ -19,6 +18,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.presentation.action.HiddenSuggestionsAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.HiddenGroupHeaderUiModel
@@ -45,7 +45,7 @@ internal fun HiddenSuggestionsContent(
                 model = state.emptyState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 40.dp),
+                    .padding(top = Spacing.x4l),
             )
         } else {
             SoftcoverText(
@@ -54,7 +54,7 @@ internal fun HiddenSuggestionsContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             if (state.isLoadingBooks || state.hiddenBooks.isEmpty.not()) {
                 HiddenGroupSection(
@@ -64,7 +64,7 @@ internal fun HiddenSuggestionsContent(
                     runAction = runAction,
                 )
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(Spacing.x4l))
             }
 
             if (state.isLoadingSeries || state.hiddenSeries.isEmpty.not()) {
@@ -77,7 +77,7 @@ internal fun HiddenSuggestionsContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
     }
 }
 
@@ -102,7 +102,7 @@ private fun HiddenGroupSection(
             isLoading = isLoading,
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         set.cards.forEach { card ->
             key(card.key.lazyKey) {
@@ -138,7 +138,7 @@ private fun HiddenSuggestionsGroupHeader(
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         SoftcoverText(
             text = model.subline,

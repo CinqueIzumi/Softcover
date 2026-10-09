@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * A small pill of chrome reporting a status in one word or a short phrase — a reading deadline's
@@ -39,13 +40,13 @@ fun Badge(
     }
     val padding = when (model.size) {
         BadgeSize.Compact -> PaddingValues(
-            horizontal = 6.dp,
-            vertical = 2.dp,
+            horizontal = Spacing.xxs,
+            vertical = Spacing.xxxs,
         )
 
         BadgeSize.Regular -> PaddingValues(
-            horizontal = 8.dp,
-            vertical = 4.dp,
+            horizontal = Spacing.xs,
+            vertical = Spacing.xxs,
         )
     }
     val style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold)
@@ -72,7 +73,7 @@ fun Badge(
                     modifier = Modifier.size(12.dp),
                 )
 
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(Spacing.xxs))
             }
 
             SoftcoverText(

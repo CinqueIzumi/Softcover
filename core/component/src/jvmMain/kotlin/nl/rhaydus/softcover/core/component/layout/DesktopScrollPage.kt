@@ -14,10 +14,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The desktop scroll page: slots for an optional [topBar], [masthead] and docked [bottomBar] around a
@@ -49,19 +49,19 @@ fun DesktopScrollPage(
                     .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(
-                        top = 24.dp,
-                        bottom = if (bottomBar == null) 24.dp + bottomBarPadding else 24.dp,
+                        top = Spacing.xl,
+                        bottom = if (bottomBar == null) Spacing.xl + bottomBarPadding else Spacing.xl,
                     ),
             ) {
                 Column(
                     modifier = Modifier
                         .cappedContentWidth()
-                        .padding(horizontal = 32.dp),
+                        .padding(horizontal = Spacing.xxxl),
                 ) {
                     if (masthead != null) {
                         masthead()
 
-                        Spacer(modifier = Modifier.height(28.dp))
+                        Spacer(modifier = Modifier.height(Spacing.xxl))
                     }
 
                     content()
@@ -73,7 +73,7 @@ fun DesktopScrollPage(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = Spacing.xxs),
             )
         }
 

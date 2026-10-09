@@ -15,9 +15,9 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.reading.presentation.state.FeaturedProgressUiModel
 
@@ -56,7 +56,7 @@ internal fun FeaturedProgressStat(
         )
     }
 
-    Spacer(modifier = Modifier.height(9.dp))
+    Spacer(modifier = Modifier.height(Spacing.xs))
 
     ProgressBar(
         fraction = model.fraction,

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 fun RankedBars(
@@ -25,7 +26,7 @@ fun RankedBars(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         model.rows.forEach { row ->
             Column {
@@ -35,7 +36,7 @@ fun RankedBars(
                     swatch = false,
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
 
                 Box(
                     modifier = Modifier

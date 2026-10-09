@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.callout.Callout
 import nl.rhaydus.softcover.core.component.callout.CalloutUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.settings.presentation.screen.handleAppUpdateCalloutEvent
 
 /**
@@ -20,7 +20,7 @@ internal fun AboutPane(
     onStartAppUpdate: () -> Unit,
     debugSection: @Composable () -> Unit,
 ) {
-    Spacer(modifier = Modifier.height(40.dp))
+    Spacer(modifier = Modifier.height(Spacing.x4l))
 
     if (appUpdateCallout != null) {
         Callout(
@@ -34,7 +34,7 @@ internal fun AboutPane(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.x4l))
     }
 
     debugSection()

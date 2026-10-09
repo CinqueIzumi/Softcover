@@ -9,8 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -21,7 +21,7 @@ internal fun YearRecapShareCardBody(content: YearRecapShareCardUiModel) {
         color = MaterialTheme.colorScheme.primary,
     )
 
-    Spacer(modifier = Modifier.height(12.dp))
+    Spacer(modifier = Modifier.height(Spacing.sm))
 
     SoftcoverText(
         text = content.headline,
@@ -29,11 +29,11 @@ internal fun YearRecapShareCardBody(content: YearRecapShareCardUiModel) {
         color = MaterialTheme.colorScheme.onSurface,
     )
 
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(Spacing.xl))
 
     content.highlights.forEachIndexed { index, highlight ->
         if (index > 0) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
         }
 
         Row(
@@ -46,7 +46,7 @@ internal fun YearRecapShareCardBody(content: YearRecapShareCardUiModel) {
                 color = MaterialTheme.colorScheme.primary,
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
 
             SoftcoverText(
                 text = highlight,

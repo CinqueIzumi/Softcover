@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -45,7 +46,7 @@ internal fun RatingsHistogramSection(
     Column(modifier = modifier) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         if (totalRatings == 0 && isLoading.not()) {
             SoftcoverText(
@@ -60,11 +61,11 @@ internal fun RatingsHistogramSection(
                 isLoading = isLoading,
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
 
             ColumnChart(model = chart)
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             SoftcoverText(
                 text = caption,
@@ -95,10 +96,10 @@ private fun RatingsAverageRow(
                 text = "/5",
                 style = MaterialTheme.editorialTypography.headlineSmall.copy(fontSize = 19.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 6.dp),
+                modifier = Modifier.padding(bottom = Spacing.xxs),
             )
 
-            Spacer(modifier = Modifier.width(6.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
 
             val star = drawableIconResource(
                 icon = SoftcoverIcon.StarFilled,
@@ -115,11 +116,11 @@ private fun RatingsAverageRow(
             )
         }
 
-        Spacer(modifier = Modifier.width(20.dp))
+        Spacer(modifier = Modifier.width(Spacing.lg))
 
         VerticalDivider(modifier = Modifier.height(32.dp))
 
-        Spacer(modifier = Modifier.width(20.dp))
+        Spacer(modifier = Modifier.width(Spacing.lg))
 
         SoftcoverText(
             text = averageLabel,

@@ -51,6 +51,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
@@ -101,8 +102,8 @@ internal actual fun OnboardingScreenLayout(
                 header = state.pageHeaders.getValue(pages[pagerState.currentPage]),
                 activePage = pagerState.currentPage + 1,
                 modifier = Modifier
-                    .padding(horizontal = 30.dp)
-                    .padding(top = 24.dp),
+                    .padding(horizontal = Spacing.xxl)
+                    .padding(top = Spacing.xl),
             )
 
             HorizontalPager(
@@ -220,14 +221,14 @@ private fun FirstIntroScreen(
             style = MaterialTheme.editorialTypography.quoteGlyph.copy(fontSize = 340.sp),
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
             modifier = Modifier
-                .offset(x = (-18).dp, y = 96.dp)
+                .offset(x = -Spacing.lg, y = 96.dp)
                 .clearAndSetSemantics {},
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 30.dp),
+                .padding(horizontal = Spacing.xxl),
         ) {
             Column(
                 modifier = Modifier
@@ -245,7 +246,7 @@ private fun FirstIntroScreen(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                Spacer(modifier = Modifier.height(26.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxl))
 
                 SoftcoverText(
                     text = "Track every book you read, share the ones worth sharing — or " +
@@ -265,7 +266,7 @@ private fun FirstIntroScreen(
                 showTrailingArrow = true,
                 trailingLabel = "Skip",
                 onTrailingClick = onSkipClick,
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier.padding(bottom = Spacing.md),
             )
         }
     }
@@ -279,7 +280,7 @@ private fun SecondIntroScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 30.dp),
+            .padding(horizontal = Spacing.xxl),
     ) {
         Column(
             modifier = Modifier
@@ -297,11 +298,11 @@ private fun SecondIntroScreen(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.height(34.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             WavyConnector()
 
-            Spacer(modifier = Modifier.height(34.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             SoftcoverText(
                 text = "To sync your reading, Softcover connects to your Hardcover account — " +
@@ -321,7 +322,7 @@ private fun SecondIntroScreen(
             showTrailingArrow = true,
             trailingLabel = "Back",
             onTrailingClick = onBackClick,
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = Spacing.md),
         )
     }
 }
@@ -348,7 +349,7 @@ private fun WavyConnector() {
         WavySineLine(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 10.dp)
+                .padding(horizontal = Spacing.xs)
                 .height(14.dp),
         )
 
@@ -430,7 +431,7 @@ private fun ThirdIntroScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 30.dp),
+            .padding(horizontal = Spacing.xxl),
     ) {
         // Scrollable content only — the commit footer is a pinned sibling below, outside this scroll
         // region, so "Save API key" is always visible rather than scrolling off-screen with the
@@ -440,7 +441,7 @@ private fun ThirdIntroScreen(
                 .weight(1f)
                 .verticalScroll(rememberScrollState()),
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             SoftcoverText(
                 text = "Add your\nkey.",
@@ -452,7 +453,7 @@ private fun ThirdIntroScreen(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             SoftcoverText(
                 text = "One key, once. It only syncs your reading progress — never your password.",
@@ -461,7 +462,7 @@ private fun ThirdIntroScreen(
                 modifier = Modifier.widthIn(max = 300.dp),
             )
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             ApiKeyEntryContent(
                 state = state,
@@ -471,7 +472,7 @@ private fun ThirdIntroScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
         }
 
         ApiKeyEntryFooter(
@@ -479,7 +480,7 @@ private fun ThirdIntroScreen(
             runAction = runAction,
             footerTrailingLabel = "Back",
             onFooterTrailingLabelClick = onBackClick,
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = Spacing.md),
         )
     }
 }

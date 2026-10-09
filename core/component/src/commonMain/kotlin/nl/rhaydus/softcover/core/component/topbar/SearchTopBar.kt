@@ -49,6 +49,7 @@ import nl.rhaydus.softcover.core.component.chrome.ChromeIconButton
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The Explore search chrome: a rounded search field (search glyph,
@@ -80,11 +81,11 @@ fun SearchTopBar(
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(
-                    horizontal = 16.dp,
-                    vertical = 12.dp,
+                    horizontal = Spacing.md,
+                    vertical = Spacing.sm,
                 ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             SearchChromeField(
                 model = model,
@@ -145,9 +146,9 @@ private fun SearchChromeField(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 14.dp),
+                .padding(horizontal = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             SearchChromeInputArea(
                 model = model,
@@ -224,7 +225,7 @@ private fun SearchChromeInputArea(
             }
         },
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         val searchIcon = drawableIconResource(
             icon = SoftcoverIcon.Search,

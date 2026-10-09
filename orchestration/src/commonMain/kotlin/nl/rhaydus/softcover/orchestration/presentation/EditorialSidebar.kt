@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private val SIDEBAR_ITEM_SHAPE = RoundedCornerShape(16.dp)
@@ -57,8 +58,8 @@ internal fun EditorialSidebar(modifier: Modifier = Modifier) {
                 .fillMaxHeight()
                 .windowInsetsPadding(WindowInsets.systemBars)
                 .padding(
-                    horizontal = 12.dp,
-                    vertical = 24.dp,
+                    horizontal = Spacing.sm,
+                    vertical = Spacing.xl,
                 ),
         ) {
             SoftcoverText(
@@ -66,14 +67,14 @@ internal fun EditorialSidebar(modifier: Modifier = Modifier) {
                 style = MaterialTheme.editorialTypography.pageTitle,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(
-                    start = 12.dp,
-                    bottom = 24.dp,
+                    start = Spacing.sm,
+                    bottom = Spacing.xl,
                 ),
             )
 
             Column(
                 modifier = Modifier.selectableGroup(),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
             ) {
                 navItems.forEach { item ->
                     val iconPainter = item.tab.options.icon ?: return@forEach
@@ -119,8 +120,8 @@ private fun SidebarItem(
                 onClick = onClick,
             )
             .padding(
-                horizontal = 16.dp,
-                vertical = 12.dp,
+                horizontal = Spacing.md,
+                vertical = Spacing.sm,
             ),
     ) {
         BadgedBox(
@@ -141,7 +142,7 @@ private fun SidebarItem(
             )
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
         SoftcoverText(
             text = item.tab.options.title,

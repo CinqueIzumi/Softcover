@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnLensSelectedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -20,7 +20,7 @@ internal fun LazyListScope.lensItems(
         )
     }
 
-    item { Spacer(modifier = Modifier.height(24.dp)) }
+    item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
     item {
         LensContent(
@@ -44,7 +44,7 @@ internal fun LazyListScope.bookDetailItems(
         )
     }
 
-    item { Spacer(modifier = Modifier.height(20.dp)) }
+    item { Spacer(modifier = Modifier.height(Spacing.lg)) }
 
     item {
         ShelveControlCard(
@@ -56,7 +56,7 @@ internal fun LazyListScope.bookDetailItems(
     }
 
     state.scanEditionCallout?.let { scanEditionCallout ->
-        item { Spacer(modifier = Modifier.height(20.dp)) }
+        item { Spacer(modifier = Modifier.height(Spacing.lg)) }
 
         item {
             ScanEditionCallout(
@@ -66,7 +66,7 @@ internal fun LazyListScope.bookDetailItems(
         }
     }
 
-    item { Spacer(modifier = Modifier.height(20.dp)) }
+    item { Spacer(modifier = Modifier.height(Spacing.lg)) }
 
     lensItems(
         state = state,

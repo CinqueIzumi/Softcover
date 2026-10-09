@@ -10,10 +10,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.cappedContentWidth
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnLibraryVisibilityBackClickAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnSaveLibraryVisibilityAction
@@ -62,7 +62,7 @@ internal actual fun LibraryVisibilitySettingsScreenLayout(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .cappedContentWidth()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = Spacing.xl),
         )
     }
 }

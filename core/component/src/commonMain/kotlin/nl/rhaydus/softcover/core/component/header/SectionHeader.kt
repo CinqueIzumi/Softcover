@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -64,7 +65,7 @@ fun SectionHeader(
             modifier = Modifier.weight(1f),
         )
 
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(Spacing.xxs)) {
             trailing()
         }
     }
@@ -115,7 +116,7 @@ private fun SectionHeaderRegion(
         )
 
         if (model.headline != null) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             SoftcoverText(
                 text = headerAnnotatedString(
@@ -131,7 +132,7 @@ private fun SectionHeaderRegion(
         }
 
         if (model.description != null) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             SoftcoverText(
                 text = headerAnnotatedString(

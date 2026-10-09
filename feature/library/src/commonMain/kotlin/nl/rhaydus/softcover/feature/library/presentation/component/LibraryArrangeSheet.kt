@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.chip.ChipEvent
@@ -14,6 +13,7 @@ import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyArrangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeLayoutChipClickedAction
@@ -62,7 +62,7 @@ internal fun LibraryArrangeSheet(
     ) {
         SectionHeader(model = state.arrangeLayoutHeader)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         ChipFlow(
             set = state.arrangeLayoutChips,
@@ -72,7 +72,7 @@ internal fun LibraryArrangeSheet(
         )
 
         state.arrangeTitlesToggle?.let { titlesToggle ->
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             ToggleRow(
                 model = titlesToggle,
@@ -84,11 +84,11 @@ internal fun LibraryArrangeSheet(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         SectionHeader(model = state.arrangeSortHeader)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         ChipFlow(
             set = state.arrangeSortChips,
@@ -98,7 +98,7 @@ internal fun LibraryArrangeSheet(
         )
 
         state.arrangeMakeOrderedListId?.let { listId ->
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             RhaydusButton(
                 label = "Make this list ordered",

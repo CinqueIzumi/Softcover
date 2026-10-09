@@ -21,6 +21,7 @@ import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnColorPaletteSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -53,7 +54,7 @@ internal fun SpineColourSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = state.spineColourSectionHeader)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         // Every tile is measured to the same width — a third of the row, capped — rather than
         // weighted: with weights the wrapped second row's two tiles would each claim half the width
@@ -61,13 +62,13 @@ internal fun SpineColourSection(
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val tileWidth = minOf(
                 128.dp,
-                (maxWidth - 14.dp * (PALETTE_TILES_PER_ROW - 1)) / PALETTE_TILES_PER_ROW,
+                (maxWidth - Spacing.md * (PALETTE_TILES_PER_ROW - 1)) / PALETTE_TILES_PER_ROW,
             )
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                verticalArrangement = Arrangement.spacedBy(Spacing.lg),
                 maxItemsInEachRow = PALETTE_TILES_PER_ROW,
             ) {
                 state.paletteChoices.forEach { tile ->
@@ -85,7 +86,7 @@ internal fun SpineColourSection(
             }
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
             text = if (state.dynamicColorToggleRow.checked) {
@@ -95,11 +96,11 @@ internal fun SpineColourSection(
             },
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp),
+            modifier = Modifier.padding(horizontal = Spacing.xxs),
         )
 
         if (supportsDynamicColor()) {
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             Divider()
 

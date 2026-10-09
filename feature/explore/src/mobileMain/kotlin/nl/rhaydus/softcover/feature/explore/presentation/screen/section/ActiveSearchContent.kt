@@ -11,10 +11,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -37,7 +37,7 @@ internal fun ActiveSearchContent(
             onBookClick = onBookClick,
         ) { onSearchResultEvent ->
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
             ) {
                 SortChip(
                     state = state,
@@ -58,7 +58,7 @@ internal fun ActiveSearchContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = Spacing.lg),
                 contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
             ) {
                 items(state.searchResults.cards, key = { it.key.lazyKey }) { card ->

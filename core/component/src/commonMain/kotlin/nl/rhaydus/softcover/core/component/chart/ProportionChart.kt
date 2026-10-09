@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 fun ProportionChart(
@@ -36,7 +37,7 @@ fun ProportionChart(
                     visible = model.isLoading,
                     shape = barShape,
                 ),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xxxs),
         ) {
             model.segments.filter { it.fraction > 0f }.forEach { segment ->
                 Box(
@@ -48,7 +49,7 @@ fun ProportionChart(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         model.segments.forEach { segment ->
             Divider()
@@ -57,7 +58,7 @@ fun ProportionChart(
                 slice = segment,
                 isLoading = model.isLoading,
                 swatch = true,
-                modifier = Modifier.padding(vertical = 7.dp),
+                modifier = Modifier.padding(vertical = Spacing.xs),
             )
         }
     }

@@ -10,13 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRow
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowUpdateProgressSheetClickAction
@@ -36,7 +36,7 @@ internal fun InProgressSection(
 ) {
     val inProgress = state.inProgress ?: return
 
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.lg)) {
         SectionHeader(model = state.inProgressSectionHeader) {
             PillButton(
                 model = state.updateProgressPill,
@@ -44,7 +44,7 @@ internal fun InProgressSection(
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         SoftcoverText(
             text = inProgress.percent,
@@ -52,11 +52,11 @@ internal fun InProgressSection(
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         ProgressBar(fraction = inProgress.fraction)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -77,7 +77,7 @@ internal fun InProgressSection(
 
         RevealedWhenPresent(value = state.readingPaceForecast) { forecast ->
             Column {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
 
                 SoftcoverText(
                     text = "Finish in ${forecast.forecastReadingDays} reading days",
@@ -89,7 +89,7 @@ internal fun InProgressSection(
 
         RevealedWhenPresent(value = state.deadlineRow) { row ->
             Column {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 DeadlineRow(model = row)
             }

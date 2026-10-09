@@ -41,6 +41,7 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -158,7 +159,7 @@ actual fun BarcodeScanner(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+                .padding(horizontal = Spacing.xl, vertical = Spacing.xxxl),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             SoftcoverText(
@@ -167,7 +168,7 @@ actual fun BarcodeScanner(
                 color = Color.White.copy(alpha = 0.8f),
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             SoftcoverText(
                 text = "Center a book's barcode",
@@ -214,12 +215,13 @@ private fun scanFrame(
 
     scanner.process(inputImage)
         .addOnSuccessListener { barcodes ->
-            val isbn = barcodes.firstNotNullOfOrNull { it.rawValue }
-
-            if (isbn != null && hasEmitted.compareAndSet(
+            val isbn = barcodes.firstNotNullOfOrNull { it.rawValue } ?: return@addOnSuccessListener
+            val isFirstDetection = hasEmitted.compareAndSet(
                 false,
                 true,
-            )) {
+            )
+
+            if (isFirstDetection) {
                 onIsbnDetected(isbn)
             }
         }

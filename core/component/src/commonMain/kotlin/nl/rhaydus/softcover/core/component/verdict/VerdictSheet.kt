@@ -68,6 +68,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 import kotlin.math.roundToInt
@@ -185,11 +186,11 @@ fun VerdictSheet(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             VerdictScoreAndCaption(rating = draftRating)
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
 
             SoftcoverText(
                 text = "In your words".uppercase(),
@@ -198,7 +199,7 @@ fun VerdictSheet(
                 modifier = Modifier.semantics(mergeDescendants = true) { heading() },
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             BasicTextField(
                 value = textFieldValue,
@@ -228,8 +229,8 @@ fun VerdictSheet(
                             .clip(RoundedCornerShape(16.dp))
                             .background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
                             .padding(
-                                horizontal = 16.dp,
-                                vertical = 14.dp,
+                                horizontal = Spacing.md,
+                                vertical = Spacing.sm,
                             ),
                     ) {
                         if (textFieldValue.text.isEmpty()) {
@@ -247,7 +248,7 @@ fun VerdictSheet(
                 },
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             MarkToolbar(
                 chips = model.markChips,
@@ -272,7 +273,7 @@ fun VerdictSheet(
                 },
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             SoftcoverText(
                 text = "Select text, then tap Bold, Italic or Spoiler",
@@ -280,7 +281,7 @@ fun VerdictSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             ToggleRow(
                 model = spoilersRow,
@@ -291,7 +292,7 @@ fun VerdictSheet(
                 },
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
         }
     }
 }
@@ -332,7 +333,7 @@ private fun VerdictScoreAndCaption(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 VerdictScoreLine(score = animatedScore)
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
 
                 SoftcoverText(
                     text = verdictCaptionFor(score = animatedScore),
@@ -416,7 +417,7 @@ private fun MarkToolbar(
     enabled: Boolean,
     onMarkToggled: (RichTextMarkType) -> Unit,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
         chips.forEach { (mark, chip) ->
             Chip(
                 model = chip.copy(

@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
 /**
@@ -53,7 +54,7 @@ internal actual fun BarcodeScannerScreenLayout(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 24.dp),
+                    .padding(horizontal = Spacing.xl, vertical = Spacing.xl),
                 contentAlignment = Alignment.Center,
             ) {
                 Surface(
@@ -74,7 +75,7 @@ internal actual fun BarcodeScannerScreenLayout(
                         onIsbnSubmit = onIsbnSubmit,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 28.dp, vertical = 28.dp),
+                            .padding(horizontal = Spacing.xxl, vertical = Spacing.xxl),
                     )
                 }
             }

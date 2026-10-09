@@ -17,6 +17,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 internal fun PickUpNextSection(
@@ -30,12 +31,12 @@ internal fun PickUpNextSection(
     ) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(
-                16.dp,
+                Spacing.md,
                 Alignment.CenterHorizontally,
             ),
         ) {

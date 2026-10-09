@@ -9,9 +9,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.softcover.core.component.header.PageMasthead
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.reading.presentation.component.StreakStrip
 import nl.rhaydus.softcover.feature.reading.presentation.state.ReadingScreenUiState
 
@@ -30,7 +30,7 @@ internal fun ReadingMasthead(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 24.dp, end = 24.dp, top = 24.dp),
+            .padding(start = Spacing.xl, end = Spacing.xl, top = Spacing.xl),
     ) {
         PullToRefreshEyebrow(
             pullToRefreshState = pullToRefreshState,
@@ -39,12 +39,12 @@ internal fun ReadingMasthead(
             refreshingText = "Catching up on your reading…",
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxs))
 
         PageMasthead(model = state.visibleCompactMasthead)
 
         if (state.streakEnabled && (state.isLoading || state.recentReadingActivity.isNotEmpty())) {
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             StreakStrip(
                 activity = state.recentReadingActivity,
@@ -53,6 +53,6 @@ internal fun ReadingMasthead(
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
     }
 }

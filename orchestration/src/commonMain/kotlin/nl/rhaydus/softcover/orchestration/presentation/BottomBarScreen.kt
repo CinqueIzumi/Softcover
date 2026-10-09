@@ -45,6 +45,7 @@ import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.BottomBarStyle
 import nl.rhaydus.softcover.core.presentation.navigation.AppNavigator
 import nl.rhaydus.softcover.core.presentation.navigation.BookDetailPresenter
@@ -176,7 +177,7 @@ internal object BottomBarScreen : Screen {
                                                     model = state.emptyDetailPane,
                                                     modifier = Modifier
                                                         .fillMaxSize()
-                                                        .padding(24.dp),
+                                                        .padding(Spacing.xl),
                                                 )
                                             }
                                         }
@@ -226,7 +227,7 @@ private fun CompactNavShell(body: @Composable () -> Unit) {
 private fun CompactBottomChrome(style: BottomBarStyle) {
     when (style) {
         BottomBarStyle.DOCKED -> Column {
-            SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
+            SessionPeekBar(modifier = Modifier.padding(bottom = Spacing.xs))
 
             DockedBottomNavigationBar()
         }
@@ -244,16 +245,16 @@ private fun CompactBottomChrome(style: BottomBarStyle) {
                     onClick = {},
                 ),
             ) {
-                SessionPeekBar(modifier = Modifier.padding(bottom = 8.dp))
+                SessionPeekBar(modifier = Modifier.padding(bottom = Spacing.xs))
 
                 BottomFloatingBar(
                     modifier = Modifier.padding(
-                        horizontal = 8.dp,
-                        vertical = 6.dp,
+                        horizontal = Spacing.xs,
+                        vertical = Spacing.xxs,
                     ),
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
             }
         }
     }

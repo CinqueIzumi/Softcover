@@ -17,6 +17,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -41,7 +42,7 @@ fun PageMasthead(
                     color = MaterialTheme.colorScheme.primary,
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxs))
             }
 
             SoftcoverText(
@@ -61,8 +62,8 @@ fun PageMasthead(
                 Spacer(
                     modifier = Modifier.height(
                         when (model.size) {
-                            PageMastheadSize.Regular -> 6.dp
-                            PageMastheadSize.Compact -> 4.dp
+                            PageMastheadSize.Regular -> Spacing.xs
+                            PageMastheadSize.Compact -> Spacing.xxs
                         },
                     ),
                 )
@@ -81,7 +82,7 @@ fun PageMasthead(
             }
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(Spacing.xxs)) {
             actions()
         }
     }

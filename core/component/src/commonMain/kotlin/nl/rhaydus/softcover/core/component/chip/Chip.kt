@@ -45,6 +45,7 @@ import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.spoilerEditorHighlight
 
 /**
@@ -120,12 +121,12 @@ private fun ChipScaffold(
         .padding(
             when (model.size) {
                 ChipSize.Regular -> PaddingValues(
-                    horizontal = 14.dp,
-                    vertical = 8.dp,
+                    horizontal = Spacing.sm,
+                    vertical = Spacing.xs,
                 )
                 ChipSize.Compact -> PaddingValues(
-                    horizontal = 10.dp,
-                    vertical = 6.dp,
+                    horizontal = Spacing.xs,
+                    vertical = Spacing.xxs,
                 )
             },
         )
@@ -202,7 +203,7 @@ private fun ChipLeadingSlot(
                 size = 18.dp,
                 onClick = null,
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
         }
 
         is ChipLeading.SpoilerToggle -> {
@@ -213,7 +214,7 @@ private fun ChipLeadingSlot(
                 size = 18.dp,
                 onClick = onToggle,
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
         }
     }
 }
@@ -240,8 +241,8 @@ private fun ChipLabel(
                 .clip(RoundedCornerShape(2.dp))
                 .background(MaterialTheme.colorScheme.spoilerEditorHighlight)
                 .padding(
-                    horizontal = 3.dp,
-                    vertical = 1.dp,
+                    horizontal = Spacing.xxxs,
+                    vertical = Spacing.xxxs,
                 )
         } else {
             Modifier
@@ -259,7 +260,7 @@ private fun ChipTrailingSlot(
         null -> Unit
 
         is ChipTrailing.Icon -> {
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
             ChipIconSlot(
                 icon = trailing.icon,
                 contentDescription = trailing.description,
@@ -270,7 +271,7 @@ private fun ChipTrailingSlot(
         }
 
         is ChipTrailing.Dismiss -> {
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
             ChipIconSlot(
                 icon = SoftcoverIcon.Close,
                 contentDescription = trailing.label,

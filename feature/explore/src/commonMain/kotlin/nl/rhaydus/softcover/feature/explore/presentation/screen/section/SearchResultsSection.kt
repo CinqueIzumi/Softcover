@@ -13,11 +13,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.InlineErrorState
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
@@ -50,7 +50,7 @@ internal fun ColumnScope.SearchResultsSection(
             onRetry = { runAction(OnRetrySearchAction) },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = Spacing.xl),
             textStyle = MaterialTheme.editorialTypography.bodySmall,
         )
 
@@ -63,7 +63,7 @@ internal fun ColumnScope.SearchResultsSection(
             onEvent = { runAction(OnClearSearchAction) },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(Spacing.xl),
         )
 
         return
@@ -133,7 +133,7 @@ internal fun LoadingMoreIndicator() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 24.dp),
+            .padding(vertical = Spacing.xl),
         contentAlignment = Alignment.Center,
     ) {
         CircularWavyProgressIndicator()

@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * The deadline date paired with the pace needed to still make it — "28 Aug • 18 pages/day", or with
@@ -44,7 +45,7 @@ fun DeadlineSummaryLine(
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         val icon = drawableIconResource(
             icon = SoftcoverIcon.DateRange,

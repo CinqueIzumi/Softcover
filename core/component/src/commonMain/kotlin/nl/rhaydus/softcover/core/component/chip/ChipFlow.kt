@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /**
  * Wraps every chip of [set] in one [FlowRow]. A [ChipEvent] resolves its key through [set] before
@@ -20,8 +20,8 @@ fun <P : Any> ChipFlow(
 ) {
     FlowRow(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         set.chips.forEach { chip ->
             Chip(

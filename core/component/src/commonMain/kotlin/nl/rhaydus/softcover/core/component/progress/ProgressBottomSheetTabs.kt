@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.editorial.component.EditorialSuffix
 import nl.rhaydus.designsystem.editorial.component.HeroStatNumberField
@@ -28,6 +27,7 @@ import nl.rhaydus.softcover.core.component.field.TextField
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import kotlin.math.min
 
@@ -113,7 +113,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
             icon = SoftcoverIcon.Remove,
             contentDescription = "Decrease minutes",
             onClick = { onEvent(ProgressSheetEvent.MinutesStepped(delta = -1)) },
-            modifier = Modifier.padding(end = 6.dp),
+            modifier = Modifier.padding(end = Spacing.xxs),
         )
 
         TextField(
@@ -125,7 +125,7 @@ internal fun ColumnScope.ProgressBottomSheetTimeContent(
             icon = SoftcoverIcon.Add,
             contentDescription = "Increase minutes",
             onClick = { onEvent(ProgressSheetEvent.MinutesStepped(delta = 1)) },
-            modifier = Modifier.padding(start = 6.dp),
+            modifier = Modifier.padding(start = Spacing.xxs),
         )
 
         TimeColon()
@@ -203,7 +203,7 @@ private fun ColumnScope.SteppedNumberContent(
             onClick = { stepBy(-1) },
         )
 
-        Spacer(modifier = Modifier.width(18.dp))
+        Spacer(modifier = Modifier.width(Spacing.lg))
 
         Row(verticalAlignment = Alignment.Bottom) {
             HeroStatNumberField(
@@ -255,14 +255,14 @@ private fun ColumnScope.SteppedNumberContent(
             if (unitSymbol != null) {
                 SoftcoverText(
                     text = unitSymbol,
-                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    modifier = Modifier.padding(start = Spacing.xs, bottom = Spacing.xs),
                     style = MaterialTheme.editorialTypography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(18.dp))
+        Spacer(modifier = Modifier.width(Spacing.lg))
 
         StepperCircle(
             icon = SoftcoverIcon.Add,
@@ -286,16 +286,16 @@ private fun ColumnScope.ProgressSheetFooter(
     onSubmit: () -> Unit,
 ) {
     if (suffix != null) {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         EditorialSuffix(text = suffix)
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
         ProgressBar(fraction = fraction)
     }
 
-    Spacer(modifier = Modifier.height(28.dp))
+    Spacer(modifier = Modifier.height(Spacing.xxl))
 
     RhaydusButton(
         label = "Update progress",
@@ -305,14 +305,14 @@ private fun ColumnScope.ProgressSheetFooter(
         size = ButtonSize.M,
     )
 
-    Spacer(modifier = Modifier.height(4.dp))
+    Spacer(modifier = Modifier.height(Spacing.xxs))
 }
 
 @Composable
 private fun TimeColon() {
     SoftcoverText(
         text = ":",
-        modifier = Modifier.padding(horizontal = 4.dp),
+        modifier = Modifier.padding(horizontal = Spacing.xxs),
         style = MaterialTheme.editorialTypography.headlineMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

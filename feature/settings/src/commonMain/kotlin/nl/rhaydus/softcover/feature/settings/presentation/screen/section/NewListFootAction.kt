@@ -22,6 +22,7 @@ import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -42,11 +43,11 @@ internal fun NewListFootAction(onClick: () -> Unit) {
             .pointerHandCursor()
             .pressScaleClickable(onClick = onClick)
             .padding(
-                horizontal = 12.dp,
-                vertical = 14.dp,
+                horizontal = Spacing.sm,
+                vertical = Spacing.sm,
             ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         Box(
             modifier = Modifier

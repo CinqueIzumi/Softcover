@@ -21,10 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -68,8 +68,8 @@ fun <K> ToggleRow(
             .then(
                 if (model.variant == ToggleRowVariant.Inset) {
                     Modifier.padding(
-                        horizontal = 4.dp,
-                        vertical = 16.dp,
+                        horizontal = Spacing.xxs,
+                        vertical = Spacing.md,
                     )
                 } else {
                     Modifier
@@ -85,7 +85,7 @@ fun <K> ToggleRow(
             )
 
             if (model.gloss != null) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxs))
 
                 SoftcoverText(
                     text = model.gloss,
@@ -95,7 +95,7 @@ fun <K> ToggleRow(
             }
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
         Switch(
             checked = model.checked,

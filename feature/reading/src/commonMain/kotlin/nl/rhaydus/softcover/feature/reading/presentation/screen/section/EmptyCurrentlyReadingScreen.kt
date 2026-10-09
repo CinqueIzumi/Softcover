@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
@@ -21,6 +20,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyState
 import nl.rhaydus.softcover.core.component.state.EmptyStateEvent
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
@@ -52,7 +52,7 @@ internal fun EmptyCurrentlyReadingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = Spacing.xxxl)
             .verticalScroll(rememberScrollState())
             .padding(bottom = rememberBottomBarPadding()),
         verticalArrangement = if (showAdaptive) Arrangement.Top else Arrangement.Center,
@@ -63,11 +63,11 @@ internal fun EmptyCurrentlyReadingScreen(
             modifier = if (showAdaptive) {
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 40.dp)
+                    .padding(top = Spacing.x4l)
             } else {
                 Modifier
                     .fillMaxSize()
-                    .padding(24.dp)
+                    .padding(Spacing.xl)
             },
             onEvent = { event ->
                 when (event) {
@@ -80,7 +80,7 @@ internal fun EmptyCurrentlyReadingScreen(
         // read (all-unlit), inviting a brand-new reader to start a streak; isNotEmpty()
         // only suppresses the brief pre-load window before activity data arrives.
         if (streakEnabled && recentReadingActivity.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             StreakStrip(
                 activity = recentReadingActivity,
@@ -89,7 +89,7 @@ internal fun EmptyCurrentlyReadingScreen(
         }
 
         if (pickUpNext.isEmpty.not()) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             PickUpNextSection(
                 cards = pickUpNext.cards,
@@ -97,7 +97,7 @@ internal fun EmptyCurrentlyReadingScreen(
                 onEvent = onPickUpNextEvent,
             )
         } else if (trendingTile != null) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(Spacing.x4l))
 
             TrendingTileSection(
                 book = trendingTile,

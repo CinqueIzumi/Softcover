@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.editorial.component.DropCapText
 import nl.rhaydus.designsystem.util.htmlToAnnotatedString
@@ -18,6 +17,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.richtext.isBlank
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.displayFontFamily
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -37,10 +37,10 @@ internal fun AboutSection(state: BookDetailUiState) {
     val isLoading = state.loadingBookDetails && headline.isBlank() && description.isBlank()
     val descriptionStandIn = remember { AnnotatedString(ABOUT_DESCRIPTION_STAND_IN) }
 
-    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.xl)) {
         SectionHeader(model = state.aboutSectionHeader)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         Column {
             if (isLoading || headline.isNotBlank()) {
@@ -55,7 +55,7 @@ internal fun AboutSection(state: BookDetailUiState) {
             }
 
             if (isLoading || (headline.isNotBlank() && description.isNotBlank())) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
             }
 
             if (isLoading || description.isNotBlank()) {

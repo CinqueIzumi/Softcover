@@ -1,0 +1,5 @@
+# Kept apart from detekt.yml because `:detekt-rules` cannot load its own plugin, so detekt's config
+# validation would reject the `softcover` key there.
+softcover:
+  RawSpacingDp:
+    active: true

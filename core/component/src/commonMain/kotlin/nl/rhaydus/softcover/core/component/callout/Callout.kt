@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderEyebrowText
 import nl.rhaydus.softcover.core.component.header.SectionHeaderInlineEyebrow
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -47,10 +48,10 @@ fun Callout(
     ) {
         Row(
             modifier = Modifier.padding(
-                start = 20.dp,
-                top = 18.dp,
-                end = if (model.dismissible) 4.dp else 20.dp,
-                bottom = 18.dp,
+                start = Spacing.lg,
+                top = Spacing.md,
+                end = if (model.dismissible) Spacing.xxs else Spacing.lg,
+                bottom = Spacing.md,
             ),
             verticalAlignment = Alignment.Top,
         ) {
@@ -88,7 +89,7 @@ private fun CalloutContent(
             variant = model.variant,
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         if (model.variant is CalloutVariant.Highlight) {
             SoftcoverText(
@@ -97,7 +98,7 @@ private fun CalloutContent(
                 color = content,
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
         }
 
         SoftcoverText(
@@ -107,7 +108,7 @@ private fun CalloutContent(
         )
 
         if (model.callToAction != null) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             CalloutActionContent(
                 action = model.callToAction,
@@ -145,7 +146,7 @@ private fun CalloutEyebrow(
                     modifier = Modifier.size(18.dp),
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
             }
 
             SectionHeaderEyebrowText(
@@ -178,7 +179,7 @@ private fun CalloutActionContent(
         ) {
             CircularWavyProgressIndicator(modifier = Modifier.size(20.dp))
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
 
             SoftcoverText(
                 text = action.label,

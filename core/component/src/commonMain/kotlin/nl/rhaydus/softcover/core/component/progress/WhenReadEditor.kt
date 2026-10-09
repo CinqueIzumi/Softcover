@@ -12,9 +12,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -32,7 +32,7 @@ internal fun WhenReadEditor(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp),
+            .padding(top = Spacing.lg),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -45,7 +45,7 @@ internal fun WhenReadEditor(
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -1440)) },
             )
 
-            Spacer(modifier = Modifier.width(18.dp))
+            Spacer(modifier = Modifier.width(Spacing.lg))
 
             SoftcoverText(
                 text = model.dayLabel,
@@ -53,7 +53,7 @@ internal fun WhenReadEditor(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.width(18.dp))
+            Spacer(modifier = Modifier.width(Spacing.lg))
 
             StepperCircle(
                 icon = SoftcoverIcon.Add,
@@ -62,7 +62,7 @@ internal fun WhenReadEditor(
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -75,7 +75,7 @@ internal fun WhenReadEditor(
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -60)) },
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
 
             StepperCircle(
                 icon = SoftcoverIcon.Remove,
@@ -83,7 +83,7 @@ internal fun WhenReadEditor(
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = -15)) },
             )
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
 
             SoftcoverText(
                 text = model.timeLabel,
@@ -91,7 +91,7 @@ internal fun WhenReadEditor(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
 
             StepperCircle(
                 icon = SoftcoverIcon.Add,
@@ -99,7 +99,7 @@ internal fun WhenReadEditor(
                 onClick = { onEvent(ProgressSheetEvent.WhenReadShifted(minutes = 15)) },
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
 
             StepperCircle(
                 icon = SoftcoverIcon.Add,

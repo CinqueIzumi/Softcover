@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @Composable
 internal fun ChartLegendRow(
@@ -46,7 +47,7 @@ internal fun ChartLegendRow(
                     ),
             )
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
         }
 
         SoftcoverText(
@@ -60,7 +61,7 @@ internal fun ChartLegendRow(
             modifier = Modifier.weight(1f),
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(Spacing.sm))
 
         SoftcoverText(
             text = slice.share,

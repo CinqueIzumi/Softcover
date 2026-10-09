@@ -39,6 +39,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.modifier.supportsBlur
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.action.OnShowProgressSheetClickAction
@@ -140,11 +141,11 @@ internal fun FeaturedBackdropCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, top = 22.dp, end = 20.dp, bottom = 20.dp),
+                .padding(Spacing.lg),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
             ) {
                 FeaturedCover(
                     cover = heroCover,
@@ -161,19 +162,19 @@ internal fun FeaturedBackdropCard(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             FeaturedProgressStat(model = progress)
 
             RevealedWhenPresent(value = deadlineSummary) { summary ->
                 Column {
-                    Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
                     DeadlineSummaryLine(model = summary)
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             RhaydusButton(
                 label = "Update progress",
@@ -195,7 +196,7 @@ internal fun FeaturedBackdropCard(
                 isLoading = isLoading,
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             SoftcoverText(
                 text = timeOfDayCaption(),

@@ -28,6 +28,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardEvent
 import nl.rhaydus.softcover.feature.explore.presentation.model.FeaturedCardUiModel
@@ -59,19 +60,19 @@ internal fun FeaturedCard(
                         .pressScaleClickable(onClick = { onEvent(FeaturedCardEvent.Clicked) })
                 },
             )
-            .padding(18.dp),
+            .padding(Spacing.md),
     ) {
         SectionHeader(model = model.header)
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         // A FlowRow rather than a Row: the date badge and the readers line together run close to the
         // card's inner width on a narrow phone, and a plain Row would clip the tail of "N readers
         // waiting" outright at the larger UI scales Appearance offers. Wrapping to a second line
         // costs nothing when there is room.
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
             model.badge?.let { badge ->
@@ -89,10 +90,10 @@ internal fun FeaturedCard(
             )
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
             verticalAlignment = Alignment.Top,
         ) {
             Cover(
@@ -108,7 +109,7 @@ internal fun FeaturedCard(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
 
                 SoftcoverText(
                     text = model.byline,
@@ -118,7 +119,7 @@ internal fun FeaturedCard(
                 )
 
                 model.description?.let { description ->
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
 
                     SoftcoverText(
                         text = description,
@@ -130,7 +131,7 @@ internal fun FeaturedCard(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         RhaydusButton(
             label = if (model.inLibrary) "Added to library" else "Want to read",

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.model.IntroScreen
@@ -54,8 +55,8 @@ internal actual fun OnboardingScreenLayout(
                     .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(
-                        horizontal = 24.dp,
-                        vertical = 48.dp,
+                        horizontal = Spacing.xl,
+                        vertical = Spacing.x5l,
                     ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
@@ -72,7 +73,7 @@ internal actual fun OnboardingScreenLayout(
                         textAlign = TextAlign.Center,
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
 
                     SoftcoverText(
                         text = "Book smart.",
@@ -82,7 +83,7 @@ internal actual fun OnboardingScreenLayout(
                         textAlign = TextAlign.Center,
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.md))
 
                     SoftcoverText(
                         text = "Track every book you read, share the ones worth sharing — or " +
@@ -96,11 +97,11 @@ internal actual fun OnboardingScreenLayout(
                         textAlign = TextAlign.Center,
                     )
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                     Divider()
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xxxl))
 
                     ApiKeyEntrySection(
                         state = state,
@@ -117,7 +118,7 @@ internal actual fun OnboardingScreenLayout(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = Spacing.xxs),
             )
         }
     }

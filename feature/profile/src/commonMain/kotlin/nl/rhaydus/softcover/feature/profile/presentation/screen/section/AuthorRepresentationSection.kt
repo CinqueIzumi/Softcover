@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.chart.ProportionChart
 import nl.rhaydus.softcover.core.component.chart.ProportionChartUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleEvent
@@ -15,6 +14,7 @@ import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.profile.domain.model.AuthorDemographics
 import nl.rhaydus.softcover.core.profile.domain.model.DemographicBreakdown
@@ -61,7 +61,7 @@ internal fun AuthorRepresentationSection(
     Column(modifier = modifier) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         if (canHideUntaggedAuthors && isLoading.not()) {
             ToggleRow(
@@ -73,7 +73,7 @@ internal fun AuthorRepresentationSection(
                 },
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
         }
 
         if (hasContent.not() && isLoading.not()) {
@@ -86,7 +86,7 @@ internal fun AuthorRepresentationSection(
             if (hasGenderData || isLoading) {
                 ProportionChart(model = genderChart)
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
 
                 SoftcoverText(
                     text = genderCaption(
@@ -103,7 +103,7 @@ internal fun AuthorRepresentationSection(
 
             if (hasBipocData || hasLgbtqData || isLoading) {
                 if (hasGenderData || isLoading) {
-                    Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(Spacing.xxl))
                 }
 
                 SoftcoverText(
@@ -114,7 +114,7 @@ internal fun AuthorRepresentationSection(
                     standIn = "Shares of the authors each one is tagged for, untagged authors left out.",
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
 
                 DemographicBreakdownBlock(
                     label = "BIPOC",
@@ -124,7 +124,7 @@ internal fun AuthorRepresentationSection(
                     isLoading = isLoading,
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(Spacing.xl))
 
                 DemographicBreakdownBlock(
                     label = "LGBTQ+",
@@ -186,14 +186,14 @@ private fun DemographicBreakdownBlock(
             color = MaterialTheme.colorScheme.primary,
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         // An empty breakdown keeps its eyebrow and drops to the caption alone: with nobody tagged there
         // is no proportion to draw, and a bar of three zero-width segments would read as data.
         if (breakdown.total > 0 || isLoading) {
             ProportionChart(model = chart)
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
         }
 
         SoftcoverText(

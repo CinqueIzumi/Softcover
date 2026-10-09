@@ -24,6 +24,7 @@ import nl.rhaydus.designsystem.component.DesktopVerticalScrollbar
 import nl.rhaydus.designsystem.layout.rememberBottomBarPadding
 import nl.rhaydus.softcover.core.component.bookcard.BookCard
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
@@ -42,14 +43,14 @@ internal fun DesktopSearchResults(
             runAction = runAction,
             onBookClick = onBookClick,
         ) { onSearchResultEvent ->
-            Row(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
+            Row(modifier = Modifier.padding(horizontal = Spacing.xl, vertical = Spacing.xs)) {
                 SortChip(
                     state = state,
                     runAction = runAction,
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             LoadMoreSearchResultsEffect(
                 state = state,
@@ -61,15 +62,15 @@ internal fun DesktopSearchResults(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = Spacing.xl),
             ) {
                 LazyVerticalGrid(
                     state = searchResultsGridState,
                     columns = GridCells.Adaptive(minSize = 380.dp),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = rememberBottomBarPadding()),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xl),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md),
                 ) {
                     items(state.searchResults.cards, key = { it.key.lazyKey }) { card ->
                         BookCard(
@@ -90,7 +91,7 @@ internal fun DesktopSearchResults(
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .fillMaxHeight()
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = Spacing.xxs),
                 )
             }
         }

@@ -104,8 +104,11 @@ subprojects {
         buildUponDefaultConfig = true
         // Layered, later wins: the shared foundation baseline, then Softcover's own deltas on top.
         config.setFrom(
-            rootProject.layout.buildDirectory.file("rhaydus-detekt/config/detekt.yml"),
-            rootProject.files("config/detekt/detekt.yml"),
+            listOfNotNull(
+                rootProject.layout.buildDirectory.file("rhaydus-detekt/config/detekt.yml"),
+                rootProject.file("config/detekt/detekt.yml"),
+                rootProject.file("config/detekt/softcover-rules.yml").takeIf { path != ":detekt-rules" },
+            ),
         )
         parallel = true
     }

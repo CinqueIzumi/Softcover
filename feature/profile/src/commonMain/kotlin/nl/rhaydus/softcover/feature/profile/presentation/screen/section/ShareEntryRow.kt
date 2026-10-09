@@ -26,6 +26,7 @@ import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -61,11 +62,11 @@ internal fun ShareEntryRow(
                 },
             )
             .padding(
-                horizontal = 18.dp,
-                vertical = 15.dp,
+                horizontal = Spacing.md,
+                vertical = Spacing.md,
             ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         Box(
             modifier = Modifier
@@ -94,7 +95,7 @@ internal fun ShareEntryRow(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.height(1.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxs))
 
             SoftcoverText(
                 text = "A card built from everything you've read.",

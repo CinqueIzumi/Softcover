@@ -42,6 +42,7 @@ import nl.rhaydus.designsystem.modifier.pressScale
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.DISABLED_ALPHA
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -83,7 +84,7 @@ private fun <K> TrackSegments(
         color = MaterialTheme.colorScheme.surfaceContainer,
         shape = CircleShape,
     ) {
-        Row(modifier = Modifier.selectableGroup().padding(4.dp)) {
+        Row(modifier = Modifier.selectableGroup().padding(Spacing.xxs)) {
             model.options.forEach { option ->
                 TrackSegment(
                     option = option,
@@ -145,7 +146,7 @@ private fun <K> RowScope.TrackSegment(
         enabled = option.enabled,
     ) {
         Box(
-            modifier = Modifier.padding(vertical = 9.dp),
+            modifier = Modifier.padding(vertical = Spacing.xs),
             contentAlignment = Alignment.Center,
         ) {
             SoftcoverText(
@@ -265,7 +266,7 @@ private fun ProseWord(
                 color = wordColor,
             )
 
-            Spacer(modifier = Modifier.height(1.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxs))
 
             Box(
                 modifier = Modifier

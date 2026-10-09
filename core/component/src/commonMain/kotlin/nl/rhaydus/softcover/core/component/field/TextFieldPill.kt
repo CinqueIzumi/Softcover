@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -52,7 +53,7 @@ internal fun PillTextField(
         TextFieldPillSize.Compact -> 42.dp
         TextFieldPillSize.Regular -> 48.dp
     }
-    val horizontalPadding = 14.dp
+    val horizontalPadding = Spacing.sm
     val iconSize = if (variant.size == TextFieldPillSize.Compact) 18.dp else 20.dp
     val textStyle = when (variant.size) {
         TextFieldPillSize.Compact -> MaterialTheme.typography.bodyMedium
@@ -72,7 +73,7 @@ internal fun PillTextField(
 
     // Eased alongside the pill's own fade so the field's edge does not jump when the pill leaves.
     val endPadding: Dp by animateDpAsState(
-        targetValue = if (variant.trailing == null) horizontalPadding else 8.dp,
+        targetValue = if (variant.trailing == null) horizontalPadding else Spacing.xs,
         animationSpec = if (playMotion) MaterialTheme.motionScheme.fastSpatialSpec() else snap(),
     )
 
@@ -96,7 +97,7 @@ internal fun PillTextField(
                         end = endPadding,
                     ),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
                 variant.leadingIcon?.let { icon ->
                     val leading = drawableIconResource(

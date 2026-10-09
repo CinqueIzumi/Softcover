@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.RatingGold
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -50,7 +51,7 @@ internal fun BookShareCardBody(model: BookShareCardUiModel) {
         )
 
         if (model.statsLine != null) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             SoftcoverText(
                 text = model.statsLine,
@@ -61,7 +62,7 @@ internal fun BookShareCardBody(model: BookShareCardUiModel) {
         }
 
         if (model.description != null && model.description.isNotBlank()) {
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             SoftcoverText(
                 text = model.description,
@@ -91,7 +92,7 @@ internal fun ReadingUpdateShareCardBody(model: ReadingUpdateShareCardUiModel) {
             author = model.author,
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         ReadingUpdateReaderIdentity(
             username = model.username,
@@ -99,14 +100,14 @@ internal fun ReadingUpdateShareCardBody(model: ReadingUpdateShareCardUiModel) {
         )
 
         if (model.tags.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
 
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(
-                    8.dp,
+                    Spacing.xs,
                     Alignment.CenterHorizontally,
                 ),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 model.tags.forEach { tag ->
@@ -118,7 +119,7 @@ internal fun ReadingUpdateShareCardBody(model: ReadingUpdateShareCardUiModel) {
         when (model) {
             is ReadingUpdateShareCardUiModel.Finished -> {
                 if (model.ratingStars != null) {
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
 
                     StarRatingInput(
                         rating = model.ratingStars,
@@ -134,7 +135,7 @@ internal fun ReadingUpdateShareCardBody(model: ReadingUpdateShareCardUiModel) {
                 }
 
                 if (model.review != null) {
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(Spacing.lg))
 
                     RichText(
                         model = model.review,
@@ -151,7 +152,7 @@ internal fun ReadingUpdateShareCardBody(model: ReadingUpdateShareCardUiModel) {
 
             is ReadingUpdateShareCardUiModel.Reading -> {
                 if (model.progressLabel != null) {
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
 
                     SoftcoverText(
                         text = model.progressLabel,
@@ -184,7 +185,7 @@ private fun BookShareCardHeader(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Box(
             modifier = Modifier
@@ -199,7 +200,7 @@ private fun BookShareCardHeader(
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         SoftcoverText(
             text = title,
@@ -212,7 +213,7 @@ private fun BookShareCardHeader(
         )
 
         if (author.isNotBlank()) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             SoftcoverText(
                 text = "BY ${author.uppercase()}",
@@ -247,7 +248,7 @@ private fun ReadingUpdateReaderIdentity(
                 )
             }
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
         }
 
         SoftcoverText(

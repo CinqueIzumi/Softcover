@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.divider.DividerInk
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -66,14 +67,14 @@ private fun HeroTile(
     ) {
         val demoted = LocalContentColor.current.copy(alpha = 0.75f)
 
-        Column(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(Spacing.xl)) {
             SoftcoverText(
                 text = model.eyebrow.uppercase(),
                 style = typography.eyebrow,
                 color = demoted,
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             StatNumber(
                 model = model.stat,
@@ -85,11 +86,11 @@ private fun HeroTile(
                 ),
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             Divider(ink = DividerInk.ContentTint)
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             SoftcoverText(
                 text = variant.caption,
@@ -115,7 +116,7 @@ private fun StandardTile(
         shape = RoundedCornerShape(24.dp),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(18.dp),
+            modifier = Modifier.fillMaxSize().padding(Spacing.md),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             SoftcoverText(
@@ -124,7 +125,7 @@ private fun StandardTile(
                 color = colors.primary,
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             StatNumber(
                 model = model.stat,
@@ -156,8 +157,8 @@ private fun CompactTile(
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(
-                horizontal = 16.dp,
-                vertical = 14.dp,
+                horizontal = Spacing.md,
+                vertical = Spacing.sm,
             ),
         ) {
             SoftcoverText(
@@ -166,7 +167,7 @@ private fun CompactTile(
                 color = colors.primary,
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             Row(verticalAlignment = Alignment.Bottom) {
                 StatNumber(
@@ -174,13 +175,13 @@ private fun CompactTile(
                     style = typography.headlineMedium,
                 )
 
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
 
                 SoftcoverText(
                     text = variant.unit,
                     style = typography.body,
                     color = colors.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 4.dp),
+                    modifier = Modifier.padding(bottom = Spacing.xxs),
                 )
             }
         }

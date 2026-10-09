@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.header.SectionHeader
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnExternalLinkClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
@@ -46,16 +46,16 @@ internal fun ExternalLinksSection(
         exit = ExitTransition.None,
     ) {
         links?.let { knownLinks ->
-            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                Spacer(modifier = Modifier.height(36.dp))
+            Column(modifier = Modifier.padding(horizontal = Spacing.xl)) {
+                Spacer(modifier = Modifier.height(Spacing.x4l))
 
                 SectionHeader(model = state.findItLabel)
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Spacing.sm))
 
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
                     knownLinks.forEach { pill ->
                         key(pill.key) {

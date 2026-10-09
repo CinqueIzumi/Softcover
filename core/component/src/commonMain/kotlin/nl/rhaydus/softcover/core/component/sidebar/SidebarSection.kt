@@ -35,6 +35,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /** Renders every section in [model] under one shared `selectableGroup()`, with a gap between sections. */
 @Composable
@@ -46,7 +47,7 @@ fun <K> Sidebar(
     Column(modifier = modifier.selectableGroup()) {
         model.sections.forEachIndexed { index, section ->
             if (index > 0) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.md))
             }
 
             SidebarSection(
@@ -68,9 +69,9 @@ private fun <K> SidebarSection(
             SectionHeader(
                 model = model.label,
                 modifier = Modifier.padding(
-                    start = 26.dp,
-                    top = 8.dp,
-                    bottom = 6.dp,
+                    start = Spacing.xl,
+                    top = Spacing.xs,
+                    bottom = Spacing.xxs,
                 ),
             )
         }
@@ -116,8 +117,8 @@ private fun <K> SidebarRow(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                horizontal = 12.dp,
-                vertical = 2.dp,
+                horizontal = Spacing.sm,
+                vertical = Spacing.xxxs,
             )
             .pointerHandCursor()
             .hoverHighlight(
@@ -142,8 +143,8 @@ private fun <K> SidebarRow(
     ) {
         Row(
             modifier = Modifier.padding(
-                horizontal = 14.dp,
-                vertical = 11.dp,
+                horizontal = Spacing.sm,
+                vertical = Spacing.sm,
             ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -159,7 +160,7 @@ private fun <K> SidebarRow(
                     modifier = Modifier.size(20.dp),
                 )
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(Spacing.md))
             }
 
             SoftcoverText(

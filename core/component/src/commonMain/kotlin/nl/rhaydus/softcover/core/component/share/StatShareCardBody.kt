@@ -6,8 +6,8 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 @Composable
@@ -18,7 +18,7 @@ internal fun StatShareCardBody(content: StatShareCardUiModel) {
         color = LocalContentColor.current.copy(alpha = 0.75f),
     )
 
-    Spacer(modifier = Modifier.height(24.dp))
+    Spacer(modifier = Modifier.height(Spacing.xl))
 
     SoftcoverText(
         text = content.value.toString(),
@@ -26,7 +26,7 @@ internal fun StatShareCardBody(content: StatShareCardUiModel) {
         color = LocalContentColor.current,
     )
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(Spacing.md))
 
     SoftcoverText(
         text = content.caption,

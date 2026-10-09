@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.presentation.theme.LocalThemeConfiguration
 import nl.rhaydus.softcover.core.presentation.theme.isDark
@@ -57,25 +58,25 @@ internal fun ComponentGalleryContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxxl))
 
         SectionHeader(model = state.previewControlsHeader)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         GalleryOverrideControls(
             state = state,
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
         GalleryFamilyFilterRow(
             familyChips = state.familyChips,
             runAction = runAction,
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(Spacing.x4l))
 
         GalleryThemedRegion(state = state)
     }
@@ -90,7 +91,7 @@ private fun GalleryOverrideControls(
     Column(modifier = Modifier.fillMaxWidth()) {
         GalleryControlLabel(text = "Brightness")
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         ChipFlow(
             set = state.themeModeChips,
@@ -99,11 +100,11 @@ private fun GalleryOverrideControls(
             },
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         GalleryControlLabel(text = "Spine colour")
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         ChipFlow(
             set = state.paletteChips,
@@ -112,7 +113,7 @@ private fun GalleryOverrideControls(
             },
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         SoftcoverText(
             text = "A highlighted chip is the override in effect — tap it again to hand the gallery " +
@@ -131,7 +132,7 @@ private fun GalleryFamilyFilterRow(
     Column(modifier = Modifier.fillMaxWidth()) {
         GalleryControlLabel(text = "Family")
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
 
         ChipFlow(
             set = familyChips,
@@ -190,13 +191,13 @@ private fun GalleryThemedRegion(state: ComponentGalleryUiState) {
                 MaterialTheme.colorScheme.outlineVariant,
             ),
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Column(modifier = Modifier.padding(Spacing.xl)) {
                 val visibleFamilies = GalleryFamily.entries.filter {
                     state.selectedFamily == null || it == state.selectedFamily
                 }
 
                 visibleFamilies.forEachIndexed { index, family ->
-                    if (index > 0) Spacer(modifier = Modifier.height(40.dp))
+                    if (index > 0) Spacer(modifier = Modifier.height(Spacing.x4l))
 
                     GalleryFamilySection(
                         family = family,
@@ -216,12 +217,12 @@ private fun GalleryFamilySection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = header)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         val entries = GalleryRegistry.entries.filter { it.family == family }
 
         entries.forEachIndexed { index, entry ->
-            if (index > 0) Spacer(modifier = Modifier.height(32.dp))
+            if (index > 0) Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             GalleryEntrySection(entry = entry)
         }
@@ -237,7 +238,7 @@ private fun GalleryEntrySection(entry: GalleryEntry) {
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxs))
 
         SoftcoverText(
             text = entry.blurb,
@@ -245,10 +246,10 @@ private fun GalleryEntrySection(entry: GalleryEntry) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         entry.fixtures.forEachIndexed { index, fixture ->
-            if (index > 0) Spacer(modifier = Modifier.height(16.dp))
+            if (index > 0) Spacer(modifier = Modifier.height(Spacing.md))
 
             GalleryFixtureFrame(fixture = fixture)
         }
@@ -270,7 +271,7 @@ private fun GalleryFixtureFrame(fixture: GalleryFixture) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.xs))
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -280,7 +281,7 @@ private fun GalleryFixtureFrame(fixture: GalleryFixture) {
             fixture.render(
                 Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(Spacing.md),
             )
         }
     }

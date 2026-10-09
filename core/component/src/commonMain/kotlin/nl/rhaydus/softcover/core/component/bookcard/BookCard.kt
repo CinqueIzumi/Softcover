@@ -23,12 +23,12 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.hoverHighlight
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.designsystem.modifier.pressScaleCombinedClickable
 import nl.rhaydus.designsystem.modifier.shakeOnError
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -110,7 +110,7 @@ private fun BookCardCoverScaffold(
                     }
 
                     if (content != null) {
-                        Box(modifier = Modifier.padding(4.dp)) {
+                        Box(modifier = Modifier.padding(Spacing.xxs)) {
                             content()
                         }
                     }
@@ -122,7 +122,7 @@ private fun BookCardCoverScaffold(
             BookCardProgressBar(
                 progress = progress,
                 isLoading = isLoading,
-                modifier = Modifier.padding(top = 9.dp),
+                modifier = Modifier.padding(top = Spacing.xs),
             )
         }
 
@@ -135,7 +135,7 @@ private fun BookCardCoverScaffold(
                 isLoading = isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 9.dp),
+                    .padding(top = Spacing.xs),
             )
         }
     }

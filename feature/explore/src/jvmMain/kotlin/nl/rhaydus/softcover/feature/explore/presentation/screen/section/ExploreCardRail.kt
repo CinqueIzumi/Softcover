@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -35,9 +36,9 @@ internal fun ExploreCardRail(
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+            .padding(horizontal = Spacing.xl),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xl),
     ) {
         set.cards.forEachIndexed { index, card ->
             key(card.key.lazyKey) {

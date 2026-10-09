@@ -1,6 +1,5 @@
 package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
-import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import nl.rhaydus.softcover.core.component.bookcard.BookCardContent
@@ -15,6 +14,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardUiModel
 import nl.rhaydus.softcover.core.component.bookcard.BookCardVariant
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Author
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -47,8 +47,8 @@ private val ALSO_READING_STAND_IN_TEMPLATE = BookCardUiModel(
             byline = "By Patrick Rothfuss",
         ),
         trailing = BookCardTrailing.SetProgress.labelled(enabled = false),
-        contentHorizontalInset = 24.dp,
-        contentVerticalInset = 18.dp,
+        contentHorizontalInset = Spacing.xl,
+        contentVerticalInset = Spacing.md,
     ),
     decorations = BookCardDecorations(
         progress = BookCardProgress.Value(

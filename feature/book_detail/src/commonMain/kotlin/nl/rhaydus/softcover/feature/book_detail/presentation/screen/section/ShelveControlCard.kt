@@ -46,6 +46,7 @@ import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookStatus
 import nl.rhaydus.softcover.core.domain.model.DateStyle
@@ -77,12 +78,12 @@ internal fun ShelveControlCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = Spacing.md),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             SectionHeader(model = state.shelveControlHeader)
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
@@ -91,14 +92,14 @@ internal fun ShelveControlCard(
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(5.dp)
+                        .padding(Spacing.xxs)
                         .shakeOnError(
                             trigger = mutationFailed,
                             onShakeEnd = {
                                 book?.let { runAction(OnClearMutationFailureAction(bookId = it.id)) }
                             },
                         ),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xxxs),
                 ) {
                     ShelveRow(
                         label = "Want to read",
@@ -296,7 +297,7 @@ private fun ShelveRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 13.dp, vertical = 11.dp),
+                .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -315,7 +316,7 @@ private fun ShelveRow(
                     },
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
 
             SoftcoverText(
                 text = label,

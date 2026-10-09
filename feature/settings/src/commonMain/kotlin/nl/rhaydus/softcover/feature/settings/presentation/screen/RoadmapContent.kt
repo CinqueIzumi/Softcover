@@ -33,6 +33,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapBlock
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
@@ -71,7 +72,7 @@ internal fun RoadmapContent(
                     onRetry = { runAction(RefreshRoadmapAction()) },
                 )
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(Spacing.xxl))
             }
 
             RoadmapDocumentBody(
@@ -118,7 +119,7 @@ private fun RoadmapDocumentBody(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
         }
 
         renderUnits.forEachIndexed { index, unit ->
@@ -133,7 +134,7 @@ private fun RoadmapDocumentBody(
         }
 
         if (lastUpdatedText != null) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxxl))
 
             RoadmapLastUpdatedFooter(text = lastUpdatedText)
         }
@@ -151,11 +152,11 @@ private fun RoadmapLastUpdatedFooter(text: String) {
 // endregion
 // region Block grouping
 private fun RoadmapRenderUnit.leadingSpacing() = when (this) {
-    is RoadmapRenderUnit.ListGroup -> 12.dp
-    is RoadmapRenderUnit.Heading, is RoadmapRenderUnit.PlainHeading -> 32.dp
-    is RoadmapRenderUnit.ThematicBreak -> 28.dp
-    is RoadmapRenderUnit.BlockQuote -> 20.dp
-    is RoadmapRenderUnit.Paragraph -> 16.dp
+    is RoadmapRenderUnit.ListGroup -> Spacing.sm
+    is RoadmapRenderUnit.Heading, is RoadmapRenderUnit.PlainHeading -> Spacing.xxxl
+    is RoadmapRenderUnit.ThematicBreak -> Spacing.xxl
+    is RoadmapRenderUnit.BlockQuote -> Spacing.lg
+    is RoadmapRenderUnit.Paragraph -> Spacing.md
 }
 // endregion
 // region Block renderers
@@ -224,7 +225,7 @@ private fun RoadmapList(
             val (marker, spans) = markerAndSpans
 
             if (index > 0) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Spacing.xs))
             }
 
             SoftcoverText(
@@ -262,7 +263,7 @@ private fun RoadmapBlockQuote(
                 .background(MaterialTheme.colorScheme.outlineVariant),
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(Spacing.md))
 
         SoftcoverText(
             text = roadmapAnnotatedString(

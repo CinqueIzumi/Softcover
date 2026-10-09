@@ -23,6 +23,7 @@ import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -52,7 +53,7 @@ internal fun ShelfNeighbourRail(
                 .fillMaxWidth()
                 // Not the ~36dp the labels need: each half of the row is a navigation tap target.
                 .height(48.dp)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = Spacing.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             NeighbourEnd(
@@ -64,7 +65,7 @@ internal fun ShelfNeighbourRail(
                 modifier = Modifier.weight(1f),
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(Spacing.sm))
 
             NeighbourEnd(
                 label = nextLabel,
@@ -123,7 +124,7 @@ private fun NeighbourEnd(
                     modifier = Modifier.size(16.dp),
                 )
 
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
             }
 
             SoftcoverText(
@@ -139,7 +140,7 @@ private fun NeighbourEnd(
             )
 
             if (iconLeading.not()) {
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
 
                 Icon(
                     painter = chevron.getIconPainter(),

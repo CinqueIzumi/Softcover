@@ -33,6 +33,7 @@ import nl.rhaydus.designsystem.layout.WindowWidthClass
 import nl.rhaydus.designsystem.layout.rememberWindowSizeClass
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.appupdate.ObserveAppUpdateStateUseCase
 import nl.rhaydus.softcover.core.domain.model.AppUpdateState
 import nl.rhaydus.softcover.core.presentation.cover.ProvideCoverImagePersister
@@ -172,7 +173,7 @@ internal fun App() {
                             Modifier
                                 .align(Alignment.BottomEnd)
                                 .navigationBarsPadding()
-                                .padding(16.dp)
+                                .padding(Spacing.md)
                                 .widthIn(max = 420.dp)
                         } else {
                             val chromeTop = bottomChromeAnchor.topInRoot
@@ -188,7 +189,7 @@ internal fun App() {
 
                                 Modifier
                                     .align(Alignment.BottomCenter)
-                                    .padding(bottom = chromeHeightDp + 8.dp)
+                                    .padding(bottom = chromeHeightDp + Spacing.xs)
                             }
                         }
 

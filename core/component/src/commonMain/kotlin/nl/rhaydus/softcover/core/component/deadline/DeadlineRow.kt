@@ -20,6 +20,7 @@ import nl.rhaydus.softcover.core.component.badge.Badge
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 
 /** The deadline card: calendar icon, "Finish by" title and status badge over the goal sentence. */
 @Composable
@@ -34,8 +35,8 @@ fun DeadlineRow(
     ) {
         Column(
             modifier = Modifier.padding(
-                horizontal = 14.dp,
-                vertical = 12.dp,
+                horizontal = Spacing.sm,
+                vertical = Spacing.sm,
             ),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -51,7 +52,7 @@ fun DeadlineRow(
                     modifier = Modifier.size(18.dp),
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
 
                 SoftcoverText(
                     text = model.title,
@@ -63,7 +64,7 @@ fun DeadlineRow(
                 Badge(model = model.badge)
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(Spacing.xs))
 
             SoftcoverText(
                 text = model.goal,

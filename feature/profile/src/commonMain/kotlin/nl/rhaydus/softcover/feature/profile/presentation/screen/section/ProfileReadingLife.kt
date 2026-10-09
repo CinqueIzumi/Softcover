@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.profile.domain.model.GenreBreakdown
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnHideUntaggedAuthorsToggledAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnYearMetricSelectedAction
@@ -27,7 +27,7 @@ internal fun ColumnScope.ProfileReadingLife(
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(Spacing.md))
 
     ShareEntryRow(
         isLoading = state.isReadingLifeLoading,
@@ -35,7 +35,7 @@ internal fun ColumnScope.ProfileReadingLife(
         onClick = onShareClick,
     )
 
-    Spacer(modifier = Modifier.height(40.dp))
+    Spacer(modifier = Modifier.height(Spacing.x4l))
 
     YearColumnHistorySection(
         chart = state.yearHistoryChart,
@@ -47,7 +47,7 @@ internal fun ColumnScope.ProfileReadingLife(
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(40.dp))
+    Spacer(modifier = Modifier.height(Spacing.x4l))
 
     GenreRankingSection(
         genres = state.readingLife?.genres ?: GenreBreakdown(),
@@ -57,7 +57,7 @@ internal fun ColumnScope.ProfileReadingLife(
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(40.dp))
+    Spacer(modifier = Modifier.height(Spacing.x4l))
 
     AuthorRepresentationSection(
         authorDemographics = state.authorDemographics,
@@ -73,7 +73,7 @@ internal fun ColumnScope.ProfileReadingLife(
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(40.dp))
+    Spacer(modifier = Modifier.height(Spacing.x4l))
 
     RatingsHistogramSection(
         chart = state.ratingsChart,
@@ -86,7 +86,7 @@ internal fun ColumnScope.ProfileReadingLife(
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(40.dp))
+    Spacer(modifier = Modifier.height(Spacing.x4l))
 
     RecentlyLovedSection(
         cards = state.recentlyLoved.cards,

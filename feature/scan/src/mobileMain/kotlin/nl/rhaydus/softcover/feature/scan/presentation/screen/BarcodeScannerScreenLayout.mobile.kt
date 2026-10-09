@@ -11,13 +11,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.component.RhaydusButton
 import nl.rhaydus.designsystem.model.ButtonSize
 import nl.rhaydus.designsystem.model.ButtonStyle
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
 import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.feature.scan.presentation.component.BarcodeScanner
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 
@@ -60,7 +60,7 @@ internal actual fun BarcodeScannerScreenLayout(
                     modifier = Modifier
                         .fillMaxSize()
                         .imePadding()
-                        .padding(horizontal = 24.dp),
+                        .padding(horizontal = Spacing.xl),
                 )
 
                 cameraGranted -> ScannerContent(
@@ -109,7 +109,7 @@ private fun ScannerContent(
             onClick = onEnterManually,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp),
+                .padding(bottom = Spacing.xl),
         )
     }
 }

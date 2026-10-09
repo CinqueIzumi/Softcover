@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverForeground
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.MonogramCoverInk
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -92,7 +93,7 @@ internal fun CoverlessTitleCover(
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
                 color = MonogramCoverForeground,
-                modifier = Modifier.padding(horizontal = metrics.borderInset + 4.dp),
+                modifier = Modifier.padding(horizontal = metrics.borderInset + Spacing.xxs),
             )
         } else if (initial.isNotEmpty()) {
             SoftcoverText(

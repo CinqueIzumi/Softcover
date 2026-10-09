@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.component.control.PreviewTileEvent
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTile
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.settings.presentation.action.OnThemeModeSelectedAction
 import nl.rhaydus.softcover.feature.settings.presentation.action.SettingsAction
@@ -36,11 +37,11 @@ internal fun ThemeSection(
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionHeader(model = state.themeSectionHeader)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             state.themeChoices.forEach { tile ->
                 ThemePreviewTile(
@@ -61,13 +62,13 @@ internal fun ThemeSection(
             }
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
 
         SoftcoverText(
             text = "System follows your device's own light and dark setting.",
             style = MaterialTheme.editorialTypography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 4.dp),
+            modifier = Modifier.padding(horizontal = Spacing.xxs),
         )
     }
 }
