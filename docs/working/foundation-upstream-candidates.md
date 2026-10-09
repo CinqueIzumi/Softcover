@@ -272,6 +272,23 @@ Filed but not yet implemented in the foundation.
 
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
+### F40 — `designsystem-core` ships no corner scale and `RhaydusTheme` has no `shapes` parameter
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Open.** `RhaydusTheme` cannot take app shapes and no token object backs corner radii.
+- **Impact in the app:** Softcover defines `Corners` itself (2dp hairline, Material 3 Expressive radii up to 28dp, a pill).
+- **What to build:** a `Corners` object and a `shapes` parameter on `RhaydusTheme`. Once adopted, drop the app-local one.
+
+### F41 — No gate keeps raw radii out of corner shapes
+
+- **Type:** gate (lint rule)
+- **Home:** `nl.rhaydus:detekt-rules`
+- **Status:** **Open.** Softcover's app-local `RawCornerDp` reports a dp literal or `percent` argument passed to
+  `RoundedCornerShape` or `CutCornerShape`.
+- **Impact in the app:** without it, corner radii drift back to per-screen numbers after the token sweep.
+- **What to build:** the rule in the shared ruleset.
+
 - **Type:** gate (custom Gradle task)
 - **Home:** `build-logic` convention plugins (alongside `rhaydus.module-graph`, F18)
 - **Status:** **Open.** Implemented inline in Softcover's root `build.gradle.kts` as

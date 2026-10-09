@@ -71,7 +71,7 @@ Never inline an ad-hoc `TextStyle`; pick the closest editorial or Material role 
 
 ### 2.3 Shape & elevation
 
-- **Corners.** Small radii on cards and tiles; medium on buttons (Material defaults via expressive theme); larger, fully-rounded for the active state of toggle buttons. Cover art uses a subtle radius to hint at a printed object without softening it into a sticker.
+- **Corners.** The `Corners` scale (`xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 20, `xxl` 28 dp, plus `pill`); true circles keep `CircleShape`. Small radii on cards and tiles; medium on buttons (Material defaults via expressive theme); larger, fully-rounded for the active state of toggle buttons. Cover art uses a subtle radius to hint at a printed object without softening it into a sticker.
 - **Elevation.** Tonal, not shadowed. Surface-container shades replace drop shadows for grouping. The one exception is book covers, which carry a slight shadow to read as physical objects on the page.
 - **Accent bar.** A short, primary-coloured bar in two sizes, picked by the role of the eyebrow it leads:
   - **Section bar — 32×4 dp.** The "this is a section / this is a sheet" mark. Sits in the page gutter (not inside a card) and precedes a full-size `eyebrow` + display/headline pair. Used by sheet headers, settings section headers, and any top-level region introduction.

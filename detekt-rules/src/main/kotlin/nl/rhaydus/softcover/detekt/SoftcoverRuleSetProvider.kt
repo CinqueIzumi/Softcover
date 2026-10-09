@@ -11,7 +11,10 @@ class SoftcoverRuleSetProvider : RuleSetProvider {
     override fun instance(config: Config): RuleSet {
         return RuleSet(
             ruleSetId,
-            listOf(RawSpacingDp(config)),
+            listOf(
+                RawSpacingDp(config),
+                RawCornerDp(config),
+            ),
         )
     }
 }

@@ -16,8 +16,8 @@ buttons, fully rounded for pills and active toggles) and app `foundations.md` §
 
 | Sub | Scope | Status |
 |---|---|---|
-| SH-1 | Inventory and approved shape (below) — stop for approval | [ ] |
-| SH-2 | The token object, its KDoc, the theme wiring, the code-style rule, and the gate | [ ] |
+| SH-1 | Inventory and approved shape (below) — stop for approval | [x] |
+| SH-2 | The token object, its KDoc, the code-style rule, and the gate | [x] |
 | SH-3 | Sweep `:core:component` and `:core:designsystem` | [ ] |
 | SH-4 | Sweep the feature modules, one brief per module group | [ ] |
 | SH-C | Convergence pass (family-procedure.md § Phase 3): the surfaces whose corners should now be one step | [ ] |
@@ -45,4 +45,24 @@ buttons, fully rounded for pills and active toggles) and app `foundations.md` §
 
 ## Approved shape
 
-Not yet approved.
+**`Corners`** in `:core:designsystem` beside `Spacing`; each step is a `RoundedCornerShape` on Material 3
+Expressive's default radii, plus a hairline and a pill:
+
+| Token | dp | Snaps |
+|---|---|---|
+| `xxs` | 2 | accent bar, mark lines, chart bars and swatches (3 → 2) |
+| `xs` | 4 | covers Raised / Floating / Jacket / StackedJacket / Flat, skeleton mask, `ChooseListsBottomSheet` top tab (3 → 4) |
+| `sm` | 8 | text field, Tile / Spotlight covers, badge, proportion bars, share thumbnail (6 → 8), page miniature (7 → 8) |
+| `md` | 12 | rows, filled toggle, sidebar, Shelf cover, reviews inner block (10 → 12), shelve buttons (11 → 12) |
+| `lg` | 16 | standard cards, Rounded cover, both `MaterialTheme.shapes.large` reads, `PreviewTile` (14), shelve card (15), reviews avatar block (18) |
+| `xl` | 20 | hero cards, reading `FeaturedBookCard` (22 → 20) |
+| `xxl` | 28 | large `StatTile`, medium `StatTile` (24 → 28), book-detail top-only sheet (24 → 28) |
+| `pill` | 50 % | every stadium shape (`PillButton`, `TextFieldPill`, `SegmentedControl`, `Chip`, outlined `Toggle`) |
+
+- True circles (dots, `StepperCircle`, `SelectionMark`) keep `CircleShape`.
+- Partial-corner shapes get no token; they derive from a step with `.copy(bottomStart = ZeroCornerSize, bottomEnd = ZeroCornerSize)`.
+- Covers join: `CoverVariant.cornerRadius(): Dp` becomes `CoverVariant.shape()` reading `Corners`.
+- Material `Shapes` stay untouched (`RhaydusTheme` has no `shapes` parameter; the steps equal Material's defaults); log that parameter in `foundation-upstream-candidates.md`.
+- Gate: detekt `RawCornerDp`, modelled on `RawSpacingDp`, fails on a non-zero number or dp literal, or `percent =`, in a corner shape (`RoundedCornerShape`, `CutCornerShape`, their `Absolute*` forms) or `CornerSize` outside `Corners.kt`.
+- Code-style rule: corners read a `Corners` token; sizes stay inline `.dp`.
+- The sweep includes `app/src/debug` and the component gallery.
