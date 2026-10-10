@@ -43,6 +43,8 @@ internal suspend fun TagScope.commitUserTags(
                 AppLog.e("$error")
 
                 setState { it.copy(userTags = previous) }
+
+                sendEvent(BookDetailEvent.MutationFailedEvent())
             }
     }
 

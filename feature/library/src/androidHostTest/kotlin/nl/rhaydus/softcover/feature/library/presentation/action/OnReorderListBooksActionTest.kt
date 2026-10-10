@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -26,16 +28,18 @@ import org.junit.jupiter.api.Test
 class OnReorderListBooksActionTest {
     private lateinit var reorderListBooksUseCase: ReorderListBooksUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var eventChannel: Channel<LibraryEvent>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     @BeforeEach
     fun setUp() {
         reorderListBooksUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
 
         mockkObject(SnackBarManager)
@@ -91,6 +95,8 @@ class OnReorderListBooksActionTest {
             }
 
             verify(exactly = 0) { SnackBarManager.showSnackbar(title = any()) }
+
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -162,6 +168,9 @@ class OnReorderListBooksActionTest {
             verify {
                 SnackBarManager.showSnackbar(title = match { it.contains(listName) })
             }
+
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ListReorderFailedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test

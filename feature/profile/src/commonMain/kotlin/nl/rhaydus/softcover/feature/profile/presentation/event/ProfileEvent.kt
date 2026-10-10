@@ -4,4 +4,6 @@ import nl.rhaydus.toad.UiEvent
 
 internal sealed interface ProfileEvent : UiEvent {
     class LogOutUserEvent : ProfileEvent
+
+    class LogOutFailedEvent : ProfileEvent
 }

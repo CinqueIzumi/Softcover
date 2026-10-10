@@ -46,7 +46,14 @@ internal class OnNewEditionSaveClickAction : BookDetailAction {
             dependencies.updateBookEditionUseCase(
                 userBook = userBook,
                 newEditionId = edition.id,
-            ).onApiFailure()
+            )
+                .onSuccess {
+                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+                }
+                .onApiFailure()
+                .onFailure {
+                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
+                }
 
             scope.setState {
                 it.copy(loadingBookDetails = false)

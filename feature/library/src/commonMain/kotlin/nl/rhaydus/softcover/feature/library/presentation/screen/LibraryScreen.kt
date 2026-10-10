@@ -54,7 +54,9 @@ object LibraryScreen : Screen {
 
                 is LibraryEvent.BulkMoveFailedEvent,
                 is LibraryEvent.ListMembershipChangeFailedEvent,
-                is LibraryEvent.NewListBooksAddFailedEvent -> haptics.reject()
+                is LibraryEvent.NewListBooksAddFailedEvent,
+                is LibraryEvent.ListReorderFailedEvent,
+                is LibraryEvent.ListRankedChangeFailedEvent -> haptics.reject()
             }
         }
 

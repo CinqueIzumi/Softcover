@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.book_detail.presentation.action
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -34,6 +35,7 @@ class OnSaveVerdictActionTest {
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
@@ -41,10 +43,11 @@ class OnSaveVerdictActionTest {
         saveBookVerdictUseCase = mockk()
         stateFlow = MutableStateFlow(BookDetailUiState(verdictSheetContext = VerdictSheetContext.EDIT))
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -228,6 +231,7 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
@@ -265,6 +269,7 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds shouldBe setOf(1, 2, 42)
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
     }
 }

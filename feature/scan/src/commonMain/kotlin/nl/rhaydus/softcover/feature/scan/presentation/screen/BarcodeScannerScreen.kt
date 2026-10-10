@@ -11,6 +11,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.SnackBarManager
 import nl.rhaydus.softcover.core.component.field.TextFieldEvent
@@ -59,9 +60,13 @@ class BarcodeScannerScreen : Screen {
             if (hasCamera && cameraGranted.not()) permissionRequester.request()
         }
 
+        val haptics = LocalHaptics.current
+
         ObserveAsEvents(flow = screenModel.events) { event ->
             when (event) {
                 is ScanEvent.BookResolvedEvent -> {
+                    haptics.select()
+
                     val scannedEdition = event.book.editions.firstOrNull { it.id == event.editionId }
 
                     navigator.pop()
@@ -81,12 +86,23 @@ class BarcodeScannerScreen : Screen {
                     )
                 }
 
-                is ScanEvent.InvalidIsbnEvent ->
+                is ScanEvent.InvalidIsbnEvent -> {
+                    haptics.reject()
+
                     SnackBarManager.showSnackbar(title = "That doesn't look like a valid ISBN.")
-                is ScanEvent.ResolutionFailedEvent ->
+                }
+
+                is ScanEvent.ResolutionFailedEvent -> {
+                    haptics.reject()
+
                     SnackBarManager.showSnackbar(title = "Couldn't look that up — try again.")
-                is ScanEvent.AddBookFailedEvent ->
+                }
+
+                is ScanEvent.AddBookFailedEvent -> {
+                    haptics.reject()
+
                     SnackBarManager.showSnackbar(title = "Couldn't add it — try again.")
+                }
             }
         }
 

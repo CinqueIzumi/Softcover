@@ -42,10 +42,12 @@ object ReadingScreen : Screen {
 
         ObserveAsEvents(flow = screenModel.events) { event ->
             when (event) {
-                is ReadingScreenEvent.ProgressUpdatedEvent -> haptics.select()
+                is ReadingScreenEvent.ProgressUpdatedEvent,
+                is ReadingScreenEvent.VerdictSavedEvent -> haptics.select()
 
                 is ReadingScreenEvent.MarkAsReadFailedEvent,
-                is ReadingScreenEvent.ProgressUpdateFailedEvent -> haptics.reject()
+                is ReadingScreenEvent.ProgressUpdateFailedEvent,
+                is ReadingScreenEvent.VerdictSaveFailedEvent -> haptics.reject()
             }
         }
 

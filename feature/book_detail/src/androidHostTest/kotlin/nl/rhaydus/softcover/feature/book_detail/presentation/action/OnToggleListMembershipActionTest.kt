@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -26,6 +27,7 @@ class OnToggleListMembershipActionTest {
     private lateinit var removeBookFromListUseCase: RemoveBookFromListUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
     private lateinit var currentEdition: BookEdition
     private lateinit var defaultEdition: BookEdition
@@ -50,10 +52,11 @@ class OnToggleListMembershipActionTest {
             )
         } returns Result.success(Unit)
         stateFlow = MutableStateFlow(BookDetailUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
         dependencies = mockk<BookDetailDependencies>(relaxed = true).also {
             every {
@@ -114,6 +117,7 @@ class OnToggleListMembershipActionTest {
                     bookId = any(),
                 )
             }
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
@@ -170,6 +174,7 @@ class OnToggleListMembershipActionTest {
                     edition = any(),
                 )
             }
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
@@ -309,6 +314,7 @@ class OnToggleListMembershipActionTest {
 
             // ----- Assert -----
             stateFlow.value.listsBeingMutated shouldBe emptySet()
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
     }
 }

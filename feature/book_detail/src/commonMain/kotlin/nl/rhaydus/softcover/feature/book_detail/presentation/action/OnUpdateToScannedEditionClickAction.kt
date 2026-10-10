@@ -31,11 +31,17 @@ internal class OnUpdateToScannedEditionClickAction : BookDetailAction {
             dependencies.updateBookEditionUseCase(
                 userBook = userBook,
                 newEditionId = scannedEditionId,
-            ).onFailure {
-                AppLog.e("Failed to update shelved edition to scanned edition $it")
+            )
+                .onSuccess {
+                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+                }
+                .onFailure {
+                    AppLog.e("Failed to update shelved edition to scanned edition $it")
 
-                SnackBarManager.showSnackbar(title = "Couldn't update the edition — try again.")
-            }
+                    SnackBarManager.showSnackbar(title = "Couldn't update the edition — try again.")
+
+                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
+                }
 
             scope.setState { it.copy(isUpdatingScannedEdition = false) }
         }

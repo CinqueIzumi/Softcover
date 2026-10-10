@@ -93,10 +93,11 @@ class OnLogOutClickActionTest {
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
             event.shouldBeInstanceOf<ProfileEvent.LogOutUserEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
-        fun `does not send any event when use case fails`() = runTest {
+        fun `sends only LogOutFailedEvent when use case fails`() = runTest {
             // ----- Arrange -----
             dependencies = stubDependencies(this)
 
@@ -114,7 +115,8 @@ class OnLogOutClickActionTest {
 
             // ----- Assert -----
             val event = eventChannel.tryReceive().getOrNull()
-            event shouldBe null
+            event.shouldBeInstanceOf<ProfileEvent.LogOutFailedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }
 }

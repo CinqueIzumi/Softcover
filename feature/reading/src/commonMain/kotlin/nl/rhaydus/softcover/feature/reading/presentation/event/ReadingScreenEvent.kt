@@ -5,6 +5,10 @@ import nl.rhaydus.toad.UiEvent
 internal sealed interface ReadingScreenEvent : UiEvent {
     class MarkAsReadFailedEvent : ReadingScreenEvent
 
+    class VerdictSavedEvent : ReadingScreenEvent
+
+    class VerdictSaveFailedEvent : ReadingScreenEvent
+
     class ProgressUpdatedEvent : ReadingScreenEvent
 
     class ProgressUpdateFailedEvent : ReadingScreenEvent

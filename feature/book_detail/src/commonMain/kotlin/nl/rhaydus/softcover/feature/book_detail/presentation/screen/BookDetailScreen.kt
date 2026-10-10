@@ -94,7 +94,8 @@ class BookDetailScreen(
                 }
 
                 is BookDetailEvent.ShelfChangedEvent,
-                is BookDetailEvent.ProgressUpdatedEvent -> haptics.select()
+                is BookDetailEvent.ProgressUpdatedEvent,
+                is BookDetailEvent.MutationSucceededEvent -> haptics.select()
 
                 is BookDetailEvent.MutationFailedEvent -> haptics.reject()
 

@@ -13,5 +13,7 @@ internal sealed interface BookDetailEvent : UiEvent {
 
     class ProgressUpdatedEvent : BookDetailEvent
 
+    class MutationSucceededEvent : BookDetailEvent
+
     class MutationFailedEvent : BookDetailEvent
 }

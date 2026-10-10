@@ -48,6 +48,8 @@ internal class OnReorderListBooksAction(
             SnackBarManager.showSnackbar(
                 title = "Couldn't save the new order$suffix — try again.",
             )
+
+            scope.sendEvent(event = LibraryEvent.ListReorderFailedEvent())
         }
     }
 }

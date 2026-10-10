@@ -18,6 +18,8 @@ internal class OnLogOutClickAction : ProfileAction {
                 AppLog.e("$it")
 
                 SnackBarManager.showSnackbar(title = "Couldn't log out — try again.")
+
+                scope.sendEvent(event = ProfileEvent.LogOutFailedEvent())
             }
             .onSuccess { scope.sendEvent(event = ProfileEvent.LogOutUserEvent()) }
     }

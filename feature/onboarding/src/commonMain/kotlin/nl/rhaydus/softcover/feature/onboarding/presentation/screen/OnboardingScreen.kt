@@ -6,12 +6,15 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.rememberClipboardReader
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
+import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
 import nl.rhaydus.softcover.feature.onboarding.presentation.screenmodel.OnboardingScreenScreenModel
 import nl.rhaydus.softcover.feature.onboarding.presentation.state.OnboardingUiState
 import org.koin.compose.koinInject
@@ -27,6 +30,16 @@ object OnboardingScreen : Screen {
         val uriHandler = LocalUriHandler.current
 
         val clipboardReader = rememberClipboardReader()
+
+        val haptics = LocalHaptics.current
+
+        ObserveAsEvents(flow = screenModel.events) {
+            when (it) {
+                is OnboardingEvent.SignedInEvent -> haptics.commit()
+
+                is OnboardingEvent.ApiKeyRejectedEvent -> haptics.reject()
+            }
+        }
 
         OnboardingScreenLayout(
             state = state,

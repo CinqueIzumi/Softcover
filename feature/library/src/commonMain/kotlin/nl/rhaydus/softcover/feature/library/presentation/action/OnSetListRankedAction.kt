@@ -96,6 +96,8 @@ internal class OnSetListRankedAction(
             SnackBarManager.showSnackbar(
                 title = "Couldn't $verb$suffix — try again.",
             )
+
+            scope.sendEvent(event = LibraryEvent.ListRankedChangeFailedEvent())
         }
     }
 }

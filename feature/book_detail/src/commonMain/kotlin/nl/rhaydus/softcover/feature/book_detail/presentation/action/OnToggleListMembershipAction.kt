@@ -36,12 +36,18 @@ internal class OnToggleListMembershipAction(
             )
         }
 
-        result.onFailure { error ->
-            AppLog.e(
-                error,
-                "Failed to toggle list membership for list $listId",
-            )
-        }
+        result
+            .onSuccess {
+                scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+            }
+            .onFailure { error ->
+                AppLog.e(
+                    error,
+                    "Failed to toggle list membership for list $listId",
+                )
+
+                scope.sendEvent(BookDetailEvent.MutationFailedEvent())
+            }
 
         scope.setState { it.copy(listsBeingMutated = it.listsBeingMutated - listId) }
     }

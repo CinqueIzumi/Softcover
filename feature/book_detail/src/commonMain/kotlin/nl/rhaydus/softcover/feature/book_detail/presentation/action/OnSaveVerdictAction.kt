@@ -24,10 +24,16 @@ internal data class OnSaveVerdictAction(
             rating = draft.rating,
             review = draft.draftReview().toReviewDocument(),
             hasSpoilers = draft.spoilers.checked,
-        ).onFailure { error ->
-            AppLog.e("$error")
+        )
+            .onSuccess {
+                scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+            }
+            .onFailure { error ->
+                AppLog.e("$error")
 
-            scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
-        }
+                scope.setState { it.copy(failedMutationBookIds = it.failedMutationBookIds + book.id) }
+
+                scope.sendEvent(BookDetailEvent.MutationFailedEvent())
+            }
     }
 }

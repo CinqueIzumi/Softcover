@@ -12,4 +12,8 @@ internal sealed interface LibraryEvent : UiEvent {
     class ListMembershipChangeFailedEvent : LibraryEvent
 
     class NewListBooksAddFailedEvent : LibraryEvent
+
+    class ListReorderFailedEvent : LibraryEvent
+
+    class ListRankedChangeFailedEvent : LibraryEvent
 }

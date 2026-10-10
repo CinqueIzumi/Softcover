@@ -37,7 +37,14 @@ internal class OnDeadlinePickedAction(
             current = current,
             total = total,
             unit = unit,
-        ).onApiFailure()
+        )
+            .onSuccess {
+                scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
+            }
+            .onApiFailure()
+            .onFailure {
+                scope.sendEvent(BookDetailEvent.MutationFailedEvent())
+            }
 
         scope.setState { it.copy(deadlinePicker = null) }
     }

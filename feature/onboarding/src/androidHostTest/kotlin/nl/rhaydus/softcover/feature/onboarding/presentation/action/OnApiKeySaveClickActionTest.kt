@@ -2,6 +2,7 @@ package nl.rhaydus.softcover.feature.onboarding.presentation.action
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -31,6 +32,7 @@ class OnApiKeySaveClickActionTest {
     private lateinit var initializeUserIdAndBooksUseCase: InitializeUserIdAndBooksUseCase
     private lateinit var dependencies: OnboardingDependencies
     private lateinit var stateFlow: MutableStateFlow<OnboardingUiState>
+    private lateinit var eventChannel: Channel<OnboardingEvent>
     private lateinit var scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>
 
     @BeforeEach
@@ -39,10 +41,11 @@ class OnApiKeySaveClickActionTest {
         updateApiKeyUseCase = mockk()
         initializeUserIdAndBooksUseCase = mockk()
         stateFlow = MutableStateFlow(OnboardingUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LocalOnboardingVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -221,6 +224,8 @@ class OnApiKeySaveClickActionTest {
             stateFlow.value.loadingSheet.progress shouldBe 1f
             stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe false
             stateFlow.value.submissionError shouldBe null
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.SignedInEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -246,6 +251,8 @@ class OnApiKeySaveClickActionTest {
             coVerify(exactly = 0) {
                 updateApiKeyUseCase(key = any())
             }
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -271,6 +278,8 @@ class OnApiKeySaveClickActionTest {
             coVerify(exactly = 0) {
                 initializeUserIdAndBooksUseCase()
             }
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -290,6 +299,8 @@ class OnApiKeySaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.submissionError shouldBe "That API key wasn't accepted. Double-check it and try again."
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -312,6 +323,8 @@ class OnApiKeySaveClickActionTest {
             stateFlow.value.loadingSheet.scaffold.closeRequested shouldBe true
             stateFlow.value.loadingSheet.progress shouldBe 0f
             stateFlow.value.submissionError shouldBe "Something went wrong setting up your account. Please try again."
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<OnboardingEvent.ApiKeyRejectedEvent>()
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }
 }

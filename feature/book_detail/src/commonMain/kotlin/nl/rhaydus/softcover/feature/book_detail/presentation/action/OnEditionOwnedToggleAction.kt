@@ -27,13 +27,19 @@ internal class OnEditionOwnedToggleAction(
             dependencies.setEditionAsOwnedUseCase(
                 edition = edition,
                 owned = owned,
-            ).onFailure { error ->
-                AppLog.e("$error")
-
-                scope.setState {
-                    it.copy(failedMutationEditionIds = it.failedMutationEditionIds + edition.id)
+            )
+                .onSuccess {
+                    scope.sendEvent(BookDetailEvent.MutationSucceededEvent())
                 }
-            }
+                .onFailure { error ->
+                    AppLog.e("$error")
+
+                    scope.setState {
+                        it.copy(failedMutationEditionIds = it.failedMutationEditionIds + edition.id)
+                    }
+
+                    scope.sendEvent(BookDetailEvent.MutationFailedEvent())
+                }
         }
 
         scope.setLocalVariables {

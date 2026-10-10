@@ -250,6 +250,7 @@ class OnSaveLibraryVisibilityActionTest {
             // ----- Assert -----
             savingSnapshots.first() shouldBe true
             stateFlow.value.isSaving shouldBe false
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -289,6 +290,8 @@ class OnSaveLibraryVisibilityActionTest {
             // ----- Assert -----
             coVerify(exactly = 1) { refreshLibraryUseCase() }
             stateFlow.value.isSaving shouldBe false
+            eventChannel.tryReceive().getOrNull() shouldBe LibraryVisibilitySettingsEvent.SaveFailed
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -328,6 +331,8 @@ class OnSaveLibraryVisibilityActionTest {
             // ----- Assert -----
             coVerify(exactly = 1) { refreshLibraryUseCase() }
             stateFlow.value.isSaving shouldBe false
+            eventChannel.tryReceive().getOrNull() shouldBe LibraryVisibilitySettingsEvent.SaveFailed
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -367,6 +372,8 @@ class OnSaveLibraryVisibilityActionTest {
             // ----- Assert -----
             coVerify(exactly = 1) { refreshLibraryUseCase() }
             stateFlow.value.isSaving shouldBe false
+            eventChannel.tryReceive().getOrNull() shouldBe LibraryVisibilitySettingsEvent.SaveFailed
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -406,6 +413,8 @@ class OnSaveLibraryVisibilityActionTest {
             // ----- Assert -----
             coVerify(exactly = 0) { refreshLibraryUseCase() }
             stateFlow.value.isSaving shouldBe false
+            eventChannel.tryReceive().getOrNull() shouldBe LibraryVisibilitySettingsEvent.SaveFailed
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -490,7 +499,7 @@ class OnSaveLibraryVisibilityActionTest {
         }
 
         @Test
-        fun `closes the sheet without leaving or sending an event when leaveAfterSave is true and a save fails`() = runTest {
+        fun `closes the sheet without leaving and sends SaveFailed when leaveAfterSave is true and a save fails`() = runTest {
             // ----- Arrange -----
             stateFlow.value = LibraryVisibilitySettingsUiState(
                 persistedEnabledStatusCodes = emptySet(),
@@ -525,6 +534,7 @@ class OnSaveLibraryVisibilityActionTest {
             )
 
             // ----- Assert -----
+            eventChannel.tryReceive().getOrNull() shouldBe LibraryVisibilitySettingsEvent.SaveFailed
             eventChannel.tryReceive().getOrNull() shouldBe null
             stateFlow.value.isSaving shouldBe false
             stateFlow.value.discardSheetScaffold.busy shouldBe false

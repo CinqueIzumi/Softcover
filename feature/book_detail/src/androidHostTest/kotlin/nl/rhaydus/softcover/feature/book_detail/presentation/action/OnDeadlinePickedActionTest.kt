@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import nl.rhaydus.softcover.core.component.dialog.DatePickerUiModel
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -30,16 +31,18 @@ class OnDeadlinePickedActionTest {
     private lateinit var setBookDeadlineUseCase: SetBookDeadlineUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         setBookDeadlineUseCase = mockk()
         stateFlow = MutableStateFlow(BookDetailUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -300,6 +303,49 @@ class OnDeadlinePickedActionTest {
             )
 
             // ----- Assert -----
+            stateFlow.value.deadlinePicker shouldBe null
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+        }
+
+        @Test
+        fun `sends MutationFailedEvent and still clears deadlinePicker when use case fails`() = runTest {
+            // ----- Arrange -----
+            val book = stubBook(
+                id = 5,
+                pages = 100,
+                currentPage = 0,
+            )
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                deadlinePicker = openPicker,
+            )
+            dependencies = stubDependencies(this)
+            val date = LocalDate(
+                2026,
+                7,
+                1,
+            )
+
+            coEvery {
+                setBookDeadlineUseCase(
+                    bookId = any(),
+                    deadlineDate = any(),
+                    current = any(),
+                    total = any(),
+                    unit = any(),
+                )
+            } returns Result.failure(RuntimeException("api error"))
+
+            val action = OnDeadlinePickedAction(date = date)
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
             stateFlow.value.deadlinePicker shouldBe null
         }
 

@@ -7,6 +7,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.presentation.navigation.LocalCreateListPresenter
 import nl.rhaydus.softcover.feature.settings.presentation.action.LibraryVisibilityAction
@@ -26,9 +27,13 @@ class LibraryVisibilitySettingsScreen : Screen {
 
         val state by screenModel.state.collectAsStateWithLifecycle()
 
+        val haptics = LocalHaptics.current
+
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
                 LibraryVisibilitySettingsEvent.NavigateBack -> navigator.pop()
+
+                LibraryVisibilitySettingsEvent.SaveFailed -> haptics.reject()
             }
         }
 

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -27,16 +28,18 @@ class OnNewEditionSaveClickActionTest {
     private lateinit var updateBookEditionUseCase: UpdateBookEditionUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         updateBookEditionUseCase = mockk()
         stateFlow = MutableStateFlow(BookDetailUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -119,6 +122,7 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.selectedEditionId shouldBe null
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
@@ -282,6 +286,7 @@ class OnNewEditionSaveClickActionTest {
             // ----- Assert -----
             stateFlow.value.previewEdition shouldBe edition
             stateFlow.value.showEditEditionSheet shouldBe true
+            eventChannel.tryReceive().getOrNull() shouldBe null
             coVerify(exactly = 0) {
                 updateBookEditionUseCase(
                     any(),
@@ -347,6 +352,7 @@ class OnNewEditionSaveClickActionTest {
 
             // ----- Assert -----
             stateFlow.value.loadingBookDetails shouldBe false
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
 
         @Test

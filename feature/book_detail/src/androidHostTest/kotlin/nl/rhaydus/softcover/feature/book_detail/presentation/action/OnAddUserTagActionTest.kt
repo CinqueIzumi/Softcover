@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -27,6 +28,7 @@ class OnAddUserTagActionTest {
     private lateinit var saveUserTagsUseCase: SaveUserTagsUseCase
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
@@ -34,10 +36,11 @@ class OnAddUserTagActionTest {
         saveUserTagsUseCase = mockk()
         stateFlow = MutableStateFlow(BookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -161,10 +164,12 @@ class OnAddUserTagActionTest {
                 book = stubBook(id = 1),
                 userTags = listOf(existingTag),
             )
-            val savedResult = listOf(existingTag, UserTag(
-                name = "cozy",
-                category = TagCategory.MOOD,
-            ),
+            val savedResult = listOf(
+                existingTag,
+                UserTag(
+                    name = "cozy",
+                    category = TagCategory.MOOD,
+                ),
             )
 
             coEvery {
@@ -318,6 +323,7 @@ class OnAddUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe serverCanonical
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
 
         @Test
@@ -355,6 +361,7 @@ class OnAddUserTagActionTest {
 
             // ----- Assert -----
             stateFlow.value.userTags shouldBe originalTags
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
 
         @Test

@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -33,6 +34,7 @@ class OnSetListRankedActionTest {
     private lateinit var setListRankedUseCase: SetListRankedUseCase
     private lateinit var setLibrarySortUseCase: SetLibrarySortUseCase
     private lateinit var stateFlow: MutableStateFlow<LibraryUiState>
+    private lateinit var eventChannel: Channel<LibraryEvent>
     private lateinit var scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>
 
     private val listId = 7
@@ -44,10 +46,11 @@ class OnSetListRankedActionTest {
         setListRankedUseCase = mockk(relaxed = true)
         setLibrarySortUseCase = mockk(relaxed = true)
         stateFlow = MutableStateFlow(LibraryUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(LibraryLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
 
         mockkObject(SnackBarManager)
@@ -132,6 +135,8 @@ class OnSetListRankedActionTest {
                 )
 
                 verify(exactly = 0) { SnackBarManager.showSnackbar(title = any()) }
+
+            eventChannel.tryReceive().getOrNull() shouldBe null
             }
 
         @Test
@@ -201,6 +206,9 @@ class OnSetListRankedActionTest {
                         },
                     )
                 }
+
+                eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<LibraryEvent.ListRankedChangeFailedEvent>()
+                eventChannel.tryReceive().getOrNull() shouldBe null
             }
 
         @Test

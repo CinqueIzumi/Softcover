@@ -13,6 +13,13 @@ internal class OnAddBookToLibraryClickAction(val book: Book) : ExploreAction {
         dependencies: ExploreDependencies,
         scope: ActionScope<ExploreScreenUiState, ExploreEvent, ExploreLocalVariables>,
     ) {
-        dependencies.markBookAsWantToReadUseCase(book = book).onApiFailure()
+        dependencies.markBookAsWantToReadUseCase(book = book)
+            .onApiFailure()
+            .onSuccess {
+                scope.sendEvent(ExploreEvent.BookAddedEvent())
+            }
+            .onFailure {
+                scope.sendEvent(ExploreEvent.AddBookFailedEvent())
+            }
     }
 }

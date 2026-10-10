@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.reading.presentation.action
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class OnSaveVerdictActionTest {
+    private val eventChannel = Channel<ReadingScreenEvent>(Channel.BUFFERED)
     private lateinit var saveBookVerdictUseCase: SaveBookVerdictUseCase
     private lateinit var dependencies: ReadingScreenDependencies
     private lateinit var stateFlow: MutableStateFlow<ReadingScreenUiState>
@@ -41,7 +43,7 @@ class OnSaveVerdictActionTest {
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(ReadingLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
 
         dependencies = mockk<ReadingScreenDependencies>(relaxed = true).also { mock ->
@@ -68,7 +70,7 @@ class OnSaveVerdictActionTest {
     @Nested
     inner class Execute {
         @Test
-        fun `saves the draft rating and spoilers with an empty review and flags no failure on success`() = runTest {
+        fun `saves draft rating and spoilers, flags no failure and sends VerdictSavedEvent`() = runTest {
             // ----- Arrange -----
             val book = stubBook()
             val draft = sheet()
@@ -101,6 +103,7 @@ class OnSaveVerdictActionTest {
                 )
             }
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ReadingScreenEvent.VerdictSavedEvent>()
         }
 
         @Test
@@ -172,7 +175,7 @@ class OnSaveVerdictActionTest {
         }
 
         @Test
-        fun `flags the book as failed when the use case fails`() = runTest {
+        fun `flags the book as failed and sends VerdictSaveFailedEvent when the use case fails`() = runTest {
             // ----- Arrange -----
             val book = stubBook(id = 42)
             stateFlow.value = ReadingScreenUiState(
@@ -196,6 +199,7 @@ class OnSaveVerdictActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe true
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ReadingScreenEvent.VerdictSaveFailedEvent>()
         }
 
         @Test
@@ -220,6 +224,7 @@ class OnSaveVerdictActionTest {
                 )
             }
             stateFlow.value.failedMutationBookIds.contains(42) shouldBe false
+            eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }
 }

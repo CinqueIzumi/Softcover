@@ -56,6 +56,8 @@ internal class OnSaveLibraryVisibilityAction(
 
             if (allSaved.not()) {
                 SnackBarManager.showSnackbar(title = "Couldn't save your tabs — try again.")
+
+                scope.sendEvent(event = LibraryVisibilitySettingsEvent.SaveFailed)
             }
 
             scope.setState {

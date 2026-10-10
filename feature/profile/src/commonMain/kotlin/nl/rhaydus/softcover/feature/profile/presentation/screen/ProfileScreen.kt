@@ -10,6 +10,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -35,9 +36,13 @@ class ProfileScreen : Screen {
 
         val navigator = LocalNavigator.currentOrThrow
 
+        val haptics = LocalHaptics.current
+
         ObserveAsEvents(flow = screenModel.events) {
             when (it) {
                 is ProfileEvent.LogOutUserEvent -> sessionAuthenticator.setUserAuthenticated(authenticated = false)
+
+                is ProfileEvent.LogOutFailedEvent -> haptics.reject()
             }
         }
 

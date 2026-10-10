@@ -1,15 +1,19 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import nl.rhaydus.softcover.core.book.domain.usecase.UpdateBookEditionUseCase
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBook
@@ -18,6 +22,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.screenmodel.BookDet
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailLocalVariables
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
 import nl.rhaydus.toad.ActionScope
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -26,17 +31,24 @@ class OnUpdateToScannedEditionClickActionTest {
     private lateinit var updateBookEditionUseCase: UpdateBookEditionUseCase
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
     fun setUp() {
         updateBookEditionUseCase = mockk()
         stateFlow = MutableStateFlow(BookDetailUiState())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = MutableStateFlow(BookDetailLocalVariables()),
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     private fun stubDependencies(testScope: TestScope): BookDetailDependencies {
@@ -105,6 +117,39 @@ class OnUpdateToScannedEditionClickActionTest {
                 )
             }
 
+            scope.currentState.isUpdatingScannedEdition shouldBe false
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
+        }
+
+        @Test
+        fun `sends MutationFailedEvent and clears isUpdatingScannedEdition when use case fails`() = runTest {
+            // ----- Arrange -----
+            val userBook = stubUserBook()
+            val book = stubBook(userBook = userBook)
+            stateFlow.value = BookDetailUiState(
+                book = book,
+                scannedEditionId = 42,
+            )
+            dependencies = stubDependencies(this)
+            Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+
+            coEvery {
+                updateBookEditionUseCase(
+                    userBook = userBook,
+                    newEditionId = 42,
+                )
+            } returns Result.failure(RuntimeException("update failed"))
+
+            val action = OnUpdateToScannedEditionClickAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
             scope.currentState.isUpdatingScannedEdition shouldBe false
         }
 

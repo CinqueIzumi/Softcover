@@ -8,6 +8,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import nl.rhaydus.designsystem.haptics.LocalHaptics
+import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.connectivity.rememberIsOnline
 import nl.rhaydus.softcover.core.presentation.model.BookInitialCover
@@ -17,6 +19,7 @@ import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
 import nl.rhaydus.softcover.feature.explore.presentation.screenmodel.ExploreScreenScreenModel
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import org.koin.compose.koinInject
@@ -34,6 +37,16 @@ object ExploreScreen : Screen {
         val state by screenModel.state.collectAsStateWithLifecycle()
 
         val isOnline = rememberIsOnline()
+
+        val haptics = LocalHaptics.current
+
+        ObserveAsEvents(flow = screenModel.events) { event ->
+            when (event) {
+                is ExploreEvent.BookAddedEvent -> haptics.select()
+
+                is ExploreEvent.AddBookFailedEvent -> haptics.reject()
+            }
+        }
 
         val prefetcher = rememberBookDetailPrefetcher()
 

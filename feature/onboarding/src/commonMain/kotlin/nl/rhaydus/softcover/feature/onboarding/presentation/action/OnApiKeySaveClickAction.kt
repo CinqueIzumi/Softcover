@@ -26,6 +26,8 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
                     submissionError = mapError(error),
                 )
             }
+
+            scope.sendEvent(event = OnboardingEvent.ApiKeyRejectedEvent())
         }
 
         scope.setState {
@@ -62,6 +64,8 @@ internal data object OnApiKeySaveClickAction : OnboardingAction {
                 }
                 .onSuccess {
                     scope.setState { it.copy(loadingSheet = it.loadingSheet.copy(progress = 1f)) }
+
+                    scope.sendEvent(event = OnboardingEvent.SignedInEvent())
                 }
         }
     }

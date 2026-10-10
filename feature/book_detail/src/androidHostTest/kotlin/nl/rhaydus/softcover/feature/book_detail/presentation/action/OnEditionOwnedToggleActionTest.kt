@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.book_detail.presentation.action
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -27,6 +28,7 @@ class OnEditionOwnedToggleActionTest {
     private lateinit var dependencies: BookDetailDependencies
     private lateinit var stateFlow: MutableStateFlow<BookDetailUiState>
     private lateinit var localVariablesFlow: MutableStateFlow<BookDetailLocalVariables>
+    private lateinit var eventChannel: Channel<BookDetailEvent>
     private lateinit var scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>
 
     @BeforeEach
@@ -34,10 +36,11 @@ class OnEditionOwnedToggleActionTest {
         setEditionAsOwnedUseCase = mockk()
         stateFlow = MutableStateFlow(BookDetailUiState())
         localVariablesFlow = MutableStateFlow(BookDetailLocalVariables())
+        eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
             stateFlow = stateFlow,
             localVariablesFlow = localVariablesFlow,
-            eventChannel = Channel(Channel.BUFFERED),
+            eventChannel = eventChannel,
         )
     }
 
@@ -140,6 +143,7 @@ class OnEditionOwnedToggleActionTest {
                     owned = false,
                 )
             }
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationSucceededEvent>()
         }
 
         @Test
@@ -171,6 +175,7 @@ class OnEditionOwnedToggleActionTest {
 
             // ----- Assert -----
             stateFlow.value.failedMutationEditionIds.contains(99) shouldBe true
+            eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<BookDetailEvent.MutationFailedEvent>()
         }
 
         @Test
