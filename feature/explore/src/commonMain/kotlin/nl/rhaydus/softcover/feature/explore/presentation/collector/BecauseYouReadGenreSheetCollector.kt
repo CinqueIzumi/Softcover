@@ -20,13 +20,14 @@ internal class BecauseYouReadGenreSheetCollector : ExploreCollector {
         dependencies: ExploreDependencies,
     ) {
         scope.state
-            .map { Triple(
-                    it.becauseYouReadGenre,
-                    it.becauseYouReadGenreOptions,
-                    it.loadingBecauseYouReadBooks && it.becauseYouReadBooks.isEmpty(),
-                ) }
+            .map {
+                GenreSheetSnapshot(
+                    genre = it.becauseYouReadGenre,
+                    options = it.becauseYouReadGenreOptions,
+                )
+            }
             .distinctUntilChanged()
-            .collectLatest { (genre, options, isLoading) ->
+            .collectLatest { (genre, options) ->
                 val rows = becauseYouReadGenreRowsFor(
                     genre = genre,
                     options = options,
@@ -36,8 +37,6 @@ internal class BecauseYouReadGenreSheetCollector : ExploreCollector {
                     it.copy(
                         becauseYouReadGenreControl = it.becauseYouReadGenreControl.copy(
                             label = becauseYouReadGenreLabelFor(genre),
-                            visible = genre != null,
-                            isLoading = isLoading,
                             hasOptions = options.isNotEmpty(),
                             genreGroup = SheetRowGroupUiModel(
                                 rows = rows,

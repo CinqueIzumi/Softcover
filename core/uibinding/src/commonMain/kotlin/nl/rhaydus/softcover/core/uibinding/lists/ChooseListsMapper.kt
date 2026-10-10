@@ -16,6 +16,8 @@ import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsRowUiModel
 import nl.rhaydus.softcover.core.component.lists.ChooseListsUiModel
 import nl.rhaydus.softcover.core.component.lists.ListMembership
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterButton
+import nl.rhaydus.softcover.core.component.sheet.SheetFooterUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderTrailing
 import nl.rhaydus.softcover.core.component.sheet.SheetHeaderUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetLayout
@@ -104,6 +106,13 @@ private fun chooseListsScaffold(
             description = persistentListOf(HeaderTextSegment.Plain(text = description)),
         ),
         trailing = trailing,
+    ),
+    footer = SheetFooterUiModel.Stacked(
+        primary = null,
+        secondary = SheetFooterButton(
+            label = "Create a new list",
+            dismissesSheet = true,
+        ),
     ),
     layout = SheetLayout.PinnedLazy,
 )

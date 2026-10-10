@@ -24,6 +24,7 @@ import nl.rhaydus.softcover.core.component.topbar.TopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutSheetOpenAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnShareSheetOpenAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
@@ -87,7 +88,10 @@ internal actual fun ProfileScreenLayout(
             Spacer(modifier = Modifier.height(Spacing.section))
 
             AccountFootSection(
-                onLogOutClick = { showLogOutConfirm = true },
+                onLogOutClick = {
+                    runAction(OnLogOutSheetOpenAction())
+                    showLogOutConfirm = true
+                },
                 enabled = state.isLoading.not(),
                 modifier = Modifier.padding(bottom = Spacing.xl),
             )

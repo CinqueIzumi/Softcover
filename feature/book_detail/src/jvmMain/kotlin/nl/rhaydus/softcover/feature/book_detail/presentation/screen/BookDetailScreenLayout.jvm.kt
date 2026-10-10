@@ -59,7 +59,6 @@ internal actual fun BookDetailScreenLayout(
     runAction: (BookDetailAction) -> Unit,
     onNavigateBack: () -> Unit,
     onCoverClick: () -> Unit,
-    onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
 ) {
     val showOfflinePlaceholder =
@@ -124,7 +123,6 @@ internal actual fun BookDetailScreenLayout(
     BookDetailOverlays(
         state = state,
         runAction = runAction,
-        onCreateNewListClick = onCreateNewListClick,
     )
 }
 

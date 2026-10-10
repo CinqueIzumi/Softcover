@@ -13,6 +13,11 @@ internal class OnBulkAddToListSheetShownAction(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        scope.setState { it.copy(isBulkAddToListSheetShown = shown) }
+        scope.setState {
+            it.copy(
+                isBulkAddToListSheetShown = shown,
+                isCreateListPending = it.isCreateListPending && shown.not(),
+            )
+        }
     }
 }

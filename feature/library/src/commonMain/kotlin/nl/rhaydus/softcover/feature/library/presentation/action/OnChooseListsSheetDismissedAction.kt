@@ -1,0 +1,27 @@
+package nl.rhaydus.softcover.feature.library.presentation.action
+
+import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
+import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDependencies
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
+import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.toad.ActionScope
+
+internal class OnChooseListsSheetDismissedAction : LibraryAction {
+    override suspend fun execute(
+        dependencies: LibraryDependencies,
+        scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
+    ) {
+        val isCreateListPending = scope.currentState.isCreateListPending
+
+        scope.setState {
+            it.copy(
+                isBulkAddToListSheetShown = false,
+                isCreateListPending = false,
+            )
+        }
+
+        if (isCreateListPending) {
+            scope.sendEvent(event = LibraryEvent.CreateListRequestedEvent())
+        }
+    }
+}

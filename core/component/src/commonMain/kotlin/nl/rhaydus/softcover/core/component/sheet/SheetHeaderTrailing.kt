@@ -19,5 +19,9 @@ sealed interface SheetHeaderTrailing {
         }
     }
 
-    data class Action(val label: String) : SheetHeaderTrailing
+    /** [dismissesSheet] works as [SheetFooterButton.dismissesSheet] does. */
+    data class Action(
+        val label: String,
+        val dismissesSheet: Boolean = false,
+    ) : SheetHeaderTrailing
 }

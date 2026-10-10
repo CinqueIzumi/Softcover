@@ -33,6 +33,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressMi
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTabClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnProgressTimeChangedAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRemoveUserTagAction
+import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnRequestCreateListAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnSaveVerdictAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareCaptureEventAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShareVariantSelectedAction
@@ -66,7 +67,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.state.TagEditorShee
 internal fun BookDetailOverlays(
     state: BookDetailUiState,
     runAction: (BookDetailAction) -> Unit,
-    onCreateNewListClick: () -> Unit,
 ) {
     val shareSheet = state.shareSheet
     if (state.isShareSheetVisible && shareSheet != null) {
@@ -132,7 +132,7 @@ internal fun BookDetailOverlays(
                         ),
                     )
 
-                    ChooseListsEvent.NewListRequested -> onCreateNewListClick()
+                    ChooseListsEvent.NewListRequested -> runAction(OnRequestCreateListAction())
 
                     ChooseListsEvent.Dismissed -> runAction(OnDismissChooseListsSheetAction())
                 }

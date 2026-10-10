@@ -16,4 +16,6 @@ internal sealed interface BookDetailEvent : UiEvent {
     class MutationSucceededEvent : BookDetailEvent
 
     class MutationFailedEvent : BookDetailEvent
+
+    class CreateListRequestedEvent : BookDetailEvent
 }

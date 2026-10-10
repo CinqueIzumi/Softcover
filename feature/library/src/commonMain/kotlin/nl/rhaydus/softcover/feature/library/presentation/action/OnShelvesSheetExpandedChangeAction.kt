@@ -13,6 +13,11 @@ internal class OnShelvesSheetExpandedChangeAction(
         dependencies: LibraryDependencies,
         scope: ActionScope<LibraryUiState, LibraryEvent, LibraryLocalVariables>,
     ) {
-        scope.setState { it.copy(isShelvesSheetExpanded = expanded) }
+        scope.setState {
+            it.copy(
+                isShelvesSheetExpanded = expanded,
+                isManageShelvesPending = it.isManageShelvesPending && expanded.not(),
+            )
+        }
     }
 }

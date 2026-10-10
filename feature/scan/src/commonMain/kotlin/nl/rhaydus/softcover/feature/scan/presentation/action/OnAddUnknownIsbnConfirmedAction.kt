@@ -4,6 +4,7 @@ import nl.rhaydus.common.AppLog
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
+import nl.rhaydus.softcover.feature.scan.presentation.state.ResolvedScan
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.toad.ActionScope
 
@@ -26,15 +27,12 @@ internal class OnAddUnknownIsbnConfirmedAction : ScanAction {
                     it.copy(
                         isUnknownIsbnCloseRequested = true,
                         isAddingBook = false,
+                        resolvedUnknownIsbn = ResolvedScan(
+                            book = result.book,
+                            editionId = result.editionId,
+                        ),
                     )
                 }
-
-                scope.sendEvent(
-                    event = ScanEvent.BookResolvedEvent(
-                        book = result.book,
-                        editionId = result.editionId,
-                    ),
-                )
             }
             .onFailure { error ->
                 AppLog.e(

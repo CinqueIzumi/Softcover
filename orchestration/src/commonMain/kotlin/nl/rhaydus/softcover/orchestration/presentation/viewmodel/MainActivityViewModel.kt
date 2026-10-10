@@ -64,6 +64,8 @@ internal class MainActivityViewModel(
 
     private val _reAuthState = MutableStateFlow(ReAuthState())
 
+    private var reAuthLogOutPending = false
+
     /** The re-auth sheet's model, or null while the sheet is not showing. */
     val reAuthSheet: StateFlow<ReAuthSheetUiModel?> = _reAuthState
         .map { if (it.visible) it.toSheetUiModel() else null }
@@ -139,20 +141,29 @@ internal class MainActivityViewModel(
         }
     }
 
-    /** The re-auth sheet finished hiding after a successful re-authentication. */
     fun onReAuthDismissed() {
         _reAuthState.update { ReAuthState() }
+
+        if (reAuthLogOutPending) {
+            reAuthLogOutPending = false
+
+            logOut()
+        }
     }
 
-    /** Escape hatch from the re-auth dialog: full logout back to onboarding. */
+    /** Escape hatch from the re-auth dialog: hides the sheet, then [onReAuthDismissed] logs out back to onboarding. */
     fun logOutFromReAuth() {
+        reAuthLogOutPending = true
+
+        _reAuthState.update { it.copy(closeRequested = true) }
+    }
+
+    private fun logOut() {
         viewModelScope.launch {
             // Best-effort wipe: even if it fails we still drop to onboarding rather than trap the
             // user behind the dialog — but surface the failure so a partial wipe is diagnosable.
             resetUserDataUseCase()
                 .onFailure { AppLog.e("Logout wipe from re-auth failed $it") }
-
-            _reAuthState.update { ReAuthState() }
 
             setUserAuthenticated(authenticated = false)
         }

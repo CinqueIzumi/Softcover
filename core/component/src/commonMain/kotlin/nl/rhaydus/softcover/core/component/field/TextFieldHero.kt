@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
+import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 /**
@@ -83,13 +85,18 @@ internal fun HeroTextField(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    // Free to shrink to its content: at zero width (empty field) this is the caret
-                    // alone, flush against the hint.
+                    // An empty BasicTextField still claims ten characters of width; capped at the
+                    // caret's width it sits flush against the hint and leaves the hint centred.
                     Box(
-                        modifier = Modifier.weight(
-                            weight = 1f,
-                            fill = false,
-                        ),
+                        modifier = Modifier
+                            .weight(
+                                weight = 1f,
+                                fill = false,
+                            )
+                            .conditional(
+                                condition = model.text.isEmpty(),
+                                ifTrue = { Modifier.widthIn(max = 2.dp) },
+                            ),
                     ) {
                         innerTextField()
                     }

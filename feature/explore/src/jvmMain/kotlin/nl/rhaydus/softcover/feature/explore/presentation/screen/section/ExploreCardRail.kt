@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.component.state.SkeletonRevealGroup
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -33,26 +34,28 @@ internal fun ExploreCardRail(
         ExploreRail.BECAUSE_YOU_READ, ExploreRail.TRENDING -> 168.dp
     }
 
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.gutter),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(Spacing.xl),
-    ) {
-        set.cards.forEachIndexed { index, card ->
-            key(card.key.lazyKey) {
-                BookCard(
-                    model = card,
-                    onEvent = onCardEvent,
-                    modifier = Modifier
-                        .width(cardWidth)
-                        .bookCardStaggeredEntry(
-                            card = card,
-                            coordinator = entry,
-                            index = index,
-                        ),
-                )
+    SkeletonRevealGroup {
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.gutter),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xl),
+        ) {
+            set.cards.forEachIndexed { index, card ->
+                key(card.key.lazyKey) {
+                    BookCard(
+                        model = card,
+                        onEvent = onCardEvent,
+                        modifier = Modifier
+                            .width(cardWidth)
+                            .bookCardStaggeredEntry(
+                                card = card,
+                                coordinator = entry,
+                                index = index,
+                            ),
+                    )
+                }
             }
         }
     }

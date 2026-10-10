@@ -22,7 +22,6 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.BookDetailAc
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.FetchBookReviewsAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.InitializeBookWithIdAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnCelebrateMarkedAsReadAction
-import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnDismissChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnOpenVerdictSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnShowChooseListsSheetAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnToggleListMembershipAction
@@ -102,6 +101,26 @@ class BookDetailScreen(
                 is BookDetailEvent.OpenExternalLinkEvent -> {
                     uriHandler.openUri(uri = it.url)
                 }
+
+                is BookDetailEvent.CreateListRequestedEvent -> {
+                    // Same detour-and-return as Library's bulk path: the reader reached for a new list
+                    // *while* choosing lists for this book, so creating it puts the book on the new list
+                    // and brings the chooser back with it ticked. Unlike the bulk path this can reuse the
+                    // ordinary toggle action, which works off the book and the id alone and so doesn't
+                    // care that the new list has yet to surface in screen state.
+                    createListPresenter?.open(
+                        onListCreated = { listId, _ ->
+                            screenModel.runAction(
+                                OnToggleListMembershipAction(
+                                    listId = listId,
+                                    isMember = false,
+                                ),
+                            )
+
+                            screenModel.runAction(OnShowChooseListsSheetAction())
+                        },
+                    )
+                }
             }
         }
 
@@ -115,27 +134,6 @@ class BookDetailScreen(
                 val cover = state.fullScreenCover ?: return@BookDetailScreenLayout
 
                 overlayNavigator.push(FullScreenCoverScreen(cover = cover))
-            },
-            onCreateNewListClick = {
-                // Same detour-and-return as Library's bulk path: the reader reached for a new list
-                // *while* choosing lists for this book, so creating it puts the book on the new list
-                // and brings the chooser back with it ticked. Unlike the bulk path this can reuse the
-                // ordinary toggle action, which works off the book and the id alone and so doesn't
-                // care that the new list has yet to surface in screen state.
-                createListPresenter?.open(
-                    onListCreated = { listId, _ ->
-                        screenModel.runAction(
-                            OnToggleListMembershipAction(
-                                listId = listId,
-                                isMember = false,
-                            ),
-                        )
-
-                        screenModel.runAction(OnShowChooseListsSheetAction())
-                    },
-                )
-
-                screenModel.runAction(OnDismissChooseListsSheetAction())
             },
             isOnline = isOnline,
         )
@@ -156,6 +154,5 @@ internal expect fun BookDetailScreenLayout(
     runAction: (BookDetailAction) -> Unit,
     onNavigateBack: () -> Unit,
     onCoverClick: () -> Unit,
-    onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
 )

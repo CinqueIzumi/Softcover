@@ -23,7 +23,6 @@ import nl.rhaydus.softcover.core.presentation.navigation.ScreenDestination
 import nl.rhaydus.softcover.core.presentation.prefetch.LocalBookDetailPrefetcher
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberBookDetailPrefetcher
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToNewListAction
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
 import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryScreenScreenModel
@@ -57,6 +56,29 @@ object LibraryScreen : Screen {
                 is LibraryEvent.NewListBooksAddFailedEvent,
                 is LibraryEvent.ListReorderFailedEvent,
                 is LibraryEvent.ListRankedChangeFailedEvent -> haptics.reject()
+
+                is LibraryEvent.ManageShelvesRequestedEvent -> {
+                    navigator.parent?.push(
+                        item = appNavigator.screen(ScreenDestination.LibraryVisibilitySettings),
+                    )
+                }
+
+                is LibraryEvent.CreateListRequestedEvent -> {
+                // Creating a list is a detour out of "put these books on a list", not a new task,
+                // so finishing it returns here: the selection lands on the new list and the chooser
+                // reopens with it ticked. Without this the chooser closes, the list is created
+                // empty, and the reader's original intent is silently dropped.
+                createListPresenter?.open(
+                    onListCreated = { listId, listName ->
+                        screenModel.runAction(
+                            OnBulkAddToNewListAction(
+                                listId = listId,
+                                listName = listName,
+                            ),
+                        )
+                    },
+                )
+                }
             }
         }
 
@@ -98,24 +120,6 @@ object LibraryScreen : Screen {
                         item = appNavigator.screen(ScreenDestination.LibraryVisibilitySettings),
                     )
                 },
-                onCreateNewListClick = {
-                    screenModel.runAction(OnBulkAddToListSheetShownAction(shown = false))
-
-                    // Creating a list is a detour out of "put these books on a list", not a new task,
-                    // so finishing it returns here: the selection lands on the new list and the chooser
-                    // reopens with it ticked. Without this the chooser closes, the list is created
-                    // empty, and the reader's original intent is silently dropped.
-                    createListPresenter?.open(
-                        onListCreated = { listId, listName ->
-                            screenModel.runAction(
-                                OnBulkAddToNewListAction(
-                                    listId = listId,
-                                    listName = listName,
-                                ),
-                            )
-                        },
-                    )
-                },
             )
         }
     }
@@ -135,7 +139,6 @@ internal expect fun LibraryScreenLayout(
     onBookClick: (Book) -> Unit,
     onEditionClick: (BookEdition) -> Unit,
     onTabLongPress: () -> Unit,
-    onCreateNewListClick: () -> Unit,
     gridStateFor: (String) -> LazyGridState,
     topAppBarState: TopAppBarState,
 )

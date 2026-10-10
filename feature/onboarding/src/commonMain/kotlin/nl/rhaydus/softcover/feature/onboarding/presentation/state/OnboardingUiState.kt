@@ -21,6 +21,7 @@ internal data class OnboardingUiState(
     ),
     val saveApiKeyButtonEnabled: Boolean = false,
     val submissionError: String? = null,
+    val signInPending: Boolean = false,
     val loadingSheet: LoadingSheetUiModel = LoadingSheetUiModel(
         scaffold = SheetScaffoldUiModel(
             header = SheetHeaderUiModel(

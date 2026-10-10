@@ -12,6 +12,7 @@ import nl.rhaydus.designsystem.util.rememberClipboardReader
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheet
 import nl.rhaydus.softcover.core.component.sheet.LoadingSheetEvent
 import nl.rhaydus.softcover.core.presentation.session.SessionAuthenticator
+import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoaderFinishedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnLoadingSheetDismissedAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.action.OnboardingAction
 import nl.rhaydus.softcover.feature.onboarding.presentation.event.OnboardingEvent
@@ -38,6 +39,10 @@ object OnboardingScreen : Screen {
                 is OnboardingEvent.SignedInEvent -> haptics.commit()
 
                 is OnboardingEvent.ApiKeyRejectedEvent -> haptics.reject()
+
+                is OnboardingEvent.SignInCompletedEvent -> {
+                    sessionAuthenticator.setUserAuthenticated(authenticated = true)
+                }
             }
         }
 
@@ -52,9 +57,7 @@ object OnboardingScreen : Screen {
             model = state.loadingSheet,
             onEvent = { event ->
                 when (event) {
-                    LoadingSheetEvent.LoaderFinished -> {
-                        sessionAuthenticator.setUserAuthenticated(authenticated = true)
-                    }
+                    LoadingSheetEvent.LoaderFinished -> screenModel.runAction(OnLoaderFinishedAction)
 
                     LoadingSheetEvent.Dismissed -> screenModel.runAction(OnLoadingSheetDismissedAction)
                 }

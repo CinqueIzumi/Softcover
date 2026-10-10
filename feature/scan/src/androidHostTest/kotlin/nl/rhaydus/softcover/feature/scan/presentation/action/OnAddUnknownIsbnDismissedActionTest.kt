@@ -2,13 +2,16 @@ package nl.rhaydus.softcover.feature.scan.presentation.action
 
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.feature.scan.presentation.event.ScanEvent
 import nl.rhaydus.softcover.feature.scan.presentation.screenmodel.ScanDependencies
 import nl.rhaydus.softcover.feature.scan.presentation.state.LocalScanVariables
+import nl.rhaydus.softcover.feature.scan.presentation.state.ResolvedScan
 import nl.rhaydus.softcover.feature.scan.presentation.state.ScanUiState
 import nl.rhaydus.softcover.feature.scan.presentation.state.UnknownIsbnSheetUiModel
 import nl.rhaydus.softcover.feature.scan.presentation.state.unknownIsbnSheetScaffoldFor
@@ -82,6 +85,63 @@ class OnAddUnknownIsbnDismissedActionTest {
 
             // ----- Assert -----
             stateFlow.value shouldBe addingState
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
+        }
+
+        @Test
+        fun `sends BookResolvedEvent for the resolved scan and clears it`() = runTest {
+            // ----- Arrange -----
+            val book = PreviewData.baseBook
+            stateFlow.value = ScanUiState(
+                unknownIsbnSheet = UnknownIsbnSheetUiModel(
+                    isbn = "9780451524935",
+                    scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
+                ),
+                isUnknownIsbnCloseRequested = true,
+                resolvedUnknownIsbn = ResolvedScan(
+                    book = book,
+                    editionId = 7,
+                ),
+            )
+            val action = OnAddUnknownIsbnDismissedAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.resolvedUnknownIsbn.shouldBeNull()
+            stateFlow.value.unknownIsbnSheet.shouldBeNull()
+            val event = eventChannel.tryReceive().getOrNull()
+            event.shouldBeInstanceOf<ScanEvent.BookResolvedEvent>()
+            event.book shouldBe book
+            event.editionId shouldBe 7
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
+        }
+
+        @Test
+        fun `keeps the resolved scan and sends no event while a book is being added`() = runTest {
+            // ----- Arrange -----
+            val resolving = ScanUiState(
+                isAddingBook = true,
+                resolvedUnknownIsbn = ResolvedScan(
+                    book = PreviewData.baseBook,
+                    editionId = null,
+                ),
+            )
+            stateFlow.value = resolving
+            val action = OnAddUnknownIsbnDismissedAction()
+
+            // ----- Act -----
+            action.execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value shouldBe resolving
             eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
     }

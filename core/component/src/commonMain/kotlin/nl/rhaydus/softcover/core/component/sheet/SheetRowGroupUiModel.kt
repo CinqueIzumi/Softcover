@@ -4,10 +4,13 @@ import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 
 /**
- * The group runs the sheet's animated dismiss after emitting [SheetRowEvent.Selected], so the host's
- * handler must not close the sheet itself.
+ * A row selection runs the sheet's animated dismiss after [SheetRowEvent.Selected], so the host's
+ * handler must not close the sheet itself. When [dismissesSheet] is false the group leaves the
+ * sheet open and the host closes it through [SheetScaffoldUiModel.closeRequested], for a host that
+ * must apply the selection before the hide starts.
  */
 @Immutable
 data class SheetRowGroupUiModel<K>(
     val rows: ImmutableList<SheetRowUiModel<K>>,
+    val dismissesSheet: Boolean = true,
 )

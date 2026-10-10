@@ -1,5 +1,6 @@
 package nl.rhaydus.softcover.feature.scan.presentation.action
 
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -148,10 +149,12 @@ class OnAddUnknownIsbnConfirmedActionTest {
         @Test
         fun `marks the book as being added while the use case runs`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbnSheet = UnknownIsbnSheetUiModel(
+            stateFlow.value = ScanUiState(
+                unknownIsbnSheet = UnknownIsbnSheetUiModel(
                     isbn = "9780451524935",
                     scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),)
+                ),
+            )
             val dependencies = stubDependencies(this)
             var stateAtInvocation: ScanUiState? = null
 
@@ -175,14 +178,16 @@ class OnAddUnknownIsbnConfirmedActionTest {
         }
 
         @Test
-        fun `requests the sheet to close, clears isAddingBook and sends BookResolvedEvent on success`() = runTest {
+        fun `records the resolved scan, requests the sheet to close and sends no event on success`() = runTest {
             // ----- Arrange -----
             val book = PreviewData.baseBook
             val editionId = 7
-            stateFlow.value = ScanUiState(unknownIsbnSheet = UnknownIsbnSheetUiModel(
+            stateFlow.value = ScanUiState(
+                unknownIsbnSheet = UnknownIsbnSheetUiModel(
                     isbn = "9780451524935",
                     scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),)
+                ),
+            )
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -207,19 +212,21 @@ class OnAddUnknownIsbnConfirmedActionTest {
             stateFlow.value.unknownIsbnSheet.shouldNotBeNull().isbn shouldBe "9780451524935"
             stateFlow.value.isAddingBook shouldBe false
 
-            val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<ScanEvent.BookResolvedEvent>()
-            event.book shouldBe book
-            event.editionId shouldBe editionId
+            val resolved = stateFlow.value.resolvedUnknownIsbn.shouldNotBeNull()
+            resolved.book shouldBe book
+            resolved.editionId shouldBe editionId
+            eventChannel.tryReceive().getOrNull().shouldBeNull()
         }
 
         @Test
         fun `keeps the sheet open and sends AddBookFailedEvent on failure`() = runTest {
             // ----- Arrange -----
-            stateFlow.value = ScanUiState(unknownIsbnSheet = UnknownIsbnSheetUiModel(
+            stateFlow.value = ScanUiState(
+                unknownIsbnSheet = UnknownIsbnSheetUiModel(
                     isbn = "9780451524935",
                     scaffold = unknownIsbnSheetScaffoldFor(isAdding = false),
-                ),)
+                ),
+            )
             val dependencies = stubDependencies(this)
 
             coEvery {
@@ -238,6 +245,7 @@ class OnAddUnknownIsbnConfirmedActionTest {
             stateFlow.value.isAddingBook shouldBe false
             stateFlow.value.unknownIsbnSheet.shouldNotBeNull().isbn shouldBe "9780451524935"
             stateFlow.value.isUnknownIsbnCloseRequested shouldBe false
+            stateFlow.value.resolvedUnknownIsbn.shouldBeNull()
 
             eventChannel.tryReceive().getOrNull().shouldBeInstanceOf<ScanEvent.AddBookFailedEvent>()
         }

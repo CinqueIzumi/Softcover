@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -49,6 +50,8 @@ import nl.rhaydus.softcover.core.domain.preview.PreviewData
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab as LibraryContentTab
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnRefreshAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnShelvesSheetCloseRequestedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnShelvesSheetDismissedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnShelvesSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
 import nl.rhaydus.softcover.feature.library.presentation.component.LibraryShelvesSheet
@@ -75,7 +78,6 @@ internal actual fun LibraryScreenLayout(
     onBookClick: (Book) -> Unit,
     onEditionClick: (BookEdition) -> Unit,
     onTabLongPress: () -> Unit,
-    onCreateNewListClick: () -> Unit,
     gridStateFor: (String) -> LazyGridState,
     topAppBarState: TopAppBarState,
 ) {
@@ -99,11 +101,19 @@ internal actual fun LibraryScreenLayout(
     // Selection made elsewhere (the Shelves sheet, a tab being hidden in settings) snaps the pager
     // across instantly: the sheet is dismissing over it, and animating a multi-shelf jump behind a
     // closing sheet reads as a glitch. The rail animates instead — see onPreviousClick below.
-    LaunchedEffect(tabs, state.selectedTabId) {
+    LaunchedEffect(tabs, state.selectedTabId, state.isShelvesSheetPickPending) {
         val targetIndex = tabs.indexOfFirst { it.id == state.selectedTabId }
 
         if (targetIndex >= 0 && targetIndex != pagerState.currentPage) {
             pagerState.scrollToPage(targetIndex)
+        }
+
+        if (state.isShelvesSheetPickPending) {
+            // One frame lets the picked shelf compose and draw while the sheet is still static, so
+            // the hide animation does not start on that frame.
+            withFrameNanos { }
+
+            runAction(OnShelvesSheetCloseRequestedAction())
         }
     }
 
@@ -289,14 +299,7 @@ internal actual fun LibraryScreenLayout(
         LibraryShelvesSheet(
             state = state,
             runAction = runAction,
-            onManageClick = {
-                runAction(OnShelvesSheetExpandedChangeAction(expanded = false))
-
-                onTabLongPress()
-            },
-            onDismissRequest = {
-                runAction(OnShelvesSheetExpandedChangeAction(expanded = false))
-            },
+            onDismissRequest = { runAction(OnShelvesSheetDismissedAction()) },
         )
     }
 
@@ -304,7 +307,6 @@ internal actual fun LibraryScreenLayout(
         state = state,
         currentTabId = currentTab?.id,
         runAction = runAction,
-        onCreateNewListClick = onCreateNewListClick,
     )
 }
 
@@ -331,7 +333,6 @@ private fun LibraryScreenPreview() {
             onBookClick = {},
             onEditionClick = {},
             onTabLongPress = {},
-            onCreateNewListClick = {},
             gridStateFor = { LazyGridState() },
             topAppBarState = rememberTopAppBarState(),
         )
@@ -355,7 +356,6 @@ private fun LibraryEmptyScreenPreview() {
             onBookClick = {},
             onEditionClick = {},
             onTabLongPress = {},
-            onCreateNewListClick = {},
             gridStateFor = { LazyGridState() },
             topAppBarState = rememberTopAppBarState(),
         )

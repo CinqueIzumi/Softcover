@@ -66,7 +66,6 @@ internal actual fun LibraryScreenLayout(
     onBookClick: (Book) -> Unit,
     onEditionClick: (BookEdition) -> Unit,
     onTabLongPress: () -> Unit,
-    onCreateNewListClick: () -> Unit,
     gridStateFor: (String) -> LazyGridState,
     topAppBarState: TopAppBarState,
 ) {
@@ -195,7 +194,6 @@ internal actual fun LibraryScreenLayout(
         state = state,
         currentTabId = currentTab?.id,
         runAction = runAction,
-        onCreateNewListClick = onCreateNewListClick,
     )
 }
 

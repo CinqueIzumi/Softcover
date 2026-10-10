@@ -25,6 +25,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTabStats
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 import nl.rhaydus.softcover.feature.library.presentation.state.arrangeSheetScaffoldFor
 import nl.rhaydus.softcover.feature.library.presentation.state.bulkRemoveSheetScaffoldFor
+import nl.rhaydus.softcover.feature.library.presentation.state.shelvesSheetScaffold
 import nl.rhaydus.toad.ActionScope
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -334,6 +335,45 @@ class SheetScaffoldCollectorsTest {
                 tabStatsByTab = tabStatsByTab,
             )
             stateFlow.value.shelvesSheetGroup.rows.map { it.selected } shouldBe listOf(false, true)
+        }
+
+        @Test
+        fun `a close request flags the sheet scaffold without changing the rows`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector(ShelvesSheetCollector())
+            val rowsBefore = stateFlow.value.shelvesSheetGroup.rows
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isShelvesSheetCloseRequested = true)
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheet shouldBe shelvesSheetScaffold().copy(closeRequested = true)
+            stateFlow.value.shelvesSheetGroup.rows shouldBe rowsBefore
+        }
+
+        @Test
+        fun `clearing the close request unflags the sheet scaffold`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector(ShelvesSheetCollector())
+            stateFlow.value = stateFlow.value.copy(isShelvesSheetCloseRequested = true)
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(isShelvesSheetCloseRequested = false)
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheet shouldBe shelvesSheetScaffold()
+        }
+
+        @Test
+        fun `rows do not dismiss the sheet themselves so the host can run the pick first`() = runTest(testDispatcher) {
+            // ----- Arrange -----
+            launchCollector(ShelvesSheetCollector())
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(selectedTabId = LibraryTab.All.id)
+
+            // ----- Assert -----
+            stateFlow.value.shelvesSheetGroup.dismissesSheet shouldBe false
         }
     }
 }

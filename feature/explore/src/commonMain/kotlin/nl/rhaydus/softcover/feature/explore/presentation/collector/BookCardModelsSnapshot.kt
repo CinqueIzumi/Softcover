@@ -7,6 +7,7 @@ import nl.rhaydus.softcover.core.domain.model.Book
 internal data class BookCardModelsSnapshot(
     val trendingBooks: List<Book>,
     val becauseYouReadBooks: List<Book>,
+    val becauseYouReadGenre: String?,
     val continueSeriesBooks: List<Book>,
     val queriedBooks: List<Book>,
     val unreleasedCoverOverlays: Map<Int, CoverOverlayUiModel>,

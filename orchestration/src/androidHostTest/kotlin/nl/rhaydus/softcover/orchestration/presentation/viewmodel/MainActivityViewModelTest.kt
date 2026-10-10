@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -186,6 +187,70 @@ class MainActivityViewModelTest {
 
             // ----- Assert -----
             viewModel.reAuthSheet.value.shouldBeNull()
+        }
+
+        @Test
+        fun `does not log out when the sheet was dismissed without the log-out escape hatch`() {
+            // ----- Arrange -----
+            showReAuthSheet()
+
+            // ----- Act -----
+            viewModel.onReAuthDismissed()
+
+            // ----- Assert -----
+            coVerify(exactly = 0) { resetUserDataUseCase() }
+        }
+
+        @Test
+        fun `logs out once the sheet finished hiding after the log-out escape hatch`() {
+            // ----- Arrange -----
+            coEvery {
+                resetUserDataUseCase()
+            } returns Result.success(Unit)
+            showReAuthSheet()
+            viewModel.logOutFromReAuth()
+
+            // ----- Act -----
+            viewModel.onReAuthDismissed()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { resetUserDataUseCase() }
+            viewModel.reAuthSheet.value.shouldBeNull()
+            viewModel.state.value.authenticated shouldBe false
+        }
+
+        @Test
+        fun `logs out only once when the sheet is dismissed twice`() {
+            // ----- Arrange -----
+            coEvery {
+                resetUserDataUseCase()
+            } returns Result.success(Unit)
+            showReAuthSheet()
+            viewModel.logOutFromReAuth()
+            viewModel.onReAuthDismissed()
+
+            // ----- Act -----
+            viewModel.onReAuthDismissed()
+
+            // ----- Assert -----
+            coVerify(exactly = 1) { resetUserDataUseCase() }
+        }
+    }
+
+    @Nested
+    inner class LogOutFromReAuth {
+        @Test
+        fun `requests the sheet to close without logging out yet`() {
+            // ----- Arrange -----
+            showReAuthSheet()
+
+            // ----- Act -----
+            viewModel.logOutFromReAuth()
+
+            // ----- Assert -----
+            val sheet = viewModel.reAuthSheet.value.shouldNotBeNull()
+            sheet.scaffold.closeRequested shouldBe true
+            coVerify(exactly = 0) { resetUserDataUseCase() }
         }
     }
 }

@@ -11,14 +11,15 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnContinueSeriesMenuDismissedAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnContinueSeriesMenuOpenAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_UP_NEXT
 
 /**
  * Hosts the "Up next in your series" cards of the mobile carousel and the desktop grid: [content]
  * lays the cards out and routes their events to the handler it receives. A tap opens the book through
- * [onBookClick]; the overflow button opens the book's entry of [menuSheets], which runs the picked
- * option through [runAction].
+ * [onBookClick]; the overflow button opens the book's entry of [menuSheets].
  */
 @Composable
 internal fun UpNextCardsHost(
@@ -39,7 +40,11 @@ internal fun UpNextCardsHost(
                 SURFACE_UP_NEXT,
             )
 
-            is BookCardEvent.MenuClicked -> sheetBook = book
+            is BookCardEvent.MenuClicked -> {
+                runAction(OnContinueSeriesMenuOpenAction())
+
+                sheetBook = book
+            }
 
             is BookCardEvent.LongClicked,
             is BookCardEvent.PressStarted,
@@ -54,9 +59,14 @@ internal fun UpNextCardsHost(
     sheetBook?.let { book ->
         menuSheets[book.id]?.let { menuSheet ->
             ContinueSeriesMenuSheet(
+                bookId = book.id,
                 model = menuSheet,
                 runAction = runAction,
-                onDismiss = { sheetBook = null },
+                onDismiss = {
+                    runAction(OnContinueSeriesMenuDismissedAction())
+
+                    sheetBook = null
+                },
             )
         }
     }

@@ -51,7 +51,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Inline error state** — [detail](components/states-feedback.md#inline-error-state) — message + retry for a `String?` error.
 - **Banner** — `core:component/callout` — full-width slide-in strip for a screen-level condition or a card-fused nudge; `BannerVariant` (`Status`, `Editorial`) sets colour, voice, icon and dismiss.
 - **Empty state** — `core:component/state` — placeholder for content a surface has nothing to draw; `EmptyStateVariant.Centered(button?)` (quote glyph, headline, optional button) or `Inline` (start-aligned title and body); the caller pads it full pane or in flow.
-- **SkeletonMask** — `core:component/state` — `Modifier.skeletonMask(visible, shape)`: shimmers a leaf over its bounds while loading, keeping its real layout, then fades the content in; `clippedSkeletonMask` clips and masks with one shape.
+- **SkeletonMask** — `core:component/state` — `Modifier.skeletonMask(visible, shape)`: shimmers a leaf while loading (no grace when replacing content; `SkeletonRevealGroup` covers new leaves), then fades in; `clippedSkeletonMask` clips too.
 - **Divider** — `core:component/divider` — hairline rule, bare, centred, or vertical.
 - **Pull-to-refresh indicator** — [detail](components/states-feedback.md#pull-to-refresh-indicator) — exception to the wavy-progress rule.
 - **Pull-to-refresh eyebrow** — [detail](components/states-feedback.md#pull-to-refresh-eyebrow) — eyebrow copy synced to pull progress.

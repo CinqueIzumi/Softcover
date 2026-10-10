@@ -11,6 +11,17 @@ internal class OnDismissChooseListsSheetAction : BookDetailAction {
         dependencies: BookDetailDependencies,
         scope: ActionScope<BookDetailUiState, BookDetailEvent, BookDetailLocalVariables>,
     ) {
-        scope.setState { it.copy(showChooseListsSheet = false) }
+        val createListPending = scope.currentState.createListPending
+
+        scope.setState {
+            it.copy(
+                showChooseListsSheet = false,
+                createListPending = false,
+            )
+        }
+
+        if (createListPending) {
+            scope.sendEvent(event = BookDetailEvent.CreateListRequestedEvent())
+        }
     }
 }

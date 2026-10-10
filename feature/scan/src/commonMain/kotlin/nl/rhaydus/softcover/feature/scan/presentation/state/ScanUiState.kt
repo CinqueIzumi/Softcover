@@ -28,6 +28,9 @@ internal data class ScanUiState(
     /** Asks the shown unknown-ISBN sheet to hide; cleared by its `Dismissed` event. */
     val isUnknownIsbnCloseRequested: Boolean = false,
     val unknownIsbnSheet: UnknownIsbnSheetUiModel? = null,
+
+    /** The book added through the unknown-ISBN sheet; opened once the sheet has finished hiding. */
+    val resolvedUnknownIsbn: ResolvedScan? = null,
     val manualEntryHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "By ISBN",
         headline = "Enter the ISBN.",

@@ -43,7 +43,6 @@ internal actual fun BookDetailScreenLayout(
     runAction: (BookDetailAction) -> Unit,
     onNavigateBack: () -> Unit,
     onCoverClick: () -> Unit,
-    onCreateNewListClick: () -> Unit,
     isOnline: Boolean,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -118,7 +117,6 @@ internal actual fun BookDetailScreenLayout(
         BookDetailOverlays(
             state = state,
             runAction = runAction,
-            onCreateNewListClick = onCreateNewListClick,
         )
     }
 }
@@ -153,7 +151,6 @@ private fun BookDetailScreenReadingPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -182,7 +179,6 @@ private fun BookDetailScreenNonePreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -211,7 +207,6 @@ private fun BookDetailScreenDnfPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -240,7 +235,6 @@ private fun BookDetailScreenWantToReadPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
             )
         }
@@ -269,7 +263,6 @@ private fun BookDetailScreenReadPreview() {
                 runAction = {},
                 onNavigateBack = {},
                 onCoverClick = {},
-                onCreateNewListClick = {},
                 isOnline = true,
             )
         }

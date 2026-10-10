@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardEvent
 import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.bookcard.bookCardStaggeredEntry
 import nl.rhaydus.softcover.core.component.bookcard.lazyKey
+import nl.rhaydus.softcover.core.component.state.SkeletonRevealGroup
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 
@@ -33,23 +34,25 @@ internal fun ExploreCardRail(
         ExploreRail.BECAUSE_YOU_READ, ExploreRail.TRENDING -> 118.dp
     }
 
-    LazyRow(
-        state = railListStates.getValue(rail),
-        contentPadding = PaddingValues(horizontal = Spacing.gutter),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-    ) {
-        itemsIndexed(set.cards, key = { _, card -> card.key.lazyKey }) { index, card ->
-            BookCard(
-                model = card,
-                onEvent = onCardEvent,
-                modifier = Modifier
-                    .width(cardWidth)
-                    .bookCardStaggeredEntry(
-                        card = card,
-                        coordinator = entry,
-                        index = index,
-                    ),
-            )
+    SkeletonRevealGroup {
+        LazyRow(
+            state = railListStates.getValue(rail),
+            contentPadding = PaddingValues(horizontal = Spacing.gutter),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            itemsIndexed(set.cards, key = { _, card -> card.key.lazyKey }) { index, card ->
+                BookCard(
+                    model = card,
+                    onEvent = onCardEvent,
+                    modifier = Modifier
+                        .width(cardWidth)
+                        .bookCardStaggeredEntry(
+                            card = card,
+                            coordinator = entry,
+                            index = index,
+                        ),
+                )
+            }
         }
     }
 }

@@ -36,6 +36,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.mapper.toSearchResultCa
 import nl.rhaydus.softcover.feature.explore.presentation.mapper.toTrendingCard
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ActiveSearchContent
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.EditorialContent
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreOverlays
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.SearchFocusScreen
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreSearchPhase
@@ -138,6 +139,11 @@ internal actual fun ExploreScreenLayout(
             )
         }
     }
+
+    ExploreOverlays(
+        state = state,
+        runAction = runAction,
+    )
 }
 
 private fun List<Book>.toPreviewTrendingSet(): BookCardSet<Book> = map { book ->

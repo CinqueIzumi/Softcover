@@ -11,6 +11,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import nl.rhaydus.softcover.core.component.badge.BadgeTone
@@ -468,6 +469,115 @@ class BookCardModelsCollectorTest {
                         ),
                     ),
                 )
+                job.cancel()
+            }
+    }
+
+    @Nested
+    inner class BecauseYouReadGenreControl {
+        private fun TestScope.launchCollector() = launch {
+            BookCardModelsCollector().onLaunch(
+                scope = scope,
+                dependencies = dependencies,
+            )
+        }
+
+        @Test
+        fun `is hidden when there is no genre even with books`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                becauseYouReadGenre = null,
+                becauseYouReadBooks = listOf(book(id = 1)),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.becauseYouReadGenreControl.visible shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `is hidden when the genre is set but loading ended with no books`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                becauseYouReadGenre = "Horror",
+                loadingBecauseYouReadBooks = false,
+                becauseYouReadBooks = emptyList(),
+            )
+
+            // ----- Assert -----
+            stateFlow.value.becauseYouReadGenreControl.visible shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `is visible and loading while the genre's books load`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            val job = launchCollector()
+
+            // ----- Act -----
+            stateFlow.value = stateFlow.value.copy(
+                becauseYouReadGenre = "Horror",
+                loadingBecauseYouReadBooks = true,
+                becauseYouReadBooks = emptyList(),
+            )
+
+            // ----- Assert -----
+            val control = stateFlow.value.becauseYouReadGenreControl
+            control.visible shouldBe true
+            control.isLoading shouldBe true
+            job.cancel()
+        }
+
+        @Test
+        fun `is visible and not loading once books exist even while loading continues`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                val job = launchCollector()
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    becauseYouReadGenre = "Horror",
+                    loadingBecauseYouReadBooks = true,
+                    becauseYouReadBooks = listOf(book(id = 1)),
+                )
+
+                // ----- Assert -----
+                val control = stateFlow.value.becauseYouReadGenreControl
+                control.visible shouldBe true
+                control.isLoading shouldBe false
+                job.cancel()
+            }
+
+        @Test
+        fun `keeps the label, options and sheet state the sheet collector wrote`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                stateFlow.value = stateFlow.value.copy(
+                    becauseYouReadGenreControl = stateFlow.value.becauseYouReadGenreControl.copy(
+                        label = "GENRE · HORROR",
+                        hasOptions = true,
+                        sheetVisible = true,
+                    ),
+                )
+                val job = launchCollector()
+
+                // ----- Act -----
+                stateFlow.value = stateFlow.value.copy(
+                    becauseYouReadGenre = "Horror",
+                    becauseYouReadBooks = listOf(book(id = 1)),
+                )
+
+                // ----- Assert -----
+                val control = stateFlow.value.becauseYouReadGenreControl
+                control.label shouldBe "GENRE · HORROR"
+                control.hasOptions shouldBe true
+                control.sheetVisible shouldBe true
                 job.cancel()
             }
     }

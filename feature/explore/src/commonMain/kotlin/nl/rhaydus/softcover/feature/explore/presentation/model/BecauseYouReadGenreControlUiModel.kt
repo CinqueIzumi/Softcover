@@ -6,7 +6,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.state.becauseYouReadGenreSheetScaffold
 
 /**
- * @property visible False when no genre has resolved, which hides the whole "because you read" section.
+ * @property visible False when no genre has resolved or its books came back empty, which hides the whole "because you read" section.
  * @property isLoading True while the section's books are still loading, which shows the control as a skeleton.
  * @property genreGroup A `null` key is the "Auto (most-read)" row.
  */

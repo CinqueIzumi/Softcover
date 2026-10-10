@@ -6,7 +6,8 @@ import nl.rhaydus.softcover.core.component.sheet.SheetRowGroup
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnTabSelectedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnManageShelvesRequestedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnShelvesSheetTabPickedAction
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 
 /**
@@ -17,14 +18,13 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
 internal fun LibraryShelvesSheet(
     state: LibraryUiState,
     runAction: (LibraryAction) -> Unit,
-    onManageClick: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
     SheetScaffold(
         model = state.shelvesSheet,
         onEvent = { event ->
             when (event) {
-                SheetScaffoldEvent.HeaderActionClicked -> onManageClick()
+                SheetScaffoldEvent.HeaderActionClicked -> runAction(OnManageShelvesRequestedAction())
 
                 SheetScaffoldEvent.Dismissed -> onDismissRequest()
 
@@ -37,7 +37,7 @@ internal fun LibraryShelvesSheet(
             model = state.shelvesSheetGroup,
             onEvent = { event ->
                 when (event) {
-                    is SheetRowEvent.Selected -> runAction(OnTabSelectedAction(tabId = event.key))
+                    is SheetRowEvent.Selected -> runAction(OnShelvesSheetTabPickedAction(tabId = event.key))
                 }
             },
         )

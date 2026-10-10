@@ -22,6 +22,7 @@ import nl.rhaydus.softcover.feature.explore.presentation.action.OnQueryChangeAct
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.DesktopDiscovery
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.DesktopExploreHeader
 import nl.rhaydus.softcover.feature.explore.presentation.screen.section.DesktopSearchResults
+import nl.rhaydus.softcover.feature.explore.presentation.screen.section.ExploreOverlays
 import nl.rhaydus.softcover.feature.explore.presentation.state.ExploreScreenUiState
 
 /**
@@ -125,5 +126,10 @@ internal actual fun ExploreScreenLayout(
                 )
             }
         }
+
+        ExploreOverlays(
+            state = state,
+            runAction = runAction,
+        )
     }
 }

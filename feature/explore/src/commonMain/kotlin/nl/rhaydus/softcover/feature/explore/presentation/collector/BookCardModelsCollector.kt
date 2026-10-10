@@ -34,6 +34,9 @@ import nl.rhaydus.toad.ActionScope
  * one list per surface: the same book
  * can sit on several surfaces, each stamping its own cover transition key.
  *
+ * Also derives the because-you-read section's `visible` and `isLoading` in the same write as its card
+ * set, so the section never renders a set that disagrees with whether it is shown.
+ *
  * Derives from the books and [UnreleasedCoverOverlaysCollector]'s overlays, so it re-runs whenever
  * either changes.
  */
@@ -47,6 +50,7 @@ internal class BookCardModelsCollector : ExploreCollector {
                 BookCardModelsSnapshot(
                     trendingBooks = it.trendingBooks,
                     becauseYouReadBooks = it.becauseYouReadBooks,
+                    becauseYouReadGenre = it.becauseYouReadGenre,
                     continueSeriesBooks = it.continueSeriesBooks,
                     queriedBooks = it.queriedBooks,
                     unreleasedCoverOverlays = it.unreleasedCoverOverlays,
@@ -75,6 +79,11 @@ internal class BookCardModelsCollector : ExploreCollector {
                             overlays = snapshot.unreleasedCoverOverlays,
                             standIns = BECAUSE_YOU_READ_STAND_IN_CARDS,
                             map = Book::toBecauseYouReadCard,
+                        ),
+                        becauseYouReadGenreControl = it.becauseYouReadGenreControl.copy(
+                            visible = snapshot.becauseYouReadGenre != null &&
+                                (snapshot.loadingBecauseYouReadBooks || snapshot.becauseYouReadBooks.isNotEmpty()),
+                            isLoading = snapshot.loadingBecauseYouReadBooks && snapshot.becauseYouReadBooks.isEmpty(),
                         ),
                         upNext = snapshot.continueSeriesBooks.toCardSet(
                             loading = snapshot.loadingContinueSeriesBooks,

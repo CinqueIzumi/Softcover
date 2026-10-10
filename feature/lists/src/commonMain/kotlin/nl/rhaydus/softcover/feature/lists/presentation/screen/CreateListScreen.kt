@@ -6,6 +6,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import nl.rhaydus.designsystem.component.AdaptiveModalSheet
+import nl.rhaydus.designsystem.component.LocalModalSheetDismiss
 import nl.rhaydus.designsystem.haptics.LocalHaptics
 import nl.rhaydus.designsystem.util.ObserveAsEvents
 import nl.rhaydus.designsystem.util.SnackBarManager
@@ -36,46 +37,48 @@ internal class CreateListScreen(
 
         val haptics = LocalHaptics.current
 
-        ObserveAsEvents(flow = screenModel.events) { event ->
-            when (event) {
-                is CreateListEvent.ListCreatedEvent -> {
-                    haptics.commit()
+        AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
+            val dismiss = LocalModalSheetDismiss.current
 
-                    // A caller that opened this sheet mid-task (add-to-list) finishes that task with
-                    // the new id and reports the outcome its own way — "Added 5 books to X" says more
-                    // than "List X created", and two stacked snackbars for one tap says less. Only the
-                    // standalone create path (no callback) confirms creation here.
-                    if (onListCreated != null) {
-                        onListCreated.invoke(
-                            event.listId,
-                            event.name,
-                        )
-                    } else {
-                        SnackBarManager.showSnackbar(title = "List “${event.name}” created")
+            ObserveAsEvents(flow = screenModel.events) { event ->
+                when (event) {
+                    is CreateListEvent.ListCreatedEvent -> {
+                        haptics.commit()
+
+                        // A caller that opened this sheet mid-task (add-to-list) finishes that task with
+                        // the new id and reports the outcome its own way — "Added 5 books to X" says more
+                        // than "List X created", and two stacked snackbars for one tap says less. Only the
+                        // standalone create path (no callback) confirms creation here.
+                        if (onListCreated != null) {
+                            onListCreated.invoke(
+                                event.listId,
+                                event.name,
+                            )
+                        } else {
+                            SnackBarManager.showSnackbar(title = "List “${event.name}” created")
+                        }
+
+                        dismiss()
                     }
 
-                    onDismissRequest()
-                }
+                    is CreateListEvent.ListNameTakenEvent -> {
+                        haptics.reject()
 
-                is CreateListEvent.ListNameTakenEvent -> {
-                    haptics.reject()
+                        SnackBarManager.showSnackbar(
+                            title = "You already have a list called “${event.name}”. Pick another name.",
+                        )
+                    }
 
-                    SnackBarManager.showSnackbar(
-                        title = "You already have a list called “${event.name}”. Pick another name.",
-                    )
-                }
+                    is CreateListEvent.ListCreationFailedEvent -> {
+                        haptics.reject()
 
-                is CreateListEvent.ListCreationFailedEvent -> {
-                    haptics.reject()
-
-                    SnackBarManager.showSnackbar(
-                        title = "Could not create list. Try again.",
-                    )
+                        SnackBarManager.showSnackbar(
+                            title = "Could not create list. Try again.",
+                        )
+                    }
                 }
             }
-        }
 
-        AdaptiveModalSheet(onDismissRequest = onDismissRequest) {
             CreateListSheetContent(
                 state = state,
                 runAction = screenModel::runAction,

@@ -34,6 +34,7 @@ import nl.rhaydus.softcover.core.component.topbar.EditorialTopBar
 import nl.rhaydus.softcover.core.component.topbar.TopBarEvent
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutSheetOpenAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnShareSheetOpenAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.screen.section.AccountFootSection
@@ -106,7 +107,10 @@ private fun ProfileContent(
                     state = state,
                     runAction = runAction,
                     onShareClick = { runAction(OnShareSheetOpenAction()) },
-                    onLogOutClick = { showLogOutConfirm = true },
+                    onLogOutClick = {
+                        runAction(OnLogOutSheetOpenAction())
+                        showLogOutConfirm = true
+                    },
                     onBookCardEvent = onBookCardEvent,
                 )
             } else {
@@ -114,7 +118,10 @@ private fun ProfileContent(
                     state = state,
                     runAction = runAction,
                     onShareClick = { runAction(OnShareSheetOpenAction()) },
-                    onLogOutClick = { showLogOutConfirm = true },
+                    onLogOutClick = {
+                        runAction(OnLogOutSheetOpenAction())
+                        showLogOutConfirm = true
+                    },
                     onBookCardEvent = onBookCardEvent,
                 )
             }

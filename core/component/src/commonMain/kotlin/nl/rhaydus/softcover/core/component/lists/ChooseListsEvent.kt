@@ -15,6 +15,11 @@ sealed interface ChooseListsEvent {
         val membership: ListMembership,
     ) : ChooseListsEvent
 
+    /**
+     * "New list" was tapped. The sheet starts its own slide-down right after emitting this, so the
+     * host only records the intent and acts on [Dismissed]; removing the sheet here would cut the
+     * animation short.
+     */
     data object NewListRequested : ChooseListsEvent
 
     data object Dismissed : ChooseListsEvent

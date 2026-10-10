@@ -13,9 +13,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.presentation.prefetch.rememberPrefetchingBookCardEventHandler
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
-import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouReadGenreSelectedAction
 import nl.rhaydus.softcover.feature.explore.presentation.action.OnBecauseYouReadGenreSheetVisibleChangeAction
-import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlEvent
 import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.screen.SURFACE_BECAUSE_YOU_READ
 
@@ -28,7 +26,7 @@ internal fun BecauseYouReadSection(
     runAction: (ExploreAction) -> Unit,
     rail: @Composable ((BookCardEvent) -> Unit) -> Unit,
 ) {
-    if (genreControl.isLoading.not() && (genreControl.visible.not() || set.isEmpty)) return
+    if (genreControl.visible.not()) return
 
     val onCardEvent = rememberPrefetchingBookCardEventHandler(
         set = set,
@@ -49,19 +47,8 @@ internal fun BecauseYouReadSection(
 
         BecauseYouReadGenreControl(
             model = genreControl,
-            onEvent = { event ->
-                runAction(
-                    when (event) {
-                        BecauseYouReadGenreControlEvent.Opened ->
-                            OnBecauseYouReadGenreSheetVisibleChangeAction(visible = true)
-
-                        BecauseYouReadGenreControlEvent.Dismissed ->
-                            OnBecauseYouReadGenreSheetVisibleChangeAction(visible = false)
-
-                        is BecauseYouReadGenreControlEvent.GenreSelected ->
-                            OnBecauseYouReadGenreSelectedAction(genre = event.genre)
-                    },
-                )
+            onOpen = {
+                runAction(OnBecauseYouReadGenreSheetVisibleChangeAction(visible = true))
             },
             modifier = Modifier.padding(horizontal = Spacing.xl),
         )

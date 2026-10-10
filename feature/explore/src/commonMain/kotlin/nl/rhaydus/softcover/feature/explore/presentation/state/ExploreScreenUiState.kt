@@ -74,6 +74,9 @@ internal data class ExploreScreenUiState(
         headline = "Up next in your series",
     ),
     val continueSeriesMenuSheets: ImmutableMap<Int, ContinueSeriesMenuSheetUiModel> = persistentMapOf(),
+
+    /** The option picked in the continue-series menu; run once the sheet has finished hiding. */
+    val pendingContinueSeriesDismissal: PendingContinueSeriesDismissal? = null,
     /** `null` until the library's offline copy has resolved. */
     val offlineEmptyState: EmptyStateUiModel? = null,
     val masthead: PageMastheadUiModel = PageMastheadUiModel(

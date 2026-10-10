@@ -57,5 +57,24 @@ class OnTabSelectedActionTest {
             stateFlow.value.isBulkRemoveSheetShown shouldBe false
             stateFlow.value.listsBeingMutated shouldBe emptySet()
         }
+
+        @Test
+        fun `closes the bulk move menu and the bulk add-to-list sheet`() = runTest {
+            // ----- Arrange -----
+            stateFlow.value = LibraryUiState(
+                isBulkMoveMenuExpanded = true,
+                isBulkAddToListSheetShown = true,
+            )
+
+            // ----- Act -----
+            OnTabSelectedAction(tabId = "want-to-read").execute(
+                dependencies = dependencies,
+                scope = scope,
+            )
+
+            // ----- Assert -----
+            stateFlow.value.isBulkMoveMenuExpanded shouldBe false
+            stateFlow.value.isBulkAddToListSheetShown shouldBe false
+        }
     }
 }

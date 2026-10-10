@@ -8,10 +8,11 @@ import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.feature.library.presentation.action.LibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnApplyFiltersAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnArrangeSheetExpandedChangeAction
-import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkAddToListSheetShownAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveFromLibraryAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkRemoveSheetExpandedChangeAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnBulkToggleListMembershipAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnChooseListsSheetDismissedAction
+import nl.rhaydus.softcover.feature.library.presentation.action.OnCreateListRequestedAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftChipToggledAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftClearAllAction
 import nl.rhaydus.softcover.feature.library.presentation.action.OnFilterDraftTagSearchChangedAction
@@ -26,7 +27,6 @@ internal fun LibrarySheets(
     state: LibraryUiState,
     currentTabId: String?,
     runAction: (LibraryAction) -> Unit,
-    onCreateNewListClick: () -> Unit,
 ) {
     if (state.isArrangeSheetExpanded && currentTabId != null) {
         LibraryArrangeSheet(
@@ -94,9 +94,9 @@ internal fun LibrarySheets(
                         )
                     }
 
-                    ChooseListsEvent.NewListRequested -> onCreateNewListClick()
+                    ChooseListsEvent.NewListRequested -> runAction(OnCreateListRequestedAction())
 
-                    ChooseListsEvent.Dismissed -> runAction(OnBulkAddToListSheetShownAction(shown = false))
+                    ChooseListsEvent.Dismissed -> runAction(OnChooseListsSheetDismissedAction())
                 }
             },
         )

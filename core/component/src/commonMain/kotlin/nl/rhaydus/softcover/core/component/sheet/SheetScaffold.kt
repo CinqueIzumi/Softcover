@@ -243,7 +243,13 @@ private fun RowScope.SheetHeaderTrailingContent(
         is SheetHeaderTrailing.Action -> RhaydusButton(
             label = trailing.label,
             style = ButtonStyle.TEXT,
-            onClick = { onEvent(SheetScaffoldEvent.HeaderActionClicked) },
+            onClick = {
+                onEvent(SheetScaffoldEvent.HeaderActionClicked)
+
+                if (trailing.dismissesSheet) {
+                    chrome.dismiss()
+                }
+            },
             enabled = chrome.unlocked,
         )
     }

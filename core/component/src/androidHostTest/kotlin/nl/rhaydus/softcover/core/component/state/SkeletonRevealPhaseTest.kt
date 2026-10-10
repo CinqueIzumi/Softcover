@@ -177,4 +177,87 @@ class SkeletonRevealPhaseTest {
             phase shouldBe SkeletonRevealPhase.Content
         }
     }
+
+    @Nested
+    inner class SkippingGrace {
+        @Test
+        fun `is Shimmer immediately while loading`() {
+            // ----- Arrange -----
+            val elapsed = 0L
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = null,
+                skipsGrace = true,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Shimmer
+        }
+
+        @Test
+        fun `is Shimmer before the minimum hold ends when loading ended at once`() {
+            // ----- Arrange -----
+            val elapsed = SKELETON_MINIMUM_VISIBLE_MILLIS - 1
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = 0L,
+                skipsGrace = true,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Shimmer
+        }
+
+        @Test
+        fun `is Content when the minimum hold ends after an immediate finish`() {
+            // ----- Arrange -----
+            val elapsed = SKELETON_MINIMUM_VISIBLE_MILLIS
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = 0L,
+                skipsGrace = true,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Content
+        }
+
+        @Test
+        fun `is Shimmer one millisecond before a late finish`() {
+            // ----- Arrange -----
+            val elapsed = SKELETON_MINIMUM_VISIBLE_MILLIS + 99
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = SKELETON_MINIMUM_VISIBLE_MILLIS + 100,
+                skipsGrace = true,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Shimmer
+        }
+
+        @Test
+        fun `is Content when a late finish arrives`() {
+            // ----- Arrange -----
+            val elapsed = SKELETON_MINIMUM_VISIBLE_MILLIS + 100
+
+            // ----- Act -----
+            val phase = skeletonRevealPhase(
+                elapsedMillis = elapsed,
+                loadingEndedAtMillis = SKELETON_MINIMUM_VISIBLE_MILLIS + 100,
+                skipsGrace = true,
+            )
+
+            // ----- Assert -----
+            phase shouldBe SkeletonRevealPhase.Content
+        }
+    }
 }

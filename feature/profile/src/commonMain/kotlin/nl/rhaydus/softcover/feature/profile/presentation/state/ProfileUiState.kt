@@ -100,6 +100,7 @@ internal data class ProfileUiState(
     val ratingsHistogramHeader: SectionHeaderUiModel = RatingBand.NEW_READER.toRatingsHistogramHeader(),
     val ratingsHistogramCaption: String = RatingBand.NEW_READER.toRatingsHistogramCaption(),
     val logOutSheetScaffold: SheetScaffoldUiModel = logOutSheetScaffold(),
+    val logOutPending: Boolean = false,
 
     /** Both bars carry no title — the page's own masthead names it. */
     val topBar: TopBarUiModel = TopBarUiModel(),

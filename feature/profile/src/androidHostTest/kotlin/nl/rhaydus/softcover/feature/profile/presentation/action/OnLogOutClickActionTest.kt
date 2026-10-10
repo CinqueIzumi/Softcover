@@ -1,25 +1,17 @@
 package nl.rhaydus.softcover.feature.profile.presentation.action
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.coEvery
-import io.mockk.every
+import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import nl.rhaydus.softcover.core.domain.account.ResetUserDataUseCase
 import nl.rhaydus.softcover.feature.profile.presentation.event.ProfileEvent
 import nl.rhaydus.softcover.feature.profile.presentation.screenmodel.ProfileDependencies
 import nl.rhaydus.softcover.feature.profile.presentation.state.LocalProfileVariables
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 import nl.rhaydus.toad.ActionScope
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -33,9 +25,8 @@ class OnLogOutClickActionTest {
 
     @BeforeEach
     fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-
         resetUserDataUseCase = mockk()
+        dependencies = mockk<ProfileDependencies>(relaxed = true)
         stateFlow = MutableStateFlow(ProfileUiState())
         eventChannel = Channel(Channel.BUFFERED)
         scope = ActionScope(
@@ -45,43 +36,11 @@ class OnLogOutClickActionTest {
         )
     }
 
-    @AfterEach
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
-    private fun stubDependencies(testScope: TestScope): ProfileDependencies {
-        val dispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
-        return mockk<ProfileDependencies>(relaxed = true).also { mock ->
-            every {
-                mock.resetUserDataUseCase
-            } returns resetUserDataUseCase
-
-            every {
-                mock.coroutineScope
-            } returns testScope
-
-            every {
-                mock.mainDispatcher
-            } returns dispatcher
-
-            every {
-                mock.launch(any())
-            } answers { callOriginal() }
-        }
-    }
-
     @Nested
     inner class Execute {
         @Test
-        fun `sends LogOutUserEvent when use case succeeds`() = runTest {
+        fun `records the log-out without performing it or sending an event`() = runTest {
             // ----- Arrange -----
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                resetUserDataUseCase()
-            } returns Result.success(Unit)
-
             val action = OnLogOutClickAction()
 
             // ----- Act -----
@@ -91,31 +50,8 @@ class OnLogOutClickActionTest {
             )
 
             // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<ProfileEvent.LogOutUserEvent>()
-            eventChannel.tryReceive().getOrNull() shouldBe null
-        }
-
-        @Test
-        fun `sends only LogOutFailedEvent when use case fails`() = runTest {
-            // ----- Arrange -----
-            dependencies = stubDependencies(this)
-
-            coEvery {
-                resetUserDataUseCase()
-            } returns Result.failure(RuntimeException("reset failed"))
-
-            val action = OnLogOutClickAction()
-
-            // ----- Act -----
-            action.execute(
-                dependencies = dependencies,
-                scope = scope,
-            )
-
-            // ----- Assert -----
-            val event = eventChannel.tryReceive().getOrNull()
-            event.shouldBeInstanceOf<ProfileEvent.LogOutFailedEvent>()
+            stateFlow.value.logOutPending shouldBe true
+            coVerify(exactly = 0) { resetUserDataUseCase() }
             eventChannel.tryReceive().getOrNull() shouldBe null
         }
     }

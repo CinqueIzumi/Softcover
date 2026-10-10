@@ -15,6 +15,7 @@ import nl.rhaydus.softcover.feature.library.presentation.screenmodel.LibraryDepe
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryLocalVariables
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryTabStats
 import nl.rhaydus.softcover.feature.library.presentation.state.LibraryUiState
+import nl.rhaydus.softcover.feature.library.presentation.state.shelvesSheetScaffold
 import nl.rhaydus.softcover.feature.library.presentation.util.formatBookCount
 import nl.rhaydus.toad.ActionScope
 
@@ -25,18 +26,22 @@ internal class ShelvesSheetCollector : LibraryCollector {
     ) {
         scope.state
             .map { state ->
-                shelvesSheetRowsFor(
+                val rows = shelvesSheetRowsFor(
                     visibleTabs = state.visibleTabs,
                     selectedTabId = state.selectedTabId,
                     tabStatsByTab = state.tabStatsByTab,
                 )
+
+                rows to state.isShelvesSheetCloseRequested
             }
             .distinctUntilChanged()
-            .collectLatest { rows ->
+            .collectLatest { (rows, closeRequested) ->
                 scope.setState {
                     it.copy(
+                        shelvesSheet = shelvesSheetScaffold().copy(closeRequested = closeRequested),
                         shelvesSheetGroup = SheetRowGroupUiModel(
                             rows = rows,
+                            dismissesSheet = false,
                         ),
                     )
                 }

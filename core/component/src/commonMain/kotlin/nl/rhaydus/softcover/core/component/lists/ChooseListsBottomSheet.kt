@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.triStateToggleable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -27,16 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.conditional
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScale
-import nl.rhaydus.designsystem.modifier.pressScaleClickable
 import nl.rhaydus.softcover.core.component.chip.Chip
 import nl.rhaydus.softcover.core.component.divider.Divider
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
@@ -75,8 +71,9 @@ fun ChooseListsBottomSheet(
             when (event) {
                 SheetScaffoldEvent.Dismissed -> onEvent(ChooseListsEvent.Dismissed)
 
+                SheetScaffoldEvent.SecondaryClicked -> onEvent(ChooseListsEvent.NewListRequested)
+
                 SheetScaffoldEvent.PrimaryClicked,
-                SheetScaffoldEvent.SecondaryClicked,
                 SheetScaffoldEvent.HeaderActionClicked -> Unit
             }
         },
@@ -113,11 +110,6 @@ fun ChooseListsBottomSheet(
                 }
             }
         }
-
-        NewListRow(
-            onClick = { onEvent(ChooseListsEvent.NewListRequested) },
-            modifier = Modifier.padding(top = Spacing.lg),
-        )
     }
 }
 
@@ -257,46 +249,6 @@ private fun PartialBookmarkMark() {
                 .width(10.dp)
                 .height(2.4.dp)
                 .background(primary),
-        )
-    }
-}
-
-@Composable
-private fun NewListRow(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .pointerHandCursor()
-            .pressScaleClickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(26.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-            contentAlignment = Alignment.Center,
-        ) {
-            val icon = drawableIconResource(
-                icon = SoftcoverIcon.Add,
-                contentDescription = "",
-            )
-
-            Icon(
-                painter = icon.getIconPainter(),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp),
-            )
-        }
-
-        SoftcoverText(
-            text = "Create a new list",
-            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.primary,
         )
     }
 }

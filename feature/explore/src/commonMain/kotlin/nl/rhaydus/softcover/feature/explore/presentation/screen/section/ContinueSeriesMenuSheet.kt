@@ -23,17 +23,18 @@ import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconReso
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.feature.explore.presentation.action.ExploreAction
+import nl.rhaydus.softcover.feature.explore.presentation.action.OnContinueSeriesDismissalChosenAction
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuOptionUiModel
 import nl.rhaydus.softcover.feature.explore.presentation.model.ContinueSeriesMenuSheetUiModel
 
 /**
- * The shared dismiss-options sheet host for an "up next" series book. Runs the picked option's dismiss
- * action through [runAction] so both the mobile carousel and the desktop grid open an identical sheet,
- * and closes through [LocalModalSheetDismiss] so each form animates out the way it should. [onDismiss]
- * clears the host's selected book once the sheet has closed.
+ * The shared dismiss-options sheet host for an "up next" series book. A picked option is recorded through
+ * [runAction] and the sheet hides through [LocalModalSheetDismiss], so both the mobile carousel and the
+ * desktop grid animate out identically.
  */
 @Composable
 internal fun ContinueSeriesMenuSheet(
+    bookId: Int,
     model: ContinueSeriesMenuSheetUiModel,
     runAction: (ExploreAction) -> Unit,
     onDismiss: () -> Unit,
@@ -56,7 +57,12 @@ internal fun ContinueSeriesMenuSheet(
             DismissSheetOption(
                 model = option,
                 onClick = {
-                    runAction(option.dismissAction)
+                    runAction(
+                        OnContinueSeriesDismissalChosenAction(
+                            bookId = bookId,
+                            kind = option.kind,
+                        ),
+                    )
 
                     dismiss()
                 },

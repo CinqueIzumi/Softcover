@@ -11,13 +11,20 @@ internal data object OnLoadingSheetDismissedAction : OnboardingAction {
         dependencies: OnboardingDependencies,
         scope: ActionScope<OnboardingUiState, OnboardingEvent, LocalOnboardingVariables>,
     ) {
+        val signInPending = scope.currentState.signInPending
+
         scope.setState {
             it.copy(
                 loadingSheet = it.loadingSheet.copy(
                     isLoading = false,
                     scaffold = it.loadingSheet.scaffold.copy(closeRequested = false),
                 ),
+                signInPending = false,
             )
+        }
+
+        if (signInPending) {
+            scope.sendEvent(event = OnboardingEvent.SignInCompletedEvent())
         }
     }
 }

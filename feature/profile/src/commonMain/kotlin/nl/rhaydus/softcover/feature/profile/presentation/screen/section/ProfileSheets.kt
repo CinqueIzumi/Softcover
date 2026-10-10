@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutClickAction
+import nl.rhaydus.softcover.feature.profile.presentation.action.OnLogOutSheetDismissedAction
 import nl.rhaydus.softcover.feature.profile.presentation.action.ProfileAction
 import nl.rhaydus.softcover.feature.profile.presentation.state.ProfileUiState
 
@@ -30,7 +31,11 @@ internal fun ProfileSheets(
                 when (event) {
                     SheetScaffoldEvent.PrimaryClicked -> runAction(OnLogOutClickAction())
 
-                    SheetScaffoldEvent.Dismissed -> onLogOutDismiss()
+                    SheetScaffoldEvent.Dismissed -> {
+                        onLogOutDismiss()
+
+                        runAction(OnLogOutSheetDismissedAction())
+                    }
 
                     SheetScaffoldEvent.SecondaryClicked,
                     SheetScaffoldEvent.HeaderActionClicked -> Unit

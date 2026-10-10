@@ -11,28 +11,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
-import nl.rhaydus.softcover.core.component.sheet.SheetRowEvent
-import nl.rhaydus.softcover.core.component.sheet.SheetRowGroup
-import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
-import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.state.skeletonMask
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
-import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlEvent
 import nl.rhaydus.softcover.feature.explore.presentation.model.BecauseYouReadGenreControlUiModel
 
 /**
  * The "because you read {genre}" picker: a compact `"Genre · {genre}"` label with a trailing chevron that
- * opens [BecauseYouReadGenreSheet]. Hidden when the reader has no genre options to switch between.
+ * opens the genre sheet. Hidden when the reader has no genre options to switch between.
  */
 @Composable
 internal fun BecauseYouReadGenreControl(
     model: BecauseYouReadGenreControlUiModel,
-    onEvent: (BecauseYouReadGenreControlEvent) -> Unit,
+    onOpen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (model.isLoading.not() && model.hasOptions.not()) return
@@ -46,7 +39,7 @@ internal fun BecauseYouReadGenreControl(
                     Modifier
                         .pointerHandCursor()
                         .pressScaleClickable(
-                            onClick = { onEvent(BecauseYouReadGenreControlEvent.Opened) },
+                            onClick = onOpen,
                         )
                 },
             ),
@@ -77,45 +70,6 @@ internal fun BecauseYouReadGenreControl(
             modifier = Modifier
                 .size(16.dp)
                 .skeletonMask(visible = model.isLoading),
-        )
-    }
-
-    if (model.sheetVisible) {
-        BecauseYouReadGenreSheet(
-            sheet = model.sheet,
-            genreGroup = model.genreGroup,
-            onEvent = onEvent,
-        )
-    }
-}
-
-@Composable
-private fun BecauseYouReadGenreSheet(
-    sheet: SheetScaffoldUiModel,
-    genreGroup: SheetRowGroupUiModel<String?>,
-    onEvent: (BecauseYouReadGenreControlEvent) -> Unit,
-) {
-    SheetScaffold(
-        model = sheet,
-        onEvent = { event ->
-            when (event) {
-                SheetScaffoldEvent.Dismissed -> onEvent(BecauseYouReadGenreControlEvent.Dismissed)
-
-                SheetScaffoldEvent.PrimaryClicked,
-                SheetScaffoldEvent.SecondaryClicked,
-                SheetScaffoldEvent.HeaderActionClicked -> Unit
-            }
-        },
-    ) {
-        SheetRowGroup(
-            model = genreGroup,
-            onEvent = { event ->
-                when (event) {
-                    is SheetRowEvent.Selected -> onEvent(
-                        BecauseYouReadGenreControlEvent.GenreSelected(genre = event.key),
-                    )
-                }
-            },
         )
     }
 }

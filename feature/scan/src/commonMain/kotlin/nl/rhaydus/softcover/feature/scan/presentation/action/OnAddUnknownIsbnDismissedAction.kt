@@ -13,10 +13,22 @@ internal class OnAddUnknownIsbnDismissedAction : ScanAction {
     ) {
         if (scope.currentState.isAddingBook) return
 
+        val resolved = scope.currentState.resolvedUnknownIsbn
+
         scope.setState {
             it.copy(
                 unknownIsbnSheet = null,
                 isUnknownIsbnCloseRequested = false,
+                resolvedUnknownIsbn = null,
+            )
+        }
+
+        if (resolved != null) {
+            scope.sendEvent(
+                event = ScanEvent.BookResolvedEvent(
+                    book = resolved.book,
+                    editionId = resolved.editionId,
+                ),
             )
         }
     }

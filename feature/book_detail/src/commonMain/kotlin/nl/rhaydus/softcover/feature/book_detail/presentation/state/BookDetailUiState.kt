@@ -219,6 +219,8 @@ internal data class BookDetailUiState(
     val editionSheet: EditionSheetUiModel? = null,
 
     val showChooseListsSheet: Boolean = false,
+
+    val createListPending: Boolean = false,
     val userLists: List<BookList> = emptyList(),
     val listsBeingMutated: Set<Int> = emptySet(),
 

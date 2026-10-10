@@ -118,6 +118,13 @@ internal data class LibraryUiState(
     /** The Shelves sheet — the tab switcher on mobile; desktop keeps its permanent sidebar. */
     val isShelvesSheetExpanded: Boolean = false,
 
+    val isManageShelvesPending: Boolean = false,
+
+    /** Set when a shelf is picked in the Shelves sheet; the layout clears it once the pager has shown that shelf. */
+    val isShelvesSheetPickPending: Boolean = false,
+
+    val isShelvesSheetCloseRequested: Boolean = false,
+
     val shelvesSheet: SheetScaffoldUiModel = shelvesSheetScaffold(),
 
     val shelvesSheetGroup: SheetRowGroupUiModel<String> = SheetRowGroupUiModel(rows = persistentListOf()),
@@ -249,6 +256,8 @@ internal data class LibraryUiState(
         inProgress = false,
     ),
     val isBulkAddToListSheetShown: Boolean = false,
+
+    val isCreateListPending: Boolean = false,
 
     /**
      * The user's full set of custom lists (unfiltered by the enabled-tabs setting), populated by

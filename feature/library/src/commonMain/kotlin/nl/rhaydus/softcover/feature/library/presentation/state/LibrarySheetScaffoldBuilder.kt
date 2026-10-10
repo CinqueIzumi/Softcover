@@ -61,7 +61,10 @@ internal fun shelvesSheetScaffold(): SheetScaffoldUiModel =
                 eyebrow = "Your shelves",
                 headline = "Jump to a shelf",
             ),
-            trailing = SheetHeaderTrailing.Action(label = "Manage"),
+            trailing = SheetHeaderTrailing.Action(
+                label = "Manage",
+                dismissesSheet = true,
+            ),
         ),
     )
 

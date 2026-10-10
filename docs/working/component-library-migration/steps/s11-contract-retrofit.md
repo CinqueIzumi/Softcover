@@ -32,8 +32,8 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [x] |
 | S11-17 | Selection states animate with motion-scheme specs | SL-15a | [x] |
 | S11-18 | `SheetScaffold` footer: no haptic of its own, spinner on the running button | S11-6 | [x] |
-| S11-19 | The progress sheet plays its dismiss on submit | — | [ ] |
-| S11-20 | Every sheet host leaves on `Dismissed` | S11-19 | [ ] |
+| S11-19 | The progress sheet plays its dismiss on submit | — | [x] |
+| S11-20 | Every sheet host leaves on `Dismissed` | S11-19 | [x] |
 | S11-21 | Panel-form `AdaptiveModalSheet` animates in and out, with elevation | SL-15a | [ ] |
 | S11-22 | `TextFieldUiModel` error state: outline, shake and `reject` | S11-6 | [ ] |
 | S11-23 | `StepperCircle`: press scale, a tick per step, accelerating auto-repeat | S11-6 | [ ] |
@@ -65,6 +65,20 @@ S11-19:
 - Both hosts (Reading and book detail): page / percentage / time submit actions stop writing the visibility flag and `bookToUpdate`; `MarkAsReadRequested` branches drop their dismiss action; `Dismissed` is the only close. The time draft now clears after a submit too.
 - `sheet-scaffold.md`: one line on the body's guarded dismiss and the tap lock.
 - No new types. Tests: the submit action tests in both features, via test-writer.
+
+S11-20 (rule: a sheet tap records the outcome and starts the hide; the host closes, navigates or applies a sheet-removing change only on `Dismissed`):
+- `ChooseListsBottomSheet` "New list" (book detail, Library bulk): the sheet dismisses itself; the host keeps a pending Create List and opens it on `Dismissed`.
+- `LibraryShelvesSheet` "Manage": the header action model gains `dismissesSheet` like `SheetFooterButton`; the host navigates to LibraryVisibilitySettings on `Dismissed`.
+- Profile log-out: the primary records the log-out; `OnLogOutClickAction` runs on `Dismissed`.
+- Onboarding `LoadingSheet`: `LoaderFinished` sets `closeRequested`; `setUserAuthenticated(true)` on `Dismissed`.
+- `ReAuthSheet` `LoggedOut`: sets `closeRequested`; `logOutFromReAuth` on `Dismissed`.
+- Scan `UnknownIsbnSheet` confirm: `BookResolvedEvent` sends on `Dismissed`, not with the close request.
+- `CreateListScreen`: `ListCreatedEvent` calls `LocalModalSheetDismiss`, not `onDismissRequest()` directly.
+- Explore genre sheet: hoisted out of `BecauseYouReadSection` to a screen-level overlay, so the section's early return no longer removes it; the pick still applies at once.
+- `ContinueSeriesMenuSheet`: options record the dismissal; `OnDismissContinueSeries*Action` runs on `Dismissed`.
+- `LibraryShelvesSheet` pick: switch first, then slide. `SheetRowGroupUiModel.dismissesSheet` (default true); the shelves group sets false; the host snaps the pager, awaits a drawn frame, then sets `closeRequested` (the pick's frame drop landed in the hide's first frames).
+- Explore genre pick goes straight from content to the masked skeleton: the section's show / loading / hidden decision is one derived value, consistent with its `set`.
+- Tests: every changed action, via test-writer.
 
 ## R10 edges
 
