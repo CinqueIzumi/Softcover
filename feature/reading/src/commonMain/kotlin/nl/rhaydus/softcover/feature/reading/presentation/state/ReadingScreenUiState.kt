@@ -8,6 +8,7 @@ import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
+import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.progress.ProgressSheetTab
@@ -171,13 +172,13 @@ internal data class ReadingScreenUiState(
         val MASTHEAD_STAND_IN = PageMastheadUiModel(
             eyebrow = mastheadEyebrowFor(isRefreshing = false),
             title = null,
-            subtitle = "0 titles in motion",
+            subtitle = PageMastheadSubtitle.Text("0 titles in motion"),
             isLoading = true,
         )
 
         val COMPACT_MASTHEAD_STAND_IN = PageMastheadUiModel(
             title = null,
-            subtitle = "0 titles in motion",
+            subtitle = PageMastheadSubtitle.Text("0 titles in motion"),
             size = PageMastheadSize.Compact,
             isLoading = true,
         )

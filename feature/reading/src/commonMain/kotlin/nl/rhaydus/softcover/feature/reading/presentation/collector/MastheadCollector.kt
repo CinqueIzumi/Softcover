@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
+import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -34,9 +35,11 @@ internal class MastheadCollector : ReadingCollector {
             .distinctUntilChanged()
             .collectLatest { snapshot ->
                 val title = greetingForNow()
-                val subtitle = buildSubtitle(
-                    bookCount = snapshot.bookCount,
-                    averageProgress = snapshot.averageProgress,
+                val subtitle = PageMastheadSubtitle.Text(
+                    text = buildSubtitle(
+                        bookCount = snapshot.bookCount,
+                        averageProgress = snapshot.averageProgress,
+                    ),
                 )
 
                 val masthead = PageMastheadUiModel(

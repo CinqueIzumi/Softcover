@@ -9,7 +9,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 - **Search top app bar** — `core:component/topbar` — mobile search chrome.
 - **Chrome icon button** — `core:component/chrome` — icon-only bar button with tooltip; `overMediaIconButtonColors()` for one floating over media.
 - **Section header** — `core:component/header` — region opener in three accent-bar registers.
-- **Page masthead** — `core:component/header` — a page's title block.
+- **Page masthead** — `core:component/header` — a page's title block; `PageMastheadSubtitle` is plain text or springing title and page counts.
 - **Masthead refresh action** — `core:component/header` — trailing refresh button.
 - **Sidebar** — `core:component/sidebar` — a desktop source list of grouped, selectable rows.
 - **DesktopScrollPage** — `core:component/layout` (jvmMain) — the desktop scroll page shell with top bar, masthead and bottom bar slots; anatomy in `layout.md`.
@@ -81,7 +81,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 
 ## Statistics
 
-- **Animated stat number** — `core:component/statistic` — tweens a stat into place.
+- **Animated stat number** — `core:component/statistic` — springs a number, with optional prefix/suffix (plural-aware), into place.
 - **Stat tile** — `core:component/statistic` — a labelled stat on a hero, standard or compact tile; only the number masks while loading.
 - **Ranked bars** — `core:component/chart` — a bar per category on its own 100% track.
 - **Proportion chart** — `core:component/chart` — a stacked bar with its legend.

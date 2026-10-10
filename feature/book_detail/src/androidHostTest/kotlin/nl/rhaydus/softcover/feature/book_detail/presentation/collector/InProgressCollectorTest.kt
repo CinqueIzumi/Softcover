@@ -77,7 +77,7 @@ class InProgressCollectorTest {
 
             // ----- Assert -----
             val model = stateFlow.value.inProgress.shouldNotBeNull()
-            model.percent shouldBe "10%"
+            model.percent.value shouldBe 10.0
             model.summaryStart shouldBe "p. 10 of 100"
             job.cancel()
         }

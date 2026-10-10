@@ -17,7 +17,10 @@ internal class ReadingReadinessCollector : ReadingCollector {
         scope.setState {
             it.copy(
                 isLoading = false,
-                streakStrip = it.streakStrip.copy(isLoading = false),
+                streakStrip = it.streakStrip.copy(
+                    running = it.streakStrip.running?.copy(isLoading = false),
+                    isLoading = false,
+                ),
             )
         }
     }

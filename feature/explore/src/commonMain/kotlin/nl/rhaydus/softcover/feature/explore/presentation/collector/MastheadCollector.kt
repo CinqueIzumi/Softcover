@@ -3,6 +3,7 @@ package nl.rhaydus.softcover.feature.explore.presentation.collector
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
 import nl.rhaydus.softcover.feature.explore.presentation.event.ExploreEvent
@@ -29,7 +30,9 @@ internal class MastheadCollector : ExploreCollector {
                         masthead = PageMastheadUiModel(
                             eyebrow = if (isRefreshing) "Finding fresh picks…" else "Discover",
                             title = "Explore",
-                            subtitle = "Trending books, the next in your series, and anything you search for.",
+                            subtitle = PageMastheadSubtitle.Text(
+                                text = "Trending books, the next in your series, and anything you search for.",
+                            ),
                         ),
                         mastheadRefresh = mastheadRefreshFor(isLoading = isRefreshing),
                     )

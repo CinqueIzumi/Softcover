@@ -52,6 +52,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReadingPa
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ReviewsSummaryCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShareCardsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveControlHeaderCollector
+import nl.rhaydus.softcover.feature.book_detail.presentation.collector.ShelveReadingStatusCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorChipModelsCollector
 import nl.rhaydus.softcover.feature.book_detail.presentation.collector.TagEditorSheetCollector
@@ -108,6 +109,7 @@ val bookDetailModule = module {
     factory { VerdictReviewCollector() } bind BookDetailCollector::class
     factory { VerdictSheetCollector() } bind BookDetailCollector::class
     factory { InProgressCollector() } bind BookDetailCollector::class
+    factory { ShelveReadingStatusCollector() } bind BookDetailCollector::class
     factory { ShareCardsCollector() } bind BookDetailCollector::class
     factory { TagEditorSheetCollector() } bind BookDetailCollector::class
     factory { EditionSheetCollector() } bind BookDetailCollector::class

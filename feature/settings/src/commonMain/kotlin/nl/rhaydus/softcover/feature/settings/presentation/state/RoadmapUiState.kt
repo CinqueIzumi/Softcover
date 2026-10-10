@@ -1,6 +1,7 @@
 package nl.rhaydus.softcover.feature.settings.presentation.state
 
 import kotlinx.collections.immutable.ImmutableList
+import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.topbar.TopBarUiModel
 import nl.rhaydus.softcover.feature.settings.domain.model.RoadmapDocument
@@ -20,7 +21,7 @@ internal data class RoadmapUiState(
     val masthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = "Roadmap",
         title = "Roadmap",
-        subtitle = "What we're building next, and roughly when.",
+        subtitle = PageMastheadSubtitle.Text("What we're building next, and roughly when."),
     ),
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,

@@ -2,8 +2,10 @@ package nl.rhaydus.softcover.feature.reading.presentation.mapper
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
+import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayRowUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayUiModel
@@ -81,7 +83,12 @@ class StreakMapperTest {
             val result = streakStripFor(activity = activity)
 
             // ----- Assert -----
-            result.runningLabel shouldBe "1 day running"
+            val running = result.running.shouldNotBeNull()
+            running.value shouldBe 1.0
+            running.suffix shouldBe StatNumberSuffix.Plural(
+                one = " day running",
+                other = " days running",
+            )
         }
 
         @Test
@@ -110,7 +117,7 @@ class StreakMapperTest {
             val result = streakStripFor(activity = activity)
 
             // ----- Assert -----
-            result.runningLabel shouldBe "2 days running"
+            result.running.shouldNotBeNull().value shouldBe 2.0
         }
 
         @Test
@@ -131,7 +138,7 @@ class StreakMapperTest {
             val result = streakStripFor(activity = activity)
 
             // ----- Assert -----
-            result.runningLabel.shouldBeNull()
+            result.running.shouldBeNull()
         }
 
         @Test
@@ -144,7 +151,7 @@ class StreakMapperTest {
 
             // ----- Assert -----
             result.days.shouldBeEmpty()
-            result.runningLabel.shouldBeNull()
+            result.running.shouldBeNull()
         }
 
         @Test
@@ -162,6 +169,28 @@ class StreakMapperTest {
             // ----- Assert -----
             loading.isLoading shouldBe true
             settled.isLoading shouldBe false
+        }
+
+        @Test
+        fun `passes isLoading through to the running figure`() {
+            // ----- Arrange -----
+            val activity = listOf(
+                day(
+                    dayOfMonth = 31,
+                    didRead = true,
+                ),
+            )
+
+            // ----- Act -----
+            val loading = streakStripFor(
+                activity = activity,
+                isLoading = true,
+            )
+            val settled = streakStripFor(activity = activity)
+
+            // ----- Assert -----
+            loading.running.shouldNotBeNull().isLoading shouldBe true
+            settled.running.shouldNotBeNull().isLoading shouldBe false
         }
     }
 

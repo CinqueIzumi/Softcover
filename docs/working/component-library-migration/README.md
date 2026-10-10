@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-9 done, uncommitted. Explore search keeps its old results while a refresh runs: the data source replaces page 1 when the response lands (a no-match writes empty); stand-ins show only when loading with nothing on screen; the list dims (`dimWhileRefreshing`); items fade and slide via `animateItem` with motion-scheme specs; `ScrollToTopWhenResultsReplacedEffect` scrolls to the top when the first real card's key changes. Search-starting actions clear `loadingMoreQueriedBooks`. Debounce is 400 ms (user-approved). PF-4/7 wait for S12-4.
-- **Next:** commit S11-9 on the user's go, then S11-11 per `steps/s11-contract-retrofit.md` § S11-11: numbers that change render through `StatNumber`.
-- **Open questions:** none. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26), after the last edit: compile and `styleCheck` passed; explore data source, collector, UiState and action tests passed; AAA markers complete; glom and `!!` check clean. Reviewer: two rounds, all findings fixed; the duplicated `searchResultItemModifier` overloads stay (reviewer: acceptable).
-- **Uncommitted:** S11-9 code and tests under `feature/explore/`, its checkbox, this `## Now` block.
+- **State:** S11-11 closed: reviewer round 2 clean. `StatNumber` springs only between loaded values. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **Next:** S11-12, the `StatNumber` count-up starts when the mask clears (Phase 1 design with the user).
+- **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
+- **Verification:** JBR 21 (detekt fails on JDK 26). Host tests of `:core:component`, reading, book_detail, library, explore, settings passed (new: `StatNumberTextTest`, `ShelveReadingStatus{Mapper,Collector}Test`, `SelectionCount{,Collector}Test`, masthead cases, percent clamps). `styleCheck` passed after the last Kotlin edit; AAA markers complete and glom check clean.
+- **Uncommitted:** all S11-11 code and tests, the step file's `## Approved shape`, F42 in `foundation-upstream-candidates.md`, the `components.md` StatNumber and masthead lines, `module-structure.md`'s header row, this block.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -68,15 +71,8 @@ fun PageMasthead(
                     ),
                 )
 
-                SoftcoverText(
-                    text = model.subtitle,
-                    isLoading = model.isLoading,
-                    standIn = model.subtitle,
-                    style = when (model.size) {
-                        PageMastheadSize.Regular -> MaterialTheme.editorialTypography.body
-                        PageMastheadSize.Compact -> MaterialTheme.editorialTypography.bodySmall
-                    },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                MastheadSubtitle(
+                    model = model,
                     modifier = Modifier.widthIn(max = 300.dp),
                 )
             }
@@ -84,6 +80,46 @@ fun PageMasthead(
 
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(Spacing.xxs)) {
             actions()
+        }
+    }
+}
+
+@Composable
+fun MastheadSubtitle(
+    model: PageMastheadUiModel,
+    modifier: Modifier = Modifier,
+) {
+    val subtitle = model.subtitle ?: return
+
+    when (subtitle) {
+        is PageMastheadSubtitle.Text -> SoftcoverText(
+            text = subtitle.text,
+            isLoading = model.isLoading,
+            standIn = subtitle.text,
+            style = when (model.size) {
+                PageMastheadSize.Regular -> MaterialTheme.editorialTypography.body
+                PageMastheadSize.Compact -> MaterialTheme.editorialTypography.bodySmall
+            },
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = modifier,
+        )
+
+        is PageMastheadSubtitle.Counts -> CompositionLocalProvider(
+            LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,
+        ) {
+            Row(modifier = modifier) {
+                StatNumber(
+                    model = subtitle.titles,
+                    modifier = Modifier.alignByBaseline(),
+                )
+
+                if (subtitle.pages != null) {
+                    StatNumber(
+                        model = subtitle.pages,
+                        modifier = Modifier.alignByBaseline(),
+                    )
+                }
+            }
         }
     }
 }

@@ -8,6 +8,10 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.domain.model.ReadingDayActivity
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayRowUiModel
 import nl.rhaydus.softcover.feature.reading.presentation.state.StreakDayUiModel
@@ -38,8 +42,17 @@ internal fun streakStripFor(
                 isToday = day.date == today,
             )
         }.toImmutableList(),
-        runningLabel = if (streakLength > 0) {
-            "$streakLength ${if (streakLength == 1) "day" else "days"} running"
+        running = if (streakLength > 0) {
+            StatNumberUiModel(
+                value = streakLength.toDouble(),
+                format = StatNumberFormat.Plain,
+                isLoading = isLoading,
+                variant = StatNumberVariant.BodySmall,
+                suffix = StatNumberSuffix.Plural(
+                    one = " day running",
+                    other = " days running",
+                ),
+            )
         } else {
             null
         },

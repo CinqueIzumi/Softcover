@@ -291,6 +291,15 @@ Filed but not yet implemented in the foundation.
 - **Impact in the app:** without it, corner radii drift back to per-screen numbers after the token sweep.
 - **What to build:** the rule in the shared ruleset.
 
+### F42 — `RhaydusButton` takes only a `String` label
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Open — blocks the Library footer's "Show N titles".** `RhaydusButton(label: String, …)` has no content slot.
+- **Impact in the app:** that count cannot render through `StatNumber`, so it jumps while every other changing number springs.
+- **What to build:** an overload taking `content: @Composable RowScope.() -> Unit` in place of `label`, with the same
+  shapes, sizes, colours and icon handling. Once adopted, `SheetFooterButton` carries a `StatNumberUiModel` count.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)

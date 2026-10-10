@@ -23,7 +23,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-6 | Haptic vocabulary: `commit` for milestones only, fired after the outcome, `reject` on failure | S11-5 | [x] |
 | S11-41 | Outcome haptics on the remaining mutations and failure paths | S11-6 | [x] |
 | S11-9 | Explore search keeps its results while a refresh runs | SL-15c | [x] |
-| S11-11 | Numbers that change render through `StatNumber` | S11-2 | [ ] |
+| S11-11 | Numbers that change render through `StatNumber` | S11-2 | [x] |
 | S11-12 | The `StatNumber` count-up starts when the mask clears | SL-15c, S11-11 | [ ] |
 | S11-13 | Charts grow, morph and slide | SL-15a | [ ] |
 | S11-14 | Cover selection animates | SL-15a | [ ] |
@@ -54,6 +54,22 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-39 | Shared title and rating keys into book detail | S11-36 | [ ] |
 | S11-40 | Predictive back drives the push/pop transition | S11-36–S11-39 | [ ] |
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | all | [ ] |
+
+## Approved shape
+
+S11-11:
+- `StatNumberUiModel` gains `prefix: String = ""` and `suffix: StatNumberSuffix? = null` (`Fixed(text)` | `Plural(one, other)`, picked by the displayed integer); the phrase stays one tabular `SoftcoverText`, only the digits move; the stand-in is prefix + digit stand-in + suffix.
+- `StatNumberFormat.Duration` renders seconds as h:m, for audiobook positions.
+- New variants, one per face: `Hero` (`statHero`), `Headline` (`headlineSmall`), `BodyStrong` (`bodyMedium` Medium), `Body`, `BodySmall`, `Label` (`labelSmall`); ink stays `LocalContentColor`.
+- The hairline pulse is removed entirely; the existing default spring stays (it matches `ProgressBar`'s); KDoc says "springs".
+- Reading `FeaturedProgressUiModel`: `percent` (`Headline`, "%") and `pageLead` (`BodyStrong`, "Page " or `Duration`) become `StatNumberUiModel`; the faded tail stays text beside it; built in `toFeaturedProgress`.
+- Book detail `InProgressUiModel.percent` becomes `StatNumberUiModel` (`Hero`, "%"); built in `toInProgress`.
+- `ShelveControlCard`'s `readingTrailingStatus` leaves composition: a collector-built `BookDetailUiState` field of two `StatNumberUiModel`s (percent "%", position " · p. " or `Duration`), `Label`.
+- `StreakStripUiModel.runningLabel: String?` becomes `running: StatNumberUiModel?` (`BodySmall`, `Plural(" day running", " days running")`); built in `streakStripFor`.
+- `SelectionHeader`'s loose `selectedCount: Int` becomes `LibraryUiState.selectionCount: StatNumberUiModel` (`Headline`, " selected").
+- `PageMastheadUiModel.subtitle` becomes a sealed subtitle: `Text(String)` | `Counts(titles, pages?)`; the mobile `MastheadHeader` takes it in place of `subtitle` + `isSubtitleLoading`; built in `MastheadSnapshot.subtitleFor`.
+- "Show N titles" waits for foundation F42 (a `RhaydusButton` content slot); it stays plain text until then.
+- Gallery fixtures for prefix, `Plural`, `Duration` and loading; the `components.md` index line updated.
 
 ## R10 edges
 

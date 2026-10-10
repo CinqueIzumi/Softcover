@@ -130,6 +130,9 @@ internal data class BookDetailUiState(
     /** [book]'s reading progress, mapped by `InProgressCollector`; null while the book has no read. */
     val inProgress: InProgressUiModel? = null,
 
+    /** Null while the book has no read. */
+    val shelveReadingStatus: ShelveReadingStatusUiModel? = null,
+
     /** Non-null exactly while the deadline picker is open; built by `OnOpenDeadlinePickerAction`. */
     val deadlinePicker: DatePickerUiModel? = null,
 

@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.reading.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
@@ -14,6 +16,10 @@ import nl.rhaydus.softcover.core.component.bookcard.BookCardSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.cover.CoverVariant
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.FEATURED_STAND_IN_BOOK
@@ -56,8 +62,18 @@ class ReadingReadinessCollectorTest {
     }
 
     private fun loadedProgress(): FeaturedProgressUiModel = FeaturedProgressUiModel(
-        percent = "10%",
-        pageLead = "Page 10",
+        percent = StatNumberUiModel(
+            value = 10.0,
+            format = StatNumberFormat.Plain,
+            variant = StatNumberVariant.Headline,
+            suffix = StatNumberSuffix.Fixed("%"),
+        ),
+        pageLead = StatNumberUiModel(
+            value = 10.0,
+            format = StatNumberFormat.Plain,
+            variant = StatNumberVariant.BodyStrong,
+            prefix = "Page ",
+        ),
         pageTail = " of 100",
         fraction = 0.1f,
     )
@@ -110,6 +126,42 @@ class ReadingReadinessCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.streakStrip.isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `clears the running figure loading flag together with isLoading`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readyState().copy(
+                streakStrip = StreakStripUiModel(
+                    running = StatNumberUiModel(
+                        value = 3.0,
+                        isLoading = true,
+                    ),
+                    isLoading = true,
+                ),
+            )
+
+            // ----- Act -----
+            val job = launchCollector(this)
+
+            // ----- Assert -----
+            stateFlow.value.streakStrip.running.shouldNotBeNull().isLoading shouldBe false
+            job.cancel()
+        }
+
+        @Test
+        fun `leaves an absent running figure absent`() = runTest(UnconfinedTestDispatcher()) {
+            // ----- Arrange -----
+            stateFlow.value = readyState().copy(
+                streakStrip = StreakStripUiModel(isLoading = true),
+            )
+
+            // ----- Act -----
+            val job = launchCollector(this)
+
+            // ----- Assert -----
+            stateFlow.value.streakStrip.running.shouldBeNull()
             job.cancel()
         }
 

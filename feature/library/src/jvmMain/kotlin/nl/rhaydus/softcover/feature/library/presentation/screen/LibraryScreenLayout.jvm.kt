@@ -109,7 +109,7 @@ internal actual fun LibraryScreenLayout(
         ) {
             if (state.selectionMode) {
                 LibrarySelectionHeader(
-                    selectedCount = state.selectedBookIds.size,
+                    selectedCount = state.selectionCount,
                     pills = state.selectionPills,
                     isMoveMenuExpanded = state.isBulkMoveMenuExpanded,
                     runAction = runAction,

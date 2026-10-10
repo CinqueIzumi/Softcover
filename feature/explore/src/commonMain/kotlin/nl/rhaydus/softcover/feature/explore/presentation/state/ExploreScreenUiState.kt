@@ -12,6 +12,7 @@ import nl.rhaydus.softcover.core.component.button.PillButtonUiModel
 import nl.rhaydus.softcover.core.component.chip.ChipSet
 import nl.rhaydus.softcover.core.component.cover.CoverUiModel
 import nl.rhaydus.softcover.core.component.header.MastheadRefreshUiModel
+import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.mood.MoodTileUiModel
@@ -78,7 +79,9 @@ internal data class ExploreScreenUiState(
     val masthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = "Discover",
         title = "Explore",
-        subtitle = "Trending books, the next in your series, and anything you search for.",
+        subtitle = PageMastheadSubtitle.Text(
+            text = "Trending books, the next in your series, and anything you search for.",
+        ),
     ),
     val mastheadRefresh: MastheadRefreshUiModel = mastheadRefreshFor(isLoading = false),
     val searchText: String = "",

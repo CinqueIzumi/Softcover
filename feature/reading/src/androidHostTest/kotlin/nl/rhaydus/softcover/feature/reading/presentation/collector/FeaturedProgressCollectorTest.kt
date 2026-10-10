@@ -86,7 +86,7 @@ class FeaturedProgressCollectorTest {
             }
 
             // ----- Assert -----
-            stateFlow.value.featuredProgress.percent shouldBe "40%"
+            stateFlow.value.featuredProgress.percent.value shouldBe 40.0
             stateFlow.value.featuredProgress.isLoading shouldBe false
             job.cancel()
         }
@@ -107,7 +107,7 @@ class FeaturedProgressCollectorTest {
             stateFlow.value = stateFlow.value.copy(books = listOf(stubBook(progress = 75f)))
 
             // ----- Assert -----
-            stateFlow.value.featuredProgress.percent shouldBe "75%"
+            stateFlow.value.featuredProgress.percent.value shouldBe 75.0
             job.cancel()
         }
     }

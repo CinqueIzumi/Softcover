@@ -1,48 +1,32 @@
 package nl.rhaydus.softcover.core.component.statistic
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import nl.rhaydus.common.formatDecimalNumber
 import nl.rhaydus.common.formatGroupedNumber
+import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val TABULAR_NUMS = "tnum"
-private const val PULSE_DURATION_MS = 220
 
 /**
- * The canonical way to render a numeric stat that can change in place — profile stats, pages-read
- * counters, deadline pacing. Raw `Text` for a number that can change should be treated as a bug.
- * Tweens between values when [StatNumberUiModel.value] changes.
+ * The canonical way to render a numeric stat that can change in place. Raw `Text` for a number that
+ * can change should be treated as a bug. Springs between values when [StatNumberUiModel.value] changes,
+ * and counts up from 0 when loading ends; a loading model's value is never shown.
  *
- * The display is locked to tabular figures so individual digits don't shift width mid-tween. When the
- * user has disabled system animations the number snaps — tweening here is decorative, the value
- * itself is the source of truth.
- *
- * Each integer crossing during the tween fires a brief 1dp hairline pulse under the number, tinted
- * with the number's own content colour so the tick reads against any surface — including a
- * `primary`-filled hero card, where that colour is `onPrimary` — a quiet ledger tick that makes a
- * count feel earned rather than rolled. Suppressed under reduced motion.
+ * The text is locked to tabular figures so digits don't shift width while it springs. When the user
+ * has disabled system animations the number snaps.
  */
 @Composable
 fun StatNumber(
@@ -58,6 +42,20 @@ fun StatNumber(
             fontSize = 52.sp,
             lineHeight = 52.sp,
         )
+
+        StatNumberVariant.Hero -> typography.statHero
+
+        StatNumberVariant.Headline -> typography.headlineSmall
+
+        StatNumberVariant.BodyStrong -> MaterialTheme.typography.bodyMedium.copy(
+            fontWeight = FontWeight.Medium,
+        )
+
+        StatNumberVariant.Body -> typography.body
+
+        StatNumberVariant.BodySmall -> typography.bodySmall
+
+        StatNumberVariant.Label -> MaterialTheme.typography.labelSmall
     }
 
     StatNumber(
@@ -78,72 +76,40 @@ internal fun StatNumber(
     val playMotion = playDecorativeMotion()
 
     val animated by animateFloatAsState(
-        targetValue = model.value.toFloat(),
+        targetValue = if (model.isLoading) 0f else model.value.toFloat(),
         label = "StatNumber",
     )
 
     val displayValue = if (playMotion) animated.toDouble() else model.value
 
-    val integerKey = displayValue.toInt()
+    SoftcoverText(
+        text = remember(displayValue, model) { model.textAt(displayValue) },
+        color = LocalContentColor.current,
+        style = style.copy(fontFeatureSettings = TABULAR_NUMS),
+        autoSize = autoSize,
+        maxLines = 1,
+        isLoading = model.isLoading,
+        standIn = model.standIn(),
+        modifier = modifier,
+    )
+}
 
-    val color = LocalContentColor.current
+internal fun StatNumberUiModel.textAt(displayValue: Double): String =
+    prefix + format.render(displayValue) + suffix.render(integer = displayValue.toInt())
 
-    val hairlinePx = with(LocalDensity.current) { 1.dp.toPx() }
+internal fun StatNumberUiModel.standIn(): String = prefix + format.standIn() + suffix.render(integer = 0)
 
-    val pulse = remember { Animatable(initialValue = 0f) }
-
-    var firstRun by remember { mutableStateOf(true) }
-
-    LaunchedEffect(integerKey) {
-        if (firstRun) {
-            firstRun = false
-            return@LaunchedEffect
-        }
-
-        if (playMotion.not()) return@LaunchedEffect
-
-        pulse.snapTo(targetValue = 1f)
-        pulse.animateTo(
-            targetValue = 0f,
-            animationSpec = tween(durationMillis = PULSE_DURATION_MS),
-        )
-    }
-
-    Box(
-        modifier = modifier.drawBehind {
-            val currentAlpha = pulse.value
-
-            if (currentAlpha <= 0f) return@drawBehind
-
-            drawRect(
-                color = color.copy(alpha = currentAlpha),
-                topLeft = Offset(
-                    x = 0f,
-                    y = size.height - hairlinePx,
-                ),
-                size = Size(
-                    width = size.width,
-                    height = hairlinePx,
-                ),
-            )
-        },
-    ) {
-        SoftcoverText(
-            text = remember(displayValue, model.format) { model.format.render(displayValue) },
-            color = color,
-            style = style.copy(fontFeatureSettings = TABULAR_NUMS),
-            autoSize = autoSize,
-            maxLines = 1,
-            isLoading = model.isLoading,
-            standIn = model.format.standIn(),
-        )
-    }
+private fun StatNumberSuffix?.render(integer: Int): String = when (this) {
+    null -> ""
+    is StatNumberSuffix.Fixed -> text
+    is StatNumberSuffix.Plural -> if (integer == 1) one else other
 }
 
 private fun StatNumberFormat.standIn(): String = when (this) {
     StatNumberFormat.Grouped -> "0,000"
     StatNumberFormat.Plain -> "00"
     StatNumberFormat.Decimal -> "0.0"
+    StatNumberFormat.Duration -> "0h 00m"
 }
 
 private fun StatNumberFormat.render(value: Double): String = when (this) {
@@ -153,4 +119,5 @@ private fun StatNumberFormat.render(value: Double): String = when (this) {
         value = value,
         fractionDigits = 1,
     )
+    StatNumberFormat.Duration -> secondsToHm(value.toInt())
 }

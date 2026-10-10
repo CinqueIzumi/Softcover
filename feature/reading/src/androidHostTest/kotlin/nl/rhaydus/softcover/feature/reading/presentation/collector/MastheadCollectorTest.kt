@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.UserBookRead
 import nl.rhaydus.softcover.feature.reading.presentation.event.ReadingScreenEvent
@@ -72,7 +73,7 @@ class MastheadCollectorTest {
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "0 titles in motion"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("0 titles in motion")
             job.cancel()
         }
 
@@ -88,7 +89,7 @@ class MastheadCollectorTest {
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "One title in motion"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("One title in motion")
             job.cancel()
         }
 
@@ -104,7 +105,7 @@ class MastheadCollectorTest {
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "3 titles in motion"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("3 titles in motion")
             job.cancel()
         }
 
@@ -124,7 +125,9 @@ class MastheadCollectorTest {
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "2 titles in motion · 60% along, on average"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text(
+                "2 titles in motion · 60% along, on average",
+            )
             job.cancel()
         }
 
@@ -144,7 +147,9 @@ class MastheadCollectorTest {
             val job = launchCollector(this)
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "2 titles in motion · 45% along, on average"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text(
+                "2 titles in motion · 45% along, on average",
+            )
             job.cancel()
         }
 
@@ -161,7 +166,7 @@ class MastheadCollectorTest {
             stateFlow.value = stateFlow.value.copy(books = listOf(stubBook()))
 
             // ----- Assert -----
-            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe "One title in motion"
+            stateFlow.value.masthead.shouldNotBeNull().subtitle shouldBe PageMastheadSubtitle.Text("One title in motion")
             job.cancel()
         }
 

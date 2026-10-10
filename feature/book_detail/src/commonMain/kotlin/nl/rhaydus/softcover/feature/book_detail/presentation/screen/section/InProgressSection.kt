@@ -7,14 +7,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import nl.rhaydus.softcover.core.component.button.PillButton
 import nl.rhaydus.softcover.core.component.deadline.DeadlineRow
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.progress.ProgressBar
 import nl.rhaydus.softcover.core.component.state.RevealedWhenPresent
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -46,11 +49,9 @@ internal fun InProgressSection(
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        SoftcoverText(
-            text = inProgress.percent,
-            style = MaterialTheme.editorialTypography.statHero,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+            StatNumber(model = inProgress.percent)
+        }
 
         Spacer(modifier = Modifier.height(Spacing.sm))
 

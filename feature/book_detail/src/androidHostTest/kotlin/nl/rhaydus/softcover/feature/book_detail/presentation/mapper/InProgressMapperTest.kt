@@ -6,6 +6,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
+import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
@@ -88,7 +91,7 @@ class InProgressMapperTest {
         }
 
         @Test
-        fun `percent label rounds the progress to the nearest whole number`() {
+        fun `percent value rounds the progress to the nearest whole number`() {
             // ----- Arrange -----
             val book = stubBook(
                 read = buildRead(progress = 42.6f),
@@ -99,7 +102,70 @@ class InProgressMapperTest {
             val result = book.toInProgress()
 
             // ----- Assert -----
-            result.shouldNotBeNull().percent shouldBe "43%"
+            result.shouldNotBeNull().percent.value shouldBe 43.0
+        }
+
+        @Test
+        fun `percent is a plain hero number with a percent sign`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                read = buildRead(progress = 42f),
+                edition = paperEdition(pages = 300),
+            )
+
+            // ----- Act -----
+            val result = book.toInProgress()
+
+            // ----- Assert -----
+            val percent = result.shouldNotBeNull().percent
+            percent.format shouldBe StatNumberFormat.Plain
+            percent.variant shouldBe StatNumberVariant.Hero
+            percent.suffix shouldBe StatNumberSuffix.Fixed("%")
+        }
+
+        @Test
+        fun `percent rounds halves up`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                read = buildRead(progress = 42.5f),
+                edition = paperEdition(pages = 300),
+            )
+
+            // ----- Act -----
+            val result = book.toInProgress()
+
+            // ----- Assert -----
+            result.shouldNotBeNull().percent.value shouldBe 43.0
+        }
+
+        @Test
+        fun `percent is clamped to 100 when progress exceeds it`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                read = buildRead(progress = 130f),
+                edition = paperEdition(pages = 300),
+            )
+
+            // ----- Act -----
+            val result = book.toInProgress()
+
+            // ----- Assert -----
+            result.shouldNotBeNull().percent.value shouldBe 100.0
+        }
+
+        @Test
+        fun `percent is clamped to zero when progress is negative`() {
+            // ----- Arrange -----
+            val book = stubBook(
+                read = buildRead(progress = -5f),
+                edition = paperEdition(pages = 300),
+            )
+
+            // ----- Act -----
+            val result = book.toInProgress()
+
+            // ----- Assert -----
+            result.shouldNotBeNull().percent.value shouldBe 0.0
         }
 
         @Test

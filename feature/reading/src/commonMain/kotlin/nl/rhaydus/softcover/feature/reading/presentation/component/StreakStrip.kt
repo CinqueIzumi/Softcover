@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -30,6 +32,7 @@ import nl.rhaydus.designsystem.theme.StandardPreview
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffold
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldEvent
 import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.SoftcoverTheme
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
@@ -55,9 +58,7 @@ internal fun StreakStrip(
     val trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.18f)
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .skeletonMask(visible = model.isLoading),
+        modifier = modifier,
     ) {
         // A scrolling row keeps every dot comfortably sized on narrow screens instead of
         // squeezing 21 of them into the viewport width. The tap target lives on this row so
@@ -71,7 +72,8 @@ internal fun StreakStrip(
                     onEvent(StreakStripEvent.Clicked)
                 }
                 .horizontalScroll(rememberScrollState())
-                .height(18.dp),
+                .height(18.dp)
+                .skeletonMask(visible = model.isLoading),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -123,16 +125,15 @@ internal fun StreakStrip(
             // accurate however far the user scrolls into the past.
             SoftcoverText(
                 text = "Most recent first".uppercase(),
+                modifier = Modifier.skeletonMask(visible = model.isLoading),
                 style = MaterialTheme.editorialTypography.eyebrowSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            model.runningLabel?.let { runningLabel ->
-                SoftcoverText(
-                    text = runningLabel,
-                    style = MaterialTheme.editorialTypography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+            model.running?.let { running ->
+                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
+                    StatNumber(model = running)
+                }
             }
         }
     }

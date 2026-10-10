@@ -156,7 +156,7 @@ internal actual fun LibraryScreenLayout(
         ) {
             if (state.selectionMode) {
                 LibrarySelectionHeader(
-                    selectedCount = state.selectedBookIds.size,
+                    selectedCount = state.selectionCount,
                     pills = state.selectionPills,
                     isMoveMenuExpanded = state.isBulkMoveMenuExpanded,
                     runAction = runAction,
@@ -165,9 +165,7 @@ internal actual fun LibraryScreenLayout(
                 val masthead = state.mastheadFor(currentTab?.id)
 
                 MastheadHeader(
-                    title = masthead.title.orEmpty(),
-                    subtitle = masthead.subtitle.orEmpty(),
-                    isSubtitleLoading = masthead.isLoading,
+                    masthead = masthead,
                     pullToRefreshState = pullToRefreshState,
                     isRefreshing = state.isLoading,
                     topAppBarState = topAppBarState,

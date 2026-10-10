@@ -3,6 +3,8 @@ package nl.rhaydus.softcover.feature.reading.presentation.mapper
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import nl.rhaydus.common.secondsToHm
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookEdition
 import nl.rhaydus.softcover.core.domain.model.ReadingFormat
@@ -81,7 +83,7 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.percent shouldBe "43%"
+            result.percent.value shouldBe 43.0
         }
 
         @Test
@@ -93,7 +95,56 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.percent shouldBe "0%"
+            result.percent.value shouldBe 0.0
+        }
+
+        @Test
+        fun `clamps progress above 100 percent to 100`() {
+            // ----- Arrange -----
+            val subject = book(userBookRead = read(progress = 140f))
+
+            // ----- Act -----
+            val result = subject.toFeaturedProgress()
+
+            // ----- Assert -----
+            result.percent.value shouldBe 100.0
+        }
+
+        @Test
+        fun `clamps negative progress to 0`() {
+            // ----- Arrange -----
+            val subject = book(userBookRead = read(progress = -5f))
+
+            // ----- Act -----
+            val result = subject.toFeaturedProgress()
+
+            // ----- Assert -----
+            result.percent.value shouldBe 0.0
+        }
+
+        @Test
+        fun `rounds a half up`() {
+            // ----- Arrange -----
+            val subject = book(userBookRead = read(progress = 42.5f))
+
+            // ----- Act -----
+            val result = subject.toFeaturedProgress()
+
+            // ----- Assert -----
+            result.percent.value shouldBe 43.0
+        }
+
+        @Test
+        fun `percent renders as a plain number with a percent sign`() {
+            // ----- Arrange -----
+            val subject = book(userBookRead = read(progress = 42.6f))
+
+            // ----- Act -----
+            val result = subject.toFeaturedProgress()
+
+            // ----- Assert -----
+            result.percent.format shouldBe StatNumberFormat.Plain
+            result.percent.suffix shouldBe StatNumberSuffix.Fixed("%")
         }
     }
 
@@ -150,7 +201,8 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.pageLead shouldBe "Page 120"
+            result.pageLead.value shouldBe 120.0
+            result.pageLead.prefix shouldBe "Page "
             result.pageTail shouldBe " of 320"
         }
 
@@ -166,7 +218,8 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.pageLead shouldBe "Page 0"
+            result.pageLead.value shouldBe 0.0
+            result.pageLead.prefix shouldBe "Page "
         }
 
         @Test
@@ -181,7 +234,7 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.pageLead shouldBe "Page 12"
+            result.pageLead.value shouldBe 12.0
             result.pageTail.shouldBeNull()
         }
 
@@ -243,7 +296,8 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.pageLead shouldBe secondsToHm(5_400)
+            result.pageLead.value shouldBe 5_400.0
+            result.pageLead.format shouldBe StatNumberFormat.Duration
             result.pageTail shouldBe " of ${secondsToHm(36_000)}"
         }
 
@@ -262,7 +316,8 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.pageLead shouldBe secondsToHm(0)
+            result.pageLead.value shouldBe 0.0
+            result.pageLead.format shouldBe StatNumberFormat.Duration
         }
 
         @Test
@@ -302,7 +357,8 @@ class FeaturedProgressMapperTest {
             val result = subject.toFeaturedProgress()
 
             // ----- Assert -----
-            result.pageLead shouldBe secondsToHm(5_400)
+            result.pageLead.value shouldBe 5_400.0
+            result.pageLead.format shouldBe StatNumberFormat.Duration
         }
     }
 }

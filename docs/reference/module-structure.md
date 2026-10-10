@@ -124,7 +124,7 @@ component/
 + field/       TextField  TextFieldUiModel/Variant/Keyboard/Event
 + gallery/     GalleryRegistry  GalleryEntry  GalleryFamily
 +              GalleryFixture  UiModelPreviews
-+ header/      SectionHeader  PageMasthead
++ header/      SectionHeader  PageMasthead  PageMastheadSubtitle
 +              MastheadRefreshAction(+UiModel, +Event)
 + layout/      DesktopScrollPage  (jvmMain; slot container, no UI model)
 + lists/       ChooseListsBottomSheet  ChooseListsUiModel/RowUiModel

@@ -42,5 +42,19 @@ class PageMastheadUiModelTest {
             // ----- Assert -----
             hasNoEyebrow shouldBe true
         }
+
+        @Test
+        fun `a fixture carries each PageMastheadSubtitle kind`() {
+            // ----- Arrange -----
+            val subtitles = PageMastheadUiModel.previews.values.mapNotNull { it.subtitle }
+
+            // ----- Act -----
+            val hasText = subtitles.any { it is PageMastheadSubtitle.Text }
+            val hasCounts = subtitles.any { it is PageMastheadSubtitle.Counts }
+
+            // ----- Assert -----
+            hasText shouldBe true
+            hasCounts shouldBe true
+        }
     }
 }

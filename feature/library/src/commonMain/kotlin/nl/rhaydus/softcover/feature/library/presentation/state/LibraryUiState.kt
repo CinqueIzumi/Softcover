@@ -16,6 +16,7 @@ import nl.rhaydus.softcover.core.component.sheet.SheetRowGroupUiModel
 import nl.rhaydus.softcover.core.component.sheet.SheetScaffoldUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
 import nl.rhaydus.softcover.core.component.state.EmptyStateUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.core.domain.model.BookDeadline
 import nl.rhaydus.softcover.core.domain.model.BookEdition
@@ -27,7 +28,7 @@ import nl.rhaydus.softcover.core.domain.model.SortDirection
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.core.uibinding.masthead.mastheadRefreshFor
-import nl.rhaydus.softcover.feature.library.presentation.collector.MASTHEAD_SUBTITLE_STAND_IN
+import nl.rhaydus.softcover.feature.library.presentation.collector.MastheadSubtitleStandIn
 import nl.rhaydus.softcover.feature.library.presentation.collector.emptyStatesFor
 import nl.rhaydus.softcover.feature.library.presentation.collector.shelfSidebarFor
 import nl.rhaydus.softcover.feature.library.presentation.mapper.standInCards
@@ -192,7 +193,7 @@ internal data class LibraryUiState(
     val fallbackMasthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = "Refreshing your shelf…",
         title = "Library",
-        subtitle = MASTHEAD_SUBTITLE_STAND_IN,
+        subtitle = MastheadSubtitleStandIn,
         isLoading = true,
     ),
 
@@ -212,6 +213,8 @@ internal data class LibraryUiState(
      */
     val selectionMode: Boolean = false,
     val selectedBookIds: Set<Int> = emptySet(),
+
+    val selectionCount: StatNumberUiModel = selectionCountOf(count = 0),
 
     val bookCardsByTab: ImmutableMap<String, LibraryTabCards<Book>> = persistentMapOf(),
 

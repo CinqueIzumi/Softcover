@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import nl.rhaydus.designsystem.editorial.component.PullToRefreshEyebrow
 import nl.rhaydus.designsystem.modifier.pointerHandCursor
 import nl.rhaydus.designsystem.modifier.pressScaleClickable
+import nl.rhaydus.softcover.core.component.header.MastheadSubtitle
+import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -34,9 +36,7 @@ import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypogr
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MastheadHeader(
-    title: String,
-    subtitle: String,
-    isSubtitleLoading: Boolean,
+    masthead: PageMastheadUiModel,
     pullToRefreshState: PullToRefreshState,
     isRefreshing: Boolean,
     topAppBarState: TopAppBarState,
@@ -103,7 +103,7 @@ internal fun MastheadHeader(
                     verticalAlignment = Alignment.Top,
                 ) {
                     SoftcoverText(
-                        text = title,
+                        text = masthead.title.orEmpty(),
                         style = MaterialTheme.editorialTypography.pageTitle,
                         color = MaterialTheme.colorScheme.onSurface,
                         autoSize = TextAutoSize.StepBased(
@@ -133,12 +133,8 @@ internal fun MastheadHeader(
 
                 Spacer(modifier = Modifier.height(Spacing.xs))
 
-                SoftcoverText(
-                    text = subtitle,
-                    isLoading = isSubtitleLoading,
-                    standIn = subtitle,
-                    style = MaterialTheme.editorialTypography.body,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                MastheadSubtitle(
+                    model = masthead,
                     modifier = Modifier.padding(end = Spacing.md),
                 )
 

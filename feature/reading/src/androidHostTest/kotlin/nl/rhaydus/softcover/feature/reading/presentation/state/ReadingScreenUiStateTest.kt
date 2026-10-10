@@ -13,6 +13,10 @@ import nl.rhaydus.softcover.core.component.deadline.DeadlineSummaryUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.domain.model.Book
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.ALSO_READING_STAND_IN_CARDS
 import nl.rhaydus.softcover.feature.reading.presentation.mapper.FEATURED_STAND_IN_BOOK
@@ -32,8 +36,18 @@ class ReadingScreenUiStateTest {
     private fun loadedHeader(): SectionHeaderUiModel = SectionHeaderUiModel.Section(eyebrow = "Loaded eyebrow")
 
     private fun loadedProgress(): FeaturedProgressUiModel = FeaturedProgressUiModel(
-        percent = "12%",
-        pageLead = "Page 40",
+        percent = StatNumberUiModel(
+            value = 12.0,
+            format = StatNumberFormat.Plain,
+            variant = StatNumberVariant.Headline,
+            suffix = StatNumberSuffix.Fixed("%"),
+        ),
+        pageLead = StatNumberUiModel(
+            value = 40.0,
+            format = StatNumberFormat.Plain,
+            variant = StatNumberVariant.BodyStrong,
+            prefix = "Page ",
+        ),
         pageTail = " of 330",
         fraction = 0.12f,
     )

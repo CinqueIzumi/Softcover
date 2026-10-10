@@ -12,4 +12,7 @@ sealed interface StatNumberFormat {
 
     /** One decimal — "4.2". For averages. */
     data object Decimal : StatNumberFormat
+
+    /** [StatNumberUiModel.value] in seconds, shown as hours and minutes. */
+    data object Duration : StatNumberFormat
 }

@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,13 +35,13 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.icon.RhaydusIconResource
 import nl.rhaydus.designsystem.modifier.shakeOnError
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.celebration.MarkAsReadBurst
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.state.clippedSkeletonMask
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.SoftcoverIcon
 import nl.rhaydus.softcover.core.designsystem.presentation.icon.drawableIconResource
@@ -54,7 +56,7 @@ import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAs
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsReadingClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.action.OnMarkBookAsWantToReadClickAction
 import nl.rhaydus.softcover.feature.book_detail.presentation.state.BookDetailUiState
-import kotlin.math.roundToInt
+import nl.rhaydus.softcover.feature.book_detail.presentation.state.ShelveReadingStatusUiModel
 
 /** Book detail's shelve control, specified in `docs/reference/design-system/patterns/book-detail.md` § Shelve control. */
 @Composable
@@ -125,7 +127,7 @@ internal fun ShelveControlCard(
                                 runAction(OnMarkBookAsReadingClickAction(book = it))
                             }
                         },
-                        trailingStatus = book?.let { readingTrailingStatus(book = it) },
+                        readingStatus = state.shelveReadingStatus,
                     )
 
                     ShelveRow(
@@ -156,19 +158,6 @@ internal fun ShelveControlCard(
     }
 }
 
-/** Live "Reading" trailing status: `{pct}% · p. {page}`, time-based for audiobooks. */
-private fun readingTrailingStatus(book: Book): String? {
-    val read = book.userBookRead ?: return null
-    val edition = book.currentEdition
-    val pct = read.progress.roundToInt()
-
-    return if (edition?.isAudiobook == true) {
-        "$pct% · ${secondsToHm(seconds = read.currentSeconds ?: 0)}"
-    } else {
-        "$pct% · p. ${read.currentPage ?: 0}"
-    }
-}
-
 /** Live "Read" trailing status: the read date, when known. */
 private fun readStatusDateTrailing(
     book: Book,
@@ -191,6 +180,7 @@ private fun ShelveRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingStatus: String? = null,
+    readingStatus: ShelveReadingStatusUiModel? = null,
     celebrationKey: Int = 0,
     enabled: Boolean = true,
 ) {
@@ -327,6 +317,16 @@ private fun ShelveRow(
                     ),
                     color = contentColor.copy(alpha = 0.9f),
                 )
+            }
+
+            if (selected && readingStatus != null) {
+                CompositionLocalProvider(LocalContentColor provides contentColor.copy(alpha = 0.9f)) {
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        StatNumber(model = readingStatus.percent)
+
+                        StatNumber(model = readingStatus.position)
+                    }
+                }
             }
         }
     }

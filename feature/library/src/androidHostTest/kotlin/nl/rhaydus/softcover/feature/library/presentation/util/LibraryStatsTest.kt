@@ -197,43 +197,6 @@ class LibraryStatsTest {
     }
 
     @Nested
-    inner class FormatPageCount {
-        @Test
-        fun `returns null for 0 pages`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 0)
-
-            // ----- Assert -----
-            result shouldBe null
-        }
-
-        @Test
-        fun `formats small page count without thousands separator`() {
-            // ----- Arrange -----
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 300)
-
-            // ----- Assert -----
-            result shouldBe "300 pages"
-        }
-
-        @Test
-        fun `formats large page count with thousands separator`() {
-            // ----- Arrange -----
-            val expected = "%,d pages".format(1500)
-
-            // ----- Act -----
-            val result = formatPageCount(pages = 1500)
-
-            // ----- Assert -----
-            result shouldBe expected
-        }
-    }
-
-    @Nested
     inner class FinishedYear {
         @Test
         fun `returns null when userBook is null`() {

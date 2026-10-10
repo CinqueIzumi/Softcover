@@ -11,15 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import nl.rhaydus.softcover.core.component.button.PillButton
+import nl.rhaydus.softcover.core.component.statistic.StatNumber
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
-import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.feature.library.presentation.state.LibrarySelectionPills
 
@@ -30,7 +32,7 @@ import nl.rhaydus.softcover.feature.library.presentation.state.LibrarySelectionP
  */
 @Composable
 internal fun SelectionHeader(
-    selectedCount: Int,
+    selectedCount: StatNumberUiModel,
     pills: LibrarySelectionPills,
     isMoveMenuExpanded: Boolean,
     onExit: () -> Unit,
@@ -52,14 +54,12 @@ internal fun SelectionHeader(
 
             Spacer(modifier = Modifier.width(Spacing.md))
 
-            SoftcoverText(
-                text = "$selectedCount selected",
-                style = MaterialTheme.editorialTypography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+                StatNumber(
+                    model = selectedCount,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(Spacing.md))

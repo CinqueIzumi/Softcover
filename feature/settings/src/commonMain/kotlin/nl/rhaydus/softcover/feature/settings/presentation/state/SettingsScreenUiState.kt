@@ -6,6 +6,7 @@ import nl.rhaydus.softcover.core.component.control.ColorPalettePreviewTileUiMode
 import nl.rhaydus.softcover.core.component.control.ThemePreviewTileUiModel
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.header.PageMastheadSize
+import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
 import nl.rhaydus.softcover.core.component.header.PageMastheadUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
 import nl.rhaydus.softcover.core.component.sidebar.SidebarUiModel
@@ -36,13 +37,13 @@ internal data class SettingsScreenUiState(
     /** Mobile only; desktop uses [settingsSidebarMasthead] instead. */
     val settingsPageMasthead: PageMastheadUiModel = PageMastheadUiModel(
         title = "Settings",
-        subtitle = "Tune Softcover to match how you read.",
+        subtitle = PageMastheadSubtitle.Text("Tune Softcover to match how you read."),
     ),
 
     /** Desktop only; mobile uses [settingsPageMasthead] instead. */
     val settingsSidebarMasthead: PageMastheadUiModel = PageMastheadUiModel(
         title = "Settings",
-        subtitle = "Tune Softcover to match how you read.",
+        subtitle = PageMastheadSubtitle.Text("Tune Softcover to match how you read."),
         size = PageMastheadSize.Compact,
     ),
 
@@ -91,7 +92,7 @@ internal data class SettingsScreenUiState(
     val appearancePaneMasthead: PageMastheadUiModel = PageMastheadUiModel(
         eyebrow = "Personalisation",
         title = "Appearance",
-        subtitle = "Make Softcover yours.",
+        subtitle = PageMastheadSubtitle.Text("Make Softcover yours."),
     ),
     val themeSectionHeader: SectionHeaderUiModel = SectionHeaderUiModel.Section(
         eyebrow = "Theme",

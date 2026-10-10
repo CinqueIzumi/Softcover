@@ -1,5 +1,7 @@
 package nl.rhaydus.softcover.feature.library.presentation.collector
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
@@ -8,6 +10,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import nl.rhaydus.softcover.core.component.header.PageMastheadSubtitle
+import nl.rhaydus.softcover.core.component.statistic.StatNumberFormat
+import nl.rhaydus.softcover.core.component.statistic.StatNumberSuffix
+import nl.rhaydus.softcover.core.component.statistic.StatNumberUiModel
+import nl.rhaydus.softcover.core.component.statistic.StatNumberVariant
 import nl.rhaydus.softcover.core.domain.model.UserBookStatus
 import nl.rhaydus.softcover.core.presentation.model.LibraryTab
 import nl.rhaydus.softcover.feature.library.presentation.event.LibraryEvent
@@ -104,10 +111,10 @@ class MastheadCollectorTest {
             // ----- Assert -----
             val mastheads = stateFlow.value.mastheads
             mastheads.mapValues { it.value.subtitle } shouldBe mapOf(
-                readTab.id to "Nothing finished yet — the page is still open.",
-                wantToReadTab.id to "No titles set aside — discover one next.",
-                currentlyReadingTab.id to "No book open — pick one up.",
-                customListTab.id to "No titles yet — your story starts here.",
+                readTab.id to PageMastheadSubtitle.Text("Nothing finished yet — the page is still open."),
+                wantToReadTab.id to PageMastheadSubtitle.Text("No titles set aside — discover one next."),
+                currentlyReadingTab.id to PageMastheadSubtitle.Text("No book open — pick one up."),
+                customListTab.id to PageMastheadSubtitle.Text("No titles yet — your story starts here."),
             )
             mastheads.values.none { it.isLoading } shouldBe true
             job.cancel()
@@ -137,7 +144,25 @@ class MastheadCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.mastheads.getValue(readTab.id).subtitle shouldBe "5 titles · 250 pages"
+                val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
+                counts.titles shouldBe StatNumberUiModel(
+                    value = 5.0,
+                    format = StatNumberFormat.Plain,
+                    variant = StatNumberVariant.Body,
+                    suffix = StatNumberSuffix.Plural(
+                        one = " title",
+                        other = " titles",
+                    ),
+                )
+                counts.pages shouldBe StatNumberUiModel(
+                    value = 250.0,
+                    variant = StatNumberVariant.Body,
+                    prefix = " · ",
+                    suffix = StatNumberSuffix.Plural(
+                        one = " page",
+                        other = " pages",
+                    ),
+                )
                 job.cancel()
             }
 
@@ -165,7 +190,33 @@ class MastheadCollectorTest {
                 }
 
                 // ----- Assert -----
-                stateFlow.value.mastheads.getValue(readTab.id).subtitle shouldBe "5 titles"
+                val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
+                counts.titles.value shouldBe 5.0
+                counts.pages.shouldBeNull()
+                job.cancel()
+            }
+
+        @Test
+        fun `a tab whose stats have not landed shows the loading stand-in counts`() =
+            runTest(UnconfinedTestDispatcher()) {
+                // ----- Arrange -----
+                stateFlow.value = LibraryUiState(visibleTabs = listOf(readTab))
+                val collector = MastheadCollector()
+
+                // ----- Act -----
+                val job = launch {
+                    collector.onLaunch(
+                        scope = scope,
+                        dependencies = dependencies,
+                    )
+                }
+
+                // ----- Assert -----
+                val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
+                counts.titles.value shouldBe 128.0
+                counts.titles.isLoading shouldBe true
+                counts.pages.shouldNotBeNull().value shouldBe 34_000.0
+                counts.pages.shouldNotBeNull().isLoading shouldBe true
                 job.cancel()
             }
 
@@ -229,7 +280,9 @@ class MastheadCollectorTest {
 
             // ----- Assert -----
             stateFlow.value.mastheads.getValue(readTab.id).isLoading shouldBe false
-            stateFlow.value.mastheads.getValue(readTab.id).subtitle shouldBe "4 titles"
+            val counts = stateFlow.value.mastheads.getValue(readTab.id).subtitle as PageMastheadSubtitle.Counts
+            counts.titles.value shouldBe 4.0
+            counts.titles.isLoading shouldBe false
             job.cancel()
         }
 
