@@ -95,6 +95,7 @@ Shared components; a `detail` link opens the family file with the full contract.
 ## Rich text
 
 - **Softcover text** — `core:component/text` — the one text leaf; lays out `standIn` under `skeletonMask` while loading or while `text` is null.
+- **Fade-through text** — `core:component/text` — Softcover text that fades when its text changes.
 - **Clickable text** — `core:component/richtext` — prose with a tappable substring resolved to a link event.
 - **Rich text** — `core:component/richtext` — read-only formatted, spoiler-maskable prose.
 - **Rich-text formatting toolbar** — `core:component/richtext` — bold/italic/spoiler chip row inside `VerdictSheet`.

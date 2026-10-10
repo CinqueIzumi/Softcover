@@ -78,7 +78,7 @@ internal fun StatNumber(
 
     val animated by animateFloatAsState(
         targetValue = if (model.isLoading) 0f else model.value.toFloat(),
-        animationSpec = Motion.countUp,
+        animationSpec = Motion.valueChange,
         label = "StatNumber",
     )
 

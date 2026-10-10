@@ -13,6 +13,7 @@ import nl.rhaydus.softcover.core.component.control.ToggleRow
 import nl.rhaydus.softcover.core.component.control.ToggleRowUiModel
 import nl.rhaydus.softcover.core.component.header.SectionHeader
 import nl.rhaydus.softcover.core.component.header.SectionHeaderUiModel
+import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
@@ -88,7 +89,7 @@ internal fun AuthorRepresentationSection(
 
                 Spacer(modifier = Modifier.height(Spacing.sm))
 
-                SoftcoverText(
+                FadeThroughText(
                     text = genderCaption(
                         knownGenderCount = authorDemographics.knownGenderCount,
                         unknownGenderCount = authorDemographics.unknownGenderCount,
@@ -106,7 +107,7 @@ internal fun AuthorRepresentationSection(
                     Spacer(modifier = Modifier.height(Spacing.xxl))
                 }
 
-                SoftcoverText(
+                FadeThroughText(
                     text = demographicScopeCaption(hideUntaggedAuthors = hideUntaggedAuthors),
                     style = MaterialTheme.editorialTypography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -196,7 +197,7 @@ private fun DemographicBreakdownBlock(
             Spacer(modifier = Modifier.height(Spacing.sm))
         }
 
-        SoftcoverText(
+        FadeThroughText(
             text = demographicCaption(
                 breakdown = breakdown,
                 hideUntaggedAuthors = hideUntaggedAuthors,

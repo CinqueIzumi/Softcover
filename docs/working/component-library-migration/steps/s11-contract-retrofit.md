@@ -25,8 +25,9 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-9 | Explore search keeps its results while a refresh runs | SL-15c | [x] |
 | S11-11 | Numbers that change render through `StatNumber` | S11-2 | [x] |
 | S11-12 | The `StatNumber` count-up is slow enough to read | SL-15c, S11-11 | [x] |
-| S11-13 | Charts grow, morph and slide | SL-15a | [ ] |
-| S11-14 | Cover selection animates | SL-15a | [ ] |
+| S11-13 | Charts grow, morph and slide | SL-15a | [x] |
+| S11-42 | Reduced motion resolves once at the theme root; call sites stop branching on it | S11-13 | [ ] |
+| S11-14 | Cover selection animates | SL-15a, S11-42 | [ ] |
 | S11-15 | One reorder lift treatment | S11-6 | [ ] |
 | S11-16 | Selectable controls fire `select`; `ToggleRow` shares its interaction source | S11-6 | [ ] |
 | S11-17 | Selection states animate with motion-scheme specs | SL-15a | [ ] |
@@ -56,6 +57,15 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | all | [ ] |
 
 ## Approved shape
+
+S11-13:
+- `Motion.countUp` is renamed `Motion.valueChange`, the spring every shown value settles on (numbers and chart geometry); `StatNumber`, foundations §2.5 and the F43 entry follow. Charts use it for every size change: it settles in ~0.9 s with no overshoot, so no bar or segment ever shows more than its share, and the bars arrive with the `StatNumber`s beside them.
+- No UI model or public API change. All bars move together, no stagger. Reduced motion (`playDecorativeMotion()` false) snaps everything.
+- `ColumnChart`: bar heights animate. On loading → loaded the real bars grow from the baseline (the placeholders' height is not reused, so they drop away as the real bars rise). On a later change (Books/Pages) each column, matched by index, morphs to its new height; the value text crossfades and the tone colour animates when the peak moves.
+- `RankedBars`: fills grow from the start edge on load and animate on change.
+- `ProportionChart`: on load the stack sweeps in left to right with a reveal clip (animating weights from zero shows no motion). On a change, segments are matched by label; a departing segment shrinks to zero width before it leaves, the rest slide to their new widths; the departing legend row collapses and the shares crossfade.
+- Feature captions crossfade: `YearColumnHistorySection`'s caption on Books/Pages, and `AuthorRepresentationSection`'s captions on "hide untagged".
+- `components/statistics.md` gets one motion line per chart. No tests (animation timing, no logic).
 
 S11-12:
 - A named count-up spec, one soft critically damped spring settling in ~0.8–1 s, defined once in a new motion file beside `Spacing.kt` / `Corners.kt` in `:core:designsystem` `theme/`; `StatNumber`'s `animateFloatAsState` reads it in place of the default `spring()`. Reduced motion still snaps.
@@ -162,6 +172,17 @@ roll only hides when loading ends 250–550 ms in, and local loads land inside t
 `ColumnChart`, `RankedBars` and `ProportionChart` jump to size on load, on Books/Pages and on "hide
 untagged", and the eight loading columns swap out at once. Bars grow from the baseline, morph between
 metrics and slide to new proportions; labels and caption crossfade with them.
+
+### S11-42 — One reduced-motion switch
+
+39 `playDecorativeMotion()` reads across 33 files branch per call site (`if (playMotion) spec else
+snap()`, `else EnterTransition.None`); one missed branch and an animation plays under reduced motion.
+Under reduced motion the theme root provides a `MotionScheme` whose every spec snaps, and `Motion`
+becomes a theme-provided value with a full and a reduced set, so callers read a spec and never branch.
+Hand-written timings (`tween(220)` in `Chip`, `SegmentedControl`) move onto named specs.
+`playDecorativeMotion()` stays only where an effect is skipped outright (burst, shimmer loop, glyph sway).
+Phase 1 first checks whether the theme root is the app's or the foundation's; the gated scheme is logged in
+`foundation-upstream-candidates.md` either way. Every later motion sub-step builds on it.
 
 ### S11-14 — Cover selection
 

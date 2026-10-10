@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-12 done: the count-up springs through `Motion.countUp` (~0.9 s); timing it to the mask was built, found invisible on device, and reverted. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
-- **Next:** S11-13 in `steps/s11-contract-retrofit.md` § S11-13 — Phase 1 design with the user (charts grow, morph and slide). S11-12 committed: `Motion.countUp` in `theme/Motion.kt`, used by `StatNumber`; F43 logged; foundations §2.5 names it.
+- **State:** S11-13 built and reviewed, not committed: `Motion.countUp` → `Motion.valueChange`; the three charts grow, morph and slide; new `FadeThroughText` (`core/component` `text/`) fades captions and chart values; `SegmentRetention` (internal, `chart/`) tracks entering / departing stack segments. S11-42 (one reduced-motion switch at the theme root) added, ordered before S11-14. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **Next:** the user commits S11-13 (or asks to), and checks it on device: the Profile charts on load, Books/Pages, and "hide untagged" on then off. Then S11-42 Phase 1 in `steps/s11-contract-retrofit.md` § S11-42, first checking whether the theme root is the app's or the foundation's.
 - **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm` and `styleCheck` passed after the last Kotlin edit; glom check clean; no tests (a spring constant). Test account's Primal Hunter 10 left at page 200 from the device check.
-- **Uncommitted:** nothing.
+- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component` / `:feature:profile` compile and `styleCheck` passed after the last edit; glom check clean on production and test files; `SegmentRetentionTest` 9/9 pass. Reviewer round 2 findings all fixed. Not yet seen on device.
+- **Uncommitted:** all of S11-13 (implementer staged its files; the docs pass, the test and `docs/working` edits are unstaged).
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:

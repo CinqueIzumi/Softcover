@@ -150,7 +150,7 @@ component/
 +              ColumnChart(+UiModel)  ColumnUiModel
 + statistic/   StatNumber  StatNumberUiModel  StatNumberFormat
 +              StatTile(+UiModel, +Variant)
-+ text/        SoftcoverText
++ text/        SoftcoverText   FadeThroughText
 + topbar/      TopBar  TopBarUiModel/Event/Surface
 +              SearchTopBar(+UiModel, +Event)   EditorialTopBar(+UiModel, +Event)
 + verdict/     VerdictBlock  VerdictBlockUiModel/Event

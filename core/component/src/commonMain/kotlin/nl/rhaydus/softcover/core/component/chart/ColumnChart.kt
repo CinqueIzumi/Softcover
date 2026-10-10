@@ -1,6 +1,8 @@
 package nl.rhaydus.softcover.core.component.chart
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +16,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.state.skeletonMask
+import nl.rhaydus.softcover.core.component.text.FadeThroughText
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Corners
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Motion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.Spacing
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
@@ -30,6 +38,7 @@ fun ColumnChart(
     modifier: Modifier = Modifier,
 ) {
     val shape = Corners.xxs
+    val playMotion = playDecorativeMotion()
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -37,6 +46,20 @@ fun ColumnChart(
     ) {
         model.columns.forEach { column ->
             val isLead = column.tone == ChartTone.Lead
+            val targetHeight = if (column.fraction > 0f) 12f + (96f - 12f) * column.fraction else 3f
+
+            // Loading holds the animation at zero so the real bars grow from the baseline once it ends.
+            val grownHeight = animateFloatAsState(
+                targetValue = if (model.isLoading) 0f else targetHeight,
+                animationSpec = if (playMotion) Motion.valueChange else snap(),
+                label = "ColumnChartHeight",
+            )
+
+            val toneColor = animateColorAsState(
+                targetValue = column.tone.color(colors = MaterialTheme.colorScheme),
+                animationSpec = if (playMotion) MaterialTheme.motionScheme.defaultEffectsSpec() else snap(),
+                label = "ColumnChartTone",
+            )
 
             Column(
                 modifier = Modifier
@@ -56,7 +79,7 @@ fun ColumnChart(
                         contentAlignment = Alignment.BottomCenter,
                     ) {
                         column.value?.let { value ->
-                            SoftcoverText(
+                            FadeThroughText(
                                 text = value,
                                 style = MaterialTheme.editorialTypography.eyebrowSmall.copy(
                                     fontWeight = if (isLead) FontWeight.Bold else FontWeight.SemiBold,
@@ -84,15 +107,30 @@ fun ColumnChart(
                         modifier = Modifier
                             .widthIn(max = 20.dp)
                             .fillMaxWidth()
-                            .height(
-                                if (column.fraction > 0f) {
-                                    12.dp + (96.dp - 12.dp) * column.fraction
-                                } else {
-                                    3.dp
-                                },
-                            )
+                            .layout { measurable, constraints ->
+                                val barHeight = (if (model.isLoading) targetHeight else grownHeight.value).dp
+                                    .roundToPx()
+                                    .coerceIn(
+                                        minimumValue = constraints.minHeight,
+                                        maximumValue = constraints.maxHeight,
+                                    )
+
+                                val placeable = measurable.measure(
+                                    constraints.copy(
+                                        minHeight = barHeight,
+                                        maxHeight = barHeight,
+                                    ),
+                                )
+
+                                layout(
+                                    width = placeable.width,
+                                    height = placeable.height,
+                                ) {
+                                    placeable.place(IntOffset.Zero)
+                                }
+                            }
                             .clip(shape)
-                            .background(column.tone.color(colors = MaterialTheme.colorScheme))
+                            .drawBehind { drawRect(toneColor.value) }
                             .skeletonMask(
                                 visible = model.isLoading,
                                 shape = shape,
