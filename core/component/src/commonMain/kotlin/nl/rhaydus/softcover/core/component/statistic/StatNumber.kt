@@ -16,6 +16,7 @@ import nl.rhaydus.common.formatGroupedNumber
 import nl.rhaydus.common.secondsToHm
 import nl.rhaydus.designsystem.motion.playDecorativeMotion
 import nl.rhaydus.softcover.core.component.text.SoftcoverText
+import nl.rhaydus.softcover.core.designsystem.presentation.theme.Motion
 import nl.rhaydus.softcover.core.designsystem.presentation.theme.editorialTypography
 
 private const val TABULAR_NUMS = "tnum"
@@ -77,6 +78,7 @@ internal fun StatNumber(
 
     val animated by animateFloatAsState(
         targetValue = if (model.isLoading) 0f else model.value.toFloat(),
+        animationSpec = Motion.countUp,
         label = "StatNumber",
     )
 

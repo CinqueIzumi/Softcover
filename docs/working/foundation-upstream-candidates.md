@@ -300,6 +300,14 @@ Filed but not yet implemented in the foundation.
 - **What to build:** an overload taking `content: @Composable RowScope.() -> Unit` in place of `label`, with the same
   shapes, sizes, colours and icon handling. Once adopted, `SheetFooterButton` carries a `StatNumberUiModel` count.
 
+### F43 — The expressive `MotionScheme` has no readable count-up spec
+
+- **Type:** enhancement
+- **Home:** `nl.rhaydus:designsystem-core`
+- **Status:** **Open.** Softcover defines `Motion.countUp` itself: a critically damped spring at `StiffnessVeryLow`.
+- **Impact in the app:** the default spring settles 0 to 24,092 in about 250 ms, too fast to read as a count.
+- **What to build:** a named slow, no-bounce count-up spring alongside the scheme's specs. Once adopted, drop the app-local one.
+
 ### F30 — `checkResourcePackaging`: Compose resources declared but never packaged on Android
 
 - **Type:** gate (custom Gradle task)

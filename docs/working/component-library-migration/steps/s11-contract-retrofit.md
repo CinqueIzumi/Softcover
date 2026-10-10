@@ -24,7 +24,7 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-41 | Outcome haptics on the remaining mutations and failure paths | S11-6 | [x] |
 | S11-9 | Explore search keeps its results while a refresh runs | SL-15c | [x] |
 | S11-11 | Numbers that change render through `StatNumber` | S11-2 | [x] |
-| S11-12 | The `StatNumber` count-up starts when the mask clears | SL-15c, S11-11 | [ ] |
+| S11-12 | The `StatNumber` count-up is slow enough to read | SL-15c, S11-11 | [x] |
 | S11-13 | Charts grow, morph and slide | SL-15a | [ ] |
 | S11-14 | Cover selection animates | SL-15a | [ ] |
 | S11-15 | One reorder lift treatment | S11-6 | [ ] |
@@ -56,6 +56,10 @@ primitives among them), and every premium-feel sub-step has landed.
 | S11-C | Convergence pass over the family (family-procedure.md § Phase 3) | all | [ ] |
 
 ## Approved shape
+
+S11-12:
+- A named count-up spec, one soft critically damped spring settling in ~0.8–1 s, defined once in a new motion file beside `Spacing.kt` / `Corners.kt` in `:core:designsystem` `theme/`; `StatNumber`'s `animateFloatAsState` reads it in place of the default `spring()`. Reduced motion still snaps.
+- The spec is logged in `foundation-upstream-candidates.md` as a foundation motion-token candidate.
 
 S11-11:
 - `StatNumberUiModel` gains `prefix: String = ""` and `suffix: StatNumberSuffix? = null` (`Fixed(text)` | `Plural(one, other)`, picked by the displayed integer); the phrase stays one tabular `SoftcoverText`, only the digits move; the stand-in is prefix + digit stand-in + suffix.
@@ -146,10 +150,12 @@ Reading's hero percentage and page (`FeaturedProgressStat`), book detail's perce
 titles" / "N titles" (`SelectionHeader`, `LibraryDisplayDerivation`, `LibraryStats`) are plain text
 beside gliding bars. Map each to `StatNumberUiModel` and render it with `StatNumber`.
 
-### S11-12 — Count-up after the mask
+### S11-12 — A readable count-up
 
-Profile's hero totals roll during the skeleton's hold, and the tick draws while masked and becomes a
-solid line on large values. Start the roll when the mask clears; keep the tick a tick on large ranges.
+`StatNumber` springs with the default `spring()` (stiffness 1500, critically damped): 0 to 24,092 settles
+in ~250 ms on Medium_Phone, too fast to read as a count. The expressive scheme's slowest no-bounce spec
+(`slowEffectsSpec`, stiffness 800) is barely slower. Timing the count-up to the mask was dropped: the
+roll only hides when loading ends 250–550 ms in, and local loads land inside the grace.
 
 ### S11-13 — Charts in motion
 

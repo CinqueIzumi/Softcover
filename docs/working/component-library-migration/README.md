@@ -14,11 +14,11 @@ checkboxes in step with `## Steps` and `## Gates` here.
 
 ## Now
 
-- **State:** S11-11 closed: reviewer round 2 clean. `StatNumber` springs only between loaded values. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
-- **Next:** S11-12, the `StatNumber` count-up starts when the mask clears (Phase 1 design with the user).
+- **State:** S11-12 done: the count-up springs through `Motion.countUp` (~0.9 s); timing it to the mask was built, found invisible on device, and reverted. "Show N titles" waits on F42. PF-4/7 wait for S12-4.
+- **Next:** S11-13 in `steps/s11-contract-retrofit.md` § S11-13 — Phase 1 design with the user (charts grow, morph and slide). S11-12 committed: `Motion.countUp` in `theme/Motion.kt`, used by `StatNumber`; F43 logged; foundations §2.5 names it.
 - **Open questions:** none. Accepted deltas: masthead `Counts` doesn't wrap; `SelectionHeader` lost ellipsis. Known limits, accepted: detekt 1.23.8 does not reject typos under `softcover:`; `padding(if (x) 4.dp else 8.dp)` and spacing held in vals / model fields are not flagged; corner radii in parentheses (`(8).dp`) or held in vals / model fields are not flagged; `UiModelBuiltInRender` sees calls only, not property reads (`Foo.Default`); `iosMain` is not gated (dead imports slip through).
-- **Verification:** JBR 21 (detekt fails on JDK 26). Host tests of `:core:component`, reading, book_detail, library, explore, settings passed (new: `StatNumberTextTest`, `ShelveReadingStatus{Mapper,Collector}Test`, `SelectionCount{,Collector}Test`, masthead cases, percent clamps). `styleCheck` passed after the last Kotlin edit; AAA markers complete and glom check clean.
-- **Uncommitted:** all S11-11 code and tests, the step file's `## Approved shape`, F42 in `foundation-upstream-candidates.md`, the `components.md` StatNumber and masthead lines, `module-structure.md`'s header row, this block.
+- **Verification:** JBR 21 (detekt fails on JDK 26). `:core:component:compileKotlinJvm` and `styleCheck` passed after the last Kotlin edit; glom check clean; no tests (a spring constant). Test account's Primal Hunter 10 left at page 200 from the device check.
+- **Uncommitted:** nothing.
 ## Local verification
 
 Two pre-existing toolchain problems on this machine:
